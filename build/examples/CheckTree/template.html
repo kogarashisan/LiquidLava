@@ -1,0 +1,30 @@
+<x:widget extends="Example" controller="CheckTreeExample">
+	<template role="main">
+		<div style="position: relative;height: 320px;width: 350px;overflow: auto;border: 1px solid gray;">
+			<x:widget extends="Tree">
+				<assign name="records">$tree_example.records</assign>
+				<template role="include" name="node_body">
+					<div class="lava-tree-node" x:type="view" unselectable="on" x:classes="'level-' + level">
+						<checkbox style="float: right">
+							<x:assign name="is_checked">node.is_checked</x:assign>
+							<x:assign name="is_indeterminate">node.is_indeterminate</x:assign>
+							<x:roles>$tree_example._checkbox</x:roles>
+						</checkbox>
+						{#expression(pad) escape_off}{/expression}{* remove whitespace
+						*}<i x:type="view"
+						     class="lava-tree-expander"
+						     x:event:click="$tree.node_click(node)"
+						     x:classes="'lava-tree'
+								+ ((foreach_index == @parent->count - 1) ? '-bottom' : '-middle')
+								+ ((node.type == 'folder' && node.children.length)
+									? (@widget.meta_storage[node.guid].is_expanded ? '-expanded' : '-collapsed')
+									: '-node')"></i>{* remove whitespace
+						*}<i x:type="view" class="lava-tree-icon" x:classes="'icon-' + node.type"></i>
+						{>$tree.node_title}
+					</div>
+				</template>
+			</x:widget>
+		</div>
+	</template>
+	<assign name="records">#ExamplesApp.tree_records</assign>
+</x:widget>

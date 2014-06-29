@@ -16,13 +16,13 @@
 	<![endif]-->
 
 	<script src="http://ajax.googleapis.com/ajax/libs/mootools/1.5.0/mootools-yui-compressed.js"></script>
-	<link rel="stylesheet" href="www/css/site.css">
-	<script src="dist/lava-master-DEBUG.js"></script>
-	<script src="www/js/site.js"></script>
-	<link rel="canonical" href="http://www.lava-framework.com/index.html"/>
+	<link rel="stylesheet" href="css/site.css">
+	<script src="../dist/lava-master-DEBUG.js"></script>
+	<script src="js/site.js"></script>
+	<link rel="canonical" href="http://www.lava-framework.com/www/roadmap.html"/>
 	<script>
 		if (window.location.href.indexOf('http://kogarashisan.github.io/LiquidLava') == 0) {
-			window.location.href = 'http://www.lava-framework.com/index.html';
+			window.location.href = 'http://www.lava-framework.com/www/roadmap.html';
 		}
 		// to prevent tracking from dev's computers
 		if (window.location.href.indexOf('http://www.lava-framework.com/') === 0) {
@@ -36,42 +36,10 @@
 	</script>
 <!--LAVA_BUILD_INCLUDE_END-->
 
-	<title>LiquidLava Framework - Home</title>
+	<title>Roadmap | LiquidLava Framework</title>
 	<script>
 		window.addEvent('load', function() {
-
 			Lava.bootstrap();
-			$('main_page_follow_container').setStyle('visibility', 'visible');
-
-			var config,
-				constructor,
-				main_page_widget;
-
-			config = {
-				type: 'widget',
-				is_extended: true,
-				template: MainPageTemplate,
-				container: {class: 'Element', tag_name: 'div'}
-			};
-
-			constructor = Lava.ClassManager.getConstructor('Lava.widget.Standard');
-			main_page_widget = /** @type {Lava.widget.Standard} */ new constructor(config);
-
-			var demo_module = Lava.app.getModule('DemoTree');
-			demo_module.loadRecords(ExampleData.example_tree);
-
-			var tree_records = new Lava.data.Enumerable(demo_module.getAllRecords());
-			tree_records.filter(function(record) {
-				return !record.get('parent')
-			});
-
-			main_page_widget.set('tree_records', tree_records);
-			main_page_widget.set('all_tree_records', new Lava.data.Enumerable(demo_module.getAllRecords()));
-			main_page_widget.inject($('main_page_demo_container'), 'Top');
-			Firestorm.Element.remove(Firestorm.getElementById('initial_loading_indicator'));
-
-			(function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs'));
-
 		});
 	</script>
 </head>
@@ -134,38 +102,53 @@
 
 <div class="container">
 
-	<div class="index-header">
-		<h1>LiquidLava framework</h1>
-		<em>When art is beautiful</em>
-		<a class="btn btn-gray" href="https://github.com/kogarashisan/LiquidLava/releases">
-			<i class="glyphicon glyphicon-download-alt"></i> v0.2.1-alpha
-		</a>
-		<div class="main-page-follow-container" style="visibility: hidden" id="main_page_follow_container">
-			<!-- tweet -->
-			<a href="https://twitter.com/share" class="twitter-share-button" data-text="LiquidLava Framework - When art is beautiful" data-via="LavaFramework">Tweet</a>
-			<!-- follow -->
-			<a href="https://twitter.com/LavaFramework" class="twitter-follow-button" data-show-count="false">Follow @LavaFramework</a>
+	<div class="row">
+
+		<div class="col-md-3">
 		</div>
-	</div>
 
-	<div class="index-about">
-		<p>Designed to solve the most complex tasks of web development</p>
-	</div>
+		<div class="col-md-9" role="main">
+			<h1>Roadmap</h1>
+			<p>General directions and big plans. Task priority does not depend on order.</p>
+			<p>For more detailed tak list see the <a href="tasks.html">Tasks</a> page.</p>
+			<ul>
+				<li>English video tutorials</li>
+				<li>CSS class names compression, resource names compression</li>
+				<li>Unit-testing</li>
+				<li>Advanced code compression</li>
+				<li>Drag-and-drop functionality</li>
+				<li>Input validators and input labels</li>
+				<li>Desktop-like UI layer, including data-bound components with selection model, layouts and focus manager</li>
+				<li>Further development of Data layer: the DataSource class with paging, filtering and server-side loading capabilities</li>
+				<li>
+					Documentation
+					<ol>
+						<li>Better inline documentation</li>
+						<li>Articles for each Lava-namespace, including best practice and architecture notes</li>
+						<li>Create the "Codestyle" document and codestyle checking rules</li>
+						<li>Generate the API documentation from source code (as JSDoc theme)</li>
+					</ol>
+				</li>
+				<li>Delay loading of images / objects</li>
+				<li>
+					Widgets:
+					<ol>
+						<li>focus-manager and keyboard navigation</li>
+						<li>Some desirable widgets are missing, some are incomplete - finish them</li>
+						<li>ARIA-compatibility for widgets</li>
+					</ol>
+				</li>
+				<li>Finish Firestorm and get rid of MooTools</li>
+				<li>Server-side template rendering with state restoration on client (questionable)</li>
+				<li>Admin panel for the server-side framework (*)</li>
+			</ul>
 
-	<h1>Demo</h1>
-	<ul>
-		<li>Click on nodes to expand them. Observe changes in the table.</li>
-		<li>Click on table rows to toggle editing. You will see changes in the tree.</li>
-		<li>Click on column headers to apply sorting.</li>
-	</ul>
-	<p>Tree is purely done in templates, except the click handler.</p>
-	<div class="row" id="main_page_demo_container">
-		<div id="initial_loading_indicator" class="initial-loading-indicator">
-			Loading...
+			<p>(*) Currently, there is a server side PHP framework being developed by the author.</p>
 		</div>
+
 	</div>
 
-</div> <!-- /container -->
+</div>
 
 <!--LAVA_BUILD_INCLUDE:footer.html-->
 <footer>

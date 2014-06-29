@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<!--LAVA_BUILD_INCLUDE:header.html-->
+<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="">
+	<meta name="author" content="">
+	<!--link rel="shortcut icon" href="favicon.png"-->
+
+	<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+	<!--[if lt IE 9]>
+		<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+		<script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+	<![endif]-->
+
+	<script src="http://ajax.googleapis.com/ajax/libs/mootools/1.5.0/mootools-yui-compressed.js"></script>
+	<link rel="stylesheet" href="css/site.css">
+	<script src="../dist/lava-master-DEBUG.js"></script>
+	<script src="js/site.js"></script>
+	<link rel="canonical" href="http://www.lava-framework.com/www/tasks.html"/>
+	<script>
+		if (window.location.href.indexOf('http://kogarashisan.github.io/LiquidLava') == 0) {
+			window.location.href = 'http://www.lava-framework.com/www/tasks.html';
+		}
+		// to prevent tracking from dev's computers
+		if (window.location.href.indexOf('http://www.lava-framework.com/') === 0) {
+			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+				(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+					m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+			ga('create', 'UA-51511486-1', 'lava-framework.com');
+			ga('send', 'pageview');
+		}
+	</script>
+<!--LAVA_BUILD_INCLUDE_END-->
+
+	<title>Tasks | LiquidLava Framework</title>
+	<script>
+		window.addEvent('load', function() {
+			Lava.bootstrap();
+		});
+	</script>
+</head>
+
+<body>
+
+<script type="lava/app">
+<!--LAVA_BUILD_INCLUDE:navbar.html-->
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+	<div class="container">
+		<div class="navbar-header">
+			<div class="navbar-brand">LiquidLava</div>
+		</div>
+		<div class="navbar-collapse collapse">
+			<ul class="nav navbar-nav">
+				<li><!-- class="active" -->
+					<a href="/index.html">Home</a>
+				</li>
+				<li class="dropdown" x:widget="DropDown">
+					<a href="#" class="dropdown-toggle" x:type="view" x:roles="$dropdown.trigger">
+						Learn <b class="caret"></b>
+					</a>
+					<ul class="dropdown-menu">
+						<li><a href="/www/examples.html">Examples</a></li>
+						<!--li class="divider"></li-->
+						<!--li class="dropdown-header">Coming soon:</li-->
+						<li class="disabled"><a href="#">Manual</a></li>
+						<li class="disabled"><a href="#">Video tutorials</a></li>
+					</ul>
+				</li>
+				<li class="dropdown" x:widget="DropDown">
+					<a href="#" class="dropdown-toggle" x:type="view" x:roles="$dropdown.trigger">
+						Develop <b class="caret"></b>
+					</a>
+					<ul class="dropdown-menu">
+						<li><a href="/www/development.html">Guidelines</a></li>
+						<li><a href="https://github.com/kogarashisan/LiquidLava/">GitHub</a></li>
+						<li><a href="/www/changelog.html">Changelog</a></li>
+						<li><a href="https://github.com/kogarashisan/LiquidLava/issues?state=open">Issues</a></li>
+						<li><a href="/www/roadmap.html">Roadmap</a></li>
+						<li><a href="/www/tasks.html">Tasks</a></li>
+						<!--li class="divider"></li-->
+						<!--li class="dropdown-header">Coming soon:</li-->
+						<li class="disabled"><a href="#">API</a></li>
+						<li class="disabled"><a href="#">Code coverage</a></li>
+					</ul>
+				</li>
+				<li>
+					<a href="/www/widgets.html">Widgets</a>
+				</li>
+				<li>
+					<a href="/www/about.html">About</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+</div>
+<!--LAVA_BUILD_INCLUDE_END-->
+</script>
+
+<div class="container">
+<div class="row">
+
+<div class="col-md-3">
+
+</div>
+
+<div class="col-md-9" role="main">
+
+<h1>Development tasks</h1>
+
+<p>This is author's detailed TODO list for the framework (for general directions see the <a href="roadmap.html">Roadmap</a>).
+	To understand something here - you need to know the source really well, but this page makes my work really public. Please, note:</p>
+<ul>
+	<li>This page does not include every possible author's thought on the framework, just tasks with settled requirements.</li>
+	<li>This is temporary page - in future it needs to be replaced by some task-tracking service or GitHub tracker.</li>
+	<li>the tasks are listed by categories, not priority.
+		Some of them are proposals, and either may never be implemented, or may be implemented in a very different way.</li>
+</ul>
+
+<p>Tags description:</p>
+<ul>
+	<li><span class="tag-Feature">Feature</span> - something that you would pay for, if it was a commercial product</li>
+	<li><span class="tag-Dev">Dev</span> - assistance in development.</li>
+	<li><span class="tag-Fix">Fix</span> - some essential functionality which needs to be implemented</li>
+	<li><span class="tag-Bug">Bug</span> - self-explanatory</li>
+	<li><span class="tag-Performance">Performance</span></li>
+	<li><span class="tag-Refactoring">Refactoring</span></li>
+	<li><span class="tag-Q">Q</span> - questionable proposal, something that may be discarded.</li>
+</ul>
+
+<!--LAVA_BUILD_TASKS_START--><h2>The src/ directory</h2>
+<h3>System-wide or uncategorized</h3>
+<ul>
+<li><span class="tag-Refactoring">Refactoring</span> isLiteral - move to one place</li>
+<li><span class="tag-Refactoring">Refactoring</span> "use strict"</li>
+<li><span class="tag-Feature">Feature</span> new selector for event and role targets: NameAndLabel<span class="task-comment">affects ExpressionParser, view.Abstract, ViewManager</span></li>
+<li><span class="tag-Refactoring">Refactoring</span><span class="tag-Performance">Performance</span> inside sleep() of the views it's not needed to turn off the argument listeners, only arguments themselves.</li>
+<li><span class="tag-Performance">Performance</span><span class="tag-Q">Q</span> turn off view bindings in sleep() (*)</li>
+<li><span class="tag-Feature">Feature</span><span class="tag-Q">Q</span> hard_refresh event for views hierarchy<span class="task-comment">to force refresh of views, which are bound to plain JS objects (like Angular refresh cycle)</span></li>
+<li><span class="tag-Feature">Feature</span><span class="tag-Performance">Performance</span><span class="tag-Q">Q</span> new kind of template includes - inlineInclude. Will be replaced in config, one time and forever.</li>
+<li><span class="tag-Refactoring">Refactoring</span> Widget and Refresher* must not access Firestorm.Element</li>
+<li><span class="tag-Refactoring">Refactoring</span> CONTROL_ATTRIBUTE_PREFIX and some other constants must be moved into Lava or schema</li>
+<li><span class="tag-Refactoring">Refactoring</span> remove "active modifiers" (see parsers, Argument and support)</li>
+<li><span class="tag-Feature">Feature</span> CSS compression, including class names</li>
+<li><span class="tag-Feature">Feature</span> Resource names compression</li>
+<li><span class="tag-Refactoring">Refactoring</span> search the framework code and find possibilities to rewrite for usage of:<br/>Firestorm.Array.exclude and Firestorm.Object.copy<span class="task-comment">Firestorm.Object.copy may be used in ClassManager in place of extend()</span></li>
+<li><span class="tag-Feature">Feature</span> config extenders should be turned into normal class, and created in Lava.init()</li>
+<li><span class="tag-Feature">Feature</span> {&gt;property: $path.to.include} - an include, which takes template from property.</li>
+<li><span class="tag-Feature">Feature</span><span class="tag-Performance">Performance</span> new kind of argument - StaticArgument for one-time calculations. Use it in static_eval<span class="task-comment">must not attach listeners</span></li>
+<li><span class="tag-Refactoring">Refactoring</span><span class="tag-Performance">Performance</span> Possible optimization: if Argument is equal to scope binding, than do not create an argument, get the binding.<span class="task-comment">search every place where Argument is used</span></li>
+<li><span class="tag-Feature">Feature</span><span class="tag-Performance">Performance</span> Segment option to evaluate it's property name only once and do not create listeners<span class="task-comment">in expression parser it will be curly braces instead of square: row{column.name}</span></li>
+<li><span class="tag-Refactoring">Refactoring</span> Move some exception texts into Lava.known_exceptions (like 'abstract function call')</li>
+<li><span class="tag-Feature">Feature</span><span class="tag-Q">Q</span> add possibility to have several Lava versions on one page</li>
+<li><span class="tag-Refactoring">Refactoring</span> one DEBUG switch should be split into several.<span class="task-comment">like:<br/> DEBUG_SCOPES - the scope processiong cycle,<br/>
+ DEBUG_FATAL - useful explanations before something will fail anyway (may be safely turned off in release),<br/>
+ DEBUG_DEV - wrong configuration by the programmer. <br/>
+ DEBUG_PARSERS - wrong templates <br/>
+ DEBUG_LISTENERS - listeners on destroyed objects</span></li>
+<li><span class="tag-Refactoring">Refactoring</span> some DEBUG checks should become permanent</li>
+<li><span class="tag-Refactoring">Refactoring</span> _cRawBlock.class_locator.name - rename to locator and change type to _cViewLocator.<br/>Same for _cWidgetConfig.class_locator.</li>
+<li><span class="tag-Fix">Fix</span> when parsing sugar inside x:define and x:widget: sugar config must be merged with parent,<br/>and class name of sugar must be taken from config.</li>
+<li><span class="tag-Refactoring">Refactoring</span> ScopeManager::scheduleScopeRefresh: do not return an object, use property of the Refreshable.</li>
+<li><span class="tag-DevAssist">DevAssist</span> recursive x:binding and x:assign protection.<span class="task-comment">Currently, you can create an assign of any property to itself</span></li>
+<li><span class="tag-Fix">Fix</span> fixes for old IE: check if get/set value on &lt;select&gt; elements works as expected. Write tests.<span class="task-comment">see <br/><br/> https://mootools.lighthouseapp.com/projects/2706/tickets/1116 <br/>
+ https://github.com/mootools/mootools-core/issues/2041 <br/>
+ and Source\Element\Element.js in MooTools</span></li>
+<li><span class="tag-Fix">Fix</span> fixes for old IE: check if event delegation for "change" event and others works in IE 8 and less.</li>
+</ul>
+<h3>Animation/</h3>
+<ul>
+<li><span class="tag-Feature">Feature</span> pulsating and cyclic animations<span class="task-comment">most likely, there will be another independent class - AnimationSequence</span></li>
+<li><span class="tag-Feature">Feature</span><span class="tag-Q">Q</span> animations should switch to transitions, if browser supports them<span class="task-comment">there must be a separate setting in the shema, USE_TRANSITIONS</span></li>
+</ul>
+<h3>Animation/BootstrapCollapse.class.js</h3>
+<ul>
+<li><span class="tag-Feature">Feature</span> check for transitions support. If browser does not support transitions - apply end state immediately, without waiting.</li>
+</ul>
+<h3>Animation/Toggle.class.js</h3>
+<ul>
+<li><span class="tag-Refactoring">Refactoring</span> must inherit from Emulated, + missing some important code</li>
+</ul>
+<h3>Data/</h3>
+<ul>
+<li><span class="tag-Refactoring">Refactoring</span> make Guid field, and remove the check in record::get<span class="task-comment">guid is needed for MetaStorage</span></li>
+<li><span class="tag-Feature">Feature</span> schema switch to turn off validation</li>
+<li><span class="tag-Feature">Feature</span> an ability to unload records from modules to free memory.</li>
+<li><span class="tag-Feature">Feature</span> DateTime field. Will be serialized to integer, but internal value will be a Date object.</li>
+<li><span class="tag-Feature">Feature</span> Record and Collection fields should be exportable</li>
+<li><span class="tag-Feature">Feature</span> fields with calculated value and dependencies.<span class="task-comment">Something like this:<br/> <pre>title: {
+		get: function() { return this.get('first_name') + ' ' + ...}
+		depends:['first_name', 'last_name']
+	}</pre></span></li>
+</ul>
+<h3>Data/Enumerable.class.js</h3>
+<ul>
+<li><span class="tag-Feature">Feature</span> methods relocateIndex(old_index, new_index) and relocateValue(value, new_index)<span class="task-comment">is equivalent of removeAt, than insertAt for given value.<br/> They will not fire item_removed/added events, only collection_changed and index_changed</span></li>
+<li><span class="tag-Feature">Feature</span><span class="tag-Q">Q</span> method for batch processing of value listeners (example: turn them off)</li>
+</ul>
+<h3>Data/Field/</h3>
+<ul>
+<li><span class="tag-Performance">Performance</span> Integer and Id fields: invent some better check than regex<span class="task-comment">this._shared.valid_value_regex.test(value)</span></li>
+</ul>
+<h3>Data/ModuleAbstract.class.js</h3>
+<ul>
+<li><span class="tag-Refactoring">Refactoring</span> destroy: Should the records be destroyed, and how? See comment inside destroy()</li>
+<li><span class="tag-Performance">Performance</span><span class="tag-Refactoring">Refactoring</span> record storage should be created from a function (now it's an object)</li>
+</ul>
+<h3>Firestorm/</h3>
+<ul>
+<li><span class="tag-Feature">Feature</span> Element.fromHTML(html)<span class="task-comment">turn html into nodes, assert there is only one and return it</span></li>
+<li><span class="tag-Performance">Performance</span> use insertAdjacentHTML where possible (*)</li>
+<li><span class="tag-Performance">Performance</span> implement fast offset calculation algorithm (*)</li>
+<li><span class="tag-Performance">Performance</span> use native element's classList property in addClass(es), removeClass(es), hasClass</li>
+</ul>
+<h3>Parsers/</h3>
+<ul>
+<li><span class="tag-Feature">Feature</span> x:classBinding directive - alternative form for x:class attribute</li>
+<li><span class="tag-Bug">Bug</span> {literal:}{:literal} switches produce a separate string.<span class="task-comment">When separate strings go in a row - this causes some parsing issues, when there is only one string expected.<br/> Either unite sequential strings in a parser (preferable), or teach parsers.Common to compile such cases. <br/>
+ Workaround: do not allow any text before and after the literal switches (switch must immediately follow the tag/block start)</span></li>
+<li><span class="tag-DevAssist">DevAssist</span> make the text for exception "Text is not allowed in this context" inside asBlocks() more meaningful<span class="task-comment">text should depend on context</span></li>
+<li><span class="tag-Feature">Feature</span> x:controller control attribute - similar to x:widget<span class="task-comment">create an inline widget from element, with specified controller class. Also should work on sugar.</span></li>
+<li><span class="tag-Feature">Feature</span> allow to set default widget config in sugar options. Such config must be merged properly.<span class="task-comment">Reason: sometimes you will want to add options and other settings to sugar.</span></li>
+<li><span class="tag-Feature">Feature</span><span class="tag-Q">Q</span> static_value directive should treat it's content as default value.</li>
+</ul>
+<h3>Parsers/Directives.js</h3>
+<ul>
+<li><span class="tag-Refactoring">Refactoring</span> get rid of roles_storage to simplify logic</li>
+<li><span class="tag-Dev">Dev</span><span class="tag-Q">Q</span> resources: need &lt;component path="..."&gt; tag inside &lt;resources&gt; to shorten paths</li>
+</ul>
+<h3>Parsers/TemplateParser.js</h3>
+<ul>
+<li><span class="tag-Feature">Feature</span><span class="tag-Q">Q</span> allow to set class for widget extenders</li>
+<li><span class="tag-Feature">Feature</span> implement removal of empty space from templates</li>
+<li><span class="tag-Feature">Feature</span><span class="tag-Q">Q</span> &lt;x:region&gt; directive for includes: it will allow to cut off pieces of template depending on options</li>
+<li><span class="tag-Refactoring">Refactoring</span> remove unused lexer switch preserve_whitespace</li>
+<li><span class="tag-Fix">Fix</span><span class="tag-DevAssist">DevAssist</span> _parseStyleAttribute: currently will not parse style strings which contain strings with semicolon inside them as style value<span class="task-comment">do not use such styles, use classes!</span></li>
+</ul>
+<h3>Parsers/ExpressionParser.js</h3>
+<ul>
+<li><span class="tag-Feature">Feature</span><span class="tag-Q">Q</span> macros to shorten the ternary operator, for example: "{is_active -&gt; 'active'}"</li>
+<li><span class="tag-Feature">Feature</span><span class="tag-Performance">Performance</span> currently, each time any variable is referenced in argument's source code - it creates a new binding config.<br/>Parser must unite bindings to the same variable referenced multiple times.</li>
+<li><span class="tag-Feature">Feature</span> static arguments must have their value in configs</li>
+<li><span class="tag-Refactoring">Refactoring</span> result config always has "modifiers" and "active_modifiers" properties. They are not always needed.</li>
+<li><span class="tag-Refactoring">Refactoring</span> remove the dn() operator. It's existence is not possible with current architecture.</li>
+</ul>
+<h3>System/App.class.js</h3>
+<ul>
+<li><span class="tag-Feature">Feature</span> app.createModule(config) - create a module with given schema</li>
+</ul>
+<h3>System/Sugar.class.js</h3>
+<ul>
+<li><span class="tag-Dev">Dev</span> always check that there are no redundant attributes on sugar tags<span class="task-comment">it's checked on root tag, but not on objects</span></li>
+<li><span class="tag-Feature">Feature</span> allow to set the default widget config in sugar. It will allow to create a sugar with default options.</li>
+<li><span class="tag-Refactoring">Refactoring</span><span class="tag-Q">Q</span> control attributes of sugar should be handled in Sugar class</li>
+</ul>
+<h3>System/Template.class.js</h3>
+<ul>
+<li><span class="tag-Performance">Performance</span><span class="tag-Q">Q</span> render() function compilation.<span class="task-comment">Take into account that code may be compressed</span></li>
+<li><span class="tag-Feature">Feature</span> static IF/ELSEIF/ELSE construct.<span class="task-comment">will include parts of template by evaluating it's conditions once.<br/> Faster than regular IF view, but does not react to changes.</span></li>
+</ul>
+<h3>System/ViewManager.class.js</h3>
+<ul>
+<li><span class="tag-Performance">Performance</span><span class="tag-Q">Q</span> speed up event dispatching and argument evaluation. Cache target and scope. <br/><br/>+ Late evaluation for event arguments, as event does not always has valid targets.</li>
+</ul>
+<h3>View/Foreach.class.js</h3>
+<ul>
+<li><span class="tag-Dev">Dev</span> "count" property must be read-only</li>
+<li><span class="tag-Performance">Performance</span><span class="tag-Feature">Feature</span><span class="tag-Q">Q</span> allow to reuse templates in Foreach<span class="task-comment">template may contain parameterized includes - such templates cannot be reused</span></li>
+</ul>
+<h3>View/Container/</h3>
+<ul>
+<li><span class="tag-Feature">Feature</span> add insertHTMLBefore() to all containers</li>
+<li><span class="tag-Feature">Feature</span> Emulated container: some "placement"s can have prependHTML and insertHTMLAfter</li>
+</ul>
+<h3>View/Container/Element.class.js</h3>
+<ul>
+<li><span class="tag-Fix">Fix</span><span class="tag-DevAssist">DevAssist</span> if you render it's content and change any attribute before it's in DOM,<br/>than you will get wrong content in DOM. Make protection from such lifecycle.<span class="task-comment">make "is_rendered"/"waits_insertion" switch and throw an error, if setting a property while it's on</span></li>
+</ul>
+<h3>ClassManager.class.js</h3>
+<ul>
+<li><span class="tag-Feature">Feature</span> Add ability to store arrays in Shared (it may be named differently, like "Prototype")<br/>Move default input roles from InputAbstract to prototype</li>
+<li><span class="tag-Feature">Feature</span><span class="tag-Q">Q</span> Static members. Like Shared, but copied to prototype as-is. It's impossible to overwrite a Static member in inherited class.</li>
+<li><span class="tag-Feature">Feature</span><span class="tag-Q">Q</span> Function inheritance: check if function calls it's parent. If not - do not create a parent in the prototype.</li>
+<li><span class="tag-Feature">Feature</span> mode, when classes are not exported. All classes exist only inside ClassManager, you can use .getConstructor() and .define()</li>
+<li><span class="tag-Feature">Feature</span><span class="tag-Q">Q</span> conditional members. Member will be in class when condition is true.<span class="task-comment">sometimes you want to create a build with different features included. Also some classes have debug members.</span></li>
+<li><span class="tag-Feature">Feature</span> overrides: functions which does not need a parent</li>
+<li><span class="tag-Feature">Feature</span> "final" functions and members - must not be overridden. Example: HierarchyMember._onRefreshed</li>
+<li><span class="tag-Feature">Feature</span> abstract classes - classes with no constructor (instead there will be a function which throws an exception)</li>
+<li><span class="tag-Feature">Feature</span> abstract functions - must be overridden in inherited classes.<span class="task-comment">Class with an abstract function which is not overridden - is also abstract.<br/> When overriding happens - the parent function is not created</span></li>
+<li><span class="tag-Feature">Feature</span><span class="tag-Q">Q</span> empty class functions should not be in r[], they should be a reference somewhere to Lava.empty()/noop()</li>
+<li><span class="tag-Feature">Feature</span><span class="tag-Q">Q</span> all parent function names should be resolved automatically.<span class="task-comment">It will allow to insert a class in middle of the hierarchy.<br/> Also assert there are no limitations for compression. <br/>
+ also rename &lt;%fname%&gt; macros in strings inside the function to current function's name (needed in exceptions).</span></li>
+<li><span class="tag-Feature">Feature</span><span class="tag-Dev">Dev</span> wrapper for ClassManager to be used separately from the framework</li>
+<li><span class="tag-Performance">Performance</span> Should it reserve nulls in object prototypes for those members, which are created in constructor?<span class="task-comment">Does it affect performance? Needs a test.</span></li>
+<li><span class="tag-Feature">Feature</span> _staticInit - applied after the class is loaded or constructed, receives ClassData.<span class="task-comment">need to move container.Element IOS fixes into static constructor.</span></li>
+</ul>
+<h3>Serializer.js</h3>
+<ul>
+<li><span class="tag-Feature">Feature</span><span class="tag-Q">Q</span> currently, serializing a string preserves the "\r\n" sequence.<br/>Convert it to "\n" by default and make a schema switch to return the old behaviour.</li>
+</ul>
+<h3>transitions.js</h3>
+<ul>
+<li><span class="tag-Fix">Fix</span> more transitions (*)</li>
+</ul>
+<h3>Cron.js</h3>
+<ul>
+<li><span class="tag-Performance">Performance</span> use requestAnimationFrame</li>
+</ul>
+<h3>Lava.js</h3>
+<ul>
+<li><span class="tag-Refactoring">Refactoring</span> namespaces reservation: move to a separate file (this will allow to generate it in user projects)</li>
+<li><span class="tag-Feature">Feature</span> create a script, which generates the file with namespaces in Lava.</li>
+<li><span class="tag-Feature">Feature</span> bootstrap() should process the control (x:) attributes, for example x:resource_id</li>
+</ul>
+<h3>Algorithms/Sorting/</h3>
+<ul>
+<li><span class="tag-Feature">Feature</span><span class="tag-Performance">Performance</span> Need fast unstable sort algorithm (*)</li>
+</ul>
+<h2>Create widgets</h2>
+<ul>
+<li><span class="tag-Feature">Feature</span> Slider<span class="task-comment">with hidden input field</span></li>
+<li><span class="tag-Feature">Feature</span> Menu<span class="task-comment">with keyboard navigation</span></li>
+<li><span class="tag-Feature">Feature</span> Validator - a separate widget with visitor pattern for validation rules<span class="task-comment">wraps the input</span></li>
+</ul>
+<h2>Existing widgets</h2>
+<h3>Panels</h3>
+<ul>
+<li><span class="tag-Feature">Feature</span> when panels are collapsed, but the body stays in DOM - they should sleep() their content</li>
+</ul>
+<h3>TreeView</h3>
+<ul>
+<li><span class="tag-Feature">Feature</span> must not contain Morph containers inside it</li>
+</ul>
+<h3>Select</h3>
+<ul>
+<li><span class="tag-Feature">Feature</span> there must be a sugar which parses it's content (optgroup and option tags)<span class="task-comment">it will be custom function, which is independent from Sugar class.<br/> Schema will define where to put the result. <br/>
+ Requires Sugar modification.</span></li>
+</ul>
+<h3>DropDown</h3>
+<ul>
+<li><span class="tag-Feature">Feature</span> does not support the "disabled" class (is it needed?); "open" class should be assignable via option.</li>
+</ul>
+<h3>Calendar</h3>
+<ul>
+<li><span class="tag-Feature">Feature</span> should be constant size, support range selection and support full localization for "now" and month name<span class="task-comment">in some languages month and year numbers are not arabic</span></li>
+</ul>
+<h3>Inputs</h3>
+<ul>
+<li><span class="tag-Feature">Feature</span> working form_id attribute</li>
+<li><span class="tag-Feature">Feature</span> validation for email input</li>
+<li><span class="tag-Feature">Feature</span> input watermarks<span class="task-comment">in Lava they will be elements before the input, with negative margin. It's the most reliable way.</span></li>
+</ul>
+<h2>New functionality</h2>
+<ul>
+<li><span class="tag-Feature">Feature</span> FocusManager - a class which routes keyboard input to it's current "focused" target<br/>(target is a widget, which supports the 'focusable' interface)</li>
+<li><span class="tag-Feature">Feature</span> Lava.data.CollectionListener.class.js - batch add listeners to items in Enumerable collections</li>
+</ul>
+<h2>Build</h2>
+<ul>
+<li><span class="tag-Refactoring">Refactoring</span> a better build script<span class="task-comment">start by making methods like exportClasses and exportWidget in separate namespace</span></li>
+<li><span class="tag-Feature">Feature</span><span class="tag-Q">Q</span> build script should remove unnecessary members that depend on switches<span class="task-comment">Example: Lava.exportTranslatableString should be removed, when Lava.schema.parsers.EXPORT_STRINGS is off</span></li>
+<li><span class="tag-Feature">Feature</span> the Lava Node module must not be exported to global</li>
+<li><span class="tag-Feature">Feature</span> build script should write version and commit hash to the result files</li>
+</ul>
+<h2>Site</h2>
+<ul>
+<li><span class="tag-Feature">Feature</span> this list should be turned into something more usable.<span class="task-comment">People should be able to leave comments, vote for features they need, and gather requirements.<br/> This may be done in external service.</span></li>
+<li><span class="tag-Refactoring">Refactoring</span> the Widgets page must be assembled like Examples</li>
+<li><span class="tag-Refactoring">Refactoring</span> there must be no calls to TemplateParser (via Lava.bootstrap) in the www directory. <br/><br/>Everything must be assembled on server.</li>
+<li><span class="tag-Feature">Feature</span> Widgets page: each widget must have a detailed description with usage, events, roles, properties and options</li>
+<li><span class="tag-Feature">Feature</span> a demo of a native widget wrapper (for example, CodeMirror, color pickers or Select2)</li>
+<li><span class="tag-Feature">Feature</span> there must be an ability to launch unit tests right on the framework site</li>
+<li><span class="tag-Feature">Feature</span> code coverage for unit tests, that can be viewed online</li>
+<li><span class="tag-Refactoring">Refactoring</span> code in examples on main page is a bit messy, build process is complicated. Correct it.</li>
+</ul>
+<h2>Documentation</h2>
+<ul>
+<li><span class="tag-Feature">Feature</span> Generate automatic API docs. Must be JSDoc theme.</li>
+<li><span class="tag-Feature">Feature</span> Doc system should validate class comments metadata<span class="task-comment">@extends and @lends must match the Extends and class name</span></li>
+<li><span class="tag-Feature">Feature</span> Widget documentation must be generated automatically<span class="task-comment">including properties, events, options and sugar</span></li>
+</ul>
+<h2>Maintenance</h2>
+<ul>
+<li><span class="tag-Feature">Feature</span> Automatic on-commit codestyle validation<span class="task-comment">one "var" per function, no camelCase, etc...</span></li>
+</ul>
+<!--LAVA_BUILD_TASKS_END-->
+
+		</div>
+
+	</div>
+</div>
+
+<!--LAVA_BUILD_INCLUDE:footer.html-->
+<footer>
+	<div class="container">
+		<div class="footer-inner">Copyright (c) 2014 Alex Galashov. MIT Licence.</div>
+	</div>
+</footer>
+<!--LAVA_BUILD_INCLUDE_END-->
+
+</body>
+</html>

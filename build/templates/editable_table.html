@@ -1,0 +1,38 @@
+<!-- This is part of examples, moved into separate file for technical reasons -->
+<x:define controller="EditableTableExample" extends="Table" title="EditableTable">
+	<template role="include" name="tbody">
+		<tbody x:type="container" x:resource_id="$table.TBODY_ELEMENT">
+			{#foreach($table.records) as=row}
+				<x:roles>$table._tbody</x:roles>
+				<tr x:type="container" x:event:click="$table.row_click(row)">
+					{#foreach($table._columns) as=column}
+						<td x:type="view">
+							{#if(row == _edit_record)}
+								{>$table.edit_cell(column)}
+							{else}
+								{>$table.cell(column)}
+							{/if}
+						</td>
+					{/foreach}
+				</tr>
+			{/foreach}
+		</tbody>
+	</template>
+	<storage>
+		<template_hash name="edit_cells">
+			<template name="String">
+				<text_input>
+					<x:bind name="value">row[column.name]</x:bind>
+				</text_input>
+			</template>
+			<template name="Boolean">
+				<checkbox>
+					<x:bind name="is_checked">row[column.name]</x:bind>
+				</checkbox>
+			</template>
+		</template_hash>
+	</storage>
+	<resources locale="default">
+		<container path="TABLE_ELEMENT" add_classes="demo-table"></container>
+	</resources>
+</x:define>

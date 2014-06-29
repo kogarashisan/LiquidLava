@@ -1,0 +1,55 @@
+<x:widget extends="Example" controller="TreeExample">
+	<template role="main">
+		Left:
+		<button type="button" class="btn btn-primary" x:type="view"
+			x:event:click="$tree_example.expand_collapse('tree_left', true)">Expand</button>
+		<button type="button" class="btn btn-primary" x:type="view"
+			x:event:click="$tree_example.expand_collapse('tree_left', false)">Collapse</button>
+		Right:
+		<button type="button" class="btn btn-primary" x:type="view"
+			x:event:click="$tree_example.expand_collapse('tree_right', true)">Expand</button>
+		<button type="button" class="btn btn-primary" x:type="view"
+			x:event:click="$tree_example.expand_collapse('tree_right', false)">Collapse</button>
+		<div class="clearfix"></div>
+
+		{* left tree is a standard widget *}
+		<div style="margin-right: 10px" class="tree-example-container">
+			<x:widget extends="Tree" id="tree_left">
+				<assign name="records">#ExamplesApp.tree_records</assign>
+			</x:widget>
+		</div>
+
+		{* copy of a parent's include with changed refresher *}
+		<div class="tree-example-container">
+			<x:widget extends="Tree" id="tree_right">
+				<assign name="records">#ExamplesApp.tree_records</assign>
+				<template role="include" name="node_children">
+					{$if(node.children.length && $tree.meta_storage[node.guid].is_expanded)}
+						{*H:'Default' refresher has no animation support*}<x:refresher>{class: 'Default'}</x:refresher>{*:H*}
+						<x:container_config>
+							{
+								class: "Emulated",
+								options: {
+									placement: "after-previous"
+								}
+							}
+						</x:container_config>
+						<x:assign name="pad">{literal:}
+								(foreach_index == count - 1)
+									? pad + '<div class="lava-tree-pad"></div>'
+									: pad + '<div class="lava-tree-pad-line"></div>'
+							{:literal}</x:assign>
+						<x:assign name="level">@parent->level + 1</x:assign>
+						<div x:type="container" class="lava-tree-container">
+							{#foreach(node.children) as=node}
+								{>$tree.node}
+							{/foreach}
+						</div>
+					{/if}
+				</template>
+			</x:widget>
+		</div>
+		<div class="clearfix"></div>
+	</template>
+	<default_events>['click']</default_events>
+</x:widget>

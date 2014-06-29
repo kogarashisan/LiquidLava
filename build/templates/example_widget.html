@@ -1,0 +1,17 @@
+<!-- This is part of examples, moved into separate file for technical reasons -->
+<x:define controller="Standard" title="Example">
+	<view role="main">
+		<div class="bs-example" x:type="view">
+			{>content}
+		</div>
+	</view>
+	<sugar>
+		{
+			tag_name: 'example',
+			is_content_allowed: true,
+			content_schema: {
+				type: 'template'
+			}
+		}
+	</sugar>
+</x:define>

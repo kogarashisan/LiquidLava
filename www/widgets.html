@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<!--LAVA_BUILD_INCLUDE:header.html-->
+<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="">
+	<meta name="author" content="">
+	<!--link rel="shortcut icon" href="favicon.png"-->
+
+	<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+	<!--[if lt IE 9]>
+		<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+		<script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+	<![endif]-->
+
+	<script src="http://ajax.googleapis.com/ajax/libs/mootools/1.5.0/mootools-yui-compressed.js"></script>
+	<link rel="stylesheet" href="css/site.css">
+	<script src="../dist/lava-master-DEBUG.js"></script>
+	<script src="js/site.js"></script>
+	<link rel="canonical" href="http://www.lava-framework.com/www/widgets.html"/>
+	<script>
+		if (window.location.href.indexOf('http://kogarashisan.github.io/LiquidLava') == 0) {
+			window.location.href = 'http://www.lava-framework.com/www/widgets.html';
+		}
+		// to prevent tracking from dev's computers
+		if (window.location.href.indexOf('http://www.lava-framework.com/') === 0) {
+			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+				(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+					m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+			ga('create', 'UA-51511486-1', 'lava-framework.com');
+			ga('send', 'pageview');
+		}
+	</script>
+<!--LAVA_BUILD_INCLUDE_END-->
+
+	<title>Widgets showcase | LiquidLava Framework</title>
+	<script>
+		window.addEvent('load', function() {
+			Lava.bootstrap();
+			$('loading_indicator').destroy();
+		});
+	</script>
+</head>
+
+<body lava-app="WidgetsPage">
+<script type="lava/fragment">
+	<x:property_string name="lipsum">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</x:property_string>
+</script>
+
+<!--LAVA_BUILD_INCLUDE:navbar.html-->
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+	<div class="container">
+		<div class="navbar-header">
+			<div class="navbar-brand">LiquidLava</div>
+		</div>
+		<div class="navbar-collapse collapse">
+			<ul class="nav navbar-nav">
+				<li><!-- class="active" -->
+					<a href="/index.html">Home</a>
+				</li>
+				<li class="dropdown" x:widget="DropDown">
+					<a href="#" class="dropdown-toggle" x:type="view" x:roles="$dropdown.trigger">
+						Learn <b class="caret"></b>
+					</a>
+					<ul class="dropdown-menu">
+						<li><a href="/www/examples.html">Examples</a></li>
+						<!--li class="divider"></li-->
+						<!--li class="dropdown-header">Coming soon:</li-->
+						<li class="disabled"><a href="#">Manual</a></li>
+						<li class="disabled"><a href="#">Video tutorials</a></li>
+					</ul>
+				</li>
+				<li class="dropdown" x:widget="DropDown">
+					<a href="#" class="dropdown-toggle" x:type="view" x:roles="$dropdown.trigger">
+						Develop <b class="caret"></b>
+					</a>
+					<ul class="dropdown-menu">
+						<li><a href="/www/development.html">Guidelines</a></li>
+						<li><a href="https://github.com/kogarashisan/LiquidLava/">GitHub</a></li>
+						<li><a href="/www/changelog.html">Changelog</a></li>
+						<li><a href="https://github.com/kogarashisan/LiquidLava/issues?state=open">Issues</a></li>
+						<li><a href="/www/roadmap.html">Roadmap</a></li>
+						<li><a href="/www/tasks.html">Tasks</a></li>
+						<!--li class="divider"></li-->
+						<!--li class="dropdown-header">Coming soon:</li-->
+						<li class="disabled"><a href="#">API</a></li>
+						<li class="disabled"><a href="#">Code coverage</a></li>
+					</ul>
+				</li>
+				<li>
+					<a href="/www/widgets.html">Widgets</a>
+				</li>
+				<li>
+					<a href="/www/about.html">About</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+</div>
+<!--LAVA_BUILD_INCLUDE_END-->
+
+<div class="container">
+	<div class="row">
+
+		<div class="col-md-3">
+			<div class="bs-sidebar hidden-print affix-top" role="complementary">
+				<ul class="nav bs-sidenav">
+					<li>
+						<a href="#panels">Panels</a>
+						<!--ul class="nav">
+							<li><a href="#">Usage</a></li>
+						</ul-->
+					</li>
+					<li>
+						<a href="#accordion">Accordion</a>
+					</li>
+					<li>
+						<a href="#tabs">Tabs</a>
+					</li>
+					<li>
+						<a href="#tooltip">Tooltip</a>
+					</li>
+					<li>
+						<a href="#dropdown">Dropdown</a>
+					</li>
+					<li>
+						<a href="#table">Table</a>
+					</li>
+					<li>
+						<a href="#calendar">Calendar</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+
+		<div class="col-md-9" role="main">
+
+			<div class="well text-center" id="loading_indicator">
+				<i class="glyphicon glyphicon-refresh"></i> Loading ...
+			</div>
+
+			<h1>Standard widgets showcase</h1>
+			<p>
+				These widgets are included with framework by default. Note: they are not limited to bootstrap theme
+				- you can write your own CSS and even HTML markup for any widget.
+			</p>
+			<p>
+				Customizing the code is very easy: you are always encouraged to inherit your own classes,
+				write your own templates and use these widgets as examples when creating your own.
+			</p>
+
+			<div class="bs-callout bs-callout-info">
+				<p>Note: framework has also a collection of form input widgets, which are not shown here, like tri-state Checkbox or Radio.</p>
+			</div>
+
+			<p>
+				All headers and all content of almost any widget in Lava is not just a static text,
+				but a normal Lava template, so inside you can use other widgets and data binding.
+				Also, most widgets support styling via "resources", so you can apply styles without changing the markup.
+			</p>
+
+			<H1 id="panels">Panels</H1>
+			<p>The "lipsim" text is bound from a parent widget's variable.</p>
+			<example>
+				<x:default_events>['click']</x:default_events>
+
+				<button type="button" class="btn btn-primary" x:type="view" x:event:click="$widgets_page.toggle_collapsible_expanded">
+					Toggle collapsible
+				</button>
+
+				<collapsible>
+					<x:assign name="is_expanded">is_collapsible_expanded</x:assign>
+					<div class="well">
+						This is expandable DIV with animation. Widget has <i style="font-weight:bold">is_expanded</i> property,
+						which you can set programmatically to control panel's state.
+					</div>
+				</collapsible>
+
+				<collapsible-panel>
+					<x:resources locale="default">
+						<container path="COLLAPSIBLE_PANEL_CONTAINER" add_classes="panel-default"></container>
+					</x:resources>
+					<title>This panel does not remove it's content in collapsed state</title>
+					<content>{#>lipsum}</content>
+				</collapsible-panel>
+
+				<collapsible-panel-ext>
+					<x:resources locale="default">
+						<container path="COLLAPSIBLE_PANEL_CONTAINER" add_classes="panel-default"></container>
+					</x:resources>
+					<title>This panel does! (see it in your browser's dev tools)</title>
+					<content>{#>lipsum}</content>
+				</collapsible-panel-ext>
+			</example>
+
+			<H1 id="accordion">Accordion</H1>
+			<example>
+				<accordion>
+					<x:resources locale="default">
+						<container path="panel.COLLAPSIBLE_PANEL_CONTAINER" add_classes="panel-info"></container>
+					</x:resources>
+					<panels>
+						<panel is-expanded="true">
+							<title>Panel 1</title>
+							<content>
+								<p><strong>Below is a data-bound-view in Metamorph-like container:</strong></p>
+								{$>lipsum}
+							</content>
+						</panel>
+						<panel>
+							<title>Panel 2</title>
+							<content>Content 2</content>
+						</panel>
+						<panel>
+							<title>Panel 3</title>
+							<content>Content 3</content>
+						</panel>
+					</panels>
+				</accordion>
+			</example>
+
+			<p>Have you ever seen a horizontal accordion? This is the flexibility of Lava widgets!</p>
+			<example>
+				<accordion>
+					<content>
+						<div style="width: 32%;float: left">
+							<collapsible-panel x:roles="$accordion.panel">
+								<x:resources locale="default">
+									<container path="COLLAPSIBLE_PANEL_CONTAINER" add_classes="panel-primary"></container>
+								</x:resources>
+								<title>Title 1</title>
+								<content>Content 1<br/>Content 1<br/>Content 1</content>
+							</collapsible-panel>
+						</div>
+						<div style="width: 32%;float: left">
+							<collapsible-panel x:roles="$accordion.panel">
+								<x:resources locale="default">
+									<container path="COLLAPSIBLE_PANEL_CONTAINER" add_classes="panel-danger"></container>
+								</x:resources>
+								<title>Title 2</title>
+								<content>Content 2<br/>Content 2<br/>Content 2<br/>Content 2</content>
+							</collapsible-panel>
+						</div>
+						<div style="width: 32%;float: left">
+							<collapsible-panel x:roles="$accordion.panel">
+								<x:resources locale="default">
+									<container path="COLLAPSIBLE_PANEL_CONTAINER" add_classes="panel-primary"></container>
+								</x:resources>
+								<title>Title 3</title>
+								<content>Content 3<br/>Content 3<br/>Content 3<br/>Content 3<br/>Content 3</content>
+							</collapsible-panel>
+						</div>
+						<div class="clearfix"></div>
+					</content>
+				</accordion>
+			</example>
+
+			<H1 id="tabs">Tabs</H1>
+
+			<example>
+				<tabs>
+					<tab>
+						<title>Tab 1</title>
+						<content>
+							<p><strong>Below is a data-bound view in an Element container:</strong></p>
+							<div x:type="container">{#>lipsum}</div>
+						</content>
+					</tab>
+					<tab>
+						<title>Tab 2</title>
+						<content>Header content is also a template</content>
+					</tab>
+					<tab>
+						<title>Tab 3</title>
+						<content>Tab 3 content</content>
+					</tab>
+				</tabs>
+			</example>
+
+			<H1 id="tooltip">Tooltip</H1>
+			<example>
+				<p>Some text with a <a href="#" data-tooltip="test">tooltip</a></p>
+			</example>
+
+			<H1 id="dropdown">Dropdown</H1>
+			<p>Keyboard navigation and nested dropdowns support is coming soon, as well as automatic ARIA markup.</p>
+			<example>
+				<ul class="nav nav-pills" style="float: left; margin-right:1em">
+					<li class="dropdown" x:widget="DropDown">
+						<a role="button" href="#" x:type="view" x:roles="$dropdown.trigger">Dropdown <b class="caret"></b></a>
+						<ul class="dropdown-menu" role="menu">
+							<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Action</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Another action</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Something else here</a></li>
+							<li role="presentation" class="divider"></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
+						</ul>
+					</li>
+				</ul>
+
+				<div class="btn-group" x:widget="DropDown" style="float: left; margin-right:1em">
+					<button type="button" class="btn btn-success">Success</button>
+					<button type="button" class="btn btn-success dropdown-toggle" x:type="view" x:roles="$dropdown.trigger">
+						<span class="caret"></span>
+						<span class="sr-only">Toggle Dropdown</span>
+					</button>
+					<ul class="dropdown-menu" role="menu">
+						<li><a href="#">Action</a></li>
+						<li><a href="#">Another action</a></li>
+						<li><a href="#">Something else here</a></li>
+						<li class="divider"></li>
+						<li><a href="#">Separated link</a></li>
+					</ul>
+				</div>
+
+				<div class="clearfix"></div>
+			</example>
+
+			<h1 id="table">Table</h1>
+			<p>Simple sortable table. Click on column headers to apply sorting.</p>
+			<example>
+				<x:widget extends="Table">
+					<script x:equiv="options" type="application/json">
+						{
+							columns: [
+								{name: 'title', title: 'Title', type: 'String'},
+								{name: 'symbol', title: 'Chemical symbol', type: 'String'},
+								{name: 'atomic_mass', title: 'Atomic mass', type: 'String'},
+								{name: 'is_gas', title: 'Gas?', type: 'Boolean'}
+							]
+						}
+					</script>
+					<resources locale="default">
+						<container path="TABLE_ELEMENT" add_classes="demo-table"></container>
+					</resources>
+					<assign name="records">$widgets_page.periodic_elements</assign>
+				</x:widget>
+			</example>
+
+			<h1 id="calendar">Calendar</h1>
+			<example>
+				<x:widget extends="Calendar"></x:widget>
+			</example>
+
+			<!-- some empty space for padding -->
+			<div style="height: 2em">&nbsp;</div>
+
+		</div>
+
+	</div>
+</div>
+
+<!--LAVA_BUILD_INCLUDE:footer.html-->
+<footer>
+	<div class="container">
+		<div class="footer-inner">Copyright (c) 2014 Alex Galashov. MIT Licence.</div>
+	</div>
+</footer>
+<!--LAVA_BUILD_INCLUDE_END-->
+
+</body>
+</html>

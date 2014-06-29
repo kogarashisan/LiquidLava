@@ -1,0 +1,29 @@
+<example>
+	<x:widget controller="PanelExample1">
+		<template role="main">
+			<div x:type="view"
+				x:event:click="$example_panel.toggle_click"
+				style="background: lightyellow; padding: 1em; border: 1px solid gray;">
+				Click me!
+			</div>
+			{$if(is_expanded)}
+				{*H:Refresher removes the view from DOM*}<x:refresher>{class: 'Default'}</x:refresher>{*:H*}
+				{*H:Container knows how to insert it back*}<x:container_config>
+					{
+						class: "Emulated",
+						options: {
+							placement: "after-previous"
+						}
+					}
+				</x:container_config>{*:H*}
+				<div x:type="view" style="border: 1px solid black">
+					test<br/>
+					test<br/>
+					test<br/>
+					test<br/>
+				</div>
+			{/if}
+		</template>
+		<default_events>['click']</default_events>
+	</x:widget>
+</example>

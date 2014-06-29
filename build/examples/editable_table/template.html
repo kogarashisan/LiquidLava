@@ -1,0 +1,14 @@
+<example>
+	<x:widget extends="EditableTable">
+		<script x:equiv="options" type="application/json">
+			{
+				columns: [
+					{name: 'title', title: 'Title', type: 'String', is_editable: true},
+					{name: 'type', title: 'Type', type: 'String'},
+					{name: 'is_expanded', title: 'Expanded?', type: 'Boolean', is_editable: true}
+				]
+			}
+		</script>
+		<assign name="records">#ExamplesApp.all_tree_records</assign>
+	</x:widget>
+</example>

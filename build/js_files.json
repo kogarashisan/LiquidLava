@@ -1,0 +1,132 @@
+{
+	"core": [
+		"Lava.js",
+		"schema.js",
+		"Serializer.js",
+		"modifiers.js",
+		"transitions.js",
+		"resources.js",
+		"types.js",
+		"extenders.js",
+		"Cron.js",
+		"Core.js",
+		"ScopeManager.js",
+		"Algorithms/Sorting/mergeSort.js",
+		"ClassManager.js"
+	],
+	"parsers": [
+		"Parsers/Common.js",
+		"Parsers/Directives.js",
+		"Parsers/Generated/ObjectParser.js",
+		"Parsers/ObjectParser.js",
+		"Parsers/Generated/ExpressionParser.js",
+		"Parsers/ExpressionParser.js",
+		"Parsers/Generated/TemplateParser.js",
+		"Parsers/TemplateParser.js"
+	],
+	"firestorm":[
+		"Firestorm/Firestorm.js",
+		"Firestorm/schema.js",
+		"Firestorm/known_exceptions.js",
+		"Firestorm/Environment.js",
+		"Firestorm/Element.js",
+		"Firestorm/ElementProperties.js",
+		"Firestorm/ElementDimensions.js",
+		"Firestorm/ElementStyles.js",
+		"Firestorm/DOM.js",
+		"Firestorm/Array.js",
+		"Firestorm/String.js",
+		"Firestorm/Object.js",
+		"Firestorm/Date.js",
+		"Firestorm/init.js"
+	],
+	"classes": [
+		"Mixin/Observable.class.js",
+		"Mixin/Properties.class.js",
+		"Mixin/Refreshable.class.js",
+
+		"Animator/Units.class.js",
+
+		"Animation/Abstract.class.js",
+		"Animation/Standard.class.js",
+		"Animation/Collapse.class.js",
+		"Animation/Toggle.class.js",
+		"Animation/Emulated.class.js",
+		"Animation/BootstrapCollapse.class.js",
+
+		"System/Template.class.js",
+		"System/ViewManager.class.js",
+		"System/App.class.js",
+		"System/Sugar.class.js",
+		"System/PopoverManager.class.js",
+
+		"Data/Field/Abstract.class.js",
+		"Data/Field/Basic.class.js",
+		"Data/Field/Collection.class.js",
+		"Data/Field/Integer.class.js",
+		"Data/Field/Id.class.js",
+		"Data/Field/ForeignKey.class.js",
+		"Data/Field/Record.class.js",
+		"Data/Field/Boolean.class.js",
+
+		"Data/Enumerable.class.js",
+		"Data/ModuleAbstract.class.js",
+		"Data/Module.class.js",
+		"Data/RecordAbstract.class.js",
+		"Data/Record.class.js",
+		"Data/MetaRecord.class.js",
+		"Data/MetaStorage.class.js",
+
+		"Scope/Abstract.class.js",
+		"Scope/Argument.class.js",
+		"Scope/Binding.class.js",
+		"Scope/DataBinding.class.js",
+		"Scope/Foreach.class.js",
+		"Scope/PropertyBinding.class.js",
+		"Scope/Segment.class.js",
+
+		"View/Container/Element.class.js",
+		"View/Container/Morph.class.js",
+		"View/Container/Emulated.class.js",
+
+		"View/Refresher/Default.class.js",
+		"View/Refresher/Animated.class.js",
+		"View/Refresher/Collapse.class.js",
+
+		"View/Abstract.class.js",
+		"View/View.class.js",
+		"View/Expression.class.js",
+		"View/Foreach.class.js",
+		"View/If.class.js",
+
+		"Widget/Standard.class.js"
+	],
+	"widgets": [
+		"Widget/Input/Abstract.class.js",
+		"Widget/Input/TextAbstract.class.js",
+		"Widget/Input/TextArea.class.js",
+		"Widget/Input/Text.class.js",
+		"Widget/Input/RadioAbstract.class.js",
+		"Widget/Input/CheckBox.class.js",
+		"Widget/Input/Radio.class.js",
+		"Widget/Input/Submit.class.js",
+		"Widget/Input/SelectAbstract.class.js",
+		"Widget/Input/Select.class.js",
+		"Widget/Input/MultipleSelect.class.js",
+		"Widget/Input/Numeric.class.js",
+
+		"Widget/FieldGroup.class.js",
+
+		"Widget/Accordion.class.js",
+		"Widget/Tabs.class.js",
+		"Widget/Collapsible.class.js",
+		"Widget/CollapsiblePanel.class.js",
+		"Widget/CollapsiblePanelExt.class.js",
+		"Widget/DropDown.class.js",
+		"Widget/Tree.class.js",
+		"Widget/Table.class.js",
+		"Widget/CalendarAbstract.class.js",
+		"Widget/Calendar.class.js",
+		"Widget/Tooltip.class.js"
+	]
+}

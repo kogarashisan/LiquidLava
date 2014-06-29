@@ -1,0 +1,12 @@
+{
+	"author": "Alex Galashov",
+	"name": "LiquidLava",
+	"version": "0.2.1",
+
+	"devDependencies" : {
+		"grunt": ">= 0.4.4",
+		"grunt-cli": ">= 0.1.13",
+		"grunt-contrib-concat": ">=0.4.0",
+		"highlight.js": "=8.0.0"
+	}
+}

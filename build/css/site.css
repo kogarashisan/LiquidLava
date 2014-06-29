@@ -1,0 +1,73 @@
+
+/*
+This file is used on Lava framework site. You will not need it in your own projects.
+*/
+
+body {padding-top: 50px;}
+
+.index-header {text-align: center;padding-bottom: 2em;}
+.index-header h1 {font-weight: bold;color: rgb(255,128,0);padding-top: 40px;margin-bottom: 18px;}
+.index-header em {font-family: serif;font-size: 1.5em;display: block;padding-bottom: 1.5em;}
+.index-header a {display: inline-block;font-size: 1.5em;}
+.index-header small {color: gray;display: block;}
+.index-text {background-color: #eeeeee;padding: 5px 20px;}
+.index-about {font-family: serif;font-size: 2em;display: block;padding: 1em;text-align: center;font-style:italic}
+
+.btn-gray {
+	padding: 7px 12px;
+	color: #333;
+	text-shadow: 0 1px 0 rgba(255,255,255,0.9);
+	white-space: nowrap;
+	background-color: #eeeeee;
+	background-image: -moz-linear-gradient(#fcfcfc, #eee);
+	background-image: -webkit-linear-gradient(#fcfcfc, #eee);
+	background-image: linear-gradient(#fcfcfc, #eee);
+	background-repeat: repeat-x;
+	border-radius: 3px;
+	border: 1px solid #d5d5d5;
+	vertical-align: middle;
+	cursor: pointer;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	-webkit-appearance: none;
+}
+
+.navbar-inverse .navbar-brand {color: rgb(255,128,0); cursor: default;}
+footer .container {background: #f7f5fa;}
+.footer-inner {padding: 1em; text-align: right;}
+
+.lava-highlight {background: #FFFF80; display: inline; cursor: pointer}
+.lava-highlight:hover {background: #FFFF00}
+.lava-control-prefix {color: #D50000}
+
+.example-circle {
+	position: absolute;width:40px;height: 40px;background: yellow;font-size: 29px;font-weight: bold;font-style: italic;text-align: center;cursor: pointer;font-family:serif;
+	-webkit-border-radius: 20px;-moz-border-radius: 20px;border-radius: 20px;
+}
+.example-circle-selected {background: lightgreen!important}
+
+/* tags for the tasks page */
+.tag-Feature {background: rgb(19, 226, 44);padding: 2px 4px}
+.tag-Dev {background: lightgrey;padding: 2px 4px}
+.tag-Fix {background: rgb(255, 194, 0);padding: 2px 4px}
+.tag-Bug {background: rgb(255, 133, 0);padding: 2px 4px}
+.tag-Performance {background: rgb(201, 233, 143);padding: 2px 4px}
+.tag-Refactoring {background: rgb(153, 198, 255);padding: 2px 4px}
+.tag-Q {background: yellow;padding: 2px 4px}
+.task-comment {display: block; opacity: 0.5}
+.task-comment:hover {opacity: 1}
+
+.demo-table td {border: 1px solid gray; padding: 3px 6px}
+.demo-table thead {background: #f4f4f4}
+.demo-table thead td {cursor: pointer}
+
+.navbar-inverse .navbar-brand:hover, .navbar-inverse .navbar-brand:focus {color: rgb(255,128,0);}
+
+.tree-example-container {position: relative;height: 320px;width: 350px;overflow: auto;border: 1px solid gray;float:left;}
+.main-page-follow-container {padding-top: 1em}
+.about-page-hostings td {padding: 1em; vertical-align: top}
+.initial-loading-indicator {background: #f7f5fa;font-size: 2em;font-weight: bold;padding: 1em;text-align: center;margin: 1em 0 1em;}

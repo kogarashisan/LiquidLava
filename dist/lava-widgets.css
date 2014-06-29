@@ -1,0 +1,60 @@
+
+/*
+This file contains essential classes for some standard widgets.
+*/
+
+/* Common classes */
+
+.lava-unselectable {-o-user-select: none;-ms-user-select: none;-moz-user-select: -moz-none;-webkit-user-select: none;user-select: none;cursor: default;}
+
+/* End: common classes */
+
+.lava-panel {overflow: hidden}
+.lava-collapsible {overflow: hidden}
+
+.lava-tree {}
+.lava-tree-node {background: no-repeat left center;overflow: visible;vertical-align: top;height: 25px; font-size: 14px;white-space: nowrap;/*text-overflow: ellipsis;-o-text-overflow: ellipsis;*/}
+.lava-tree-node:hover {background: rgb(234, 240, 250);/*box-sizing: border-box;border: 1px solid rgb(163, 168, 180);*/}
+.lava-tree-text {display: inline-block;padding-left: 3px;vertical-align: top;padding-top: 2px;cursor: pointer;line-height: 25px;font-family: helvetica, arial, verdana, sans-serif;font-style: normal;}
+.lava-tree-icon {width: 25px; height: 25px;font-size: 1px;display: inline-block;background: no-repeat left center;}
+.lava-tree .icon-folder {background-image: url(data:image/gif;base64,R0lGODlhFwAUAKIAAAAAAP/////lAP+DAP///wAAAAAAAAAAACH5BAEAAAQALAAAAAAXABQAAAM2OLpM/vCxqaIllF6Y9cZdKI6hYJ5oijJqq7JuLMByS9fpjZ/6Pi++HDDIGxJ/iqOptyM5n6EEADs=);}
+.lava-tree .icon-file {background-image: url(data:image/gif;base64,R0lGODlhEQAUANUAAAAAAP////r6+vX19fPz8+zs7Obm5uXl5eHh4eDg4La2trW1tampqaenp6ampqKiop+fn52dnZmZmZOTk4WFhXBwcFNTU1FRUUJCQj8/Pz4+Pj09PTk5OTg4ODMzMzAwMCgoKP///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAACEALAAAAAARABQAAAZ/wMpDwiAai41JaBl6FEADqDRKQCyYjEEksO1yA4KDYpkNmM9o8OFaTrsFiUnWwLlY7pYLBnImONpuaQMMgIFng3N1eHh6fIgDhoKEA3R2i3l7AY+RaI+Vl5iOk5yHo6SapqSbHh0aGa+vGx8UqIWRg04Duru8uwUPQoTCw8PAQQA7);}
+.lava-tree-container {overflow: hidden;}
+.lava-tree-expander {background-repeat: no-repeat;background-position: left center;display: inline-block;width: 23px;height:25px;cursor: pointer;}
+.lava-tree-middle-expanded {background-image: url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAJYlG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtMigOe6GvS+XwL8hsHhr2jsFXW5ABMnSSp5UmTSagw+d6IayPvCgMe1sIs8M8vS6Jha0m69bWxKAQA7);}
+.lava-tree-middle-collapsed {background-image: url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAJclG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtMigOe6GvS+XwL8hEAecGjsEZU8XS7gxEmGyAq1aD1iO79uMLoT1UDjF6aMrpld6dla5m7H3hJ5i26LUwoAOw==);}
+.lava-tree-bottom-expanded {background-image: url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAJPlG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtMigOe6GvS+XwL8hsHhr2jsFXW5ABMnSSp5UmTSagw+d7Wu9wsOi8fksvmMTqspBQA7);}
+.lava-tree-bottom-collapsed {background-image: url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAJUlG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtMigOe6GvS+XwL8hEAecGjsEZU8XS7gxEmGyAq1aD1iO79uMLqricfksvmMTqvX7Lb7TSkAADs=);}
+.lava-tree-middle-node {background-image: url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAJFlG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtP1i9Wgjrs8AAwKRz3ZrCjhKW/LYzOGtDmZ1KkV+mxFd1Vst1EAADs=);}
+.lava-tree-bottom-node {background-image: url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAI8lG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtP1i9Wgjrs8AAwKe7qi8YhMKpfMpvMJjUqnVEYBADs=);}
+.lava-tree-pad-line {width: 25px;height: 25px;display: inline-block;background: no-repeat left center url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAJBlG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtP1i9Wgjrv8fwPOerKhMEaUHFtJmzEIfUqRy09zF6VmGwUAOw==)}
+.lava-tree-pad {width: 25px;height: 25px;display: inline-block;}
+
+.lava-column-sort-ascending {font-weight: bold}
+.lava-column-sort-descending {font-weight: bold}
+.lava-column-sort-ascending:after {content: '\25BC'}
+.lava-column-sort-descending:after {content: '\25B2'}
+
+.lava-calendar {display: inline-block}
+.lava-calendar-header {text-align: center}
+.lava-calendar-left-arrow {float: left}
+.lava-calendar-right-arrow {float: right}
+.lava-calendar-days-view-month-name {}
+.lava-calendar-today {background: lightgray}
+.lava-calendar-today-link {}
+.lava-calendar-month {border: 1px solid lightgray;cursor: default;display: inline-block}
+.lava-calendar-month thead {background: #f7f5fa}
+.lava-calendar-month td {padding: 1px 2px;text-align: center}
+.lava-calendar-month tbody td:hover {background: lightgray;color: black}
+.lava-calendar-month-names {border: 1px solid lightgray;cursor: default}
+.lava-calendar-month-names td {padding: 0.5em;}
+.lava-calendar-month-names td:hover {background: lightgray; color: black}
+.lava-calendar-month-selected {background: blue!important; color: white!important}
+.lava-calendar-month-current {background: lightgray;color: black}
+.lava-calendar-year-input {width: 5em}
+.lava-calendar-selected-day {background: blue!important; color: white!important}
+.lava-calendar-center {padding: 2px 0}
+.lava-calendar-footer {}
+.lava-calendar-input-invalid {background: #FFC5C5}
+.lava-calendar-other-month-day {color: lightgray}
+.lava-calendar-current-month-day {}

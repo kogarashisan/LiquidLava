@@ -1,0 +1,455 @@
+
+<x:define controller="Collapsible" title="Collapsible">
+	<template role="main">
+		<div x:type="view" x:resource_id="$collapsible.COLLAPSIBLE_CONTAINER" x:roles="$collapsible._container_view">
+			{>$collapsible.content}
+		</div>
+	</template>
+	<script x:equiv="options" type="application/json">
+		{
+			animation: {
+				'class': 'Collapse'
+			}
+		}
+	</script>
+	<script x:equiv="sugar" type="application/json">
+		{
+			tag_name: 'collapsible',
+			is_content_allowed: true,
+			content_schema: {
+				type: 'template'
+			},
+			attribute_mappings: {
+				'is-expanded': {type: 'property', type_name: 'Boolean', name: 'is_expanded'},
+				'is-animation-enabled': {type: 'property', type_name: 'Boolean', name: 'is_animation_enabled'}
+			}
+		}
+	</script>
+	<resources locale="default">
+		<container path="COLLAPSIBLE_CONTAINER" static_classes="lava-collapsible"></container>
+	</resources>
+</x:define>
+
+<x:define controller="CollapsiblePanel" title="CollapsiblePanel" extends="Collapsible">
+	<view role="main">
+		<div x:type="view" x:resource_id="$collapsible_panel.COLLAPSIBLE_PANEL_CONTAINER">
+			{>$collapsible_panel.header_wrapper}
+			{>$collapsible_panel.content_wrapper}
+		</div>
+	</view>
+	<template role="include" name="header_wrapper">
+		<div x:type="view" x:event:click="$collapsible_panel.header_click" x:resource_id="$collapsible_panel.COLLAPSIBLE_PANEL_HEADER_CONTAINER">
+			{>$collapsible_panel.header}
+		</div>
+	</template>
+	<template role="include" name="content_wrapper">
+		<div x:type="view" x:roles="$collapsible_panel._container_view">
+			<div x:type="static" x:resource_id="$collapsible_panel.COLLAPSIBLE_PANEL_BODY_CONTAINER">
+				{>$collapsible_panel.content}
+			</div>
+		</div>
+	</template>
+	<template role="include" name="header">
+		<h3 class="panel-title">{>$collapsible_panel.title}</h3>
+	</template>
+	<template role="include" name="title">
+		{#>$collapsible_panel.title}
+	</template>
+	<template role="include" name="content">
+		{#>$collapsible_panel.content}
+	</template>
+	<script x:equiv="sugar" type="application/json">
+		{
+			tag_name: 'collapsible-panel',
+			is_content_allowed: true,
+			content_schema: {
+				type: 'object_map',
+				tag_roles: {
+					title: {type: 'template', name: 'title'},
+					content: {type: 'template'}
+				}
+			},
+			attribute_mappings: {
+				'is-locked': {type: 'property', type_name: 'Boolean', name: 'is_locked'}
+			}
+		}
+	</script>
+	<resources locale="default">
+		<container path="COLLAPSIBLE_PANEL_CONTAINER" static_classes="panel lava-panel"></container>
+		<container path="COLLAPSIBLE_PANEL_HEADER_CONTAINER" static_classes="panel-heading lava-unselectable"></container>
+		<container path="COLLAPSIBLE_PANEL_BODY_CONTAINER" static_classes="panel-body"></container>
+	</resources>
+	<default_events>['click']</default_events>
+</x:define>
+
+<x:define title="CollapsiblePanelExt" extends="CollapsiblePanel" controller="CollapsiblePanelExt">
+	<template role="include" name="content_wrapper">
+		{$if($collapsible_panel.is_expanded)}
+		<x:container_config>
+			{
+				class: "Emulated",
+				options: {
+					placement: "after-previous"
+				}
+			}
+		</x:container_config>
+		<x:roles>$collapsible_panel._content_if</x:roles>
+		<x:refresher>{class: 'Collapse'}</x:refresher>
+		<div x:type="view">
+			<div x:type="static" x:resource_id="$collapsible_panel.COLLAPSIBLE_PANEL_EXT_BODY_CONTAINER">
+				{>$collapsible_panel.content}
+			</div>
+		</div>
+		{/if}
+	</template>
+	<script x:equiv="sugar" type="application/json">
+		{
+			tag_name: 'collapsible-panel-ext'
+		}
+	</script>
+	<resources locale="default">
+		<container path="COLLAPSIBLE_PANEL_EXT_BODY_CONTAINER" static_classes="panel-body"></container>
+	</resources>
+</x:define>
+
+<x:define controller="Accordion" title="Accordion">
+	<template role="main">
+		{>$accordion.content}
+	</template>
+	<template role="include" name="content">
+		<div x:type="container" x:resource_id="$accordion.ACCORDION_CONTAINER">
+			{#foreach($accordion._panels) as=panel}
+				<x:refresher>{class: 'Default', insertion_strategy: 'sequential_elements'}</x:refresher>
+				<collapsible-panel x:roles="$accordion.panel" x:resource_id="$accordion.panel">
+					<x:assign name="is_expanded">panel.is_expanded</x:assign>
+					<title>
+						{>$accordion.panel_include(panel, 'title_template')}
+					</title>
+					<content>
+						{>$accordion.panel_include(panel, 'content_template')}
+					</content>
+				</collapsible-panel>
+			{/foreach}
+		</div>
+	</template>
+	<script x:equiv="sugar" type="application/json">
+		{
+			tag_name: 'accordion',
+			content_schema: {
+				type: 'object_map',
+				tag_roles: {
+					content: {
+						type: 'template'
+					},
+					panels: {
+						type: 'object_collection',
+						name: 'panels',
+						tag_name: 'panel',
+						tag_mappings: {
+							title: {type: 'template'},
+							content: {type: 'template'}
+						},
+						attribute_mappings: {
+							'is-expanded': {type: 'object_property', name: 'is_expanded', type_name: 'Boolean'}
+						}
+					}
+				}
+			},
+			attribute_mappings: {
+				'keep-expanded-on-add': {type: 'switch', name: 'keep_expanded_on_add'}
+			}
+		}
+	</script>
+	<resources locale="default">
+		<container path="ACCORDION_CONTAINER" static_classes="panel-group"></container>
+		<container path="panel.COLLAPSIBLE_PANEL_CONTAINER" add_classes="panel-collapse"></container>
+	</resources>
+</x:define>
+
+<x:define controller="Tabs" title="Tabs">
+	<template role="main">
+		<ul x:type="container" x:resource_id="$tabs.TABS_HEADERS_CONTAINER">
+			{#foreach($tabs._tabs) as=tab}
+				{#if(!tab.is_hidden)}
+					<li x:type="view" x:classes="tab == $tabs._active_tab ? 'active' : '';
+							tab.is_enabled ? '' : 'disabled'">
+						<a x:type="view" x:bind:href="'#' + (tab.name || '')" x:event:click="$tabs.header_click(tab)">
+							{>$tabs.tab_include(tab, 'title_template')}
+						</a>
+					</li>
+				{/if}
+			{/foreach}
+		</ul>
+		<div x:type="container" x:resource_id="$tabs.TABS_CONTENT_CONTAINER">
+			{#foreach($tabs._tabs) as=tab}
+				<x:refresher>{class: 'Default', insertion_strategy: 'sequential_elements'}</x:refresher>
+				<div x:type="view" class="tab-pane" x:classes="tab == $tabs._active_tab ? 'active' : ''">
+					{>$tabs.tab_include(tab, 'content_template'))}
+				</div>
+			{/foreach}
+		</div>
+	</template>
+	<script x:equiv="sugar" type="application/json">
+		{
+			tag_name: 'tabs',
+			content_schema: {
+				type: 'object_collection',
+				name: 'tabs',
+				tag_name: 'tab',
+				tag_mappings: {
+					title: {type: 'template', name: 'title_template'},
+					content: {type: 'template', name: 'content_template'}
+				},
+				attribute_mappings: {
+					name: {type: 'object_property'},
+					'is-enabled': {type: 'object_property', type_name: 'Boolean', name: 'is_enabled'},
+					'is-hidden': {type: 'object_property', type_name: 'Boolean', name: 'is_hidden'}
+				}
+			}
+		}
+	</script>
+	<resources locale="default">
+		<container path="TABS_HEADERS_CONTAINER" static_classes="nav nav-tabs"></container>
+		<container path="TABS_CONTENT_CONTAINER" static_classes="tab-content"></container>
+	</resources>
+	<default_events>['click']</default_events>
+</x:define>
+
+<x:define controller="Tooltip" title="Tooltip">
+	<view role="main">
+		<div class="tooltip" x:type="view"
+				x:style:top="($tooltip.y + $tooltip.y_offset) + 'px'"
+				x:style:left="($tooltip.x + $tooltip.x_offset) + 'px'"
+				x:classes="$tooltip.is_visible ? 'in' : 'hidden'">
+			<div class="tooltip-inner" x:type="container">
+				{#>$tooltip.html}
+			</div>
+			<div class="tooltip-arrow"></div>
+		</div>
+	</view>
+</x:define>
+
+<x:define controller="DropDown" title="DropDown">
+	<script x:equiv="options" type="application/json">
+		{
+			target_class: 'open'
+		}
+	</script>
+</x:define>
+
+<x:define controller="Tree" title="Tree">
+	<view role="main">
+		<div x:type="view" x:resource_id="$tree.MAIN_TREE_CONTAINER">
+			<x:assign name="pad">''</x:assign>
+			<x:assign name="level">0</x:assign>
+			{$foreach($tree.records) as=node}
+				{>$tree.node}
+			{/foreach}
+		</div>
+	</view>
+	<template role="include" name="node">
+		{>$tree.node_body}
+		{>$tree.node_children}
+	</template>
+	<template role="include" name="node_body">
+		<div class="lava-tree-node" x:type="view" unselectable="on" x:classes="'level-' + level">
+			{#expression(pad) escape_off}{/expression}{* remove whitespace
+			*}<i x:type="view"
+			     class="lava-tree-expander"
+			     x:event:click="$tree.node_click(node)"
+			     x:classes="'lava-tree'
+					+ ((foreach_index == @parent->count - 1) ? '-bottom' : '-middle')
+					+ ((node.type == 'folder' && node.children.length)
+						? (@widget.meta_storage[node.guid].is_expanded ? '-expanded' : '-collapsed')
+						: '-node')"></i>{* remove whitespace
+			*}<i x:type="view" class="lava-tree-icon" x:classes="'icon-' + node.type"></i>
+			{>$tree.node_title}
+		</div>
+	</template>
+	<template role="include" name="node_children">
+		{$if(node.children.length && $tree.meta_storage[node.guid].is_expanded)}
+			<x:refresher>{class: 'Collapse'}</x:refresher>
+			<x:container_config>
+				{
+					class: "Emulated",
+					options: {
+						placement: "after-previous"
+					}
+				}
+			</x:container_config>
+			<x:assign name="pad">{literal:}
+					(foreach_index == count - 1)
+						? pad + '<div class="lava-tree-pad"></div>'
+						: pad + '<div class="lava-tree-pad-line"></div>'
+				{:literal}</x:assign>
+			<x:assign name="level">@parent->level + 1</x:assign>
+			<div x:type="container" class="lava-tree-container">
+				{#foreach(node.children) as=node}
+					{>$tree.node}
+				{/foreach}
+			</div>
+		{/if}
+	</template>
+	<template role="include" name="node_title">
+		<span class="lava-tree-text" x:type="container" x:event:click="$tree.node_click(node)">
+			{#>node.title}
+		</span>
+	</template>
+	<resources locale="default">
+		<container path="MAIN_TREE_CONTAINER" add_classes="lava-tree lava-unselectable"></container>
+	</resources>
+	<default_events>['click']</default_events>
+</x:define>
+
+<x:define controller="Table" title="Table">
+	<view role="main">
+		<table x:type="view" x:resource_id="$table.TABLE_ELEMENT">
+			{>$table.thead}
+			{>$table.tbody}
+		</table>
+	</view>
+	<template role="include" name="thead">
+		<thead x:type="view" x:resource_id="$table.THEAD_ELEMENT">
+			<tr x:type="container">
+				{#foreach($table._columns) as=column}
+					<td x:type="view" x:event:click="$table.column_header_click(column)">
+						<span x:type="container"
+							x:classes="column.name == _sort_column_name ? ('lava-column-sort-' + ($table._sort_descending ? 'de' : 'a') + 'scending') : ''">
+								{#>column.title}
+						</span>
+					</td>
+				{/foreach}
+			</tr>
+		</thead>
+	</template>
+	<template role="include" name="tbody">
+		<tbody x:type="container" x:resource_id="$table.TBODY_ELEMENT">
+			{#foreach($table.records) as=row}
+				<tr x:type="container">
+					{#foreach($table._columns) as=column}
+						<td x:type="view">
+							{>$table.cell(column)}
+						</td>
+					{/foreach}
+				</tr>
+			{/foreach}
+		</tbody>
+	</template>
+	<storage>
+		<template_hash name="cells">
+			<template name="String">
+				{#> row[column.name]}
+			</template>
+			<template name="Boolean">
+				{#> translateBoolean(!!row[column.name])}
+			</template>
+		</template_hash>
+	</storage>
+	<resources locale="default">
+		<container path="TABLE_ELEMENT">
+			<static_properties cellspacing="0" cellpadding="0"></static_properties>
+		</container>
+	</resources>
+	<default_events>['click']</default_events>
+</x:define>
+
+<x:define controller="Calendar" title="Calendar">
+	<view role="main">
+		<div x:type="view" class="lava-calendar">
+			{#if($calendar._selected_view == 'days')}
+				{>$calendar.days_view}
+			{else}
+				{>$calendar.months_view}
+			{/if}
+		</div>
+	</view>
+	<template role="include" name="days_view">
+		<div class="lava-calendar-header">
+			<a href="#" x:type="view" x:event:click="$calendar.previous_month_click" class="lava-calendar-left-arrow">&#9664;</a>
+			<a href="#" x:type="container" x:event:click="$calendar.days_view_month_name_click" class="lava-calendar-days-view-month-name">
+				{#>$calendar._month_year_string}
+			</a>
+			<a href="#" x:type="view" x:event:click="$calendar.next_month_click" class="lava-calendar-right-arrow">&#9654;</a>
+		</div>
+		<div class="lava-calendar-center">
+			{>$calendar.months}
+		</div>
+		<div class="lava-calendar-footer">
+			<a href="#" x:type="container" x:event:click="$calendar.today_click" class="lava-calendar-today-link">{#>$calendar._today_string}</a>
+		</div>
+	</template>
+	<template role="include" name="months_view">
+		<div class="lava-calendar-header">
+			<a href="#" x:type="view" x:event:click="$calendar.previous_year_click" class="lava-calendar-left-arrow">&#9664;</a>
+			<x:widget extends="TextInput" resource_id="$calendar.year_input">
+				<assign name="value">$calendar._displayed_year + ''</assign>
+				<roles>$calendar._year_input</roles>
+			</x:widget>
+			<a href="#" x:type="view" x:event:click="$calendar.next_year_click" class="lava-calendar-right-arrow">&#9654;</a>
+		</div>
+		<div class="lava-calendar-center">
+			{>$calendar.month_names}
+		</div>
+	</template>
+	<template role="include" name="months">
+		{#foreach($calendar._months) as=month}
+			<table class="lava-calendar-month" cellspacing="0" cellpadding="0">
+				<thead>
+					<tr>
+						{#foreach($calendar._weekdays) as=weekday}
+							<td>{#>weekday.title}</td>
+						{/foreach}
+					</tr>
+				</thead>
+				<tbody>
+					{#foreach(month.weeks) as=week}
+						<tr>
+							{#foreach(week) as=day}
+								{>$calendar.day}
+							{/foreach}
+						</tr>
+					{/foreach}
+				</tbody>
+			</table>
+		{/foreach}
+	</template>
+	<template role="include" name="day">
+		<td x:type="view" x:event:mousedown="$calendar.day_click(day)" x:classes="
+				day.is_today ? 'lava-calendar-today' : '';
+				(month.index != day.month) ? 'lava-calendar-other-month-day' : '';
+				(day.milliseconds >= $calendar._selection_start && day.milliseconds <= $calendar._selection_end) ? 'lava-calendar-selected-day' : ''">
+			{#>day.day}
+		</td>
+	</template>
+	<template role="include" name="month_names">
+		<table class="lava-calendar-month-names">
+			<tbody>
+				{#foreach($calendar._month_descriptor_rows) as=row}
+					<tr>
+						{#foreach(row) as=descriptor}
+							<td x:type="container"
+									x:event:click="month_click(descriptor)"
+									x:classes="
+									$calendar._displayed_month == descriptor.index
+									? 'lava-calendar-month-selected'
+									: ($calendar._current_month == descriptor.index ? 'lava-calendar-month-current' : '')">
+								{#>descriptor.title}
+							</td>
+						{/foreach}
+					</tr>
+				{/foreach}
+			</tbody>
+		</table>
+	</template>
+	<resources locale="default">
+		<container path="year_input.TEXT_INPUT_ELEMENT" add_classes="lava-calendar-year-input">
+			<add_properties maxlength="5"></add_properties>
+		</container>
+	</resources>
+	<script x:equiv="options" type="application/json">
+		{
+			invalid_input_class: 'lava-calendar-input-invalid'
+		}
+	</script>
+	<default_events>['click', 'mousedown']</default_events>
+</x:define>

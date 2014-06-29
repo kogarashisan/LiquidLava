@@ -16,13 +16,13 @@
 	<![endif]-->
 
 	<script src="http://ajax.googleapis.com/ajax/libs/mootools/1.5.0/mootools-yui-compressed.js"></script>
-	<link rel="stylesheet" href="www/css/site.css">
-	<script src="dist/lava-master-DEBUG.js"></script>
-	<script src="www/js/site.js"></script>
-	<link rel="canonical" href="http://www.lava-framework.com/index.html"/>
+	<link rel="stylesheet" href="css/site.css">
+	<script src="../dist/lava-master-DEBUG.js"></script>
+	<script src="js/site.js"></script>
+	<link rel="canonical" href="http://www.lava-framework.com/www/development.html"/>
 	<script>
 		if (window.location.href.indexOf('http://kogarashisan.github.io/LiquidLava') == 0) {
-			window.location.href = 'http://www.lava-framework.com/index.html';
+			window.location.href = 'http://www.lava-framework.com/www/development.html';
 		}
 		// to prevent tracking from dev's computers
 		if (window.location.href.indexOf('http://www.lava-framework.com/') === 0) {
@@ -36,42 +36,10 @@
 	</script>
 <!--LAVA_BUILD_INCLUDE_END-->
 
-	<title>LiquidLava Framework - Home</title>
+	<title>Development | LiquidLava Framework</title>
 	<script>
 		window.addEvent('load', function() {
-
 			Lava.bootstrap();
-			$('main_page_follow_container').setStyle('visibility', 'visible');
-
-			var config,
-				constructor,
-				main_page_widget;
-
-			config = {
-				type: 'widget',
-				is_extended: true,
-				template: MainPageTemplate,
-				container: {class: 'Element', tag_name: 'div'}
-			};
-
-			constructor = Lava.ClassManager.getConstructor('Lava.widget.Standard');
-			main_page_widget = /** @type {Lava.widget.Standard} */ new constructor(config);
-
-			var demo_module = Lava.app.getModule('DemoTree');
-			demo_module.loadRecords(ExampleData.example_tree);
-
-			var tree_records = new Lava.data.Enumerable(demo_module.getAllRecords());
-			tree_records.filter(function(record) {
-				return !record.get('parent')
-			});
-
-			main_page_widget.set('tree_records', tree_records);
-			main_page_widget.set('all_tree_records', new Lava.data.Enumerable(demo_module.getAllRecords()));
-			main_page_widget.inject($('main_page_demo_container'), 'Top');
-			Firestorm.Element.remove(Firestorm.getElementById('initial_loading_indicator'));
-
-			(function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs'));
-
 		});
 	</script>
 </head>
@@ -133,39 +101,52 @@
 </script>
 
 <div class="container">
+	<div class="row">
 
-	<div class="index-header">
-		<h1>LiquidLava framework</h1>
-		<em>When art is beautiful</em>
-		<a class="btn btn-gray" href="https://github.com/kogarashisan/LiquidLava/releases">
-			<i class="glyphicon glyphicon-download-alt"></i> v0.2.1-alpha
-		</a>
-		<div class="main-page-follow-container" style="visibility: hidden" id="main_page_follow_container">
-			<!-- tweet -->
-			<a href="https://twitter.com/share" class="twitter-share-button" data-text="LiquidLava Framework - When art is beautiful" data-via="LavaFramework">Tweet</a>
-			<!-- follow -->
-			<a href="https://twitter.com/LavaFramework" class="twitter-follow-button" data-show-count="false">Follow @LavaFramework</a>
+		<div class="col-md-3">
+
 		</div>
-	</div>
 
-	<div class="index-about">
-		<p>Designed to solve the most complex tasks of web development</p>
-	</div>
+		<div class="col-md-9" role="main">
 
-	<h1>Demo</h1>
-	<ul>
-		<li>Click on nodes to expand them. Observe changes in the table.</li>
-		<li>Click on table rows to toggle editing. You will see changes in the tree.</li>
-		<li>Click on column headers to apply sorting.</li>
-	</ul>
-	<p>Tree is purely done in templates, except the click handler.</p>
-	<div class="row" id="main_page_demo_container">
-		<div id="initial_loading_indicator" class="initial-loading-indicator">
-			Loading...
+			<h1>Development</h1>
+
+			<h2>Release notes</h2>
+			<ul>
+				<li>requires MooTools 1.45</li>
+				<li>(alpha) IE8 and below are not fully supported. Some features may work for you, but some are broken,
+					including non-bubbling input events like focus/blur and submit.</li>
+				<li>Currently, the framework cannot used with advanced/unsafe compression methods: function renaming will break it.
+					Advanced compression will be implemented later.</li>
+			</ul>
+
+			<h2>Compatibility</h2>
+			<p>LiquidLava and Firestorm frameworks can not coexist with code that modifies the native object's ptototype.</p>
+
+			<h2>Bugs</h2>
+			<p>See the <a href="tasks.html">Tasks</a> page and GitHub
+				<a href="https://github.com/kogarashisan/LiquidLava/issues?state=open">tracker</a>.</p>
+
+			<p>If you found a bug or a mistake somewhere, please, submit an issue.</p>
+
+			<h2>Versioning</h2>
+			<p>Git master branch has tags '<i>version-x</i>', which you may use to switch to specific framework version.
+				There is also the GitHub <a href="https://github.com/kogarashisan/LiquidLava/downloads/">Downloads</a> section,
+				which contains versions, uploaded by the author.</p>
+			<p>In case of any breaking changes, there will be no backward compatibility. Instead, you will be given detailed
+			upgrade instructions. See the <a href="changelog.html">Changelog</a>.</p>
+
+			<h2>Building</h2>
+			<p>First you will need to run</p>
+			<pre>npm install</pre>
+			<p>in the project root to install dependencies, than</p>
+			<pre>grunt</pre>
+			<p>to build the current master.</p>
+
 		</div>
-	</div>
 
-</div> <!-- /container -->
+	</div>
+</div>
 
 <!--LAVA_BUILD_INCLUDE:footer.html-->
 <footer>

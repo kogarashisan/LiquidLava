@@ -1,0 +1,267 @@
+
+<x:define title="InputAbstract">
+	<template role="main">
+		{>input_view}
+	</template>
+	<script x:equiv="sugar" type="application/json">
+		{
+			attribute_mappings: {
+				'name': {type: 'property', type_name: 'String', name: 'name'},
+				'value': {type: 'property', type_name: 'String', name: 'value'},
+				'disabled': {type: 'property', type_name: 'SwitchAttribute', name: 'is_disabled'},
+				'required': {type: 'property', type_name: 'SwitchAttribute', name: 'is_required'},
+				'readonly': {type: 'property', type_name: 'SwitchAttribute', name: 'is_readonly'}
+			}
+		}
+	</script>
+</x:define>
+
+<x:define controller="input.CheckBox" title="CheckBox" extends="InputAbstract">
+	<view role="include" name="input_view">
+		<input
+			x:type="view"
+			x:roles="_input_view"
+			x:resource_id="$checkbox.CHECKBOX_ELEMENT"
+			x:event:change="$checkbox.checked_changed"
+			x:event:focus="$checkbox._focused"
+			x:event:blur="$checkbox._blurred"
+
+			x:bind:name="$checkbox.name"
+			x:bind:value="$checkbox.value"
+			x:bind:disabled="$checkbox.is_disabled"
+			x:bind:required="$checkbox.is_required"
+			x:bind:readonly="$checkbox.is_readonly" />
+	</view>
+	<script x:equiv="sugar" type="application/json">
+		{
+			tag_name: 'checkbox',
+			unknown_root_attributes: {
+				type: 'as_resource',
+				container_resource_name: 'CHECKBOX_ELEMENT'
+			},
+			attribute_mappings: {
+				'checked': {type: 'property', type_name: 'SwitchAttribute', name: 'is_checked'},
+				'indeterminate': {type: 'property', type_name: 'SwitchAttribute', name: 'is_indeterminate'}
+			}
+		}
+	</script>
+	<default_events>['change']</default_events>
+</x:define>
+
+<x:define controller="input.TextArea" title="TextArea" extends="InputAbstract">
+	<view role="include" name="input_view">
+		<textarea
+			x:type="view"
+			x:roles="_input_view"
+			x:resource_id="$textarea.TEXTAREA_ELEMENT"
+			x:event:change="$textarea.value_changed"
+			x:event:input="$textarea.input"
+			x:event:focus="$textarea._focused"
+			x:event:blur="$textarea._blurred"
+
+			x:bind:name="$textarea.name"
+			x:bind:disabled="$textarea.is_disabled"
+			x:bind:required="$textarea.is_required"
+			x:bind:readonly="$textarea.is_readonly"></textarea>
+	</view>
+	<script x:equiv="sugar" type="application/json">
+		{
+			tag_name: 'text_area',
+			unknown_root_attributes: {
+				type: 'as_resource',
+				container_resource_name: 'TEXTAREA_ELEMENT'
+			},
+			attribute_mappings: {
+				'value': {type: 'property', type_name: 'String', name: 'value'}
+			}
+		}
+	</script>
+	<default_events>['change', 'input']</default_events>
+</x:define>
+
+<x:define controller="input.Text" title="TextInput" extends="InputAbstract">
+	<view role="include" name="input_view">
+		<input
+			x:type="view"
+			x:roles="_input_view"
+			x:resource_id="$text_input.TEXT_INPUT_ELEMENT"
+			x:event:change="$text_input.value_changed"
+			x:event:input="$text_input.input"
+			x:event:focus="$text_input._focused"
+			x:event:blur="$text_input._blurred"
+
+			x:bind:name="$text_input.name"
+			x:bind:disabled="$text_input.is_disabled"
+			x:bind:required="$text_input.is_required"
+			x:bind:readonly="$text_input.is_readonly"/>
+	</view>
+	<script x:equiv="sugar" type="application/json">
+		{
+			tag_name: 'text_input',
+			unknown_root_attributes: {
+				type: 'as_resource',
+				container_resource_name: 'TEXT_INPUT_ELEMENT'
+			},
+			attribute_mappings: {
+				'value': {type: 'property', type_name: 'String', name: 'value'}
+			}
+		}
+	</script>
+	<default_events>['change', 'input']</default_events>
+</x:define>
+
+<x:define controller="input.Numeric" title="Numeric" extends="TextInput"></x:define>
+
+<x:define controller="input.Radio" title="Radio" extends="InputAbstract">
+	<view role="include" name="input_view">
+		<input
+			x:type="view"
+			x:roles="_input_view"
+			x:resource_id="$radio.RADIO_ELEMENT"
+			x:event:change="$radio.checked_changed"
+			x:event:focus="$radio._focused"
+			x:event:blur="$radio._blurred"
+
+			x:bind:name="$radio.name"
+			x:bind:value="$radio.value"
+			x:bind:disabled="$radio.is_disabled"
+			x:bind:required="$radio.is_required"
+			x:bind:readonly="$radio.is_readonly" />
+	</view>
+	<script x:equiv="sugar" type="application/json">
+		{
+			tag_name: 'radio',
+			unknown_root_attributes: {
+				type: 'as_resource',
+				container_resource_name: 'RADIO_ELEMENT'
+			},
+			attribute_mappings: {
+				'checked': {type: 'property', type_name: 'SwitchAttribute', name: 'is_checked'}
+			}
+		}
+	</script>
+	<default_events>['change']</default_events>
+</x:define>
+
+<x:define controller="input.Submit" title="SubmitInput" extends="InputAbstract">
+	<view role="include" name="input_view">
+		<input
+			x:type="view"
+			x:roles="_input_view"
+			x:resource_id="$submit.SUBMIT_INPUT_ELEMENT"
+			x:event:click="$submit.clicked"
+			x:event:focus="$submit._focused"
+			x:event:blur="$submit._blurred"
+
+			x:bind:name="$submit.name"
+			x:bind:value="$submit.value"
+			x:bind:disabled="$submit.is_disabled" />
+	</view>
+	<script x:equiv="sugar" type="application/json">
+		{
+			tag_name: 'submit_input',
+			unknown_root_attributes: {
+				type: 'as_resource',
+				container_resource_name: 'SUBMIT_INPUT_ELEMENT'
+			}
+		}
+	</script>
+	<default_events>['click']</default_events>
+</x:define>
+
+<x:define controller="input.Submit" title="SubmitButton" extends="InputAbstract">
+	<view role="include" name="input_view">
+		<button
+			x:type="view"
+			x:roles="_input_view"
+			x:resource_id="$submit.SUBMIT_BUTTON_ELEMENT"
+			x:event:click="$submit.clicked"
+			x:event:focus="$submit._focused"
+			x:event:blur="$submit._blurred"
+
+			x:bind:name="$submit.name"
+			x:bind:value="$submit.value"
+			x:bind:disabled="$submit.is_disabled">
+				{>content}
+		</button>
+	</view>
+	<template role="include" name="content">
+	</template>
+	<script x:equiv="sugar" type="application/json">
+		{
+			tag_name: 'submit_button',
+			is_content_allowed: true,
+			content_schema: {
+				type: 'template'
+			},
+			unknown_root_attributes: {
+				type: 'as_resource',
+				container_resource_name: 'SUBMIT_BUTTON_ELEMENT'
+			}
+		}
+	</script>
+	<default_events>['click']</default_events>
+</x:define>
+
+<x:define title="SelectAbstract" extends="InputAbstract">
+	<view role="include" name="input_view">
+		<select x:type="view"
+				x:roles="_input_view"
+				x:event:change="$select.value_changed"
+				x:event:focus="$select._focused"
+				x:event:blur="$select._blurred">
+			{#foreach($select.optgroups) as=optgroup}
+				{#if(optgroup.label)}
+					<optgroup x:type="view" x:bind:label="optgroup.label" x:bind:disabled="optgroup.is_disabled">
+						{>group_options}
+					</optgroup>
+				{else}
+					{>group_options}
+				{/if}
+			{/foreach}
+		</select>
+	</view>
+	<view role="include" name="group_options">
+		{#foreach(optgroup.options) as=option}
+			<option
+					x:type="container"
+					x:bind:value="option.value"
+					x:bind:selected="$select.isValueSelected(option.value)"
+					x:bind:disabled="option.is_disabled">
+				{#>option.title}
+			</option>
+		{/foreach}
+	</view>
+	<default_events>['change']</default_events>
+</x:define>
+
+<x:define controller="input.Select" title="Select" extends="SelectAbstract"></x:define>
+<x:define controller="input.MultipleSelect" title="MultipleSelect" extends="SelectAbstract"></x:define>
+
+<!--x:define controller="Form" title="Form">
+	<template role="main">
+		{>main_view}
+	</template>
+	<view role="include" name="main_view">
+		<form x:type="view"
+			x:roles="$form.main_view"
+			x:resource_id="$form.FORM_ELEMENT">
+			{>$form.content}
+		</form>
+	</view>
+	<template role="include" name="content">
+	</template>
+	<script x:equiv="sugar" type="application/json">
+		{
+			tag_name: 'form_widget',
+			is_content_allowed: true,
+			content_schema: {
+				type: 'template'
+			},
+			unknown_root_attributes: {
+				type: 'as_resource',
+				container_resource_name: 'FORM_ELEMENT'
+			}
+		}
+	</script>
+</x:define-->

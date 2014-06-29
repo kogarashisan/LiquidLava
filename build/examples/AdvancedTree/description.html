@@ -1,0 +1,12 @@
+<p>Full-functional tree usage example:</p>
+<ul>
+	<li>data is loaded from a Module as Records</li>
+	<li>both trees are bound to the same data</li>
+	<li>internally widget uses MetaStorage class - this allows trees to expand nodes independently from each other.
+		This also means, that nodes lose their expanded state, when the tree is destroyed.</li>
+</ul>
+<p>
+	Note: the right tree has animation disabled via template redefinition.
+	There is another way to disable animation dynamically - via refresher API (see CollapsiblePanelExt widget for an example)
+</p>
+<p>See the widgets/Tree.class.js for the class source and standard widget templates for the template.</p>
