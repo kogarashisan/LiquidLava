@@ -191,7 +191,7 @@ function _cElementContainer() {
 
 	_cElementContainerCommon.apply(this);
 
-	this.class = "Element";
+	this['class'] = "Element";
 
 	this.tag_name = 'div';
 
@@ -222,7 +222,7 @@ function _cElementContainer() {
 
 function _cEmulatedContainer() {
 
-	this.class = "Emulated";
+	this['class'] = "Emulated";
 
 	this.options = {
 		placement: 'top' || 'bottom'
@@ -241,7 +241,7 @@ function _cView() {
 	 * */
 	this.view_name = '';
 
-	this.class = '';
+	this['class'] = '';
 
 	/**
 	 * @type {!Lavadoc._tTemplate}
@@ -308,7 +308,7 @@ function _cView() {
 
 function _cRefresher() {
 
-	this.class = 'Default';
+	this['class'] = 'Default';
 
 	this.insertion_strategy = null;
 

@@ -14,23 +14,23 @@ var package_content = {
 		"<p>Unlike the previous panel, this one removes itself from DOM while in hidden state.</p>",
 		{
 			type: "widget",
-			class: "Lava.WidgetConfigExtensionGateway",
+			"class": "Lava.WidgetConfigExtensionGateway",
 			extender_type: "Default",
-			extends: "Example",
+			"extends": "Example",
 			includes: {
 				content: [
 					"\r\n\t",
 					{
 						type: "widget",
-						class: "Lava.WidgetConfigExtensionGateway",
+						"class": "Lava.WidgetConfigExtensionGateway",
 						extender_type: "Default",
 						template: [
 							"\r\n\t\t\t",
 							{
 								type: "view",
-								class: "View",
+								"class": "View",
 								container: {
-									class: "Element",
+									"class": "Element",
 									tag_name: "div",
 									static_styles: {
 										background: "lightyellow",
@@ -50,7 +50,7 @@ var package_content = {
 							"\r\n\t\t\t",
 							{
 								type: "view",
-								class: "If",
+								"class": "If",
 								argument: {
 									evaluator: function() {
 return (this._binds[0].getValue());
@@ -69,17 +69,17 @@ return (this._binds[0].getValue());
 									active_modifiers: []
 								},
 								container: {
-									class: "Emulated",
+									"class": "Emulated",
 									options: {placement: "after-previous"}
 								},
-								refresher: {class: "Default"},
+								refresher: {"class": "Default"},
 								template: [
 									"\r\n\t\t\t\t\r\n\t\t\t\t\r\n\t\t\t\t",
 									{
 										type: "view",
-										class: "View",
+										"class": "View",
 										container: {
-											class: "Element",
+											"class": "Element",
 											tag_name: "div",
 											static_styles: {border: "1px solid black"}
 										},

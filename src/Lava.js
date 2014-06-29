@@ -93,6 +93,11 @@ var Lava = {
 	DEFAULT_LESS: function(a, b) { return a < b; },
 	// not sure if these obsolete tags should also be included: basefont, bgsound, frame, isindex
 	VOID_TAGS: ['area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'],
+	JS_KEYWORDS: ['break','case','catch','class','const','continue','debugger','default','delete','do','else','export','extends','false','finally',
+		'for','function','if','import','in','instanceof','new','null','protected','return','super','switch','this','throw','true','try','typeof',
+		'var','while','with','abstract','boolean','byte','char','decimal','double','enum','final','float','get','implements','int','interface',
+		'internal','long','package','private','protected','public','sbyte','set','short','static','uint','ulong','ushort','void','assert','ensure',
+		'event','goto','invariant','namespace','native','require','synchronized','throws','transient','use','volatile'],
 
 	KNOWN_EXCEPTIONS: null,
 
@@ -248,7 +253,7 @@ var Lava = {
 
 		}
 
-		constructor = Lava.ClassManager.getConstructor(config.class);
+		constructor = Lava.ClassManager.getConstructor(config['class']);
 		return /** @type {Lava.widget.Standard} */ new constructor(config, null, null, null, properties);
 
 	},
@@ -321,7 +326,7 @@ var Lava = {
 
 			widget_config = this.getWidgetConfig(widget_title);
 			if (!('sugar' in widget_config)) Lava.t("Widget " + widget_title + " does not have sugar in configuration");
-			sugar_class = widget_config.sugar.class || Lava.schema.widget.DEFAULT_SUGAR_CLASS;
+			sugar_class = widget_config.sugar['class'] || Lava.schema.widget.DEFAULT_SUGAR_CLASS;
 			this._widget_title_to_sugar_instance[widget_title] = this._sugar_instances[sugar_class];
 
 		}
@@ -440,13 +445,13 @@ var Lava = {
 
 		if ('class_locator' in config) {
 
-			config.class = Lava.schema.widget.DEFAULT_CLASS_LOCATOR_GATEWAY;
+			config['class'] = Lava.schema.widget.DEFAULT_CLASS_LOCATOR_GATEWAY;
 
 		}
 
-		if (Lava.schema.DEBUG && !config.class) Lava.t("Trying to create a widget without class");
-		var constructor = Lava.ClassManager.getConstructor(config.class, 'Lava.widget');
-		if (Lava.schema.DEBUG && !constructor) Lava.t("Class not found: " + config.class);
+		if (Lava.schema.DEBUG && !config['class']) Lava.t("Trying to create a widget without class");
+		var constructor = Lava.ClassManager.getConstructor(config['class'], 'Lava.widget');
+		if (Lava.schema.DEBUG && !constructor) Lava.t("Class not found: " + config['class']);
 		return new constructor(config, widget, parent_view, template, properties);
 
 	},

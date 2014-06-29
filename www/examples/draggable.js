@@ -14,21 +14,21 @@ var package_content = {
 		"<p>You can drag the rectangle around.</p>",
 		{
 			type: "widget",
-			class: "Lava.WidgetConfigExtensionGateway",
+			"class": "Lava.WidgetConfigExtensionGateway",
 			extender_type: "Default",
-			extends: "Example",
+			"extends": "Example",
 			includes: {
 				content: [
 					"\r\n\t<div style=\"position:relative;height: 100px;\">\r\n\t\t",
 					{
 						type: "widget",
-						class: "Lava.WidgetConfigExtensionGateway",
+						"class": "Lava.WidgetConfigExtensionGateway",
 						extender_type: "Default",
 						template: [
 							"\r\n\t\t\t\t\t",
 							{
 								type: "view",
-								class: "Expression",
+								"class": "Expression",
 								argument: {
 									evaluator: function() {
 return ("x: " + this._binds[0].getValue() + ", y: " + this._binds[1].getValue());
@@ -61,7 +61,7 @@ return ("x: " + this._binds[0].getValue() + ", y: " + this._binds[1].getValue())
 							"\r\n\t\t\t\t"
 						],
 						container: {
-							class: "Element",
+							"class": "Element",
 							tag_name: "div",
 							static_classes: ["lava-unselectable"],
 							static_styles: {

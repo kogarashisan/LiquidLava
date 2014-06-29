@@ -194,9 +194,9 @@ Lava.parsers.Common = {
 		if ('class_locator' in raw_block) {
 			config.class_locator = raw_block.class_locator;
 			config.real_class = raw_block.real_class;
-			config.class = Lava.schema.view.DEFAULT_CLASS_LOCATOR_GATEWAY;
+			config['class'] = Lava.schema.view.DEFAULT_CLASS_LOCATOR_GATEWAY;
 		} else {
-			config.class = this._viewNameToClass(raw_block.name);
+			config['class'] = this._viewNameToClass(raw_block.name);
 		}
 
 		if (raw_block.prefix == '$') {
@@ -632,7 +632,7 @@ Lava.parsers.Common = {
 
 		if ('container_class' in x) {
 
-			container_config.class = x.container_class;
+			container_config['class'] = x.container_class;
 
 		}
 
@@ -742,7 +742,7 @@ Lava.parsers.Common = {
 
 			} else if (name == 'class') {
 
-				container_config.static_classes = raw_attributes.class.trim().split(/\s+/);
+				container_config.static_classes = raw_attributes['class'].trim().split(/\s+/);
 
 			} else if (name == 'id') {
 

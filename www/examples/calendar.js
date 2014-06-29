@@ -14,16 +14,16 @@ var package_content = {
 		"<p>This example demonstrates the simplicity of Lava widgets.\r\n\tYou can add previous and next months to the calendar by modifying just one function</p>\r\n<p>This demo is not very usable, so in your own project you will also want to modify the template to display month names,\r\nand hide days that are gray by default.</p>",
 		{
 			type: "widget",
-			class: "Lava.WidgetConfigExtensionGateway",
+			"class": "Lava.WidgetConfigExtensionGateway",
 			extender_type: "Default",
-			extends: "Example",
+			"extends": "Example",
 			includes: {
 				content: [
 					"\r\n\t",
 					{
 						real_class: "DemoCalendar",
-						extends: "Calendar",
-						class: "Lava.WidgetConfigExtensionGateway",
+						"extends": "Calendar",
+						"class": "Lava.WidgetConfigExtensionGateway",
 						extender_type: "Default",
 						type: "widget"
 					},

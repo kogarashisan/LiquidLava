@@ -118,7 +118,7 @@ Lava.parsers.Directives = {
 		} else if (raw_tag.name == 'view') {
 
 			view_config = Lava.parsers.Common.compileAsView(raw_tag.content);
-			if (view_config.class != 'View') Lava.t("define: view in 'main' role must be pure View, not subclass");
+			if (view_config['class'] != 'View') Lava.t("define: view in 'main' role must be pure View, not subclass");
 			if ('argument' in view_config) Lava.t("Widgets do not support arguments");
 			if ('roles' in view_config) Lava.t("Widget definition: move the roles from main view to widget");
 
@@ -704,7 +704,7 @@ Lava.parsers.Directives = {
 			widget_config.assigns = roles_storage.assigns;
 		}
 
-		if (!widget_config.class) widget_config.class = Lava.schema.widget.DEFAULT_EXTENSION_GATEWAY;
+		if (!widget_config['class']) widget_config['class'] = Lava.schema.widget.DEFAULT_EXTENSION_GATEWAY;
 		if (!widget_config.extender_type) widget_config.extender_type = Lava.schema.widget.DEFAULT_EXTENDER;
 
 		return widget_config;
@@ -764,7 +764,7 @@ Lava.parsers.Directives = {
 
 		var widget_config = this._parseWidgetDefinition(raw_directive);
 
-		if (Lava.schema.DEBUG && !widget_config.class && !widget_config.extends) Lava.t("x:define: widget definition is missing either 'controller' or 'extends' attribute");
+		if (Lava.schema.DEBUG && !widget_config['class'] && !widget_config.extends) Lava.t("x:define: widget definition is missing either 'controller' or 'extends' attribute");
 		if (raw_directive.attributes.resource_id) widget_config.resource_id = Lava.parsers.Common.parseResourceId(raw_directive.attributes.resource_id);
 
 		widget_config.type = 'widget';
@@ -906,7 +906,7 @@ Lava.parsers.Directives = {
 			}
 		}
 
-		if ('class' in config) original_config.class = config.class;
+		if ('class' in config) original_config['class'] = config['class'];
 		if ('options' in config) {
 			if (!('options' in original_config)) original_config.options = {};
 			Firestorm.extend(original_config.options, config.options);

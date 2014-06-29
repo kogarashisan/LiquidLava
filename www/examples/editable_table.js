@@ -17,9 +17,9 @@ var package_content = {
 		"<p>Very basic sortable and editable table. Changes are saved to records immediately (as you type).</p>\r\n<p>Keep in mind: example data is global for all widgets, so you can see your changes in other examples.</p>",
 		{
 			type: "widget",
-			class: "Lava.WidgetConfigExtensionGateway",
+			"class": "Lava.WidgetConfigExtensionGateway",
 			extender_type: "Default",
-			extends: "Example",
+			"extends": "Example",
 			includes: {
 				content: [
 					"\r\n\t",
@@ -45,7 +45,7 @@ var package_content = {
 								}
 							]
 						},
-						extends: "EditableTable",
+						"extends": "EditableTable",
 						assigns: {
 							records: {
 								evaluator: function() {
@@ -69,7 +69,7 @@ return (this._binds[0].getValue());
 								active_modifiers: []
 							}
 						},
-						class: "Lava.WidgetConfigExtensionGateway",
+						"class": "Lava.WidgetConfigExtensionGateway",
 						extender_type: "Default",
 						type: "widget"
 					},

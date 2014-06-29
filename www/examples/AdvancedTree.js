@@ -14,15 +14,15 @@ var package_content = {
 		"<p>Full-functional tree usage example:</p>\r\n<ul>\r\n\t<li>data is loaded from a Module as Records</li>\r\n\t<li>both trees are bound to the same data</li>\r\n\t<li>internally widget uses MetaStorage class - this allows trees to expand nodes independently from each other.\r\n\t\tThis also means, that nodes lose their expanded state, when the tree is destroyed.</li>\r\n</ul>\r\n<p>\r\n\tNote: the right tree has animation disabled via template redefinition.\r\n\tThere is another way to disable animation dynamically - via refresher API (see CollapsiblePanelExt widget for an example)\r\n</p>\r\n<p>See the widgets/Tree.class.js for the class source and standard widget templates for the template.</p>",
 		{
 			type: "widget",
-			class: "Lava.WidgetConfigExtensionGateway",
+			"class": "Lava.WidgetConfigExtensionGateway",
 			extender_type: "Default",
 			template: [
 				"\r\n\t\tLeft:\r\n\t\t",
 				{
 					type: "view",
-					class: "View",
+					"class": "View",
 					container: {
-						class: "Element",
+						"class": "Element",
 						tag_name: "button",
 						static_classes: [
 							"btn",
@@ -52,9 +52,9 @@ var package_content = {
 				"\r\n\t\t",
 				{
 					type: "view",
-					class: "View",
+					"class": "View",
 					container: {
-						class: "Element",
+						"class": "Element",
 						tag_name: "button",
 						static_classes: [
 							"btn",
@@ -84,9 +84,9 @@ var package_content = {
 				"\r\n\t\tRight:\r\n\t\t",
 				{
 					type: "view",
-					class: "View",
+					"class": "View",
 					container: {
-						class: "Element",
+						"class": "Element",
 						tag_name: "button",
 						static_classes: [
 							"btn",
@@ -116,9 +116,9 @@ var package_content = {
 				"\r\n\t\t",
 				{
 					type: "view",
-					class: "View",
+					"class": "View",
 					container: {
-						class: "Element",
+						"class": "Element",
 						tag_name: "button",
 						static_classes: [
 							"btn",
@@ -147,7 +147,7 @@ var package_content = {
 				},
 				"\r\n\t\t<div class=\"clearfix\"></div>\r\n\r\n\t\t\r\n\t\t<div style=\"margin-right: 10px\" class=\"tree-example-container\">\r\n\t\t\t",
 				{
-					extends: "Tree",
+					"extends": "Tree",
 					id: "tree_left",
 					assigns: {
 						records: {
@@ -172,7 +172,7 @@ return (this._binds[0].getValue());
 							active_modifiers: []
 						}
 					},
-					class: "Lava.WidgetConfigExtensionGateway",
+					"class": "Lava.WidgetConfigExtensionGateway",
 					extender_type: "Default",
 					type: "widget"
 				},
@@ -183,7 +183,7 @@ return (this._binds[0].getValue());
 							"\r\n\t\t\t\t\t",
 							{
 								type: "view",
-								class: "If",
+								"class": "If",
 								argument: {
 									evaluator: function() {
 return (this._binds[0].getValue() && this._binds[1].getValue());
@@ -222,10 +222,10 @@ return (this._binds[0].getValue() && this._binds[1].getValue());
 									active_modifiers: []
 								},
 								container: {
-									class: "Emulated",
+									"class": "Emulated",
 									options: {placement: "after-previous"}
 								},
-								refresher: {class: "Default"},
+								refresher: {"class": "Default"},
 								assigns: {
 									pad: {
 										evaluator: function() {
@@ -275,7 +275,7 @@ return (this._binds[0].getValue() + 1);
 									"\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t\t",
 									{
 										type: "view",
-										class: "Foreach",
+										"class": "Foreach",
 										argument: {
 											evaluator: function() {
 return (this._binds[0].getValue());
@@ -308,7 +308,7 @@ return (this._binds[0].getValue());
 											"\r\n\t\t\t\t\t\t\t"
 										],
 										container: {
-											class: "Element",
+											"class": "Element",
 											tag_name: "div",
 											static_classes: ["lava-tree-container"]
 										}
@@ -319,7 +319,7 @@ return (this._binds[0].getValue());
 							"\r\n\t\t\t\t"
 						]
 					},
-					extends: "Tree",
+					"extends": "Tree",
 					id: "tree_right",
 					assigns: {
 						records: {
@@ -344,14 +344,14 @@ return (this._binds[0].getValue());
 							active_modifiers: []
 						}
 					},
-					class: "Lava.WidgetConfigExtensionGateway",
+					"class": "Lava.WidgetConfigExtensionGateway",
 					extender_type: "Default",
 					type: "widget"
 				},
 				"\r\n\t\t</div>\r\n\t\t<div class=\"clearfix\"></div>\r\n\t"
 			],
 			real_class: "TreeExample",
-			extends: "Example"
+			"extends": "Example"
 		}
 	]
 }

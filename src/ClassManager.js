@@ -466,7 +466,7 @@ Lava.ClassManager = {
 					Lava.t("[_serializeSkeleton] unknown property descriptor type: " + skeleton[name].type);
 			}
 
-			if (Lava.VALID_PROPERTY_NAME_REGEX.test(name)) {
+			if (Lava.VALID_PROPERTY_NAME_REGEX.test(name) && Lava.JS_KEYWORDS.indexOf(name) == -1) {
 
 				serialized_properties.push(name + ': ' + serialized_value);
 

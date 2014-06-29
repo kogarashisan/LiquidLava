@@ -151,7 +151,7 @@ Lava.Serializer = {
 
 		// if you serialize only Lava configs, than most likely you do not need this check,
 		// cause the property names in configs are always valid.
-		if (this.CHECK_PROPERTY_NAMES && !Lava.VALID_PROPERTY_NAME_REGEX.test(name)) {
+		if (this.CHECK_PROPERTY_NAMES && (!Lava.VALID_PROPERTY_NAME_REGEX.test(name) || Lava.JS_KEYWORDS.indexOf(name) != -1)) {
 
 			name = '"' + name.replace(/\"/g, "\\\"") + '"';
 

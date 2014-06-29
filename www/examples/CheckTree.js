@@ -14,7 +14,7 @@ var package_content = {
 		"<p>Tree with cascading checkboxes. Indeterminate state is also supported.</p>\r\n<p>Notes:</p>\r\n<ul>\r\n\t<li>checkbox is bound to a native record's field, \r\n\t\tso they restore their state when you switch to other examples and back</li>\r\n\t<li>checkbox's bindings are unidirectional</li>\r\n\t<li>the state of checkbox hierarchy is not validated in the data layer \r\n\t\t(such validation would be extremely hard to implement and maintain). \r\n\t\tInstead, the touched part of hierarchy is recalculated in controller.</li>\r\n</ul>",
 		{
 			type: "widget",
-			class: "Lava.WidgetConfigExtensionGateway",
+			"class": "Lava.WidgetConfigExtensionGateway",
 			extender_type: "Default",
 			template: [
 				"\r\n\t\t<div style=\"position: relative;height: 320px;width: 350px;overflow: auto;border: 1px solid gray;\">\r\n\t\t\t",
@@ -24,9 +24,9 @@ var package_content = {
 							"\r\n\t\t\t\t\t",
 							{
 								type: "view",
-								class: "View",
+								"class": "View",
 								container: {
-									class: "Element",
+									"class": "Element",
 									tag_name: "div",
 									static_classes: ["lava-tree-node"],
 									static_properties: {unselectable: "on"},
@@ -54,9 +54,9 @@ return ('level-' + this._binds[0].getValue());
 									"\r\n\t\t\t\t\t\t",
 									{
 										type: "widget",
-										class: "Lava.WidgetConfigExtensionGateway",
+										"class": "Lava.WidgetConfigExtensionGateway",
 										extender_type: "Default",
-										extends: "CheckBox",
+										"extends": "CheckBox",
 										assigns: {
 											is_checked: {
 												evaluator: function() {
@@ -105,12 +105,12 @@ return (this._binds[0].getValue());
 											name: "_checkbox"
 										}],
 										resources: {
-											default: {
+											"default": {
 												CHECKBOX_ELEMENT: {
 													type: "container_stack",
 													value: [{
 														name: "static_styles",
-														value: {float: "right"}
+														value: {"float": "right"}
 													}]
 												}
 											}
@@ -119,7 +119,7 @@ return (this._binds[0].getValue());
 									"\r\n\t\t\t\t\t\t",
 									{
 										type: "view",
-										class: "Expression",
+										"class": "Expression",
 										argument: {
 											evaluator: function() {
 return (this._binds[0].getValue());
@@ -142,9 +142,9 @@ return (this._binds[0].getValue());
 									},
 									{
 										type: "view",
-										class: "View",
+										"class": "View",
 										container: {
-											class: "Element",
+											"class": "Element",
 											tag_name: "i",
 											static_classes: ["lava-tree-expander"],
 											events: {
@@ -211,9 +211,9 @@ return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() -
 									},
 									{
 										type: "view",
-										class: "View",
+										"class": "View",
 										container: {
-											class: "Element",
+											"class": "Element",
 											tag_name: "i",
 											static_classes: ["lava-tree-icon"],
 											class_bindings: {
@@ -253,7 +253,7 @@ return ('icon-' + this._binds[0].getValue());
 							"\r\n\t\t\t\t"
 						]
 					},
-					extends: "Tree",
+					"extends": "Tree",
 					assigns: {
 						records: {
 							evaluator: function() {
@@ -277,14 +277,14 @@ return (this._binds[0].getValue());
 							active_modifiers: []
 						}
 					},
-					class: "Lava.WidgetConfigExtensionGateway",
+					"class": "Lava.WidgetConfigExtensionGateway",
 					extender_type: "Default",
 					type: "widget"
 				},
 				"\r\n\t\t</div>\r\n\t"
 			],
 			real_class: "CheckTreeExample",
-			extends: "Example",
+			"extends": "Example",
 			assigns: {
 				records: {
 					evaluator: function() {

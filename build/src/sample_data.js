@@ -2,16 +2,16 @@
 Lava.schema.modules['DemoTree'] = {
 	fields: {
 		//id: {type: 'Id'},
-		title: {type: 'Basic', default: ''},
-		type: {type: 'Basic', default: 'file'},
+		title: {type: 'Basic', 'default': ''},
+		type: {type: 'Basic', 'default': 'file'},
 		parent: {type: 'Record', module: 'this'/*, foreign_key_field: 'parent_id'*/},
 		//parent_id: {type: 'ForeignKey'},
 		children: {type: 'Collection', module: 'this', record_field: 'parent'},
 
-		is_expanded: {type: 'Basic', default: false},
+		is_expanded: {type: 'Basic', 'default': false},
 		// for tree with checkboxes:
-		is_checked: {type: 'Basic', default: false},
-		is_indeterminate: {type: 'Basic', default: false}
+		is_checked: {type: 'Basic', 'default': false},
+		is_indeterminate: {type: 'Basic', 'default': false}
 	}
 };
 

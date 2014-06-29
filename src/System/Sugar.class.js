@@ -619,9 +619,9 @@ Lava.define(
 
 		}
 
-		if (!widget_config.resources.default) {
+		if (!widget_config.resources['default']) {
 
-			widget_config.resources.default = {};
+			widget_config.resources['default'] = {};
 
 		}
 
@@ -629,9 +629,9 @@ Lava.define(
 
 			operations_stack.push({
 				name: 'static_classes',
-				value: unknown_attributes.class.trim().split(/\s+/)
+				value: unknown_attributes['class'].trim().split(/\s+/)
 			});
-			delete unknown_attributes.class;
+			delete unknown_attributes['class'];
 
 		}
 
@@ -654,7 +654,7 @@ Lava.define(
 
 		}
 
-		Lava.resources.putResourceValue(widget_config.resources.default, action_schema.container_resource_name, value);
+		Lava.resources.putResourceValue(widget_config.resources['default'], action_schema.container_resource_name, value);
 
 	},
 

@@ -130,7 +130,7 @@ Lava.define(
 
 		if ('container' in config) {
 
-			constructor = Lava.ClassManager.getConstructor(config.container.class, 'Lava.view.container');
+			constructor = Lava.ClassManager.getConstructor(config.container['class'], 'Lava.view.container');
 			this._container = new constructor(this, config.container, widget);
 
 		}

@@ -17,7 +17,7 @@ Lava.define(
 
 		if ('default' in config) {
 
-			this._default = config.default;
+			this._default = config['default'];
 
 		}
 

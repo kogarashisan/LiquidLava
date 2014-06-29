@@ -14,21 +14,21 @@ var package_content = {
 		"<p>This is the simplest HTML tree, built with the Framework.</p>\r\n<p>The nodes, which have children, are highlighted in yellow by the widget's template.</p>\r\n<p></p>\r\n<p>The tree takes data from the ExamplesPage widget (see ExamplesPage::init for details).\r\n\tThe <i>is_expanded</i> property is stored in the data record, so if several trees are bound to the same data - they share the expanded nodes.</p>",
 		{
 			type: "widget",
-			class: "Lava.WidgetConfigExtensionGateway",
+			"class": "Lava.WidgetConfigExtensionGateway",
 			extender_type: "Default",
-			extends: "Example",
+			"extends": "Example",
 			includes: {
 				content: [
 					"\r\n\t",
 					{
 						type: "widget",
-						class: "Lava.WidgetConfigExtensionGateway",
+						"class": "Lava.WidgetConfigExtensionGateway",
 						extender_type: "Default",
 						template: [
 							"\r\n\t\t\t\t",
 							{
 								type: "view",
-								class: "Foreach",
+								"class": "Foreach",
 								argument: {
 									evaluator: function() {
 return (this._binds[0].getValue());
@@ -50,7 +50,7 @@ return (this._binds[0].getValue());
 									modifiers: [],
 									active_modifiers: []
 								},
-								container: {class: "Morph"},
+								container: {"class": "Morph"},
 								as: "node",
 								template: [
 									"\r\n\t\t\t\t\t",
@@ -66,7 +66,7 @@ return (this._binds[0].getValue());
 							"\r\n\t\t\t"
 						],
 						container: {
-							class: "Element",
+							"class": "Element",
 							tag_name: "div",
 							static_styles: {border: "1px solid black"}
 						},
@@ -75,7 +75,7 @@ return (this._binds[0].getValue());
 								"\r\n\t\t\t",
 								{
 									type: "view",
-									class: "Expression",
+									"class": "Expression",
 									argument: {
 										evaluator: function() {
 return (this._binds[0].getValue());
@@ -97,7 +97,7 @@ return (this._binds[0].getValue());
 										active_modifiers: []
 									},
 									container: {
-										class: "Element",
+										"class": "Element",
 										tag_name: "div",
 										static_styles: {border: "1px solid black"},
 										events: {
@@ -141,7 +141,7 @@ return ((this._binds[0].getValue()) ? 'yellow' : '');
 								"\r\n\t\t\t",
 								{
 									type: "view",
-									class: "If",
+									"class": "If",
 									argument: {
 										evaluator: function() {
 return (this._binds[0].getValue() && this._binds[1].getValue());
@@ -171,12 +171,12 @@ return (this._binds[0].getValue() && this._binds[1].getValue());
 										modifiers: [],
 										active_modifiers: []
 									},
-									container: {class: "Morph"},
+									container: {"class": "Morph"},
 									template: [
 										"\r\n\t\t\t\t",
 										{
 											type: "view",
-											class: "Foreach",
+											"class": "Foreach",
 											argument: {
 												evaluator: function() {
 return (this._binds[0].getValue());
@@ -209,7 +209,7 @@ return (this._binds[0].getValue());
 												"\r\n\t\t\t\t\t"
 											],
 											container: {
-												class: "Element",
+												"class": "Element",
 												tag_name: "div",
 												static_styles: {"padding-left": "2em"}
 											}

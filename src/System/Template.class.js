@@ -82,7 +82,7 @@ Lava.define(
 
 	_createView: function(result, childConfig, include_name_stack, properties) {
 
-		var constructor = Lava.ClassManager.getConstructor(childConfig.class, 'Lava.view'),
+		var constructor = Lava.ClassManager.getConstructor(childConfig['class'], 'Lava.view'),
 			view = new constructor(
 				childConfig,
 				this._widget,

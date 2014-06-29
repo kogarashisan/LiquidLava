@@ -62,16 +62,16 @@ var Examples = {
 Lava.schema.modules['DemoTree'] = {
 	fields: {
 		//id: {type: 'Id'},
-		title: {type: 'Basic', default: ''},
-		type: {type: 'Basic', default: 'file'},
+		title: {type: 'Basic', 'default': ''},
+		type: {type: 'Basic', 'default': 'file'},
 		parent: {type: 'Record', module: 'this'/*, foreign_key_field: 'parent_id'*/},
 		//parent_id: {type: 'ForeignKey'},
 		children: {type: 'Collection', module: 'this', record_field: 'parent'},
 
-		is_expanded: {type: 'Basic', default: false},
+		is_expanded: {type: 'Basic', 'default': false},
 		// for tree with checkboxes:
-		is_checked: {type: 'Basic', default: false},
-		is_indeterminate: {type: 'Basic', default: false}
+		is_checked: {type: 'Basic', 'default': false},
+		is_indeterminate: {type: 'Basic', 'default': false}
 	}
 };
 
@@ -603,7 +603,7 @@ Lava.define(
 });
 Lava.widgets["Example"] = {
 	type: "widget",
-	class: "Lava.WidgetConfigExtensionGateway",
+	"class": "Lava.WidgetConfigExtensionGateway",
 	extender_type: "Default",
 	template: [
 		"\r\n\t\t\t",
@@ -614,7 +614,7 @@ Lava.widgets["Example"] = {
 		"\r\n\t\t"
 	],
 	container: {
-		class: "Element",
+		"class": "Element",
 		tag_name: "div",
 		static_classes: ["bs-example"]
 	},
@@ -634,7 +634,7 @@ Lava.widgets["EditableTable"] = {
 			"\r\n\t\t",
 			{
 				type: "view",
-				class: "Foreach",
+				"class": "Foreach",
 				argument: {
 					evaluator: function() {
 return (this._binds[0].getValue());
@@ -666,7 +666,7 @@ return (this._binds[0].getValue());
 					"\r\n\t\t\t\t\r\n\t\t\t\t",
 					{
 						type: "view",
-						class: "Foreach",
+						"class": "Foreach",
 						argument: {
 							evaluator: function() {
 return (this._binds[0].getValue());
@@ -693,16 +693,16 @@ return (this._binds[0].getValue());
 							"\r\n\t\t\t\t\t\t",
 							{
 								type: "view",
-								class: "View",
+								"class": "View",
 								container: {
-									class: "Element",
+									"class": "Element",
 									tag_name: "td"
 								},
 								template: [
 									"\r\n\t\t\t\t\t\t\t",
 									{
 										type: "view",
-										class: "If",
+										"class": "If",
 										argument: {
 											evaluator: function() {
 return (this._binds[0].getValue() == this._binds[1].getValue());
@@ -758,7 +758,7 @@ return (this._binds[0].getValue() == this._binds[1].getValue());
 							"\r\n\t\t\t\t\t"
 						],
 						container: {
-							class: "Element",
+							"class": "Element",
 							tag_name: "tr",
 							events: {
 								click: [{
@@ -776,7 +776,7 @@ return (this._binds[0].getValue() == this._binds[1].getValue());
 					"\r\n\t\t\t"
 				],
 				container: {
-					class: "Element",
+					"class": "Element",
 					tag_name: "tbody",
 					resource_id: {
 						locator_type: "Name",
@@ -801,9 +801,9 @@ return (this._binds[0].getValue() == this._binds[1].getValue());
 					"\r\n\t\t\t\t",
 					{
 						type: "widget",
-						class: "Lava.WidgetConfigExtensionGateway",
+						"class": "Lava.WidgetConfigExtensionGateway",
 						extender_type: "Default",
-						extends: "TextInput",
+						"extends": "TextInput",
 						bindings: {
 							value: {
 								property_name: "value",
@@ -823,9 +823,9 @@ return (this._binds[0].getValue() == this._binds[1].getValue());
 					"\r\n\t\t\t\t",
 					{
 						type: "widget",
-						class: "Lava.WidgetConfigExtensionGateway",
+						"class": "Lava.WidgetConfigExtensionGateway",
 						extender_type: "Default",
-						extends: "CheckBox",
+						"extends": "CheckBox",
 						bindings: {
 							is_checked: {
 								property_name: "is_checked",
@@ -845,7 +845,7 @@ return (this._binds[0].getValue() == this._binds[1].getValue());
 		}
 	},
 	resources: {
-		default: {
+		"default": {
 			TABLE_ELEMENT: {
 				type: "container_stack",
 				value: [{
@@ -856,17 +856,17 @@ return (this._binds[0].getValue() == this._binds[1].getValue());
 		}
 	},
 	real_class: "EditableTableExample",
-	extends: "Table",
-	class: "Lava.WidgetConfigExtensionGateway",
+	"extends": "Table",
+	"class": "Lava.WidgetConfigExtensionGateway",
 	extender_type: "Default",
 	is_extended: false
 };
 
 var MainPageTemplate = [{
 	type: "widget",
-	class: "Lava.WidgetConfigExtensionGateway",
+	"class": "Lava.WidgetConfigExtensionGateway",
 	extender_type: "Default",
-	extends: "Example",
+	"extends": "Example",
 	includes: {
 		content: [
 			"\r\n\t<div class=\"col-md-6\" style=\"padding: 1em;overflow: auto;height: 370px;position: relative;\">\r\n\t\t",
@@ -876,9 +876,9 @@ var MainPageTemplate = [{
 						"\r\n\t\t\t\t",
 						{
 							type: "view",
-							class: "View",
+							"class": "View",
 							container: {
-								class: "Element",
+								"class": "Element",
 								tag_name: "div",
 								static_classes: ["lava-tree-node"],
 								static_properties: {unselectable: "on"},
@@ -906,7 +906,7 @@ return ('level-' + this._binds[0].getValue());
 								"\r\n\t\t\t\t\t",
 								{
 									type: "view",
-									class: "Expression",
+									"class": "Expression",
 									argument: {
 										evaluator: function() {
 return (this._binds[0].getValue());
@@ -929,9 +929,9 @@ return (this._binds[0].getValue());
 								},
 								{
 									type: "view",
-									class: "View",
+									"class": "View",
 									container: {
-										class: "Element",
+										"class": "Element",
 										tag_name: "i",
 										static_classes: ["lava-tree-expander"],
 										events: {
@@ -990,9 +990,9 @@ return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() -
 								},
 								{
 									type: "view",
-									class: "View",
+									"class": "View",
 									container: {
-										class: "Element",
+										"class": "Element",
 										tag_name: "i",
 										static_classes: ["lava-tree-icon"],
 										class_bindings: {
@@ -1035,7 +1035,7 @@ return ('icon-' + this._binds[0].getValue());
 						"\r\n\t\t\t\t",
 						{
 							type: "view",
-							class: "If",
+							"class": "If",
 							argument: {
 								evaluator: function() {
 return (this._binds[0].getValue() && this._binds[1].getValue());
@@ -1066,10 +1066,10 @@ return (this._binds[0].getValue() && this._binds[1].getValue());
 								active_modifiers: []
 							},
 							container: {
-								class: "Emulated",
+								"class": "Emulated",
 								options: {placement: "after-previous"}
 							},
-							refresher: {class: "Collapse"},
+							refresher: {"class": "Collapse"},
 							assigns: {
 								pad: {
 									evaluator: function() {
@@ -1119,7 +1119,7 @@ return (this._binds[0].getValue() + 1);
 								"\r\n\t\t\t\t\t\r\n\t\t\t\t\t\r\n\t\t\t\t\t\r\n\t\t\t\t\t\r\n\t\t\t\t\t",
 								{
 									type: "view",
-									class: "Foreach",
+									"class": "Foreach",
 									argument: {
 										evaluator: function() {
 return (this._binds[0].getValue());
@@ -1152,7 +1152,7 @@ return (this._binds[0].getValue());
 										"\r\n\t\t\t\t\t\t"
 									],
 									container: {
-										class: "Element",
+										"class": "Element",
 										tag_name: "div",
 										static_classes: ["lava-tree-container"]
 									}
@@ -1164,7 +1164,7 @@ return (this._binds[0].getValue());
 					]
 				},
 				real_class: "MainPageTree",
-				extends: "Tree",
+				"extends": "Tree",
 				id: "main_page_tree",
 				assigns: {
 					records: {
@@ -1185,7 +1185,7 @@ return (this._binds[0].getValue());
 						active_modifiers: []
 					}
 				},
-				class: "Lava.WidgetConfigExtensionGateway",
+				"class": "Lava.WidgetConfigExtensionGateway",
 				extender_type: "Default",
 				type: "widget"
 			},
@@ -1212,7 +1212,7 @@ return (this._binds[0].getValue());
 						}
 					]
 				},
-				extends: "EditableTable",
+				"extends": "EditableTable",
 				id: "main_page_table",
 				assigns: {
 					records: {
@@ -1233,7 +1233,7 @@ return (this._binds[0].getValue());
 						active_modifiers: []
 					}
 				},
-				class: "Lava.WidgetConfigExtensionGateway",
+				"class": "Lava.WidgetConfigExtensionGateway",
 				extender_type: "Default",
 				type: "widget"
 			},

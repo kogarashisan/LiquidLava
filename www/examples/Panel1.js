@@ -14,23 +14,23 @@ var package_content = {
 		"<p>A very simple databinding demo. The click listener changes the <i>is_expanded</i> widget property,\r\n\twhich is bound to the style of the panel.</p>",
 		{
 			type: "widget",
-			class: "Lava.WidgetConfigExtensionGateway",
+			"class": "Lava.WidgetConfigExtensionGateway",
 			extender_type: "Default",
-			extends: "Example",
+			"extends": "Example",
 			includes: {
 				content: [
 					"\r\n\t",
 					{
 						type: "widget",
-						class: "Lava.WidgetConfigExtensionGateway",
+						"class": "Lava.WidgetConfigExtensionGateway",
 						extender_type: "Default",
 						template: [
 							"\r\n\t\t\t",
 							{
 								type: "view",
-								class: "View",
+								"class": "View",
 								container: {
-									class: "Element",
+									"class": "Element",
 									tag_name: "div",
 									static_styles: {
 										background: "lightyellow",
@@ -50,9 +50,9 @@ var package_content = {
 							"\r\n\t\t\t",
 							{
 								type: "view",
-								class: "View",
+								"class": "View",
 								container: {
-									class: "Element",
+									"class": "Element",
 									tag_name: "div",
 									static_styles: {border: "1px solid black"},
 									style_bindings: {

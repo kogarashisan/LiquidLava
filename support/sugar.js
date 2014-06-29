@@ -129,7 +129,7 @@ function _cSugar() {
 	 * Lava.system.Sugar inherited (or compatible) class
 	 * @type {string}
 	 */
-	this.class = '';
+	this['class'] = '';
 
 	/**
 	 * The name of the real tag, which will be converted into widget configuration

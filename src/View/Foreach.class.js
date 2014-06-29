@@ -49,7 +49,7 @@ Lava.define(
 		if (this._config.refresher) {
 
 			if (Lava.schema.DEBUG && !this._container) Lava.t('View/Foreach: refresher needs container to work');
-			var constructor = Lava.ClassManager.getConstructor(this._config.refresher.class, 'Lava.view.refresher');
+			var constructor = Lava.ClassManager.getConstructor(this._config.refresher['class'], 'Lava.view.refresher');
 			this._refresher = /** @type {Lava.refresher.Default} */ new constructor(
 				this._config.refresher,
 				this,

@@ -168,13 +168,13 @@ Lava.extenders = {
 
 		if (config.real_class && !('class_locator' in config)) {
 
-			config.class = Lava.ClassManager.hasConstructor(config.real_class)
+			config['class'] = Lava.ClassManager.hasConstructor(config.real_class)
 				? config.real_class
 				: 'Lava.widget.' + config.real_class;
 
 		} else {
 
-			config.class = null;
+			config['class'] = null;
 
 		}
 

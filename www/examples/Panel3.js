@@ -14,23 +14,23 @@ var package_content = {
 		"<p>\r\n\tJust like Panel 2, but with different refresher, which performs animation.\r\n\tNote: \"overflow: hidden\" was added to the animated container.\r\n</p>\r\n<p>\r\n\tIf you are interested in a panel which animates, but does not remove itself from DOM\r\n\t- see widget/Collapsible.class.js.\r\n</p>",
 		{
 			type: "widget",
-			class: "Lava.WidgetConfigExtensionGateway",
+			"class": "Lava.WidgetConfigExtensionGateway",
 			extender_type: "Default",
-			extends: "Example",
+			"extends": "Example",
 			includes: {
 				content: [
 					"\r\n\t",
 					{
 						type: "widget",
-						class: "Lava.WidgetConfigExtensionGateway",
+						"class": "Lava.WidgetConfigExtensionGateway",
 						extender_type: "Default",
 						template: [
 							"\r\n\t\t\t",
 							{
 								type: "view",
-								class: "View",
+								"class": "View",
 								container: {
-									class: "Element",
+									"class": "Element",
 									tag_name: "div",
 									static_styles: {
 										background: "lightyellow",
@@ -50,7 +50,7 @@ var package_content = {
 							"\r\n\t\t\t",
 							{
 								type: "view",
-								class: "If",
+								"class": "If",
 								argument: {
 									evaluator: function() {
 return (this._binds[0].getValue());
@@ -69,17 +69,17 @@ return (this._binds[0].getValue());
 									active_modifiers: []
 								},
 								container: {
-									class: "Emulated",
+									"class": "Emulated",
 									options: {placement: "after-previous"}
 								},
-								refresher: {class: "Collapse"},
+								refresher: {"class": "Collapse"},
 								template: [
 									"\r\n\t\t\t\r\n\t\t\t\r\n\t\t\t",
 									{
 										type: "view",
-										class: "View",
+										"class": "View",
 										container: {
-											class: "Element",
+											"class": "Element",
 											tag_name: "div",
 											static_styles: {
 												border: "1px solid black",

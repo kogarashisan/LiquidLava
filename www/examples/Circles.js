@@ -14,15 +14,15 @@ var package_content = {
 		"<p>Widget like this is used in admin panel of a shop, which author maintained for some time.</p>\r\n<p>You can drag the circles around and edit their tooltips.</p>\r\n<p>Note: architecturally, it's wrong to load data in constructor, unless it's a global widget.</p>",
 		{
 			type: "widget",
-			class: "Lava.WidgetConfigExtensionGateway",
+			"class": "Lava.WidgetConfigExtensionGateway",
 			extender_type: "Default",
 			template: [
 				"\r\n\t\t",
 				{
 					type: "view",
-					class: "View",
+					"class": "View",
 					container: {
-						class: "Element",
+						"class": "Element",
 						tag_name: "div",
 						static_styles: {
 							width: "500px",
@@ -30,14 +30,14 @@ var package_content = {
 							border: "1px solid gray",
 							position: "relative",
 							overflow: "hidden",
-							float: "left"
+							"float": "left"
 						}
 					},
 					template: [
 						"\r\n\t\t\t<img src=\"img/goods.jpg\" style=\"position: absolute\"/>\r\n\t\t\t",
 						{
 							type: "view",
-							class: "Foreach",
+							"class": "Foreach",
 							argument: {
 								evaluator: function() {
 return (this._binds[0].getValue());
@@ -59,15 +59,15 @@ return (this._binds[0].getValue());
 								modifiers: [],
 								active_modifiers: []
 							},
-							container: {class: "Morph"},
+							container: {"class": "Morph"},
 							as: "circle",
 							template: [
 								"\r\n\t\t\t\t",
 								{
 									type: "view",
-									class: "View",
+									"class": "View",
 									container: {
-										class: "Element",
+										"class": "Element",
 										tag_name: "div",
 										static_classes: [
 											"example-circle",
@@ -182,9 +182,9 @@ return ((this._binds[0].getValue() == this._binds[1].getValue()) ? 'example-circ
 				"\r\n\t\t<div style=\"float:left;padding: 1em\">\r\n\t\t\t",
 				{
 					type: "view",
-					class: "View",
+					"class": "View",
 					container: {
-						class: "Element",
+						"class": "Element",
 						tag_name: "button",
 						static_classes: [
 							"btn",
@@ -204,9 +204,9 @@ return ((this._binds[0].getValue() == this._binds[1].getValue()) ? 'example-circ
 				"<br/>\r\n\t\t\t",
 				{
 					type: "view",
-					class: "View",
+					"class": "View",
 					container: {
-						class: "Element",
+						"class": "Element",
 						tag_name: "button",
 						static_classes: [
 							"btn",
@@ -227,7 +227,7 @@ return ((this._binds[0].getValue() == this._binds[1].getValue()) ? 'example-circ
 				"\r\n\t\t\t<br/>\r\n\t\t\t",
 				{
 					type: "view",
-					class: "If",
+					"class": "If",
 					argument: {
 						evaluator: function() {
 return (this._binds[0].getValue());
@@ -245,12 +245,12 @@ return (this._binds[0].getValue());
 						modifiers: [],
 						active_modifiers: []
 					},
-					container: {class: "Morph"},
+					container: {"class": "Morph"},
 					template: [
 						"\r\n\t\t\t<div style=\"padding-top:0.5em\">\r\n\t\t\t\tSelected circle:<br/>\r\n\t\t\t\tx: ",
 						{
 							type: "view",
-							class: "Expression",
+							"class": "Expression",
 							argument: {
 								evaluator: function() {
 return (this._binds[0].getValue());
@@ -271,12 +271,12 @@ return (this._binds[0].getValue());
 								modifiers: [],
 								active_modifiers: []
 							},
-							container: {class: "Morph"}
+							container: {"class": "Morph"}
 						},
 						"<br/>\r\n\t\t\t\ty: ",
 						{
 							type: "view",
-							class: "Expression",
+							"class": "Expression",
 							argument: {
 								evaluator: function() {
 return (this._binds[0].getValue());
@@ -297,14 +297,14 @@ return (this._binds[0].getValue());
 								modifiers: [],
 								active_modifiers: []
 							},
-							container: {class: "Morph"}
+							container: {"class": "Morph"}
 						},
 						"<br/>\r\n\t\t\t\tTooltip text:<br/>\r\n\t\t\t\t",
 						{
 							type: "widget",
-							class: "Lava.WidgetConfigExtensionGateway",
+							"class": "Lava.WidgetConfigExtensionGateway",
 							extender_type: "Default",
-							extends: "TextInput",
+							"extends": "TextInput",
 							bindings: {
 								value: {
 									property_name: "value",
@@ -321,7 +321,7 @@ return (this._binds[0].getValue());
 				"\r\n\t\t</div>\r\n\t\t<div class=\"clearfix\"></div>\r\n\t"
 			],
 			real_class: "CirclesExample",
-			extends: "Example"
+			"extends": "Example"
 		}
 	]
 }

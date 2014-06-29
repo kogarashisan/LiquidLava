@@ -1113,6 +1113,11 @@ var Lava = {
 	DEFAULT_LESS: function(a, b) { return a < b; },
 	// not sure if these obsolete tags should also be included: basefont, bgsound, frame, isindex
 	VOID_TAGS: ['area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'],
+	JS_KEYWORDS: ['break','case','catch','class','const','continue','debugger','default','delete','do','else','export','extends','false','finally',
+		'for','function','if','import','in','instanceof','new','null','protected','return','super','switch','this','throw','true','try','typeof',
+		'var','while','with','abstract','boolean','byte','char','decimal','double','enum','final','float','get','implements','int','interface',
+		'internal','long','package','private','protected','public','sbyte','set','short','static','uint','ulong','ushort','void','assert','ensure',
+		'event','goto','invariant','namespace','native','require','synchronized','throws','transient','use','volatile'],
 
 	KNOWN_EXCEPTIONS: null,
 
@@ -1268,7 +1273,7 @@ var Lava = {
 
 		}
 
-		constructor = Lava.ClassManager.getConstructor(config.class);
+		constructor = Lava.ClassManager.getConstructor(config['class']);
 		return /** @type {Lava.widget.Standard} */ new constructor(config, null, null, null, properties);
 
 	},
@@ -1341,7 +1346,7 @@ var Lava = {
 
 			widget_config = this.getWidgetConfig(widget_title);
 			if (!('sugar' in widget_config)) Lava.t("Widget " + widget_title + " does not have sugar in configuration");
-			sugar_class = widget_config.sugar.class || Lava.schema.widget.DEFAULT_SUGAR_CLASS;
+			sugar_class = widget_config.sugar['class'] || Lava.schema.widget.DEFAULT_SUGAR_CLASS;
 			this._widget_title_to_sugar_instance[widget_title] = this._sugar_instances[sugar_class];
 
 		}
@@ -1460,13 +1465,13 @@ var Lava = {
 
 		if ('class_locator' in config) {
 
-			config.class = Lava.schema.widget.DEFAULT_CLASS_LOCATOR_GATEWAY;
+			config['class'] = Lava.schema.widget.DEFAULT_CLASS_LOCATOR_GATEWAY;
 
 		}
 
-		if (Lava.schema.DEBUG && !config.class) Lava.t("Trying to create a widget without class");
-		var constructor = Lava.ClassManager.getConstructor(config.class, 'Lava.widget');
-		if (Lava.schema.DEBUG && !constructor) Lava.t("Class not found: " + config.class);
+		if (Lava.schema.DEBUG && !config['class']) Lava.t("Trying to create a widget without class");
+		var constructor = Lava.ClassManager.getConstructor(config['class'], 'Lava.widget');
+		if (Lava.schema.DEBUG && !constructor) Lava.t("Class not found: " + config['class']);
 		return new constructor(config, widget, parent_view, template, properties);
 
 	},
@@ -1837,7 +1842,7 @@ Lava.Serializer = {
 
 		// if you serialize only Lava configs, than most likely you do not need this check,
 		// cause the property names in configs are always valid.
-		if (this.CHECK_PROPERTY_NAMES && !Lava.VALID_PROPERTY_NAME_REGEX.test(name)) {
+		if (this.CHECK_PROPERTY_NAMES && (!Lava.VALID_PROPERTY_NAME_REGEX.test(name) || Lava.JS_KEYWORDS.indexOf(name) != -1)) {
 
 			name = '"' + name.replace(/\"/g, "\\\"") + '"';
 
@@ -2770,13 +2775,13 @@ Lava.extenders = {
 
 		if (config.real_class && !('class_locator' in config)) {
 
-			config.class = Lava.ClassManager.hasConstructor(config.real_class)
+			config['class'] = Lava.ClassManager.hasConstructor(config.real_class)
 				? config.real_class
 				: 'Lava.widget.' + config.real_class;
 
 		} else {
 
-			config.class = null;
+			config['class'] = null;
 
 		}
 
@@ -3908,7 +3913,7 @@ Lava.ClassManager = {
 					Lava.t("[_serializeSkeleton] unknown property descriptor type: " + skeleton[name].type);
 			}
 
-			if (Lava.VALID_PROPERTY_NAME_REGEX.test(name)) {
+			if (Lava.VALID_PROPERTY_NAME_REGEX.test(name) && Lava.JS_KEYWORDS.indexOf(name) == -1) {
 
 				serialized_properties.push(name + ': ' + serialized_value);
 
@@ -4418,9 +4423,9 @@ Lava.parsers.Common = {
 		if ('class_locator' in raw_block) {
 			config.class_locator = raw_block.class_locator;
 			config.real_class = raw_block.real_class;
-			config.class = Lava.schema.view.DEFAULT_CLASS_LOCATOR_GATEWAY;
+			config['class'] = Lava.schema.view.DEFAULT_CLASS_LOCATOR_GATEWAY;
 		} else {
-			config.class = this._viewNameToClass(raw_block.name);
+			config['class'] = this._viewNameToClass(raw_block.name);
 		}
 
 		if (raw_block.prefix == '$') {
@@ -4856,7 +4861,7 @@ Lava.parsers.Common = {
 
 		if ('container_class' in x) {
 
-			container_config.class = x.container_class;
+			container_config['class'] = x.container_class;
 
 		}
 
@@ -4966,7 +4971,7 @@ Lava.parsers.Common = {
 
 			} else if (name == 'class') {
 
-				container_config.static_classes = raw_attributes.class.trim().split(/\s+/);
+				container_config.static_classes = raw_attributes['class'].trim().split(/\s+/);
 
 			} else if (name == 'id') {
 
@@ -5425,7 +5430,7 @@ Lava.parsers.Directives = {
 		} else if (raw_tag.name == 'view') {
 
 			view_config = Lava.parsers.Common.compileAsView(raw_tag.content);
-			if (view_config.class != 'View') Lava.t("define: view in 'main' role must be pure View, not subclass");
+			if (view_config['class'] != 'View') Lava.t("define: view in 'main' role must be pure View, not subclass");
 			if ('argument' in view_config) Lava.t("Widgets do not support arguments");
 			if ('roles' in view_config) Lava.t("Widget definition: move the roles from main view to widget");
 
@@ -6011,7 +6016,7 @@ Lava.parsers.Directives = {
 			widget_config.assigns = roles_storage.assigns;
 		}
 
-		if (!widget_config.class) widget_config.class = Lava.schema.widget.DEFAULT_EXTENSION_GATEWAY;
+		if (!widget_config['class']) widget_config['class'] = Lava.schema.widget.DEFAULT_EXTENSION_GATEWAY;
 		if (!widget_config.extender_type) widget_config.extender_type = Lava.schema.widget.DEFAULT_EXTENDER;
 
 		return widget_config;
@@ -6071,7 +6076,7 @@ Lava.parsers.Directives = {
 
 		var widget_config = this._parseWidgetDefinition(raw_directive);
 
-		if (Lava.schema.DEBUG && !widget_config.class && !widget_config.extends) Lava.t("x:define: widget definition is missing either 'controller' or 'extends' attribute");
+		if (Lava.schema.DEBUG && !widget_config['class'] && !widget_config.extends) Lava.t("x:define: widget definition is missing either 'controller' or 'extends' attribute");
 		if (raw_directive.attributes.resource_id) widget_config.resource_id = Lava.parsers.Common.parseResourceId(raw_directive.attributes.resource_id);
 
 		widget_config.type = 'widget';
@@ -6213,7 +6218,7 @@ Lava.parsers.Directives = {
 			}
 		}
 
-		if ('class' in config) original_config.class = config.class;
+		if ('class' in config) original_config['class'] = config['class'];
 		if ('options' in config) {
 			if (!('options' in original_config)) original_config.options = {};
 			Firestorm.extend(original_config.options, config.options);
@@ -9831,7 +9836,7 @@ Lava.define(
 
 	_createView: function(result, childConfig, include_name_stack, properties) {
 
-		var constructor = Lava.ClassManager.getConstructor(childConfig.class, 'Lava.view'),
+		var constructor = Lava.ClassManager.getConstructor(childConfig['class'], 'Lava.view'),
 			view = new constructor(
 				childConfig,
 				this._widget,
@@ -11722,9 +11727,9 @@ Lava.define(
 
 		}
 
-		if (!widget_config.resources.default) {
+		if (!widget_config.resources['default']) {
 
-			widget_config.resources.default = {};
+			widget_config.resources['default'] = {};
 
 		}
 
@@ -11732,9 +11737,9 @@ Lava.define(
 
 			operations_stack.push({
 				name: 'static_classes',
-				value: unknown_attributes.class.trim().split(/\s+/)
+				value: unknown_attributes['class'].trim().split(/\s+/)
 			});
-			delete unknown_attributes.class;
+			delete unknown_attributes['class'];
 
 		}
 
@@ -11757,7 +11762,7 @@ Lava.define(
 
 		}
 
-		Lava.resources.putResourceValue(widget_config.resources.default, action_schema.container_resource_name, value);
+		Lava.resources.putResourceValue(widget_config.resources['default'], action_schema.container_resource_name, value);
 
 	},
 
@@ -12043,7 +12048,7 @@ Lava.define(
 
 		if ('default' in config) {
 
-			this._default = config.default;
+			this._default = config['default'];
 
 		}
 
@@ -17074,7 +17079,7 @@ Lava.define(
 
 		if ('container' in config) {
 
-			constructor = Lava.ClassManager.getConstructor(config.container.class, 'Lava.view.container');
+			constructor = Lava.ClassManager.getConstructor(config.container['class'], 'Lava.view.container');
 			this._container = new constructor(this, config.container, widget);
 
 		}
@@ -17840,7 +17845,7 @@ Lava.define(
 		if (this._config.refresher) {
 
 			if (Lava.schema.DEBUG && !this._container) Lava.t('View/Foreach: refresher needs container to work');
-			var constructor = Lava.ClassManager.getConstructor(this._config.refresher.class, 'Lava.view.refresher');
+			var constructor = Lava.ClassManager.getConstructor(this._config.refresher['class'], 'Lava.view.refresher');
 			this._refresher = /** @type {Lava.refresher.Default} */ new constructor(
 				this._config.refresher,
 				this,
@@ -18156,7 +18161,7 @@ Lava.define(
 
 			// otherwise, it will not be able to insert the template
 			if (Lava.schema.DEBUG && !this._container) Lava.t('View/If: refresher needs container to work');
-			constructor = Lava.ClassManager.getConstructor(this._config.refresher.class, 'Lava.view.refresher');
+			constructor = Lava.ClassManager.getConstructor(this._config.refresher['class'], 'Lava.view.refresher');
 			this._refresher = /** @type {Lava.refresher.Default} */ new constructor(
 				this._config.refresher,
 				this, this._container
@@ -20273,7 +20278,7 @@ Lava.define(
 		if (!this._animation) {
 
 			animation_options = this._properties.is_animation_enabled ? this._config.options.animation : {class: this.TOGGLE_ANIMATION_CLASS};
-			this._animation = new Lava.animation[animation_options.class](animation_options, element);
+			this._animation = new Lava.animation[animation_options['class']](animation_options, element);
 			this._animation.on('complete', this._onAnimationComplete, this);
 
 		}
@@ -21286,7 +21291,7 @@ Lava.define(
 });Lava.widgets = {
 	InputAbstract: {
 		type: "widget",
-		class: "Lava.WidgetConfigExtensionGateway",
+		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Default",
 		template: [
 			"\r\n\t\t",
@@ -21331,9 +21336,9 @@ Lava.define(
 		includes: {
 			input_view: [{
 				type: "view",
-				class: "View",
+				"class": "View",
 				container: {
-					class: "Element",
+					"class": "Element",
 					tag_name: "input",
 					events: {
 						change: [{
@@ -21488,8 +21493,8 @@ return (this._binds[0].getValue());
 			}
 		},
 		real_class: "input.CheckBox",
-		extends: "InputAbstract",
-		class: "Lava.WidgetConfigExtensionGateway",
+		"extends": "InputAbstract",
+		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Default",
 		is_extended: false
 	},
@@ -21497,9 +21502,9 @@ return (this._binds[0].getValue());
 		includes: {
 			input_view: [{
 				type: "view",
-				class: "View",
+				"class": "View",
 				container: {
-					class: "Element",
+					"class": "Element",
 					tag_name: "textarea",
 					events: {
 						change: [{
@@ -21634,8 +21639,8 @@ return (this._binds[0].getValue());
 		},
 		default_events: ["input"],
 		real_class: "input.TextArea",
-		extends: "InputAbstract",
-		class: "Lava.WidgetConfigExtensionGateway",
+		"extends": "InputAbstract",
+		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Default",
 		is_extended: false
 	},
@@ -21643,9 +21648,9 @@ return (this._binds[0].getValue());
 		includes: {
 			input_view: [{
 				type: "view",
-				class: "View",
+				"class": "View",
 				container: {
-					class: "Element",
+					"class": "Element",
 					tag_name: "input",
 					events: {
 						change: [{
@@ -21780,15 +21785,15 @@ return (this._binds[0].getValue());
 		},
 		default_events: ["input"],
 		real_class: "input.Text",
-		extends: "InputAbstract",
-		class: "Lava.WidgetConfigExtensionGateway",
+		"extends": "InputAbstract",
+		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Default",
 		is_extended: false
 	},
 	Numeric: {
 		real_class: "input.Numeric",
-		extends: "TextInput",
-		class: "Lava.WidgetConfigExtensionGateway",
+		"extends": "TextInput",
+		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Default",
 		is_extended: false
 	},
@@ -21796,9 +21801,9 @@ return (this._binds[0].getValue());
 		includes: {
 			input_view: [{
 				type: "view",
-				class: "View",
+				"class": "View",
 				container: {
-					class: "Element",
+					"class": "Element",
 					tag_name: "input",
 					events: {
 						change: [{
@@ -21948,8 +21953,8 @@ return (this._binds[0].getValue());
 			}
 		},
 		real_class: "input.Radio",
-		extends: "InputAbstract",
-		class: "Lava.WidgetConfigExtensionGateway",
+		"extends": "InputAbstract",
+		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Default",
 		is_extended: false
 	},
@@ -21957,9 +21962,9 @@ return (this._binds[0].getValue());
 		includes: {
 			input_view: [{
 				type: "view",
-				class: "View",
+				"class": "View",
 				container: {
-					class: "Element",
+					"class": "Element",
 					tag_name: "input",
 					events: {
 						click: [{
@@ -22060,8 +22065,8 @@ return (this._binds[0].getValue());
 			}
 		},
 		real_class: "input.Submit",
-		extends: "InputAbstract",
-		class: "Lava.WidgetConfigExtensionGateway",
+		"extends": "InputAbstract",
+		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Default",
 		is_extended: false
 	},
@@ -22069,9 +22074,9 @@ return (this._binds[0].getValue());
 		includes: {
 			input_view: [{
 				type: "view",
-				class: "View",
+				"class": "View",
 				container: {
-					class: "Element",
+					"class": "Element",
 					tag_name: "button",
 					events: {
 						click: [{
@@ -22183,8 +22188,8 @@ return (this._binds[0].getValue());
 			}
 		},
 		real_class: "input.Submit",
-		extends: "InputAbstract",
-		class: "Lava.WidgetConfigExtensionGateway",
+		"extends": "InputAbstract",
+		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Default",
 		is_extended: false
 	},
@@ -22192,9 +22197,9 @@ return (this._binds[0].getValue());
 		includes: {
 			input_view: [{
 				type: "view",
-				class: "View",
+				"class": "View",
 				container: {
-					class: "Element",
+					"class": "Element",
 					tag_name: "select",
 					events: {
 						change: [{
@@ -22219,7 +22224,7 @@ return (this._binds[0].getValue());
 					"\r\n\t\t\t",
 					{
 						type: "view",
-						class: "Foreach",
+						"class": "Foreach",
 						argument: {
 							evaluator: function() {
 return (this._binds[0].getValue());
@@ -22246,7 +22251,7 @@ return (this._binds[0].getValue());
 							"\r\n\t\t\t\t",
 							{
 								type: "view",
-								class: "If",
+								"class": "If",
 								argument: {
 									evaluator: function() {
 return (this._binds[0].getValue());
@@ -22271,9 +22276,9 @@ return (this._binds[0].getValue());
 									"\r\n\t\t\t\t\t",
 									{
 										type: "view",
-										class: "View",
+										"class": "View",
 										container: {
-											class: "Element",
+											"class": "Element",
 											tag_name: "optgroup",
 											property_bindings: {
 												label: {
@@ -22346,7 +22351,7 @@ return (this._binds[0].getValue());
 			}],
 			group_options: [{
 				type: "view",
-				class: "Foreach",
+				"class": "Foreach",
 				argument: {
 					evaluator: function() {
 return (this._binds[0].getValue());
@@ -22372,7 +22377,7 @@ return (this._binds[0].getValue());
 					"\r\n\t\t\t",
 					{
 						type: "view",
-						class: "Expression",
+						"class": "Expression",
 						argument: {
 							evaluator: function() {
 return (this._binds[0].getValue());
@@ -22394,7 +22399,7 @@ return (this._binds[0].getValue());
 							active_modifiers: []
 						},
 						container: {
-							class: "Element",
+							"class": "Element",
 							tag_name: "option",
 							property_bindings: {
 								value: {
@@ -22468,36 +22473,36 @@ return (this._binds[0].getValue());
 				]
 			}]
 		},
-		extends: "InputAbstract",
-		class: "Lava.WidgetConfigExtensionGateway",
+		"extends": "InputAbstract",
+		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Default",
 		is_extended: false
 	},
 	Select: {
 		real_class: "input.Select",
-		extends: "SelectAbstract",
-		class: "Lava.WidgetConfigExtensionGateway",
+		"extends": "SelectAbstract",
+		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Default",
 		is_extended: false
 	},
 	MultipleSelect: {
 		real_class: "input.MultipleSelect",
-		extends: "SelectAbstract",
-		class: "Lava.WidgetConfigExtensionGateway",
+		"extends": "SelectAbstract",
+		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Default",
 		is_extended: false
 	},
 	Collapsible: {
 		type: "widget",
-		class: "Lava.widget.Collapsible",
+		"class": "Lava.widget.Collapsible",
 		extender_type: "Default",
 		template: [
 			"\r\n\t\t",
 			{
 				type: "view",
-				class: "View",
+				"class": "View",
 				container: {
-					class: "Element",
+					"class": "Element",
 					tag_name: "div",
 					resource_id: {
 						locator_type: "Name",
@@ -22524,7 +22529,7 @@ return (this._binds[0].getValue());
 			"\r\n\t"
 		],
 		options: {
-			animation: {class: "Collapse"}
+			animation: {"class": "Collapse"}
 		},
 		sugar: {
 			tag_name: "collapsible",
@@ -22544,7 +22549,7 @@ return (this._binds[0].getValue());
 			}
 		},
 		resources: {
-			default: {
+			"default": {
 				COLLAPSIBLE_CONTAINER: {
 					type: "container_stack",
 					value: [{
@@ -22570,7 +22575,7 @@ return (this._binds[0].getValue());
 	},
 	CollapsiblePanel: {
 		type: "widget",
-		class: "Lava.widget.CollapsiblePanel",
+		"class": "Lava.widget.CollapsiblePanel",
 		extender_type: "Default",
 		template: [
 			"\r\n\t\t\t",
@@ -22590,7 +22595,7 @@ return (this._binds[0].getValue());
 			"\r\n\t\t"
 		],
 		container: {
-			class: "Element",
+			"class": "Element",
 			tag_name: "div",
 			resource_id: {
 				locator_type: "Name",
@@ -22603,9 +22608,9 @@ return (this._binds[0].getValue());
 				"\r\n\t\t",
 				{
 					type: "view",
-					class: "View",
+					"class": "View",
 					container: {
-						class: "Element",
+						"class": "Element",
 						tag_name: "div",
 						events: {
 							click: [{
@@ -22637,9 +22642,9 @@ return (this._binds[0].getValue());
 				"\r\n\t\t",
 				{
 					type: "view",
-					class: "View",
+					"class": "View",
 					container: {
-						class: "Element",
+						"class": "Element",
 						tag_name: "div"
 					},
 					roles: [{
@@ -22687,7 +22692,7 @@ return (this._binds[0].getValue());
 				"\r\n\t\t",
 				{
 					type: "view",
-					class: "Expression",
+					"class": "Expression",
 					argument: {
 						evaluator: function() {
 return (this._binds[0].getValue());
@@ -22716,7 +22721,7 @@ return (this._binds[0].getValue());
 				"\r\n\t\t",
 				{
 					type: "view",
-					class: "Expression",
+					"class": "Expression",
 					argument: {
 						evaluator: function() {
 return (this._binds[0].getValue());
@@ -22774,7 +22779,7 @@ return (this._binds[0].getValue());
 			}
 		},
 		resources: {
-			default: {
+			"default": {
 				COLLAPSIBLE_PANEL_CONTAINER: {
 					type: "container_stack",
 					value: [{
@@ -22805,10 +22810,10 @@ return (this._binds[0].getValue());
 			}
 		},
 		real_class: "CollapsiblePanel",
-		extends: "Collapsible",
+		"extends": "Collapsible",
 		is_extended: true,
 		options: {
-			animation: {class: "Collapse"}
+			animation: {"class": "Collapse"}
 		},
 		resources_cache: {
 			en: {
@@ -22855,7 +22860,7 @@ return (this._binds[0].getValue());
 				"\r\n\t\t",
 				{
 					type: "view",
-					class: "If",
+					"class": "If",
 					argument: {
 						evaluator: function() {
 return (this._binds[0].getValue());
@@ -22878,7 +22883,7 @@ return (this._binds[0].getValue());
 						active_modifiers: []
 					},
 					container: {
-						class: "Emulated",
+						"class": "Emulated",
 						options: {placement: "after-previous"}
 					},
 					roles: [{
@@ -22886,14 +22891,14 @@ return (this._binds[0].getValue());
 						locator: "collapsible_panel",
 						name: "_content_if"
 					}],
-					refresher: {class: "Collapse"},
+					refresher: {"class": "Collapse"},
 					template: [
 						"\r\n\t\t\r\n\t\t\r\n\t\t\r\n\t\t",
 						{
 							type: "view",
-							class: "View",
+							"class": "View",
 							container: {
-								class: "Element",
+								"class": "Element",
 								tag_name: "div"
 							},
 							template: [
@@ -22928,7 +22933,7 @@ return (this._binds[0].getValue());
 		},
 		sugar: {tag_name: "collapsible-panel-ext"},
 		resources: {
-			default: {
+			"default": {
 				COLLAPSIBLE_PANEL_EXT_BODY_CONTAINER: {
 					type: "container_stack",
 					value: [{
@@ -22939,14 +22944,14 @@ return (this._binds[0].getValue());
 			}
 		},
 		real_class: "CollapsiblePanelExt",
-		extends: "CollapsiblePanel",
-		class: "Lava.WidgetConfigExtensionGateway",
+		"extends": "CollapsiblePanel",
+		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Default",
 		is_extended: false
 	},
 	Accordion: {
 		type: "widget",
-		class: "Lava.WidgetConfigExtensionGateway",
+		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Default",
 		template: [
 			"\r\n\t\t",
@@ -22963,7 +22968,7 @@ return (this._binds[0].getValue());
 				"\r\n\t\t",
 				{
 					type: "view",
-					class: "Foreach",
+					"class": "Foreach",
 					argument: {
 						evaluator: function() {
 return (this._binds[0].getValue());
@@ -22987,16 +22992,16 @@ return (this._binds[0].getValue());
 					},
 					as: "panel",
 					refresher: {
-						class: "Default",
+						"class": "Default",
 						insertion_strategy: "sequential_elements"
 					},
 					template: [
 						"\r\n\t\t\t\t\r\n\t\t\t\t",
 						{
 							type: "widget",
-							class: "Lava.WidgetConfigExtensionGateway",
+							"class": "Lava.WidgetConfigExtensionGateway",
 							extender_type: "Default",
-							extends: "CollapsiblePanel",
+							"extends": "CollapsiblePanel",
 							assigns: {
 								is_expanded: {
 									evaluator: function() {
@@ -23075,7 +23080,7 @@ return (this._binds[0].getValue());
 						"\r\n\t\t\t"
 					],
 					container: {
-						class: "Element",
+						"class": "Element",
 						tag_name: "div",
 						resource_id: {
 							locator_type: "Name",
@@ -23119,7 +23124,7 @@ return (this._binds[0].getValue());
 			}
 		},
 		resources: {
-			default: {
+			"default": {
 				ACCORDION_CONTAINER: {
 					type: "container_stack",
 					value: [{
@@ -23146,13 +23151,13 @@ return (this._binds[0].getValue());
 	},
 	Tabs: {
 		type: "widget",
-		class: "Lava.WidgetConfigExtensionGateway",
+		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Default",
 		template: [
 			"\r\n\t\t",
 			{
 				type: "view",
-				class: "Foreach",
+				"class": "Foreach",
 				argument: {
 					evaluator: function() {
 return (this._binds[0].getValue());
@@ -23179,7 +23184,7 @@ return (this._binds[0].getValue());
 					"\r\n\t\t\t\t",
 					{
 						type: "view",
-						class: "If",
+						"class": "If",
 						argument: {
 							evaluator: function() {
 return (! this._binds[0].getValue());
@@ -23204,9 +23209,9 @@ return (! this._binds[0].getValue());
 							"\r\n\t\t\t\t\t",
 							{
 								type: "view",
-								class: "View",
+								"class": "View",
 								container: {
-									class: "Element",
+									"class": "Element",
 									tag_name: "li",
 									class_bindings: {
 										0: {
@@ -23259,9 +23264,9 @@ return (this._binds[0].getValue() ? '' : 'disabled');
 									"\r\n\t\t\t\t\t\t",
 									{
 										type: "view",
-										class: "View",
+										"class": "View",
 										container: {
-											class: "Element",
+											"class": "Element",
 											tag_name: "a",
 											events: {
 												click: [{
@@ -23327,7 +23332,7 @@ return ('#' + (this._binds[0].getValue() || ''));
 					"\r\n\t\t\t"
 				],
 				container: {
-					class: "Element",
+					"class": "Element",
 					tag_name: "ul",
 					resource_id: {
 						locator_type: "Name",
@@ -23339,7 +23344,7 @@ return ('#' + (this._binds[0].getValue() || ''));
 			"\r\n\t\t",
 			{
 				type: "view",
-				class: "Foreach",
+				"class": "Foreach",
 				argument: {
 					evaluator: function() {
 return (this._binds[0].getValue());
@@ -23363,16 +23368,16 @@ return (this._binds[0].getValue());
 				},
 				as: "tab",
 				refresher: {
-					class: "Default",
+					"class": "Default",
 					insertion_strategy: "sequential_elements"
 				},
 				template: [
 					"\r\n\t\t\t\t\r\n\t\t\t\t",
 					{
 						type: "view",
-						class: "View",
+						"class": "View",
 						container: {
-							class: "Element",
+							"class": "Element",
 							tag_name: "div",
 							static_classes: ["tab-pane"],
 							class_bindings: {
@@ -23426,7 +23431,7 @@ return (this._binds[0].getValue() == this._binds[1].getValue() ? 'active' : '');
 					"\r\n\t\t\t"
 				],
 				container: {
-					class: "Element",
+					"class": "Element",
 					tag_name: "div",
 					resource_id: {
 						locator_type: "Name",
@@ -23469,7 +23474,7 @@ return (this._binds[0].getValue() == this._binds[1].getValue() ? 'active' : '');
 			}
 		},
 		resources: {
-			default: {
+			"default": {
 				TABS_HEADERS_CONTAINER: {
 					type: "container_stack",
 					value: [{
@@ -23494,13 +23499,13 @@ return (this._binds[0].getValue() == this._binds[1].getValue() ? 'active' : '');
 	},
 	Tooltip: {
 		type: "widget",
-		class: "Lava.WidgetConfigExtensionGateway",
+		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Default",
 		template: [
 			"\r\n\t\t\t",
 			{
 				type: "view",
-				class: "Expression",
+				"class": "Expression",
 				argument: {
 					evaluator: function() {
 return (this._binds[0].getValue());
@@ -23523,7 +23528,7 @@ return (this._binds[0].getValue());
 					active_modifiers: []
 				},
 				container: {
-					class: "Element",
+					"class": "Element",
 					tag_name: "div",
 					static_classes: ["tooltip-inner"]
 				}
@@ -23531,7 +23536,7 @@ return (this._binds[0].getValue());
 			"\r\n\t\t\t<div class=\"tooltip-arrow\"></div>\r\n\t\t"
 		],
 		container: {
-			class: "Element",
+			"class": "Element",
 			tag_name: "div",
 			static_classes: ["tooltip"],
 			style_bindings: {
@@ -23622,19 +23627,19 @@ return (this._binds[0].getValue() ? 'in' : 'hidden');
 	DropDown: {
 		options: {target_class: "open"},
 		real_class: "DropDown",
-		class: "Lava.WidgetConfigExtensionGateway",
+		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Default",
 		is_extended: false
 	},
 	Tree: {
 		type: "widget",
-		class: "Lava.WidgetConfigExtensionGateway",
+		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Default",
 		template: [
 			"\r\n\t\t\t\r\n\t\t\t\r\n\t\t\t",
 			{
 				type: "view",
-				class: "Foreach",
+				"class": "Foreach",
 				argument: {
 					evaluator: function() {
 return (this._binds[0].getValue());
@@ -23656,7 +23661,7 @@ return (this._binds[0].getValue());
 					modifiers: [],
 					active_modifiers: []
 				},
-				container: {class: "Morph"},
+				container: {"class": "Morph"},
 				as: "node",
 				template: [
 					"\r\n\t\t\t\t",
@@ -23672,7 +23677,7 @@ return (this._binds[0].getValue());
 			"\r\n\t\t"
 		],
 		container: {
-			class: "Element",
+			"class": "Element",
 			tag_name: "div",
 			resource_id: {
 				locator_type: "Name",
@@ -23738,9 +23743,9 @@ return (0);
 				"\r\n\t\t",
 				{
 					type: "view",
-					class: "View",
+					"class": "View",
 					container: {
-						class: "Element",
+						"class": "Element",
 						tag_name: "div",
 						static_classes: ["lava-tree-node"],
 						static_properties: {unselectable: "on"},
@@ -23768,7 +23773,7 @@ return ('level-' + this._binds[0].getValue());
 						"\r\n\t\t\t",
 						{
 							type: "view",
-							class: "Expression",
+							"class": "Expression",
 							argument: {
 								evaluator: function() {
 return (this._binds[0].getValue());
@@ -23791,9 +23796,9 @@ return (this._binds[0].getValue());
 						},
 						{
 							type: "view",
-							class: "View",
+							"class": "View",
 							container: {
-								class: "Element",
+								"class": "Element",
 								tag_name: "i",
 								static_classes: ["lava-tree-expander"],
 								events: {
@@ -23860,9 +23865,9 @@ return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() -
 						},
 						{
 							type: "view",
-							class: "View",
+							"class": "View",
 							container: {
-								class: "Element",
+								"class": "Element",
 								tag_name: "i",
 								static_classes: ["lava-tree-icon"],
 								class_bindings: {
@@ -23905,7 +23910,7 @@ return ('icon-' + this._binds[0].getValue());
 				"\r\n\t\t",
 				{
 					type: "view",
-					class: "If",
+					"class": "If",
 					argument: {
 						evaluator: function() {
 return (this._binds[0].getValue() && this._binds[1].getValue());
@@ -23944,10 +23949,10 @@ return (this._binds[0].getValue() && this._binds[1].getValue());
 						active_modifiers: []
 					},
 					container: {
-						class: "Emulated",
+						"class": "Emulated",
 						options: {placement: "after-previous"}
 					},
-					refresher: {class: "Collapse"},
+					refresher: {"class": "Collapse"},
 					assigns: {
 						pad: {
 							evaluator: function() {
@@ -23997,7 +24002,7 @@ return (this._binds[0].getValue() + 1);
 						"\r\n\t\t\t\r\n\t\t\t\r\n\t\t\t\r\n\t\t\t\r\n\t\t\t",
 						{
 							type: "view",
-							class: "Foreach",
+							"class": "Foreach",
 							argument: {
 								evaluator: function() {
 return (this._binds[0].getValue());
@@ -24030,7 +24035,7 @@ return (this._binds[0].getValue());
 								"\r\n\t\t\t\t"
 							],
 							container: {
-								class: "Element",
+								"class": "Element",
 								tag_name: "div",
 								static_classes: ["lava-tree-container"]
 							}
@@ -24044,7 +24049,7 @@ return (this._binds[0].getValue());
 				"\r\n\t\t",
 				{
 					type: "view",
-					class: "Expression",
+					"class": "Expression",
 					argument: {
 						evaluator: function() {
 return (this._binds[0].getValue());
@@ -24066,7 +24071,7 @@ return (this._binds[0].getValue());
 						active_modifiers: []
 					},
 					container: {
-						class: "Element",
+						"class": "Element",
 						tag_name: "span",
 						static_classes: ["lava-tree-text"],
 						events: {
@@ -24086,7 +24091,7 @@ return (this._binds[0].getValue());
 			]
 		},
 		resources: {
-			default: {
+			"default": {
 				MAIN_TREE_CONTAINER: {
 					type: "container_stack",
 					value: [{
@@ -24104,7 +24109,7 @@ return (this._binds[0].getValue());
 	},
 	Table: {
 		type: "widget",
-		class: "Lava.WidgetConfigExtensionGateway",
+		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Default",
 		template: [
 			"\r\n\t\t\t",
@@ -24124,7 +24129,7 @@ return (this._binds[0].getValue());
 			"\r\n\t\t"
 		],
 		container: {
-			class: "Element",
+			"class": "Element",
 			tag_name: "table",
 			resource_id: {
 				locator_type: "Name",
@@ -24137,9 +24142,9 @@ return (this._binds[0].getValue());
 				"\r\n\t\t",
 				{
 					type: "view",
-					class: "View",
+					"class": "View",
 					container: {
-						class: "Element",
+						"class": "Element",
 						tag_name: "thead",
 						resource_id: {
 							locator_type: "Name",
@@ -24151,7 +24156,7 @@ return (this._binds[0].getValue());
 						"\r\n\t\t\t",
 						{
 							type: "view",
-							class: "Foreach",
+							"class": "Foreach",
 							argument: {
 								evaluator: function() {
 return (this._binds[0].getValue());
@@ -24178,9 +24183,9 @@ return (this._binds[0].getValue());
 								"\r\n\t\t\t\t\t",
 								{
 									type: "view",
-									class: "View",
+									"class": "View",
 									container: {
-										class: "Element",
+										"class": "Element",
 										tag_name: "td",
 										events: {
 											click: [{
@@ -24198,7 +24203,7 @@ return (this._binds[0].getValue());
 										"\r\n\t\t\t\t\t\t",
 										{
 											type: "view",
-											class: "Expression",
+											"class": "Expression",
 											argument: {
 												evaluator: function() {
 return (this._binds[0].getValue());
@@ -24220,7 +24225,7 @@ return (this._binds[0].getValue());
 												active_modifiers: []
 											},
 											container: {
-												class: "Element",
+												"class": "Element",
 												tag_name: "span",
 												class_bindings: {
 													0: {
@@ -24260,7 +24265,7 @@ return (this._binds[0].getValue() == this._binds[1].getValue() ? ('lava-column-s
 								"\r\n\t\t\t\t"
 							],
 							container: {
-								class: "Element",
+								"class": "Element",
 								tag_name: "tr"
 							}
 						},
@@ -24273,7 +24278,7 @@ return (this._binds[0].getValue() == this._binds[1].getValue() ? ('lava-column-s
 				"\r\n\t\t",
 				{
 					type: "view",
-					class: "Foreach",
+					"class": "Foreach",
 					argument: {
 						evaluator: function() {
 return (this._binds[0].getValue());
@@ -24300,7 +24305,7 @@ return (this._binds[0].getValue());
 						"\r\n\t\t\t\t",
 						{
 							type: "view",
-							class: "Foreach",
+							"class": "Foreach",
 							argument: {
 								evaluator: function() {
 return (this._binds[0].getValue());
@@ -24327,9 +24332,9 @@ return (this._binds[0].getValue());
 								"\r\n\t\t\t\t\t\t",
 								{
 									type: "view",
-									class: "View",
+									"class": "View",
 									container: {
-										class: "Element",
+										"class": "Element",
 										tag_name: "td"
 									},
 									template: [
@@ -24350,14 +24355,14 @@ return (this._binds[0].getValue());
 								"\r\n\t\t\t\t\t"
 							],
 							container: {
-								class: "Element",
+								"class": "Element",
 								tag_name: "tr"
 							}
 						},
 						"\r\n\t\t\t"
 					],
 					container: {
-						class: "Element",
+						"class": "Element",
 						tag_name: "tbody",
 						resource_id: {
 							locator_type: "Name",
@@ -24382,7 +24387,7 @@ return (this._binds[0].getValue());
 						"\r\n\t\t\t\t",
 						{
 							type: "view",
-							class: "Expression",
+							"class": "Expression",
 							argument: {
 								evaluator: function() {
 return (this._binds[0].getValue());
@@ -24413,7 +24418,7 @@ return (this._binds[0].getValue());
 						"\r\n\t\t\t\t",
 						{
 							type: "view",
-							class: "Expression",
+							"class": "Expression",
 							argument: {
 								evaluator: function() {
 return (this._callGlobalModifier("translateBoolean", [!! this._binds[0].getValue()]));
@@ -24444,7 +24449,7 @@ return (this._callGlobalModifier("translateBoolean", [!! this._binds[0].getValue
 			}
 		},
 		resources: {
-			default: {
+			"default": {
 				TABLE_ELEMENT: {
 					type: "container_stack",
 					value: [{
@@ -24462,13 +24467,13 @@ return (this._callGlobalModifier("translateBoolean", [!! this._binds[0].getValue
 	},
 	Calendar: {
 		type: "widget",
-		class: "Lava.WidgetConfigExtensionGateway",
+		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Default",
 		template: [
 			"\r\n\t\t\t",
 			{
 				type: "view",
-				class: "If",
+				"class": "If",
 				argument: {
 					evaluator: function() {
 return (this._binds[0].getValue() == 'days');
@@ -24514,7 +24519,7 @@ return (this._binds[0].getValue() == 'days');
 			"\r\n\t\t"
 		],
 		container: {
-			class: "Element",
+			"class": "Element",
 			tag_name: "div",
 			static_classes: ["lava-calendar"]
 		},
@@ -24523,9 +24528,9 @@ return (this._binds[0].getValue() == 'days');
 				"\r\n\t\t<div class=\"lava-calendar-header\">\r\n\t\t\t",
 				{
 					type: "view",
-					class: "View",
+					"class": "View",
 					container: {
-						class: "Element",
+						"class": "Element",
 						tag_name: "a",
 						static_classes: ["lava-calendar-left-arrow"],
 						static_properties: {href: "#"},
@@ -24542,7 +24547,7 @@ return (this._binds[0].getValue() == 'days');
 				"\r\n\t\t\t",
 				{
 					type: "view",
-					class: "Expression",
+					"class": "Expression",
 					argument: {
 						evaluator: function() {
 return (this._binds[0].getValue());
@@ -24565,7 +24570,7 @@ return (this._binds[0].getValue());
 						active_modifiers: []
 					},
 					container: {
-						class: "Element",
+						"class": "Element",
 						tag_name: "a",
 						static_classes: ["lava-calendar-days-view-month-name"],
 						static_properties: {href: "#"},
@@ -24581,9 +24586,9 @@ return (this._binds[0].getValue());
 				"\r\n\t\t\t",
 				{
 					type: "view",
-					class: "View",
+					"class": "View",
 					container: {
-						class: "Element",
+						"class": "Element",
 						tag_name: "a",
 						static_classes: ["lava-calendar-right-arrow"],
 						static_properties: {href: "#"},
@@ -24607,7 +24612,7 @@ return (this._binds[0].getValue());
 				"\r\n\t\t</div>\r\n\t\t<div class=\"lava-calendar-footer\">\r\n\t\t\t",
 				{
 					type: "view",
-					class: "Expression",
+					"class": "Expression",
 					argument: {
 						evaluator: function() {
 return (this._binds[0].getValue());
@@ -24630,7 +24635,7 @@ return (this._binds[0].getValue());
 						active_modifiers: []
 					},
 					container: {
-						class: "Element",
+						"class": "Element",
 						tag_name: "a",
 						static_classes: ["lava-calendar-today-link"],
 						static_properties: {href: "#"},
@@ -24649,9 +24654,9 @@ return (this._binds[0].getValue());
 				"\r\n\t\t<div class=\"lava-calendar-header\">\r\n\t\t\t",
 				{
 					type: "view",
-					class: "View",
+					"class": "View",
 					container: {
-						class: "Element",
+						"class": "Element",
 						tag_name: "a",
 						static_classes: ["lava-calendar-left-arrow"],
 						static_properties: {href: "#"},
@@ -24672,7 +24677,7 @@ return (this._binds[0].getValue());
 						locator: "calendar",
 						name: "_year_input"
 					}],
-					extends: "TextInput",
+					"extends": "TextInput",
 					assigns: {
 						value: {
 							evaluator: function() {
@@ -24696,7 +24701,7 @@ return (this._binds[0].getValue() + '');
 							active_modifiers: []
 						}
 					},
-					class: "Lava.WidgetConfigExtensionGateway",
+					"class": "Lava.WidgetConfigExtensionGateway",
 					extender_type: "Default",
 					resource_id: {
 						locator_type: "Name",
@@ -24708,9 +24713,9 @@ return (this._binds[0].getValue() + '');
 				"\r\n\t\t\t",
 				{
 					type: "view",
-					class: "View",
+					"class": "View",
 					container: {
-						class: "Element",
+						"class": "Element",
 						tag_name: "a",
 						static_classes: ["lava-calendar-right-arrow"],
 						static_properties: {href: "#"},
@@ -24737,7 +24742,7 @@ return (this._binds[0].getValue() + '');
 				"\r\n\t\t",
 				{
 					type: "view",
-					class: "Foreach",
+					"class": "Foreach",
 					argument: {
 						evaluator: function() {
 return (this._binds[0].getValue());
@@ -24764,7 +24769,7 @@ return (this._binds[0].getValue());
 						"\r\n\t\t\t<table class=\"lava-calendar-month\" cellspacing=\"0\" cellpadding=\"0\">\r\n\t\t\t\t<thead>\r\n\t\t\t\t\t<tr>\r\n\t\t\t\t\t\t",
 						{
 							type: "view",
-							class: "Foreach",
+							"class": "Foreach",
 							argument: {
 								evaluator: function() {
 return (this._binds[0].getValue());
@@ -24791,7 +24796,7 @@ return (this._binds[0].getValue());
 								"\r\n\t\t\t\t\t\t\t<td>",
 								{
 									type: "view",
-									class: "Expression",
+									"class": "Expression",
 									argument: {
 										evaluator: function() {
 return (this._binds[0].getValue());
@@ -24819,7 +24824,7 @@ return (this._binds[0].getValue());
 						"\r\n\t\t\t\t\t</tr>\r\n\t\t\t\t</thead>\r\n\t\t\t\t<tbody>\r\n\t\t\t\t\t",
 						{
 							type: "view",
-							class: "Foreach",
+							"class": "Foreach",
 							argument: {
 								evaluator: function() {
 return (this._binds[0].getValue());
@@ -24845,7 +24850,7 @@ return (this._binds[0].getValue());
 								"\r\n\t\t\t\t\t\t<tr>\r\n\t\t\t\t\t\t\t",
 								{
 									type: "view",
-									class: "Foreach",
+									"class": "Foreach",
 									argument: {
 										evaluator: function() {
 return (this._binds[0].getValue());
@@ -24887,9 +24892,9 @@ return (this._binds[0].getValue());
 				"\r\n\t\t",
 				{
 					type: "view",
-					class: "View",
+					"class": "View",
 					container: {
-						class: "Element",
+						"class": "Element",
 						tag_name: "td",
 						events: {
 							mousedown: [{
@@ -24991,7 +24996,7 @@ return ((this._binds[0].getValue() >= this._binds[1].getValue() && this._binds[2
 						"\r\n\t\t\t",
 						{
 							type: "view",
-							class: "Expression",
+							"class": "Expression",
 							argument: {
 								evaluator: function() {
 return (this._binds[0].getValue());
@@ -25022,7 +25027,7 @@ return (this._binds[0].getValue());
 				"\r\n\t\t<table class=\"lava-calendar-month-names\">\r\n\t\t\t<tbody>\r\n\t\t\t\t",
 				{
 					type: "view",
-					class: "Foreach",
+					"class": "Foreach",
 					argument: {
 						evaluator: function() {
 return (this._binds[0].getValue());
@@ -25049,7 +25054,7 @@ return (this._binds[0].getValue());
 						"\r\n\t\t\t\t\t<tr>\r\n\t\t\t\t\t\t",
 						{
 							type: "view",
-							class: "Foreach",
+							"class": "Foreach",
 							argument: {
 								evaluator: function() {
 return (this._binds[0].getValue());
@@ -25072,7 +25077,7 @@ return (this._binds[0].getValue());
 								"\r\n\t\t\t\t\t\t\t",
 								{
 									type: "view",
-									class: "Expression",
+									"class": "Expression",
 									argument: {
 										evaluator: function() {
 return (this._binds[0].getValue());
@@ -25094,7 +25099,7 @@ return (this._binds[0].getValue());
 										active_modifiers: []
 									},
 									container: {
-										class: "Element",
+										"class": "Element",
 										tag_name: "td",
 										events: {
 											click: [{
@@ -25155,7 +25160,7 @@ return (this._binds[0].getValue() == this._binds[1].getValue() ? 'lava-calendar-
 			]
 		},
 		resources: {
-			default: {
+			"default": {
 				year_input: {
 					type: "component",
 					value: {

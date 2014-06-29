@@ -16,7 +16,7 @@ function _cField() {
 	 */
 	//this.depends = [];
 
-	this.default = '';
+	this['default'] = '';
 
 	this.is_nullable = false;
 
