@@ -390,7 +390,7 @@ parse: function parse(input) {
     if (typeof this.yy.parseError === 'function') {
         this.parseError = this.yy.parseError;
     } else {
-        this.parseError = Object.getPrototypeOf(this).parseError;
+        this.parseError = (Object.getPrototypeOf ? Object.getPrototypeOf(this) : this.__proto__).parseError;
     }
     function popStack(n) {
         stack.length = stack.length - 2 * n;
@@ -601,9 +601,9 @@ case 8: this.popState(); return 9; // normal
 break;
 case 9: this.popState(); return 10; // escaped 
 break;
-case 10: Lava.t('Spaces between block opening tag and block name are not allowed');
+case 10: Lava.t('Spaces between block opening tag and block name are not allowed'); 
 break;
-case 11: Lava.t('Spaces between block name and opening brace are not allowed');
+case 11: Lava.t('Spaces between block name and opening brace are not allowed'); 
 break;
 case 12: return 20; 
 break;

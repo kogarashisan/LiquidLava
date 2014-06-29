@@ -173,7 +173,7 @@ case 26: this.$ = {label: $$[$0], direction: 'look_down'};
 break;
 case 27: this.$ = $$[$0]; 
 break;
-case 28: Lava.t("Lookup operator is not supported yet.");
+case 28: Lava.t("Lookup operator is not supported yet."); 
 break;
 case 29:
 			$$[$0-1].depth = parseInt($$[$0]);
@@ -181,7 +181,7 @@ case 29:
 			this.$ = $$[$0-1];
 		
 break;
-case 30: Lava.t("Lookup operator is not supported yet.");
+case 30: Lava.t("Lookup operator is not supported yet."); 
 break;
 case 31:
 			yy.x_counters.global_modifiers++;
@@ -274,7 +274,7 @@ parse: function parse(input) {
     if (typeof this.yy.parseError === 'function') {
         this.parseError = this.yy.parseError;
     } else {
-        this.parseError = Object.getPrototypeOf(this).parseError;
+        this.parseError = (Object.getPrototypeOf ? Object.getPrototypeOf(this) : this.__proto__).parseError;
     }
     function popStack(n) {
         stack.length = stack.length - 2 * n;
@@ -448,15 +448,15 @@ performAction: function anonymous(yy,yy_,$avoiding_name_collisions,YY_START
 
 var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {
-case 0: Lava.t('Spaces between function name and opening brace are not allowed (1)');
+case 0: Lava.t('Spaces between function name and opening brace are not allowed (1)'); 
 break;
-case 1: Lava.t('Spaces between function name and opening brace are not allowed (1)');
+case 1: Lava.t('Spaces between function name and opening brace are not allowed (1)'); 
 break;
-case 2: Lava.t('Spaces between function name and opening brace are not allowed (2)');
+case 2: Lava.t('Spaces between function name and opening brace are not allowed (2)'); 
 break;
-case 3: Lava.t('Spaces in scope path are not allowed (1)');
+case 3: Lava.t('Spaces in scope path are not allowed (1)'); 
 break;
-case 4: Lava.t('Spaces in scope path are not allowed (2)');
+case 4: Lava.t('Spaces in scope path are not allowed (2)'); 
 break;
 case 5: yy_.yytext = yy_.yytext.slice(1); return 24; 
 break;

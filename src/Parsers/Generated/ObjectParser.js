@@ -109,7 +109,7 @@ parse: function parse(input) {
     if (typeof this.yy.parseError === 'function') {
         this.parseError = this.yy.parseError;
     } else {
-        this.parseError = Object.getPrototypeOf(this).parseError;
+        this.parseError = (Object.getPrototypeOf ? Object.getPrototypeOf(this) : this.__proto__).parseError;
     }
     function popStack(n) {
         stack.length = stack.length - 2 * n;

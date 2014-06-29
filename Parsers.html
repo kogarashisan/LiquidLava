@@ -44,7 +44,15 @@
 		// yes, it's not perfect, but it's enough.
 		result = generator.generate().replace('var parser = ', dest_path + " = ");
 		cut_index = result.lastIndexOf("if (typeof require !== 'undefined' && typeof exports !== 'undefined') {");
-		return result.substr(0, cut_index);
+		result =  result.substr(0, cut_index);
+
+		// old Opera
+		result = result.replace(
+			'this.parseError = Object.getPrototypeOf(this).parseError;',
+			'this.parseError = (Object.getPrototypeOf ? Object.getPrototypeOf(this) : this.__proto__).parseError;'
+		);
+
+		return result;
 
 	}
 
