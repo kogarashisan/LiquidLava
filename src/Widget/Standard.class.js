@@ -51,11 +51,11 @@ Lava.define(
 
 		var name;
 
-		if (Lava.schema.DEBUG && !config.is_extended) Lava.throw("Widget was created with partial (unextended) config");
+		if (Lava.schema.DEBUG && !config.is_extended) Lava.t("Widget was created with partial (unextended) config");
 
 		if (Lava.schema.DEBUG) {
 			for (name in this._property_descriptors) {
-				if (!(name in this._properties)) Lava.throw("All widget properties must have a default value");
+				if (!(name in this._properties)) Lava.t("All widget properties must have a default value");
 			}
 		}
 
@@ -115,12 +115,12 @@ Lava.define(
 
 			resource_owner = this['locateViewBy' + config.resource_id.locator_type](config.resource_id.locator);
 			if (Lava.schema.DEBUG && (!resource_owner || !resource_owner.isWidget))
-				Lava.throw("Resource root not found: " + config.resource_id.locator_type + '=' + config.resource_id.locator);
+				Lava.t("Resource root not found: " + config.resource_id.locator_type + '=' + config.resource_id.locator);
 			component_resource = resource_owner.getResource(config.resource_id.name, Lava.schema.LOCALE);
 
 			if (component_resource) {
 
-				if (Lava.schema.DEBUG && component_resource.type != 'component') Lava.throw("resource value is not a component");
+				if (Lava.schema.DEBUG && component_resource.type != 'component') Lava.t("resource value is not a component");
 
 				resources = resources
 					? Lava.resources.mergeResources(component_resource.value, resources, true)
@@ -208,9 +208,9 @@ Lava.define(
 
 	inject: function(element, position) {
 
-		if (this._is_inDOM) Lava.throw("inject: widget is already in DOM");
-		if (Lava.schema.DEBUG && this._parent_view) Lava.throw("Widget: only top-level widgets can be inserted into DOM");
-		if (Lava.schema.DEBUG && !this._container) Lava.throw("Widget: root widgets must have a container");
+		if (this._is_inDOM) Lava.t("inject: widget is already in DOM");
+		if (Lava.schema.DEBUG && this._parent_view) Lava.t("Widget: only top-level widgets can be inserted into DOM");
+		if (Lava.schema.DEBUG && !this._container) Lava.t("Widget: root widgets must have a container");
 
 		var html = this.render();
 
@@ -228,10 +228,10 @@ Lava.define(
 	 */
 	injectIntoExistingElement: function(element) {
 
-		if (this._is_inDOM) Lava.throw("inject: widget is already in DOM");
-		if (Lava.schema.DEBUG && this._parent_view) Lava.throw("Widget: only top-level widgets can be inserted into DOM");
-		if (Lava.schema.DEBUG && !this._container) Lava.throw("Widget: root widgets must have a container");
-		if (Lava.schema.DEBUG && !this._container.isElementContainer) Lava.throw("injectIntoExistingElement expects an element containers");
+		if (this._is_inDOM) Lava.t("inject: widget is already in DOM");
+		if (Lava.schema.DEBUG && this._parent_view) Lava.t("Widget: only top-level widgets can be inserted into DOM");
+		if (Lava.schema.DEBUG && !this._container) Lava.t("Widget: root widgets must have a container");
+		if (Lava.schema.DEBUG && !this._container.isElementContainer) Lava.t("injectIntoExistingElement expects an element containers");
 
 		this._container.captureExistingElement(element);
 		this._container.setHTML(this._renderContents());
@@ -297,8 +297,8 @@ Lava.define(
 
 	remove: function() {
 
-		if (!this._is_inDOM) Lava.throw("remove: widget is not in DOM");
-		if (Lava.schema.DEBUG && !this._container) Lava.throw("remove: widget doesn't have a container");
+		if (!this._is_inDOM) Lava.t("remove: widget is not in DOM");
+		if (Lava.schema.DEBUG && !this._container) Lava.t("remove: widget doesn't have a container");
 
 		this._releaseAllEvents();
 		if (!this._is_sleeping) this._sleep();
@@ -325,7 +325,7 @@ Lava.define(
 	 */
 	callModifier: function(name, arguments_array) {
 
-		if (Lava.schema.DEBUG && !(name in this._modifiers)) Lava.throw("Unknown widget modifier: " + name);
+		if (Lava.schema.DEBUG && !(name in this._modifiers)) Lava.t("Unknown widget modifier: " + name);
 
 		return this[this._modifiers[name]].apply(this, arguments_array);
 
@@ -338,7 +338,7 @@ Lava.define(
 	 */
 	callActiveModifier: function(name, arguments_array) {
 
-		Lava.throw("Alpha version. This functionality may be removed later.");
+		Lava.t("Alpha version. This functionality may be removed later.");
 
 	},
 
@@ -380,17 +380,17 @@ Lava.define(
 
 			descriptor = this._property_descriptors[name];
 
-			if (Lava.schema.DEBUG && descriptor.is_readonly) Lava.throw("Trying to set readonly property: " + name);
+			if (Lava.schema.DEBUG && descriptor.is_readonly) Lava.t("Trying to set readonly property: " + name);
 
 			if (Lava.schema.widget.VALIDATE_PROPERTY_TYPES) {
 
 				if (value === null) {
 
-					if (!descriptor.is_nullable) Lava.throw("Trying to assign NULL to non-nullable property");
+					if (!descriptor.is_nullable) Lava.t("Trying to assign NULL to non-nullable property");
 
 				} else if (descriptor.type && !Lava.types[descriptor.type].isValidValue(value, descriptor)) {
 
-					Lava.throw("Assigned value does not match the property type: " + descriptor.type);
+					Lava.t("Assigned value does not match the property type: " + descriptor.type);
 
 				}
 
@@ -399,7 +399,7 @@ Lava.define(
 			if (descriptor.setter) {
 
 				// It's forced to make setters private, cause type-checking will not work if setter is called directly.
-				if (Lava.schema.DEBUG && descriptor.setter[0] != '_') Lava.throw("Widget property setters must not be public: " + descriptor.setter);
+				if (Lava.schema.DEBUG && descriptor.setter[0] != '_') Lava.t("Widget property setters must not be public: " + descriptor.setter);
 
 				//try { // additional protection from crash for the scope system
 				//	this[descriptor.setter](name, value);
@@ -494,7 +494,7 @@ Lava.define(
 
 		if (string_descriptor) {
 
-			if (Lava.schema.DEBUG && string_descriptor.type != 'translate') Lava.throw("[translate] resource is not a string: " + resource_name);
+			if (Lava.schema.DEBUG && string_descriptor.type != 'translate') Lava.t("[translate] resource is not a string: " + resource_name);
 
 			if (arguments_list) {
 
@@ -536,9 +536,9 @@ Lava.define(
 
 		if (string_descriptor) {
 
-			if (Lava.schema.DEBUG && string_descriptor.type != 'ntranslate') Lava.throw("[ntranslate] resource is not a string: " + string_name);
+			if (Lava.schema.DEBUG && string_descriptor.type != 'ntranslate') Lava.t("[ntranslate] resource is not a string: " + string_name);
 			pluralform = string_descriptor.value[form_index];
-			if (Lava.schema.DEBUG && pluralform == null) Lava.throw("[ntranslate] requested plural string is missing one of it's plural forms:" + string_name);
+			if (Lava.schema.DEBUG && pluralform == null) Lava.t("[ntranslate] requested plural string is missing one of it's plural forms:" + string_name);
 
 			if (arguments_list) {
 

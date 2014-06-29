@@ -20,7 +20,7 @@ Lava.define(
 
 	_postInit: function() {
 
-		if (Lava.schema.DEBUG && !('argument' in this._config)) Lava.throw("Expression view requires an argument");
+		if (Lava.schema.DEBUG && !('argument' in this._config)) Lava.t("Expression view requires an argument");
 		this._escape = !this._config.escape_off;
 		this._argument = new Lava.scope.Argument(this._config.argument, this, this._widget);
 		this._argument_changed_listener = this._argument.on('changed', this.onValueChanged, this);
@@ -35,7 +35,7 @@ Lava.define(
 
 	_renderContents: function() {
 
-		if (Lava.schema.DEBUG && this._argument.isWaitingRefresh()) Lava.throw();
+		if (Lava.schema.DEBUG && this._argument.isWaitingRefresh()) Lava.t();
 
 		var result = '',
 			new_value = this._argument.getValue();

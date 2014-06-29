@@ -64,7 +64,7 @@ Lava.define(
 	 */
 	scheduleViewRefresh: function(view) {
 
-		if (this._views_refreshing) Lava.throw("Views may not become dirty while they are being refreshed");
+		if (this._views_refreshing) Lava.t("Views may not become dirty while they are being refreshed");
 
 		if (view.depth in this._dirty_views) {
 
@@ -132,9 +132,9 @@ Lava.define(
 
 		if (instance.id) {
 
-			if (instance.id in this._views_by_id) Lava.throw("Duplicate view id: " + instance.id);
+			if (instance.id in this._views_by_id) Lava.t("Duplicate view id: " + instance.id);
 
-			if (Lava.schema.DEBUG && !Lava.isValidId(instance.id)) Lava.throw(); // Element ID is either malformed or conflicts with framework id patterns
+			if (Lava.schema.DEBUG && !Lava.isValidId(instance.id)) Lava.t(); // Element ID is either malformed or conflicts with framework id patterns
 
 			this._views_by_id[instance.id] = instance;
 
@@ -176,7 +176,7 @@ Lava.define(
 
 	_locateWidgetById: function(starting_widget, id) {
 
-		if (Lava.schema.DEBUG && !id) Lava.throw();
+		if (Lava.schema.DEBUG && !id) Lava.t();
 
 		return this._views_by_id[id];
 
@@ -184,7 +184,7 @@ Lava.define(
 
 	_locateWidgetByGuid: function(starting_widget, guid) {
 
-		if (Lava.schema.DEBUG && !guid) Lava.throw();
+		if (Lava.schema.DEBUG && !guid) Lava.t();
 
 		return this._views_by_guid[guid];
 
@@ -192,7 +192,7 @@ Lava.define(
 
 	_locateWidgetByName: function(widget, name) {
 
-		if (Lava.schema.DEBUG && !name) Lava.throw();
+		if (Lava.schema.DEBUG && !name) Lava.t();
 
 		while (widget && widget.name != name) {
 
@@ -206,7 +206,7 @@ Lava.define(
 
 	_locateWidgetByLabel: function(widget, label) {
 
-		if (Lava.schema.DEBUG && !label) Lava.throw();
+		if (Lava.schema.DEBUG && !label) Lava.t();
 
 		// Targets are different from view locators, there must be no hardcoded '@widget' label, like in views
 		// (it may be very harmful. Use widget names instead!)
@@ -410,7 +410,7 @@ Lava.define(
 
 			} else {
 
-				if (target.arguments[i].type != Lava.TARGET_ARGUMENT_TYPES.BIND) Lava.throw();
+				if (target.arguments[i].type != Lava.TARGET_ARGUMENT_TYPES.BIND) Lava.t();
 
 				result.push(view.evalPathConfig(target.arguments[i].data));
 
@@ -436,7 +436,7 @@ Lava.define(
 
 			widget = this['_locateWidgetBy' + config.locator_type](widget, config.locator);
 
-			if (!widget || !widget.isWidget) Lava.throw();
+			if (!widget || !widget.isWidget) Lava.t();
 
 		}
 
@@ -492,7 +492,7 @@ Lava.define(
 
 	_removeTarget: function(storage, name, widget) {
 
-		if (!(name in storage)) Lava.throw("Trying to remove a global event target for nonexistent event");
+		if (!(name in storage)) Lava.t("Trying to remove a global event target for nonexistent event");
 
 		var index = storage[name].indexOf(widget);
 
@@ -712,7 +712,7 @@ Lava.define(
 	lendEvent: function(event_name) {
 
 		if (Lava.schema.DEBUG && ['mouseenter', 'mouseleave', 'mouseover', 'mouseout'].indexOf(event_name) != -1)
-			Lava.throw("The following events: mouseenter, mouseleave, mouseover and mouseout are served by common alias - mouse_events");
+			Lava.t("The following events: mouseenter, mouseleave, mouseover and mouseout are served by common alias - mouse_events");
 
 		if (this._event_usage_counters[event_name]) {
 
@@ -801,7 +801,7 @@ Lava.define(
 			for (i = 0, count = event_targets.length; i < count; i++) {
 
 				target = event_targets[i];
-				if (Lava.schema.DEBUG && !('locator_type' in target)) Lava.throw("dispatchBroadcast: malformed target");
+				if (Lava.schema.DEBUG && !('locator_type' in target)) Lava.t("dispatchBroadcast: malformed target");
 				template_arguments = ('arguments' in target) ? this._evalTargetArguments(widget, target) : null;
 				destination_widget = this['_locateWidgetBy' + target.locator_type](widget, target.locator);
 				destination_widget.registerBroadcastTarget(widget, event_name, target.name, template_arguments);
@@ -814,7 +814,7 @@ Lava.define(
 
 	cancelBubble: function() {
 
-		if (Lava.schema.DEBUG && !this._is_bubble_cancellable) Lava.throw("This event is not cancellable");
+		if (Lava.schema.DEBUG && !this._is_bubble_cancellable) Lava.t("This event is not cancellable");
 
 		if (this._is_bubble_cancellable) {
 			this._cancel_bubble = true;

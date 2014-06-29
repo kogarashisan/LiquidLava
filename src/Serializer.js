@@ -38,7 +38,7 @@ Lava.Serializer = {
 		var type = Firestorm.getType(value),
 			result;
 
-		if (Lava.schema.DEBUG && !(type in this._callback_map)) Lava.throw("Unsupported type for serialization: " + type);
+		if (Lava.schema.DEBUG && !(type in this._callback_map)) Lava.t("Unsupported type for serialization: " + type);
 
 		result = this[this._callback_map[type]](value, padding);
 

@@ -74,14 +74,14 @@ Lava.parsers.Directives = {
 		var directive_name = raw_directive.name,
 			config = this._directives_schema[directive_name];
 
-		if (!config) Lava.throw("Unknown directive: " + directive_name);
+		if (!config) Lava.t("Unknown directive: " + directive_name);
 
 		if (config.view_config_presence) {
-			if (view_config && !config.view_config_presence) Lava.throw('Directive must not be inside view definition: ' + directive_name);
-			if (!view_config && config.view_config_presence) Lava.throw('Directive must be inside view definition: ' + directive_name);
+			if (view_config && !config.view_config_presence) Lava.t('Directive must not be inside view definition: ' + directive_name);
+			if (!view_config && config.view_config_presence) Lava.t('Directive must be inside view definition: ' + directive_name);
 		}
 
-		if (config.is_top_directive && !is_top_directive) Lava.throw("Directive must be at the top of the block content: " + directive_name);
+		if (config.is_top_directive && !is_top_directive) Lava.t("Directive must be at the top of the block content: " + directive_name);
 
 		return this['_x' + directive_name](raw_directive, view_config);
 
@@ -90,7 +90,7 @@ Lava.parsers.Directives = {
 	_store: function(widget_config, storage_name, item_name, value) {
 
 		if (!(storage_name in widget_config)) widget_config[storage_name] = {};
-		if (Lava.schema.DEBUG && (item_name in widget_config[storage_name])) Lava.throw("Duplicate item in '" + storage_name + "': " + item_name);
+		if (Lava.schema.DEBUG && (item_name in widget_config[storage_name])) Lava.t("Duplicate item in '" + storage_name + "': " + item_name);
 		widget_config[storage_name][item_name] = value;
 
 	},
@@ -105,7 +105,7 @@ Lava.parsers.Directives = {
 	 */
 	_widgetRoleMain: function(raw_tag, config_storage, roles_storage) {
 
-		if ('widget_config' in roles_storage) Lava.throw("multiple tags with role=main in widget definition");
+		if ('widget_config' in roles_storage) Lava.t("multiple tags with role=main in widget definition");
 
 		var view_config,
 			name,
@@ -118,9 +118,9 @@ Lava.parsers.Directives = {
 		} else if (raw_tag.name == 'view') {
 
 			view_config = Lava.parsers.Common.compileAsView(raw_tag.content);
-			if (view_config.class != 'View') Lava.throw("define: view in 'main' role must be pure View, not subclass");
-			if ('argument' in view_config) Lava.throw("Widgets do not support arguments");
-			if ('roles' in view_config) Lava.throw("Widget definition: move the roles from main view to widget");
+			if (view_config.class != 'View') Lava.t("define: view in 'main' role must be pure View, not subclass");
+			if ('argument' in view_config) Lava.t("Widgets do not support arguments");
+			if ('roles' in view_config) Lava.t("Widget definition: move the roles from main view to widget");
 
 			widget_config.template = view_config.template;
 
@@ -131,7 +131,7 @@ Lava.parsers.Directives = {
 			if (Lava.schema.DEBUG) {
 				for (name in view_config) {
 					if (['assigns', 'options', 'class', 'type', 'template', 'container'].indexOf(name) == -1) {
-						Lava.throw("[role='main'] view has an option, which can not be copied to widget: " + name
+						Lava.t("[role='main'] view has an option, which can not be copied to widget: " + name
 							+ ". Probably, it must be specified via separate tag");
 					}
 				}
@@ -139,7 +139,7 @@ Lava.parsers.Directives = {
 
 		} else {
 
-			Lava.throw("Widget definition: role=main may be applied to templates and views only");
+			Lava.t("Widget definition: role=main may be applied to templates and views only");
 
 		}
 
@@ -164,7 +164,7 @@ Lava.parsers.Directives = {
 				include = [Lava.parsers.Common.compileAsView(raw_tag.content)];
 				break;
 			default:
-				Lava.throw("Only templates and views may have role=include");
+				Lava.t("Only templates and views may have role=include");
 		}
 
 		this._store(config_storage, 'includes', raw_tag.attributes.name, include);
@@ -255,8 +255,8 @@ Lava.parsers.Directives = {
 	 */
 	_widgetTagSugar: function(raw_tag, config_storage, roles_storage) {
 
-		if ('sugar' in config_storage) Lava.throw("Sugar is already defined");
-		if (Lava.schema.DEBUG && raw_tag.content.length != 1) Lava.throw("Malformed option: " + raw_tag.attributes.name);
+		if ('sugar' in config_storage) Lava.t("Sugar is already defined");
+		if (Lava.schema.DEBUG && raw_tag.content.length != 1) Lava.t("Malformed option: " + raw_tag.attributes.name);
 		config_storage.sugar = Lava.parseOptions(raw_tag.content[0]);
 
 	},
@@ -294,8 +294,8 @@ Lava.parsers.Directives = {
 			tag = tags[i];
 
 			if (Lava.schema.DEBUG) {
-				if (!tag.attributes || !tag.attributes.name) Lava.throw("<" + "storage>: tag without a name attribute");
-				if (config_storage.storage && (tag.attributes.name in config_storage.storage)) Lava.throw("Duplicate item in storage: " + tag.attributes.name);
+				if (!tag.attributes || !tag.attributes.name) Lava.t("<" + "storage>: tag without a name attribute");
+				if (config_storage.storage && (tag.attributes.name in config_storage.storage)) Lava.t("Duplicate item in storage: " + tag.attributes.name);
 			}
 
 			type = tag.name;
@@ -310,10 +310,10 @@ Lava.parsers.Directives = {
 			} else if (type == 'object' || type == 'object_collection' || type == 'object_hash') {
 
 				inner_tags = Lava.parsers.Common.asBlockType(tag.content, 'tag');
-				if (Lava.schema.DEBUG && (inner_tags.length != 2 || !inner_tags[0].content || !inner_tags[1].content)) Lava.throw("storage: malformed tag");
-				if (Lava.schema.DEBUG && (inner_tags[0].name != 'schema' || inner_tags[1].name != 'content')) Lava.throw("storage: malformed tag");
+				if (Lava.schema.DEBUG && (inner_tags.length != 2 || !inner_tags[0].content || !inner_tags[1].content)) Lava.t("storage: malformed tag");
+				if (Lava.schema.DEBUG && (inner_tags[0].name != 'schema' || inner_tags[1].name != 'content')) Lava.t("storage: malformed tag");
 				schema = Lava.parseOptions(inner_tags[0].content[0]);
-				if (Lava.schema.DEBUG && (('name' in schema) || ('type' in schema))) Lava.throw("storage tag schema: 'name' and 'type' are not allowed");
+				if (Lava.schema.DEBUG && (('name' in schema) || ('type' in schema))) Lava.t("storage tag schema: 'name' and 'type' are not allowed");
 				schema.name = name;
 				schema.type = type;
 
@@ -321,7 +321,7 @@ Lava.parsers.Directives = {
 
 			} else {
 
-				Lava.throw("Unknown storage tag: " + type);
+				Lava.t("Unknown storage tag: " + type);
 
 			}
 
@@ -368,13 +368,13 @@ Lava.parsers.Directives = {
 			tag,
 			value;
 
-		if (Lava.schema.DEBUG && count == 0) Lava.throw("Empty resources definition");
+		if (Lava.schema.DEBUG && count == 0) Lava.t("Empty resources definition");
 
 		for (; i < count; i++) {
 
 			tag = tags[i];
-			if (Lava.schema.DEBUG && (!tag.attributes || !tag.attributes.path)) Lava.throw("resources, tag is missing attributes: " + tag.name);
-			if (Lava.schema.DEBUG && !(tag.name in this._resource_tag_actions)) Lava.throw("resources, unknown tag: " + tag.name);
+			if (Lava.schema.DEBUG && (!tag.attributes || !tag.attributes.path)) Lava.t("resources, tag is missing attributes: " + tag.name);
+			if (Lava.schema.DEBUG && !(tag.name in this._resource_tag_actions)) Lava.t("resources, unknown tag: " + tag.name);
 			value = this[this._resource_tag_actions[tag.name]](tag);
 			if (Lava.schema.parsers.EXPORT_STRINGS && (value.type == 'translate' || value.type == 'ntranslate')) {
 				Lava.resources.exportTranslatableString(value, widget_title, raw_tag.attributes.locale, tag.attributes.path);
@@ -396,7 +396,7 @@ Lava.parsers.Directives = {
 
 		if (raw_tag.content) {
 
-			if (Lava.schema.DEBUG && raw_tag.content.length != 1) Lava.throw("Malformed resources string tag");
+			if (Lava.schema.DEBUG && raw_tag.content.length != 1) Lava.t("Malformed resources string tag");
 			value = raw_tag.content[0];
 
 		}
@@ -413,7 +413,7 @@ Lava.parsers.Directives = {
 	 */
 	_resourceTagNumber: function(raw_tag) {
 
-		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1 || raw_tag.content[0] == '')) Lava.throw("Malformed resources tag");
+		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1 || raw_tag.content[0] == '')) Lava.t("Malformed resources tag");
 
 		return {
 			type: 'number',
@@ -427,7 +427,7 @@ Lava.parsers.Directives = {
 	 */
 	_resourceTagBoolean: function(raw_tag) {
 
-		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1 || raw_tag.content[0] == '')) Lava.throw("Malformed resources tag");
+		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1 || raw_tag.content[0] == '')) Lava.t("Malformed resources tag");
 
 		return {
 			type: 'boolean',
@@ -441,16 +441,16 @@ Lava.parsers.Directives = {
 	 */
 	_resourceTagArray: function(raw_tag) {
 
-		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1 || raw_tag.content[0] == '')) Lava.throw("Malformed resources tag");
+		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1 || raw_tag.content[0] == '')) Lava.t("Malformed resources tag");
 
 		var value = Lava.parseOptions(raw_tag.content[0]),
 			i,
 			count;
 
 		if (Lava.schema.DEBUG) {
-			if (!Array.isArray(value)) Lava.throw("Malformed resources array tag content");
+			if (!Array.isArray(value)) Lava.t("Malformed resources array tag content");
 			for (i = 0, count = value.length; i < count; i++) {
-				if (this.RESOURCE_ARRAY_ALLOWED_TYPES.indexOf(Lava.getType(value[i])) == -1) Lava.throw("resources/array contains value type that is not allowed: " + Lava.getType(value[i]));
+				if (this.RESOURCE_ARRAY_ALLOWED_TYPES.indexOf(Lava.getType(value[i])) == -1) Lava.t("resources/array contains value type that is not allowed: " + Lava.getType(value[i]));
 			}
 		}
 
@@ -466,7 +466,7 @@ Lava.parsers.Directives = {
 	 */
 	_resourceTagTranslate: function(raw_tag) {
 
-		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1 || raw_tag.content[0] == '')) Lava.throw("Malformed resources tag");
+		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1 || raw_tag.content[0] == '')) Lava.t("Malformed resources tag");
 
 		var result = {
 			type: 'translate',
@@ -485,7 +485,7 @@ Lava.parsers.Directives = {
 	 */
 	_resourceTagTranslatePlural: function(raw_tag) {
 
-		if (Lava.schema.DEBUG && (!raw_tag.content)) Lava.throw("Malformed resources tag");
+		if (Lava.schema.DEBUG && (!raw_tag.content)) Lava.t("Malformed resources tag");
 
 		var plural_tags = Lava.parsers.Common.asBlockType(raw_tag.content, 'tag'),
 			i = 0,
@@ -493,11 +493,11 @@ Lava.parsers.Directives = {
 			plurals = [],
 			result;
 
-		if (Lava.schema.DEBUG && count == 0) Lava.throw("Malformed resources plural string definition");
+		if (Lava.schema.DEBUG && count == 0) Lava.t("Malformed resources plural string definition");
 
 		for (; i < count; i++) {
 
-			if (Lava.schema.DEBUG && (!plural_tags[i].content || !plural_tags[i].content[0])) Lava.throw("Resources, malformed plural string");
+			if (Lava.schema.DEBUG && (!plural_tags[i].content || !plural_tags[i].content[0])) Lava.t("Resources, malformed plural string");
 			plurals.push(plural_tags[i].content[0]);
 
 		}
@@ -533,10 +533,10 @@ Lava.parsers.Directives = {
 		if (count) {
 
 			if (Lava.schema.DEBUG) {
-				if (count > 1) Lava.throw("Malformed resources/container definition");
-				if (tags[0].name != 'static_properties' && tags[0].name != 'add_properties') Lava.throw("Malformed resources/container definition");
-				if (!tags[0].attributes || tags[0].content) Lava.throw("resources/container: malformed (static/add)_properties tag");
-				if (('class' in tags[0].attributes) || ('style' in tags[0].attributes)) Lava.throw("resources/container: class and style attributes must be defined separately from properties");
+				if (count > 1) Lava.t("Malformed resources/container definition");
+				if (tags[0].name != 'static_properties' && tags[0].name != 'add_properties') Lava.t("Malformed resources/container definition");
+				if (!tags[0].attributes || tags[0].content) Lava.t("resources/container: malformed (static/add)_properties tag");
+				if (('class' in tags[0].attributes) || ('style' in tags[0].attributes)) Lava.t("resources/container: class and style attributes must be defined separately from properties");
 			}
 
 			operations_stack.push({
@@ -553,24 +553,24 @@ Lava.parsers.Directives = {
 				case 'remove_classes':
 				case 'remove_properties':
 				case 'remove_styles':
-					if (Lava.schema.DEBUG && !raw_tag.attributes[name].trim()) Lava.throw("Codestyle: remove the empty remove_* attributes from resources/container tag");
+					if (Lava.schema.DEBUG && !raw_tag.attributes[name].trim()) Lava.t("Codestyle: remove the empty remove_* attributes from resources/container tag");
 					operation_value = raw_tag.attributes[name].trim().split(/\s*,\s*/);
 					break;
 				case 'add_classes':
 				case 'static_classes':
-					if (Lava.schema.DEBUG && name == 'add_classes' && !raw_tag.attributes[name].trim()) Lava.throw("Codestyle: remove the empty add_classes attribute from resources/container tag");
+					if (Lava.schema.DEBUG && name == 'add_classes' && !raw_tag.attributes[name].trim()) Lava.t("Codestyle: remove the empty add_classes attribute from resources/container tag");
 					operation_value = raw_tag.attributes[name].trim().split(/\s+/);
 					break;
 				case 'add_styles':
 				case 'static_styles':
-					if (Lava.schema.DEBUG && name == 'add_styles' && !raw_tag.attributes[name].trim()) Lava.throw("Codestyle: remove the empty style attribute from resources/container tag");
+					if (Lava.schema.DEBUG && name == 'add_styles' && !raw_tag.attributes[name].trim()) Lava.t("Codestyle: remove the empty style attribute from resources/container tag");
 					operation_value = Lava.parsers.Common.parseStyleAttribute(raw_tag.attributes[name]);
 					break;
 				case 'path': // the path and name of the resource
 					operation_value = null;
 					break;
 				default:
-					Lava.throw("Unknown resources/container attribute:" + name);
+					Lava.t("Unknown resources/container attribute:" + name);
 			}
 
 			if (operation_value) {
@@ -590,9 +590,9 @@ Lava.parsers.Directives = {
 				|| ('static_classes' in used_instructions && (('add_classes' in used_instructions) || ('remove_classes' in used_instructions)))
 				|| ('static_properties' in used_instructions && (('add_properties' in used_instructions) || ('remove_properties' in used_instructions)))
 			)
-				Lava.throw("resources/container: having add/remove instructions together with 'set' instruction has no sense");
+				Lava.t("resources/container: having add/remove instructions together with 'set' instruction has no sense");
 
-			if (operations_stack.length == 0) Lava.throw("Empty resources/container definition");
+			if (operations_stack.length == 0) Lava.t("Empty resources/container definition");
 
 		}
 
@@ -609,7 +609,7 @@ Lava.parsers.Directives = {
 	 */
 	_parseWidgetDefinition: function(raw_directive) {
 
-		if (Lava.schema.DEBUG && !('attributes' in raw_directive)) Lava.throw("Widget definition is missing attributes");
+		if (Lava.schema.DEBUG && !('attributes' in raw_directive)) Lava.t("Widget definition is missing attributes");
 
 		var tags = raw_directive.content ? Lava.parsers.Common.asBlockType(raw_directive.content, 'tag') : [],
 			config_storage = {},
@@ -627,12 +627,12 @@ Lava.parsers.Directives = {
 
 			if (('attributes' in tag) && tag.attributes.role) {
 
-				if (!(tag.attributes.role in this._widget_role_actions)) Lava.throw("Unknown role in widget definition: " + tag.attributes.role);
+				if (!(tag.attributes.role in this._widget_role_actions)) Lava.t("Unknown role in widget definition: " + tag.attributes.role);
 				this[this._widget_role_actions[tag.attributes.role]](tag, config_storage, roles_storage);
 
 			} else {
 
-				if (!(tag.name in this._widget_tag_actions)) Lava.throw("Unknown tag in widget definition: " + tag.name + ". Maybe missing the 'role' attribute.");
+				if (!(tag.name in this._widget_tag_actions)) Lava.t("Unknown tag in widget definition: " + tag.name + ". Maybe missing the 'role' attribute.");
 				this[this._widget_tag_actions[tag.name]](tag, config_storage, roles_storage);
 
 			}
@@ -658,11 +658,11 @@ Lava.parsers.Directives = {
 			if (path[0] in Lava.parsers.Common.locator_types) {
 
 				i = path.indexOf('/');
-				if (Lava.schema.DEBUG && i == -1) Lava.throw("Malformed class name locator: " + path);
+				if (Lava.schema.DEBUG && i == -1) Lava.t("Malformed class name locator: " + path);
 				name = path.substr(0, i); // cut the locator part, "$widgetname"
 				widget_config.real_class = path.substr(i); // leave the name part: "/ClassName1/ClassName2"
 				widget_config.class_locator = {locator_type: Lava.parsers.Common.locator_types[name[0]], name: name.substr(1)};
-				if (Lava.schema.DEBUG && (!widget_config.class_locator.name || !widget_config.class_locator.locator_type)) Lava.throw("Malformed class name locator: " + path);
+				if (Lava.schema.DEBUG && (!widget_config.class_locator.name || !widget_config.class_locator.locator_type)) Lava.t("Malformed class name locator: " + path);
 
 			} else {
 
@@ -676,7 +676,7 @@ Lava.parsers.Directives = {
 		if (raw_directive.attributes.label) Lava.parsers.Common.setViewConfigLabel(widget_config, raw_directive.attributes.label);
 
 		if (raw_directive.attributes.id) {
-			if (Lava.schema.DEBUG && widget_config.id) Lava.throw("[Widget configuration] widget id was already set via main view configuration: " + raw_directive.attributes.id);
+			if (Lava.schema.DEBUG && widget_config.id) Lava.t("[Widget configuration] widget id was already set via main view configuration: " + raw_directive.attributes.id);
 			Lava.parsers.Common.setViewConfigId(widget_config, raw_directive.attributes.id);
 		}
 
@@ -686,7 +686,7 @@ Lava.parsers.Directives = {
 
 				for (name in roles_storage.options) {
 
-					if (name in widget_config.options) Lava.throw("Duplicate option: " + name);
+					if (name in widget_config.options) Lava.t("Duplicate option: " + name);
 					widget_config.options[name] = roles_storage.options[name];
 
 				}
@@ -700,7 +700,7 @@ Lava.parsers.Directives = {
 		}
 
 		if ('assigns' in roles_storage) {
-			if ('assigns' in widget_config) Lava.throw("Please, move assigns to one place: either to widget tag, or view directives");
+			if ('assigns' in widget_config) Lava.t("Please, move assigns to one place: either to widget tag, or view directives");
 			widget_config.assigns = roles_storage.assigns;
 		}
 
@@ -717,7 +717,7 @@ Lava.parsers.Directives = {
 	 */
 	_parseWidgetDefinitionWrapper: function(raw_directive) {
 
-		if (this._is_processing_define) Lava.throw("Nested defines are not allowed");
+		if (this._is_processing_define) Lava.t("Nested defines are not allowed");
 		this._is_processing_define = true;
 		var result;
 
@@ -742,16 +742,16 @@ Lava.parsers.Directives = {
 	 */
 	_xdefine: function(raw_directive) {
 
-		if (Lava.schema.DEBUG && (!raw_directive.attributes || !raw_directive.attributes.title)) Lava.throw("define: missing 'title' attribute");
-		if (Lava.schema.DEBUG && raw_directive.attributes.title.indexOf(' ') != -1) Lava.throw("Widget title must not contain spaces");
-		if (Lava.schema.DEBUG && ('resource_id' in raw_directive.attributes)) Lava.throw("resource_id is not allowed on define");
+		if (Lava.schema.DEBUG && (!raw_directive.attributes || !raw_directive.attributes.title)) Lava.t("define: missing 'title' attribute");
+		if (Lava.schema.DEBUG && raw_directive.attributes.title.indexOf(' ') != -1) Lava.t("Widget title must not contain spaces");
+		if (Lava.schema.DEBUG && ('resource_id' in raw_directive.attributes)) Lava.t("resource_id is not allowed on define");
 
 		this._current_widget_title = raw_directive.attributes.title;
 		var widget_config = this._parseWidgetDefinitionWrapper(raw_directive);
 		this._current_widget_title = null;
 		widget_config.is_extended = false; // reserve it for serialization
 
-		if (Lava.schema.DEBUG && ('class_locator' in widget_config)) Lava.throw("Dynamic class names are allowed only in inline widgets, not in x:define");
+		if (Lava.schema.DEBUG && ('class_locator' in widget_config)) Lava.t("Dynamic class names are allowed only in inline widgets, not in x:define");
 
 		Lava.storeWidgetSchema(raw_directive.attributes.title, widget_config);
 
@@ -764,7 +764,7 @@ Lava.parsers.Directives = {
 
 		var widget_config = this._parseWidgetDefinition(raw_directive);
 
-		if (Lava.schema.DEBUG && !widget_config.class && !widget_config.extends) Lava.throw("x:define: widget definition is missing either 'controller' or 'extends' attribute");
+		if (Lava.schema.DEBUG && !widget_config.class && !widget_config.extends) Lava.t("x:define: widget definition is missing either 'controller' or 'extends' attribute");
 		if (raw_directive.attributes.resource_id) widget_config.resource_id = Lava.parsers.Common.parseResourceId(raw_directive.attributes.resource_id);
 
 		widget_config.type = 'widget';
@@ -790,12 +790,12 @@ Lava.parsers.Directives = {
 
 		if (!('assigns' in storage)) storage.assigns = {};
 
-		if (Lava.schema.DEBUG && !('attributes' in raw_tag)) Lava.throw("assign: missing attributes");
-		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.throw("Malformed assign");
-		if (raw_tag.attributes.name in storage.assigns) Lava.throw("Duplicate assign: " + raw_tag.attributes.name);
+		if (Lava.schema.DEBUG && !('attributes' in raw_tag)) Lava.t("assign: missing attributes");
+		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.t("Malformed assign");
+		if (raw_tag.attributes.name in storage.assigns) Lava.t("Duplicate assign: " + raw_tag.attributes.name);
 
 		var arguments = Lava.ExpressionParser.parse(raw_tag.content[0]);
-		if (Lava.schema.DEBUG && arguments.length != 1) Lava.throw("Expression block requires exactly one argument");
+		if (Lava.schema.DEBUG && arguments.length != 1) Lava.t("Expression block requires exactly one argument");
 
 		if (raw_tag.attributes.once && Lava.types.Boolean.fromString(raw_tag.attributes.once)) {
 
@@ -824,8 +824,8 @@ Lava.parsers.Directives = {
 	 */
 	_parseOption: function(storage, raw_tag, storage_property_name) {
 
-		if (Lava.schema.DEBUG && !('attributes' in raw_tag)) Lava.throw("option: missing attributes");
-		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.throw("Malformed option: " + raw_tag.attributes.name);
+		if (Lava.schema.DEBUG && !('attributes' in raw_tag)) Lava.t("option: missing attributes");
+		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.t("Malformed option: " + raw_tag.attributes.name);
 
 		var option_type = raw_tag.attributes.type,
 			result;
@@ -842,7 +842,7 @@ Lava.parsers.Directives = {
 
 			} else {
 
-				Lava.throw("Unknown option type: " + option_type);
+				Lava.t("Unknown option type: " + option_type);
 
 			}
 
@@ -863,8 +863,8 @@ Lava.parsers.Directives = {
 	 */
 	_parseProperty: function(storage, raw_tag, storage_property_name) {
 
-		if (Lava.schema.DEBUG && !('attributes' in raw_tag)) Lava.throw("option: missing attributes");
-		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.throw("Malformed option: " + raw_tag.attributes.name);
+		if (Lava.schema.DEBUG && !('attributes' in raw_tag)) Lava.t("option: missing attributes");
+		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.t("Malformed option: " + raw_tag.attributes.name);
 		this._store(storage, storage_property_name, raw_tag.attributes.name, Lava.parseOptions(raw_tag.content[0]));
 
 	},
@@ -881,8 +881,8 @@ Lava.parsers.Directives = {
 
 	_parseRoles: function(storage, raw_tag) {
 
-		if ('roles' in storage) Lava.throw("Roles are already defined");
-		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.throw("Malformed roles tag/directive");
+		if ('roles' in storage) Lava.t("Roles are already defined");
+		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.t("Malformed roles tag/directive");
 		storage.roles = Lava.parsers.Common.parseTargets(raw_tag.content[0]);
 
 	},
@@ -893,8 +893,8 @@ Lava.parsers.Directives = {
 	 */
 	_xcontainer_config: function(raw_directive, view_config) {
 
-		if (Lava.schema.DEBUG && (!raw_directive.content || raw_directive.content.length == 0)) Lava.throw("Malformed container_config directive: content is missing");
-		if (Lava.schema.DEBUG && !view_config.container) Lava.throw("Trying to change container settings for container-less view. Please, change the view opening tag (# => $) or move the directive into wrapping container.");
+		if (Lava.schema.DEBUG && (!raw_directive.content || raw_directive.content.length == 0)) Lava.t("Malformed container_config directive: content is missing");
+		if (Lava.schema.DEBUG && !view_config.container) Lava.t("Trying to change container settings for container-less view. Please, change the view opening tag (# => $) or move the directive into wrapping container.");
 
 		var original_config = view_config.container,
 			config = Lava.parseOptions(raw_directive.content[0]),
@@ -902,7 +902,7 @@ Lava.parsers.Directives = {
 
 		if (Lava.schema.DEBUG) {
 			for (name in config) {
-				if (['class', 'options'].indexOf(name) == -1) Lava.throw('[_xcontainer_config] setting config property is not allowed: ' + name);
+				if (['class', 'options'].indexOf(name) == -1) Lava.t('[_xcontainer_config] setting config property is not allowed: ' + name);
 			}
 		}
 
@@ -920,9 +920,9 @@ Lava.parsers.Directives = {
 	 */
 	_xrefresher: function(raw_directive, view_config) {
 
-		if (Lava.schema.DEBUG && view_config.type == 'widget') Lava.throw("Wrong usage of x:refresher directive. May be applied only to views.");
-		if (Lava.schema.DEBUG && ('refresher' in view_config)) Lava.throw("Refresher is already defined");
-		if (Lava.schema.DEBUG && (!raw_directive.content || raw_directive.content.length != 1)) Lava.throw("Malformed refresher config");
+		if (Lava.schema.DEBUG && view_config.type == 'widget') Lava.t("Wrong usage of x:refresher directive. May be applied only to views.");
+		if (Lava.schema.DEBUG && ('refresher' in view_config)) Lava.t("Refresher is already defined");
+		if (Lava.schema.DEBUG && (!raw_directive.content || raw_directive.content.length != 1)) Lava.t("Malformed refresher config");
 		view_config.refresher = Lava.parseOptions(raw_directive.content[0]);
 
 	},
@@ -933,7 +933,7 @@ Lava.parsers.Directives = {
 	 */
 	_parseBroadcast: function(widget_config, raw_element) {
 
-		if ('broadcast' in widget_config) Lava.throw("Broadcast is already defined");
+		if ('broadcast' in widget_config) Lava.t("Broadcast is already defined");
 
 		var result = {},
 			name;
@@ -954,7 +954,7 @@ Lava.parsers.Directives = {
 	 */
 	_xbroadcast: function(raw_directive, widget_config) {
 
-		if (Lava.schema.DEBUG && widget_config.type != 'widget') Lava.throw("Broadcast directive requires a widget");
+		if (Lava.schema.DEBUG && widget_config.type != 'widget') Lava.t("Broadcast directive requires a widget");
 
 		this._parseBroadcast(widget_config, raw_directive);
 
@@ -966,7 +966,7 @@ Lava.parsers.Directives = {
 	 */
 	_parseBinding: function(widget_config, raw_element) {
 
-		if (raw_element.content.length != 1) Lava.throw("Malformed binding in widget definition: " + raw_element.attributes.name);
+		if (raw_element.content.length != 1) Lava.t("Malformed binding in widget definition: " + raw_element.attributes.name);
 
 		var binding = {
 			property_name: raw_element.attributes.name,
@@ -974,7 +974,7 @@ Lava.parsers.Directives = {
 		};
 		if ('direction' in raw_element.attributes) {
 			if (!(raw_element.attributes.direction in Lava.BINDING_DIRECTIONS))
-				Lava.throw("Unknown binding direction: " + raw_element.attributes.direction);
+				Lava.t("Unknown binding direction: " + raw_element.attributes.direction);
 			binding.direction = Lava.BINDING_DIRECTIONS[raw_element.attributes.direction];
 		}
 		this._store(widget_config, 'bindings', raw_element.attributes.name, binding);
@@ -987,7 +987,7 @@ Lava.parsers.Directives = {
 	 */
 	_xbind: function(raw_directive, widget_config) {
 
-		if (Lava.schema.DEBUG && widget_config.type != 'widget') Lava.throw("Binding directive requires a widget");
+		if (Lava.schema.DEBUG && widget_config.type != 'widget') Lava.t("Binding directive requires a widget");
 		this._parseBinding(widget_config, raw_directive);
 
 	},
@@ -999,8 +999,8 @@ Lava.parsers.Directives = {
 	 */
 	_parseObject: function(config, name, raw_tag) {
 
-		if (Lava.schema.DEBUG && (name in config)) Lava.throw("Object already exists: " + name + ". Ensure, that x:options and x:properties directives appear before x:option and x:property.");
-		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.throw("Malformed directive or tag for config property: " + name);
+		if (Lava.schema.DEBUG && (name in config)) Lava.t("Object already exists: " + name + ". Ensure, that x:options and x:properties directives appear before x:option and x:property.");
+		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.t("Malformed directive or tag for config property: " + name);
 		config[name] = Lava.parseOptions(raw_tag.content[0]);
 
 	},
@@ -1021,7 +1021,7 @@ Lava.parsers.Directives = {
 	 */
 	_xproperty: function(raw_directive, widget_config) {
 
-		if (Lava.schema.DEBUG && widget_config.type != 'widget') Lava.throw("Property directive requires a widget");
+		if (Lava.schema.DEBUG && widget_config.type != 'widget') Lava.t("Property directive requires a widget");
 
 		this._parseProperty(widget_config, raw_directive, 'properties');
 
@@ -1033,7 +1033,7 @@ Lava.parsers.Directives = {
 	 */
 	_xproperties: function(raw_directive, widget_config) {
 
-		if (Lava.schema.DEBUG && widget_config.type != 'widget') Lava.throw("Property directive requires a widget");
+		if (Lava.schema.DEBUG && widget_config.type != 'widget') Lava.t("Property directive requires a widget");
 
 		this._parseObject(widget_config, 'properties', raw_directive);
 
@@ -1041,8 +1041,8 @@ Lava.parsers.Directives = {
 
 	_storeDirectiveContent: function(widget_config, raw_directive, storage_name) {
 
-		if (Lava.schema.DEBUG && !('attributes' in raw_directive)) Lava.throw("option: missing attributes");
-		if (Lava.schema.DEBUG && (!raw_directive.content || raw_directive.content.length != 1)) Lava.throw("Malformed property: " + raw_directive.attributes.name);
+		if (Lava.schema.DEBUG && !('attributes' in raw_directive)) Lava.t("option: missing attributes");
+		if (Lava.schema.DEBUG && (!raw_directive.content || raw_directive.content.length != 1)) Lava.t("Malformed property: " + raw_directive.attributes.name);
 		this._store(widget_config, storage_name, raw_directive.attributes.name, raw_directive.content[0]);
 
 	},
@@ -1053,7 +1053,7 @@ Lava.parsers.Directives = {
 	 */
 	_xproperty_string: function(raw_directive, widget_config) {
 
-		if (Lava.schema.DEBUG && widget_config.type != 'widget') Lava.throw("property_string directive requires a widget");
+		if (Lava.schema.DEBUG && widget_config.type != 'widget') Lava.t("property_string directive requires a widget");
 
 		this._storeDirectiveContent(widget_config, raw_directive, 'properties');
 
@@ -1075,7 +1075,7 @@ Lava.parsers.Directives = {
 	_xdefine_resources: function(raw_directive) {
 
 		if (Lava.schema.DEBUG && (!raw_directive.attributes || !raw_directive.attributes['locale'] || !raw_directive.attributes['for']))
-			Lava.throw("Malformed x:resources definition. 'locale' and 'for' are required");
+			Lava.t("Malformed x:resources definition. 'locale' and 'for' are required");
 
 		Lava.resources.addWidgetResource(
 			raw_directive.attributes['for'],
@@ -1091,14 +1091,14 @@ Lava.parsers.Directives = {
 	 */
 	_xresources: function(raw_directive, widget_config) {
 
-		if (Lava.schema.DEBUG && (!raw_directive.attributes || !raw_directive.attributes['locale'])) Lava.throw("Malformed resources definition, missing locale");
+		if (Lava.schema.DEBUG && (!raw_directive.attributes || !raw_directive.attributes['locale'])) Lava.t("Malformed resources definition, missing locale");
 
 		if (!widget_config.resources) {
 			widget_config.resources = {}
 		}
 
 		if (Lava.schema.DEBUG && (raw_directive.attributes['locale'] in widget_config.resources))
-			Lava.throw("Locale is already defined: " + raw_directive.attributes['locale']);
+			Lava.t("Locale is already defined: " + raw_directive.attributes['locale']);
 
 		widget_config.resources[raw_directive.attributes['locale']] = this._parseResources(raw_directive, this._current_widget_title);
 
@@ -1110,7 +1110,7 @@ Lava.parsers.Directives = {
 	_xstatic_value: function(raw_directive) {
 
 		if (Lava.schema.DEBUG && (raw_directive.content || !raw_directive.attributes || !raw_directive.attributes.resource_id))
-			Lava.throw('Malformed static_value directive');
+			Lava.t('Malformed static_value directive');
 
 		return {
 			type: 'static_value',
@@ -1128,11 +1128,11 @@ Lava.parsers.Directives = {
 	_xstatic_eval: function(raw_directive) {
 
 		if (Lava.schema.DEBUG && (!raw_directive.content || raw_directive.content.length != 1))
-			Lava.throw('Malformed static_eval directive');
+			Lava.t('Malformed static_eval directive');
 
 		var arguments = Lava.ExpressionParser.parse(raw_directive.content[0]);
 
-		if (Lava.schema.DEBUG && arguments.length == 0) Lava.throw("static_eval: malformed argument");
+		if (Lava.schema.DEBUG && arguments.length == 0) Lava.t("static_eval: malformed argument");
 
 		return {
 			type: 'static_eval',
@@ -1147,7 +1147,7 @@ Lava.parsers.Directives = {
 	 */
 	_xattach_directives: function(raw_directive, widget_config) {
 
-		if (Lava.schema.DEBUG && !raw_directive.content) Lava.throw("empty attach_directives");
+		if (Lava.schema.DEBUG && !raw_directive.content) Lava.t("empty attach_directives");
 
 		var blocks = Lava.parsers.Common.asBlocks(raw_directive.content),
 			sugar = blocks[0],
@@ -1156,9 +1156,9 @@ Lava.parsers.Directives = {
 			count;
 
 		if (Lava.schema.DEBUG) {
-			if (sugar.type != 'tag' || sugar.content || directives.length == 0) Lava.throw("Malformed attach_directives");
+			if (sugar.type != 'tag' || sugar.content || directives.length == 0) Lava.t("Malformed attach_directives");
 			for (i = 0, count = directives.length; i < count; i++) {
-				if (directives[i].type != 'directive') Lava.throw("Malformed attach_directives");
+				if (directives[i].type != 'directive') Lava.t("Malformed attach_directives");
 			}
 		}
 
@@ -1169,17 +1169,17 @@ Lava.parsers.Directives = {
 
 	_parseDefaultEvents: function(raw_tag, widget_config) {
 
-		if (Lava.schema.DEBUG && (!raw_tag.content || !raw_tag.content.length)) Lava.throw('default_events: tag content is required');
-		if (Lava.schema.DEBUG && ('default_events' in widget_config)) Lava.throw('default_events: property already defined');
+		if (Lava.schema.DEBUG && (!raw_tag.content || !raw_tag.content.length)) Lava.t('default_events: tag content is required');
+		if (Lava.schema.DEBUG && ('default_events' in widget_config)) Lava.t('default_events: property already defined');
 
 		var events = Lava.parseOptions(raw_tag.content[0]),
 			i = 0,
 			count;
 
 		if (Lava.schema.DEBUG) {
-			if (!Array.isArray(events)) Lava.throw('default_events: array expected');
+			if (!Array.isArray(events)) Lava.t('default_events: array expected');
 			for (count = events.length; i < count; i++) {
-				if (typeof(events[i]) != 'string') Lava.throw('default_events: expected an array of strings');
+				if (typeof(events[i]) != 'string') Lava.t('default_events: expected an array of strings');
 			}
 		}
 

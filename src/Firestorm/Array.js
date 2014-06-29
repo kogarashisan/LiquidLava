@@ -80,7 +80,7 @@ Firestorm.Array = {
 	replace: function(array, old_value, new_value) {
 
 		var template_index = array.indexOf(old_value);
-		if (template_index == -1) Firestorm.throw("Array.replace: value is not in array");
+		if (template_index == -1) Firestorm.t("Array.replace: value is not in array");
 		array[template_index] = new_value;
 
 	}

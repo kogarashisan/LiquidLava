@@ -34,7 +34,7 @@ Lava.define(
 
 	_postInit: function() {
 
-		if (Lava.schema.DEBUG && !('argument' in this._config)) Lava.throw("If view requires an argument");
+		if (Lava.schema.DEBUG && !('argument' in this._config)) Lava.t("If view requires an argument");
 
 		var i = 0,
 			count,
@@ -62,7 +62,7 @@ Lava.define(
 		if (this._config.refresher) {
 
 			// otherwise, it will not be able to insert the template
-			if (Lava.schema.DEBUG && !this._container) Lava.throw('View/If: refresher needs container to work');
+			if (Lava.schema.DEBUG && !this._container) Lava.t('View/If: refresher needs container to work');
 			constructor = Lava.ClassManager.getConstructor(this._config.refresher.class, 'Lava.view.refresher');
 			this._refresher = /** @type {Lava.refresher.Default} */ new constructor(
 				this._config.refresher,
@@ -153,7 +153,7 @@ Lava.define(
 
 	_renderContents: function() {
 
-		if (Lava.schema.DEBUG && this._active_argument_index != null && this._arguments[this._active_argument_index].isWaitingRefresh()) Lava.throw();
+		if (Lava.schema.DEBUG && this._active_argument_index != null && this._arguments[this._active_argument_index].isWaitingRefresh()) Lava.t();
 
 		this._refresher && this._refresher.onRender(this._active_template ? [this._active_template] : []);
 		return this._active_template ? this._active_template.render() : '';

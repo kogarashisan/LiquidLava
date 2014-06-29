@@ -44,7 +44,7 @@ var Firestorm = {
 
 		if (typeof(window) != 'undefined') {
 
-			if (!('id' in window.document)) Firestorm.throw("MooTools isn't loaded");
+			if (!('id' in window.document)) Firestorm.t("MooTools isn't loaded");
 
 			this.Environment && this.Environment.init();
 			this.DOM && this.DOM.init();
@@ -52,7 +52,7 @@ var Firestorm = {
 		}
 
 		// You must know this yourself:
-		// for (var name in {}) Firestorm.throw("Firestorm framework can not coexist with frameworks that modify native object's prototype");
+		// for (var name in {}) Firestorm.t("Firestorm framework can not coexist with frameworks that modify native object's prototype");
 
 	},
 
@@ -124,7 +124,7 @@ var Firestorm = {
 
 	},
 
-	'throw': function(message) {
+	t: function(message) {
 
 		if (typeof(message) == 'number' && this.KNOWN_EXCEPTIONS && (message in this.KNOWN_EXCEPTIONS)) {
 			throw new Error(this.KNOWN_EXCEPTIONS[message]);

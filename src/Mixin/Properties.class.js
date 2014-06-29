@@ -57,7 +57,7 @@ Lava.define(
 	 */
 	setProperties: function(properties_object) {
 
-		if (Lava.schema.DEBUG && properties_object && properties_object.isProperties) Lava.throw("setProperties expects a plain JS object as an argument, not a class");
+		if (Lava.schema.DEBUG && properties_object && properties_object.isProperties) Lava.t("setProperties expects a plain JS object as an argument, not a class");
 
 		for (var name in properties_object) {
 
@@ -112,7 +112,7 @@ Lava.define(
 	 */
 	_firePropertyChanged: function(property_name, event_args) {
 
-		if (Lava.schema.DEBUG && property_name == null) Lava.throw("firePropertyChanged: property_name is null");
+		if (Lava.schema.DEBUG && property_name == null) Lava.t("firePropertyChanged: property_name is null");
 
 		if (this._property_listeners[property_name] != null) {
 

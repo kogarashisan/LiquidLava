@@ -53,7 +53,7 @@ Lava.define(
 	_onRecordIdChanged: function(id_field, event_args) {
 
 		var id = event_args.record.get('id');
-		if (id in this._records_by_id) Lava.throw("Duplicate record id in module " + this._name);
+		if (id in this._records_by_id) Lava.t("Duplicate record id in module " + this._name);
 		this._records_by_id[id] = event_args.record;
 
 	},
@@ -131,7 +131,7 @@ Lava.define(
 
 		if (storage.id) {
 
-			if (storage.id in this._records_by_id) Lava.throw("Duplicate record id in module " + this._name);
+			if (storage.id in this._records_by_id) Lava.t("Duplicate record id in module " + this._name);
 			this._records_by_id[storage.id] = record;
 
 		}

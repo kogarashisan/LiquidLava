@@ -153,11 +153,11 @@ IDENTIFIER				[a-zA-Z\_][a-zA-Z0-9\_]*
 
 %%
 
-\-\>{IDENTIFIER}/\s+\(							{ Lava.throw('Spaces between function name and opening brace are not allowed (1)'); }
-\-\&gt\;{IDENTIFIER}/\s+\(						{ Lava.throw('Spaces between function name and opening brace are not allowed (1)'); }
-\.{IDENTIFIER}/\s+\(							{ Lava.throw('Spaces between function name and opening brace are not allowed (2)'); }
-\s+[\~\.\[\]]									{ Lava.throw('Spaces in scope path are not allowed (1)'); }
-\[\s											{ Lava.throw('Spaces in scope path are not allowed (2)'); }
+\-\>{IDENTIFIER}/\s+\(							{ Lava.t('Spaces between function name and opening brace are not allowed (1)'); }
+\-\&gt\;{IDENTIFIER}/\s+\(						{ Lava.t('Spaces between function name and opening brace are not allowed (1)'); }
+\.{IDENTIFIER}/\s+\(							{ Lava.t('Spaces between function name and opening brace are not allowed (2)'); }
+\s+[\~\.\[\]]									{ Lava.t('Spaces in scope path are not allowed (1)'); }
+\[\s											{ Lava.t('Spaces in scope path are not allowed (2)'); }
 
 \@{IDENTIFIER}									{ yytext = yytext.slice(1); return 'VIEW_BY_LABEL'; }
 \#{IDENTIFIER}									{ yytext = yytext.slice(1); return 'VIEW_BY_ID'; }
@@ -219,8 +219,8 @@ IDENTIFIER				[a-zA-Z\_][a-zA-Z0-9\_]*
 			'and': '&&'
 		};
 
-		if (lowercase == 'this') Lava.throw("'this' is reserved word. Are you missing the Label sign (@)?");
-		if ((lowercase in map) && lowercase != yytext) Lava.throw("Expression parser: 'lt', 'gt', 'and' must be lower case");
+		if (lowercase == 'this') Lava.t("'this' is reserved word. Are you missing the Label sign (@)?");
+		if ((lowercase in map) && lowercase != yytext) Lava.t("Expression parser: 'lt', 'gt', 'and' must be lower case");
 
 		if (lowercase in map) {
 			yytext = map[lowercase];
@@ -228,7 +228,7 @@ IDENTIFIER				[a-zA-Z\_][a-zA-Z0-9\_]*
 		}
 
 		if (Lava.parsers.Common.isLiteral(yytext)) {
-			if (lowercase != yytext) Lava.throw("Expression parser, code style: literals must be lower case");
+			if (lowercase != yytext) Lava.t("Expression parser, code style: literals must be lower case");
 			return 'LITERAL';
 		}
 
@@ -334,13 +334,13 @@ lookupOperator
 
 viewLocator
 	: knownView { $$ = $1; }
-	| knownView lookupOperator { Lava.throw("Lookup operator is not supported yet."); }
+	| knownView lookupOperator { Lava.t("Lookup operator is not supported yet."); }
 	| knownView DEEPNESS_OPERATOR {
 			$1.depth = parseInt($2);
-			if (!$1.depth) Lava.throw('Deepness operator: depth must be > 0');
+			if (!$1.depth) Lava.t('Deepness operator: depth must be > 0');
 			$$ = $1;
 		}
-	| knownView DEEPNESS_OPERATOR lookupOperator { Lava.throw("Lookup operator is not supported yet."); }
+	| knownView DEEPNESS_OPERATOR lookupOperator { Lava.t("Lookup operator is not supported yet."); }
 	;
 
 functionCall
@@ -404,7 +404,7 @@ scopePathSegment
 			var segments = $2.path_segments;
 			if (segments) {
 				for (var i = 0, count = segments.length; i < count; i++) {
-					if (typeof(segments[i]) == 'object') Lava.throw('Dynamic segment must not contain other dynamic segments');
+					if (typeof(segments[i]) == 'object') Lava.t('Dynamic segment must not contain other dynamic segments');
 				}
 			}
 			$$ = $2;
@@ -497,8 +497,8 @@ KNOWN_SWITCHES				\{\:[LR]\:\}|\{\:[LG]T\:\}|\{\:AMP\:\}
 <block>\{(\#|\$)\>[^\}]+\}								{ this.popState(); return 'EXPRESSION_BLOCK_N'; // normal }
 <block>\{(\#|\$)\&gt\;[^\}]+\}							{ this.popState(); return 'EXPRESSION_BLOCK_E'; // escaped }
 
-<block>({BLOCK_OPEN_N}|{BLOCK_OPEN_E})\s							{ Lava.throw('Spaces between block opening tag and block name are not allowed'); }
-<block>({BLOCK_OPEN_N}|{BLOCK_OPEN_E}){BLOCK_NAME}\s\(				{ Lava.throw('Spaces between block name and opening brace are not allowed'); }
+<block>({BLOCK_OPEN_N}|{BLOCK_OPEN_E})\s							{ Lava.t('Spaces between block opening tag and block name are not allowed'); }
+<block>({BLOCK_OPEN_N}|{BLOCK_OPEN_E}){BLOCK_NAME}\s\(				{ Lava.t('Spaces between block name and opening brace are not allowed'); }
 <block>({BLOCK_OPEN_N}|{BLOCK_OPEN_E})								{ return 'OPEN_BLOCK'; }
 
 <block>\{elseif/\(										{ return 'OPEN_ELSEIF'; }
@@ -517,7 +517,7 @@ KNOWN_SWITCHES				\{\:[LR]\:\}|\{\:[LG]T\:\}|\{\:AMP\:\}
 		this.x_export_arguments = Lava.ExpressionParser.parseWithTail(config_ref);
 		this._input = this._input.substr(this._input.length - config_ref.tail_length);
 		// { <- comment for Jison
-		if (!(/(\s|\})/.test(this._input[0]))) Lava.throw('Lex: arguments closing brace must be followed by whitespace or CLOSE_CURLY');
+		if (!(/(\s|\})/.test(this._input[0]))) Lava.t('Lex: arguments closing brace must be followed by whitespace or CLOSE_CURLY');
 		this.popState(); // block
 		this.begin('blockHash');
 		return 'EXPORT_ARGUMENTS';
@@ -539,7 +539,7 @@ KNOWN_SWITCHES				\{\:[LR]\:\}|\{\:[LG]T\:\}|\{\:AMP\:\}
 		this.yy.x_lexer_is_fragment = false;
 		if (yytext == 'script') {
 			var index = this._input.indexOf('>');
-			if (index == -1) Lava.throw("Lexical error: malformed script tag");
+			if (index == -1) Lava.t("Lexical error: malformed script tag");
 			var attributes_string = this._input.substr(0, index);
 			if (/type=(\'|\")lava\/fragment(\'|\")/.test(attributes_string)) {
 				this.yy.x_lexer_is_fragment = true;
@@ -591,25 +591,25 @@ KNOWN_SWITCHES				\{\:[LR]\:\}|\{\:[LG]T\:\}|\{\:AMP\:\}
 		if (yytext == '{literal:}') {
 			this.begin('literal');
 		} else if (yytext == '{pure_blocks:}') {
-			if (this.x_pure_blocks_mode) Lava.throw('Lexer switch: "{pure_blocks:}" mode is already enabled');
+			if (this.x_pure_blocks_mode) Lava.t('Lexer switch: "{pure_blocks:}" mode is already enabled');
 			this.x_pure_blocks_mode = true;
 		} else if (yytext == '{pre:}') {
 			yytext = 'preserve_whitespace';
 			return 'SWITCH_ON';
 		} else {
-			Lava.throw('Unknown switch: ' + yytext);
+			Lava.t('Unknown switch: ' + yytext);
 		}
 	}
 <switch>{SWITCH_CLOSE}									{
 		this.popState();
 		if (yytext == '{:pure_blocks}') {
-			if (!this.x_pure_blocks_mode) Lava.throw('Redundant lexer switch "{:pure_blocks}"');
+			if (!this.x_pure_blocks_mode) Lava.t('Redundant lexer switch "{:pure_blocks}"');
 			this.x_pure_blocks_mode = false;
 		} else if (yytext == '{:pre}') {
 			yytext = 'preserve_whitespace';
 			return 'SWITCH_OFF';
 		} else {
-			Lava.throw('Unknown switch: ' + yytext);
+			Lava.t('Unknown switch: ' + yytext);
 		}
 	}
 
@@ -660,7 +660,7 @@ block
 		}
 	| INCLUDE {
 			var targets = Lava.parsers.Common.parseTargets($1);
-			if (targets.length != 1) Lava.throw("Malformed include");
+			if (targets.length != 1) Lava.t("Malformed include");
 			targets[0].type = 'include';
 			$$ = targets[0];
 		}
@@ -679,16 +679,16 @@ block
 			};
 		}
 	| blockStart BLOCK_END {
-			if ($1.name != $2) Lava.throw('End block ("' + $2 + '") does not match the start block ("' + $1.name + '") (1)');
+			if ($1.name != $2) Lava.t('End block ("' + $2 + '") does not match the start block ("' + $1.name + '") (1)');
 			$$ = $1;
 		}
 	| blockStart blocks BLOCK_END {
-			if ($1.name != $3) Lava.throw('End block ("' + $3 + '") does not match the start block ("' + $1.name + '") (2)');
+			if ($1.name != $3) Lava.t('End block ("' + $3 + '") does not match the start block ("' + $1.name + '") (2)');
 			$1.content = $2;
 			$$ = $1;
 		}
 	| blockStart elsePart BLOCK_END {
-			if ($1.name != $3) Lava.throw('End block ("' + $3 + '") does not match the start block ("' + $1.name + '") (3)');
+			if ($1.name != $3) Lava.t('End block ("' + $3 + '") does not match the start block ("' + $1.name + '") (3)');
 			if ('elseif_arguments' in $2) {
 				$1.elseif_arguments = $2.elseif_arguments;
 				$1.elseif_contents = $2.elseif_contents;
@@ -697,7 +697,7 @@ block
 			$$ = $1;
 		}
 	| blockStart blocks elsePart BLOCK_END {
-			if ($1.name != $4) Lava.throw('End block ("' + $4 + '") does not match the start block ("' + $1.name + '") (4)');
+			if ($1.name != $4) Lava.t('End block ("' + $4 + '") does not match the start block ("' + $1.name + '") (4)');
 			$1.content = $2;
 			if ('elseif_arguments' in $3) {
 				$1.elseif_arguments = $3.elseif_arguments;
@@ -716,7 +716,7 @@ block
 	| tagStart SCRIPT_CONTENT {
 			$$ = $1;
 			if ($1.x && ('equiv' in $1.x)) {
-				if (!$1.x.equiv) Lava.throw('empty x:equiv');
+				if (!$1.x.equiv) Lava.t('empty x:equiv');
 				$$ = yy.parseRawTag($1.x.equiv); // sets name and type
 				$$.x = $1.x;
 				if ('attributes' in $1) $$.attributes = $1.attributes;
@@ -727,23 +727,23 @@ block
 			yy.validateTagEnd($1, $3);
 			$1.content = $2;
 			$$ = $1;
-			if (Lava.isVoidTag($$.name)) Lava.throw("Void tag with content: " + $$.name);
+			if (Lava.isVoidTag($$.name)) Lava.t("Void tag with content: " + $$.name);
 		}
 	| SWITCH_ON {
 			if ($1 == 'preserve_whitespace') {
-				if (yy.preserve_whitespace) Lava.throw("Switch {pre:} is already active");
+				if (yy.preserve_whitespace) Lava.t("Switch {pre:} is already active");
 				yy.preserve_whitespace = true;
 			} else {
-				Lava.throw("Parser error: lexer returned unknown switch: " + $1);
+				Lava.t("Parser error: lexer returned unknown switch: " + $1);
 			}
 			$$ = null;
 		}
 	| SWITCH_OFF {
 			if ($1 == 'preserve_whitespace') {
-				if (!yy.preserve_whitespace) Lava.throw("Trying to turn off inactive switch: {:pre}");
+				if (!yy.preserve_whitespace) Lava.t("Trying to turn off inactive switch: {:pre}");
 				yy.preserve_whitespace = false;
 			} else {
-				Lava.throw("Parser error: lexer returned unknown switch: " + $1);
+				Lava.t("Parser error: lexer returned unknown switch: " + $1);
 			}
 			$$ = null;
 		}
@@ -790,7 +790,7 @@ blockInit
 
 blockHash
 	: blockHash blockHashSegment {
-			if ($2.name in $1) Lava.throw('Duplicate attribute in block definition: ' + $2.name);
+			if ($2.name in $1) Lava.t('Duplicate attribute in block definition: ' + $2.name);
 			$1[$2.name] = $2.value;
 			$$ = $1;
 		}
@@ -862,7 +862,7 @@ elseifChain
 blockElseif
 	: OPEN_ELSEIF EXPORT_ARGUMENTS BLOCK_CLOSE {
 			var arguments = yy.lexer.x_export_arguments;
-			if (arguments.length != 1) Lava.throw('Elseif block requires exactly one argument');
+			if (arguments.length != 1) Lava.t('Elseif block requires exactly one argument');
 			$$ = arguments[0];
 			yy.lexer.x_export_arguments = null;
 		}
@@ -870,22 +870,22 @@ blockElseif
 
 selfClosingTag
 	: TAG_OPEN TAG_END_CLOSE {
-			if ($1 != $1.toLowerCase()) Lava.throw("Tag names must be lower case: " + $1);
+			if ($1 != $1.toLowerCase()) Lava.t("Tag names must be lower case: " + $1);
 			$$ = yy.parseRawTag($1);
 		}
 	| TAG_OPEN htmlHash TAG_END_CLOSE {
-			if ($1 != $1.toLowerCase()) Lava.throw("Tag names must be lower case: " + $1);
+			if ($1 != $1.toLowerCase()) Lava.t("Tag names must be lower case: " + $1);
 			$$ = yy.parseRawTag($1, $2);
 		}
 	;
 
 tagStart
 	: TAG_OPEN TAG_CLOSE {
-			if ($1 != $1.toLowerCase()) Lava.throw("Tag names must be lower case: " + $1);
+			if ($1 != $1.toLowerCase()) Lava.t("Tag names must be lower case: " + $1);
 			$$ = yy.parseRawTag($1);
 		}
 	| TAG_OPEN htmlHash TAG_CLOSE {
-			if ($1 != $1.toLowerCase()) Lava.throw("Tag names must be lower case: " + $1);
+			if ($1 != $1.toLowerCase()) Lava.t("Tag names must be lower case: " + $1);
 			$$ = yy.parseRawTag($1, $2);
 		}
 	;

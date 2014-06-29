@@ -18,7 +18,7 @@ Lava.TemplateParser.parse = function(input, view_config) {
  */
 Lava.TemplateParser.parseRaw = function(input) {
 
-	if (this.yy.is_parsing) Lava.throw("Calling TemplateParser.parseRaw() recursively will break the parser. Please, create another instance.");
+	if (this.yy.is_parsing) Lava.t("Calling TemplateParser.parseRaw() recursively will break the parser. Please, create another instance.");
 
 	var result;
 
@@ -89,17 +89,17 @@ Lava.TemplateParser.yy = {
 					segments_count--;
 					segment_name = normalized_path.shift();
 
-					if (Lava.schema.DEBUG && segment_name == '') Lava.throw("Malformed control attribute: " + attribute.name);
+					if (Lava.schema.DEBUG && segment_name == '') Lava.t("Malformed control attribute: " + attribute.name);
 
 					if (segments_count) {
 
 						if (!(segment_name in current_object)) current_object[segment_name] = {};
 						current_object = current_object[segment_name];
-						if (typeof(current_object) != 'object') Lava.throw("Conflicting control attribute: " + attribute.name);
+						if (typeof(current_object) != 'object') Lava.t("Conflicting control attribute: " + attribute.name);
 
 					} else {
 
-						if (segment_name in current_object) Lava.throw('Conflicting control attribute: ' + attribute.name);
+						if (segment_name in current_object) Lava.t('Conflicting control attribute: ' + attribute.name);
 						current_object[segment_name] = attribute.value;
 
 					}
@@ -108,7 +108,7 @@ Lava.TemplateParser.yy = {
 
 			} else {
 
-				if (attribute.name in attributes) Lava.throw('Duplicate attribute on tag: ' + attribute.name);
+				if (attribute.name in attributes) Lava.t('Duplicate attribute on tag: ' + attribute.name);
 				attributes[attribute.name] = attribute.value;
 
 			}
@@ -162,7 +162,7 @@ Lava.TemplateParser.yy = {
 			? this.CONTROL_ATTRIBUTE_PREFIX + start_object.name
 			: start_object.name;
 
-		if (start_name != end_name) Lava.throw('End tag ("' + end_name + '") does not match the start tag ("' + start_name + '")');
+		if (start_name != end_name) Lava.t('End tag ("' + end_name + '") does not match the start tag ("' + start_name + '")');
 
 	},
 
@@ -171,14 +171,14 @@ Lava.TemplateParser.yy = {
 		var i = string.indexOf('/'),
 			name = string.substr(0, i);
 
-		if (Lava.schema.DEBUG && i == -1) Lava.throw();
-		if (Lava.schema.DEBUG && !(name[0] in Lava.parsers.Common.locator_types)) Lava.throw("Malformed class name locator: " + string);
+		if (Lava.schema.DEBUG && i == -1) Lava.t();
+		if (Lava.schema.DEBUG && !(name[0] in Lava.parsers.Common.locator_types)) Lava.t("Malformed class name locator: " + string);
 
 		config.class_locator = {locator_type: Lava.parsers.Common.locator_types[name[0]], name: name.substr(1)};
 		config.real_class = string.substr(i);
 		config.name = config.real_class.substr(1); // cut the slash to match the end block
 
-		if (Lava.schema.DEBUG && (!config.class_locator.name || !config.class_locator.locator_type)) Lava.throw("Malformed class name locator: " + string);
+		if (Lava.schema.DEBUG && (!config.class_locator.name || !config.class_locator.locator_type)) Lava.t("Malformed class name locator: " + string);
 
 	}
 

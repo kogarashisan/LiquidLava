@@ -173,15 +173,15 @@ case 26: this.$ = {label: $$[$0], direction: 'look_down'};
 break;
 case 27: this.$ = $$[$0]; 
 break;
-case 28: Lava.throw("Lookup operator is not supported yet."); 
+case 28: Lava.t("Lookup operator is not supported yet.");
 break;
 case 29:
 			$$[$0-1].depth = parseInt($$[$0]);
-			if (!$$[$0-1].depth) Lava.throw('Deepness operator: depth must be > 0');
+			if (!$$[$0-1].depth) Lava.t('Deepness operator: depth must be > 0');
 			this.$ = $$[$0-1];
 		
 break;
-case 30: Lava.throw("Lookup operator is not supported yet."); 
+case 30: Lava.t("Lookup operator is not supported yet.");
 break;
 case 31:
 			yy.x_counters.global_modifiers++;
@@ -248,7 +248,7 @@ case 45:
 			var segments = $$[$0-1].path_segments;
 			if (segments) {
 				for (var i = 0, count = segments.length; i < count; i++) {
-					if (typeof(segments[i]) == 'object') Lava.throw('Dynamic segment must not contain other dynamic segments');
+					if (typeof(segments[i]) == 'object') Lava.t('Dynamic segment must not contain other dynamic segments');
 				}
 			}
 			this.$ = $$[$0-1];
@@ -448,15 +448,15 @@ performAction: function anonymous(yy,yy_,$avoiding_name_collisions,YY_START
 
 var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {
-case 0: Lava.throw('Spaces between function name and opening brace are not allowed (1)'); 
+case 0: Lava.t('Spaces between function name and opening brace are not allowed (1)');
 break;
-case 1: Lava.throw('Spaces between function name and opening brace are not allowed (1)'); 
+case 1: Lava.t('Spaces between function name and opening brace are not allowed (1)');
 break;
-case 2: Lava.throw('Spaces between function name and opening brace are not allowed (2)'); 
+case 2: Lava.t('Spaces between function name and opening brace are not allowed (2)');
 break;
-case 3: Lava.throw('Spaces in scope path are not allowed (1)'); 
+case 3: Lava.t('Spaces in scope path are not allowed (1)');
 break;
-case 4: Lava.throw('Spaces in scope path are not allowed (2)'); 
+case 4: Lava.t('Spaces in scope path are not allowed (2)');
 break;
 case 5: yy_.yytext = yy_.yytext.slice(1); return 24; 
 break;
@@ -543,8 +543,8 @@ case 37:
 			'and': '&&'
 		};
 
-		if (lowercase == 'this') Lava.throw("'this' is reserved word. Are you missing the Label sign (@)?");
-		if ((lowercase in map) && lowercase != yy_.yytext) Lava.throw("Expression parser: 'lt', 'gt', 'and' must be lower case");
+		if (lowercase == 'this') Lava.t("'this' is reserved word. Are you missing the Label sign (@)?");
+		if ((lowercase in map) && lowercase != yy_.yytext) Lava.t("Expression parser: 'lt', 'gt', 'and' must be lower case");
 
 		if (lowercase in map) {
 			yy_.yytext = map[lowercase];
@@ -552,7 +552,7 @@ case 37:
 		}
 
 		if (Lava.parsers.Common.isLiteral(yy_.yytext)) {
-			if (lowercase != yy_.yytext) Lava.throw("Expression parser, code style: literals must be lower case");
+			if (lowercase != yy_.yytext) Lava.t("Expression parser, code style: literals must be lower case");
 			return 17;
 		}
 

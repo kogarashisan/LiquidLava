@@ -99,7 +99,7 @@ Lava.define(
 	_setIsOpen: function(name, value) {
 
 		var open_target_container = this._getTargetContainer();
-		if (Lava.schema.DEBUG && !open_target_container) Lava.throw("DropDown was created without container and target");
+		if (Lava.schema.DEBUG && !open_target_container) Lava.t("DropDown was created without container and target");
 
 		if (this._properties.is_expanded != value) {
 

@@ -120,7 +120,7 @@ Lava.define(
 
 			} else {
 
-				if (name in this._property_bindings_by_property) Lava.throw("Error initializing assign: property binding already created");
+				if (name in this._property_bindings_by_property) Lava.t("Error initializing assign: property binding already created");
 
 				this._property_bindings_by_property[name] = new Lava.scope.PropertyBinding(this, name, this.depth, config.assigns[name]);
 
@@ -195,7 +195,7 @@ Lava.define(
 
 			root = root.getParentView();
 
-			if (!root) Lava.throw("Error evaluating depth: parent view does not exist");
+			if (!root) Lava.t("Error evaluating depth: parent view does not exist");
 
 			depth--;
 
@@ -267,7 +267,7 @@ Lava.define(
 
 	broadcastSleep: function() {
 
-		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.throw();
+		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.t();
 
 		if (!this._is_sleeping) {
 
@@ -287,7 +287,7 @@ Lava.define(
 
 	broadcastWakeup: function() {
 
-		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.throw();
+		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.t();
 
 		if (this._is_sleeping) {
 
@@ -314,7 +314,7 @@ Lava.define(
 
 	_renderContents: function() {
 
-		Lava.throw("_renderContents must be overridden in inherited classes");
+		Lava.t("_renderContents must be overridden in inherited classes");
 
 	},
 
@@ -344,7 +344,7 @@ Lava.define(
 	 */
 	refresh: function() {
 
-		if (Lava.schema.DEBUG && !this._container) Lava.throw("Refresh on a view without container");
+		if (Lava.schema.DEBUG && !this._container) Lava.t("Refresh on a view without container");
 
 		this._is_queued_for_refresh = false;
 
@@ -374,7 +374,7 @@ Lava.define(
 	 */
 	locateViewByLabel: function(label) {
 
-		if (Lava.schema.DEBUG && !label) Lava.throw();
+		if (Lava.schema.DEBUG && !label) Lava.t();
 
 		var result = this;
 
@@ -418,7 +418,7 @@ Lava.define(
 	 */
 	locateViewByName: function(name) {
 
-		if (Lava.schema.DEBUG && !name) Lava.throw();
+		if (Lava.schema.DEBUG && !name) Lava.t();
 
 		var result = this._widget;
 
@@ -438,7 +438,7 @@ Lava.define(
 	 */
 	locateViewById: function(id) {
 
-		if (Lava.schema.DEBUG && !id) Lava.throw();
+		if (Lava.schema.DEBUG && !id) Lava.t();
 
 		return Lava.view_manager.getViewById(id);
 
@@ -450,7 +450,7 @@ Lava.define(
 	 */
 	locateViewByGuid: function(guid) {
 
-		if (Lava.schema.DEBUG && !guid) Lava.throw();
+		if (Lava.schema.DEBUG && !guid) Lava.t();
 
 		return Lava.view_manager.getViewByGuid(guid);
 
@@ -464,7 +464,7 @@ Lava.define(
 
 		var result = this['locateViewBy' + path_config.locator_type](path_config.locator);
 
-		if (Lava.schema.DEBUG && !result) Lava.throw("View not found. " + path_config.locator_type + ':' + path_config.locator);
+		if (Lava.schema.DEBUG && !result) Lava.t("View not found. " + path_config.locator_type + ':' + path_config.locator);
 
 		if ('depth' in path_config) {
 
@@ -508,18 +508,18 @@ Lava.define(
 
 			view = view.locateViewWithProperty(path_config.property_name);
 
-			if (Lava.schema.DEBUG && !view) Lava.throw("Property not found: " + path_config.property_name);
+			if (Lava.schema.DEBUG && !view) Lava.t("Property not found: " + path_config.property_name);
 
 			result = view.getDataBinding(path_config.property_name);
 
 		} else {
 
-			if (Lava.schema.DEBUG && !('locator_type' in path_config)) Lava.throw("Malformed scope path (1)");
-			if (Lava.schema.DEBUG && !tail) Lava.throw("Malformed scope path (2)");
+			if (Lava.schema.DEBUG && !('locator_type' in path_config)) Lava.t("Malformed scope path (1)");
+			if (Lava.schema.DEBUG && !tail) Lava.t("Malformed scope path (2)");
 
 			result = this.locateViewByPathConfig(path_config);
 
-			if (Lava.schema.DEBUG && !result) Lava.throw("View not found. "
+			if (Lava.schema.DEBUG && !result) Lava.t("View not found. "
 				+ path_config.locator_type + ": " + path_config.locator + ", depth:" + path_config.depth);
 
 		}
@@ -563,12 +563,12 @@ Lava.define(
 
 		} else {
 
-			if (Lava.schema.DEBUG && !('locator_type' in path_config)) Lava.throw("Malformed scope path (1)");
-			if (Lava.schema.DEBUG && !tail) Lava.throw("Malformed scope path (2)");
+			if (Lava.schema.DEBUG && !('locator_type' in path_config)) Lava.t("Malformed scope path (1)");
+			if (Lava.schema.DEBUG && !tail) Lava.t("Malformed scope path (2)");
 
 			result = this.locateViewByPathConfig(path_config);
 
-			if (Lava.schema.DEBUG && !result) Lava.throw("View not found. "
+			if (Lava.schema.DEBUG && !result) Lava.t("View not found. "
 				+ path_config.locator_type + ": " + path_config.locator + ", depth:" + path_config.depth);
 
 		}
@@ -617,7 +617,7 @@ Lava.define(
 	 */
 	getSegment: function(name_source_scope) {
 
-		if (Lava.schema.DEBUG && !name_source_scope.guid) Lava.throw("Only PropertyBinding and DataBinding may be used as name source for segments");
+		if (Lava.schema.DEBUG && !name_source_scope.guid) Lava.t("Only PropertyBinding and DataBinding may be used as name source for segments");
 
 		if (!(name_source_scope.guid in this._data_segments)) {
 

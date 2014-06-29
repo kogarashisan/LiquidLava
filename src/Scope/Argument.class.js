@@ -126,7 +126,7 @@ Lava.define(
 
 		var widget = this._widget.locateViewByPathConfig(path_config);
 
-		if (Lava.schema.DEBUG && !widget.isWidget) Lava.throw("Tried to call a modifier from non-widget view");
+		if (Lava.schema.DEBUG && !widget.isWidget) Lava.t("Tried to call a modifier from non-widget view");
 
 		return widget;
 
@@ -136,7 +136,7 @@ Lava.define(
 
 		// Classes that can serve as a binding: PropertyBinding, DataBinding and Segment. They all will fire 'changed'
 		// event only during the refresh cycle, so at this moment the Argument must be already in queue.
-		if (!this._waits_refresh) Lava.throw();
+		if (!this._waits_refresh) Lava.t();
 
 		this._is_dirty = true;
 
@@ -204,7 +204,7 @@ Lava.define(
 
 	_callGlobalModifier: function(name, arguments_array) {
 
-		if (Lava.schema.DEBUG && !(name in Lava.modifiers)) Lava.throw("Unknown global modifier: " + name);
+		if (Lava.schema.DEBUG && !(name in Lava.modifiers)) Lava.t("Unknown global modifier: " + name);
 		return Lava.modifiers[name].apply(Lava.modifiers, arguments_array);
 
 	},
@@ -230,7 +230,7 @@ Lava.define(
 			if (this._binds[i].isWaitingRefresh()) {
 
 				//this._count_dependencies_waiting_refresh++;
-				Lava.throw();
+				Lava.t();
 
 			}
 

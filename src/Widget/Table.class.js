@@ -26,7 +26,7 @@ Lava.define(
 
 	init: function(config, widget, parent_view, template, properties) {
 
-		if (Lava.schema.DEBUG && (!config.options || !config.options.columns)) Lava.throw("Table: config.options.columns is required");
+		if (Lava.schema.DEBUG && (!config.options || !config.options.columns)) Lava.t("Table: config.options.columns is required");
 		this._properties._columns = config.options.columns;
 		this.Standard$init(config, widget, parent_view, template, properties);
 

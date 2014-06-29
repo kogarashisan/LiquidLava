@@ -14,7 +14,7 @@ Lava.types = {
 		 * @returns {boolean}
 		 */
 		fromString: function(value, descriptor) {
-			if (!this.isValidString(value, descriptor)) Lava.throw("Invalid " + this.type_name + " string: " + value);
+			if (!this.isValidString(value, descriptor)) Lava.t("Invalid " + this.type_name + " string: " + value);
 			return this.fromSafeString(value, descriptor);
 		}
 
@@ -166,7 +166,7 @@ Lava.types = {
 		 */
 		isValidValue: function(value, descriptor) {
 
-			if (Lava.schema.DEBUG && (!descriptor || !('allowed_values' in descriptor))) Lava.throw("Set type: missing allowed_values in schema");
+			if (Lava.schema.DEBUG && (!descriptor || !('allowed_values' in descriptor))) Lava.t("Set type: missing allowed_values in schema");
 			return descriptor['allowed_values'].indexOf(value) != -1;
 
 		},
@@ -231,7 +231,7 @@ Lava.types = {
 		 */
 		isValidValue: function(value, descriptor) {
 
-			if (Lava.schema.DEBUG && (!descriptor || !('value_map' in descriptor))) Lava.throw("Set type: missing allowed_values in schema");
+			if (Lava.schema.DEBUG && (!descriptor || !('value_map' in descriptor))) Lava.t("Set type: missing allowed_values in schema");
 			return (value in descriptor['value_map']);
 
 		},
@@ -268,7 +268,7 @@ Lava.types = {
 
 		fromSafeString: function() {
 
-			Lava.throw();
+			Lava.t();
 
 		}
 
@@ -292,7 +292,7 @@ Lava.types = {
 
 		fromSafeString: function(value) {
 
-			Lava.throw();
+			Lava.t();
 
 		}
 

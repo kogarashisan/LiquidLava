@@ -43,7 +43,7 @@ Lava.modifiers = {
 
 	translateBoolean: function(value) {
 
-		if (Lava.schema.DEBUG && typeof(value) != 'boolean') Lava.throw("translateBoolean: argument is not boolean type");
+		if (Lava.schema.DEBUG && typeof(value) != 'boolean') Lava.t("translateBoolean: argument is not boolean type");
 		return Lava.locales[Lava.schema.LOCALE].booleans[+value];
 
 	}

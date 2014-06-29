@@ -139,7 +139,7 @@ Lava.define(
 		var edit_row = template_arguments[0];
 		if (this._properties._edit_record == null) {
 
-			if (Lava.schema.DEBUG && this._click_stack_changed_listener) Lava.throw();
+			if (Lava.schema.DEBUG && this._click_stack_changed_listener) Lava.t();
 			this._click_stack_changed_listener = Lava.view_manager.on(
 				'click_stack_changed',
 				this._onClickStackChanged,
@@ -268,7 +268,7 @@ Lava.define(
 
 		Firestorm.Element.removeClass(Firestorm.getElementById('initial_loading_indicator'), 'hidden');
 
-		if (this._request != null) Lava.throw();
+		if (this._request != null) Lava.t();
 
 		this._properties.versions.each(function(value){
 			if (value.get('name') == name) {
@@ -278,7 +278,7 @@ Lava.define(
 		});
 
 		if (version) {
-			if (version.get('is_loaded')) Lava.throw();
+			if (version.get('is_loaded')) Lava.t();
 			this._loadTarget(version);
 		} else {
 			window.alert('Page not found: ' + name);
@@ -440,7 +440,7 @@ Lava.define(
 
 		Firestorm.Element.removeClass(Firestorm.getElementById('initial_loading_indicator'), 'hidden');
 
-		if (this._request != null) Lava.throw();
+		if (this._request != null) Lava.t();
 
 		this._properties.examples.each(function(value){
 			if (value.get('name') == name) {
@@ -450,7 +450,7 @@ Lava.define(
 		});
 
 		if (example) {
-			if (example.get('is_loaded')) Lava.throw();
+			if (example.get('is_loaded')) Lava.t();
 			this._loadExample(example);
 		} else {
 			window.alert('Example not found: ' + name);

@@ -80,7 +80,7 @@ Lava.algorithms.sorting.mergeSort = (function(){
 
 	return function(items, less) {
 
-		if (_less) Lava.throw("This version of mergeSort may not be called recursively");
+		if (_less) Lava.t("This version of mergeSort may not be called recursively");
 
 		var length = items.length,
 			result;

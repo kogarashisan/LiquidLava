@@ -118,7 +118,7 @@ case 5:
 break;
 case 6:
 			var targets = Lava.parsers.Common.parseTargets($$[$0]);
-			if (targets.length != 1) Lava.throw("Malformed include");
+			if (targets.length != 1) Lava.t("Malformed include");
 			targets[0].type = 'include';
 			this.$ = targets[0];
 		
@@ -140,18 +140,18 @@ case 8:
 		
 break;
 case 9:
-			if ($$[$0-1].name != $$[$0]) Lava.throw('End block ("' + $$[$0] + '") does not match the start block ("' + $$[$0-1].name + '") (1)');
+			if ($$[$0-1].name != $$[$0]) Lava.t('End block ("' + $$[$0] + '") does not match the start block ("' + $$[$0-1].name + '") (1)');
 			this.$ = $$[$0-1];
 		
 break;
 case 10:
-			if ($$[$0-2].name != $$[$0]) Lava.throw('End block ("' + $$[$0] + '") does not match the start block ("' + $$[$0-2].name + '") (2)');
+			if ($$[$0-2].name != $$[$0]) Lava.t('End block ("' + $$[$0] + '") does not match the start block ("' + $$[$0-2].name + '") (2)');
 			$$[$0-2].content = $$[$0-1];
 			this.$ = $$[$0-2];
 		
 break;
 case 11:
-			if ($$[$0-2].name != $$[$0]) Lava.throw('End block ("' + $$[$0] + '") does not match the start block ("' + $$[$0-2].name + '") (3)');
+			if ($$[$0-2].name != $$[$0]) Lava.t('End block ("' + $$[$0] + '") does not match the start block ("' + $$[$0-2].name + '") (3)');
 			if ('elseif_arguments' in $$[$0-1]) {
 				$$[$0-2].elseif_arguments = $$[$0-1].elseif_arguments;
 				$$[$0-2].elseif_contents = $$[$0-1].elseif_contents;
@@ -161,7 +161,7 @@ case 11:
 		
 break;
 case 12:
-			if ($$[$0-3].name != $$[$0]) Lava.throw('End block ("' + $$[$0] + '") does not match the start block ("' + $$[$0-3].name + '") (4)');
+			if ($$[$0-3].name != $$[$0]) Lava.t('End block ("' + $$[$0] + '") does not match the start block ("' + $$[$0-3].name + '") (4)');
 			$$[$0-3].content = $$[$0-2];
 			if ('elseif_arguments' in $$[$0-1]) {
 				$$[$0-3].elseif_arguments = $$[$0-1].elseif_arguments;
@@ -183,7 +183,7 @@ break;
 case 15:
 			this.$ = $$[$0-1];
 			if ($$[$0-1].x && ('equiv' in $$[$0-1].x)) {
-				if (!$$[$0-1].x.equiv) Lava.throw('empty x:equiv');
+				if (!$$[$0-1].x.equiv) Lava.t('empty x:equiv');
 				this.$ = yy.parseRawTag($$[$0-1].x.equiv); // sets name and type
 				this.$.x = $$[$0-1].x;
 				if ('attributes' in $$[$0-1]) this.$.attributes = $$[$0-1].attributes;
@@ -195,25 +195,25 @@ case 16:
 			yy.validateTagEnd($$[$0-2], $$[$0]);
 			$$[$0-2].content = $$[$0-1];
 			this.$ = $$[$0-2];
-			if (Lava.isVoidTag(this.$.name)) Lava.throw("Void tag with content: " + this.$.name);
+			if (Lava.isVoidTag(this.$.name)) Lava.t("Void tag with content: " + this.$.name);
 		
 break;
 case 17:
 			if ($$[$0] == 'preserve_whitespace') {
-				if (yy.preserve_whitespace) Lava.throw("Switch {pre:} is already active");
+				if (yy.preserve_whitespace) Lava.t("Switch {pre:} is already active");
 				yy.preserve_whitespace = true;
 			} else {
-				Lava.throw("Parser error: lexer returned unknown switch: " + $$[$0]);
+				Lava.t("Parser error: lexer returned unknown switch: " + $$[$0]);
 			}
 			this.$ = null;
 		
 break;
 case 18:
 			if ($$[$0] == 'preserve_whitespace') {
-				if (!yy.preserve_whitespace) Lava.throw("Trying to turn off inactive switch: {:pre}");
+				if (!yy.preserve_whitespace) Lava.t("Trying to turn off inactive switch: {:pre}");
 				yy.preserve_whitespace = false;
 			} else {
-				Lava.throw("Parser error: lexer returned unknown switch: " + $$[$0]);
+				Lava.t("Parser error: lexer returned unknown switch: " + $$[$0]);
 			}
 			this.$ = null;
 		
@@ -258,7 +258,7 @@ case 24:
 		
 break;
 case 25:
-			if ($$[$0].name in $$[$0-1]) Lava.throw('Duplicate attribute in block definition: ' + $$[$0].name);
+			if ($$[$0].name in $$[$0-1]) Lava.t('Duplicate attribute in block definition: ' + $$[$0].name);
 			$$[$0-1][$$[$0].name] = $$[$0].value;
 			this.$ = $$[$0-1];
 		
@@ -332,28 +332,28 @@ case 38:
 break;
 case 39:
 			var arguments = yy.lexer.x_export_arguments;
-			if (arguments.length != 1) Lava.throw('Elseif block requires exactly one argument');
+			if (arguments.length != 1) Lava.t('Elseif block requires exactly one argument');
 			this.$ = arguments[0];
 			yy.lexer.x_export_arguments = null;
 		
 break;
 case 40:
-			if ($$[$0-1] != $$[$0-1].toLowerCase()) Lava.throw("Tag names must be lower case: " + $$[$0-1]);
+			if ($$[$0-1] != $$[$0-1].toLowerCase()) Lava.t("Tag names must be lower case: " + $$[$0-1]);
 			this.$ = yy.parseRawTag($$[$0-1]);
 		
 break;
 case 41:
-			if ($$[$0-2] != $$[$0-2].toLowerCase()) Lava.throw("Tag names must be lower case: " + $$[$0-2]);
+			if ($$[$0-2] != $$[$0-2].toLowerCase()) Lava.t("Tag names must be lower case: " + $$[$0-2]);
 			this.$ = yy.parseRawTag($$[$0-2], $$[$0-1]);
 		
 break;
 case 42:
-			if ($$[$0-1] != $$[$0-1].toLowerCase()) Lava.throw("Tag names must be lower case: " + $$[$0-1]);
+			if ($$[$0-1] != $$[$0-1].toLowerCase()) Lava.t("Tag names must be lower case: " + $$[$0-1]);
 			this.$ = yy.parseRawTag($$[$0-1]);
 		
 break;
 case 43:
-			if ($$[$0-2] != $$[$0-2].toLowerCase()) Lava.throw("Tag names must be lower case: " + $$[$0-2]);
+			if ($$[$0-2] != $$[$0-2].toLowerCase()) Lava.t("Tag names must be lower case: " + $$[$0-2]);
 			this.$ = yy.parseRawTag($$[$0-2], $$[$0-1]);
 		
 break;
@@ -601,9 +601,9 @@ case 8: this.popState(); return 9; // normal
 break;
 case 9: this.popState(); return 10; // escaped 
 break;
-case 10: Lava.throw('Spaces between block opening tag and block name are not allowed'); 
+case 10: Lava.t('Spaces between block opening tag and block name are not allowed');
 break;
-case 11: Lava.throw('Spaces between block name and opening brace are not allowed'); 
+case 11: Lava.t('Spaces between block name and opening brace are not allowed');
 break;
 case 12: return 20; 
 break;
@@ -627,7 +627,7 @@ case 17:
 		this.x_export_arguments = Lava.ExpressionParser.parseWithTail(config_ref);
 		this._input = this._input.substr(this._input.length - config_ref.tail_length);
 		// { <- comment for Jison
-		if (!(/(\s|\})/.test(this._input[0]))) Lava.throw('Lex: arguments closing brace must be followed by whitespace or CLOSE_CURLY');
+		if (!(/(\s|\})/.test(this._input[0]))) Lava.t('Lex: arguments closing brace must be followed by whitespace or CLOSE_CURLY');
 		this.popState(); // block
 		this.begin('blockHash');
 		return 26;
@@ -657,7 +657,7 @@ case 27:
 		this.yy.x_lexer_is_fragment = false;
 		if (yy_.yytext == 'script') {
 			var index = this._input.indexOf('>');
-			if (index == -1) Lava.throw("Lexical error: malformed script tag");
+			if (index == -1) Lava.t("Lexical error: malformed script tag");
 			var attributes_string = this._input.substr(0, index);
 			if (/type=(\'|\")lava\/fragment(\'|\")/.test(attributes_string)) {
 				this.yy.x_lexer_is_fragment = true;
@@ -720,26 +720,26 @@ case 40:
 		if (yy_.yytext == '{literal:}') {
 			this.begin('literal');
 		} else if (yy_.yytext == '{pure_blocks:}') {
-			if (this.x_pure_blocks_mode) Lava.throw('Lexer switch: "{pure_blocks:}" mode is already enabled');
+			if (this.x_pure_blocks_mode) Lava.t('Lexer switch: "{pure_blocks:}" mode is already enabled');
 			this.x_pure_blocks_mode = true;
 		} else if (yy_.yytext == '{pre:}') {
 			yy_.yytext = 'preserve_whitespace';
 			return 18;
 		} else {
-			Lava.throw('Unknown switch: ' + yy_.yytext);
+			Lava.t('Unknown switch: ' + yy_.yytext);
 		}
 	
 break;
 case 41:
 		this.popState();
 		if (yy_.yytext == '{:pure_blocks}') {
-			if (!this.x_pure_blocks_mode) Lava.throw('Redundant lexer switch "{:pure_blocks}"');
+			if (!this.x_pure_blocks_mode) Lava.t('Redundant lexer switch "{:pure_blocks}"');
 			this.x_pure_blocks_mode = false;
 		} else if (yy_.yytext == '{:pre}') {
 			yy_.yytext = 'preserve_whitespace';
 			return 19;
 		} else {
-			Lava.throw('Unknown switch: ' + yy_.yytext);
+			Lava.t('Unknown switch: ' + yy_.yytext);
 		}
 	
 break;

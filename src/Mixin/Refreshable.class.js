@@ -28,8 +28,8 @@ Lava.define(
 	 */
 	doRefresh: function(refresh_id, is_safe) {
 
-		if (Lava.schema.DEBUG && this._count_dependencies_waiting_refresh) Lava.throw();
-		if (Lava.schema.DEBUG && !this._waits_refresh && this._refresh_ticket) Lava.throw();
+		if (Lava.schema.DEBUG && this._count_dependencies_waiting_refresh) Lava.t();
+		if (Lava.schema.DEBUG && !this._waits_refresh && this._refresh_ticket) Lava.t();
 
 		if (this._waits_refresh) { // to counter exceptions
 
@@ -84,7 +84,7 @@ Lava.define(
 
 		} else {
 
-			if (Lava.schema.DEBUG && this._refresh_ticket) Lava.throw();
+			if (Lava.schema.DEBUG && this._refresh_ticket) Lava.t();
 
 			this._waits_refresh = true;
 			this._fire('waits_refresh');
@@ -95,8 +95,8 @@ Lava.define(
 
 	_onDependencyRefreshed: function() {
 
-		if (Lava.schema.DEBUG && !this._waits_refresh) Lava.throw();
-		if (Lava.schema.DEBUG && this._refresh_ticket) Lava.throw();
+		if (Lava.schema.DEBUG && !this._waits_refresh) Lava.t();
+		if (Lava.schema.DEBUG && this._refresh_ticket) Lava.t();
 
 		this._count_dependencies_waiting_refresh--;
 
@@ -104,7 +104,7 @@ Lava.define(
 
 			if (this._requeue) {
 
-				if (Lava.schema.DEBUG && this._refresh_ticket) Lava.throw();
+				if (Lava.schema.DEBUG && this._refresh_ticket) Lava.t();
 
 				this._refresh_ticket = Lava.ScopeManager.scheduleScopeRefresh(this, this.level);
 
@@ -138,7 +138,7 @@ Lava.define(
 
 		if (!this._waits_refresh) {
 
-			if (Lava.schema.DEBUG && this._refresh_ticket) Lava.throw();
+			if (Lava.schema.DEBUG && this._refresh_ticket) Lava.t();
 
 			this._waits_refresh = true;
 			this._refresh_ticket = Lava.ScopeManager.scheduleScopeRefresh(this, this.level);
@@ -150,7 +150,7 @@ Lava.define(
 
 	debugAssertClean: function() {
 
-		if (this._waits_refresh || this._refresh_ticket || this._is_dirty) Lava.throw("Refreshable::debugAssertClean() failed");
+		if (this._waits_refresh || this._refresh_ticket || this._is_dirty) Lava.t("Refreshable::debugAssertClean() failed");
 
 	},
 

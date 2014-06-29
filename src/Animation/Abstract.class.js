@@ -41,7 +41,7 @@ Lava.define(
 	 */
 	onTimer: function(now) {
 
-		Lava.throw("This method is assigned dynamically in constructor");
+		Lava.t("This method is assigned dynamically in constructor");
 
 	},
 

@@ -115,7 +115,7 @@ Lava.define(
 
 		Firestorm.Element.removeClass(Firestorm.getElementById('initial_loading_indicator'), 'hidden');
 
-		if (this._request != null) Lava.throw();
+		if (this._request != null) Lava.t();
 
 		this._properties.examples.each(function(value){
 			if (value.get('name') == name) {
@@ -125,7 +125,7 @@ Lava.define(
 		});
 
 		if (example) {
-			if (example.get('is_loaded')) Lava.throw();
+			if (example.get('is_loaded')) Lava.t();
 			this._loadExample(example);
 		} else {
 			window.alert('Example not found: ' + name);

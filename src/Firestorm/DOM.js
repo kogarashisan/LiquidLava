@@ -47,14 +47,14 @@ Firestorm.DOM = {
 
 	},
 
-	insertHTMLBefore: function(element, html) { Firestorm.throw(1); },
-	insertHTMLAfter: function(element, html) { Firestorm.throw(1); },
-	insertHTMLTop: function(element, html) { Firestorm.throw(1); },
-	insertHTMLBottom: function(element, html) { Firestorm.throw(1); },
+	insertHTMLBefore: function(element, html) { Firestorm.t(1); },
+	insertHTMLAfter: function(element, html) { Firestorm.t(1); },
+	insertHTMLTop: function(element, html) { Firestorm.t(1); },
+	insertHTMLBottom: function(element, html) { Firestorm.t(1); },
 
-	clearOuterRange: function(start_element, end_element) { Firestorm.throw(1); },
-	clearInnerRange: function(start_element, end_element) { Firestorm.throw(1); },
-	replaceInnerRange: function(start_element, end_element, html) { Firestorm.throw(1); },
+	clearOuterRange: function(start_element, end_element) { Firestorm.t(1); },
+	clearInnerRange: function(start_element, end_element) { Firestorm.t(1); },
+	replaceInnerRange: function(start_element, end_element, html) { Firestorm.t(1); },
 
 	insertHTML: function(element, html, position) {
 

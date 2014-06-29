@@ -63,7 +63,7 @@ function _cCollectionField() {
 	 */
 	this.record_field = '';
 
-	this.export = false;
+	this['export'] = false;
 
 }
 

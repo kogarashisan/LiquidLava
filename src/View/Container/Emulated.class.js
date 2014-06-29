@@ -54,17 +54,17 @@ Lava.define(
 
 	setHTML: function(html) {
 
-		if (!this._is_inDOM) Lava.throw("setHTML: container is not in DOM");
+		if (!this._is_inDOM) Lava.t("setHTML: container is not in DOM");
 
-		Lava.throw('call to setHTML() in emulated container');
+		Lava.t('call to setHTML() in emulated container');
 
 	},
 
 	remove: function() {
 
-		if (!this._is_inDOM) Lava.throw("remove: container is not in DOM");
+		if (!this._is_inDOM) Lava.t("remove: container is not in DOM");
 
-		Lava.throw('call to remove() in emulated container');
+		Lava.t('call to remove() in emulated container');
 
 	},
 
@@ -86,19 +86,19 @@ Lava.define(
 	 */
 	appendHTML: function(html) {
 
-		Lava.throw("appendHTML: placement is not supported");
+		Lava.t("appendHTML: placement is not supported");
 
 	},
 
 	prependHTML: function(html) {
 
-		Lava.throw('call to prependHTML() in emulated container');
+		Lava.t('call to prependHTML() in emulated container');
 
 	},
 
 	insertHTMLAfter: function(html) {
 
-		Lava.throw('call to insertHTMLAfter() in emulated container');
+		Lava.t('call to insertHTMLAfter() in emulated container');
 
 	},
 

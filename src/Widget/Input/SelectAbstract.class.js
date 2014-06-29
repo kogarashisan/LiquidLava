@@ -47,7 +47,7 @@ Lava.define(
 
 	_refreshValue: function() {
 
-		Lava.throw('Abstract function call: _refreshValue');
+		Lava.t('Abstract function call: _refreshValue');
 
 	}
 

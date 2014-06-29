@@ -66,7 +66,7 @@ Lava.Core = {
 
 		var event_name = listener.event_name,
 			index = this._event_handlers[event_name].indexOf(listener);
-		if (Lava.schema.DEBUG && index == -1) Lava.throw();
+		if (Lava.schema.DEBUG && index == -1) Lava.t();
 		this._event_handlers[event_name].splice(index, 1);
 
 		this._event_usage_counters[event_name]--;

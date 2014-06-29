@@ -43,7 +43,7 @@ Lava.define(
 	 */
 	getSegment: function(name_source_scope) {
 
-		if (Lava.schema.DEBUG && !name_source_scope.guid) Lava.throw("Only PropertyBinding and DataBinding may be used as name source for segments");
+		if (Lava.schema.DEBUG && !name_source_scope.guid) Lava.t("Only PropertyBinding and DataBinding may be used as name source for segments");
 
 		if (!(name_source_scope.guid in this._data_segments)) {
 

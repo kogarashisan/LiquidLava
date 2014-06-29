@@ -21,7 +21,7 @@ Lava.define(
 			Lava.schema.DEBUG
 			&& (('argument' in this._config) || ('else_template' in this._config) || ('elseif_arguments' in this._config))
 		) {
-			Lava.throw("Standard View does not support arguments and elseif/else blocks");
+			Lava.t("Standard View does not support arguments and elseif/else blocks");
 		}
 
 	},

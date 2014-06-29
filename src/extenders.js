@@ -91,7 +91,7 @@ Lava.extenders = {
 
 			} else {
 
-				if (Lava.schema.DEBUG && dest[name].type != source[name].type) Lava.throw("[Config storage] property types must match: " + name);
+				if (Lava.schema.DEBUG && dest[name].type != source[name].type) Lava.t("[Config storage] property types must match: " + name);
 				if (['template_hash', 'object_hash', 'object'].indexOf(dest[name].type) != -1) {
 
 					Firestorm.implement(dest[name], source[name]);

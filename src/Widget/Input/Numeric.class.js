@@ -30,7 +30,7 @@ Lava.define(
 
 			if (config.options['type']) {
 
-				if (config.options['type'] != 'text') Lava.throw('Numeric input: the only recognized "type" option value in "text"');
+				if (config.options['type'] != 'text') Lava.t('Numeric input: the only recognized "type" option value in "text"');
 				this._type = config.options['type'];
 
 			}

@@ -47,7 +47,7 @@ Lava.define(
 
 			} else {
 
-				if (Lava.schema.DEBUG && config.direction != Lava.BINDING_DIRECTIONS.FROM_WIDGET) Lava.throw();
+				if (Lava.schema.DEBUG && config.direction != Lava.BINDING_DIRECTIONS.FROM_WIDGET) Lava.t();
 
 				this._scope.setValue(this._widget.get(this._property_name));
 				scope_listener = false;
@@ -65,7 +65,7 @@ Lava.define(
 		}
 
 		if (widget_listener) {
-			if (!this._scope.isSetValue) Lava.throw("Binding: bound scope does not implement setValue");
+			if (!this._scope.isSetValue) Lava.t("Binding: bound scope does not implement setValue");
 			this._widget_property_changed_listener = widget.onPropertyChanged(this._property_name, this.onWidgetPropertyChanged, this);
 		}
 

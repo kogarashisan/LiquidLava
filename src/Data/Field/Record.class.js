@@ -62,7 +62,7 @@ Lava.define(
 
 		if (this._config.foreign_key_field) {
 
-			if (Lava.schema.DEBUG && !this._referenced_module.hasField('id')) Lava.throw("field/Record: the referenced module must have an ID field");
+			if (Lava.schema.DEBUG && !this._referenced_module.hasField('id')) Lava.t("field/Record: the referenced module must have an ID field");
 
 			this._foreign_key_field_name = this._config.foreign_key_field;
 			this._foreign_key_field = this._module.getField(this._foreign_key_field_name);
@@ -93,7 +93,7 @@ Lava.define(
 			// Now foreign records are loaded, they get a GUID, and we need to ensure that collections can be referenced by that guid.
 			if (foreign_id in this._collections_by_id) {
 
-				if (Lava.schema.DEBUG && (records[i].guid in this._collections_by_guid)) Lava.throw();
+				if (Lava.schema.DEBUG && (records[i].guid in this._collections_by_guid)) Lava.t();
 				this._collections_by_guid[records[i].guid] = this._collections_by_id[foreign_id];
 
 			}
@@ -112,7 +112,7 @@ Lava.define(
 
 			collection = this._collections_by_guid[referenced_record.guid];
 
-			if (new_referenced_id in this._collections_by_id) Lava.throw();
+			if (new_referenced_id in this._collections_by_id) Lava.t();
 			this._collections_by_id[new_referenced_id] = collection;
 
 			// set the value of foreign ID field in all local records that reference this foreign record
@@ -219,7 +219,7 @@ Lava.define(
 				if (this._foreign_key_field) {
 
 					if (storage[this._foreign_key_field_name] && storage[this._foreign_key_field_name] != raw_properties[this._name].get('id'))
-						Lava.throw("Record field: mismatch of actual referenced record and it's id in import data");
+						Lava.t("Record field: mismatch of actual referenced record and it's id in import data");
 
 				}
 
@@ -263,7 +263,7 @@ Lava.define(
 
 			} else if (referenced_record_id in this._collections_by_id) {
 
-				if (Lava.schema.DEBUG && this._collections_by_id[referenced_record_id].isEnumerable) Lava.throw("Assertion failed");
+				if (Lava.schema.DEBUG && this._collections_by_id[referenced_record_id].isEnumerable) Lava.t("Assertion failed");
 				this._collections_by_id[referenced_record_id].push(record);
 
 			} else {
@@ -289,7 +289,7 @@ Lava.define(
 	setValue: function(record, storage, new_ref_record) {
 
 		if (!this.isValidValue(new_ref_record))
-			Lava.throw("Field/Record: assigned value is not valid. Reason: " + this.getInvalidReason(new_ref_record));
+			Lava.t("Field/Record: assigned value is not valid. Reason: " + this.getInvalidReason(new_ref_record));
 
 		if (storage[this._name] != null) {
 
@@ -340,13 +340,13 @@ Lava.define(
 
 			Lava.suspendListener(this._collection_listeners_by_guid[referenced_guid].removed);
 			var result = this._collections_by_guid[referenced_guid].remove(local_record);
-			if (Lava.schema.DEBUG && !result) Lava.throw();
+			if (Lava.schema.DEBUG && !result) Lava.t();
 			Lava.resumeListener(this._collection_listeners_by_guid[referenced_guid].removed);
 
 		} else {
 
 			var index = this._collections_by_guid[referenced_guid].indexOf(local_record);
-			if (index == -1) Lava.throw();
+			if (index == -1) Lava.t();
 			this._collections_by_guid[referenced_guid].splice(index, 1);
 
 		}
@@ -367,7 +367,7 @@ Lava.define(
 			if (this._collections_by_guid[referenced_guid].isEnumerable) {
 
 				if (Lava.schema.DEBUG && this._collections_by_guid[referenced_guid].contains(local_record))
-					Lava.throw("Duplicate record");
+					Lava.t("Duplicate record");
 
 				Lava.suspendListener(this._collection_listeners_by_guid[referenced_guid].added);
 				this._collections_by_guid[referenced_guid].push(local_record);
@@ -376,7 +376,7 @@ Lava.define(
 			} else {
 
 				if (Lava.schema.DEBUG && this._collections_by_guid[referenced_guid].indexOf(local_record) !== -1)
-					Lava.throw("Duplicate record");
+					Lava.t("Duplicate record");
 				this._collections_by_guid[referenced_guid].push(local_record);
 
 			}
@@ -465,7 +465,7 @@ Lava.define(
 
 			record = added_records[i];
 			if (!(record.guid in this._storages_by_guid))
-				Lava.throw("Record field: added record is either from different module or not record at all (2)");
+				Lava.t("Record field: added record is either from different module or not record at all (2)");
 			storage = this._storages_by_guid[record.guid];
 
 			if (storage[this._name] != null) {
@@ -537,7 +537,7 @@ Lava.define(
 	_getComparisonValues: function(record_a, record_b) {
 
 		if (Lava.schema.DEBUG && (!(record_a.guid in this._storages_by_guid) || !(record_b.guid in this._storages_by_guid)))
-			Lava.throw("isLess: record does not belong to this module");
+			Lava.t("isLess: record does not belong to this module");
 
 		var ref_record_a = this._storages_by_guid[record_a.guid][this._name],
 			ref_record_b = this._storages_by_guid[record_b.guid][this._name],

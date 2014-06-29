@@ -21,7 +21,7 @@ Lava.define(
 	init: function(module, name, config, module_storages) {
 
 		if (Lava.schema.DEBUG && (('is_nullable' in config) || ('default' in config)))
-			Lava.throw("Standard ID field can not be configured as nullable or have a default value");
+			Lava.t("Standard ID field can not be configured as nullable or have a default value");
 
 		this.Abstract$init(module, name, config, module_storages);
 
@@ -69,7 +69,7 @@ Lava.define(
 
 		} else {
 
-			Lava.throw("Import record must have an ID");
+			Lava.t("Import record must have an ID");
 
 		}
 
@@ -89,7 +89,7 @@ Lava.define(
 
 	setValue: function(record, storage, value) {
 
-		Lava.throw("Standard id field must not be set");
+		Lava.t("Standard id field must not be set");
 
 	}
 

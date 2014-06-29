@@ -143,7 +143,7 @@ Lava.define(
 
 	setHTML: function(html) {
 
-		if (!this._is_inDOM) Lava.throw("setHTML: container is not in DOM");
+		if (!this._is_inDOM) Lava.t("setHTML: container is not in DOM");
 
 		Firestorm.DOM.clearInnerRange(this.getStartElement(), this.getEndElement());
 		Firestorm.DOM.insertHTMLBefore(this.getEndElement(), html);
@@ -152,7 +152,7 @@ Lava.define(
 
 	remove: function() {
 
-		if (!this._is_inDOM) Lava.throw("remove: container is not in DOM");
+		if (!this._is_inDOM) Lava.t("remove: container is not in DOM");
 		Firestorm.DOM.clearOuterRange(this.getStartElement(), this.getEndElement());
 
 	},

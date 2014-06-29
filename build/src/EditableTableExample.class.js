@@ -23,7 +23,7 @@ Lava.define(
 		var edit_row = template_arguments[0];
 		if (this._properties._edit_record == null) {
 
-			if (Lava.schema.DEBUG && this._click_stack_changed_listener) Lava.throw();
+			if (Lava.schema.DEBUG && this._click_stack_changed_listener) Lava.t();
 			this._click_stack_changed_listener = Lava.view_manager.on(
 				'click_stack_changed',
 				this._onClickStackChanged,

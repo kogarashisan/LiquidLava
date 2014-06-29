@@ -8,7 +8,7 @@ Firestorm.extend(Firestorm.Element, {
 	getSize: function(element) {
 
 		if (Firestorm.schema.DEBUG && (element.tagName == 'body' || element.tagName == 'html'))
-			Firestorm.throw('This method requires an element inside the body tag.');
+			Firestorm.t('This method requires an element inside the body tag.');
 
 		return {x: element.offsetWidth, y: element.offsetHeight};
 

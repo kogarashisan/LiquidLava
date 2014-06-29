@@ -43,7 +43,7 @@ Lava.define(
 
 		} else {
 
-			if (Lava.schema.DEBUG && !(name in this._fields)) Lava.throw('[Record] No such field: ' + name);
+			if (Lava.schema.DEBUG && !(name in this._fields)) Lava.t('[Record] No such field: ' + name);
 			result = this._fields[name].getValue(this, this._properties);
 
 		}
@@ -54,8 +54,8 @@ Lava.define(
 
 	set: function(name, value) {
 
-		if (Lava.schema.DEBUG && name == 'guid') Lava.throw("trying to set record's GUID");
-		if (Lava.schema.DEBUG && !(name in this._fields)) Lava.throw('[Record] No such field: ' + name);
+		if (Lava.schema.DEBUG && name == 'guid') Lava.t("trying to set record's GUID");
+		if (Lava.schema.DEBUG && !(name in this._fields)) Lava.t('[Record] No such field: ' + name);
 
 		this._fields[name].setValue(this, this._properties, value);
 
@@ -73,7 +73,7 @@ Lava.define(
 
 		for (var field in this._fields) {
 
-			this._fields[field].export(this, export_record);
+			this._fields[field]['export'](this, export_record);
 
 		}
 

@@ -81,11 +81,11 @@ Lava.define(
 			if (Lava.isVoidTag(raw_tag.name) || !schema.content_schema) {
 
 				tag_copy = this._applyTopDirectives(raw_tag, widget_config);
-				if (Lava.schema.DEBUG && tag_copy.content && tag_copy.content.length) Lava.throw("Widget is not allowed to have any content: " + raw_tag.name);
+				if (Lava.schema.DEBUG && tag_copy.content && tag_copy.content.length) Lava.t("Widget is not allowed to have any content: " + raw_tag.name);
 
 			} else {
 
-				if (Lava.schema.DEBUG && !(schema.content_schema.type in this._root_map)) Lava.throw("Unknown type of content in sugar: " + schema.content_schema.type);
+				if (Lava.schema.DEBUG && !(schema.content_schema.type in this._root_map)) Lava.t("Unknown type of content in sugar: " + schema.content_schema.type);
 				this[this._root_map[schema.content_schema.type]](schema.content_schema, raw_tag, widget_config);
 
 			}
@@ -122,7 +122,7 @@ Lava.define(
 		for (; i < count; i++) {
 
 			if (raw_blocks[i].type == 'directive') {
-				if (Lava.parsers.Directives.processDirective(raw_blocks[i], widget_config, true)) Lava.throw("Directive inside sugar has returned a value: " + raw_blocks[i].name);
+				if (Lava.parsers.Directives.processDirective(raw_blocks[i], widget_config, true)) Lava.t("Directive inside sugar has returned a value: " + raw_blocks[i].name);
 			} else {
 				tag_copy.content = raw_blocks.slice(i);
 				has_content = true;
@@ -154,7 +154,7 @@ Lava.define(
 		for (name in raw_tag.attributes) {
 
 			if (Lava.schema.DEBUG && (name in this._attribute_mappings) && schema.attribute_mappings && (name in schema.attribute_mappings))
-				Lava.throw("Attribute schema is overridden by built-in schema: " + name);
+				Lava.t("Attribute schema is overridden by built-in schema: " + name);
 			descriptor = this._attribute_mappings[name] || schema.attribute_mappings[name];
 			if (descriptor) {
 				this[this._root_attributes_handlers[descriptor.type]](widget_config, raw_tag.attributes[name], descriptor, name);
@@ -166,7 +166,7 @@ Lava.define(
 
 		if (!Firestorm.Object.isEmpty(unknown_attributes)) {
 			unknown_schema = schema.unknown_root_attributes;
-			if (Lava.schema.DEBUG && !unknown_schema) Lava.throw("Sugar: unknown attribute: " + name + ", for widget: " + raw_tag.name);
+			if (Lava.schema.DEBUG && !unknown_schema) Lava.t("Sugar: unknown attribute: " + name + ", for widget: " + raw_tag.name);
 			this[this._unknown_root_attributes_actions[unknown_schema.type]](widget_config, unknown_attributes, unknown_schema);
 		}
 
@@ -187,7 +187,7 @@ Lava.define(
 
 		for (; i < count; i++) {
 
-			if (tags[i].name != schema.tag_name) Lava.throw("Unknown tag in collection: " + tags[i].name);
+			if (tags[i].name != schema.tag_name) Lava.t("Unknown tag in collection: " + tags[i].name);
 			result.push(
 				this[callback_name](schema, tags[i])
 			);
@@ -214,8 +214,8 @@ Lava.define(
 
 		for (; i < count; i++) {
 
-			if (tags[i].name != tag_name) Lava.throw("Unknown tag in collection: " + tags[i].name);
-			if (Lava.schema.DEBUG && (!tags[i].attributes || !tags[i].attributes.name)) Lava.throw("Sugar: hash tag is missing the name attribute");
+			if (tags[i].name != tag_name) Lava.t("Unknown tag in collection: " + tags[i].name);
+			if (Lava.schema.DEBUG && (!tags[i].attributes || !tags[i].attributes.name)) Lava.t("Sugar: hash tag is missing the name attribute");
 			result[tags[i].attributes.name] = this[callback_name](schema, tags[i]);
 
 		}
@@ -250,7 +250,7 @@ Lava.define(
 
 		for (; i < count; i++) {
 
-			if (!(tags[i].name in schema.tag_mappings)) Lava.throw("Unknown tag in sugar: " + tags[i].name);
+			if (!(tags[i].name in schema.tag_mappings)) Lava.t("Unknown tag in sugar: " + tags[i].name);
 			descriptor = schema.tag_mappings[tags[i].name];
 			this[this._object_tag_map[descriptor.type]](descriptor, tags[i], result);
 
@@ -279,7 +279,7 @@ Lava.define(
 		for (name in raw_tag.attributes) {
 
 			descriptor = schema.attribute_mappings[name];
-			if (Lava.schema.DEBUG && !descriptor) Lava.throw("Unknown attribute " + name + " in widget sugar on object: " + raw_tag.name);
+			if (Lava.schema.DEBUG && !descriptor) Lava.t("Unknown attribute " + name + " in widget sugar on object: " + raw_tag.name);
 			this[this._object_attributes_map[descriptor.type]](object, raw_tag.attributes[name], descriptor, name);
 
 		}
@@ -295,14 +295,14 @@ Lava.define(
 	_store: function(widget_config, storage_name, item_name, value) {
 
 		if (!(storage_name in widget_config)) widget_config[storage_name] = {};
-		if (Lava.schema.DEBUG && (item_name in widget_config[storage_name])) Lava.throw("Duplicate item in storage: " + item_name);
+		if (Lava.schema.DEBUG && (item_name in widget_config[storage_name])) Lava.t("Duplicate item in storage: " + item_name);
 		widget_config[storage_name][item_name] = value;
 
 	},
 
 	_putStorageProperty: function(widget_config, schema, value) {
 
-		if (Lava.schema.DEBUG && !schema.type) Lava.throw("storage item schema must have a type");
+		if (Lava.schema.DEBUG && !schema.type) Lava.t("storage item schema must have a type");
 
 		this._store(
 			widget_config,
@@ -463,7 +463,7 @@ Lava.define(
 
 	_unknownTagRoleAction: function(tag) {
 
-		Lava.throw("Unknown tag role in sugar: " + tag.name);
+		Lava.t("Unknown tag role in sugar: " + tag.name);
 
 	},
 
@@ -474,7 +474,7 @@ Lava.define(
 	 */
 	_parseRootAsObject: function(schema, raw_tag, widget_config) {
 
-		if (Lava.schema.DEBUG && schema.attribute_mappings) Lava.throw("Invalid schema for root object: attribute_mappings belong to root.");
+		if (Lava.schema.DEBUG && schema.attribute_mappings) Lava.t("Invalid schema for root object: attribute_mappings belong to root.");
 
 		var tag_copy = this._applyTopDirectives(raw_tag, widget_config);
 		this._parseTagAsObject(schema, tag_copy, widget_config);
@@ -499,7 +499,7 @@ Lava.define(
 	 */
 	_parseObjectTagAsTemplate: function(schema, raw_tag, object) {
 
-		if (Lava.schema.DEBUG && (raw_tag.name in object)) Lava.throw("Duplicate tag in object: " + raw_tag.name);
+		if (Lava.schema.DEBUG && (raw_tag.name in object)) Lava.t("Duplicate tag in object: " + raw_tag.name);
 		object[schema.name || raw_tag.name] = raw_tag.content ? Lava.parsers.Common.compileTemplate(raw_tag.content) : [];
 
 	},
@@ -512,9 +512,9 @@ Lava.define(
 	_parseObjectTagAsType: function(schema, raw_tag, object) {
 
 		if (Lava.schema.DEBUG) {
-			if (!raw_tag.content || raw_tag.content.length != 1 || typeof (raw_tag.content[0]) != 'string') Lava.throw("One string expected in tag content: " + raw_tag.name);
-			if (!Lava.types[schema.type_name].isValidString(raw_tag.content[0], schema)) Lava.throw("Invalid value in object tag: " + raw_tag.content[0]);
-			if (raw_tag.name in object) Lava.throw("Duplicate tag in object: " + raw_tag.name);
+			if (!raw_tag.content || raw_tag.content.length != 1 || typeof (raw_tag.content[0]) != 'string') Lava.t("One string expected in tag content: " + raw_tag.name);
+			if (!Lava.types[schema.type_name].isValidString(raw_tag.content[0], schema)) Lava.t("Invalid value in object tag: " + raw_tag.content[0]);
+			if (raw_tag.name in object) Lava.t("Duplicate tag in object: " + raw_tag.name);
 		}
 
 		object[schema.name || raw_tag.name] = Lava.types[schema.type_name].fromSafeString(raw_tag.content[0], schema);
@@ -530,7 +530,7 @@ Lava.define(
 
 		if (descriptor.type_name) {
 
-			if (Lava.schema.DEBUG && !Lava.types[descriptor.type_name].isValidString(attribute_value, descriptor)) Lava.throw("Invalid attribute value: " + attribute_value);
+			if (Lava.schema.DEBUG && !Lava.types[descriptor.type_name].isValidString(attribute_value, descriptor)) Lava.t("Invalid attribute value: " + attribute_value);
 			attribute_value = Lava.types[descriptor.type_name].fromSafeString(attribute_value, descriptor);
 
 		}
@@ -545,7 +545,7 @@ Lava.define(
 	 */
 	_parseRootIdAttribute: function(widget_config, attribute_value) {
 
-		if (Lava.schema.DEBUG && (!Lava.isValidId(attribute_value) || ('id' in widget_config))) Lava.throw();
+		if (Lava.schema.DEBUG && (!Lava.isValidId(attribute_value) || ('id' in widget_config))) Lava.t();
 		widget_config.id = attribute_value;
 
 	},
@@ -595,7 +595,7 @@ Lava.define(
 	 */
 	_parseObjectPropertyAttribute: function(object, attribute_value, schema, name) {
 
-		if (Lava.schema.DEBUG && (name in object)) Lava.throw("Duplicate property in object: " + name);
+		if (Lava.schema.DEBUG && (name in object)) Lava.t("Duplicate property in object: " + name);
 		object[schema.name || name] = this._valueToType(schema, attribute_value);
 
 	},

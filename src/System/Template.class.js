@@ -67,7 +67,7 @@ Lava.define(
 			type = typeof(childConfig);
 			if (type == 'object') type = childConfig.type;
 
-			if (Lava.schema.DEBUG && !(type in this._block_handlers_map)) Lava.throw("Unsupported template item type: " + type);
+			if (Lava.schema.DEBUG && !(type in this._block_handlers_map)) Lava.t("Unsupported template item type: " + type);
 			this[this._block_handlers_map[type]](result, childConfig, include_name_stack, properties);
 
 		}
@@ -97,9 +97,9 @@ Lava.define(
 
 	_createInclude: function(result, child_config, include_name_stack, properties) {
 
-		if (include_name_stack.indexOf(child_config.name) != -1) Lava.throw("Infinite include recursion");
+		if (include_name_stack.indexOf(child_config.name) != -1) Lava.t("Infinite include recursion");
 		var include = Lava.view_manager.getInclude(this._parent_view, child_config);
-		if (Lava.schema.DEBUG && include == null) Lava.throw("Include not found: " + child_config.name);
+		if (Lava.schema.DEBUG && include == null) Lava.t("Include not found: " + child_config.name);
 
 		include_name_stack.push(child_config.name);
 		this._createChildren(result, include, include_name_stack, properties);
@@ -120,12 +120,12 @@ Lava.define(
 			resource_value,
 			type;
 
-		if (!Lava.schema.RESOURCES_ENABLED) Lava.throw("static_value: resources are disabled");
-		if (Lava.schema.DEBUG && !resource_owner) Lava.throw("Resource owner not found: " + resource_id.locator_type + '=' + resource_id.locator);
+		if (!Lava.schema.RESOURCES_ENABLED) Lava.t("static_value: resources are disabled");
+		if (Lava.schema.DEBUG && !resource_owner) Lava.t("Resource owner not found: " + resource_id.locator_type + '=' + resource_id.locator);
 
 		resource_value = resource_owner.getResource(resource_id.name);
-		if (Lava.schema.DEBUG && !resource_value) Lava.throw("static_value: resource not found: " + resource_id.locator_type + '=' + resource_id.locator);
-		if (['string', 'number', 'boolean', 'translate'].indexOf(resource_value.type) == -1) Lava.throw("static_value: resource has wrong type");
+		if (Lava.schema.DEBUG && !resource_value) Lava.t("static_value: resource not found: " + resource_id.locator_type + '=' + resource_id.locator);
+		if (['string', 'number', 'boolean', 'translate'].indexOf(resource_value.type) == -1) Lava.t("static_value: resource has wrong type");
 
 		result.push(resource_value.value);
 
@@ -142,7 +142,7 @@ Lava.define(
 		var argument = new Lava.scope.Argument(childConfig.argument, this._view, this._widget);
 		// if this happens - than you are probably doing something wrong
 		if (argument.isWaitingRefresh()) {
-			if (Lava.schema.DEBUG) Lava.throw("static_eval wrong usage: created argument is dirty");
+			if (Lava.schema.DEBUG) Lava.t("static_eval wrong usage: created argument is dirty");
 			Lava.logError("static_eval wrong usage: created argument is dirty");
 		}
 		result.push(argument.getValue + '');
@@ -172,13 +172,13 @@ Lava.define(
 
 		if (Lava.schema.RESOURCES_ENABLED) {
 			resource_owner = Lava.view_manager.locateTarget(this._widget, resource_id.locator_type, resource_id.locator);
-			if (Lava.schema.DEBUG && !resource_owner) Lava.throw("Resource owner not found: " + resource_id.locator_type + '=' + resource_id.locator);
+			if (Lava.schema.DEBUG && !resource_owner) Lava.t("Resource owner not found: " + resource_id.locator_type + '=' + resource_id.locator);
 			container_resources = resource_owner.getResource(resource_id.name);
 		}
 
-		if (Lava.schema.DEBUG && !Lava.schema.RESOURCES_ENABLED) Lava.throw("Unable to render a static container: resources are disabled");
-		if (Lava.schema.DEBUG && !container_resources) Lava.throw("Static container, resources not found: " + resource_id.name);
-		if (Lava.schema.DEBUG && container_resources.type != 'container') Lava.throw("Malformed/invalid container resource: " + resource_id.locator_type + '=' + resource_id.locator);
+		if (Lava.schema.DEBUG && !Lava.schema.RESOURCES_ENABLED) Lava.t("Unable to render a static container: resources are disabled");
+		if (Lava.schema.DEBUG && !container_resources) Lava.t("Static container, resources not found: " + resource_id.name);
+		if (Lava.schema.DEBUG && container_resources.type != 'container') Lava.t("Malformed/invalid container resource: " + resource_id.locator_type + '=' + resource_id.locator);
 
 		static_properties = container_resources.value['static_properties'];
 		static_classes = container_resources.value['static_classes'];
@@ -206,7 +206,7 @@ Lava.define(
 
 		if (child_config.template) {
 
-			if (Lava.schema.DEBUG && is_void) Lava.throw();
+			if (Lava.schema.DEBUG && is_void) Lava.t();
 
 			result.push(serialized_tag + '>');
 			this._createChildren(result, child_config.template, include_name_stack, properties);
@@ -257,7 +257,7 @@ Lava.define(
 
 			} else if (typeof(contents[i]) == 'function') {
 
-				Lava.throw("Not implemented");
+				Lava.t("Not implemented");
 
 			} else {
 
@@ -292,7 +292,7 @@ Lava.define(
 
 	broadcastSleep: function() {
 
-		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.throw();
+		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.t();
 
 		this._is_sleeping = true;
 		this._broadcast('broadcastSleep');
@@ -301,7 +301,7 @@ Lava.define(
 
 	broadcastWakeup: function() {
 
-		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.throw();
+		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.t();
 
 		this._is_sleeping = false;
 		this._broadcast('broadcastWakeup');

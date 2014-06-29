@@ -81,7 +81,7 @@ Lava.define(
 	 */
 	_fire: function(event_name, event_args) {
 
-		if (Lava.schema.DEBUG && typeof(event_name) == "undefined") Lava.throw();
+		if (Lava.schema.DEBUG && typeof(event_name) == "undefined") Lava.t();
 
 		if (this._listeners[event_name] != null) {
 

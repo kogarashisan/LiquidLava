@@ -52,7 +52,7 @@ Lava.ScopeManager = {
 	 */
 	cancelScopeRefresh: function(refresh_ticket, level) {
 
-		if (Lava.schema.DEBUG && refresh_ticket == null) Lava.throw();
+		if (Lava.schema.DEBUG && refresh_ticket == null) Lava.t();
 
 		this._scope_refresh_queues[level][refresh_ticket.index] = undefined;
 
@@ -308,7 +308,7 @@ Lava.ScopeManager = {
 	debugStopTracking: function(scope) {
 
 		var index = this._debug_all_scopes.indexOf(scope);
-		if (index == -1) Lava.throw();
+		if (index == -1) Lava.t();
 		this._debug_all_scopes.splice(index, 1);
 
 	},

@@ -104,7 +104,7 @@ Lava.define(
 
 			if (Lava.schema.DEBUG) {
 
-				Lava.throw("Emulated animation: call to state changing function while the animation is running");
+				Lava.t("Emulated animation: call to state changing function while the animation is running");
 
 			} else {
 

@@ -44,7 +44,7 @@ var Firestorm = {
 
 		if (typeof(window) != 'undefined') {
 
-			if (!('id' in window.document)) Firestorm.throw("MooTools isn't loaded");
+			if (!('id' in window.document)) Firestorm.t("MooTools isn't loaded");
 
 			this.Environment && this.Environment.init();
 			this.DOM && this.DOM.init();
@@ -52,7 +52,7 @@ var Firestorm = {
 		}
 
 		// You must know this yourself:
-		// for (var name in {}) Firestorm.throw("Firestorm framework can not coexist with frameworks that modify native object's prototype");
+		// for (var name in {}) Firestorm.t("Firestorm framework can not coexist with frameworks that modify native object's prototype");
 
 	},
 
@@ -124,7 +124,7 @@ var Firestorm = {
 
 	},
 
-	'throw': function(message) {
+	t: function(message) {
 
 		if (typeof(message) == 'number' && this.KNOWN_EXCEPTIONS && (message in this.KNOWN_EXCEPTIONS)) {
 			throw new Error(this.KNOWN_EXCEPTIONS[message]);
@@ -355,7 +355,7 @@ Firestorm.extend(Firestorm.Element, {
 	getSize: function(element) {
 
 		if (Firestorm.schema.DEBUG && (element.tagName == 'body' || element.tagName == 'html'))
-			Firestorm.throw('This method requires an element inside the body tag.');
+			Firestorm.t('This method requires an element inside the body tag.');
 
 		return {x: element.offsetWidth, y: element.offsetHeight};
 
@@ -388,7 +388,7 @@ Firestorm.extend(Firestorm.Element, {
 
 		for (var i = 0, count = value.length; i < count; i++) {
 
-			if (Firestorm.schema.DEBUG && typeof value[i] != "number") Firestorm.throw("Invalid argument passed to setPixels");
+			if (Firestorm.schema.DEBUG && typeof value[i] != "number") Firestorm.t("Invalid argument passed to setPixels");
 			style += Math.round(value[i]) + 'px ';
 
 		}
@@ -429,7 +429,7 @@ Firestorm.extend(Firestorm.Element, {
 
 	addClasses: function(element, class_list) {
 
-		if (Firestorm.schema.DEBUG && typeof(class_list) == 'string') Firestorm.throw();
+		if (Firestorm.schema.DEBUG && typeof(class_list) == 'string') Firestorm.t();
 
 		for (var i = 0, count = class_list.length; i < count; i++) {
 
@@ -441,7 +441,7 @@ Firestorm.extend(Firestorm.Element, {
 
 	removeClasses: function(element, class_list) {
 
-		if (Firestorm.schema.DEBUG && typeof(class_list) == 'string') Firestorm.throw();
+		if (Firestorm.schema.DEBUG && typeof(class_list) == 'string') Firestorm.t();
 
 		for (var i = 0, count = class_list.length; i < count; i++) {
 
@@ -500,14 +500,14 @@ Firestorm.DOM = {
 
 	},
 
-	insertHTMLBefore: function(element, html) { Firestorm.throw(1); },
-	insertHTMLAfter: function(element, html) { Firestorm.throw(1); },
-	insertHTMLTop: function(element, html) { Firestorm.throw(1); },
-	insertHTMLBottom: function(element, html) { Firestorm.throw(1); },
+	insertHTMLBefore: function(element, html) { Firestorm.t(1); },
+	insertHTMLAfter: function(element, html) { Firestorm.t(1); },
+	insertHTMLTop: function(element, html) { Firestorm.t(1); },
+	insertHTMLBottom: function(element, html) { Firestorm.t(1); },
 
-	clearOuterRange: function(start_element, end_element) { Firestorm.throw(1); },
-	clearInnerRange: function(start_element, end_element) { Firestorm.throw(1); },
-	replaceInnerRange: function(start_element, end_element, html) { Firestorm.throw(1); },
+	clearOuterRange: function(start_element, end_element) { Firestorm.t(1); },
+	clearInnerRange: function(start_element, end_element) { Firestorm.t(1); },
+	replaceInnerRange: function(start_element, end_element, html) { Firestorm.t(1); },
 
 	insertHTML: function(element, html, position) {
 
@@ -860,7 +860,7 @@ Firestorm.Array = {
 	replace: function(array, old_value, new_value) {
 
 		var template_index = array.indexOf(old_value);
-		if (template_index == -1) Firestorm.throw("Array.replace: value is not in array");
+		if (template_index == -1) Firestorm.t("Array.replace: value is not in array");
 		array[template_index] = new_value;
 
 	}
@@ -1140,9 +1140,9 @@ var Lava = {
 			count = this.schema.sugar_classes.length;
 
 		// You must know this yourself
-		// for (var name in {}) Lava.throw("LiquidLava framework can not coexist with frameworks that modify native object's prototype");
+		// for (var name in {}) Lava.t("LiquidLava framework can not coexist with frameworks that modify native object's prototype");
 
-		if (typeof(Firestorm) == 'undefined') Lava.throw('init: Firestorm is not loaded');
+		if (typeof(Firestorm) == 'undefined') Lava.t('init: Firestorm is not loaded');
 
 		this.ClassManager.registerRootNamespace('Lava', this);
 
@@ -1229,7 +1229,7 @@ var Lava = {
 	 */
 	getWidgetConfig: function(widget_title) {
 
-		if (Lava.schema.DEBUG && !(widget_title in this.widgets)) Lava.throw("Widget config not found: " + widget_title);
+		if (Lava.schema.DEBUG && !(widget_title in this.widgets)) Lava.t("Widget config not found: " + widget_title);
 
 		var config = this.widgets[widget_title];
 
@@ -1256,7 +1256,7 @@ var Lava = {
 
 		if (config) {
 
-			if (Lava.schema.DEBUG && config.extends && config.extends != title) Lava.throw("Malformed widget config");
+			if (Lava.schema.DEBUG && config.extends && config.extends != title) Lava.t("Malformed widget config");
 
 			config.extends = title;
 			Lava.extenders[config.extender_type || widget_config.extender_type](config);
@@ -1304,7 +1304,7 @@ var Lava = {
 
 	},
 
-	'throw': function(message) {
+	t: function(message) {
 
 		if (typeof(message) == 'number' && this.KNOWN_EXCEPTIONS && (message in this.KNOWN_EXCEPTIONS)) {
 			throw new Error(this.KNOWN_EXCEPTIONS[message]);
@@ -1316,7 +1316,7 @@ var Lava = {
 
 	registerSugar: function(class_name) {
 
-		if (Lava.schema.DEBUG && (class_name in this._sugar_instances)) Lava.throw('Class is already registered as sugar');
+		if (Lava.schema.DEBUG && (class_name in this._sugar_instances)) Lava.t('Class is already registered as sugar');
 		var constructor = this.ClassManager.getConstructor(class_name);
 		this._sugar_instances[class_name] = new constructor();
 
@@ -1340,7 +1340,7 @@ var Lava = {
 		if (!(widget_title in this._widget_title_to_sugar_instance)) {
 
 			widget_config = this.getWidgetConfig(widget_title);
-			if (!('sugar' in widget_config)) Lava.throw("Widget " + widget_title + " does not have sugar in configuration");
+			if (!('sugar' in widget_config)) Lava.t("Widget " + widget_title + " does not have sugar in configuration");
 			sugar_class = widget_config.sugar.class || Lava.schema.widget.DEFAULT_SUGAR_CLASS;
 			this._widget_title_to_sugar_instance[widget_title] = this._sugar_instances[sugar_class];
 
@@ -1357,7 +1357,7 @@ var Lava = {
 	storeWidgetSchema: function(widget_title, widget_config) {
 
 		if (!Lava.schema.widget.ALLOW_REDEFINITION && (widget_title in this.widgets))
-			Lava.throw("storeWidgetSchema: widget is already defined: " + widget_title);
+			Lava.t("storeWidgetSchema: widget is already defined: " + widget_title);
 
 		this.widgets[widget_title] = widget_config;
 
@@ -1464,9 +1464,9 @@ var Lava = {
 
 		}
 
-		if (Lava.schema.DEBUG && !config.class) Lava.throw("Trying to create a widget without class");
+		if (Lava.schema.DEBUG && !config.class) Lava.t("Trying to create a widget without class");
 		var constructor = Lava.ClassManager.getConstructor(config.class, 'Lava.widget');
-		if (Lava.schema.DEBUG && !constructor) Lava.throw("Class not found: " + config.class);
+		if (Lava.schema.DEBUG && !constructor) Lava.t("Class not found: " + config.class);
 		return new constructor(config, widget, parent_view, template, properties);
 
 	},
@@ -1474,7 +1474,7 @@ var Lava = {
 	ClassLocatorGateway: function(config, widget, parent_view, template, properties) {
 
 		var target = Lava.view_manager.locateTarget(widget, config.class_locator.locator_type, config.class_locator.name);
-		if (Lava.schema.DEBUG && (!target || !target.isWidget)) Lava.throw("[ClassLocatorGateway] Target is null or not a widget");
+		if (Lava.schema.DEBUG && (!target || !target.isWidget)) Lava.t("[ClassLocatorGateway] Target is null or not a widget");
 
 		var constructor = target.getPackageConstructor(config.real_class);
 		return new constructor(config, widget, parent_view, template, properties);
@@ -1505,7 +1505,7 @@ var Lava = {
 			i = 0,
 			count;
 
-		if (Lava.schema.DEBUG && !class_body) Lava.throw("[Lava::_loadClass] Class does not exists: " + path);
+		if (Lava.schema.DEBUG && !class_body) Lava.t("[Lava::_loadClass] Class does not exists: " + path);
 
 		if ('Extends' in class_body) {
 			if (!this.ClassManager.hasClass(class_body.Extends)) {
@@ -1724,7 +1724,7 @@ Lava.Serializer = {
 		var type = Firestorm.getType(value),
 			result;
 
-		if (Lava.schema.DEBUG && !(type in this._callback_map)) Lava.throw("Unsupported type for serialization: " + type);
+		if (Lava.schema.DEBUG && !(type in this._callback_map)) Lava.t("Unsupported type for serialization: " + type);
 
 		result = this[this._callback_map[type]](value, padding);
 
@@ -1939,7 +1939,7 @@ Lava.modifiers = {
 
 	translateBoolean: function(value) {
 
-		if (Lava.schema.DEBUG && typeof(value) != 'boolean') Lava.throw("translateBoolean: argument is not boolean type");
+		if (Lava.schema.DEBUG && typeof(value) != 'boolean') Lava.t("translateBoolean: argument is not boolean type");
 		return Lava.locales[Lava.schema.LOCALE].booleans[+value];
 
 	}
@@ -2038,17 +2038,17 @@ Lava.resources =
 	 */
 	addWidgetResource: function(widget_title, locale, locale_resources) {
 
-		if (Lava.schema.DEBUG && !(widget_title in Lava.widgets)) Lava.throw("Widget config not found: " + widget_title);
+		if (Lava.schema.DEBUG && !(widget_title in Lava.widgets)) Lava.t("Widget config not found: " + widget_title);
 
 		var config = Lava.widgets[widget_title];
 
-		if (config.is_extended) Lava.throw("Widget is already extended, can not add resources: " + widget_title);
+		if (config.is_extended) Lava.t("Widget is already extended, can not add resources: " + widget_title);
 
 		if (!config.resources) {
 			config.resources = {}
 		}
 
-		if (Lava.schema.DEBUG && (locale in config.resources)) Lava.throw("Locale is already defined: " + locale);
+		if (Lava.schema.DEBUG && (locale in config.resources)) Lava.t("Locale is already defined: " + locale);
 
 		config.resources[locale] = locale_resources;
 
@@ -2068,7 +2068,7 @@ Lava.resources =
 
 		} else if ((add_property_name in target) || (remove_property_name in target)) {
 
-			if (Lava.schema.DEBUG && !(static_property_name in result)) Lava.throw("Merging resources container: add/remove operation present, but value is not defined");
+			if (Lava.schema.DEBUG && !(static_property_name in result)) Lava.t("Merging resources container: add/remove operation present, but value is not defined");
 			result[static_property_name] = Firestorm.Object.copy(result[static_property_name]);
 			if (add_property_name in target) {
 				Firestorm.extend(result[static_property_name], target[add_property_name]);
@@ -2096,7 +2096,7 @@ Lava.resources =
 
 		} else if (('add_classes' in top_object) || ('remove_classes' in top_object)) {
 
-			if (Lava.schema.DEBUG && !('static_classes' in result)) Lava.throw("Merging resources container: add/remove operation present, but value is not defined");
+			if (Lava.schema.DEBUG && !('static_classes' in result)) Lava.t("Merging resources container: add/remove operation present, but value is not defined");
 			result['static_classes'] = result['static_classes'].slice();
 			if ('add_classes' in top_object) {
 				result['static_classes'] = result['static_classes'].concat(top_object['add_classes']);
@@ -2127,7 +2127,7 @@ Lava.resources =
 
 			if (name in result) {
 
-				if (Lava.schema.DEBUG && result[name].type != bottom_resources[name].type) Lava.throw("Resource types mismatch: " + name);
+				if (Lava.schema.DEBUG && result[name].type != bottom_resources[name].type) Lava.t("Resource types mismatch: " + name);
 
 				if (bottom_resources[name].type == 'component') {
 
@@ -2138,7 +2138,7 @@ Lava.resources =
 
 				} else if (bottom_resources[name].type == 'container_stack') {
 
-					if (result[name].type != 'container_stack') Lava.throw();
+					if (result[name].type != 'container_stack') Lava.t();
 
 					result[name] = {
 						type: 'container_stack',
@@ -2181,7 +2181,7 @@ Lava.resources =
 			result = {},
 			operation;
 
-		if (Lava.schema.DEBUG && !Array.isArray(stack)) Lava.throw();
+		if (Lava.schema.DEBUG && !Array.isArray(stack)) Lava.t();
 
 		for (; i < count; i++) {
 			operation = stack[i];
@@ -2248,12 +2248,12 @@ Lava.resources =
 			i = 0,
 			count = path_segments.length;
 
-		if (Lava.schema.DEBUG && /[a-z]/.test(resource_name)) Lava.throw("Terminal resource names must be uppercase");
+		if (Lava.schema.DEBUG && /[a-z]/.test(resource_name)) Lava.t("Terminal resource names must be uppercase");
 
 		for (; i < count; i++) {
 
 			segment = path_segments[i];
-			if (Lava.schema.DEBUG && /[A-Z]/.test(segment)) Lava.throw("Resource component names must be lowercase");
+			if (Lava.schema.DEBUG && /[A-Z]/.test(segment)) Lava.t("Resource component names must be lowercase");
 
 			if (!(segment in target_object)) {
 
@@ -2264,7 +2264,7 @@ Lava.resources =
 
 			} else {
 
-				if (Lava.schema.DEBUG && target_object[segment].type != 'component') Lava.throw("Malformed resource definition, path is not component: " + path);
+				if (Lava.schema.DEBUG && target_object[segment].type != 'component') Lava.t("Malformed resource definition, path is not component: " + path);
 
 			}
 
@@ -2272,7 +2272,7 @@ Lava.resources =
 
 		}
 
-		if (resource_name in target_object) Lava.throw("Resource is already defined: " + path);
+		if (resource_name in target_object) Lava.t("Resource is already defined: " + path);
 		target_object[resource_name] = value;
 
 	}
@@ -2293,7 +2293,7 @@ Lava.types = {
 		 * @returns {boolean}
 		 */
 		fromString: function(value, descriptor) {
-			if (!this.isValidString(value, descriptor)) Lava.throw("Invalid " + this.type_name + " string: " + value);
+			if (!this.isValidString(value, descriptor)) Lava.t("Invalid " + this.type_name + " string: " + value);
 			return this.fromSafeString(value, descriptor);
 		}
 
@@ -2445,7 +2445,7 @@ Lava.types = {
 		 */
 		isValidValue: function(value, descriptor) {
 
-			if (Lava.schema.DEBUG && (!descriptor || !('allowed_values' in descriptor))) Lava.throw("Set type: missing allowed_values in schema");
+			if (Lava.schema.DEBUG && (!descriptor || !('allowed_values' in descriptor))) Lava.t("Set type: missing allowed_values in schema");
 			return descriptor['allowed_values'].indexOf(value) != -1;
 
 		},
@@ -2510,7 +2510,7 @@ Lava.types = {
 		 */
 		isValidValue: function(value, descriptor) {
 
-			if (Lava.schema.DEBUG && (!descriptor || !('value_map' in descriptor))) Lava.throw("Set type: missing allowed_values in schema");
+			if (Lava.schema.DEBUG && (!descriptor || !('value_map' in descriptor))) Lava.t("Set type: missing allowed_values in schema");
 			return (value in descriptor['value_map']);
 
 		},
@@ -2547,7 +2547,7 @@ Lava.types = {
 
 		fromSafeString: function() {
 
-			Lava.throw();
+			Lava.t();
 
 		}
 
@@ -2571,7 +2571,7 @@ Lava.types = {
 
 		fromSafeString: function(value) {
 
-			Lava.throw();
+			Lava.t();
 
 		}
 
@@ -2693,7 +2693,7 @@ Lava.extenders = {
 
 			} else {
 
-				if (Lava.schema.DEBUG && dest[name].type != source[name].type) Lava.throw("[Config storage] property types must match: " + name);
+				if (Lava.schema.DEBUG && dest[name].type != source[name].type) Lava.t("[Config storage] property types must match: " + name);
 				if (['template_hash', 'object_hash', 'object'].indexOf(dest[name].type) != -1) {
 
 					Firestorm.implement(dest[name], source[name]);
@@ -2919,7 +2919,7 @@ Lava.Core = {
 
 		var event_name = listener.event_name,
 			index = this._event_handlers[event_name].indexOf(listener);
-		if (Lava.schema.DEBUG && index == -1) Lava.throw();
+		if (Lava.schema.DEBUG && index == -1) Lava.t();
 		this._event_handlers[event_name].splice(index, 1);
 
 		this._event_usage_counters[event_name]--;
@@ -3060,7 +3060,7 @@ Lava.ScopeManager = {
 	 */
 	cancelScopeRefresh: function(refresh_ticket, level) {
 
-		if (Lava.schema.DEBUG && refresh_ticket == null) Lava.throw();
+		if (Lava.schema.DEBUG && refresh_ticket == null) Lava.t();
 
 		this._scope_refresh_queues[level][refresh_ticket.index] = undefined;
 
@@ -3316,7 +3316,7 @@ Lava.ScopeManager = {
 	debugStopTracking: function(scope) {
 
 		var index = this._debug_all_scopes.indexOf(scope);
-		if (index == -1) Lava.throw();
+		if (index == -1) Lava.t();
 		this._debug_all_scopes.splice(index, 1);
 
 	},
@@ -3419,7 +3419,7 @@ Lava.algorithms.sorting.mergeSort = (function(){
 
 	return function(items, less) {
 
-		if (_less) Lava.throw("This version of mergeSort may not be called recursively");
+		if (_less) Lava.t("This version of mergeSort may not be called recursively");
 
 		var length = items.length,
 			result;
@@ -3527,8 +3527,8 @@ Lava.ClassManager = {
 			parent_data = this._sources[source_object.Extends];
 			class_data.parent_class_data = parent_data;
 
-			if (!parent_data) Lava.throw('[define] Base class not found: "' + source_object.Extends + '"');
-			if (!parent_data.skeleton) Lava.throw("[define] Parent class was loaded without skeleton, extension is not possible: " + class_data.extends);
+			if (!parent_data) Lava.t('[define] Base class not found: "' + source_object.Extends + '"');
+			if (!parent_data.skeleton) Lava.t("[define] Parent class was loaded without skeleton, extension is not possible: " + class_data.extends);
 
 			class_data.hierarchy_index = parent_data.hierarchy_index + 1;
 			class_data.hierarchy_paths = parent_data.hierarchy_paths.slice();
@@ -3563,8 +3563,8 @@ Lava.ClassManager = {
 			for (i = 0, count = shared_names.length; i < count; i++) {
 
 				name = shared_names[i];
-				if (Lava.schema.DEBUG && !(name in source_object)) Lava.throw("Shared member is not in class: " + name);
-				if (Lava.schema.DEBUG && Firestorm.getType(source_object[name]) != 'object') Lava.throw("Shared: class member must be an object");
+				if (Lava.schema.DEBUG && !(name in source_object)) Lava.t("Shared member is not in class: " + name);
+				if (Lava.schema.DEBUG && Firestorm.getType(source_object[name]) != 'object') Lava.t("Shared: class member must be an object");
 
 				if (!(name in class_data.shared)) {
 
@@ -3622,16 +3622,16 @@ Lava.ClassManager = {
 			name,
 			references_offset;
 
-		if (!implements_source) Lava.throw('Implements: class not found - "' + path + '"');
+		if (!implements_source) Lava.t('Implements: class not found - "' + path + '"');
 		if (Lava.schema.DEBUG) {
 
-			for (name in implements_source.shared) Lava.throw("Implements: unable to use a class with Shared as mixin.");
+			for (name in implements_source.shared) Lava.t("Implements: unable to use a class with Shared as mixin.");
 
 		}
 
 		if (Lava.schema.DEBUG && class_data.implements.indexOf(path) != -1) {
 
-			Lava.throw("Implements: class " + class_data.path + " already implements " + path);
+			Lava.t("Implements: class " + class_data.path + " already implements " + path);
 
 		}
 
@@ -3665,7 +3665,7 @@ Lava.ClassManager = {
 			if (name in child_skeleton) {
 
 				if (is_root && (child_skeleton[name].type == 'function' ^ parent_descriptor.type == 'function')) {
-					Lava.throw('Extend: functions in class root are not replaceable with other types (' + name + ')');
+					Lava.t('Extend: functions in class root are not replaceable with other types (' + name + ')');
 				}
 
 				if (parent_descriptor.type == 'function') {
@@ -3673,7 +3673,7 @@ Lava.ClassManager = {
 					if (!is_root || typeof(references_offset) != 'undefined') continue;
 
 					new_name = parent_data.name + '$' + name;
-					if (new_name in child_skeleton) Lava.throw('[ClassManager] Assertion failed, function already exists: ' + new_name);
+					if (new_name in child_skeleton) Lava.t('[ClassManager] Assertion failed, function already exists: ' + new_name);
 					child_skeleton[new_name] = parent_descriptor;
 
 				} else if (parent_descriptor.type == 'object') {
@@ -3758,7 +3758,7 @@ Lava.ClassManager = {
 					skeleton[name] = {type: 'regexp', value: value};
 					break;
 				default:
-					Lava.throw("[Class system] Unsupported property type in source object: " + type);
+					Lava.t("[Class system] Unsupported property type in source object: " + type);
 					break;
 
 			}
@@ -3820,7 +3820,7 @@ Lava.ClassManager = {
 						: "{}";
 					break;
 				default:
-					Lava.throw("[_buildRealConstructor] unknown property descriptor type: " + skeleton[name].type);
+					Lava.t("[_buildRealConstructor] unknown property descriptor type: " + skeleton[name].type);
 			}
 
 			if (serialized_action) {
@@ -3905,7 +3905,7 @@ Lava.ClassManager = {
 						? "{\n\t" + padding + object_properties.join(",\n\t" + padding) + "\n" + padding + "}" : "{}";
 					break;
 				default:
-					Lava.throw("[_serializeSkeleton] unknown property descriptor type: " + skeleton[name].type);
+					Lava.t("[_serializeSkeleton] unknown property descriptor type: " + skeleton[name].type);
 			}
 
 			if (Lava.VALID_PROPERTY_NAME_REGEX.test(name)) {
@@ -3931,8 +3931,8 @@ Lava.ClassManager = {
 			count = path_segments.length,
 			i = 1;
 
-		if (!count) Lava.throw("ClassManager: class names must include a namespace, even for global classes.");
-		if (!(path_segments[0] in this._root)) Lava.throw("[ClassManager] namespace is not registered: " + path_segments[0]);
+		if (!count) Lava.t("ClassManager: class names must include a namespace, even for global classes.");
+		if (!(path_segments[0] in this._root)) Lava.t("[ClassManager] namespace is not registered: " + path_segments[0]);
 		namespace = this._root[path_segments[0]];
 
 		for (; i < count; i++) {
@@ -3996,7 +3996,7 @@ Lava.ClassManager = {
 	 */
 	registerExistingConstructor: function(class_path, constructor) {
 
-		if (class_path in this._sources) Lava.throw('Class "' + class_path + '" is already defined');
+		if (class_path in this._sources) Lava.t('Class "' + class_path + '" is already defined');
 		this.constructors[class_path] = constructor;
 
 	},
@@ -4136,7 +4136,7 @@ Lava.ClassManager = {
 		if (class_data.extends) {
 
 			parent_data = this._sources[class_data.extends];
-			if (Lava.schema.DEBUG && !parent_data) Lava.throw("[loadClass] class parent does not exists: " + class_data.extends);
+			if (Lava.schema.DEBUG && !parent_data) Lava.t("[loadClass] class parent does not exists: " + class_data.extends);
 
 			class_data.parent_class_data = parent_data;
 			class_data.references = parent_data.references.concat(class_data.references);
@@ -4180,9 +4180,9 @@ Lava.ClassManager = {
 			class_name = namespace_path.pop(),
 			namespace = this._getNamespace(namespace_path);
 
-		if (Lava.schema.DEBUG && ((class_path in this._sources) || (class_path in this.constructors))) Lava.throw("Class is already defined: " + class_path);
+		if (Lava.schema.DEBUG && ((class_path in this._sources) || (class_path in this.constructors))) Lava.t("Class is already defined: " + class_path);
 
-		if ((class_name in namespace) && namespace[class_name] != null) Lava.throw("Class name conflict: '" + class_path + "' property is already defined in namespace path");
+		if ((class_name in namespace) && namespace[class_name] != null) Lava.t("Class name conflict: '" + class_path + "' property is already defined in namespace path");
 
 		this._sources[class_path] = class_data;
 		this.constructors[class_path] = class_data.constructor;
@@ -4192,7 +4192,7 @@ Lava.ClassManager = {
 
 	getPackageConstructor: function(base_path, suffix) {
 
-		if (Lava.schema.DEBUG && !(base_path in this._sources)) Lava.throw("[getPackageConstructor] Class not found: " + base_path);
+		if (Lava.schema.DEBUG && !(base_path in this._sources)) Lava.t("[getPackageConstructor] Class not found: " + base_path);
 
 		var path,
 			current_class = this._sources[base_path],
@@ -4283,7 +4283,7 @@ Lava.parsers.Common = {
 
 		for (var name in raw_hash) {
 
-			if (Lava.schema.DEBUG && this._allowed_hash_options.indexOf(name) == -1) Lava.throw("Hash option is not supported: " + name);
+			if (Lava.schema.DEBUG && this._allowed_hash_options.indexOf(name) == -1) Lava.t("Hash option is not supported: " + name);
 			if (name in this._view_config_property_setters) {
 				this[this._view_config_property_setters[name]](view_config, raw_hash[name]);
 			} else {
@@ -4303,7 +4303,7 @@ Lava.parsers.Common = {
 	 */
 	setViewConfigId: function(view_config, id) {
 
-		if (Lava.schema.DEBUG && !Lava.isValidId(id)) Lava.throw();
+		if (Lava.schema.DEBUG && !Lava.isValidId(id)) Lava.t();
 		view_config.id = id;
 
 	},
@@ -4314,8 +4314,8 @@ Lava.parsers.Common = {
 	 */
 	setViewConfigLabel: function(view_config, label) {
 
-		if (Lava.schema.DEBUG && !Lava.VALID_LABEL_REGEX.test(label)) Lava.throw("Malformed view label");
-		if (Lava.schema.DEBUG && this._reserved_labels.indexOf(label) != -1) Lava.throw("Label name is reserved: " + label);
+		if (Lava.schema.DEBUG && !Lava.VALID_LABEL_REGEX.test(label)) Lava.t("Malformed view label");
+		if (Lava.schema.DEBUG && this._reserved_labels.indexOf(label) != -1) Lava.t("Label name is reserved: " + label);
 		view_config.label = label;
 
 	},
@@ -4408,7 +4408,7 @@ Lava.parsers.Common = {
 
 		if ('arguments' in raw_block) {
 
-			if (Lava.schema.DEBUG && raw_block.arguments.length > 1) Lava.throw('Block may have no more than one argument');
+			if (Lava.schema.DEBUG && raw_block.arguments.length > 1) Lava.t('Block may have no more than one argument');
 			if (raw_block.arguments.length) {
 				config.argument = raw_block.arguments[0];
 			}
@@ -4457,7 +4457,7 @@ Lava.parsers.Common = {
 	 */
 	_compileExpression: function(result, raw_expression) {
 
-		if (raw_expression.arguments.length != 1) Lava.throw("Expression block requires exactly one argument");
+		if (raw_expression.arguments.length != 1) Lava.t("Expression block requires exactly one argument");
 
 		var config = {
 			type: 'view',
@@ -4491,7 +4491,7 @@ Lava.parsers.Common = {
 
 		this. _compileString(result, tag_start_text);
 
-		if (Lava.schema.DEBUG && is_void && tag.content) Lava.throw("Void tag with content");
+		if (Lava.schema.DEBUG && is_void && tag.content) Lava.t("Void tag with content");
 
 		if (!is_void) {
 
@@ -4540,7 +4540,7 @@ Lava.parsers.Common = {
 		if ('content' in raw_tag) view_config.template = this.compileTemplate(raw_tag.content, view_config);
 		if ('resource_id' in x) {
 			if (Lava.schema.DEBUG && (('static_styles' in view_config.container) || ('static_properties' in view_config.container) || ('static_styles' in view_config.container)))
-				Lava.throw("View container with resource_id: all properties must be moved to resources");
+				Lava.t("View container with resource_id: all properties must be moved to resources");
 			view_config.container.resource_id = Lava.parsers.Common.parseResourceId(x.resource_id);
 		}
 
@@ -4564,13 +4564,13 @@ Lava.parsers.Common = {
 
 		if (Lava.schema.DEBUG) {
 
-			if (Lava.isVoidTag(raw_tag.name)) Lava.throw("Void tag with type='container'");
-			if (!raw_tag.content) Lava.throw("Empty container tag");
+			if (Lava.isVoidTag(raw_tag.name)) Lava.t("Void tag with type='container'");
+			if (!raw_tag.content) Lava.t("Empty container tag");
 			this._assertControlAttributesValid(x);
 
 			if (('options' in x) || ('roles' in x) || ('label' in x)) {
 
-				Lava.throw("Please move x:options, x:roles and x:label from container element to the wrapped view");
+				Lava.t("Please move x:options, x:roles and x:label from container element to the wrapped view");
 
 			}
 
@@ -4590,31 +4590,31 @@ Lava.parsers.Common = {
 
 		} else {
 
-			Lava.throw("Malformed contents of tag with type='container'");
+			Lava.t("Malformed contents of tag with type='container'");
 
 		}
 
-		if (Lava.schema.DEBUG && view_config.type != 'view' && view_config.type != 'widget') Lava.throw("Expected: view or widget inside container, got: " + view_config.type);
-		if (Lava.schema.DEBUG && view_config.container) Lava.throw("Container wraps a view with it's container already defined.");
+		if (Lava.schema.DEBUG && view_config.type != 'view' && view_config.type != 'widget') Lava.t("Expected: view or widget inside container, got: " + view_config.type);
+		if (Lava.schema.DEBUG && view_config.container) Lava.t("Container wraps a view with it's container already defined.");
 		container_config = this._toContainer(raw_tag);
 		view_config.container = container_config;
 
 		if (container_config_directive) {
 			if (Lava.schema.DEBUG && (container_config_directive.type != 'directive' || container_config_directive.name == 'container_config'))
-				Lava.throw("Malformed contents of tag with type='container'");
+				Lava.t("Malformed contents of tag with type='container'");
 			Lava.parsers.Directives.processDirective(container_config_directive, view_config, true);
 		}
 
 		if (Lava.schema.DEBUG) {
 
-			if ('id' in view_config) Lava.throw("Please, move the id attribute from inner view's hash to wrapping container: " + view_config.id);
+			if ('id' in view_config) Lava.t("Please, move the id attribute from inner view's hash to wrapping container: " + view_config.id);
 
 			if (('static_properties' in container_config) && ('property_bindings' in container_config)) {
 
 				for (name in container_config.property_bindings) {
 
 					if (name in container_config.static_properties)
-						Lava.throw("Same property can not be bound and have static value at the same time - it may result in unexpected behaviour");
+						Lava.t("Same property can not be bound and have static value at the same time - it may result in unexpected behaviour");
 
 				}
 
@@ -4625,7 +4625,7 @@ Lava.parsers.Common = {
 				for (name in container_config.static_styles) {
 
 					if (name in container_config.style_bindings)
-						Lava.throw("Same style can not be bound and have static value at the same time - it may result in unexpected behaviour");
+						Lava.t("Same style can not be bound and have static value at the same time - it may result in unexpected behaviour");
 
 				}
 
@@ -4636,7 +4636,7 @@ Lava.parsers.Common = {
 		if (('attributes' in raw_tag) && ('id' in raw_tag.attributes)) view_config.id = raw_tag.attributes.id;
 		if ('resource_id' in x) {
 			if (Lava.schema.DEBUG && (('static_styles' in container_config) || ('static_properties' in container_config) || ('static_styles' in container_config)))
-				Lava.throw("Element container with resource_id: all properties must be moved to resources");
+				Lava.t("Element container with resource_id: all properties must be moved to resources");
 			container_config.resource_id = this.parseResourceId(x.resource_id);
 		}
 
@@ -4656,9 +4656,9 @@ Lava.parsers.Common = {
 
 		if (Lava.schema.DEBUG) {
 
-			if (!raw_tag.x.resource_id) Lava.throw("Static container requires resource id");
+			if (!raw_tag.x.resource_id) Lava.t("Static container requires resource id");
 			for (name in raw_tag.x) {
-				if (['type', 'resource_id'].indexOf(name) == -1) Lava.throw("Unknown control attribute on static container: " + name);
+				if (['type', 'resource_id'].indexOf(name) == -1) Lava.t("Unknown control attribute on static container: " + name);
 			}
 
 		}
@@ -4669,7 +4669,7 @@ Lava.parsers.Common = {
 			name: raw_tag.name
 		};
 
-		if ('attributes' in raw_tag) Lava.throw("Static container with resource_id: all attributes must be moved to resources");
+		if ('attributes' in raw_tag) Lava.t("Static container with resource_id: all attributes must be moved to resources");
 
 		if (raw_tag.content) {
 			block.template = this.compileTemplate(raw_tag.content);
@@ -4710,7 +4710,7 @@ Lava.parsers.Common = {
 
 			if (Lava.schema.DEBUG && x) {
 				for (name in x) {
-					if (this._allowed_sugar_control_attributes.indexOf(name) == -1) Lava.throw("Control attribute is not allowed on sugar: " + name);
+					if (this._allowed_sugar_control_attributes.indexOf(name) == -1) Lava.t("Control attribute is not allowed on sugar: " + name);
 				}
 			}
 
@@ -4740,7 +4740,7 @@ Lava.parsers.Common = {
 		this._parseViewAttributes(config, raw_tag);
 		// Otherwise, there will be ambiguity between the target of the attribute (widget or it's container)
 		// to set resource_id with x:widget - rewrite the declaration to x:type='container' with <x:widget> inside
-		if (Lava.schema.DEBUG && raw_tag.x && ('resource_id' in raw_tag.x)) Lava.throw("x:widget attribute is not compatible with resource_id attribute");
+		if (Lava.schema.DEBUG && raw_tag.x && ('resource_id' in raw_tag.x)) Lava.t("x:widget attribute is not compatible with resource_id attribute");
 		if (raw_tag.content) config.template = this.compileTemplate(raw_tag.content, config);
 
 		result.push(config);
@@ -4763,7 +4763,7 @@ Lava.parsers.Common = {
 			if (Lava.schema.DEBUG) this._assertControlAttributesValid(x);
 			if ('options' in x) {
 
-				if (typeof(x.options) != 'object') Lava.throw("Malformed x:options");
+				if (typeof(x.options) != 'object') Lava.t("Malformed x:options");
 				view_config.options = x.options;
 
 			}
@@ -4779,7 +4779,7 @@ Lava.parsers.Common = {
 	_assertControlAttributesValid: function(x) {
 
 		for (var name in x) {
-			if (this._allowed_control_attributes.indexOf(name) == -1) Lava.throw("Unknown option in x: " + name);
+			if (this._allowed_control_attributes.indexOf(name) == -1) Lava.t("Unknown option in x: " + name);
 		}
 
 	},
@@ -4810,7 +4810,7 @@ Lava.parsers.Common = {
 
 		if ('event' in x) {
 
-			if (typeof(x.event) != 'object') Lava.throw("Malformed x:event attribute");
+			if (typeof(x.event) != 'object') Lava.t("Malformed x:event attribute");
 
 			container_config.events = {};
 
@@ -4825,7 +4825,7 @@ Lava.parsers.Common = {
 		// Attribute binding. Example: x:bind:src="<any_valid_expression>"
 		if ('bind' in x) {
 
-			if (typeof(x.bind) != 'object') Lava.throw("Malformed x:bind attribute");
+			if (typeof(x.bind) != 'object') Lava.t("Malformed x:bind attribute");
 
 			container_config.property_bindings = this._parseBindingsHash(x.bind);
 
@@ -4833,7 +4833,7 @@ Lava.parsers.Common = {
 
 		if ('style' in x) {
 
-			if (typeof(x.style) != 'object') Lava.throw("Malformed x:style attribute");
+			if (typeof(x.style) != 'object') Lava.t("Malformed x:style attribute");
 
 			container_config.style_bindings = this._parseBindingsHash(x.style);
 
@@ -4871,7 +4871,7 @@ Lava.parsers.Common = {
 	 */
 	_parseBindingsHash: function(hash) {
 
-		if (typeof(hash) != 'object') Lava.throw("Malformed control tag");
+		if (typeof(hash) != 'object') Lava.t("Malformed control tag");
 
 		var name,
 			arguments,
@@ -4880,8 +4880,8 @@ Lava.parsers.Common = {
 		for (name in hash) {
 
 			arguments = Lava.ExpressionParser.parse(hash[name]);
-			if (arguments.length == 0) Lava.throw("Binding: empty expression (" + name + ")");
-			if (arguments.length > 1) Lava.throw("Binding: malformed expression for '" + name + "'");
+			if (arguments.length == 0) Lava.t("Binding: empty expression (" + name + ")");
+			if (arguments.length > 1) Lava.t("Binding: malformed expression for '" + name + "'");
 			result[name] = arguments[0];
 
 		}
@@ -4927,7 +4927,7 @@ Lava.parsers.Common = {
 
 					} else {
 
-						Lava.throw("Unable to parse the style attribute");
+						Lava.t("Unable to parse the style attribute");
 
 					}
 
@@ -5014,9 +5014,9 @@ Lava.parsers.Common = {
 
 					if ('type' in x) {
 
-						if ('widget' in x) Lava.throw("Malformed tag: both x:type and x:widget present");
+						if ('widget' in x) Lava.t("Malformed tag: both x:type and x:widget present");
 						type = x.type;
-						if (['view', 'container', 'static'].indexOf(type) == -1) Lava.throw("Unknown x:type attribute: " + type);
+						if (['view', 'container', 'static'].indexOf(type) == -1) Lava.t("Unknown x:type attribute: " + type);
 
 					} else if ('widget' in x) {
 
@@ -5028,7 +5028,7 @@ Lava.parsers.Common = {
 
 					} else {
 
-						Lava.throw("Tag with control attributes and no sugar or type on it: " + current_block.name);
+						Lava.t("Tag with control attributes and no sugar or type on it: " + current_block.name);
 
 					}
 
@@ -5057,8 +5057,8 @@ Lava.parsers.Common = {
 	compileAsView: function(raw_blocks) {
 
 		var result = this.asBlocks(this.compileTemplate(raw_blocks));
-		if (result.length != 1) Lava.throw("Expected: exactly one view, got either several or none.");
-		if (result[0].type != 'view' && result[0].type != 'widget') Lava.throw("Expected: view, got: " + result[0].type);
+		if (result.length != 1) Lava.t("Expected: exactly one view, got either several or none.");
+		if (result[0].type != 'view' && result[0].type != 'widget') Lava.t("Expected: view, got: " + result[0].type);
 		return result[0];
 
 	},
@@ -5077,7 +5077,7 @@ Lava.parsers.Common = {
 
 			if (typeof(blocks[i]) == 'string') {
 
-				if (!Lava.EMPTY_REGEX.test(blocks[i])) Lava.throw("Text between tags is not allowed in this context");
+				if (!Lava.EMPTY_REGEX.test(blocks[i])) Lava.t("Text between tags is not allowed in this context");
 
 			} else {
 
@@ -5105,7 +5105,7 @@ Lava.parsers.Common = {
 
 		for (; i < count; i++) {
 
-			if (result[i].type != type) Lava.throw("Block type is not permitted in this context. Expected: " + type + ", got: " + result[i].type);
+			if (result[i].type != type) Lava.t("Block type is not permitted in this context. Expected: " + type + ", got: " + result[i].type);
 
 		}
 
@@ -5152,7 +5152,7 @@ Lava.parsers.Common = {
 
 		targets_string = targets_string.trim();
 
-		if (targets_string == '') Lava.throw("Code style: empty targets are not allowed");
+		if (targets_string == '') Lava.t("Code style: empty targets are not allowed");
 
 		while (targets_string.length) {
 
@@ -5173,15 +5173,15 @@ Lava.parsers.Common = {
 			} else {
 
 				match = this._identifier_regex.exec(targets_string);
-				if (!match) Lava.throw("Malformed targets (1): " + targets_string);
+				if (!match) Lava.t("Malformed targets (1): " + targets_string);
 				target.name = match[0];
 
 			}
 
 			if (Lava.schema.DEBUG) {
 
-				if ((target.locator_type == 'Id' || target.locator_type == 'Name') && !Lava.isValidId(target.locator)) Lava.throw("Malformed id: " + target.locator);
-				else if (target.locator_type == 'Label' && !Lava.VALID_LABEL_REGEX.test(target.locator)) Lava.throw("Malformed target label" + target.locator);
+				if ((target.locator_type == 'Id' || target.locator_type == 'Name') && !Lava.isValidId(target.locator)) Lava.t("Malformed id: " + target.locator);
+				else if (target.locator_type == 'Label' && !Lava.VALID_LABEL_REGEX.test(target.locator)) Lava.t("Malformed target label" + target.locator);
 
 			}
 
@@ -5189,7 +5189,7 @@ Lava.parsers.Common = {
 
 			if (targets_string[0] == '(') {
 
-				if (targets_string[1] == ')') Lava.throw("Code style: empty target arguments must be removed");
+				if (targets_string[1] == ')') Lava.t("Code style: empty target arguments must be removed");
 
 				config_ref = {
 					input: targets_string.substr(1),
@@ -5217,7 +5217,7 @@ Lava.parsers.Common = {
 
 					} else {
 
-						Lava.throw("Expressions are not allowed for target callback arguments, only scope paths and static values");
+						Lava.t("Expressions are not allowed for target callback arguments, only scope paths and static values");
 
 					}
 
@@ -5233,7 +5233,7 @@ Lava.parsers.Common = {
 
 			} else if (targets_string.length) {
 
-				Lava.throw('Malformed targets (2): ' + targets_string);
+				Lava.t('Malformed targets (2): ' + targets_string);
 
 			}
 
@@ -5257,7 +5257,7 @@ Lava.parsers.Common = {
 		var match = this._locator_regex.exec(id_string),
 			result;
 
-		if (!match) Lava.throw("Malformed resource id");
+		if (!match) Lava.t("Malformed resource id");
 
 		result = {
 			locator_type: this.locator_types[id_string[0]],
@@ -5298,7 +5298,7 @@ Lava.parsers.Common = {
 				return typeof c == 'string' ? c : '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
 			}) + ")");
 		} catch (e) {
-			Lava.throw("Malformed string: " + raw_string);
+			Lava.t("Malformed string: " + raw_string);
 		}
 
 		return result;
@@ -5381,14 +5381,14 @@ Lava.parsers.Directives = {
 		var directive_name = raw_directive.name,
 			config = this._directives_schema[directive_name];
 
-		if (!config) Lava.throw("Unknown directive: " + directive_name);
+		if (!config) Lava.t("Unknown directive: " + directive_name);
 
 		if (config.view_config_presence) {
-			if (view_config && !config.view_config_presence) Lava.throw('Directive must not be inside view definition: ' + directive_name);
-			if (!view_config && config.view_config_presence) Lava.throw('Directive must be inside view definition: ' + directive_name);
+			if (view_config && !config.view_config_presence) Lava.t('Directive must not be inside view definition: ' + directive_name);
+			if (!view_config && config.view_config_presence) Lava.t('Directive must be inside view definition: ' + directive_name);
 		}
 
-		if (config.is_top_directive && !is_top_directive) Lava.throw("Directive must be at the top of the block content: " + directive_name);
+		if (config.is_top_directive && !is_top_directive) Lava.t("Directive must be at the top of the block content: " + directive_name);
 
 		return this['_x' + directive_name](raw_directive, view_config);
 
@@ -5397,7 +5397,7 @@ Lava.parsers.Directives = {
 	_store: function(widget_config, storage_name, item_name, value) {
 
 		if (!(storage_name in widget_config)) widget_config[storage_name] = {};
-		if (Lava.schema.DEBUG && (item_name in widget_config[storage_name])) Lava.throw("Duplicate item in '" + storage_name + "': " + item_name);
+		if (Lava.schema.DEBUG && (item_name in widget_config[storage_name])) Lava.t("Duplicate item in '" + storage_name + "': " + item_name);
 		widget_config[storage_name][item_name] = value;
 
 	},
@@ -5412,7 +5412,7 @@ Lava.parsers.Directives = {
 	 */
 	_widgetRoleMain: function(raw_tag, config_storage, roles_storage) {
 
-		if ('widget_config' in roles_storage) Lava.throw("multiple tags with role=main in widget definition");
+		if ('widget_config' in roles_storage) Lava.t("multiple tags with role=main in widget definition");
 
 		var view_config,
 			name,
@@ -5425,9 +5425,9 @@ Lava.parsers.Directives = {
 		} else if (raw_tag.name == 'view') {
 
 			view_config = Lava.parsers.Common.compileAsView(raw_tag.content);
-			if (view_config.class != 'View') Lava.throw("define: view in 'main' role must be pure View, not subclass");
-			if ('argument' in view_config) Lava.throw("Widgets do not support arguments");
-			if ('roles' in view_config) Lava.throw("Widget definition: move the roles from main view to widget");
+			if (view_config.class != 'View') Lava.t("define: view in 'main' role must be pure View, not subclass");
+			if ('argument' in view_config) Lava.t("Widgets do not support arguments");
+			if ('roles' in view_config) Lava.t("Widget definition: move the roles from main view to widget");
 
 			widget_config.template = view_config.template;
 
@@ -5438,7 +5438,7 @@ Lava.parsers.Directives = {
 			if (Lava.schema.DEBUG) {
 				for (name in view_config) {
 					if (['assigns', 'options', 'class', 'type', 'template', 'container'].indexOf(name) == -1) {
-						Lava.throw("[role='main'] view has an option, which can not be copied to widget: " + name
+						Lava.t("[role='main'] view has an option, which can not be copied to widget: " + name
 							+ ". Probably, it must be specified via separate tag");
 					}
 				}
@@ -5446,7 +5446,7 @@ Lava.parsers.Directives = {
 
 		} else {
 
-			Lava.throw("Widget definition: role=main may be applied to templates and views only");
+			Lava.t("Widget definition: role=main may be applied to templates and views only");
 
 		}
 
@@ -5471,7 +5471,7 @@ Lava.parsers.Directives = {
 				include = [Lava.parsers.Common.compileAsView(raw_tag.content)];
 				break;
 			default:
-				Lava.throw("Only templates and views may have role=include");
+				Lava.t("Only templates and views may have role=include");
 		}
 
 		this._store(config_storage, 'includes', raw_tag.attributes.name, include);
@@ -5562,8 +5562,8 @@ Lava.parsers.Directives = {
 	 */
 	_widgetTagSugar: function(raw_tag, config_storage, roles_storage) {
 
-		if ('sugar' in config_storage) Lava.throw("Sugar is already defined");
-		if (Lava.schema.DEBUG && raw_tag.content.length != 1) Lava.throw("Malformed option: " + raw_tag.attributes.name);
+		if ('sugar' in config_storage) Lava.t("Sugar is already defined");
+		if (Lava.schema.DEBUG && raw_tag.content.length != 1) Lava.t("Malformed option: " + raw_tag.attributes.name);
 		config_storage.sugar = Lava.parseOptions(raw_tag.content[0]);
 
 	},
@@ -5601,8 +5601,8 @@ Lava.parsers.Directives = {
 			tag = tags[i];
 
 			if (Lava.schema.DEBUG) {
-				if (!tag.attributes || !tag.attributes.name) Lava.throw("<" + "storage>: tag without a name attribute");
-				if (config_storage.storage && (tag.attributes.name in config_storage.storage)) Lava.throw("Duplicate item in storage: " + tag.attributes.name);
+				if (!tag.attributes || !tag.attributes.name) Lava.t("<" + "storage>: tag without a name attribute");
+				if (config_storage.storage && (tag.attributes.name in config_storage.storage)) Lava.t("Duplicate item in storage: " + tag.attributes.name);
 			}
 
 			type = tag.name;
@@ -5617,10 +5617,10 @@ Lava.parsers.Directives = {
 			} else if (type == 'object' || type == 'object_collection' || type == 'object_hash') {
 
 				inner_tags = Lava.parsers.Common.asBlockType(tag.content, 'tag');
-				if (Lava.schema.DEBUG && (inner_tags.length != 2 || !inner_tags[0].content || !inner_tags[1].content)) Lava.throw("storage: malformed tag");
-				if (Lava.schema.DEBUG && (inner_tags[0].name != 'schema' || inner_tags[1].name != 'content')) Lava.throw("storage: malformed tag");
+				if (Lava.schema.DEBUG && (inner_tags.length != 2 || !inner_tags[0].content || !inner_tags[1].content)) Lava.t("storage: malformed tag");
+				if (Lava.schema.DEBUG && (inner_tags[0].name != 'schema' || inner_tags[1].name != 'content')) Lava.t("storage: malformed tag");
 				schema = Lava.parseOptions(inner_tags[0].content[0]);
-				if (Lava.schema.DEBUG && (('name' in schema) || ('type' in schema))) Lava.throw("storage tag schema: 'name' and 'type' are not allowed");
+				if (Lava.schema.DEBUG && (('name' in schema) || ('type' in schema))) Lava.t("storage tag schema: 'name' and 'type' are not allowed");
 				schema.name = name;
 				schema.type = type;
 
@@ -5628,7 +5628,7 @@ Lava.parsers.Directives = {
 
 			} else {
 
-				Lava.throw("Unknown storage tag: " + type);
+				Lava.t("Unknown storage tag: " + type);
 
 			}
 
@@ -5675,13 +5675,13 @@ Lava.parsers.Directives = {
 			tag,
 			value;
 
-		if (Lava.schema.DEBUG && count == 0) Lava.throw("Empty resources definition");
+		if (Lava.schema.DEBUG && count == 0) Lava.t("Empty resources definition");
 
 		for (; i < count; i++) {
 
 			tag = tags[i];
-			if (Lava.schema.DEBUG && (!tag.attributes || !tag.attributes.path)) Lava.throw("resources, tag is missing attributes: " + tag.name);
-			if (Lava.schema.DEBUG && !(tag.name in this._resource_tag_actions)) Lava.throw("resources, unknown tag: " + tag.name);
+			if (Lava.schema.DEBUG && (!tag.attributes || !tag.attributes.path)) Lava.t("resources, tag is missing attributes: " + tag.name);
+			if (Lava.schema.DEBUG && !(tag.name in this._resource_tag_actions)) Lava.t("resources, unknown tag: " + tag.name);
 			value = this[this._resource_tag_actions[tag.name]](tag);
 			if (Lava.schema.parsers.EXPORT_STRINGS && (value.type == 'translate' || value.type == 'ntranslate')) {
 				Lava.resources.exportTranslatableString(value, widget_title, raw_tag.attributes.locale, tag.attributes.path);
@@ -5703,7 +5703,7 @@ Lava.parsers.Directives = {
 
 		if (raw_tag.content) {
 
-			if (Lava.schema.DEBUG && raw_tag.content.length != 1) Lava.throw("Malformed resources string tag");
+			if (Lava.schema.DEBUG && raw_tag.content.length != 1) Lava.t("Malformed resources string tag");
 			value = raw_tag.content[0];
 
 		}
@@ -5720,7 +5720,7 @@ Lava.parsers.Directives = {
 	 */
 	_resourceTagNumber: function(raw_tag) {
 
-		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1 || raw_tag.content[0] == '')) Lava.throw("Malformed resources tag");
+		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1 || raw_tag.content[0] == '')) Lava.t("Malformed resources tag");
 
 		return {
 			type: 'number',
@@ -5734,7 +5734,7 @@ Lava.parsers.Directives = {
 	 */
 	_resourceTagBoolean: function(raw_tag) {
 
-		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1 || raw_tag.content[0] == '')) Lava.throw("Malformed resources tag");
+		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1 || raw_tag.content[0] == '')) Lava.t("Malformed resources tag");
 
 		return {
 			type: 'boolean',
@@ -5748,16 +5748,16 @@ Lava.parsers.Directives = {
 	 */
 	_resourceTagArray: function(raw_tag) {
 
-		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1 || raw_tag.content[0] == '')) Lava.throw("Malformed resources tag");
+		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1 || raw_tag.content[0] == '')) Lava.t("Malformed resources tag");
 
 		var value = Lava.parseOptions(raw_tag.content[0]),
 			i,
 			count;
 
 		if (Lava.schema.DEBUG) {
-			if (!Array.isArray(value)) Lava.throw("Malformed resources array tag content");
+			if (!Array.isArray(value)) Lava.t("Malformed resources array tag content");
 			for (i = 0, count = value.length; i < count; i++) {
-				if (this.RESOURCE_ARRAY_ALLOWED_TYPES.indexOf(Lava.getType(value[i])) == -1) Lava.throw("resources/array contains value type that is not allowed: " + Lava.getType(value[i]));
+				if (this.RESOURCE_ARRAY_ALLOWED_TYPES.indexOf(Lava.getType(value[i])) == -1) Lava.t("resources/array contains value type that is not allowed: " + Lava.getType(value[i]));
 			}
 		}
 
@@ -5773,7 +5773,7 @@ Lava.parsers.Directives = {
 	 */
 	_resourceTagTranslate: function(raw_tag) {
 
-		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1 || raw_tag.content[0] == '')) Lava.throw("Malformed resources tag");
+		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1 || raw_tag.content[0] == '')) Lava.t("Malformed resources tag");
 
 		var result = {
 			type: 'translate',
@@ -5792,7 +5792,7 @@ Lava.parsers.Directives = {
 	 */
 	_resourceTagTranslatePlural: function(raw_tag) {
 
-		if (Lava.schema.DEBUG && (!raw_tag.content)) Lava.throw("Malformed resources tag");
+		if (Lava.schema.DEBUG && (!raw_tag.content)) Lava.t("Malformed resources tag");
 
 		var plural_tags = Lava.parsers.Common.asBlockType(raw_tag.content, 'tag'),
 			i = 0,
@@ -5800,11 +5800,11 @@ Lava.parsers.Directives = {
 			plurals = [],
 			result;
 
-		if (Lava.schema.DEBUG && count == 0) Lava.throw("Malformed resources plural string definition");
+		if (Lava.schema.DEBUG && count == 0) Lava.t("Malformed resources plural string definition");
 
 		for (; i < count; i++) {
 
-			if (Lava.schema.DEBUG && (!plural_tags[i].content || !plural_tags[i].content[0])) Lava.throw("Resources, malformed plural string");
+			if (Lava.schema.DEBUG && (!plural_tags[i].content || !plural_tags[i].content[0])) Lava.t("Resources, malformed plural string");
 			plurals.push(plural_tags[i].content[0]);
 
 		}
@@ -5840,10 +5840,10 @@ Lava.parsers.Directives = {
 		if (count) {
 
 			if (Lava.schema.DEBUG) {
-				if (count > 1) Lava.throw("Malformed resources/container definition");
-				if (tags[0].name != 'static_properties' && tags[0].name != 'add_properties') Lava.throw("Malformed resources/container definition");
-				if (!tags[0].attributes || tags[0].content) Lava.throw("resources/container: malformed (static/add)_properties tag");
-				if (('class' in tags[0].attributes) || ('style' in tags[0].attributes)) Lava.throw("resources/container: class and style attributes must be defined separately from properties");
+				if (count > 1) Lava.t("Malformed resources/container definition");
+				if (tags[0].name != 'static_properties' && tags[0].name != 'add_properties') Lava.t("Malformed resources/container definition");
+				if (!tags[0].attributes || tags[0].content) Lava.t("resources/container: malformed (static/add)_properties tag");
+				if (('class' in tags[0].attributes) || ('style' in tags[0].attributes)) Lava.t("resources/container: class and style attributes must be defined separately from properties");
 			}
 
 			operations_stack.push({
@@ -5860,24 +5860,24 @@ Lava.parsers.Directives = {
 				case 'remove_classes':
 				case 'remove_properties':
 				case 'remove_styles':
-					if (Lava.schema.DEBUG && !raw_tag.attributes[name].trim()) Lava.throw("Codestyle: remove the empty remove_* attributes from resources/container tag");
+					if (Lava.schema.DEBUG && !raw_tag.attributes[name].trim()) Lava.t("Codestyle: remove the empty remove_* attributes from resources/container tag");
 					operation_value = raw_tag.attributes[name].trim().split(/\s*,\s*/);
 					break;
 				case 'add_classes':
 				case 'static_classes':
-					if (Lava.schema.DEBUG && name == 'add_classes' && !raw_tag.attributes[name].trim()) Lava.throw("Codestyle: remove the empty add_classes attribute from resources/container tag");
+					if (Lava.schema.DEBUG && name == 'add_classes' && !raw_tag.attributes[name].trim()) Lava.t("Codestyle: remove the empty add_classes attribute from resources/container tag");
 					operation_value = raw_tag.attributes[name].trim().split(/\s+/);
 					break;
 				case 'add_styles':
 				case 'static_styles':
-					if (Lava.schema.DEBUG && name == 'add_styles' && !raw_tag.attributes[name].trim()) Lava.throw("Codestyle: remove the empty style attribute from resources/container tag");
+					if (Lava.schema.DEBUG && name == 'add_styles' && !raw_tag.attributes[name].trim()) Lava.t("Codestyle: remove the empty style attribute from resources/container tag");
 					operation_value = Lava.parsers.Common.parseStyleAttribute(raw_tag.attributes[name]);
 					break;
 				case 'path': // the path and name of the resource
 					operation_value = null;
 					break;
 				default:
-					Lava.throw("Unknown resources/container attribute:" + name);
+					Lava.t("Unknown resources/container attribute:" + name);
 			}
 
 			if (operation_value) {
@@ -5897,9 +5897,9 @@ Lava.parsers.Directives = {
 				|| ('static_classes' in used_instructions && (('add_classes' in used_instructions) || ('remove_classes' in used_instructions)))
 				|| ('static_properties' in used_instructions && (('add_properties' in used_instructions) || ('remove_properties' in used_instructions)))
 			)
-				Lava.throw("resources/container: having add/remove instructions together with 'set' instruction has no sense");
+				Lava.t("resources/container: having add/remove instructions together with 'set' instruction has no sense");
 
-			if (operations_stack.length == 0) Lava.throw("Empty resources/container definition");
+			if (operations_stack.length == 0) Lava.t("Empty resources/container definition");
 
 		}
 
@@ -5916,7 +5916,7 @@ Lava.parsers.Directives = {
 	 */
 	_parseWidgetDefinition: function(raw_directive) {
 
-		if (Lava.schema.DEBUG && !('attributes' in raw_directive)) Lava.throw("Widget definition is missing attributes");
+		if (Lava.schema.DEBUG && !('attributes' in raw_directive)) Lava.t("Widget definition is missing attributes");
 
 		var tags = raw_directive.content ? Lava.parsers.Common.asBlockType(raw_directive.content, 'tag') : [],
 			config_storage = {},
@@ -5934,12 +5934,12 @@ Lava.parsers.Directives = {
 
 			if (('attributes' in tag) && tag.attributes.role) {
 
-				if (!(tag.attributes.role in this._widget_role_actions)) Lava.throw("Unknown role in widget definition: " + tag.attributes.role);
+				if (!(tag.attributes.role in this._widget_role_actions)) Lava.t("Unknown role in widget definition: " + tag.attributes.role);
 				this[this._widget_role_actions[tag.attributes.role]](tag, config_storage, roles_storage);
 
 			} else {
 
-				if (!(tag.name in this._widget_tag_actions)) Lava.throw("Unknown tag in widget definition: " + tag.name + ". Maybe missing the 'role' attribute.");
+				if (!(tag.name in this._widget_tag_actions)) Lava.t("Unknown tag in widget definition: " + tag.name + ". Maybe missing the 'role' attribute.");
 				this[this._widget_tag_actions[tag.name]](tag, config_storage, roles_storage);
 
 			}
@@ -5965,11 +5965,11 @@ Lava.parsers.Directives = {
 			if (path[0] in Lava.parsers.Common.locator_types) {
 
 				i = path.indexOf('/');
-				if (Lava.schema.DEBUG && i == -1) Lava.throw("Malformed class name locator: " + path);
+				if (Lava.schema.DEBUG && i == -1) Lava.t("Malformed class name locator: " + path);
 				name = path.substr(0, i); // cut the locator part, "$widgetname"
 				widget_config.real_class = path.substr(i); // leave the name part: "/ClassName1/ClassName2"
 				widget_config.class_locator = {locator_type: Lava.parsers.Common.locator_types[name[0]], name: name.substr(1)};
-				if (Lava.schema.DEBUG && (!widget_config.class_locator.name || !widget_config.class_locator.locator_type)) Lava.throw("Malformed class name locator: " + path);
+				if (Lava.schema.DEBUG && (!widget_config.class_locator.name || !widget_config.class_locator.locator_type)) Lava.t("Malformed class name locator: " + path);
 
 			} else {
 
@@ -5983,7 +5983,7 @@ Lava.parsers.Directives = {
 		if (raw_directive.attributes.label) Lava.parsers.Common.setViewConfigLabel(widget_config, raw_directive.attributes.label);
 
 		if (raw_directive.attributes.id) {
-			if (Lava.schema.DEBUG && widget_config.id) Lava.throw("[Widget configuration] widget id was already set via main view configuration: " + raw_directive.attributes.id);
+			if (Lava.schema.DEBUG && widget_config.id) Lava.t("[Widget configuration] widget id was already set via main view configuration: " + raw_directive.attributes.id);
 			Lava.parsers.Common.setViewConfigId(widget_config, raw_directive.attributes.id);
 		}
 
@@ -5993,7 +5993,7 @@ Lava.parsers.Directives = {
 
 				for (name in roles_storage.options) {
 
-					if (name in widget_config.options) Lava.throw("Duplicate option: " + name);
+					if (name in widget_config.options) Lava.t("Duplicate option: " + name);
 					widget_config.options[name] = roles_storage.options[name];
 
 				}
@@ -6007,7 +6007,7 @@ Lava.parsers.Directives = {
 		}
 
 		if ('assigns' in roles_storage) {
-			if ('assigns' in widget_config) Lava.throw("Please, move assigns to one place: either to widget tag, or view directives");
+			if ('assigns' in widget_config) Lava.t("Please, move assigns to one place: either to widget tag, or view directives");
 			widget_config.assigns = roles_storage.assigns;
 		}
 
@@ -6024,7 +6024,7 @@ Lava.parsers.Directives = {
 	 */
 	_parseWidgetDefinitionWrapper: function(raw_directive) {
 
-		if (this._is_processing_define) Lava.throw("Nested defines are not allowed");
+		if (this._is_processing_define) Lava.t("Nested defines are not allowed");
 		this._is_processing_define = true;
 		var result;
 
@@ -6049,16 +6049,16 @@ Lava.parsers.Directives = {
 	 */
 	_xdefine: function(raw_directive) {
 
-		if (Lava.schema.DEBUG && (!raw_directive.attributes || !raw_directive.attributes.title)) Lava.throw("define: missing 'title' attribute");
-		if (Lava.schema.DEBUG && raw_directive.attributes.title.indexOf(' ') != -1) Lava.throw("Widget title must not contain spaces");
-		if (Lava.schema.DEBUG && ('resource_id' in raw_directive.attributes)) Lava.throw("resource_id is not allowed on define");
+		if (Lava.schema.DEBUG && (!raw_directive.attributes || !raw_directive.attributes.title)) Lava.t("define: missing 'title' attribute");
+		if (Lava.schema.DEBUG && raw_directive.attributes.title.indexOf(' ') != -1) Lava.t("Widget title must not contain spaces");
+		if (Lava.schema.DEBUG && ('resource_id' in raw_directive.attributes)) Lava.t("resource_id is not allowed on define");
 
 		this._current_widget_title = raw_directive.attributes.title;
 		var widget_config = this._parseWidgetDefinitionWrapper(raw_directive);
 		this._current_widget_title = null;
 		widget_config.is_extended = false; // reserve it for serialization
 
-		if (Lava.schema.DEBUG && ('class_locator' in widget_config)) Lava.throw("Dynamic class names are allowed only in inline widgets, not in x:define");
+		if (Lava.schema.DEBUG && ('class_locator' in widget_config)) Lava.t("Dynamic class names are allowed only in inline widgets, not in x:define");
 
 		Lava.storeWidgetSchema(raw_directive.attributes.title, widget_config);
 
@@ -6071,7 +6071,7 @@ Lava.parsers.Directives = {
 
 		var widget_config = this._parseWidgetDefinition(raw_directive);
 
-		if (Lava.schema.DEBUG && !widget_config.class && !widget_config.extends) Lava.throw("x:define: widget definition is missing either 'controller' or 'extends' attribute");
+		if (Lava.schema.DEBUG && !widget_config.class && !widget_config.extends) Lava.t("x:define: widget definition is missing either 'controller' or 'extends' attribute");
 		if (raw_directive.attributes.resource_id) widget_config.resource_id = Lava.parsers.Common.parseResourceId(raw_directive.attributes.resource_id);
 
 		widget_config.type = 'widget';
@@ -6097,12 +6097,12 @@ Lava.parsers.Directives = {
 
 		if (!('assigns' in storage)) storage.assigns = {};
 
-		if (Lava.schema.DEBUG && !('attributes' in raw_tag)) Lava.throw("assign: missing attributes");
-		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.throw("Malformed assign");
-		if (raw_tag.attributes.name in storage.assigns) Lava.throw("Duplicate assign: " + raw_tag.attributes.name);
+		if (Lava.schema.DEBUG && !('attributes' in raw_tag)) Lava.t("assign: missing attributes");
+		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.t("Malformed assign");
+		if (raw_tag.attributes.name in storage.assigns) Lava.t("Duplicate assign: " + raw_tag.attributes.name);
 
 		var arguments = Lava.ExpressionParser.parse(raw_tag.content[0]);
-		if (Lava.schema.DEBUG && arguments.length != 1) Lava.throw("Expression block requires exactly one argument");
+		if (Lava.schema.DEBUG && arguments.length != 1) Lava.t("Expression block requires exactly one argument");
 
 		if (raw_tag.attributes.once && Lava.types.Boolean.fromString(raw_tag.attributes.once)) {
 
@@ -6131,8 +6131,8 @@ Lava.parsers.Directives = {
 	 */
 	_parseOption: function(storage, raw_tag, storage_property_name) {
 
-		if (Lava.schema.DEBUG && !('attributes' in raw_tag)) Lava.throw("option: missing attributes");
-		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.throw("Malformed option: " + raw_tag.attributes.name);
+		if (Lava.schema.DEBUG && !('attributes' in raw_tag)) Lava.t("option: missing attributes");
+		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.t("Malformed option: " + raw_tag.attributes.name);
 
 		var option_type = raw_tag.attributes.type,
 			result;
@@ -6149,7 +6149,7 @@ Lava.parsers.Directives = {
 
 			} else {
 
-				Lava.throw("Unknown option type: " + option_type);
+				Lava.t("Unknown option type: " + option_type);
 
 			}
 
@@ -6170,8 +6170,8 @@ Lava.parsers.Directives = {
 	 */
 	_parseProperty: function(storage, raw_tag, storage_property_name) {
 
-		if (Lava.schema.DEBUG && !('attributes' in raw_tag)) Lava.throw("option: missing attributes");
-		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.throw("Malformed option: " + raw_tag.attributes.name);
+		if (Lava.schema.DEBUG && !('attributes' in raw_tag)) Lava.t("option: missing attributes");
+		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.t("Malformed option: " + raw_tag.attributes.name);
 		this._store(storage, storage_property_name, raw_tag.attributes.name, Lava.parseOptions(raw_tag.content[0]));
 
 	},
@@ -6188,8 +6188,8 @@ Lava.parsers.Directives = {
 
 	_parseRoles: function(storage, raw_tag) {
 
-		if ('roles' in storage) Lava.throw("Roles are already defined");
-		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.throw("Malformed roles tag/directive");
+		if ('roles' in storage) Lava.t("Roles are already defined");
+		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.t("Malformed roles tag/directive");
 		storage.roles = Lava.parsers.Common.parseTargets(raw_tag.content[0]);
 
 	},
@@ -6200,8 +6200,8 @@ Lava.parsers.Directives = {
 	 */
 	_xcontainer_config: function(raw_directive, view_config) {
 
-		if (Lava.schema.DEBUG && (!raw_directive.content || raw_directive.content.length == 0)) Lava.throw("Malformed container_config directive: content is missing");
-		if (Lava.schema.DEBUG && !view_config.container) Lava.throw("Trying to change container settings for container-less view. Please, change the view opening tag (# => $) or move the directive into wrapping container.");
+		if (Lava.schema.DEBUG && (!raw_directive.content || raw_directive.content.length == 0)) Lava.t("Malformed container_config directive: content is missing");
+		if (Lava.schema.DEBUG && !view_config.container) Lava.t("Trying to change container settings for container-less view. Please, change the view opening tag (# => $) or move the directive into wrapping container.");
 
 		var original_config = view_config.container,
 			config = Lava.parseOptions(raw_directive.content[0]),
@@ -6209,7 +6209,7 @@ Lava.parsers.Directives = {
 
 		if (Lava.schema.DEBUG) {
 			for (name in config) {
-				if (['class', 'options'].indexOf(name) == -1) Lava.throw('[_xcontainer_config] setting config property is not allowed: ' + name);
+				if (['class', 'options'].indexOf(name) == -1) Lava.t('[_xcontainer_config] setting config property is not allowed: ' + name);
 			}
 		}
 
@@ -6227,9 +6227,9 @@ Lava.parsers.Directives = {
 	 */
 	_xrefresher: function(raw_directive, view_config) {
 
-		if (Lava.schema.DEBUG && view_config.type == 'widget') Lava.throw("Wrong usage of x:refresher directive. May be applied only to views.");
-		if (Lava.schema.DEBUG && ('refresher' in view_config)) Lava.throw("Refresher is already defined");
-		if (Lava.schema.DEBUG && (!raw_directive.content || raw_directive.content.length != 1)) Lava.throw("Malformed refresher config");
+		if (Lava.schema.DEBUG && view_config.type == 'widget') Lava.t("Wrong usage of x:refresher directive. May be applied only to views.");
+		if (Lava.schema.DEBUG && ('refresher' in view_config)) Lava.t("Refresher is already defined");
+		if (Lava.schema.DEBUG && (!raw_directive.content || raw_directive.content.length != 1)) Lava.t("Malformed refresher config");
 		view_config.refresher = Lava.parseOptions(raw_directive.content[0]);
 
 	},
@@ -6240,7 +6240,7 @@ Lava.parsers.Directives = {
 	 */
 	_parseBroadcast: function(widget_config, raw_element) {
 
-		if ('broadcast' in widget_config) Lava.throw("Broadcast is already defined");
+		if ('broadcast' in widget_config) Lava.t("Broadcast is already defined");
 
 		var result = {},
 			name;
@@ -6261,7 +6261,7 @@ Lava.parsers.Directives = {
 	 */
 	_xbroadcast: function(raw_directive, widget_config) {
 
-		if (Lava.schema.DEBUG && widget_config.type != 'widget') Lava.throw("Broadcast directive requires a widget");
+		if (Lava.schema.DEBUG && widget_config.type != 'widget') Lava.t("Broadcast directive requires a widget");
 
 		this._parseBroadcast(widget_config, raw_directive);
 
@@ -6273,7 +6273,7 @@ Lava.parsers.Directives = {
 	 */
 	_parseBinding: function(widget_config, raw_element) {
 
-		if (raw_element.content.length != 1) Lava.throw("Malformed binding in widget definition: " + raw_element.attributes.name);
+		if (raw_element.content.length != 1) Lava.t("Malformed binding in widget definition: " + raw_element.attributes.name);
 
 		var binding = {
 			property_name: raw_element.attributes.name,
@@ -6281,7 +6281,7 @@ Lava.parsers.Directives = {
 		};
 		if ('direction' in raw_element.attributes) {
 			if (!(raw_element.attributes.direction in Lava.BINDING_DIRECTIONS))
-				Lava.throw("Unknown binding direction: " + raw_element.attributes.direction);
+				Lava.t("Unknown binding direction: " + raw_element.attributes.direction);
 			binding.direction = Lava.BINDING_DIRECTIONS[raw_element.attributes.direction];
 		}
 		this._store(widget_config, 'bindings', raw_element.attributes.name, binding);
@@ -6294,7 +6294,7 @@ Lava.parsers.Directives = {
 	 */
 	_xbind: function(raw_directive, widget_config) {
 
-		if (Lava.schema.DEBUG && widget_config.type != 'widget') Lava.throw("Binding directive requires a widget");
+		if (Lava.schema.DEBUG && widget_config.type != 'widget') Lava.t("Binding directive requires a widget");
 		this._parseBinding(widget_config, raw_directive);
 
 	},
@@ -6306,8 +6306,8 @@ Lava.parsers.Directives = {
 	 */
 	_parseObject: function(config, name, raw_tag) {
 
-		if (Lava.schema.DEBUG && (name in config)) Lava.throw("Object already exists: " + name + ". Ensure, that x:options and x:properties directives appear before x:option and x:property.");
-		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.throw("Malformed directive or tag for config property: " + name);
+		if (Lava.schema.DEBUG && (name in config)) Lava.t("Object already exists: " + name + ". Ensure, that x:options and x:properties directives appear before x:option and x:property.");
+		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.t("Malformed directive or tag for config property: " + name);
 		config[name] = Lava.parseOptions(raw_tag.content[0]);
 
 	},
@@ -6328,7 +6328,7 @@ Lava.parsers.Directives = {
 	 */
 	_xproperty: function(raw_directive, widget_config) {
 
-		if (Lava.schema.DEBUG && widget_config.type != 'widget') Lava.throw("Property directive requires a widget");
+		if (Lava.schema.DEBUG && widget_config.type != 'widget') Lava.t("Property directive requires a widget");
 
 		this._parseProperty(widget_config, raw_directive, 'properties');
 
@@ -6340,7 +6340,7 @@ Lava.parsers.Directives = {
 	 */
 	_xproperties: function(raw_directive, widget_config) {
 
-		if (Lava.schema.DEBUG && widget_config.type != 'widget') Lava.throw("Property directive requires a widget");
+		if (Lava.schema.DEBUG && widget_config.type != 'widget') Lava.t("Property directive requires a widget");
 
 		this._parseObject(widget_config, 'properties', raw_directive);
 
@@ -6348,8 +6348,8 @@ Lava.parsers.Directives = {
 
 	_storeDirectiveContent: function(widget_config, raw_directive, storage_name) {
 
-		if (Lava.schema.DEBUG && !('attributes' in raw_directive)) Lava.throw("option: missing attributes");
-		if (Lava.schema.DEBUG && (!raw_directive.content || raw_directive.content.length != 1)) Lava.throw("Malformed property: " + raw_directive.attributes.name);
+		if (Lava.schema.DEBUG && !('attributes' in raw_directive)) Lava.t("option: missing attributes");
+		if (Lava.schema.DEBUG && (!raw_directive.content || raw_directive.content.length != 1)) Lava.t("Malformed property: " + raw_directive.attributes.name);
 		this._store(widget_config, storage_name, raw_directive.attributes.name, raw_directive.content[0]);
 
 	},
@@ -6360,7 +6360,7 @@ Lava.parsers.Directives = {
 	 */
 	_xproperty_string: function(raw_directive, widget_config) {
 
-		if (Lava.schema.DEBUG && widget_config.type != 'widget') Lava.throw("property_string directive requires a widget");
+		if (Lava.schema.DEBUG && widget_config.type != 'widget') Lava.t("property_string directive requires a widget");
 
 		this._storeDirectiveContent(widget_config, raw_directive, 'properties');
 
@@ -6382,7 +6382,7 @@ Lava.parsers.Directives = {
 	_xdefine_resources: function(raw_directive) {
 
 		if (Lava.schema.DEBUG && (!raw_directive.attributes || !raw_directive.attributes['locale'] || !raw_directive.attributes['for']))
-			Lava.throw("Malformed x:resources definition. 'locale' and 'for' are required");
+			Lava.t("Malformed x:resources definition. 'locale' and 'for' are required");
 
 		Lava.resources.addWidgetResource(
 			raw_directive.attributes['for'],
@@ -6398,14 +6398,14 @@ Lava.parsers.Directives = {
 	 */
 	_xresources: function(raw_directive, widget_config) {
 
-		if (Lava.schema.DEBUG && (!raw_directive.attributes || !raw_directive.attributes['locale'])) Lava.throw("Malformed resources definition, missing locale");
+		if (Lava.schema.DEBUG && (!raw_directive.attributes || !raw_directive.attributes['locale'])) Lava.t("Malformed resources definition, missing locale");
 
 		if (!widget_config.resources) {
 			widget_config.resources = {}
 		}
 
 		if (Lava.schema.DEBUG && (raw_directive.attributes['locale'] in widget_config.resources))
-			Lava.throw("Locale is already defined: " + raw_directive.attributes['locale']);
+			Lava.t("Locale is already defined: " + raw_directive.attributes['locale']);
 
 		widget_config.resources[raw_directive.attributes['locale']] = this._parseResources(raw_directive, this._current_widget_title);
 
@@ -6417,7 +6417,7 @@ Lava.parsers.Directives = {
 	_xstatic_value: function(raw_directive) {
 
 		if (Lava.schema.DEBUG && (raw_directive.content || !raw_directive.attributes || !raw_directive.attributes.resource_id))
-			Lava.throw('Malformed static_value directive');
+			Lava.t('Malformed static_value directive');
 
 		return {
 			type: 'static_value',
@@ -6435,11 +6435,11 @@ Lava.parsers.Directives = {
 	_xstatic_eval: function(raw_directive) {
 
 		if (Lava.schema.DEBUG && (!raw_directive.content || raw_directive.content.length != 1))
-			Lava.throw('Malformed static_eval directive');
+			Lava.t('Malformed static_eval directive');
 
 		var arguments = Lava.ExpressionParser.parse(raw_directive.content[0]);
 
-		if (Lava.schema.DEBUG && arguments.length == 0) Lava.throw("static_eval: malformed argument");
+		if (Lava.schema.DEBUG && arguments.length == 0) Lava.t("static_eval: malformed argument");
 
 		return {
 			type: 'static_eval',
@@ -6454,7 +6454,7 @@ Lava.parsers.Directives = {
 	 */
 	_xattach_directives: function(raw_directive, widget_config) {
 
-		if (Lava.schema.DEBUG && !raw_directive.content) Lava.throw("empty attach_directives");
+		if (Lava.schema.DEBUG && !raw_directive.content) Lava.t("empty attach_directives");
 
 		var blocks = Lava.parsers.Common.asBlocks(raw_directive.content),
 			sugar = blocks[0],
@@ -6463,9 +6463,9 @@ Lava.parsers.Directives = {
 			count;
 
 		if (Lava.schema.DEBUG) {
-			if (sugar.type != 'tag' || sugar.content || directives.length == 0) Lava.throw("Malformed attach_directives");
+			if (sugar.type != 'tag' || sugar.content || directives.length == 0) Lava.t("Malformed attach_directives");
 			for (i = 0, count = directives.length; i < count; i++) {
-				if (directives[i].type != 'directive') Lava.throw("Malformed attach_directives");
+				if (directives[i].type != 'directive') Lava.t("Malformed attach_directives");
 			}
 		}
 
@@ -6476,17 +6476,17 @@ Lava.parsers.Directives = {
 
 	_parseDefaultEvents: function(raw_tag, widget_config) {
 
-		if (Lava.schema.DEBUG && (!raw_tag.content || !raw_tag.content.length)) Lava.throw('default_events: tag content is required');
-		if (Lava.schema.DEBUG && ('default_events' in widget_config)) Lava.throw('default_events: property already defined');
+		if (Lava.schema.DEBUG && (!raw_tag.content || !raw_tag.content.length)) Lava.t('default_events: tag content is required');
+		if (Lava.schema.DEBUG && ('default_events' in widget_config)) Lava.t('default_events: property already defined');
 
 		var events = Lava.parseOptions(raw_tag.content[0]),
 			i = 0,
 			count;
 
 		if (Lava.schema.DEBUG) {
-			if (!Array.isArray(events)) Lava.throw('default_events: array expected');
+			if (!Array.isArray(events)) Lava.t('default_events: array expected');
 			for (count = events.length; i < count; i++) {
-				if (typeof(events[i]) != 'string') Lava.throw('default_events: expected an array of strings');
+				if (typeof(events[i]) != 'string') Lava.t('default_events: expected an array of strings');
 			}
 		}
 
@@ -6851,14 +6851,14 @@ Lava.ObjectParser.yy = {
 			var count = path_segments.length;
 			if (count == 1) {
 
-				if (!Lava.parsers.Common.isLiteral(path_segments[0])) Lava.throw("ObjectParser: all external paths must start with 'window.*'. Text: " + path_segments.join('.'));
+				if (!Lava.parsers.Common.isLiteral(path_segments[0])) Lava.t("ObjectParser: all external paths must start with 'window.*'. Text: " + path_segments.join('.'));
 
 			} else { // > 1
 
-				if (path_segments[0] != 'window' && path_segments[0] != 'global') Lava.throw("ObjectParser: all external paths must start with 'window.' or 'global.'. Text: " + path_segments.join('.'));
+				if (path_segments[0] != 'window' && path_segments[0] != 'global') Lava.t("ObjectParser: all external paths must start with 'window.' or 'global.'. Text: " + path_segments.join('.'));
 				if (count == 2) {
 					if (this.valid_globals.indexOf(path_segments[1]) !== -1)
-						Lava.throw("ObjectParser: objects should not contain global variables. Exceptions may be manually added to valid_globals property");
+						Lava.t("ObjectParser: objects should not contain global variables. Exceptions may be manually added to valid_globals property");
 				}
 				// else count > 2
 
@@ -7043,15 +7043,15 @@ case 26: this.$ = {label: $$[$0], direction: 'look_down'};
 break;
 case 27: this.$ = $$[$0]; 
 break;
-case 28: Lava.throw("Lookup operator is not supported yet."); 
+case 28: Lava.t("Lookup operator is not supported yet.");
 break;
 case 29:
 			$$[$0-1].depth = parseInt($$[$0]);
-			if (!$$[$0-1].depth) Lava.throw('Deepness operator: depth must be > 0');
+			if (!$$[$0-1].depth) Lava.t('Deepness operator: depth must be > 0');
 			this.$ = $$[$0-1];
 		
 break;
-case 30: Lava.throw("Lookup operator is not supported yet."); 
+case 30: Lava.t("Lookup operator is not supported yet.");
 break;
 case 31:
 			yy.x_counters.global_modifiers++;
@@ -7118,7 +7118,7 @@ case 45:
 			var segments = $$[$0-1].path_segments;
 			if (segments) {
 				for (var i = 0, count = segments.length; i < count; i++) {
-					if (typeof(segments[i]) == 'object') Lava.throw('Dynamic segment must not contain other dynamic segments');
+					if (typeof(segments[i]) == 'object') Lava.t('Dynamic segment must not contain other dynamic segments');
 				}
 			}
 			this.$ = $$[$0-1];
@@ -7318,15 +7318,15 @@ performAction: function anonymous(yy,yy_,$avoiding_name_collisions,YY_START
 
 var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {
-case 0: Lava.throw('Spaces between function name and opening brace are not allowed (1)'); 
+case 0: Lava.t('Spaces between function name and opening brace are not allowed (1)');
 break;
-case 1: Lava.throw('Spaces between function name and opening brace are not allowed (1)'); 
+case 1: Lava.t('Spaces between function name and opening brace are not allowed (1)');
 break;
-case 2: Lava.throw('Spaces between function name and opening brace are not allowed (2)'); 
+case 2: Lava.t('Spaces between function name and opening brace are not allowed (2)');
 break;
-case 3: Lava.throw('Spaces in scope path are not allowed (1)'); 
+case 3: Lava.t('Spaces in scope path are not allowed (1)');
 break;
-case 4: Lava.throw('Spaces in scope path are not allowed (2)'); 
+case 4: Lava.t('Spaces in scope path are not allowed (2)');
 break;
 case 5: yy_.yytext = yy_.yytext.slice(1); return 24; 
 break;
@@ -7413,8 +7413,8 @@ case 37:
 			'and': '&&'
 		};
 
-		if (lowercase == 'this') Lava.throw("'this' is reserved word. Are you missing the Label sign (@)?");
-		if ((lowercase in map) && lowercase != yy_.yytext) Lava.throw("Expression parser: 'lt', 'gt', 'and' must be lower case");
+		if (lowercase == 'this') Lava.t("'this' is reserved word. Are you missing the Label sign (@)?");
+		if ((lowercase in map) && lowercase != yy_.yytext) Lava.t("Expression parser: 'lt', 'gt', 'and' must be lower case");
 
 		if (lowercase in map) {
 			yy_.yytext = map[lowercase];
@@ -7422,7 +7422,7 @@ case 37:
 		}
 
 		if (Lava.parsers.Common.isLiteral(yy_.yytext)) {
-			if (lowercase != yy_.yytext) Lava.throw("Expression parser, code style: literals must be lower case");
+			if (lowercase != yy_.yytext) Lava.t("Expression parser, code style: literals must be lower case");
 			return 17;
 		}
 
@@ -7463,7 +7463,7 @@ Lava.ExpressionParser.SEPARATORS = {
  */
 Lava.ExpressionParser.parseRaw = function(input, separator) {
 
-	if (this.yy.is_parsing) Lava.throw("Calling ExpressionParser.parse*() recursively will break the parser. Please, create another instance.");
+	if (this.yy.is_parsing) Lava.t("Calling ExpressionParser.parse*() recursively will break the parser. Please, create another instance.");
 
 	this.lexer.x_tail_mode = false;
 	this.lexer.x_lex_brace_levels = 0;
@@ -7501,8 +7501,8 @@ Lava.ExpressionParser.parse = function(input, separator) {
  */
 Lava.ExpressionParser.parsePath = function(input) {
 	var configs = this.yy.convertArguments(this.parseRaw(input));
-	if (configs.length != 1) Lava.throw("ExpressionParser: single scope expected, got either many expressions or nothing");
-	if (!configs[0].flags.isScopeEval) Lava.throw("ExpressionParser: expected scope path, got expression");
+	if (configs.length != 1) Lava.t("ExpressionParser: single scope expected, got either many expressions or nothing");
+	if (!configs[0].flags.isScopeEval) Lava.t("ExpressionParser: expected scope path, got expression");
 	return configs[0].binds[0];
 };
 
@@ -7513,7 +7513,7 @@ Lava.ExpressionParser.parsePath = function(input) {
  */
 Lava.ExpressionParser.parseWithTailRaw = function(config_ref, separator) {
 
-	if (this.yy.is_parsing) Lava.throw("Calling ExpressionParser.parse*() recursively will break the parser. Please, create another instance.");
+	if (this.yy.is_parsing) Lava.t("Calling ExpressionParser.parse*() recursively will break the parser. Please, create another instance.");
 
 	this.lexer.x_tail_mode = true;
 	this.lexer.x_lex_brace_levels = 0;
@@ -7661,15 +7661,15 @@ Lava.ExpressionParser.yy = {
 
 	assertSemicolonAllowed: function() {
 
-		if (typeof(this.x_allowed_separator) == 'undefined') Lava.throw("ExpressionParser: semicolon encountered, but separator is not set");
-		if (this.x_allowed_separator != Lava.ExpressionParser.SEPARATORS.SEMICOLON) Lava.throw("ExpressionParser: comma is not allowed as separator here");
+		if (typeof(this.x_allowed_separator) == 'undefined') Lava.t("ExpressionParser: semicolon encountered, but separator is not set");
+		if (this.x_allowed_separator != Lava.ExpressionParser.SEPARATORS.SEMICOLON) Lava.t("ExpressionParser: comma is not allowed as separator here");
 
 	},
 
 	assertCommaAllowed: function() {
 
-		if (typeof(this.x_allowed_separator) == 'undefined') Lava.throw("ExpressionParser: comma encountered, but separator is not set");
-		if (this.x_allowed_separator != Lava.ExpressionParser.SEPARATORS.COMMA) Lava.throw("ExpressionParser: semicolon is not allowed as separator here");
+		if (typeof(this.x_allowed_separator) == 'undefined') Lava.t("ExpressionParser: comma encountered, but separator is not set");
+		if (this.x_allowed_separator != Lava.ExpressionParser.SEPARATORS.COMMA) Lava.t("ExpressionParser: semicolon is not allowed as separator here");
 
 	}
 
@@ -7793,7 +7793,7 @@ case 5:
 break;
 case 6:
 			var targets = Lava.parsers.Common.parseTargets($$[$0]);
-			if (targets.length != 1) Lava.throw("Malformed include");
+			if (targets.length != 1) Lava.t("Malformed include");
 			targets[0].type = 'include';
 			this.$ = targets[0];
 		
@@ -7815,18 +7815,18 @@ case 8:
 		
 break;
 case 9:
-			if ($$[$0-1].name != $$[$0]) Lava.throw('End block ("' + $$[$0] + '") does not match the start block ("' + $$[$0-1].name + '") (1)');
+			if ($$[$0-1].name != $$[$0]) Lava.t('End block ("' + $$[$0] + '") does not match the start block ("' + $$[$0-1].name + '") (1)');
 			this.$ = $$[$0-1];
 		
 break;
 case 10:
-			if ($$[$0-2].name != $$[$0]) Lava.throw('End block ("' + $$[$0] + '") does not match the start block ("' + $$[$0-2].name + '") (2)');
+			if ($$[$0-2].name != $$[$0]) Lava.t('End block ("' + $$[$0] + '") does not match the start block ("' + $$[$0-2].name + '") (2)');
 			$$[$0-2].content = $$[$0-1];
 			this.$ = $$[$0-2];
 		
 break;
 case 11:
-			if ($$[$0-2].name != $$[$0]) Lava.throw('End block ("' + $$[$0] + '") does not match the start block ("' + $$[$0-2].name + '") (3)');
+			if ($$[$0-2].name != $$[$0]) Lava.t('End block ("' + $$[$0] + '") does not match the start block ("' + $$[$0-2].name + '") (3)');
 			if ('elseif_arguments' in $$[$0-1]) {
 				$$[$0-2].elseif_arguments = $$[$0-1].elseif_arguments;
 				$$[$0-2].elseif_contents = $$[$0-1].elseif_contents;
@@ -7836,7 +7836,7 @@ case 11:
 		
 break;
 case 12:
-			if ($$[$0-3].name != $$[$0]) Lava.throw('End block ("' + $$[$0] + '") does not match the start block ("' + $$[$0-3].name + '") (4)');
+			if ($$[$0-3].name != $$[$0]) Lava.t('End block ("' + $$[$0] + '") does not match the start block ("' + $$[$0-3].name + '") (4)');
 			$$[$0-3].content = $$[$0-2];
 			if ('elseif_arguments' in $$[$0-1]) {
 				$$[$0-3].elseif_arguments = $$[$0-1].elseif_arguments;
@@ -7858,7 +7858,7 @@ break;
 case 15:
 			this.$ = $$[$0-1];
 			if ($$[$0-1].x && ('equiv' in $$[$0-1].x)) {
-				if (!$$[$0-1].x.equiv) Lava.throw('empty x:equiv');
+				if (!$$[$0-1].x.equiv) Lava.t('empty x:equiv');
 				this.$ = yy.parseRawTag($$[$0-1].x.equiv); // sets name and type
 				this.$.x = $$[$0-1].x;
 				if ('attributes' in $$[$0-1]) this.$.attributes = $$[$0-1].attributes;
@@ -7870,25 +7870,25 @@ case 16:
 			yy.validateTagEnd($$[$0-2], $$[$0]);
 			$$[$0-2].content = $$[$0-1];
 			this.$ = $$[$0-2];
-			if (Lava.isVoidTag(this.$.name)) Lava.throw("Void tag with content: " + this.$.name);
+			if (Lava.isVoidTag(this.$.name)) Lava.t("Void tag with content: " + this.$.name);
 		
 break;
 case 17:
 			if ($$[$0] == 'preserve_whitespace') {
-				if (yy.preserve_whitespace) Lava.throw("Switch {pre:} is already active");
+				if (yy.preserve_whitespace) Lava.t("Switch {pre:} is already active");
 				yy.preserve_whitespace = true;
 			} else {
-				Lava.throw("Parser error: lexer returned unknown switch: " + $$[$0]);
+				Lava.t("Parser error: lexer returned unknown switch: " + $$[$0]);
 			}
 			this.$ = null;
 		
 break;
 case 18:
 			if ($$[$0] == 'preserve_whitespace') {
-				if (!yy.preserve_whitespace) Lava.throw("Trying to turn off inactive switch: {:pre}");
+				if (!yy.preserve_whitespace) Lava.t("Trying to turn off inactive switch: {:pre}");
 				yy.preserve_whitespace = false;
 			} else {
-				Lava.throw("Parser error: lexer returned unknown switch: " + $$[$0]);
+				Lava.t("Parser error: lexer returned unknown switch: " + $$[$0]);
 			}
 			this.$ = null;
 		
@@ -7933,7 +7933,7 @@ case 24:
 		
 break;
 case 25:
-			if ($$[$0].name in $$[$0-1]) Lava.throw('Duplicate attribute in block definition: ' + $$[$0].name);
+			if ($$[$0].name in $$[$0-1]) Lava.t('Duplicate attribute in block definition: ' + $$[$0].name);
 			$$[$0-1][$$[$0].name] = $$[$0].value;
 			this.$ = $$[$0-1];
 		
@@ -8007,28 +8007,28 @@ case 38:
 break;
 case 39:
 			var arguments = yy.lexer.x_export_arguments;
-			if (arguments.length != 1) Lava.throw('Elseif block requires exactly one argument');
+			if (arguments.length != 1) Lava.t('Elseif block requires exactly one argument');
 			this.$ = arguments[0];
 			yy.lexer.x_export_arguments = null;
 		
 break;
 case 40:
-			if ($$[$0-1] != $$[$0-1].toLowerCase()) Lava.throw("Tag names must be lower case: " + $$[$0-1]);
+			if ($$[$0-1] != $$[$0-1].toLowerCase()) Lava.t("Tag names must be lower case: " + $$[$0-1]);
 			this.$ = yy.parseRawTag($$[$0-1]);
 		
 break;
 case 41:
-			if ($$[$0-2] != $$[$0-2].toLowerCase()) Lava.throw("Tag names must be lower case: " + $$[$0-2]);
+			if ($$[$0-2] != $$[$0-2].toLowerCase()) Lava.t("Tag names must be lower case: " + $$[$0-2]);
 			this.$ = yy.parseRawTag($$[$0-2], $$[$0-1]);
 		
 break;
 case 42:
-			if ($$[$0-1] != $$[$0-1].toLowerCase()) Lava.throw("Tag names must be lower case: " + $$[$0-1]);
+			if ($$[$0-1] != $$[$0-1].toLowerCase()) Lava.t("Tag names must be lower case: " + $$[$0-1]);
 			this.$ = yy.parseRawTag($$[$0-1]);
 		
 break;
 case 43:
-			if ($$[$0-2] != $$[$0-2].toLowerCase()) Lava.throw("Tag names must be lower case: " + $$[$0-2]);
+			if ($$[$0-2] != $$[$0-2].toLowerCase()) Lava.t("Tag names must be lower case: " + $$[$0-2]);
 			this.$ = yy.parseRawTag($$[$0-2], $$[$0-1]);
 		
 break;
@@ -8276,9 +8276,9 @@ case 8: this.popState(); return 9; // normal
 break;
 case 9: this.popState(); return 10; // escaped 
 break;
-case 10: Lava.throw('Spaces between block opening tag and block name are not allowed'); 
+case 10: Lava.t('Spaces between block opening tag and block name are not allowed');
 break;
-case 11: Lava.throw('Spaces between block name and opening brace are not allowed'); 
+case 11: Lava.t('Spaces between block name and opening brace are not allowed');
 break;
 case 12: return 20; 
 break;
@@ -8302,7 +8302,7 @@ case 17:
 		this.x_export_arguments = Lava.ExpressionParser.parseWithTail(config_ref);
 		this._input = this._input.substr(this._input.length - config_ref.tail_length);
 		// { <- comment for Jison
-		if (!(/(\s|\})/.test(this._input[0]))) Lava.throw('Lex: arguments closing brace must be followed by whitespace or CLOSE_CURLY');
+		if (!(/(\s|\})/.test(this._input[0]))) Lava.t('Lex: arguments closing brace must be followed by whitespace or CLOSE_CURLY');
 		this.popState(); // block
 		this.begin('blockHash');
 		return 26;
@@ -8332,7 +8332,7 @@ case 27:
 		this.yy.x_lexer_is_fragment = false;
 		if (yy_.yytext == 'script') {
 			var index = this._input.indexOf('>');
-			if (index == -1) Lava.throw("Lexical error: malformed script tag");
+			if (index == -1) Lava.t("Lexical error: malformed script tag");
 			var attributes_string = this._input.substr(0, index);
 			if (/type=(\'|\")lava\/fragment(\'|\")/.test(attributes_string)) {
 				this.yy.x_lexer_is_fragment = true;
@@ -8395,26 +8395,26 @@ case 40:
 		if (yy_.yytext == '{literal:}') {
 			this.begin('literal');
 		} else if (yy_.yytext == '{pure_blocks:}') {
-			if (this.x_pure_blocks_mode) Lava.throw('Lexer switch: "{pure_blocks:}" mode is already enabled');
+			if (this.x_pure_blocks_mode) Lava.t('Lexer switch: "{pure_blocks:}" mode is already enabled');
 			this.x_pure_blocks_mode = true;
 		} else if (yy_.yytext == '{pre:}') {
 			yy_.yytext = 'preserve_whitespace';
 			return 18;
 		} else {
-			Lava.throw('Unknown switch: ' + yy_.yytext);
+			Lava.t('Unknown switch: ' + yy_.yytext);
 		}
 	
 break;
 case 41:
 		this.popState();
 		if (yy_.yytext == '{:pure_blocks}') {
-			if (!this.x_pure_blocks_mode) Lava.throw('Redundant lexer switch "{:pure_blocks}"');
+			if (!this.x_pure_blocks_mode) Lava.t('Redundant lexer switch "{:pure_blocks}"');
 			this.x_pure_blocks_mode = false;
 		} else if (yy_.yytext == '{:pre}') {
 			yy_.yytext = 'preserve_whitespace';
 			return 19;
 		} else {
-			Lava.throw('Unknown switch: ' + yy_.yytext);
+			Lava.t('Unknown switch: ' + yy_.yytext);
 		}
 	
 break;
@@ -8458,7 +8458,7 @@ Lava.TemplateParser.parse = function(input, view_config) {
  */
 Lava.TemplateParser.parseRaw = function(input) {
 
-	if (this.yy.is_parsing) Lava.throw("Calling TemplateParser.parseRaw() recursively will break the parser. Please, create another instance.");
+	if (this.yy.is_parsing) Lava.t("Calling TemplateParser.parseRaw() recursively will break the parser. Please, create another instance.");
 
 	var result;
 
@@ -8529,17 +8529,17 @@ Lava.TemplateParser.yy = {
 					segments_count--;
 					segment_name = normalized_path.shift();
 
-					if (Lava.schema.DEBUG && segment_name == '') Lava.throw("Malformed control attribute: " + attribute.name);
+					if (Lava.schema.DEBUG && segment_name == '') Lava.t("Malformed control attribute: " + attribute.name);
 
 					if (segments_count) {
 
 						if (!(segment_name in current_object)) current_object[segment_name] = {};
 						current_object = current_object[segment_name];
-						if (typeof(current_object) != 'object') Lava.throw("Conflicting control attribute: " + attribute.name);
+						if (typeof(current_object) != 'object') Lava.t("Conflicting control attribute: " + attribute.name);
 
 					} else {
 
-						if (segment_name in current_object) Lava.throw('Conflicting control attribute: ' + attribute.name);
+						if (segment_name in current_object) Lava.t('Conflicting control attribute: ' + attribute.name);
 						current_object[segment_name] = attribute.value;
 
 					}
@@ -8548,7 +8548,7 @@ Lava.TemplateParser.yy = {
 
 			} else {
 
-				if (attribute.name in attributes) Lava.throw('Duplicate attribute on tag: ' + attribute.name);
+				if (attribute.name in attributes) Lava.t('Duplicate attribute on tag: ' + attribute.name);
 				attributes[attribute.name] = attribute.value;
 
 			}
@@ -8602,7 +8602,7 @@ Lava.TemplateParser.yy = {
 			? this.CONTROL_ATTRIBUTE_PREFIX + start_object.name
 			: start_object.name;
 
-		if (start_name != end_name) Lava.throw('End tag ("' + end_name + '") does not match the start tag ("' + start_name + '")');
+		if (start_name != end_name) Lava.t('End tag ("' + end_name + '") does not match the start tag ("' + start_name + '")');
 
 	},
 
@@ -8611,14 +8611,14 @@ Lava.TemplateParser.yy = {
 		var i = string.indexOf('/'),
 			name = string.substr(0, i);
 
-		if (Lava.schema.DEBUG && i == -1) Lava.throw();
-		if (Lava.schema.DEBUG && !(name[0] in Lava.parsers.Common.locator_types)) Lava.throw("Malformed class name locator: " + string);
+		if (Lava.schema.DEBUG && i == -1) Lava.t();
+		if (Lava.schema.DEBUG && !(name[0] in Lava.parsers.Common.locator_types)) Lava.t("Malformed class name locator: " + string);
 
 		config.class_locator = {locator_type: Lava.parsers.Common.locator_types[name[0]], name: name.substr(1)};
 		config.real_class = string.substr(i);
 		config.name = config.real_class.substr(1); // cut the slash to match the end block
 
-		if (Lava.schema.DEBUG && (!config.class_locator.name || !config.class_locator.locator_type)) Lava.throw("Malformed class name locator: " + string);
+		if (Lava.schema.DEBUG && (!config.class_locator.name || !config.class_locator.locator_type)) Lava.t("Malformed class name locator: " + string);
 
 	}
 
@@ -8725,7 +8725,7 @@ Lava.define(
 	 */
 	_fire: function(event_name, event_args) {
 
-		if (Lava.schema.DEBUG && typeof(event_name) == "undefined") Lava.throw();
+		if (Lava.schema.DEBUG && typeof(event_name) == "undefined") Lava.t();
 
 		if (this._listeners[event_name] != null) {
 
@@ -8825,7 +8825,7 @@ Lava.define(
 	 */
 	setProperties: function(properties_object) {
 
-		if (Lava.schema.DEBUG && properties_object && properties_object.isProperties) Lava.throw("setProperties expects a plain JS object as an argument, not a class");
+		if (Lava.schema.DEBUG && properties_object && properties_object.isProperties) Lava.t("setProperties expects a plain JS object as an argument, not a class");
 
 		for (var name in properties_object) {
 
@@ -8880,7 +8880,7 @@ Lava.define(
 	 */
 	_firePropertyChanged: function(property_name, event_args) {
 
-		if (Lava.schema.DEBUG && property_name == null) Lava.throw("firePropertyChanged: property_name is null");
+		if (Lava.schema.DEBUG && property_name == null) Lava.t("firePropertyChanged: property_name is null");
 
 		if (this._property_listeners[property_name] != null) {
 
@@ -8920,8 +8920,8 @@ Lava.define(
 	 */
 	doRefresh: function(refresh_id, is_safe) {
 
-		if (Lava.schema.DEBUG && this._count_dependencies_waiting_refresh) Lava.throw();
-		if (Lava.schema.DEBUG && !this._waits_refresh && this._refresh_ticket) Lava.throw();
+		if (Lava.schema.DEBUG && this._count_dependencies_waiting_refresh) Lava.t();
+		if (Lava.schema.DEBUG && !this._waits_refresh && this._refresh_ticket) Lava.t();
 
 		if (this._waits_refresh) { // to counter exceptions
 
@@ -8976,7 +8976,7 @@ Lava.define(
 
 		} else {
 
-			if (Lava.schema.DEBUG && this._refresh_ticket) Lava.throw();
+			if (Lava.schema.DEBUG && this._refresh_ticket) Lava.t();
 
 			this._waits_refresh = true;
 			this._fire('waits_refresh');
@@ -8987,8 +8987,8 @@ Lava.define(
 
 	_onDependencyRefreshed: function() {
 
-		if (Lava.schema.DEBUG && !this._waits_refresh) Lava.throw();
-		if (Lava.schema.DEBUG && this._refresh_ticket) Lava.throw();
+		if (Lava.schema.DEBUG && !this._waits_refresh) Lava.t();
+		if (Lava.schema.DEBUG && this._refresh_ticket) Lava.t();
 
 		this._count_dependencies_waiting_refresh--;
 
@@ -8996,7 +8996,7 @@ Lava.define(
 
 			if (this._requeue) {
 
-				if (Lava.schema.DEBUG && this._refresh_ticket) Lava.throw();
+				if (Lava.schema.DEBUG && this._refresh_ticket) Lava.t();
 
 				this._refresh_ticket = Lava.ScopeManager.scheduleScopeRefresh(this, this.level);
 
@@ -9030,7 +9030,7 @@ Lava.define(
 
 		if (!this._waits_refresh) {
 
-			if (Lava.schema.DEBUG && this._refresh_ticket) Lava.throw();
+			if (Lava.schema.DEBUG && this._refresh_ticket) Lava.t();
 
 			this._waits_refresh = true;
 			this._refresh_ticket = Lava.ScopeManager.scheduleScopeRefresh(this, this.level);
@@ -9042,7 +9042,7 @@ Lava.define(
 
 	debugAssertClean: function() {
 
-		if (this._waits_refresh || this._refresh_ticket || this._is_dirty) Lava.throw("Refreshable::debugAssertClean() failed");
+		if (this._waits_refresh || this._refresh_ticket || this._is_dirty) Lava.t("Refreshable::debugAssertClean() failed");
 
 	},
 
@@ -9141,7 +9141,7 @@ Lava.define(
 	 */
 	onTimer: function(now) {
 
-		Lava.throw("This method is assigned dynamically in constructor");
+		Lava.t("This method is assigned dynamically in constructor");
 
 	},
 
@@ -9482,7 +9482,7 @@ Lava.define(
 		Firestorm.extend(new_config, config);
 
 		// assuming that the first animator is Units
-		if (Lava.schema.DEBUG && !new_config.animators[0].property) Lava.throw("Collapse: malformed animation config");
+		if (Lava.schema.DEBUG && !new_config.animators[0].property) Lava.t("Collapse: malformed animation config");
 		this._property = new_config.animators[0].property;
 
 		this.Standard$init(new_config, target);
@@ -9642,7 +9642,7 @@ Lava.define(
 
 			if (Lava.schema.DEBUG) {
 
-				Lava.throw("Emulated animation: call to state changing function while the animation is running");
+				Lava.t("Emulated animation: call to state changing function while the animation is running");
 
 			} else {
 
@@ -9816,7 +9816,7 @@ Lava.define(
 			type = typeof(childConfig);
 			if (type == 'object') type = childConfig.type;
 
-			if (Lava.schema.DEBUG && !(type in this._block_handlers_map)) Lava.throw("Unsupported template item type: " + type);
+			if (Lava.schema.DEBUG && !(type in this._block_handlers_map)) Lava.t("Unsupported template item type: " + type);
 			this[this._block_handlers_map[type]](result, childConfig, include_name_stack, properties);
 
 		}
@@ -9846,9 +9846,9 @@ Lava.define(
 
 	_createInclude: function(result, child_config, include_name_stack, properties) {
 
-		if (include_name_stack.indexOf(child_config.name) != -1) Lava.throw("Infinite include recursion");
+		if (include_name_stack.indexOf(child_config.name) != -1) Lava.t("Infinite include recursion");
 		var include = Lava.view_manager.getInclude(this._parent_view, child_config);
-		if (Lava.schema.DEBUG && include == null) Lava.throw("Include not found: " + child_config.name);
+		if (Lava.schema.DEBUG && include == null) Lava.t("Include not found: " + child_config.name);
 
 		include_name_stack.push(child_config.name);
 		this._createChildren(result, include, include_name_stack, properties);
@@ -9869,12 +9869,12 @@ Lava.define(
 			resource_value,
 			type;
 
-		if (!Lava.schema.RESOURCES_ENABLED) Lava.throw("static_value: resources are disabled");
-		if (Lava.schema.DEBUG && !resource_owner) Lava.throw("Resource owner not found: " + resource_id.locator_type + '=' + resource_id.locator);
+		if (!Lava.schema.RESOURCES_ENABLED) Lava.t("static_value: resources are disabled");
+		if (Lava.schema.DEBUG && !resource_owner) Lava.t("Resource owner not found: " + resource_id.locator_type + '=' + resource_id.locator);
 
 		resource_value = resource_owner.getResource(resource_id.name);
-		if (Lava.schema.DEBUG && !resource_value) Lava.throw("static_value: resource not found: " + resource_id.locator_type + '=' + resource_id.locator);
-		if (['string', 'number', 'boolean', 'translate'].indexOf(resource_value.type) == -1) Lava.throw("static_value: resource has wrong type");
+		if (Lava.schema.DEBUG && !resource_value) Lava.t("static_value: resource not found: " + resource_id.locator_type + '=' + resource_id.locator);
+		if (['string', 'number', 'boolean', 'translate'].indexOf(resource_value.type) == -1) Lava.t("static_value: resource has wrong type");
 
 		result.push(resource_value.value);
 
@@ -9891,7 +9891,7 @@ Lava.define(
 		var argument = new Lava.scope.Argument(childConfig.argument, this._view, this._widget);
 		// if this happens - than you are probably doing something wrong
 		if (argument.isWaitingRefresh()) {
-			if (Lava.schema.DEBUG) Lava.throw("static_eval wrong usage: created argument is dirty");
+			if (Lava.schema.DEBUG) Lava.t("static_eval wrong usage: created argument is dirty");
 			Lava.logError("static_eval wrong usage: created argument is dirty");
 		}
 		result.push(argument.getValue + '');
@@ -9921,13 +9921,13 @@ Lava.define(
 
 		if (Lava.schema.RESOURCES_ENABLED) {
 			resource_owner = Lava.view_manager.locateTarget(this._widget, resource_id.locator_type, resource_id.locator);
-			if (Lava.schema.DEBUG && !resource_owner) Lava.throw("Resource owner not found: " + resource_id.locator_type + '=' + resource_id.locator);
+			if (Lava.schema.DEBUG && !resource_owner) Lava.t("Resource owner not found: " + resource_id.locator_type + '=' + resource_id.locator);
 			container_resources = resource_owner.getResource(resource_id.name);
 		}
 
-		if (Lava.schema.DEBUG && !Lava.schema.RESOURCES_ENABLED) Lava.throw("Unable to render a static container: resources are disabled");
-		if (Lava.schema.DEBUG && !container_resources) Lava.throw("Static container, resources not found: " + resource_id.name);
-		if (Lava.schema.DEBUG && container_resources.type != 'container') Lava.throw("Malformed/invalid container resource: " + resource_id.locator_type + '=' + resource_id.locator);
+		if (Lava.schema.DEBUG && !Lava.schema.RESOURCES_ENABLED) Lava.t("Unable to render a static container: resources are disabled");
+		if (Lava.schema.DEBUG && !container_resources) Lava.t("Static container, resources not found: " + resource_id.name);
+		if (Lava.schema.DEBUG && container_resources.type != 'container') Lava.t("Malformed/invalid container resource: " + resource_id.locator_type + '=' + resource_id.locator);
 
 		static_properties = container_resources.value['static_properties'];
 		static_classes = container_resources.value['static_classes'];
@@ -9955,7 +9955,7 @@ Lava.define(
 
 		if (child_config.template) {
 
-			if (Lava.schema.DEBUG && is_void) Lava.throw();
+			if (Lava.schema.DEBUG && is_void) Lava.t();
 
 			result.push(serialized_tag + '>');
 			this._createChildren(result, child_config.template, include_name_stack, properties);
@@ -10006,7 +10006,7 @@ Lava.define(
 
 			} else if (typeof(contents[i]) == 'function') {
 
-				Lava.throw("Not implemented");
+				Lava.t("Not implemented");
 
 			} else {
 
@@ -10041,7 +10041,7 @@ Lava.define(
 
 	broadcastSleep: function() {
 
-		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.throw();
+		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.t();
 
 		this._is_sleeping = true;
 		this._broadcast('broadcastSleep');
@@ -10050,7 +10050,7 @@ Lava.define(
 
 	broadcastWakeup: function() {
 
-		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.throw();
+		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.t();
 
 		this._is_sleeping = false;
 		this._broadcast('broadcastWakeup');
@@ -10278,7 +10278,7 @@ Lava.define(
 	 */
 	scheduleViewRefresh: function(view) {
 
-		if (this._views_refreshing) Lava.throw("Views may not become dirty while they are being refreshed");
+		if (this._views_refreshing) Lava.t("Views may not become dirty while they are being refreshed");
 
 		if (view.depth in this._dirty_views) {
 
@@ -10346,9 +10346,9 @@ Lava.define(
 
 		if (instance.id) {
 
-			if (instance.id in this._views_by_id) Lava.throw("Duplicate view id: " + instance.id);
+			if (instance.id in this._views_by_id) Lava.t("Duplicate view id: " + instance.id);
 
-			if (Lava.schema.DEBUG && !Lava.isValidId(instance.id)) Lava.throw(); // Element ID is either malformed or conflicts with framework id patterns
+			if (Lava.schema.DEBUG && !Lava.isValidId(instance.id)) Lava.t(); // Element ID is either malformed or conflicts with framework id patterns
 
 			this._views_by_id[instance.id] = instance;
 
@@ -10390,7 +10390,7 @@ Lava.define(
 
 	_locateWidgetById: function(starting_widget, id) {
 
-		if (Lava.schema.DEBUG && !id) Lava.throw();
+		if (Lava.schema.DEBUG && !id) Lava.t();
 
 		return this._views_by_id[id];
 
@@ -10398,7 +10398,7 @@ Lava.define(
 
 	_locateWidgetByGuid: function(starting_widget, guid) {
 
-		if (Lava.schema.DEBUG && !guid) Lava.throw();
+		if (Lava.schema.DEBUG && !guid) Lava.t();
 
 		return this._views_by_guid[guid];
 
@@ -10406,7 +10406,7 @@ Lava.define(
 
 	_locateWidgetByName: function(widget, name) {
 
-		if (Lava.schema.DEBUG && !name) Lava.throw();
+		if (Lava.schema.DEBUG && !name) Lava.t();
 
 		while (widget && widget.name != name) {
 
@@ -10420,7 +10420,7 @@ Lava.define(
 
 	_locateWidgetByLabel: function(widget, label) {
 
-		if (Lava.schema.DEBUG && !label) Lava.throw();
+		if (Lava.schema.DEBUG && !label) Lava.t();
 
 		// Targets are different from view locators, there must be no hardcoded '@widget' label, like in views
 		// (it may be very harmful. Use widget names instead!)
@@ -10624,7 +10624,7 @@ Lava.define(
 
 			} else {
 
-				if (target.arguments[i].type != Lava.TARGET_ARGUMENT_TYPES.BIND) Lava.throw();
+				if (target.arguments[i].type != Lava.TARGET_ARGUMENT_TYPES.BIND) Lava.t();
 
 				result.push(view.evalPathConfig(target.arguments[i].data));
 
@@ -10650,7 +10650,7 @@ Lava.define(
 
 			widget = this['_locateWidgetBy' + config.locator_type](widget, config.locator);
 
-			if (!widget || !widget.isWidget) Lava.throw();
+			if (!widget || !widget.isWidget) Lava.t();
 
 		}
 
@@ -10706,7 +10706,7 @@ Lava.define(
 
 	_removeTarget: function(storage, name, widget) {
 
-		if (!(name in storage)) Lava.throw("Trying to remove a global event target for nonexistent event");
+		if (!(name in storage)) Lava.t("Trying to remove a global event target for nonexistent event");
 
 		var index = storage[name].indexOf(widget);
 
@@ -10926,7 +10926,7 @@ Lava.define(
 	lendEvent: function(event_name) {
 
 		if (Lava.schema.DEBUG && ['mouseenter', 'mouseleave', 'mouseover', 'mouseout'].indexOf(event_name) != -1)
-			Lava.throw("The following events: mouseenter, mouseleave, mouseover and mouseout are served by common alias - mouse_events");
+			Lava.t("The following events: mouseenter, mouseleave, mouseover and mouseout are served by common alias - mouse_events");
 
 		if (this._event_usage_counters[event_name]) {
 
@@ -11015,7 +11015,7 @@ Lava.define(
 			for (i = 0, count = event_targets.length; i < count; i++) {
 
 				target = event_targets[i];
-				if (Lava.schema.DEBUG && !('locator_type' in target)) Lava.throw("dispatchBroadcast: malformed target");
+				if (Lava.schema.DEBUG && !('locator_type' in target)) Lava.t("dispatchBroadcast: malformed target");
 				template_arguments = ('arguments' in target) ? this._evalTargetArguments(widget, target) : null;
 				destination_widget = this['_locateWidgetBy' + target.locator_type](widget, target.locator);
 				destination_widget.registerBroadcastTarget(widget, event_name, target.name, template_arguments);
@@ -11028,7 +11028,7 @@ Lava.define(
 
 	cancelBubble: function() {
 
-		if (Lava.schema.DEBUG && !this._is_bubble_cancellable) Lava.throw("This event is not cancellable");
+		if (Lava.schema.DEBUG && !this._is_bubble_cancellable) Lava.t("This event is not cancellable");
 
 		if (this._is_bubble_cancellable) {
 			this._cancel_bubble = true;
@@ -11072,7 +11072,7 @@ Lava.define(
 
 			if (Lava.schema.DEBUG) {
 
-				if (this._getmodule_recursion_protection.indexOf(name) != -1) Lava.throw("Circular module dependency");
+				if (this._getmodule_recursion_protection.indexOf(name) != -1) Lava.t("Circular module dependency");
 				this._getmodule_recursion_protection.push(name);
 
 			}
@@ -11184,11 +11184,11 @@ Lava.define(
 			if (Lava.isVoidTag(raw_tag.name) || !schema.content_schema) {
 
 				tag_copy = this._applyTopDirectives(raw_tag, widget_config);
-				if (Lava.schema.DEBUG && tag_copy.content && tag_copy.content.length) Lava.throw("Widget is not allowed to have any content: " + raw_tag.name);
+				if (Lava.schema.DEBUG && tag_copy.content && tag_copy.content.length) Lava.t("Widget is not allowed to have any content: " + raw_tag.name);
 
 			} else {
 
-				if (Lava.schema.DEBUG && !(schema.content_schema.type in this._root_map)) Lava.throw("Unknown type of content in sugar: " + schema.content_schema.type);
+				if (Lava.schema.DEBUG && !(schema.content_schema.type in this._root_map)) Lava.t("Unknown type of content in sugar: " + schema.content_schema.type);
 				this[this._root_map[schema.content_schema.type]](schema.content_schema, raw_tag, widget_config);
 
 			}
@@ -11225,7 +11225,7 @@ Lava.define(
 		for (; i < count; i++) {
 
 			if (raw_blocks[i].type == 'directive') {
-				if (Lava.parsers.Directives.processDirective(raw_blocks[i], widget_config, true)) Lava.throw("Directive inside sugar has returned a value: " + raw_blocks[i].name);
+				if (Lava.parsers.Directives.processDirective(raw_blocks[i], widget_config, true)) Lava.t("Directive inside sugar has returned a value: " + raw_blocks[i].name);
 			} else {
 				tag_copy.content = raw_blocks.slice(i);
 				has_content = true;
@@ -11257,7 +11257,7 @@ Lava.define(
 		for (name in raw_tag.attributes) {
 
 			if (Lava.schema.DEBUG && (name in this._attribute_mappings) && schema.attribute_mappings && (name in schema.attribute_mappings))
-				Lava.throw("Attribute schema is overridden by built-in schema: " + name);
+				Lava.t("Attribute schema is overridden by built-in schema: " + name);
 			descriptor = this._attribute_mappings[name] || schema.attribute_mappings[name];
 			if (descriptor) {
 				this[this._root_attributes_handlers[descriptor.type]](widget_config, raw_tag.attributes[name], descriptor, name);
@@ -11269,7 +11269,7 @@ Lava.define(
 
 		if (!Firestorm.Object.isEmpty(unknown_attributes)) {
 			unknown_schema = schema.unknown_root_attributes;
-			if (Lava.schema.DEBUG && !unknown_schema) Lava.throw("Sugar: unknown attribute: " + name + ", for widget: " + raw_tag.name);
+			if (Lava.schema.DEBUG && !unknown_schema) Lava.t("Sugar: unknown attribute: " + name + ", for widget: " + raw_tag.name);
 			this[this._unknown_root_attributes_actions[unknown_schema.type]](widget_config, unknown_attributes, unknown_schema);
 		}
 
@@ -11290,7 +11290,7 @@ Lava.define(
 
 		for (; i < count; i++) {
 
-			if (tags[i].name != schema.tag_name) Lava.throw("Unknown tag in collection: " + tags[i].name);
+			if (tags[i].name != schema.tag_name) Lava.t("Unknown tag in collection: " + tags[i].name);
 			result.push(
 				this[callback_name](schema, tags[i])
 			);
@@ -11317,8 +11317,8 @@ Lava.define(
 
 		for (; i < count; i++) {
 
-			if (tags[i].name != tag_name) Lava.throw("Unknown tag in collection: " + tags[i].name);
-			if (Lava.schema.DEBUG && (!tags[i].attributes || !tags[i].attributes.name)) Lava.throw("Sugar: hash tag is missing the name attribute");
+			if (tags[i].name != tag_name) Lava.t("Unknown tag in collection: " + tags[i].name);
+			if (Lava.schema.DEBUG && (!tags[i].attributes || !tags[i].attributes.name)) Lava.t("Sugar: hash tag is missing the name attribute");
 			result[tags[i].attributes.name] = this[callback_name](schema, tags[i]);
 
 		}
@@ -11353,7 +11353,7 @@ Lava.define(
 
 		for (; i < count; i++) {
 
-			if (!(tags[i].name in schema.tag_mappings)) Lava.throw("Unknown tag in sugar: " + tags[i].name);
+			if (!(tags[i].name in schema.tag_mappings)) Lava.t("Unknown tag in sugar: " + tags[i].name);
 			descriptor = schema.tag_mappings[tags[i].name];
 			this[this._object_tag_map[descriptor.type]](descriptor, tags[i], result);
 
@@ -11382,7 +11382,7 @@ Lava.define(
 		for (name in raw_tag.attributes) {
 
 			descriptor = schema.attribute_mappings[name];
-			if (Lava.schema.DEBUG && !descriptor) Lava.throw("Unknown attribute " + name + " in widget sugar on object: " + raw_tag.name);
+			if (Lava.schema.DEBUG && !descriptor) Lava.t("Unknown attribute " + name + " in widget sugar on object: " + raw_tag.name);
 			this[this._object_attributes_map[descriptor.type]](object, raw_tag.attributes[name], descriptor, name);
 
 		}
@@ -11398,14 +11398,14 @@ Lava.define(
 	_store: function(widget_config, storage_name, item_name, value) {
 
 		if (!(storage_name in widget_config)) widget_config[storage_name] = {};
-		if (Lava.schema.DEBUG && (item_name in widget_config[storage_name])) Lava.throw("Duplicate item in storage: " + item_name);
+		if (Lava.schema.DEBUG && (item_name in widget_config[storage_name])) Lava.t("Duplicate item in storage: " + item_name);
 		widget_config[storage_name][item_name] = value;
 
 	},
 
 	_putStorageProperty: function(widget_config, schema, value) {
 
-		if (Lava.schema.DEBUG && !schema.type) Lava.throw("storage item schema must have a type");
+		if (Lava.schema.DEBUG && !schema.type) Lava.t("storage item schema must have a type");
 
 		this._store(
 			widget_config,
@@ -11566,7 +11566,7 @@ Lava.define(
 
 	_unknownTagRoleAction: function(tag) {
 
-		Lava.throw("Unknown tag role in sugar: " + tag.name);
+		Lava.t("Unknown tag role in sugar: " + tag.name);
 
 	},
 
@@ -11577,7 +11577,7 @@ Lava.define(
 	 */
 	_parseRootAsObject: function(schema, raw_tag, widget_config) {
 
-		if (Lava.schema.DEBUG && schema.attribute_mappings) Lava.throw("Invalid schema for root object: attribute_mappings belong to root.");
+		if (Lava.schema.DEBUG && schema.attribute_mappings) Lava.t("Invalid schema for root object: attribute_mappings belong to root.");
 
 		var tag_copy = this._applyTopDirectives(raw_tag, widget_config);
 		this._parseTagAsObject(schema, tag_copy, widget_config);
@@ -11602,7 +11602,7 @@ Lava.define(
 	 */
 	_parseObjectTagAsTemplate: function(schema, raw_tag, object) {
 
-		if (Lava.schema.DEBUG && (raw_tag.name in object)) Lava.throw("Duplicate tag in object: " + raw_tag.name);
+		if (Lava.schema.DEBUG && (raw_tag.name in object)) Lava.t("Duplicate tag in object: " + raw_tag.name);
 		object[schema.name || raw_tag.name] = raw_tag.content ? Lava.parsers.Common.compileTemplate(raw_tag.content) : [];
 
 	},
@@ -11615,9 +11615,9 @@ Lava.define(
 	_parseObjectTagAsType: function(schema, raw_tag, object) {
 
 		if (Lava.schema.DEBUG) {
-			if (!raw_tag.content || raw_tag.content.length != 1 || typeof (raw_tag.content[0]) != 'string') Lava.throw("One string expected in tag content: " + raw_tag.name);
-			if (!Lava.types[schema.type_name].isValidString(raw_tag.content[0], schema)) Lava.throw("Invalid value in object tag: " + raw_tag.content[0]);
-			if (raw_tag.name in object) Lava.throw("Duplicate tag in object: " + raw_tag.name);
+			if (!raw_tag.content || raw_tag.content.length != 1 || typeof (raw_tag.content[0]) != 'string') Lava.t("One string expected in tag content: " + raw_tag.name);
+			if (!Lava.types[schema.type_name].isValidString(raw_tag.content[0], schema)) Lava.t("Invalid value in object tag: " + raw_tag.content[0]);
+			if (raw_tag.name in object) Lava.t("Duplicate tag in object: " + raw_tag.name);
 		}
 
 		object[schema.name || raw_tag.name] = Lava.types[schema.type_name].fromSafeString(raw_tag.content[0], schema);
@@ -11633,7 +11633,7 @@ Lava.define(
 
 		if (descriptor.type_name) {
 
-			if (Lava.schema.DEBUG && !Lava.types[descriptor.type_name].isValidString(attribute_value, descriptor)) Lava.throw("Invalid attribute value: " + attribute_value);
+			if (Lava.schema.DEBUG && !Lava.types[descriptor.type_name].isValidString(attribute_value, descriptor)) Lava.t("Invalid attribute value: " + attribute_value);
 			attribute_value = Lava.types[descriptor.type_name].fromSafeString(attribute_value, descriptor);
 
 		}
@@ -11648,7 +11648,7 @@ Lava.define(
 	 */
 	_parseRootIdAttribute: function(widget_config, attribute_value) {
 
-		if (Lava.schema.DEBUG && (!Lava.isValidId(attribute_value) || ('id' in widget_config))) Lava.throw();
+		if (Lava.schema.DEBUG && (!Lava.isValidId(attribute_value) || ('id' in widget_config))) Lava.t();
 		widget_config.id = attribute_value;
 
 	},
@@ -11698,7 +11698,7 @@ Lava.define(
 	 */
 	_parseObjectPropertyAttribute: function(object, attribute_value, schema, name) {
 
-		if (Lava.schema.DEBUG && (name in object)) Lava.throw("Duplicate property in object: " + name);
+		if (Lava.schema.DEBUG && (name in object)) Lava.t("Duplicate property in object: " + name);
 		object[schema.name || name] = this._valueToType(schema, attribute_value);
 
 	},
@@ -11812,7 +11812,7 @@ Lava.define(
 
 	enable: function() {
 
-		if (Lava.schema.DEBUG && this._mouseover_stack_changed_listener) Lava.throw("PopoverManager is already enabled");
+		if (Lava.schema.DEBUG && this._mouseover_stack_changed_listener) Lava.t("PopoverManager is already enabled");
 		Lava.view_manager.lendEvent('mouse_events');
 		this._mouseover_stack_changed_listener = Lava.view_manager.on('mouseover_stack_changed', this._onMouseoverStackChanged, this);
 		if (!this._tooltip) {
@@ -11854,7 +11854,7 @@ Lava.define(
 
 			if (!this._tooltip_target) {
 
-				if (Lava.schema.DEBUG && this._mousemove_listener) Lava.throw();
+				if (Lava.schema.DEBUG && this._mousemove_listener) Lava.t();
 				this._mousemove_listener = Lava.Core.addGlobalHandler('mousemove', this._onMouseMove, this);
 				this._tooltip.set('is_visible', true);
 
@@ -11975,19 +11975,19 @@ Lava.define(
 	initNewRecord: function(record, storage) {},
 
 	'import': function(record, storage, raw_properties) {
-		Lava.throw("Abstract function call: import");
+		Lava.t("Abstract function call: import");
 	},
 
 	'export': function(record, destination_object) {
-		Lava.throw("Abstract function call: export");
+		Lava.t("Abstract function call: export");
 	},
 
 	getValue: function(record, storage) {
-		Lava.throw("Abstract function call: getValue");
+		Lava.t("Abstract function call: getValue");
 	},
 
 	setValue: function(record, storage, value) {
-		Lava.throw("Abstract function call: setValue");
+		Lava.t("Abstract function call: setValue");
 	},
 
 	_fireFieldChangedEvents: function(record) {
@@ -12000,7 +12000,7 @@ Lava.define(
 	_getImportValue: function(storage, raw_properties) {
 
 		if (Lava.schema.data.VALIDATE_IMPORT_DATA && !this.isValidValue(raw_properties[this._name]))
-			Lava.throw('Invalid value in import data (' + this._name + '): ' + raw_properties[this._name]);
+			Lava.t('Invalid value in import data (' + this._name + '): ' + raw_properties[this._name]);
 
 		return raw_properties[this._name];
 
@@ -12050,12 +12050,12 @@ Lava.define(
 		if (!this._is_nullable && this._default == null) {
 
 			// the default value could be provided in derived classes
-			Lava.throw("Non-nullable Basic fields must have a default value");
+			Lava.t("Non-nullable Basic fields must have a default value");
 
 		}
 
 		if (Lava.schema.DEBUG && !this.isValidValue(this._default))
-			Lava.throw("Field was configured with invalid default value. Module: " + this._module.getName() + ", field name: " + this._name);
+			Lava.t("Field was configured with invalid default value. Module: " + this._module.getName() + ", field name: " + this._name);
 
 	},
 
@@ -12091,7 +12091,7 @@ Lava.define(
 
 		if (storage[this._name] !== value) {
 
-			if (!this.isValidValue(value)) Lava.throw('[Field name=' + this._name + '] Invalid field value: '
+			if (!this.isValidValue(value)) Lava.t('[Field name=' + this._name + '] Invalid field value: '
 				+ value + ". Reason: " + this.getInvalidReason(value));
 
 			storage[this._name] = value;
@@ -12130,7 +12130,7 @@ Lava.define(
 		this.Abstract$init(module, name, config, module_storages);
 
 		if (Lava.schema.DEBUG && !config.record_field)
-			Lava.throw("Missing corresponding Record field. Record fields are used by Collection fields.");
+			Lava.t("Missing corresponding Record field. Record fields are used by Collection fields.");
 
 		this._target_record_field_name = config.record_field;
 
@@ -12141,10 +12141,10 @@ Lava.define(
 		this._target_module = (this._config.module == 'this') ? this._module : this._module.getApp().getModule(this._config.module);
 		this._target_record_field = this._target_module.getField(this._target_record_field_name);
 
-		if (!this._target_record_field.isRecordField) Lava.throw('CollectionField: mirror field is not Record field');
+		if (!this._target_record_field.isRecordField) Lava.t('CollectionField: mirror field is not Record field');
 
 		if (this._target_record_field.getReferencedModule() !== this._module)
-			Lava.throw("CollectionField: module mismatch with mirror Record field");
+			Lava.t("CollectionField: module mismatch with mirror Record field");
 
 	},
 
@@ -12177,7 +12177,7 @@ Lava.define(
 		if (raw_properties[this._name]) {
 
 			if (Lava.schema.data.VALIDATE_IMPORT_DATA && !this.isValidValue(raw_properties[this._name]))
-				Lava.throw('Invalid value in import data');
+				Lava.t('Invalid value in import data');
 
 			var i = 0,
 				raw_records = raw_properties[this._name],
@@ -12215,7 +12215,7 @@ Lava.define(
 
 	setValue: function(record, storage, new_records) {
 
-		if (!Array.isArray(new_records) && !new_records.isEnumerable) Lava.throw("CollectionField: only arrays and enumerables may be assigned");
+		if (!Array.isArray(new_records) && !new_records.isEnumerable) Lava.t("CollectionField: only arrays and enumerables may be assigned");
 
 		this._target_record_field.replaceCollection(record, new_records);
 
@@ -12308,7 +12308,7 @@ Lava.define(
 	init: function(module, name, config, module_storages) {
 
 		if (Lava.schema.DEBUG && (('is_nullable' in config) || ('default' in config)))
-			Lava.throw("Standard ID field can not be configured as nullable or have a default value");
+			Lava.t("Standard ID field can not be configured as nullable or have a default value");
 
 		this.Abstract$init(module, name, config, module_storages);
 
@@ -12356,7 +12356,7 @@ Lava.define(
 
 		} else {
 
-			Lava.throw("Import record must have an ID");
+			Lava.t("Import record must have an ID");
 
 		}
 
@@ -12376,7 +12376,7 @@ Lava.define(
 
 	setValue: function(record, storage, value) {
 
-		Lava.throw("Standard id field must not be set");
+		Lava.t("Standard id field must not be set");
 
 	}
 
@@ -12463,7 +12463,7 @@ Lava.define(
 
 		if (this._config.foreign_key_field) {
 
-			if (Lava.schema.DEBUG && !this._referenced_module.hasField('id')) Lava.throw("field/Record: the referenced module must have an ID field");
+			if (Lava.schema.DEBUG && !this._referenced_module.hasField('id')) Lava.t("field/Record: the referenced module must have an ID field");
 
 			this._foreign_key_field_name = this._config.foreign_key_field;
 			this._foreign_key_field = this._module.getField(this._foreign_key_field_name);
@@ -12494,7 +12494,7 @@ Lava.define(
 			// Now foreign records are loaded, they get a GUID, and we need to ensure that collections can be referenced by that guid.
 			if (foreign_id in this._collections_by_id) {
 
-				if (Lava.schema.DEBUG && (records[i].guid in this._collections_by_guid)) Lava.throw();
+				if (Lava.schema.DEBUG && (records[i].guid in this._collections_by_guid)) Lava.t();
 				this._collections_by_guid[records[i].guid] = this._collections_by_id[foreign_id];
 
 			}
@@ -12513,7 +12513,7 @@ Lava.define(
 
 			collection = this._collections_by_guid[referenced_record.guid];
 
-			if (new_referenced_id in this._collections_by_id) Lava.throw();
+			if (new_referenced_id in this._collections_by_id) Lava.t();
 			this._collections_by_id[new_referenced_id] = collection;
 
 			// set the value of foreign ID field in all local records that reference this foreign record
@@ -12620,7 +12620,7 @@ Lava.define(
 				if (this._foreign_key_field) {
 
 					if (storage[this._foreign_key_field_name] && storage[this._foreign_key_field_name] != raw_properties[this._name].get('id'))
-						Lava.throw("Record field: mismatch of actual referenced record and it's id in import data");
+						Lava.t("Record field: mismatch of actual referenced record and it's id in import data");
 
 				}
 
@@ -12664,7 +12664,7 @@ Lava.define(
 
 			} else if (referenced_record_id in this._collections_by_id) {
 
-				if (Lava.schema.DEBUG && this._collections_by_id[referenced_record_id].isEnumerable) Lava.throw("Assertion failed");
+				if (Lava.schema.DEBUG && this._collections_by_id[referenced_record_id].isEnumerable) Lava.t("Assertion failed");
 				this._collections_by_id[referenced_record_id].push(record);
 
 			} else {
@@ -12690,7 +12690,7 @@ Lava.define(
 	setValue: function(record, storage, new_ref_record) {
 
 		if (!this.isValidValue(new_ref_record))
-			Lava.throw("Field/Record: assigned value is not valid. Reason: " + this.getInvalidReason(new_ref_record));
+			Lava.t("Field/Record: assigned value is not valid. Reason: " + this.getInvalidReason(new_ref_record));
 
 		if (storage[this._name] != null) {
 
@@ -12741,13 +12741,13 @@ Lava.define(
 
 			Lava.suspendListener(this._collection_listeners_by_guid[referenced_guid].removed);
 			var result = this._collections_by_guid[referenced_guid].remove(local_record);
-			if (Lava.schema.DEBUG && !result) Lava.throw();
+			if (Lava.schema.DEBUG && !result) Lava.t();
 			Lava.resumeListener(this._collection_listeners_by_guid[referenced_guid].removed);
 
 		} else {
 
 			var index = this._collections_by_guid[referenced_guid].indexOf(local_record);
-			if (index == -1) Lava.throw();
+			if (index == -1) Lava.t();
 			this._collections_by_guid[referenced_guid].splice(index, 1);
 
 		}
@@ -12768,7 +12768,7 @@ Lava.define(
 			if (this._collections_by_guid[referenced_guid].isEnumerable) {
 
 				if (Lava.schema.DEBUG && this._collections_by_guid[referenced_guid].contains(local_record))
-					Lava.throw("Duplicate record");
+					Lava.t("Duplicate record");
 
 				Lava.suspendListener(this._collection_listeners_by_guid[referenced_guid].added);
 				this._collections_by_guid[referenced_guid].push(local_record);
@@ -12777,7 +12777,7 @@ Lava.define(
 			} else {
 
 				if (Lava.schema.DEBUG && this._collections_by_guid[referenced_guid].indexOf(local_record) !== -1)
-					Lava.throw("Duplicate record");
+					Lava.t("Duplicate record");
 				this._collections_by_guid[referenced_guid].push(local_record);
 
 			}
@@ -12866,7 +12866,7 @@ Lava.define(
 
 			record = added_records[i];
 			if (!(record.guid in this._storages_by_guid))
-				Lava.throw("Record field: added record is either from different module or not record at all (2)");
+				Lava.t("Record field: added record is either from different module or not record at all (2)");
 			storage = this._storages_by_guid[record.guid];
 
 			if (storage[this._name] != null) {
@@ -12938,7 +12938,7 @@ Lava.define(
 	_getComparisonValues: function(record_a, record_b) {
 
 		if (Lava.schema.DEBUG && (!(record_a.guid in this._storages_by_guid) || !(record_b.guid in this._storages_by_guid)))
-			Lava.throw("isLess: record does not belong to this module");
+			Lava.t("isLess: record does not belong to this module");
 
 		var ref_record_a = this._storages_by_guid[record_a.guid][this._name],
 			ref_record_b = this._storages_by_guid[record_b.guid][this._name],
@@ -13092,7 +13092,7 @@ Lava.define(
 
 			} else {
 
-				Lava.throw("Wrong argument supplied for Enumerable constructor");
+				Lava.t("Wrong argument supplied for Enumerable constructor");
 
 			}
 
@@ -13146,7 +13146,7 @@ Lava.define(
 
 		} else {
 
-			if (Lava.schema.DEBUG && !/^\d+$/.test(name)) Lava.throw("Enumerable: invalid index (1)");
+			if (Lava.schema.DEBUG && !/^\d+$/.test(name)) Lava.t("Enumerable: invalid index (1)");
 
 			result = this.getValueAt(+name); // convert to integer
 
@@ -13277,7 +13277,7 @@ Lava.define(
 
 	set: function(name, value) {
 
-		if (Lava.schema.DEBUG && !/^\d+$/.test(name)) Lava.throw("Enumerable: invalid index (2)");
+		if (Lava.schema.DEBUG && !/^\d+$/.test(name)) Lava.t("Enumerable: invalid index (2)");
 
 		this.replaceAt(+name, value); // '+' to convert to integer
 
@@ -13292,7 +13292,7 @@ Lava.define(
 
 	replaceAt: function(index, value, name) {
 
-		if (index > this._count) Lava.throw("Index is out of range");
+		if (index > this._count) Lava.t("Index is out of range");
 
 		var old_uid = this._data_uids[index],
 			old_value = this._data_values[index],
@@ -13324,7 +13324,7 @@ Lava.define(
 
 	swap: function(index_a, index_b) {
 
-		if (index_a > this._count || index_b > this._count) Lava.throw("Index is out of range (2)");
+		if (index_a > this._count || index_b > this._count) Lava.t("Index is out of range (2)");
 
 		var swap = Firestorm.Array.swap;
 
@@ -13459,7 +13459,7 @@ Lava.define(
 
 	updateFromSourceObject: function(new_source_object) {
 
-		if (!this._source_object) Lava.throw("Enumerable was not created from object");
+		if (!this._source_object) Lava.t("Enumerable was not created from object");
 
 		var i = 0,
 			name,
@@ -13614,7 +13614,7 @@ Lava.define(
 
 			if (Lava.schema.DEBUG) {
 				// duplicate UIDs may break a lot of functionality, in this class and outside
-				if (index in verification) Lava.throw("Malformed index array");
+				if (index in verification) Lava.t("Malformed index array");
 				verification[index] = null;
 			}
 
@@ -13628,8 +13628,8 @@ Lava.define(
 
 	removeRange: function(start_index, count) {
 
-		if (count <= 0) Lava.throw("Invalid item count supplied for removeRange");
-		if (start_index + count >= this._count + 1) Lava.throw("Index is out of range");
+		if (count <= 0) Lava.t("Invalid item count supplied for removeRange");
+		if (start_index + count >= this._count + 1) Lava.t("Index is out of range");
 
 		var removed_uids = this._data_uids.splice(start_index, count),
 			removed_values = this._data_values.splice(start_index, count),
@@ -13652,7 +13652,7 @@ Lava.define(
 
 	insertRange: function(start_index, values, names) {
 
-		if (start_index >= this._count) Lava.throw("Index is out of range");
+		if (start_index >= this._count) Lava.t("Index is out of range");
 
 		var i = 0,
 			count = values.length,
@@ -13661,7 +13661,7 @@ Lava.define(
 
 		if (names) {
 
-			if (count != names.length) Lava.throw("If names array is provided, it must be equal length with values array.");
+			if (count != names.length) Lava.t("If names array is provided, it must be equal length with values array.");
 			added_names = names;
 
 		} else {
@@ -13921,7 +13921,7 @@ Lava.define(
 	_onRecordIdChanged: function(id_field, event_args) {
 
 		var id = event_args.record.get('id');
-		if (id in this._records_by_id) Lava.throw("Duplicate record id in module " + this._name);
+		if (id in this._records_by_id) Lava.t("Duplicate record id in module " + this._name);
 		this._records_by_id[id] = event_args.record;
 
 	},
@@ -13999,7 +13999,7 @@ Lava.define(
 
 		if (storage.id) {
 
-			if (storage.id in this._records_by_id) Lava.throw("Duplicate record id in module " + this._name);
+			if (storage.id in this._records_by_id) Lava.t("Duplicate record id in module " + this._name);
 			this._records_by_id[storage.id] = record;
 
 		}
@@ -14097,7 +14097,7 @@ Lava.define(
 
 		} else {
 
-			if (Lava.schema.DEBUG && !(name in this._fields)) Lava.throw('[Record] No such field: ' + name);
+			if (Lava.schema.DEBUG && !(name in this._fields)) Lava.t('[Record] No such field: ' + name);
 			result = this._fields[name].getValue(this, this._properties);
 
 		}
@@ -14108,8 +14108,8 @@ Lava.define(
 
 	set: function(name, value) {
 
-		if (Lava.schema.DEBUG && name == 'guid') Lava.throw("trying to set record's GUID");
-		if (Lava.schema.DEBUG && !(name in this._fields)) Lava.throw('[Record] No such field: ' + name);
+		if (Lava.schema.DEBUG && name == 'guid') Lava.t("trying to set record's GUID");
+		if (Lava.schema.DEBUG && !(name in this._fields)) Lava.t('[Record] No such field: ' + name);
 
 		this._fields[name].setValue(this, this._properties, value);
 
@@ -14127,7 +14127,7 @@ Lava.define(
 
 		for (var field in this._fields) {
 
-			this._fields[field].export(this, export_record);
+			this._fields[field]['export'](this, export_record);
 
 		}
 
@@ -14218,7 +14218,7 @@ Lava.define(
 	 */
 	init: function(config) {
 
-		if ('id' in config.fields) Lava.throw("Id field in MetaStorage is not permitted");
+		if ('id' in config.fields) Lava.t("Id field in MetaStorage is not permitted");
 
 		this._config = config;
 		//this._attached_module = attached_module;
@@ -14229,7 +14229,7 @@ Lava.define(
 		if (Lava.schema.DEBUG) {
 			for (field in this._fields) {
 				if (this._fields[field].isCollectionField || this._fields[field].isRecordField)
-					Lava.throw("Standard Collection and Record fields will not work inside the MetaStorage");
+					Lava.t("Standard Collection and Record fields will not work inside the MetaStorage");
 			}
 		}
 
@@ -14253,7 +14253,7 @@ Lava.define(
 
 	set: function(name, value) {
 
-		Lava.throw("MetaStorage: set operation is not permitted");
+		Lava.t("MetaStorage: set operation is not permitted");
 
 	},
 
@@ -14334,7 +14334,7 @@ Lava.define(
 	 */
 	getSegment: function(name_source_scope) {
 
-		if (Lava.schema.DEBUG && !name_source_scope.guid) Lava.throw("Only PropertyBinding and DataBinding may be used as name source for segments");
+		if (Lava.schema.DEBUG && !name_source_scope.guid) Lava.t("Only PropertyBinding and DataBinding may be used as name source for segments");
 
 		if (!(name_source_scope.guid in this._data_segments)) {
 
@@ -14494,7 +14494,7 @@ Lava.define(
 
 		var widget = this._widget.locateViewByPathConfig(path_config);
 
-		if (Lava.schema.DEBUG && !widget.isWidget) Lava.throw("Tried to call a modifier from non-widget view");
+		if (Lava.schema.DEBUG && !widget.isWidget) Lava.t("Tried to call a modifier from non-widget view");
 
 		return widget;
 
@@ -14504,7 +14504,7 @@ Lava.define(
 
 		// Classes that can serve as a binding: PropertyBinding, DataBinding and Segment. They all will fire 'changed'
 		// event only during the refresh cycle, so at this moment the Argument must be already in queue.
-		if (!this._waits_refresh) Lava.throw();
+		if (!this._waits_refresh) Lava.t();
 
 		this._is_dirty = true;
 
@@ -14572,7 +14572,7 @@ Lava.define(
 
 	_callGlobalModifier: function(name, arguments_array) {
 
-		if (Lava.schema.DEBUG && !(name in Lava.modifiers)) Lava.throw("Unknown global modifier: " + name);
+		if (Lava.schema.DEBUG && !(name in Lava.modifiers)) Lava.t("Unknown global modifier: " + name);
 		return Lava.modifiers[name].apply(Lava.modifiers, arguments_array);
 
 	},
@@ -14598,7 +14598,7 @@ Lava.define(
 			if (this._binds[i].isWaitingRefresh()) {
 
 				//this._count_dependencies_waiting_refresh++;
-				Lava.throw();
+				Lava.t();
 
 			}
 
@@ -14698,7 +14698,7 @@ Lava.define(
 
 			} else {
 
-				if (Lava.schema.DEBUG && config.direction != Lava.BINDING_DIRECTIONS.FROM_WIDGET) Lava.throw();
+				if (Lava.schema.DEBUG && config.direction != Lava.BINDING_DIRECTIONS.FROM_WIDGET) Lava.t();
 
 				this._scope.setValue(this._widget.get(this._property_name));
 				scope_listener = false;
@@ -14716,7 +14716,7 @@ Lava.define(
 		}
 
 		if (widget_listener) {
-			if (!this._scope.isSetValue) Lava.throw("Binding: bound scope does not implement setValue");
+			if (!this._scope.isSetValue) Lava.t("Binding: bound scope does not implement setValue");
 			this._widget_property_changed_listener = widget.onPropertyChanged(this._property_name, this.onWidgetPropertyChanged, this);
 		}
 
@@ -15304,8 +15304,8 @@ Lava.define(
 	 */
 	init: function(container, name_source_container, level) {
 
-		if (Lava.schema.DEBUG && !name_source_container.isValueContainer) Lava.throw();
-		if (Lava.schema.DEBUG && !name_source_container.guid) Lava.throw("Name source for segments must be either PropertyBinding or DataBinding");
+		if (Lava.schema.DEBUG && !name_source_container.isValueContainer) Lava.t();
+		if (Lava.schema.DEBUG && !name_source_container.guid) Lava.t("Name source for segments must be either PropertyBinding or DataBinding");
 
 		this._container = container;
 		this._property_name = name_source_container.getValue();
@@ -15331,7 +15331,7 @@ Lava.define(
 
 	isConnected: function() {
 
-		if (!this._data_binding) Lava.throw();
+		if (!this._data_binding) Lava.t();
 		return this._data_binding.isConnected();
 
 	},
@@ -15501,14 +15501,14 @@ Lava.define(
 		if (Lava.schema.RESOURCES_ENABLED && config.resource_id) {
 
 			resource_owner = Lava.view_manager.locateTarget(widget, config.resource_id.locator_type, config.resource_id.locator);
-			if (Lava.schema.DEBUG && !resource_owner) Lava.throw("[Element container] resource owner not found: " + config.resource_id.locator_type + "=" + config.resource_id.locator);
+			if (Lava.schema.DEBUG && !resource_owner) Lava.t("[Element container] resource owner not found: " + config.resource_id.locator_type + "=" + config.resource_id.locator);
 			container_resources = resource_owner.getResource(config.resource_id.name);
 
 		}
 
 		if (Lava.schema.RESOURCES_ENABLED && container_resources) {
 
-			if (Lava.schema.DEBUG && container_resources.type != 'container') Lava.throw("Element container: received resource type is not container: " + container_resources.type);
+			if (Lava.schema.DEBUG && container_resources.type != 'container') Lava.t("Element container: received resource type is not container: " + container_resources.type);
 			static_classes = container_resources.value['static_classes'];
 			static_properties = container_resources.value['static_properties'];
 			static_styles = container_resources.value['static_styles'];
@@ -15522,7 +15522,7 @@ Lava.define(
 		}
 
 		if (Lava.schema.DEBUG && static_properties && ('id' in static_properties))
-			Lava.throw("Element container: id must not be set via resources or be in config.static_properties");
+			Lava.t("Element container: id must not be set via resources or be in config.static_properties");
 
 		// Must clone everything, cause additional statics can be added to the element at run time
 		if (static_classes) this._static_classes = static_classes.slice();
@@ -15628,8 +15628,8 @@ Lava.define(
 
 	storeProperty: function(name, value) {
 
-		if (Lava.schema.DEBUG && name == 'id') Lava.throw();
-		if (Lava.schema.DEBUG && (name in this._property_bindings)) Lava.throw("Property is bound to an argument and cannot be set directly: " + name);
+		if (Lava.schema.DEBUG && name == 'id') Lava.t();
+		if (Lava.schema.DEBUG && (name in this._property_bindings)) Lava.t("Property is bound to an argument and cannot be set directly: " + name);
 
 		this._static_properties[name] = value;
 
@@ -15653,7 +15653,7 @@ Lava.define(
 
 	addClass: function(class_name, cancel_sync) {
 
-		if (Lava.schema.DEBUG && (!class_name || class_name.indexOf(' ') != -1)) Lava.throw("addClass: expected one class name, got: " + class_name);
+		if (Lava.schema.DEBUG && (!class_name || class_name.indexOf(' ') != -1)) Lava.t("addClass: expected one class name, got: " + class_name);
 
 		if (Firestorm.Array.include(this._static_classes, class_name)) {
 
@@ -15675,7 +15675,7 @@ Lava.define(
 
 	addClasses: function(class_names, cancel_sync) {
 
-		if (Lava.schema.DEBUG && typeof(class_names) == 'string') Lava.throw();
+		if (Lava.schema.DEBUG && typeof(class_names) == 'string') Lava.t();
 
 		for (var i = 0, count = class_names.length; i < count; i++) {
 
@@ -15823,12 +15823,12 @@ Lava.define(
 
 	assertStyleValid: function(value) {
 		if (/\"\<\>/.test(value))
-			Lava.throw("Invalid symbols in style value: " + value + ". Please, use single quotes for string values and manually escape special characters.");
+			Lava.t("Invalid symbols in style value: " + value + ". Please, use single quotes for string values and manually escape special characters.");
 	},
 
 	assertClassStringValid: function(value) {
 
-		if (/\'\"\<\>\&\./.test(value)) Lava.throw("Invalid class names: " + value);
+		if (/\'\"\<\>\&\./.test(value)) Lava.t("Invalid class names: " + value);
 
 	},
 
@@ -15915,7 +15915,7 @@ Lava.define(
 			result;
 
 		// view calls this function in render(), and before that it must wake up itself and it's container
-		if (Lava.schema.DEBUG && this._is_sleeping) Lava.throw();
+		if (Lava.schema.DEBUG && this._is_sleeping) Lava.t();
 
 		this._element = null;
 
@@ -15949,7 +15949,7 @@ Lava.define(
 
 		if (this._is_void) {
 
-			if (Lava.schema.DEBUG && html) Lava.throw('Trying to wrap content in void tag');
+			if (Lava.schema.DEBUG && html) Lava.t('Trying to wrap content in void tag');
 
 			result += "/>";
 
@@ -15965,8 +15965,8 @@ Lava.define(
 
 	setHTML: function(html) {
 
-		if (!this._is_inDOM) Lava.throw("setHTML: element is not in DOM");
-		if (this._is_void) Lava.throw('setHTML on void tag');
+		if (!this._is_inDOM) Lava.t("setHTML: element is not in DOM");
+		if (this._is_void) Lava.t('setHTML on void tag');
 
 		Firestorm.Element.setProperty(this.getDOMElement(), 'html', html);
 
@@ -16010,7 +16010,7 @@ Lava.define(
 	informInDOM_Original: function() {
 
 		this._is_inDOM = true;
-		if (Lava.schema.DEBUG && this._element) Lava.throw();
+		if (Lava.schema.DEBUG && this._element) Lava.t();
 
 	},
 
@@ -16071,8 +16071,8 @@ Lava.define(
 
 	setSignature: function(tag_name) {
 
-		if (Lava.schema.DEBUG && tag_name != tag_name.toLowerCase()) Lava.throw("Tag names must be lower case");
-		if (this._is_inDOM) Lava.throw("Can not change signature on elements that are in dom");
+		if (Lava.schema.DEBUG && tag_name != tag_name.toLowerCase()) Lava.t("Tag names must be lower case");
+		if (this._is_inDOM) Lava.t("Can not change signature on elements that are in dom");
 		this._tag_name = tag_name;
 		this._is_void = Lava.isVoidTag(tag_name);
 
@@ -16083,9 +16083,9 @@ Lava.define(
 		var Element = Firestorm.Element,
 			name;
 
-		if (this._is_inDOM) Lava.throw("Can not set duplicate id attribute on elements");
-		if (Element.getProperty(element, 'id')) Lava.throw("Target element already has an ID, and could be owned by another container");
-		if (Element.getProperty(element, 'tag').toLowerCase() != this._tag_name) Lava.throw("Captured tag name differs from the container's tag name");
+		if (this._is_inDOM) Lava.t("Can not set duplicate id attribute on elements");
+		if (Element.getProperty(element, 'id')) Lava.t("Target element already has an ID, and could be owned by another container");
+		if (Element.getProperty(element, 'tag').toLowerCase() != this._tag_name) Lava.t("Captured tag name differs from the container's tag name");
 
 		this.wakeup();
 
@@ -16137,7 +16137,7 @@ Lava.define(
 
 	remove: function() {
 
-		if (!this._is_inDOM) Lava.throw("remove: container is not in DOM");
+		if (!this._is_inDOM) Lava.t("remove: container is not in DOM");
 		Firestorm.Element.destroy(this.getDOMElement());
 
 	},
@@ -16311,7 +16311,7 @@ Lava.define(
 
 	setHTML: function(html) {
 
-		if (!this._is_inDOM) Lava.throw("setHTML: container is not in DOM");
+		if (!this._is_inDOM) Lava.t("setHTML: container is not in DOM");
 
 		Firestorm.DOM.clearInnerRange(this.getStartElement(), this.getEndElement());
 		Firestorm.DOM.insertHTMLBefore(this.getEndElement(), html);
@@ -16320,7 +16320,7 @@ Lava.define(
 
 	remove: function() {
 
-		if (!this._is_inDOM) Lava.throw("remove: container is not in DOM");
+		if (!this._is_inDOM) Lava.t("remove: container is not in DOM");
 		Firestorm.DOM.clearOuterRange(this.getStartElement(), this.getEndElement());
 
 	},
@@ -16428,17 +16428,17 @@ Lava.define(
 
 	setHTML: function(html) {
 
-		if (!this._is_inDOM) Lava.throw("setHTML: container is not in DOM");
+		if (!this._is_inDOM) Lava.t("setHTML: container is not in DOM");
 
-		Lava.throw('call to setHTML() in emulated container');
+		Lava.t('call to setHTML() in emulated container');
 
 	},
 
 	remove: function() {
 
-		if (!this._is_inDOM) Lava.throw("remove: container is not in DOM");
+		if (!this._is_inDOM) Lava.t("remove: container is not in DOM");
 
-		Lava.throw('call to remove() in emulated container');
+		Lava.t('call to remove() in emulated container');
 
 	},
 
@@ -16460,19 +16460,19 @@ Lava.define(
 	 */
 	appendHTML: function(html) {
 
-		Lava.throw("appendHTML: placement is not supported");
+		Lava.t("appendHTML: placement is not supported");
 
 	},
 
 	prependHTML: function(html) {
 
-		Lava.throw('call to prependHTML() in emulated container');
+		Lava.t('call to prependHTML() in emulated container');
 
 	},
 
 	insertHTMLAfter: function(html) {
 
-		Lava.throw('call to insertHTMLAfter() in emulated container');
+		Lava.t('call to insertHTMLAfter() in emulated container');
 
 	},
 
@@ -16768,7 +16768,7 @@ Lava.define(
 	 */
 	_createAnimation: function(template) {
 
-		Lava.throw("Abstract function call: _createAnimation");
+		Lava.t("Abstract function call: _createAnimation");
 
 	},
 
@@ -17064,7 +17064,7 @@ Lava.define(
 
 			} else {
 
-				if (name in this._property_bindings_by_property) Lava.throw("Error initializing assign: property binding already created");
+				if (name in this._property_bindings_by_property) Lava.t("Error initializing assign: property binding already created");
 
 				this._property_bindings_by_property[name] = new Lava.scope.PropertyBinding(this, name, this.depth, config.assigns[name]);
 
@@ -17139,7 +17139,7 @@ Lava.define(
 
 			root = root.getParentView();
 
-			if (!root) Lava.throw("Error evaluating depth: parent view does not exist");
+			if (!root) Lava.t("Error evaluating depth: parent view does not exist");
 
 			depth--;
 
@@ -17211,7 +17211,7 @@ Lava.define(
 
 	broadcastSleep: function() {
 
-		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.throw();
+		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.t();
 
 		if (!this._is_sleeping) {
 
@@ -17231,7 +17231,7 @@ Lava.define(
 
 	broadcastWakeup: function() {
 
-		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.throw();
+		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.t();
 
 		if (this._is_sleeping) {
 
@@ -17258,7 +17258,7 @@ Lava.define(
 
 	_renderContents: function() {
 
-		Lava.throw("_renderContents must be overridden in inherited classes");
+		Lava.t("_renderContents must be overridden in inherited classes");
 
 	},
 
@@ -17288,7 +17288,7 @@ Lava.define(
 	 */
 	refresh: function() {
 
-		if (Lava.schema.DEBUG && !this._container) Lava.throw("Refresh on a view without container");
+		if (Lava.schema.DEBUG && !this._container) Lava.t("Refresh on a view without container");
 
 		this._is_queued_for_refresh = false;
 
@@ -17318,7 +17318,7 @@ Lava.define(
 	 */
 	locateViewByLabel: function(label) {
 
-		if (Lava.schema.DEBUG && !label) Lava.throw();
+		if (Lava.schema.DEBUG && !label) Lava.t();
 
 		var result = this;
 
@@ -17362,7 +17362,7 @@ Lava.define(
 	 */
 	locateViewByName: function(name) {
 
-		if (Lava.schema.DEBUG && !name) Lava.throw();
+		if (Lava.schema.DEBUG && !name) Lava.t();
 
 		var result = this._widget;
 
@@ -17382,7 +17382,7 @@ Lava.define(
 	 */
 	locateViewById: function(id) {
 
-		if (Lava.schema.DEBUG && !id) Lava.throw();
+		if (Lava.schema.DEBUG && !id) Lava.t();
 
 		return Lava.view_manager.getViewById(id);
 
@@ -17394,7 +17394,7 @@ Lava.define(
 	 */
 	locateViewByGuid: function(guid) {
 
-		if (Lava.schema.DEBUG && !guid) Lava.throw();
+		if (Lava.schema.DEBUG && !guid) Lava.t();
 
 		return Lava.view_manager.getViewByGuid(guid);
 
@@ -17408,7 +17408,7 @@ Lava.define(
 
 		var result = this['locateViewBy' + path_config.locator_type](path_config.locator);
 
-		if (Lava.schema.DEBUG && !result) Lava.throw("View not found. " + path_config.locator_type + ':' + path_config.locator);
+		if (Lava.schema.DEBUG && !result) Lava.t("View not found. " + path_config.locator_type + ':' + path_config.locator);
 
 		if ('depth' in path_config) {
 
@@ -17452,18 +17452,18 @@ Lava.define(
 
 			view = view.locateViewWithProperty(path_config.property_name);
 
-			if (Lava.schema.DEBUG && !view) Lava.throw("Property not found: " + path_config.property_name);
+			if (Lava.schema.DEBUG && !view) Lava.t("Property not found: " + path_config.property_name);
 
 			result = view.getDataBinding(path_config.property_name);
 
 		} else {
 
-			if (Lava.schema.DEBUG && !('locator_type' in path_config)) Lava.throw("Malformed scope path (1)");
-			if (Lava.schema.DEBUG && !tail) Lava.throw("Malformed scope path (2)");
+			if (Lava.schema.DEBUG && !('locator_type' in path_config)) Lava.t("Malformed scope path (1)");
+			if (Lava.schema.DEBUG && !tail) Lava.t("Malformed scope path (2)");
 
 			result = this.locateViewByPathConfig(path_config);
 
-			if (Lava.schema.DEBUG && !result) Lava.throw("View not found. "
+			if (Lava.schema.DEBUG && !result) Lava.t("View not found. "
 				+ path_config.locator_type + ": " + path_config.locator + ", depth:" + path_config.depth);
 
 		}
@@ -17507,12 +17507,12 @@ Lava.define(
 
 		} else {
 
-			if (Lava.schema.DEBUG && !('locator_type' in path_config)) Lava.throw("Malformed scope path (1)");
-			if (Lava.schema.DEBUG && !tail) Lava.throw("Malformed scope path (2)");
+			if (Lava.schema.DEBUG && !('locator_type' in path_config)) Lava.t("Malformed scope path (1)");
+			if (Lava.schema.DEBUG && !tail) Lava.t("Malformed scope path (2)");
 
 			result = this.locateViewByPathConfig(path_config);
 
-			if (Lava.schema.DEBUG && !result) Lava.throw("View not found. "
+			if (Lava.schema.DEBUG && !result) Lava.t("View not found. "
 				+ path_config.locator_type + ": " + path_config.locator + ", depth:" + path_config.depth);
 
 		}
@@ -17561,7 +17561,7 @@ Lava.define(
 	 */
 	getSegment: function(name_source_scope) {
 
-		if (Lava.schema.DEBUG && !name_source_scope.guid) Lava.throw("Only PropertyBinding and DataBinding may be used as name source for segments");
+		if (Lava.schema.DEBUG && !name_source_scope.guid) Lava.t("Only PropertyBinding and DataBinding may be used as name source for segments");
 
 		if (!(name_source_scope.guid in this._data_segments)) {
 
@@ -17622,7 +17622,7 @@ Lava.define(
 			Lava.schema.DEBUG
 			&& (('argument' in this._config) || ('else_template' in this._config) || ('elseif_arguments' in this._config))
 		) {
-			Lava.throw("Standard View does not support arguments and elseif/else blocks");
+			Lava.t("Standard View does not support arguments and elseif/else blocks");
 		}
 
 	},
@@ -17724,7 +17724,7 @@ Lava.define(
 
 	_postInit: function() {
 
-		if (Lava.schema.DEBUG && !('argument' in this._config)) Lava.throw("Expression view requires an argument");
+		if (Lava.schema.DEBUG && !('argument' in this._config)) Lava.t("Expression view requires an argument");
 		this._escape = !this._config.escape_off;
 		this._argument = new Lava.scope.Argument(this._config.argument, this, this._widget);
 		this._argument_changed_listener = this._argument.on('changed', this.onValueChanged, this);
@@ -17739,7 +17739,7 @@ Lava.define(
 
 	_renderContents: function() {
 
-		if (Lava.schema.DEBUG && this._argument.isWaitingRefresh()) Lava.throw();
+		if (Lava.schema.DEBUG && this._argument.isWaitingRefresh()) Lava.t();
 
 		var result = '',
 			new_value = this._argument.getValue();
@@ -17839,7 +17839,7 @@ Lava.define(
 
 		if (this._config.refresher) {
 
-			if (Lava.schema.DEBUG && !this._container) Lava.throw('View/Foreach: refresher needs container to work');
+			if (Lava.schema.DEBUG && !this._container) Lava.t('View/Foreach: refresher needs container to work');
 			var constructor = Lava.ClassManager.getConstructor(this._config.refresher.class, 'Lava.view.refresher');
 			this._refresher = /** @type {Lava.refresher.Default} */ new constructor(
 				this._config.refresher,
@@ -17863,9 +17863,9 @@ Lava.define(
 
 	_initMembers: function(properties) {
 
-		if (Lava.schema.DEBUG && !('argument' in this._config)) Lava.throw("Foreach view requires an argument");
-		if (Lava.schema.DEBUG && !this._config.as) Lava.throw("Foreach view requires 'as' hash parameter");
-		if (Lava.schema.DEBUG && !this._config.template) Lava.throw("Foreach view must not be empty");
+		if (Lava.schema.DEBUG && !('argument' in this._config)) Lava.t("Foreach view requires an argument");
+		if (Lava.schema.DEBUG && !this._config.as) Lava.t("Foreach view requires 'as' hash parameter");
+		if (Lava.schema.DEBUG && !this._config.template) Lava.t("Foreach view must not be empty");
 
 		this.Abstract$_initMembers(properties);
 
@@ -18002,7 +18002,7 @@ Lava.define(
 
 	_renderContents: function() {
 
-		if (Lava.schema.DEBUG && (this._argument.isWaitingRefresh() || this._foreach_scope.isWaitingRefresh())) Lava.throw();
+		if (Lava.schema.DEBUG && (this._argument.isWaitingRefresh() || this._foreach_scope.isWaitingRefresh())) Lava.t();
 
 		this._refresher && this._refresher.onRender(this._current_templates);
 
@@ -18127,7 +18127,7 @@ Lava.define(
 
 	_postInit: function() {
 
-		if (Lava.schema.DEBUG && !('argument' in this._config)) Lava.throw("If view requires an argument");
+		if (Lava.schema.DEBUG && !('argument' in this._config)) Lava.t("If view requires an argument");
 
 		var i = 0,
 			count,
@@ -18155,7 +18155,7 @@ Lava.define(
 		if (this._config.refresher) {
 
 			// otherwise, it will not be able to insert the template
-			if (Lava.schema.DEBUG && !this._container) Lava.throw('View/If: refresher needs container to work');
+			if (Lava.schema.DEBUG && !this._container) Lava.t('View/If: refresher needs container to work');
 			constructor = Lava.ClassManager.getConstructor(this._config.refresher.class, 'Lava.view.refresher');
 			this._refresher = /** @type {Lava.refresher.Default} */ new constructor(
 				this._config.refresher,
@@ -18246,7 +18246,7 @@ Lava.define(
 
 	_renderContents: function() {
 
-		if (Lava.schema.DEBUG && this._active_argument_index != null && this._arguments[this._active_argument_index].isWaitingRefresh()) Lava.throw();
+		if (Lava.schema.DEBUG && this._active_argument_index != null && this._arguments[this._active_argument_index].isWaitingRefresh()) Lava.t();
 
 		this._refresher && this._refresher.onRender(this._active_template ? [this._active_template] : []);
 		return this._active_template ? this._active_template.render() : '';
@@ -18422,11 +18422,11 @@ Lava.define(
 
 		var name;
 
-		if (Lava.schema.DEBUG && !config.is_extended) Lava.throw("Widget was created with partial (unextended) config");
+		if (Lava.schema.DEBUG && !config.is_extended) Lava.t("Widget was created with partial (unextended) config");
 
 		if (Lava.schema.DEBUG) {
 			for (name in this._property_descriptors) {
-				if (!(name in this._properties)) Lava.throw("All widget properties must have a default value");
+				if (!(name in this._properties)) Lava.t("All widget properties must have a default value");
 			}
 		}
 
@@ -18486,12 +18486,12 @@ Lava.define(
 
 			resource_owner = this['locateViewBy' + config.resource_id.locator_type](config.resource_id.locator);
 			if (Lava.schema.DEBUG && (!resource_owner || !resource_owner.isWidget))
-				Lava.throw("Resource root not found: " + config.resource_id.locator_type + '=' + config.resource_id.locator);
+				Lava.t("Resource root not found: " + config.resource_id.locator_type + '=' + config.resource_id.locator);
 			component_resource = resource_owner.getResource(config.resource_id.name, Lava.schema.LOCALE);
 
 			if (component_resource) {
 
-				if (Lava.schema.DEBUG && component_resource.type != 'component') Lava.throw("resource value is not a component");
+				if (Lava.schema.DEBUG && component_resource.type != 'component') Lava.t("resource value is not a component");
 
 				resources = resources
 					? Lava.resources.mergeResources(component_resource.value, resources, true)
@@ -18579,9 +18579,9 @@ Lava.define(
 
 	inject: function(element, position) {
 
-		if (this._is_inDOM) Lava.throw("inject: widget is already in DOM");
-		if (Lava.schema.DEBUG && this._parent_view) Lava.throw("Widget: only top-level widgets can be inserted into DOM");
-		if (Lava.schema.DEBUG && !this._container) Lava.throw("Widget: root widgets must have a container");
+		if (this._is_inDOM) Lava.t("inject: widget is already in DOM");
+		if (Lava.schema.DEBUG && this._parent_view) Lava.t("Widget: only top-level widgets can be inserted into DOM");
+		if (Lava.schema.DEBUG && !this._container) Lava.t("Widget: root widgets must have a container");
 
 		var html = this.render();
 
@@ -18599,10 +18599,10 @@ Lava.define(
 	 */
 	injectIntoExistingElement: function(element) {
 
-		if (this._is_inDOM) Lava.throw("inject: widget is already in DOM");
-		if (Lava.schema.DEBUG && this._parent_view) Lava.throw("Widget: only top-level widgets can be inserted into DOM");
-		if (Lava.schema.DEBUG && !this._container) Lava.throw("Widget: root widgets must have a container");
-		if (Lava.schema.DEBUG && !this._container.isElementContainer) Lava.throw("injectIntoExistingElement expects an element containers");
+		if (this._is_inDOM) Lava.t("inject: widget is already in DOM");
+		if (Lava.schema.DEBUG && this._parent_view) Lava.t("Widget: only top-level widgets can be inserted into DOM");
+		if (Lava.schema.DEBUG && !this._container) Lava.t("Widget: root widgets must have a container");
+		if (Lava.schema.DEBUG && !this._container.isElementContainer) Lava.t("injectIntoExistingElement expects an element containers");
 
 		this._container.captureExistingElement(element);
 		this._container.setHTML(this._renderContents());
@@ -18668,8 +18668,8 @@ Lava.define(
 
 	remove: function() {
 
-		if (!this._is_inDOM) Lava.throw("remove: widget is not in DOM");
-		if (Lava.schema.DEBUG && !this._container) Lava.throw("remove: widget doesn't have a container");
+		if (!this._is_inDOM) Lava.t("remove: widget is not in DOM");
+		if (Lava.schema.DEBUG && !this._container) Lava.t("remove: widget doesn't have a container");
 
 		this._releaseAllEvents();
 		if (!this._is_sleeping) this._sleep();
@@ -18696,7 +18696,7 @@ Lava.define(
 	 */
 	callModifier: function(name, arguments_array) {
 
-		if (Lava.schema.DEBUG && !(name in this._modifiers)) Lava.throw("Unknown widget modifier: " + name);
+		if (Lava.schema.DEBUG && !(name in this._modifiers)) Lava.t("Unknown widget modifier: " + name);
 
 		return this[this._modifiers[name]].apply(this, arguments_array);
 
@@ -18709,7 +18709,7 @@ Lava.define(
 	 */
 	callActiveModifier: function(name, arguments_array) {
 
-		Lava.throw("Alpha version. This functionality may be removed later.");
+		Lava.t("Alpha version. This functionality may be removed later.");
 
 	},
 
@@ -18751,17 +18751,17 @@ Lava.define(
 
 			descriptor = this._property_descriptors[name];
 
-			if (Lava.schema.DEBUG && descriptor.is_readonly) Lava.throw("Trying to set readonly property: " + name);
+			if (Lava.schema.DEBUG && descriptor.is_readonly) Lava.t("Trying to set readonly property: " + name);
 
 			if (Lava.schema.widget.VALIDATE_PROPERTY_TYPES) {
 
 				if (value === null) {
 
-					if (!descriptor.is_nullable) Lava.throw("Trying to assign NULL to non-nullable property");
+					if (!descriptor.is_nullable) Lava.t("Trying to assign NULL to non-nullable property");
 
 				} else if (descriptor.type && !Lava.types[descriptor.type].isValidValue(value, descriptor)) {
 
-					Lava.throw("Assigned value does not match the property type: " + descriptor.type);
+					Lava.t("Assigned value does not match the property type: " + descriptor.type);
 
 				}
 
@@ -18770,7 +18770,7 @@ Lava.define(
 			if (descriptor.setter) {
 
 				// It's forced to make setters private, cause type-checking will not work if setter is called directly.
-				if (Lava.schema.DEBUG && descriptor.setter[0] != '_') Lava.throw("Widget property setters must not be public: " + descriptor.setter);
+				if (Lava.schema.DEBUG && descriptor.setter[0] != '_') Lava.t("Widget property setters must not be public: " + descriptor.setter);
 
 				//try { // additional protection from crash for the scope system
 				//	this[descriptor.setter](name, value);
@@ -18865,7 +18865,7 @@ Lava.define(
 
 		if (string_descriptor) {
 
-			if (Lava.schema.DEBUG && string_descriptor.type != 'translate') Lava.throw("[translate] resource is not a string: " + resource_name);
+			if (Lava.schema.DEBUG && string_descriptor.type != 'translate') Lava.t("[translate] resource is not a string: " + resource_name);
 
 			if (arguments_list) {
 
@@ -18907,9 +18907,9 @@ Lava.define(
 
 		if (string_descriptor) {
 
-			if (Lava.schema.DEBUG && string_descriptor.type != 'ntranslate') Lava.throw("[ntranslate] resource is not a string: " + string_name);
+			if (Lava.schema.DEBUG && string_descriptor.type != 'ntranslate') Lava.t("[ntranslate] resource is not a string: " + string_name);
 			pluralform = string_descriptor.value[form_index];
-			if (Lava.schema.DEBUG && pluralform == null) Lava.throw("[ntranslate] requested plural string is missing one of it's plural forms:" + string_name);
+			if (Lava.schema.DEBUG && pluralform == null) Lava.t("[ntranslate] requested plural string is missing one of it's plural forms:" + string_name);
 
 			if (arguments_list) {
 
@@ -19404,7 +19404,7 @@ Lava.define(
 
 	_refreshValue: function() {
 
-		Lava.throw('Abstract function call: _refreshValue');
+		Lava.t('Abstract function call: _refreshValue');
 
 	}
 
@@ -19604,7 +19604,7 @@ Lava.define(
 
 			if (config.options['type']) {
 
-				if (config.options['type'] != 'text') Lava.throw('Numeric input: the only recognized "type" option value in "text"');
+				if (config.options['type'] != 'text') Lava.t('Numeric input: the only recognized "type" option value in "text"');
 				this._type = config.options['type'];
 
 			}
@@ -20613,7 +20613,7 @@ Lava.define(
 	_setIsOpen: function(name, value) {
 
 		var open_target_container = this._getTargetContainer();
-		if (Lava.schema.DEBUG && !open_target_container) Lava.throw("DropDown was created without container and target");
+		if (Lava.schema.DEBUG && !open_target_container) Lava.t("DropDown was created without container and target");
 
 		if (this._properties.is_expanded != value) {
 
@@ -20785,7 +20785,7 @@ Lava.define(
 
 	init: function(config, widget, parent_view, template, properties) {
 
-		if (Lava.schema.DEBUG && (!config.options || !config.options.columns)) Lava.throw("Table: config.options.columns is required");
+		if (Lava.schema.DEBUG && (!config.options || !config.options.columns)) Lava.t("Table: config.options.columns is required");
 		this._properties._columns = config.options.columns;
 		this.Standard$init(config, widget, parent_view, template, properties);
 

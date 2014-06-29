@@ -48,7 +48,7 @@ Lava.define(
 
 		if (this._config.refresher) {
 
-			if (Lava.schema.DEBUG && !this._container) Lava.throw('View/Foreach: refresher needs container to work');
+			if (Lava.schema.DEBUG && !this._container) Lava.t('View/Foreach: refresher needs container to work');
 			var constructor = Lava.ClassManager.getConstructor(this._config.refresher.class, 'Lava.view.refresher');
 			this._refresher = /** @type {Lava.refresher.Default} */ new constructor(
 				this._config.refresher,
@@ -72,9 +72,9 @@ Lava.define(
 
 	_initMembers: function(properties) {
 
-		if (Lava.schema.DEBUG && !('argument' in this._config)) Lava.throw("Foreach view requires an argument");
-		if (Lava.schema.DEBUG && !this._config.as) Lava.throw("Foreach view requires 'as' hash parameter");
-		if (Lava.schema.DEBUG && !this._config.template) Lava.throw("Foreach view must not be empty");
+		if (Lava.schema.DEBUG && !('argument' in this._config)) Lava.t("Foreach view requires an argument");
+		if (Lava.schema.DEBUG && !this._config.as) Lava.t("Foreach view requires 'as' hash parameter");
+		if (Lava.schema.DEBUG && !this._config.template) Lava.t("Foreach view must not be empty");
 
 		this.Abstract$_initMembers(properties);
 
@@ -211,7 +211,7 @@ Lava.define(
 
 	_renderContents: function() {
 
-		if (Lava.schema.DEBUG && (this._argument.isWaitingRefresh() || this._foreach_scope.isWaitingRefresh())) Lava.throw();
+		if (Lava.schema.DEBUG && (this._argument.isWaitingRefresh() || this._foreach_scope.isWaitingRefresh())) Lava.t();
 
 		this._refresher && this._refresher.onRender(this._current_templates);
 

@@ -19,7 +19,7 @@ Lava.define(
 	 */
 	init: function(config) {
 
-		if ('id' in config.fields) Lava.throw("Id field in MetaStorage is not permitted");
+		if ('id' in config.fields) Lava.t("Id field in MetaStorage is not permitted");
 
 		this._config = config;
 		//this._attached_module = attached_module;
@@ -30,7 +30,7 @@ Lava.define(
 		if (Lava.schema.DEBUG) {
 			for (field in this._fields) {
 				if (this._fields[field].isCollectionField || this._fields[field].isRecordField)
-					Lava.throw("Standard Collection and Record fields will not work inside the MetaStorage");
+					Lava.t("Standard Collection and Record fields will not work inside the MetaStorage");
 			}
 		}
 
@@ -54,7 +54,7 @@ Lava.define(
 
 	set: function(name, value) {
 
-		Lava.throw("MetaStorage: set operation is not permitted");
+		Lava.t("MetaStorage: set operation is not permitted");
 
 	},
 

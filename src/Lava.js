@@ -120,9 +120,9 @@ var Lava = {
 			count = this.schema.sugar_classes.length;
 
 		// You must know this yourself
-		// for (var name in {}) Lava.throw("LiquidLava framework can not coexist with frameworks that modify native object's prototype");
+		// for (var name in {}) Lava.t("LiquidLava framework can not coexist with frameworks that modify native object's prototype");
 
-		if (typeof(Firestorm) == 'undefined') Lava.throw('init: Firestorm is not loaded');
+		if (typeof(Firestorm) == 'undefined') Lava.t('init: Firestorm is not loaded');
 
 		this.ClassManager.registerRootNamespace('Lava', this);
 
@@ -209,7 +209,7 @@ var Lava = {
 	 */
 	getWidgetConfig: function(widget_title) {
 
-		if (Lava.schema.DEBUG && !(widget_title in this.widgets)) Lava.throw("Widget config not found: " + widget_title);
+		if (Lava.schema.DEBUG && !(widget_title in this.widgets)) Lava.t("Widget config not found: " + widget_title);
 
 		var config = this.widgets[widget_title];
 
@@ -236,7 +236,7 @@ var Lava = {
 
 		if (config) {
 
-			if (Lava.schema.DEBUG && config.extends && config.extends != title) Lava.throw("Malformed widget config");
+			if (Lava.schema.DEBUG && config.extends && config.extends != title) Lava.t("Malformed widget config");
 
 			config.extends = title;
 			Lava.extenders[config.extender_type || widget_config.extender_type](config);
@@ -284,7 +284,7 @@ var Lava = {
 
 	},
 
-	'throw': function(message) {
+	t: function(message) {
 
 		if (typeof(message) == 'number' && this.KNOWN_EXCEPTIONS && (message in this.KNOWN_EXCEPTIONS)) {
 			throw new Error(this.KNOWN_EXCEPTIONS[message]);
@@ -296,7 +296,7 @@ var Lava = {
 
 	registerSugar: function(class_name) {
 
-		if (Lava.schema.DEBUG && (class_name in this._sugar_instances)) Lava.throw('Class is already registered as sugar');
+		if (Lava.schema.DEBUG && (class_name in this._sugar_instances)) Lava.t('Class is already registered as sugar');
 		var constructor = this.ClassManager.getConstructor(class_name);
 		this._sugar_instances[class_name] = new constructor();
 
@@ -320,7 +320,7 @@ var Lava = {
 		if (!(widget_title in this._widget_title_to_sugar_instance)) {
 
 			widget_config = this.getWidgetConfig(widget_title);
-			if (!('sugar' in widget_config)) Lava.throw("Widget " + widget_title + " does not have sugar in configuration");
+			if (!('sugar' in widget_config)) Lava.t("Widget " + widget_title + " does not have sugar in configuration");
 			sugar_class = widget_config.sugar.class || Lava.schema.widget.DEFAULT_SUGAR_CLASS;
 			this._widget_title_to_sugar_instance[widget_title] = this._sugar_instances[sugar_class];
 
@@ -337,7 +337,7 @@ var Lava = {
 	storeWidgetSchema: function(widget_title, widget_config) {
 
 		if (!Lava.schema.widget.ALLOW_REDEFINITION && (widget_title in this.widgets))
-			Lava.throw("storeWidgetSchema: widget is already defined: " + widget_title);
+			Lava.t("storeWidgetSchema: widget is already defined: " + widget_title);
 
 		this.widgets[widget_title] = widget_config;
 
@@ -444,9 +444,9 @@ var Lava = {
 
 		}
 
-		if (Lava.schema.DEBUG && !config.class) Lava.throw("Trying to create a widget without class");
+		if (Lava.schema.DEBUG && !config.class) Lava.t("Trying to create a widget without class");
 		var constructor = Lava.ClassManager.getConstructor(config.class, 'Lava.widget');
-		if (Lava.schema.DEBUG && !constructor) Lava.throw("Class not found: " + config.class);
+		if (Lava.schema.DEBUG && !constructor) Lava.t("Class not found: " + config.class);
 		return new constructor(config, widget, parent_view, template, properties);
 
 	},
@@ -454,7 +454,7 @@ var Lava = {
 	ClassLocatorGateway: function(config, widget, parent_view, template, properties) {
 
 		var target = Lava.view_manager.locateTarget(widget, config.class_locator.locator_type, config.class_locator.name);
-		if (Lava.schema.DEBUG && (!target || !target.isWidget)) Lava.throw("[ClassLocatorGateway] Target is null or not a widget");
+		if (Lava.schema.DEBUG && (!target || !target.isWidget)) Lava.t("[ClassLocatorGateway] Target is null or not a widget");
 
 		var constructor = target.getPackageConstructor(config.real_class);
 		return new constructor(config, widget, parent_view, template, properties);
@@ -485,7 +485,7 @@ var Lava = {
 			i = 0,
 			count;
 
-		if (Lava.schema.DEBUG && !class_body) Lava.throw("[Lava::_loadClass] Class does not exists: " + path);
+		if (Lava.schema.DEBUG && !class_body) Lava.t("[Lava::_loadClass] Class does not exists: " + path);
 
 		if ('Extends' in class_body) {
 			if (!this.ClassManager.hasClass(class_body.Extends)) {

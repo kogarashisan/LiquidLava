@@ -30,7 +30,7 @@ Lava.define(
 		Firestorm.extend(new_config, config);
 
 		// assuming that the first animator is Units
-		if (Lava.schema.DEBUG && !new_config.animators[0].property) Lava.throw("Collapse: malformed animation config");
+		if (Lava.schema.DEBUG && !new_config.animators[0].property) Lava.t("Collapse: malformed animation config");
 		this._property = new_config.animators[0].property;
 
 		this.Standard$init(new_config, target);

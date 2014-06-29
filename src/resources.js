@@ -46,17 +46,17 @@ Lava.resources =
 	 */
 	addWidgetResource: function(widget_title, locale, locale_resources) {
 
-		if (Lava.schema.DEBUG && !(widget_title in Lava.widgets)) Lava.throw("Widget config not found: " + widget_title);
+		if (Lava.schema.DEBUG && !(widget_title in Lava.widgets)) Lava.t("Widget config not found: " + widget_title);
 
 		var config = Lava.widgets[widget_title];
 
-		if (config.is_extended) Lava.throw("Widget is already extended, can not add resources: " + widget_title);
+		if (config.is_extended) Lava.t("Widget is already extended, can not add resources: " + widget_title);
 
 		if (!config.resources) {
 			config.resources = {}
 		}
 
-		if (Lava.schema.DEBUG && (locale in config.resources)) Lava.throw("Locale is already defined: " + locale);
+		if (Lava.schema.DEBUG && (locale in config.resources)) Lava.t("Locale is already defined: " + locale);
 
 		config.resources[locale] = locale_resources;
 
@@ -76,7 +76,7 @@ Lava.resources =
 
 		} else if ((add_property_name in target) || (remove_property_name in target)) {
 
-			if (Lava.schema.DEBUG && !(static_property_name in result)) Lava.throw("Merging resources container: add/remove operation present, but value is not defined");
+			if (Lava.schema.DEBUG && !(static_property_name in result)) Lava.t("Merging resources container: add/remove operation present, but value is not defined");
 			result[static_property_name] = Firestorm.Object.copy(result[static_property_name]);
 			if (add_property_name in target) {
 				Firestorm.extend(result[static_property_name], target[add_property_name]);
@@ -104,7 +104,7 @@ Lava.resources =
 
 		} else if (('add_classes' in top_object) || ('remove_classes' in top_object)) {
 
-			if (Lava.schema.DEBUG && !('static_classes' in result)) Lava.throw("Merging resources container: add/remove operation present, but value is not defined");
+			if (Lava.schema.DEBUG && !('static_classes' in result)) Lava.t("Merging resources container: add/remove operation present, but value is not defined");
 			result['static_classes'] = result['static_classes'].slice();
 			if ('add_classes' in top_object) {
 				result['static_classes'] = result['static_classes'].concat(top_object['add_classes']);
@@ -135,7 +135,7 @@ Lava.resources =
 
 			if (name in result) {
 
-				if (Lava.schema.DEBUG && result[name].type != bottom_resources[name].type) Lava.throw("Resource types mismatch: " + name);
+				if (Lava.schema.DEBUG && result[name].type != bottom_resources[name].type) Lava.t("Resource types mismatch: " + name);
 
 				if (bottom_resources[name].type == 'component') {
 
@@ -146,7 +146,7 @@ Lava.resources =
 
 				} else if (bottom_resources[name].type == 'container_stack') {
 
-					if (result[name].type != 'container_stack') Lava.throw();
+					if (result[name].type != 'container_stack') Lava.t();
 
 					result[name] = {
 						type: 'container_stack',
@@ -189,7 +189,7 @@ Lava.resources =
 			result = {},
 			operation;
 
-		if (Lava.schema.DEBUG && !Array.isArray(stack)) Lava.throw();
+		if (Lava.schema.DEBUG && !Array.isArray(stack)) Lava.t();
 
 		for (; i < count; i++) {
 			operation = stack[i];
@@ -256,12 +256,12 @@ Lava.resources =
 			i = 0,
 			count = path_segments.length;
 
-		if (Lava.schema.DEBUG && /[a-z]/.test(resource_name)) Lava.throw("Terminal resource names must be uppercase");
+		if (Lava.schema.DEBUG && /[a-z]/.test(resource_name)) Lava.t("Terminal resource names must be uppercase");
 
 		for (; i < count; i++) {
 
 			segment = path_segments[i];
-			if (Lava.schema.DEBUG && /[A-Z]/.test(segment)) Lava.throw("Resource component names must be lowercase");
+			if (Lava.schema.DEBUG && /[A-Z]/.test(segment)) Lava.t("Resource component names must be lowercase");
 
 			if (!(segment in target_object)) {
 
@@ -272,7 +272,7 @@ Lava.resources =
 
 			} else {
 
-				if (Lava.schema.DEBUG && target_object[segment].type != 'component') Lava.throw("Malformed resource definition, path is not component: " + path);
+				if (Lava.schema.DEBUG && target_object[segment].type != 'component') Lava.t("Malformed resource definition, path is not component: " + path);
 
 			}
 
@@ -280,7 +280,7 @@ Lava.resources =
 
 		}
 
-		if (resource_name in target_object) Lava.throw("Resource is already defined: " + path);
+		if (resource_name in target_object) Lava.t("Resource is already defined: " + path);
 		target_object[resource_name] = value;
 
 	}

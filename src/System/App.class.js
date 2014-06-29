@@ -18,7 +18,7 @@ Lava.define(
 
 			if (Lava.schema.DEBUG) {
 
-				if (this._getmodule_recursion_protection.indexOf(name) != -1) Lava.throw("Circular module dependency");
+				if (this._getmodule_recursion_protection.indexOf(name) != -1) Lava.t("Circular module dependency");
 				this._getmodule_recursion_protection.push(name);
 
 			}

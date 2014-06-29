@@ -14,7 +14,7 @@ Lava.ExpressionParser.SEPARATORS = {
  */
 Lava.ExpressionParser.parseRaw = function(input, separator) {
 
-	if (this.yy.is_parsing) Lava.throw("Calling ExpressionParser.parse*() recursively will break the parser. Please, create another instance.");
+	if (this.yy.is_parsing) Lava.t("Calling ExpressionParser.parse*() recursively will break the parser. Please, create another instance.");
 
 	this.lexer.x_tail_mode = false;
 	this.lexer.x_lex_brace_levels = 0;
@@ -52,8 +52,8 @@ Lava.ExpressionParser.parse = function(input, separator) {
  */
 Lava.ExpressionParser.parsePath = function(input) {
 	var configs = this.yy.convertArguments(this.parseRaw(input));
-	if (configs.length != 1) Lava.throw("ExpressionParser: single scope expected, got either many expressions or nothing");
-	if (!configs[0].flags.isScopeEval) Lava.throw("ExpressionParser: expected scope path, got expression");
+	if (configs.length != 1) Lava.t("ExpressionParser: single scope expected, got either many expressions or nothing");
+	if (!configs[0].flags.isScopeEval) Lava.t("ExpressionParser: expected scope path, got expression");
 	return configs[0].binds[0];
 };
 
@@ -64,7 +64,7 @@ Lava.ExpressionParser.parsePath = function(input) {
  */
 Lava.ExpressionParser.parseWithTailRaw = function(config_ref, separator) {
 
-	if (this.yy.is_parsing) Lava.throw("Calling ExpressionParser.parse*() recursively will break the parser. Please, create another instance.");
+	if (this.yy.is_parsing) Lava.t("Calling ExpressionParser.parse*() recursively will break the parser. Please, create another instance.");
 
 	this.lexer.x_tail_mode = true;
 	this.lexer.x_lex_brace_levels = 0;
@@ -212,15 +212,15 @@ Lava.ExpressionParser.yy = {
 
 	assertSemicolonAllowed: function() {
 
-		if (typeof(this.x_allowed_separator) == 'undefined') Lava.throw("ExpressionParser: semicolon encountered, but separator is not set");
-		if (this.x_allowed_separator != Lava.ExpressionParser.SEPARATORS.SEMICOLON) Lava.throw("ExpressionParser: comma is not allowed as separator here");
+		if (typeof(this.x_allowed_separator) == 'undefined') Lava.t("ExpressionParser: semicolon encountered, but separator is not set");
+		if (this.x_allowed_separator != Lava.ExpressionParser.SEPARATORS.SEMICOLON) Lava.t("ExpressionParser: comma is not allowed as separator here");
 
 	},
 
 	assertCommaAllowed: function() {
 
-		if (typeof(this.x_allowed_separator) == 'undefined') Lava.throw("ExpressionParser: comma encountered, but separator is not set");
-		if (this.x_allowed_separator != Lava.ExpressionParser.SEPARATORS.COMMA) Lava.throw("ExpressionParser: semicolon is not allowed as separator here");
+		if (typeof(this.x_allowed_separator) == 'undefined') Lava.t("ExpressionParser: comma encountered, but separator is not set");
+		if (this.x_allowed_separator != Lava.ExpressionParser.SEPARATORS.COMMA) Lava.t("ExpressionParser: semicolon is not allowed as separator here");
 
 	}
 

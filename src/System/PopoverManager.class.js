@@ -20,7 +20,7 @@ Lava.define(
 
 	enable: function() {
 
-		if (Lava.schema.DEBUG && this._mouseover_stack_changed_listener) Lava.throw("PopoverManager is already enabled");
+		if (Lava.schema.DEBUG && this._mouseover_stack_changed_listener) Lava.t("PopoverManager is already enabled");
 		Lava.view_manager.lendEvent('mouse_events');
 		this._mouseover_stack_changed_listener = Lava.view_manager.on('mouseover_stack_changed', this._onMouseoverStackChanged, this);
 		if (!this._tooltip) {
@@ -62,7 +62,7 @@ Lava.define(
 
 			if (!this._tooltip_target) {
 
-				if (Lava.schema.DEBUG && this._mousemove_listener) Lava.throw();
+				if (Lava.schema.DEBUG && this._mousemove_listener) Lava.t();
 				this._mousemove_listener = Lava.Core.addGlobalHandler('mousemove', this._onMouseMove, this);
 				this._tooltip.set('is_visible', true);
 

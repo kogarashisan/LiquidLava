@@ -60,7 +60,7 @@ Lava.define(
 
 			} else {
 
-				Lava.throw("Wrong argument supplied for Enumerable constructor");
+				Lava.t("Wrong argument supplied for Enumerable constructor");
 
 			}
 
@@ -114,7 +114,7 @@ Lava.define(
 
 		} else {
 
-			if (Lava.schema.DEBUG && !/^\d+$/.test(name)) Lava.throw("Enumerable: invalid index (1)");
+			if (Lava.schema.DEBUG && !/^\d+$/.test(name)) Lava.t("Enumerable: invalid index (1)");
 
 			result = this.getValueAt(+name); // convert to integer
 
@@ -245,7 +245,7 @@ Lava.define(
 
 	set: function(name, value) {
 
-		if (Lava.schema.DEBUG && !/^\d+$/.test(name)) Lava.throw("Enumerable: invalid index (2)");
+		if (Lava.schema.DEBUG && !/^\d+$/.test(name)) Lava.t("Enumerable: invalid index (2)");
 
 		this.replaceAt(+name, value); // '+' to convert to integer
 
@@ -260,7 +260,7 @@ Lava.define(
 
 	replaceAt: function(index, value, name) {
 
-		if (index > this._count) Lava.throw("Index is out of range");
+		if (index > this._count) Lava.t("Index is out of range");
 
 		var old_uid = this._data_uids[index],
 			old_value = this._data_values[index],
@@ -292,7 +292,7 @@ Lava.define(
 
 	swap: function(index_a, index_b) {
 
-		if (index_a > this._count || index_b > this._count) Lava.throw("Index is out of range (2)");
+		if (index_a > this._count || index_b > this._count) Lava.t("Index is out of range (2)");
 
 		var swap = Firestorm.Array.swap;
 
@@ -427,7 +427,7 @@ Lava.define(
 
 	updateFromSourceObject: function(new_source_object) {
 
-		if (!this._source_object) Lava.throw("Enumerable was not created from object");
+		if (!this._source_object) Lava.t("Enumerable was not created from object");
 
 		var i = 0,
 			name,
@@ -582,7 +582,7 @@ Lava.define(
 
 			if (Lava.schema.DEBUG) {
 				// duplicate UIDs may break a lot of functionality, in this class and outside
-				if (index in verification) Lava.throw("Malformed index array");
+				if (index in verification) Lava.t("Malformed index array");
 				verification[index] = null;
 			}
 
@@ -596,8 +596,8 @@ Lava.define(
 
 	removeRange: function(start_index, count) {
 
-		if (count <= 0) Lava.throw("Invalid item count supplied for removeRange");
-		if (start_index + count >= this._count + 1) Lava.throw("Index is out of range");
+		if (count <= 0) Lava.t("Invalid item count supplied for removeRange");
+		if (start_index + count >= this._count + 1) Lava.t("Index is out of range");
 
 		var removed_uids = this._data_uids.splice(start_index, count),
 			removed_values = this._data_values.splice(start_index, count),
@@ -620,7 +620,7 @@ Lava.define(
 
 	insertRange: function(start_index, values, names) {
 
-		if (start_index >= this._count) Lava.throw("Index is out of range");
+		if (start_index >= this._count) Lava.t("Index is out of range");
 
 		var i = 0,
 			count = values.length,
@@ -629,7 +629,7 @@ Lava.define(
 
 		if (names) {
 
-			if (count != names.length) Lava.throw("If names array is provided, it must be equal length with values array.");
+			if (count != names.length) Lava.t("If names array is provided, it must be equal length with values array.");
 			added_names = names;
 
 		} else {

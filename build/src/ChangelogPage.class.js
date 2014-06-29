@@ -73,7 +73,7 @@ Lava.define(
 
 		Firestorm.Element.removeClass(Firestorm.getElementById('initial_loading_indicator'), 'hidden');
 
-		if (this._request != null) Lava.throw();
+		if (this._request != null) Lava.t();
 
 		this._properties.versions.each(function(value){
 			if (value.get('name') == name) {
@@ -83,7 +83,7 @@ Lava.define(
 		});
 
 		if (version) {
-			if (version.get('is_loaded')) Lava.throw();
+			if (version.get('is_loaded')) Lava.t();
 			this._loadTarget(version);
 		} else {
 			window.alert('Page not found: ' + name);

@@ -88,19 +88,19 @@ Lava.define(
 	initNewRecord: function(record, storage) {},
 
 	'import': function(record, storage, raw_properties) {
-		Lava.throw("Abstract function call: import");
+		Lava.t("Abstract function call: import");
 	},
 
 	'export': function(record, destination_object) {
-		Lava.throw("Abstract function call: export");
+		Lava.t("Abstract function call: export");
 	},
 
 	getValue: function(record, storage) {
-		Lava.throw("Abstract function call: getValue");
+		Lava.t("Abstract function call: getValue");
 	},
 
 	setValue: function(record, storage, value) {
-		Lava.throw("Abstract function call: setValue");
+		Lava.t("Abstract function call: setValue");
 	},
 
 	_fireFieldChangedEvents: function(record) {
@@ -113,7 +113,7 @@ Lava.define(
 	_getImportValue: function(storage, raw_properties) {
 
 		if (Lava.schema.data.VALIDATE_IMPORT_DATA && !this.isValidValue(raw_properties[this._name]))
-			Lava.throw('Invalid value in import data (' + this._name + '): ' + raw_properties[this._name]);
+			Lava.t('Invalid value in import data (' + this._name + '): ' + raw_properties[this._name]);
 
 		return raw_properties[this._name];
 

@@ -24,12 +24,12 @@ Lava.define(
 		if (!this._is_nullable && this._default == null) {
 
 			// the default value could be provided in derived classes
-			Lava.throw("Non-nullable Basic fields must have a default value");
+			Lava.t("Non-nullable Basic fields must have a default value");
 
 		}
 
 		if (Lava.schema.DEBUG && !this.isValidValue(this._default))
-			Lava.throw("Field was configured with invalid default value. Module: " + this._module.getName() + ", field name: " + this._name);
+			Lava.t("Field was configured with invalid default value. Module: " + this._module.getName() + ", field name: " + this._name);
 
 	},
 
@@ -65,7 +65,7 @@ Lava.define(
 
 		if (storage[this._name] !== value) {
 
-			if (!this.isValidValue(value)) Lava.throw('[Field name=' + this._name + '] Invalid field value: '
+			if (!this.isValidValue(value)) Lava.t('[Field name=' + this._name + '] Invalid field value: '
 				+ value + ". Reason: " + this.getInvalidReason(value));
 
 			storage[this._name] = value;

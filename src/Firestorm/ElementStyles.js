@@ -25,7 +25,7 @@ Firestorm.extend(Firestorm.Element, {
 
 		for (var i = 0, count = value.length; i < count; i++) {
 
-			if (Firestorm.schema.DEBUG && typeof value[i] != "number") Firestorm.throw("Invalid argument passed to setPixels");
+			if (Firestorm.schema.DEBUG && typeof value[i] != "number") Firestorm.t("Invalid argument passed to setPixels");
 			style += Math.round(value[i]) + 'px ';
 
 		}
@@ -66,7 +66,7 @@ Firestorm.extend(Firestorm.Element, {
 
 	addClasses: function(element, class_list) {
 
-		if (Firestorm.schema.DEBUG && typeof(class_list) == 'string') Firestorm.throw();
+		if (Firestorm.schema.DEBUG && typeof(class_list) == 'string') Firestorm.t();
 
 		for (var i = 0, count = class_list.length; i < count; i++) {
 
@@ -78,7 +78,7 @@ Firestorm.extend(Firestorm.Element, {
 
 	removeClasses: function(element, class_list) {
 
-		if (Firestorm.schema.DEBUG && typeof(class_list) == 'string') Firestorm.throw();
+		if (Firestorm.schema.DEBUG && typeof(class_list) == 'string') Firestorm.t();
 
 		for (var i = 0, count = class_list.length; i < count; i++) {
 

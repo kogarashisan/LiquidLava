@@ -82,14 +82,14 @@ Lava.define(
 		if (Lava.schema.RESOURCES_ENABLED && config.resource_id) {
 
 			resource_owner = Lava.view_manager.locateTarget(widget, config.resource_id.locator_type, config.resource_id.locator);
-			if (Lava.schema.DEBUG && !resource_owner) Lava.throw("[Element container] resource owner not found: " + config.resource_id.locator_type + "=" + config.resource_id.locator);
+			if (Lava.schema.DEBUG && !resource_owner) Lava.t("[Element container] resource owner not found: " + config.resource_id.locator_type + "=" + config.resource_id.locator);
 			container_resources = resource_owner.getResource(config.resource_id.name);
 
 		}
 
 		if (Lava.schema.RESOURCES_ENABLED && container_resources) {
 
-			if (Lava.schema.DEBUG && container_resources.type != 'container') Lava.throw("Element container: received resource type is not container: " + container_resources.type);
+			if (Lava.schema.DEBUG && container_resources.type != 'container') Lava.t("Element container: received resource type is not container: " + container_resources.type);
 			static_classes = container_resources.value['static_classes'];
 			static_properties = container_resources.value['static_properties'];
 			static_styles = container_resources.value['static_styles'];
@@ -103,7 +103,7 @@ Lava.define(
 		}
 
 		if (Lava.schema.DEBUG && static_properties && ('id' in static_properties))
-			Lava.throw("Element container: id must not be set via resources or be in config.static_properties");
+			Lava.t("Element container: id must not be set via resources or be in config.static_properties");
 
 		// Must clone everything, cause additional statics can be added to the element at run time
 		if (static_classes) this._static_classes = static_classes.slice();
@@ -209,8 +209,8 @@ Lava.define(
 
 	storeProperty: function(name, value) {
 
-		if (Lava.schema.DEBUG && name == 'id') Lava.throw();
-		if (Lava.schema.DEBUG && (name in this._property_bindings)) Lava.throw("Property is bound to an argument and cannot be set directly: " + name);
+		if (Lava.schema.DEBUG && name == 'id') Lava.t();
+		if (Lava.schema.DEBUG && (name in this._property_bindings)) Lava.t("Property is bound to an argument and cannot be set directly: " + name);
 
 		this._static_properties[name] = value;
 
@@ -234,7 +234,7 @@ Lava.define(
 
 	addClass: function(class_name, cancel_sync) {
 
-		if (Lava.schema.DEBUG && (!class_name || class_name.indexOf(' ') != -1)) Lava.throw("addClass: expected one class name, got: " + class_name);
+		if (Lava.schema.DEBUG && (!class_name || class_name.indexOf(' ') != -1)) Lava.t("addClass: expected one class name, got: " + class_name);
 
 		if (Firestorm.Array.include(this._static_classes, class_name)) {
 
@@ -256,7 +256,7 @@ Lava.define(
 
 	addClasses: function(class_names, cancel_sync) {
 
-		if (Lava.schema.DEBUG && typeof(class_names) == 'string') Lava.throw();
+		if (Lava.schema.DEBUG && typeof(class_names) == 'string') Lava.t();
 
 		for (var i = 0, count = class_names.length; i < count; i++) {
 
@@ -404,12 +404,12 @@ Lava.define(
 
 	assertStyleValid: function(value) {
 		if (/\"\<\>/.test(value))
-			Lava.throw("Invalid symbols in style value: " + value + ". Please, use single quotes for string values and manually escape special characters.");
+			Lava.t("Invalid symbols in style value: " + value + ". Please, use single quotes for string values and manually escape special characters.");
 	},
 
 	assertClassStringValid: function(value) {
 
-		if (/\'\"\<\>\&\./.test(value)) Lava.throw("Invalid class names: " + value);
+		if (/\'\"\<\>\&\./.test(value)) Lava.t("Invalid class names: " + value);
 
 	},
 
@@ -496,7 +496,7 @@ Lava.define(
 			result;
 
 		// view calls this function in render(), and before that it must wake up itself and it's container
-		if (Lava.schema.DEBUG && this._is_sleeping) Lava.throw();
+		if (Lava.schema.DEBUG && this._is_sleeping) Lava.t();
 
 		this._element = null;
 
@@ -530,7 +530,7 @@ Lava.define(
 
 		if (this._is_void) {
 
-			if (Lava.schema.DEBUG && html) Lava.throw('Trying to wrap content in void tag');
+			if (Lava.schema.DEBUG && html) Lava.t('Trying to wrap content in void tag');
 
 			result += "/>";
 
@@ -546,8 +546,8 @@ Lava.define(
 
 	setHTML: function(html) {
 
-		if (!this._is_inDOM) Lava.throw("setHTML: element is not in DOM");
-		if (this._is_void) Lava.throw('setHTML on void tag');
+		if (!this._is_inDOM) Lava.t("setHTML: element is not in DOM");
+		if (this._is_void) Lava.t('setHTML on void tag');
 
 		Firestorm.Element.setProperty(this.getDOMElement(), 'html', html);
 
@@ -591,7 +591,7 @@ Lava.define(
 	informInDOM_Original: function() {
 
 		this._is_inDOM = true;
-		if (Lava.schema.DEBUG && this._element) Lava.throw();
+		if (Lava.schema.DEBUG && this._element) Lava.t();
 
 	},
 
@@ -652,8 +652,8 @@ Lava.define(
 
 	setSignature: function(tag_name) {
 
-		if (Lava.schema.DEBUG && tag_name != tag_name.toLowerCase()) Lava.throw("Tag names must be lower case");
-		if (this._is_inDOM) Lava.throw("Can not change signature on elements that are in dom");
+		if (Lava.schema.DEBUG && tag_name != tag_name.toLowerCase()) Lava.t("Tag names must be lower case");
+		if (this._is_inDOM) Lava.t("Can not change signature on elements that are in dom");
 		this._tag_name = tag_name;
 		this._is_void = Lava.isVoidTag(tag_name);
 
@@ -664,9 +664,9 @@ Lava.define(
 		var Element = Firestorm.Element,
 			name;
 
-		if (this._is_inDOM) Lava.throw("Can not set duplicate id attribute on elements");
-		if (Element.getProperty(element, 'id')) Lava.throw("Target element already has an ID, and could be owned by another container");
-		if (Element.getProperty(element, 'tag').toLowerCase() != this._tag_name) Lava.throw("Captured tag name differs from the container's tag name");
+		if (this._is_inDOM) Lava.t("Can not set duplicate id attribute on elements");
+		if (Element.getProperty(element, 'id')) Lava.t("Target element already has an ID, and could be owned by another container");
+		if (Element.getProperty(element, 'tag').toLowerCase() != this._tag_name) Lava.t("Captured tag name differs from the container's tag name");
 
 		this.wakeup();
 
@@ -718,7 +718,7 @@ Lava.define(
 
 	remove: function() {
 
-		if (!this._is_inDOM) Lava.throw("remove: container is not in DOM");
+		if (!this._is_inDOM) Lava.t("remove: container is not in DOM");
 		Firestorm.Element.destroy(this.getDOMElement());
 
 	},

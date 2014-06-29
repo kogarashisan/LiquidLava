@@ -32,8 +32,8 @@ Lava.define(
 	 */
 	init: function(container, name_source_container, level) {
 
-		if (Lava.schema.DEBUG && !name_source_container.isValueContainer) Lava.throw();
-		if (Lava.schema.DEBUG && !name_source_container.guid) Lava.throw("Name source for segments must be either PropertyBinding or DataBinding");
+		if (Lava.schema.DEBUG && !name_source_container.isValueContainer) Lava.t();
+		if (Lava.schema.DEBUG && !name_source_container.guid) Lava.t("Name source for segments must be either PropertyBinding or DataBinding");
 
 		this._container = container;
 		this._property_name = name_source_container.getValue();
@@ -59,7 +59,7 @@ Lava.define(
 
 	isConnected: function() {
 
-		if (!this._data_binding) Lava.throw();
+		if (!this._data_binding) Lava.t();
 		return this._data_binding.isConnected();
 
 	},

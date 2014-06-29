@@ -59,7 +59,7 @@ Lava.parsers.Common = {
 
 		for (var name in raw_hash) {
 
-			if (Lava.schema.DEBUG && this._allowed_hash_options.indexOf(name) == -1) Lava.throw("Hash option is not supported: " + name);
+			if (Lava.schema.DEBUG && this._allowed_hash_options.indexOf(name) == -1) Lava.t("Hash option is not supported: " + name);
 			if (name in this._view_config_property_setters) {
 				this[this._view_config_property_setters[name]](view_config, raw_hash[name]);
 			} else {
@@ -79,7 +79,7 @@ Lava.parsers.Common = {
 	 */
 	setViewConfigId: function(view_config, id) {
 
-		if (Lava.schema.DEBUG && !Lava.isValidId(id)) Lava.throw();
+		if (Lava.schema.DEBUG && !Lava.isValidId(id)) Lava.t();
 		view_config.id = id;
 
 	},
@@ -90,8 +90,8 @@ Lava.parsers.Common = {
 	 */
 	setViewConfigLabel: function(view_config, label) {
 
-		if (Lava.schema.DEBUG && !Lava.VALID_LABEL_REGEX.test(label)) Lava.throw("Malformed view label");
-		if (Lava.schema.DEBUG && this._reserved_labels.indexOf(label) != -1) Lava.throw("Label name is reserved: " + label);
+		if (Lava.schema.DEBUG && !Lava.VALID_LABEL_REGEX.test(label)) Lava.t("Malformed view label");
+		if (Lava.schema.DEBUG && this._reserved_labels.indexOf(label) != -1) Lava.t("Label name is reserved: " + label);
 		view_config.label = label;
 
 	},
@@ -184,7 +184,7 @@ Lava.parsers.Common = {
 
 		if ('arguments' in raw_block) {
 
-			if (Lava.schema.DEBUG && raw_block.arguments.length > 1) Lava.throw('Block may have no more than one argument');
+			if (Lava.schema.DEBUG && raw_block.arguments.length > 1) Lava.t('Block may have no more than one argument');
 			if (raw_block.arguments.length) {
 				config.argument = raw_block.arguments[0];
 			}
@@ -233,7 +233,7 @@ Lava.parsers.Common = {
 	 */
 	_compileExpression: function(result, raw_expression) {
 
-		if (raw_expression.arguments.length != 1) Lava.throw("Expression block requires exactly one argument");
+		if (raw_expression.arguments.length != 1) Lava.t("Expression block requires exactly one argument");
 
 		var config = {
 			type: 'view',
@@ -267,7 +267,7 @@ Lava.parsers.Common = {
 
 		this. _compileString(result, tag_start_text);
 
-		if (Lava.schema.DEBUG && is_void && tag.content) Lava.throw("Void tag with content");
+		if (Lava.schema.DEBUG && is_void && tag.content) Lava.t("Void tag with content");
 
 		if (!is_void) {
 
@@ -316,7 +316,7 @@ Lava.parsers.Common = {
 		if ('content' in raw_tag) view_config.template = this.compileTemplate(raw_tag.content, view_config);
 		if ('resource_id' in x) {
 			if (Lava.schema.DEBUG && (('static_styles' in view_config.container) || ('static_properties' in view_config.container) || ('static_styles' in view_config.container)))
-				Lava.throw("View container with resource_id: all properties must be moved to resources");
+				Lava.t("View container with resource_id: all properties must be moved to resources");
 			view_config.container.resource_id = Lava.parsers.Common.parseResourceId(x.resource_id);
 		}
 
@@ -340,13 +340,13 @@ Lava.parsers.Common = {
 
 		if (Lava.schema.DEBUG) {
 
-			if (Lava.isVoidTag(raw_tag.name)) Lava.throw("Void tag with type='container'");
-			if (!raw_tag.content) Lava.throw("Empty container tag");
+			if (Lava.isVoidTag(raw_tag.name)) Lava.t("Void tag with type='container'");
+			if (!raw_tag.content) Lava.t("Empty container tag");
 			this._assertControlAttributesValid(x);
 
 			if (('options' in x) || ('roles' in x) || ('label' in x)) {
 
-				Lava.throw("Please move x:options, x:roles and x:label from container element to the wrapped view");
+				Lava.t("Please move x:options, x:roles and x:label from container element to the wrapped view");
 
 			}
 
@@ -366,31 +366,31 @@ Lava.parsers.Common = {
 
 		} else {
 
-			Lava.throw("Malformed contents of tag with type='container'");
+			Lava.t("Malformed contents of tag with type='container'");
 
 		}
 
-		if (Lava.schema.DEBUG && view_config.type != 'view' && view_config.type != 'widget') Lava.throw("Expected: view or widget inside container, got: " + view_config.type);
-		if (Lava.schema.DEBUG && view_config.container) Lava.throw("Container wraps a view with it's container already defined.");
+		if (Lava.schema.DEBUG && view_config.type != 'view' && view_config.type != 'widget') Lava.t("Expected: view or widget inside container, got: " + view_config.type);
+		if (Lava.schema.DEBUG && view_config.container) Lava.t("Container wraps a view with it's container already defined.");
 		container_config = this._toContainer(raw_tag);
 		view_config.container = container_config;
 
 		if (container_config_directive) {
 			if (Lava.schema.DEBUG && (container_config_directive.type != 'directive' || container_config_directive.name == 'container_config'))
-				Lava.throw("Malformed contents of tag with type='container'");
+				Lava.t("Malformed contents of tag with type='container'");
 			Lava.parsers.Directives.processDirective(container_config_directive, view_config, true);
 		}
 
 		if (Lava.schema.DEBUG) {
 
-			if ('id' in view_config) Lava.throw("Please, move the id attribute from inner view's hash to wrapping container: " + view_config.id);
+			if ('id' in view_config) Lava.t("Please, move the id attribute from inner view's hash to wrapping container: " + view_config.id);
 
 			if (('static_properties' in container_config) && ('property_bindings' in container_config)) {
 
 				for (name in container_config.property_bindings) {
 
 					if (name in container_config.static_properties)
-						Lava.throw("Same property can not be bound and have static value at the same time - it may result in unexpected behaviour");
+						Lava.t("Same property can not be bound and have static value at the same time - it may result in unexpected behaviour");
 
 				}
 
@@ -401,7 +401,7 @@ Lava.parsers.Common = {
 				for (name in container_config.static_styles) {
 
 					if (name in container_config.style_bindings)
-						Lava.throw("Same style can not be bound and have static value at the same time - it may result in unexpected behaviour");
+						Lava.t("Same style can not be bound and have static value at the same time - it may result in unexpected behaviour");
 
 				}
 
@@ -412,7 +412,7 @@ Lava.parsers.Common = {
 		if (('attributes' in raw_tag) && ('id' in raw_tag.attributes)) view_config.id = raw_tag.attributes.id;
 		if ('resource_id' in x) {
 			if (Lava.schema.DEBUG && (('static_styles' in container_config) || ('static_properties' in container_config) || ('static_styles' in container_config)))
-				Lava.throw("Element container with resource_id: all properties must be moved to resources");
+				Lava.t("Element container with resource_id: all properties must be moved to resources");
 			container_config.resource_id = this.parseResourceId(x.resource_id);
 		}
 
@@ -432,9 +432,9 @@ Lava.parsers.Common = {
 
 		if (Lava.schema.DEBUG) {
 
-			if (!raw_tag.x.resource_id) Lava.throw("Static container requires resource id");
+			if (!raw_tag.x.resource_id) Lava.t("Static container requires resource id");
 			for (name in raw_tag.x) {
-				if (['type', 'resource_id'].indexOf(name) == -1) Lava.throw("Unknown control attribute on static container: " + name);
+				if (['type', 'resource_id'].indexOf(name) == -1) Lava.t("Unknown control attribute on static container: " + name);
 			}
 
 		}
@@ -445,7 +445,7 @@ Lava.parsers.Common = {
 			name: raw_tag.name
 		};
 
-		if ('attributes' in raw_tag) Lava.throw("Static container with resource_id: all attributes must be moved to resources");
+		if ('attributes' in raw_tag) Lava.t("Static container with resource_id: all attributes must be moved to resources");
 
 		if (raw_tag.content) {
 			block.template = this.compileTemplate(raw_tag.content);
@@ -486,7 +486,7 @@ Lava.parsers.Common = {
 
 			if (Lava.schema.DEBUG && x) {
 				for (name in x) {
-					if (this._allowed_sugar_control_attributes.indexOf(name) == -1) Lava.throw("Control attribute is not allowed on sugar: " + name);
+					if (this._allowed_sugar_control_attributes.indexOf(name) == -1) Lava.t("Control attribute is not allowed on sugar: " + name);
 				}
 			}
 
@@ -516,7 +516,7 @@ Lava.parsers.Common = {
 		this._parseViewAttributes(config, raw_tag);
 		// Otherwise, there will be ambiguity between the target of the attribute (widget or it's container)
 		// to set resource_id with x:widget - rewrite the declaration to x:type='container' with <x:widget> inside
-		if (Lava.schema.DEBUG && raw_tag.x && ('resource_id' in raw_tag.x)) Lava.throw("x:widget attribute is not compatible with resource_id attribute");
+		if (Lava.schema.DEBUG && raw_tag.x && ('resource_id' in raw_tag.x)) Lava.t("x:widget attribute is not compatible with resource_id attribute");
 		if (raw_tag.content) config.template = this.compileTemplate(raw_tag.content, config);
 
 		result.push(config);
@@ -539,7 +539,7 @@ Lava.parsers.Common = {
 			if (Lava.schema.DEBUG) this._assertControlAttributesValid(x);
 			if ('options' in x) {
 
-				if (typeof(x.options) != 'object') Lava.throw("Malformed x:options");
+				if (typeof(x.options) != 'object') Lava.t("Malformed x:options");
 				view_config.options = x.options;
 
 			}
@@ -555,7 +555,7 @@ Lava.parsers.Common = {
 	_assertControlAttributesValid: function(x) {
 
 		for (var name in x) {
-			if (this._allowed_control_attributes.indexOf(name) == -1) Lava.throw("Unknown option in x: " + name);
+			if (this._allowed_control_attributes.indexOf(name) == -1) Lava.t("Unknown option in x: " + name);
 		}
 
 	},
@@ -586,7 +586,7 @@ Lava.parsers.Common = {
 
 		if ('event' in x) {
 
-			if (typeof(x.event) != 'object') Lava.throw("Malformed x:event attribute");
+			if (typeof(x.event) != 'object') Lava.t("Malformed x:event attribute");
 
 			container_config.events = {};
 
@@ -601,7 +601,7 @@ Lava.parsers.Common = {
 		// Attribute binding. Example: x:bind:src="<any_valid_expression>"
 		if ('bind' in x) {
 
-			if (typeof(x.bind) != 'object') Lava.throw("Malformed x:bind attribute");
+			if (typeof(x.bind) != 'object') Lava.t("Malformed x:bind attribute");
 
 			container_config.property_bindings = this._parseBindingsHash(x.bind);
 
@@ -609,7 +609,7 @@ Lava.parsers.Common = {
 
 		if ('style' in x) {
 
-			if (typeof(x.style) != 'object') Lava.throw("Malformed x:style attribute");
+			if (typeof(x.style) != 'object') Lava.t("Malformed x:style attribute");
 
 			container_config.style_bindings = this._parseBindingsHash(x.style);
 
@@ -647,7 +647,7 @@ Lava.parsers.Common = {
 	 */
 	_parseBindingsHash: function(hash) {
 
-		if (typeof(hash) != 'object') Lava.throw("Malformed control tag");
+		if (typeof(hash) != 'object') Lava.t("Malformed control tag");
 
 		var name,
 			arguments,
@@ -656,8 +656,8 @@ Lava.parsers.Common = {
 		for (name in hash) {
 
 			arguments = Lava.ExpressionParser.parse(hash[name]);
-			if (arguments.length == 0) Lava.throw("Binding: empty expression (" + name + ")");
-			if (arguments.length > 1) Lava.throw("Binding: malformed expression for '" + name + "'");
+			if (arguments.length == 0) Lava.t("Binding: empty expression (" + name + ")");
+			if (arguments.length > 1) Lava.t("Binding: malformed expression for '" + name + "'");
 			result[name] = arguments[0];
 
 		}
@@ -703,7 +703,7 @@ Lava.parsers.Common = {
 
 					} else {
 
-						Lava.throw("Unable to parse the style attribute");
+						Lava.t("Unable to parse the style attribute");
 
 					}
 
@@ -790,9 +790,9 @@ Lava.parsers.Common = {
 
 					if ('type' in x) {
 
-						if ('widget' in x) Lava.throw("Malformed tag: both x:type and x:widget present");
+						if ('widget' in x) Lava.t("Malformed tag: both x:type and x:widget present");
 						type = x.type;
-						if (['view', 'container', 'static'].indexOf(type) == -1) Lava.throw("Unknown x:type attribute: " + type);
+						if (['view', 'container', 'static'].indexOf(type) == -1) Lava.t("Unknown x:type attribute: " + type);
 
 					} else if ('widget' in x) {
 
@@ -804,7 +804,7 @@ Lava.parsers.Common = {
 
 					} else {
 
-						Lava.throw("Tag with control attributes and no sugar or type on it: " + current_block.name);
+						Lava.t("Tag with control attributes and no sugar or type on it: " + current_block.name);
 
 					}
 
@@ -833,8 +833,8 @@ Lava.parsers.Common = {
 	compileAsView: function(raw_blocks) {
 
 		var result = this.asBlocks(this.compileTemplate(raw_blocks));
-		if (result.length != 1) Lava.throw("Expected: exactly one view, got either several or none.");
-		if (result[0].type != 'view' && result[0].type != 'widget') Lava.throw("Expected: view, got: " + result[0].type);
+		if (result.length != 1) Lava.t("Expected: exactly one view, got either several or none.");
+		if (result[0].type != 'view' && result[0].type != 'widget') Lava.t("Expected: view, got: " + result[0].type);
 		return result[0];
 
 	},
@@ -853,7 +853,7 @@ Lava.parsers.Common = {
 
 			if (typeof(blocks[i]) == 'string') {
 
-				if (!Lava.EMPTY_REGEX.test(blocks[i])) Lava.throw("Text between tags is not allowed in this context");
+				if (!Lava.EMPTY_REGEX.test(blocks[i])) Lava.t("Text between tags is not allowed in this context");
 
 			} else {
 
@@ -881,7 +881,7 @@ Lava.parsers.Common = {
 
 		for (; i < count; i++) {
 
-			if (result[i].type != type) Lava.throw("Block type is not permitted in this context. Expected: " + type + ", got: " + result[i].type);
+			if (result[i].type != type) Lava.t("Block type is not permitted in this context. Expected: " + type + ", got: " + result[i].type);
 
 		}
 
@@ -928,7 +928,7 @@ Lava.parsers.Common = {
 
 		targets_string = targets_string.trim();
 
-		if (targets_string == '') Lava.throw("Code style: empty targets are not allowed");
+		if (targets_string == '') Lava.t("Code style: empty targets are not allowed");
 
 		while (targets_string.length) {
 
@@ -949,15 +949,15 @@ Lava.parsers.Common = {
 			} else {
 
 				match = this._identifier_regex.exec(targets_string);
-				if (!match) Lava.throw("Malformed targets (1): " + targets_string);
+				if (!match) Lava.t("Malformed targets (1): " + targets_string);
 				target.name = match[0];
 
 			}
 
 			if (Lava.schema.DEBUG) {
 
-				if ((target.locator_type == 'Id' || target.locator_type == 'Name') && !Lava.isValidId(target.locator)) Lava.throw("Malformed id: " + target.locator);
-				else if (target.locator_type == 'Label' && !Lava.VALID_LABEL_REGEX.test(target.locator)) Lava.throw("Malformed target label" + target.locator);
+				if ((target.locator_type == 'Id' || target.locator_type == 'Name') && !Lava.isValidId(target.locator)) Lava.t("Malformed id: " + target.locator);
+				else if (target.locator_type == 'Label' && !Lava.VALID_LABEL_REGEX.test(target.locator)) Lava.t("Malformed target label" + target.locator);
 
 			}
 
@@ -965,7 +965,7 @@ Lava.parsers.Common = {
 
 			if (targets_string[0] == '(') {
 
-				if (targets_string[1] == ')') Lava.throw("Code style: empty target arguments must be removed");
+				if (targets_string[1] == ')') Lava.t("Code style: empty target arguments must be removed");
 
 				config_ref = {
 					input: targets_string.substr(1),
@@ -993,7 +993,7 @@ Lava.parsers.Common = {
 
 					} else {
 
-						Lava.throw("Expressions are not allowed for target callback arguments, only scope paths and static values");
+						Lava.t("Expressions are not allowed for target callback arguments, only scope paths and static values");
 
 					}
 
@@ -1009,7 +1009,7 @@ Lava.parsers.Common = {
 
 			} else if (targets_string.length) {
 
-				Lava.throw('Malformed targets (2): ' + targets_string);
+				Lava.t('Malformed targets (2): ' + targets_string);
 
 			}
 
@@ -1033,7 +1033,7 @@ Lava.parsers.Common = {
 		var match = this._locator_regex.exec(id_string),
 			result;
 
-		if (!match) Lava.throw("Malformed resource id");
+		if (!match) Lava.t("Malformed resource id");
 
 		result = {
 			locator_type: this.locator_types[id_string[0]],
@@ -1074,7 +1074,7 @@ Lava.parsers.Common = {
 				return typeof c == 'string' ? c : '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
 			}) + ")");
 		} catch (e) {
-			Lava.throw("Malformed string: " + raw_string);
+			Lava.t("Malformed string: " + raw_string);
 		}
 
 		return result;
