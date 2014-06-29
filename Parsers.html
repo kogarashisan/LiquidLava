@@ -462,7 +462,7 @@ IDENTIFIER					[a-zA-Z\_][a-zA-Z0-9\_]*
 BLOCK_NAME					{IDENTIFIER}(\/{IDENTIFIER})*
 HTML_IDENTIFIER				[a-zA-Z][a-zA-Z0-9\_\-]*(\:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*
 HTML_TAGOPEN				\<{HTML_IDENTIFIER}\s*
-HTML_ENDTAG					\<\/{HTML_IDENTIFIER}\s*\>
+HTML_ENDTAG					\<\/{HTML_IDENTIFIER}\>
 BLOCK_OPEN_N				\{[\#\$\>\*]
 BLOCK_OPEN_E				\{\&gt\;
 OPEN_ENDBLOCK				\{\/
@@ -540,7 +540,7 @@ KNOWN_SWITCHES				\{\:[LR]\:\}|\{\:[LG]T\:\}|\{\:AMP\:\}
 
 <tag>\#htmlcomment\#									{ this.popState(); return 'CONTENT'; }
 <tag>\#cdata\#											{ this.popState(); return 'CONTENT'; }
-<tag>{HTML_ENDTAG}										{ this.popState(); yytext = yytext.substr(2,yyleng-3).trimRight().toLowerCase(); return 'TAG_END'; }
+<tag>{HTML_ENDTAG}										{ this.popState(); yytext = yytext.substr(2,yyleng-3).toLowerCase(); return 'TAG_END'; }
 <tag>{HTML_TAGOPEN}										{
 		yytext = yytext.substr(1).trim().toLowerCase();
 		this.yy.x_lexer_tag_name = yytext;
@@ -571,10 +571,10 @@ KNOWN_SWITCHES				\{\:[LR]\:\}|\{\:[LG]T\:\}|\{\:AMP\:\}
 		this.popState();
 		return 'TAG_END_CLOSE';
 	}
-<tag>{HTML_IDENTIFIER}\s+								{ yytext = yytext.trimRight(); return 'HASH_ATTRIBUTE'; }
+<tag>{HTML_IDENTIFIER}\s+								{ yytext = yytext.trim(); return 'HASH_ATTRIBUTE'; }
 <tag>{HTML_IDENTIFIER}/\>								{ return 'HASH_ATTRIBUTE'; }
 <tag>{HTML_IDENTIFIER}\=								{ yytext = yytext.substr(0,yyleng-1); return 'HASH_ASSIGN'; }
-<tag>{HTML_IDENTIFIER}\={IDENTIFIER}+\s					{ yytext = yytext.trimRight(); return 'UNESCAPED_HASH_ASSIGN'; }
+<tag>{HTML_IDENTIFIER}\={IDENTIFIER}+\s					{ yytext = yytext.trim(); return 'UNESCAPED_HASH_ASSIGN'; }
 <tag>\"([^\\\"]|\\.)*\"									{ yytext = Lava.parsers.Common.unquoteString(yytext); return 'STRING'; }
 <tag>\'([^\\\']|\\.)*\'									{ yytext = Lava.parsers.Common.unquoteString(yytext); return 'STRING'; }
 <tag>\s+												{ }
