@@ -14161,7 +14161,7 @@ Lava.define(
 
 			for (field in fields) {
 
-				fields[field].import(this, properties_storage_ref, raw_properties);
+				fields[field]['import'](this, properties_storage_ref, raw_properties);
 
 			}
 
