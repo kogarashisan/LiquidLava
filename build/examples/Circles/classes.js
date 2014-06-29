@@ -12,7 +12,7 @@ Lava.ClassManager.define(
 	_event_handlers: {
 		circle_mouse_down: '_onCircleMouseDown',
 		add: '_addCircle',
-		delete: '_deleteCircle'
+		'delete': '_deleteCircle'
 	},
 
 	_circles: null,
