@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<script src="http://ajax.googleapis.com/ajax/libs/mootools/1.4.5/mootools-yui-compressed.js"></script>
+	<script src="http://lava-framework.com/dist/lava-master-DEBUG.js"></script>
+
+	<script>
+
+		Lava.define('Lava.widget.HelloApp', {
+			Extends: 'Lava.widget.Standard',
+			_properties: {
+				your_name: ''
+			}
+		});
+
+		window.addEvent('load', function() {
+			Lava.bootstrap();
+		});
+
+	</script>
+</head>
+
+<body lava-app="HelloApp">
+
+	<label>Name:</label>
+	<x:widget extends="TextInput">
+		<bind name="value">your_name</bind>
+	</x:widget>
+	<br/>
+	<h1>Hello {$>your_name}!</h1>
+
+</body>
+</html>
