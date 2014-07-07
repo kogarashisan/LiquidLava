@@ -19,7 +19,7 @@ Lava.define(
 	_argument_refreshed_listener: null,
 
 	/**
-	 * @type {Lava.data.Enumerable}
+	 * @type {Lava.system.Enumerable}
 	 */
 	_value: null,
 	_collection_listener: null,
@@ -84,7 +84,7 @@ Lava.define(
 
 				this._own_collection = true;
 				// do not bind any listeners, cause this collection must not be modified by hands (it would make a design flaw)
-				this._value = new Lava.data.Enumerable(data_source);
+				this._value = new Lava.system.Enumerable(data_source);
 				this._fire('new_enumerable');
 
 			}

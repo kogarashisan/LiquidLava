@@ -1,8 +1,8 @@
 
 Lava.define(
-'Lava.data.Enumerable',
+'Lava.system.Enumerable',
 /**
- * @lends Lava.data.Enumerable#
+ * @lends Lava.system.Enumerable#
  * @extends Lava.mixin.Properties
  */
 {
@@ -329,7 +329,7 @@ Lava.define(
 
 		this._fire('collection_changed');
 
-		return this._count; // after _setLength() equals to count + 1
+		return this._count; // after _setLength() this was incremented by one
 
 	},
 

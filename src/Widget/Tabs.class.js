@@ -12,7 +12,7 @@ Lava.define(
 	name: 'tabs',
 
 	_properties: {
-		/** @type {Lava.data.Enumerable} */
+		/** @type {Lava.system.Enumerable} */
 		_tabs: null,
 		_active_tab: null
 	},
@@ -29,7 +29,7 @@ Lava.define(
 
 	init: function(config, widget, parent_view, template, properties) {
 
-		this._tabs = new Lava.data.Enumerable();
+		this._tabs = new Lava.system.Enumerable();
 		this._properties._tabs = this._tabs;
 
 		this.Standard$init(config, widget, parent_view, template, properties);

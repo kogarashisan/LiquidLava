@@ -163,7 +163,7 @@
 <li><span class="tag-Refactoring">Refactoring</span> _cRawBlock.class_locator.name - rename to locator and change type to _cViewLocator.<br/>Same for _cWidgetConfig.class_locator.</li>
 <li><span class="tag-Fix">Fix</span> when parsing sugar inside x:define and x:widget: sugar config must be merged with parent,<br/>and class name of sugar must be taken from config.</li>
 <li><span class="tag-Refactoring">Refactoring</span> ScopeManager::scheduleScopeRefresh: do not return an object, use property of the Refreshable.</li>
-<li><span class="tag-DevAssist">DevAssist</span> recursive x:binding and x:assign protection.<span class="task-comment">Currently, you can create an assign of any property to itself</span></li>
+<li><span class="tag-Dev">Dev</span> recursive x:binding and x:assign protection.<span class="task-comment">Currently, you can create an assign of any property to itself</span></li>
 <li><span class="tag-Fix">Fix</span> fixes for old IE: check if get/set value on &lt;select&gt; elements works as expected. Write tests.<span class="task-comment">see <br/><br/> https://mootools.lighthouseapp.com/projects/2706/tickets/1116 <br/>
  https://github.com/mootools/mootools-core/issues/2041 <br/>
  and Source\Element\Element.js in MooTools</span></li>
@@ -194,11 +194,6 @@
 		depends:['first_name', 'last_name']
 	}</pre></span></li>
 </ul>
-<h3>Data/Enumerable.class.js</h3>
-<ul>
-<li><span class="tag-Feature">Feature</span> methods relocateIndex(old_index, new_index) and relocateValue(value, new_index)<span class="task-comment">is equivalent of removeAt, than insertAt for given value.<br/> They will not fire item_removed/added events, only collection_changed and index_changed</span></li>
-<li><span class="tag-Feature">Feature</span><span class="tag-Q">Q</span> method for batch processing of value listeners (example: turn them off)</li>
-</ul>
 <h3>Data/Field/</h3>
 <ul>
 <li><span class="tag-Performance">Performance</span> Integer and Id fields: invent some better check than regex<span class="task-comment">this._shared.valid_value_regex.test(value)</span></li>
@@ -220,7 +215,7 @@
 <li><span class="tag-Feature">Feature</span> x:classBinding directive - alternative form for x:class attribute</li>
 <li><span class="tag-Bug">Bug</span> {literal:}{:literal} switches produce a separate string.<span class="task-comment">When separate strings go in a row - this causes some parsing issues, when there is only one string expected.<br/> Either unite sequential strings in a parser (preferable), or teach parsers.Common to compile such cases. <br/>
  Workaround: do not allow any text before and after the literal switches (switch must immediately follow the tag/block start)</span></li>
-<li><span class="tag-DevAssist">DevAssist</span> make the text for exception "Text is not allowed in this context" inside asBlocks() more meaningful<span class="task-comment">text should depend on context</span></li>
+<li><span class="tag-Dev">Dev</span> make the text for exception "Text is not allowed in this context" inside asBlocks() more meaningful<span class="task-comment">text should depend on context</span></li>
 <li><span class="tag-Feature">Feature</span> x:controller control attribute - similar to x:widget<span class="task-comment">create an inline widget from element, with specified controller class. Also should work on sugar.</span></li>
 <li><span class="tag-Feature">Feature</span> allow to set default widget config in sugar options. Such config must be merged properly.<span class="task-comment">Reason: sometimes you will want to add options and other settings to sugar.</span></li>
 <li><span class="tag-Feature">Feature</span><span class="tag-Q">Q</span> static_value directive should treat it's content as default value.</li>
@@ -236,19 +231,24 @@
 <li><span class="tag-Feature">Feature</span> implement removal of empty space from templates</li>
 <li><span class="tag-Feature">Feature</span><span class="tag-Q">Q</span> &lt;x:region&gt; directive for includes: it will allow to cut off pieces of template depending on options</li>
 <li><span class="tag-Refactoring">Refactoring</span> remove unused lexer switch preserve_whitespace</li>
-<li><span class="tag-Fix">Fix</span><span class="tag-DevAssist">DevAssist</span> _parseStyleAttribute: currently will not parse style strings which contain strings with semicolon inside them as style value<span class="task-comment">do not use such styles, use classes!</span></li>
+<li><span class="tag-Fix">Fix</span><span class="tag-Dev">Dev</span> _parseStyleAttribute: currently will not parse style strings which contain strings with semicolon inside them as style value<span class="task-comment">do not use such styles, use classes!</span></li>
 </ul>
 <h3>Parsers/ExpressionParser.js</h3>
 <ul>
 <li><span class="tag-Feature">Feature</span><span class="tag-Q">Q</span> macros to shorten the ternary operator, for example: "{is_active -&gt; 'active'}"</li>
 <li><span class="tag-Feature">Feature</span><span class="tag-Performance">Performance</span> currently, each time any variable is referenced in argument's source code - it creates a new binding config.<br/>Parser must unite bindings to the same variable referenced multiple times.</li>
+<li><span class="tag-Feature">Feature</span><span class="tag-Performance">Performance</span> too many redundant variables in parse result. Remove flags, which value is false, remove empty arrays.</li>
 <li><span class="tag-Feature">Feature</span> static arguments must have their value in configs</li>
-<li><span class="tag-Refactoring">Refactoring</span> result config always has "modifiers" and "active_modifiers" properties. They are not always needed.</li>
 <li><span class="tag-Refactoring">Refactoring</span> remove the dn() operator. It's existence is not possible with current architecture.<br/>Finish the up() operator, or remove it also.</li>
 </ul>
 <h3>System/App.class.js</h3>
 <ul>
 <li><span class="tag-Feature">Feature</span> app.createModule(config) - create a module with given schema</li>
+</ul>
+<h3>System/Enumerable.class.js</h3>
+<ul>
+<li><span class="tag-Feature">Feature</span> methods relocateIndex(old_index, new_index) and relocateValue(value, new_index)<span class="task-comment">is equivalent of removeAt, than insertAt for given value.<br/> They will not fire item_removed/added events, only collection_changed and index_changed</span></li>
+<li><span class="tag-Feature">Feature</span><span class="tag-Q">Q</span> method for batch processing of value listeners (example: turn them off)</li>
 </ul>
 <h3>System/Sugar.class.js</h3>
 <ul>
@@ -277,7 +277,7 @@
 </ul>
 <h3>View/Container/Element.class.js</h3>
 <ul>
-<li><span class="tag-Fix">Fix</span><span class="tag-DevAssist">DevAssist</span> if you render it's content and change any attribute before it's in DOM,<br/>than you will get wrong content in DOM. Make protection from such lifecycle.<span class="task-comment">make "is_rendered"/"waits_insertion" switch and throw an error, if setting a property while it's on</span></li>
+<li><span class="tag-Fix">Fix</span><span class="tag-Dev">Dev</span> if you render it's content and change any attribute before it's in DOM,<br/>than you will get wrong content in DOM. Make protection from such lifecycle.<span class="task-comment">make "is_rendered"/"waits_insertion" switch and throw an error, if setting a property while it's on</span></li>
 </ul>
 <h3>ClassManager.class.js</h3>
 <ul>

@@ -40,7 +40,7 @@ System-wide or uncategorized
 	- [Fix] when parsing sugar inside x:define and x:widget: sugar config must be merged with parent,
 		and class name of sugar must be taken from config.
 	- [Refactoring] ScopeManager::scheduleScopeRefresh: do not return an object, use property of the Refreshable.
-	- [DevAssist] recursive x:binding and x:assign protection.
+	- [Dev] recursive x:binding and x:assign protection.
 		// Currently, you can create an assign of any property to itself
 	- [Fix] fixes for old IE: check if get/set value on &lt;select&gt; elements works as expected. Write tests.
 		// see <br/>
@@ -71,11 +71,6 @@ Data/
 		//		get: function() { return this.get('first_name') + ' ' + ...}
 		//		depends:['first_name', 'last_name']
 		//	}</pre>
-Data/Enumerable.class.js
-	- [Feature] methods relocateIndex(old_index, new_index) and relocateValue(value, new_index)
-		// is equivalent of removeAt, than insertAt for given value.
-		// They will not fire item_removed/added events, only collection_changed and index_changed
-	- [Feature,Q] method for batch processing of value listeners (example: turn them off)
 Data/Field/
 	- [Performance] Integer and Id fields: invent some better check than regex
 		// this._shared.valid_value_regex.test(value)
@@ -94,7 +89,7 @@ Parsers/
 		// When separate strings go in a row - this causes some parsing issues, when there is only one string expected.
 		// Either unite sequential strings in a parser (preferable), or teach parsers.Common to compile such cases. <br/>
 		// Workaround: do not allow any text before and after the literal switches (switch must immediately follow the tag/block start)
-	- [DevAssist] make the text for exception "Text is not allowed in this context" inside asBlocks() more meaningful
+	- [Dev] make the text for exception "Text is not allowed in this context" inside asBlocks() more meaningful
 		// text should depend on context
 	- [Feature] x:controller control attribute - similar to x:widget
 		// create an inline widget from element, with specified controller class. Also should work on sugar.
@@ -109,18 +104,23 @@ Parsers/TemplateParser.js
 	- [Feature] implement removal of empty space from templates
 	- [Feature,Q] &lt;x:region&gt; directive for includes: it will allow to cut off pieces of template depending on options
 	- [Refactoring] remove unused lexer switch preserve_whitespace
-	- [Fix,DevAssist] _parseStyleAttribute: currently will not parse style strings which contain strings with semicolon inside them as style value
+	- [Fix,Dev] _parseStyleAttribute: currently will not parse style strings which contain strings with semicolon inside them as style value
 		// do not use such styles, use classes!
 Parsers/ExpressionParser.js
 	- [Feature,Q] macros to shorten the ternary operator, for example: "{is_active -&gt; 'active'}"
 	- [Feature, Performance] currently, each time any variable is referenced in argument's source code - it creates a new binding config.
 		Parser must unite bindings to the same variable referenced multiple times.
+	- [Feature, Performance] too many redundant variables in parse result. Remove flags, which value is false, remove empty arrays.
 	- [Feature] static arguments must have their value in configs
-	- [Refactoring] result config always has "modifiers" and "active_modifiers" properties. They are not always needed.
 	- [Refactoring] remove the dn() operator. It's existence is not possible with current architecture.
 		Finish the up() operator, or remove it also.
 System/App.class.js
 	- [Feature] app.createModule(config) - create a module with given schema
+System/Enumerable.class.js
+	- [Feature] methods relocateIndex(old_index, new_index) and relocateValue(value, new_index)
+		// is equivalent of removeAt, than insertAt for given value.
+		// They will not fire item_removed/added events, only collection_changed and index_changed
+	- [Feature,Q] method for batch processing of value listeners (example: turn them off)
 System/Sugar.class.js
 	- [Dev] always check that there are no redundant attributes on sugar tags
 		// it's checked on root tag, but not on objects
@@ -143,7 +143,7 @@ View/Container/
 	- [Feature] add insertHTMLBefore() to all containers
 	- [Feature] Emulated container: some "placement"s can have prependHTML and insertHTMLAfter
 View/Container/Element.class.js
-	- [Fix,DevAssist] if you render it's content and change any attribute before it's in DOM,
+	- [Fix,Dev] if you render it's content and change any attribute before it's in DOM,
 		than you will get wrong content in DOM. Make protection from such lifecycle.
 		// make "is_rendered"/"waits_insertion" switch and throw an error, if setting a property while it's on
 ClassManager.class.js

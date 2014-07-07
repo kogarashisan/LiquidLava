@@ -17,6 +17,9 @@ Lava.define(
 	_config: null,
 
 	_transition: null,
+	/**
+	 * @type {Lavadoc._tGUID}
+	 */
 	guid: null,
 
 	/**
@@ -25,7 +28,7 @@ Lava.define(
 	 */
 	init: function(config, target) {
 
-		this._guid = Lava.guid++;
+		this.guid = Lava.guid++;
 		if (config.duration) {
 			this._duration = config.duration;
 		}

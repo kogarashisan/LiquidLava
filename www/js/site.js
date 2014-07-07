@@ -34,7 +34,7 @@ var Examples = {
 				temp.push(this.makeLive(arg[i]));
 			}
 
-			result = new Lava.data.Enumerable(temp);
+			result = new Lava.system.Enumerable(temp);
 
 		} else if (Firestorm.getType(arg) == 'object') {
 
@@ -357,8 +357,8 @@ Lava.define(
 		var demo_module = Lava.app.getModule('DemoTree');
 		// clone cause loading modifies the data
 		demo_module.loadRecords(Firestorm.clone(ExampleData.example_tree));
-		this._properties.all_tree_records = new Lava.data.Enumerable(demo_module.getAllRecords());
-		this._properties.tree_records = new Lava.data.Enumerable(demo_module.getAllRecords());
+		this._properties.all_tree_records = new Lava.system.Enumerable(demo_module.getAllRecords());
+		this._properties.tree_records = new Lava.system.Enumerable(demo_module.getAllRecords());
 		this._properties.tree_records.filter(function(record) {
 			return !record.get('parent')
 		});

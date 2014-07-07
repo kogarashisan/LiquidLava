@@ -54,6 +54,7 @@
 		"Animation/Emulated.class.js",
 		"Animation/BootstrapCollapse.class.js",
 
+		"System/Enumerable.class.js",
 		"System/Template.class.js",
 		"System/ViewManager.class.js",
 		"System/App.class.js",
@@ -69,7 +70,6 @@
 		"Data/Field/Record.class.js",
 		"Data/Field/Boolean.class.js",
 
-		"Data/Enumerable.class.js",
 		"Data/ModuleAbstract.class.js",
 		"Data/Module.class.js",
 		"Data/RecordAbstract.class.js",

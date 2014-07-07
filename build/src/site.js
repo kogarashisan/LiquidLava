@@ -29,7 +29,7 @@ var Examples = {
 				temp.push(this.makeLive(arg[i]));
 			}
 
-			result = new Lava.data.Enumerable(temp);
+			result = new Lava.system.Enumerable(temp);
 
 		} else if (Firestorm.getType(arg) == 'object') {
 

@@ -16,7 +16,7 @@ Lava.define(
 	},
 
 	_properties: {
-		/** @type {Lava.data.Enumerable} */
+		/** @type {Lava.system.Enumerable} */
 		_panels: null,
 		is_enabled: true
 	},
@@ -36,7 +36,7 @@ Lava.define(
 
 	init: function(config, widget, parent_view, template, properties) {
 
-		this._panels = new Lava.data.Enumerable();
+		this._panels = new Lava.system.Enumerable();
 		this._properties._panels = this._panels;
 		this.Standard$init(config, widget, parent_view, template, properties);
 

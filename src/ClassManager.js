@@ -11,12 +11,12 @@ Lava.ClassManager = {
 	SIMPLE_TYPES: ['string', 'boolean', 'number', 'null', 'undefined'],
 
 	/**
-	 * @type {Object.<string, _cClassData>
+	 * @type {Object.<string, _cClassData>}
 	 */
 	_sources: {},
 	/**
 	 * [Class path] => constructor - a function that returns a new class instance
-	 * @type {Object.<string, function>
+	 * @type {Object.<string, function>}
 	 */
 	constructors: {},
 	_reserved_members: ['Extends', 'Implements', 'Class', 'Shared'],

@@ -400,7 +400,7 @@ Lava.define(
 		// if needed - turn array into collection
 		if (!(referenced_guid in this._collections_by_guid) || !this._collections_by_guid[referenced_guid].isEnumerable) {
 
-			var collection = new Lava.data.Enumerable(this._collections_by_guid[referenced_guid]);
+			var collection = new Lava.system.Enumerable(this._collections_by_guid[referenced_guid]);
 			this._collections_by_guid[referenced_guid] = collection;
 			this._collection_listeners_by_guid[referenced_guid] = {
 				added: collection.on('items_added', this._onCollectionRecordsAdded, this),
