@@ -90,9 +90,11 @@ break;
 case 3:
 			this.$ = $$[$0-1];
 			if ($$[$0]) {
-				// all scripts are returned as SCRIPT_CONTENT unless they are 'lava/fragment'
-				if ($$[$0].name == 'script' && $$[$0].type == 'tag') {
+				// inline fragments
+				if ($$[$0].name == 'script' && $$[$0].type == 'tag' && $$[$0].attributes && $$[$0].attributes.type == 'lava/fragment') {
 					this.$ = $$[$0].content ? $$[$0-1].concat($$[$0].content) : $$[$0-1];
+				} else if (typeof($$[$0]) == 'string' && this.$.length && typeof(this.$[this.$.length-1]) == 'string') {
+					this.$[this.$.length-1] += $$[$0];
 				} else {
 					this.$.push($$[$0]);
 				}
@@ -101,7 +103,7 @@ case 3:
 break;
 case 4:
 			if ($$[$0]) {
-				if ($$[$0].name == 'script' && $$[$0].type == 'tag') {
+				if ($$[$0].name == 'script' && $$[$0].type == 'tag' && $$[$0].attributes && $$[$0].attributes.type == 'lava/fragment') {
 					this.$ = $$[$0].content || [];
 				} else {
 					this.$ = [$$[$0]];
@@ -182,9 +184,9 @@ case 14:
 break;
 case 15:
 			this.$ = $$[$0-1];
-			if ($$[$0-1].x && ('equiv' in $$[$0-1].x)) {
+			if ($$[$0-1].name == 'script' && $$[$0-1].x && ('equiv' in $$[$0-1].x)) {
 				if (!$$[$0-1].x.equiv) Lava.t('empty x:equiv');
-				this.$ = yy.parseRawTag($$[$0-1].x.equiv); // sets name and type
+				this.$ = yy.parseRawTag($$[$0-1].x.equiv); // sets name and type (it may be directive)
 				this.$.x = $$[$0-1].x;
 				if ('attributes' in $$[$0-1]) this.$.attributes = $$[$0-1].attributes;
 			}

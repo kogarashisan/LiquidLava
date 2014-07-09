@@ -640,9 +640,11 @@ blocks
 	: blocks block {
 			$$ = $1;
 			if ($2) {
-				// all scripts are returned as SCRIPT_CONTENT unless they are 'lava/fragment'
-				if ($2.name == 'script' && $2.type == 'tag') {
+				// inline fragments
+				if ($2.name == 'script' && $2.type == 'tag' && $2.attributes && $2.attributes.type == 'lava/fragment') {
 					$$ = $2.content ? $1.concat($2.content) : $1;
+				} else if (typeof($2) == 'string' && $$.length && typeof($$[$$.length-1]) == 'string') {
+					$$[$$.length-1] += $2;
 				} else {
 					$$.push($2);
 				}
@@ -650,7 +652,7 @@ blocks
 		}
 	| block {
 			if ($1) {
-				if ($1.name == 'script' && $1.type == 'tag') {
+				if ($1.name == 'script' && $1.type == 'tag' && $1.attributes && $1.attributes.type == 'lava/fragment') {
 					$$ = $1.content || [];
 				} else {
 					$$ = [$1];
@@ -723,9 +725,9 @@ block
 		}
 	| tagStart SCRIPT_CONTENT {
 			$$ = $1;
-			if ($1.x && ('equiv' in $1.x)) {
+			if ($1.name == 'script' && $1.x && ('equiv' in $1.x)) {
 				if (!$1.x.equiv) Lava.t('empty x:equiv');
-				$$ = yy.parseRawTag($1.x.equiv); // sets name and type
+				$$ = yy.parseRawTag($1.x.equiv); // sets name and type (it may be directive)
 				$$.x = $1.x;
 				if ('attributes' in $1) $$.attributes = $1.attributes;
 			}
