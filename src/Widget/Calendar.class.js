@@ -160,6 +160,7 @@ Lava.define(
 
 		var day = template_arguments[0];
 		this._select(day.year, day.month, day.milliseconds);
+		dom_event.preventDefault(); // cancel selection
 
 	},
 
