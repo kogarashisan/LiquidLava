@@ -9,7 +9,6 @@ module.exports = function(grunt) {
 	grunt.registerTask('buildExamples', function() {
 
 		var fs = require('fs');
-		var highlight_js = require('highlight.js');
 		var example_names = fs.readdirSync('./build/examples/');
 		var Lava;
 
@@ -17,35 +16,10 @@ module.exports = function(grunt) {
 
 		function makeTab(example, title, type, text) {
 
-			if (type == 'xml') {
-				text = text.replace(/\t/g, '  ');
-			}
-
-			var highlighted = highlight_js.highlight(type, text).value;
-
-			if (type == 'javascript') {
-				highlighted = highlighted.replace(/<span class="hljs-comment">\/\*H\:(.*?)\*\/([\s\S]+?)\/\*:H\*\/<\/span>/g, function() {
-					return '<div data-tooltip="' + arguments[1] + '" class="lava-highlight">' + arguments[2] + '</div>';
-				});
-			} else if (type == 'xml') {
-				// highlight regions with tooltip
-				highlighted = highlighted.replace(/\{\*H\:(.*?)\*\}([\s\S]+?)\{\*\:H\*\}/g, function() {
-					return '<div data-tooltip="' + arguments[1] + '" class="lava-highlight">' + arguments[2] + '</div>';
-				});
-				// also highlight other comments
-				highlighted = highlighted.replace(/\{\*[\s\S]+?\*\}/g, function() {
-					return '<div class="lava-highlight">' + arguments[0] + '</div>';
-				});
-				// make control attributes red
-				highlighted = highlighted.replace(/\<span class="hljs-attribute"\>x:([\s\S]+?)\<\/span>/g, function() {
-					return '<span class="lava-control-prefix">x</span><span class="hljs-attribute">:' + arguments[1] + '</span>';
-				});
-			}
-
 			example.tabs.push({
 				title: title,
-				content: '<pre><code class="hljs ' + type + '">' + highlighted + '</code></pre>'
-			});
+				content: global.LavaBuild.highlight(type, text)
+			})
 
 		}
 
@@ -98,7 +72,7 @@ module.exports = function(grunt) {
 				= packs['Panel1'].classes;
 
 			var define_source = grunt.file.read('./build/templates/editable_table.html');
-			define_source = define_source.replace(/^\<!\-\-[\s\S]+?\-\-\>\r?\n/, '');
+			define_source = define_source.replace(/^\<!\-\-[\s\S]+?\-\-\>\r?\n/, ''); // remove the topmost comment
 			makeTab(packs['editable_table'], 'Defines', 'xml', define_source);
 			makeTab(packs['editable_table'], 'Classes', 'javascript', grunt.file.read('./build/src/EditableTableExample.class.js'));
 

@@ -25,19 +25,13 @@ module.exports = function(grunt) {
 			///
 
 			Lava.TemplateParser.parse(grunt.file.read('./build/templates/editable_table.html'));
-
-			var include =
-				'Lava.widgets["EditableTable"] = ' + Lava.Serializer.serialize(Lava.widgets['EditableTable']) + ';\n';
-
+			var include = 'Lava.widgets["EditableTable"] = ' + Lava.Serializer.serialize(Lava.widgets['EditableTable']) + ';\n';
 			grunt.file.write('./build/temp/editable_table_widget.js', include);
 
 			///
 
 			var main_page_widgets = Lava.TemplateParser.parse(grunt.file.read('./build/templates/main_page_demo.html'));
-
-			include =
-				'var MainPageTemplate = ' + Lava.Serializer.serialize(main_page_widgets) + ';\n';
-
+			include = 'var MainPageTemplate = ' + Lava.Serializer.serialize(main_page_widgets) + ';\n';
 			grunt.file.write('./build/temp/main_page_widgets_template.js', include);
 
 		} catch (e) {

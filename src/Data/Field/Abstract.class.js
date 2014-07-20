@@ -9,14 +9,19 @@ Lava.define(
 
 	Implements: 'Lava.mixin.Observable',
 
+	/**
+	 * @type {string}
+	 */
 	_name: null,
-
 	_module: null,
-
 	_config: null,
-
+	/**
+	 * @type {Object.<Lavadoc._tGUID, Object>}
+	 */
 	_storages_by_guid: null,
-
+	/**
+	 * @type {boolean}
+	 */
 	_is_nullable: false,
 
 	/**
@@ -88,7 +93,7 @@ Lava.define(
 	initNewRecord: function(record, storage) {},
 
 	'import': function(record, storage, raw_properties) {
-		Lava.t("Abstract function call: import");
+
 	},
 
 	'export': function(record, destination_object) {

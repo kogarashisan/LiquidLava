@@ -69,6 +69,7 @@
 		"Data/Field/ForeignKey.class.js",
 		"Data/Field/Record.class.js",
 		"Data/Field/Boolean.class.js",
+		"Data/Field/Guid.class.js",
 
 		"Data/ModuleAbstract.class.js",
 		"Data/Module.class.js",

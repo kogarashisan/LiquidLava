@@ -40,8 +40,6 @@ body {padding-top: 50px;}
 footer .container {background: #f7f5fa;}
 .footer-inner {padding: 1em; text-align: right;}
 
-.lava-highlight {background: #FFFF80; display: inline; cursor: pointer}
-.lava-highlight:hover {background: #FFFF00}
 .lava-control-prefix {color: #D50000}
 
 .example-circle {
@@ -61,6 +59,13 @@ footer .container {background: #f7f5fa;}
 .task-comment {display: block; opacity: 0.5}
 .task-comment:hover {opacity: 1}
 
+.tag-P1,.tag-P2,.tag-P3,.tag-P4,.tag-P5 {margin-left: -100px;float: left;padding: 0 3px}
+.tag-P1 {background: rgb(19, 226, 44)}
+.tag-P2 {background: rgb(19, 226, 143)}
+.tag-P3 {background: rgb(161, 255, 173)}
+.tag-P4 {background: rgb(223, 235, 224)}
+.tag-P5 {background: lightgrey;}
+
 .demo-table td {border: 1px solid gray; padding: 3px 6px}
 .demo-table thead {background: #f4f4f4}
 .demo-table thead td {cursor: pointer}
@@ -71,3 +76,19 @@ footer .container {background: #f7f5fa;}
 .main-page-follow-container {padding-top: 1em}
 .about-page-hostings td {padding: 1em; vertical-align: top}
 .initial-loading-indicator {background: #f7f5fa;font-size: 2em;font-weight: bold;padding: 1em;text-align: center;margin: 1em 0 1em;}
+
+/* source code formatting */
+.lava-code-container {clear: both;position: relative;margin: 10px 0;}
+.lava-code {clear: both;position: relative;border: none;border-color: #969696;background-color: #FFFFFF;}
+.lava-code pre {
+	font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+	font-size: 13px;line-height: 18px;white-space: pre !important;overflow-x: auto;overflow-y: hidden;z-index: 1;position: relative;padding: 0.5em !important;
+	word-break: normal !important;word-wrap: normal !important;
+}
+.lava-code-line-numbers {float: left;margin-right: 5px;margin-top: 0;margin-bottom: 0;padding: 0;padding-right: 4px;padding-left: 4px;border-right: 1px solid #CCCCCC;background-color: #EEEEEE;color: #848484;text-align: right;position: relative;z-index: 3;}
+.lava-code-overlay, .lava-code-tooltips {position: absolute;top: 0;left: 0;width: 100%;padding-top: 0.5em}
+.lava-code-overlay {z-index: 0;}
+.lava-code-tooltips {z-index: 3;}
+.lava-code-overlay div, .lava-code-tooltips div {height: 18px;width: 100%;}
+.lava-code-overlay-line {background: yellow; opacity: 0.6; cursor: pointer}
+.lava-code-content {background: transparent !important;}

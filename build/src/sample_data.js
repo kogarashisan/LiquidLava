@@ -2,6 +2,7 @@
 Lava.schema.modules['DemoTree'] = {
 	fields: {
 		//id: {type: 'Id'},
+		guid: {type: 'Guid'}, // for MetaStorage
 		title: {type: 'Basic', 'default': ''},
 		type: {type: 'Basic', 'default': 'file'},
 		parent: {type: 'Record', module: 'this'/*, foreign_key_field: 'parent_id'*/},

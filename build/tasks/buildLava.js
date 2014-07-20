@@ -14,43 +14,21 @@ module.exports = function(grunt) {
 		var groups = grunt.config('js_files');
 		var fs = require('fs');
 
-		function concatList(filelist, prefix) {
-
-			var result = '';
-
-			for (var i = 0, count = filelist.length; i < count; i++) {
-				result += grunt.file.read(prefix + filelist[i]);
-			}
-
-			return result;
-
-		}
-
-		var export_classes_result = '';
-		var exported_paths = [];
-
-		function export_path(path) {
-
-			var exported = Lava.ClassManager.exportClass(path);
-
-			if (exported.extends && exported_paths.indexOf(exported.extends) == -1) {
-				export_path(exported.extends);
-			}
-
-			delete exported.skeleton;
-			delete exported.source_object;
-			export_classes_result += "Lava.ClassManager.loadClass(" + Lava.Serializer.serialize(exported) + ");\n\n";
-			exported_paths.push(path);
-
-		}
-
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// read files from disk
 
 		var group_contents = {};
 
 		for (var name in groups) {
-			group_contents[name] = concatList(groups[name], './src/');
+
+			var group_content = '',
+				filelist = groups[name];
+
+			for (i = 0, count = filelist.length; i < count; i++) {
+				group_content += grunt.file.read('./src/' + filelist[i]) + '\n';
+			}
+
+			group_contents[name] = group_content;
 		}
 
 		group_contents['locale'] = grunt.file.read('./locale/en/schema.js');
@@ -84,21 +62,6 @@ module.exports = function(grunt) {
 			var Lava = global.Lava;
 
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			// Generate classes, loadable by ClassManager
-
-			var class_names = Lava.ClassManager.getClassNames();
-			for (var i = 0, count = class_names.length; i < count; i++) {
-
-				if (exported_paths.indexOf(class_names[i]) == -1) {
-					export_path(class_names[i]);
-				}
-
-			}
-
-			// End
-			////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-			////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			// Parse and compile the standard widget templates
 
 			var template_source = '';
@@ -118,12 +81,8 @@ module.exports = function(grunt) {
 			// Finally: build Lava package, which can be used in browser
 
 			var package_content = core_content;
-
-			package_content += export_classes_result;
-			//package_content += '\n' + 'Lava.init();';
+			package_content += global.LavaBuild.exportClasses();
 			package_content += compiled_templates;
-
-			//grunt.file.write('./build/temp/package.js', package_content);
 			grunt.file.write('./dist/lava-master-compiled-DEBUG.js', package_content);
 
 			// End
@@ -133,13 +92,10 @@ module.exports = function(grunt) {
 			// Build uncompiled package
 
 			package_content = core_content;
-
 			package_content += group_contents['classes'];
 			package_content += group_contents['widgets'];
-			//package_content += '\n' + 'Lava.init();';
 			package_content += compiled_templates;
 
-			//grunt.file.write('./build/temp/package.js', package_content);
 			grunt.file.write('./dist/lava-master-DEBUG.js', package_content);
 
 			// End

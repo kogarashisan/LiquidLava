@@ -17,7 +17,7 @@ Lava.ClassManager.define(
 
 	_onToggleClick: function(dom_event_name, dom_event, view, template_arguments) {
 
-		/*H:The only significant line of code*/this.set('is_expanded', !this.get('is_expanded'));/*:H*/
+		this.set('is_expanded', !this.get('is_expanded'));/*H:The only significant line of code*/
 
 	}
 

@@ -11,10 +11,33 @@ Lava.define(
 
 	isCollectionField: true,
 
+	/**
+	 * Collection field holds an array of records from this module
+	 */
 	_target_module: null,
 
+	/**
+	 * @type {string}
+	 */
 	_target_record_field_name: null,
+	/**
+	 * Each Collection field has corresponding Record field, they always come in pairs, like 'parent' and 'children'
+	 * @type {Lava.data.field.Record}
+	 */
 	_target_record_field: null,
+
+	_record_removed_listener: null,
+	_record_added_listener: null,
+
+	/**
+	 * @type {Object.<string, Lava.system.Enumerable>}
+	 */
+	_collections_by_record_guid: {},
+	_collection_listeners_by_guid: {},
+	/**
+	 * @type {Object.<Lavadoc._tGUID, Lava.data.RecordAbstract>}
+	 */
+	_collection_guid_to_record: {},
 
 	/**
 	 * @param {Lava.data.Module} module
@@ -37,11 +60,31 @@ Lava.define(
 
 		this._target_module = (this._config.module == 'this') ? this._module : this._module.getApp().getModule(this._config.module);
 		this._target_record_field = this._target_module.getField(this._target_record_field_name);
+		this._record_removed_listener = this._target_record_field.on('removed_child', this._onRecordRemoved, this);
+		this._record_added_listener = this._target_record_field.on('added_child', this._onRecordAdded, this);
 
 		if (!this._target_record_field.isRecordField) Lava.t('CollectionField: mirror field is not Record field');
 
 		if (this._target_record_field.getReferencedModule() !== this._module)
 			Lava.t("CollectionField: module mismatch with mirror Record field");
+
+	},
+
+	_onRecordRemoved: function(field, event_args) {
+
+		var local_record = event_args.collection_owner;
+		if (local_record.guid in this._collections_by_record_guid) {
+			this._collections_by_record_guid[local_record.guid].remove(event_args.child);
+		}
+
+	},
+
+	_onRecordAdded: function(field, event_args) {
+
+		var local_record = event_args.collection_owner;
+		if (local_record.guid in this._collections_by_record_guid) {
+			this._collections_by_record_guid[local_record.guid].push(event_args.child);
+		}
 
 	},
 
@@ -77,18 +120,14 @@ Lava.define(
 				Lava.t('Invalid value in import data');
 
 			var i = 0,
-				raw_records = raw_properties[this._name],
-				count = raw_records.length;
+				records = this._target_module.loadRecords(raw_properties[this._name]),
+				count = records.length;
 
-			// raw data belongs to the framework, so it has right to modify it as it wants
 			for (; i < count; i++) {
 
-				// set foreign record in import data to this one
-				raw_records[i][this._target_record_field_name] = record;
+				records[i].set(this._target_record_field_name, record);
 
 			}
-
-			this._target_module.loadRecords(raw_properties[this._name]);
 
 		}
 
@@ -100,7 +139,51 @@ Lava.define(
 
 	getValue: function(record, storage) {
 
-		return this._target_record_field.getCollection(record);
+		var guid = record.guid,
+			collection;
+
+		if (!(guid in this._collections_by_record_guid)) {
+
+			collection = new Lava.system.Enumerable(this._target_record_field.getCollection(record));
+			this._collections_by_record_guid[guid] = collection;
+			this._collection_listeners_by_guid[guid] = {
+				added: collection.on('items_added', this._onCollectionRecordsAdded, this),
+				removed: collection.on('items_removed', this._onCollectionRecordsRemoved, this)
+			};
+			this._collection_guid_to_record[collection.guid] = record;
+
+		}
+
+		return this._collections_by_record_guid[guid];
+
+	},
+
+	_onCollectionRecordsAdded: function(collection, event_args) {
+
+		this._setCollectionOwner(event_args.values, this._collection_guid_to_record[collection.guid]);
+
+	},
+
+	_onCollectionRecordsRemoved: function() {
+
+		this._setCollectionOwner(event_args.values, null);
+
+	},
+
+	_setCollectionOwner: function(records, new_value) {
+
+		var i = 0,
+			count = records.length,
+			record;
+
+		for (; i < count; i++) {
+
+			record = records[i];
+			// everything else will be done by the Record field
+			// also, it will raise an event to remove the record from Enumerable
+			record.set(this._target_record_field_name, new_value);
+
+		}
 
 	},
 
@@ -112,9 +195,7 @@ Lava.define(
 
 	setValue: function(record, storage, new_records) {
 
-		if (!Array.isArray(new_records) && !new_records.isEnumerable) Lava.t("CollectionField: only arrays and enumerables may be assigned");
-
-		this._target_record_field.replaceCollection(record, new_records);
+		Lava.t('Trying to set Collection field value');
 
 	},
 
@@ -132,7 +213,23 @@ Lava.define(
 
 	destroy: function() {
 
-		this._target_module = this._target_record_field_name = this._target_record_field = null;
+		var guid;
+
+		for (guid in this._collections_by_record_guid) {
+
+			this._collections_by_record_guid[guid].destroy();
+
+		}
+
+		this._target_record_field.removeListener(this._record_removed_listener);
+		this._target_record_field.removeListener(this._record_added_listener);
+
+		this._target_module
+			= this._collections_by_record_guid
+			= this._collection_listeners_by_guid
+			= this._collection_guid_to_record
+			= this._target_record_field = null;
+
 		this.Abstract$destroy();
 
 	}

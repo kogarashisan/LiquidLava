@@ -18,31 +18,29 @@ Lava.define(
 	/**
 	 * Records, grouped by this field. Serves as a helper for mirror Collection field.
 	 * Key is GUID of the foreign record, value is collection of records from local module.
-	 * Arrays are turned into Enumerable upon first request.
-	 * @type {Object.<string, (Enumerable|Array)>}
+	 * @type {Object.<string, Array>}
 	 */
-	_collections_by_guid: {},
-	_collections_by_id: {},
+	_collections_by_foreign_guid: {},
 
 	/**
-	 * Each Enumerable from _collections_by_guid has a GUID, and each enumerable belongs to foreign record
+	 * Example: 'parent_id'
+	 * @type {string}
 	 */
-	_collection_listeners_by_guid: {},
-	/**
-	 * @type {Object.<number, Lava.data.RecordAbstract>}
-	 */
-	_collection_guid_to_foreign_record: {},
-
 	_foreign_key_field_name: null,
 	/**
-	 * Local field with ID of the foreign record
+	 * Local field with ID of the record in external module.
 	 */
 	_foreign_key_field: null,
 	_foreign_key_changed_listener: null,
 
+	/**
+	 * @type {Lava.data.field.Abstract}
+	 */
 	_external_id_field: null,
 	_external_id_changed_listener: null,
 	_external_records_loaded_listener: null,
+
+	EMPTY_FOREIGN_ID: 0,
 
 	/**
 	 * @param {Lava.data.Module} module
@@ -53,7 +51,6 @@ Lava.define(
 	init: function(module, name, config, module_storages) {
 
 		this.Abstract$init(module, name, config, module_storages);
-
 		this._referenced_module = (config.module == 'this') ? module : module.getApp().getModule(config.module);
 
 	},
@@ -66,10 +63,11 @@ Lava.define(
 
 			this._foreign_key_field_name = this._config.foreign_key_field;
 			this._foreign_key_field = this._module.getField(this._foreign_key_field_name);
+			if (Lava.schema.DEBUG && !this._foreign_key_field.isForeignKey) Lava.t();
 			this._foreign_key_changed_listener = this._foreign_key_field.on('changed', this._onForeignKeyChanged, this);
 			this._external_id_field = this._referenced_module.getField('id');
 			this._external_id_changed_listener = this._external_id_field.on('changed', this._onExternalIdCreated, this);
-			this._external_records_loaded_listener = this._referenced_module.on('records_loaded', this._onReferencedModuleRecordsLoaded, this);
+			this._external_records_loaded_listener = this._referenced_module.on('records_loaded', this._onReferencedModuleRecordsLoaded);
 
 		}
 
@@ -81,52 +79,60 @@ Lava.define(
 	_onReferencedModuleRecordsLoaded: function(module, event_args) {
 
 		var records = event_args.records,
-			i = 0,
 			count = records.length,
-			foreign_id;
+			i = 0,
+			local_records,
+			local_count,
+			local_index,
+			local_record;
 
 		for (; i < count; i++) {
 
-			foreign_id = records[i].get('id');
+			local_records = this._foreign_key_field.getCollection(records[i].get('id'));
 
-			// The situation: records in local module are already loaded, they reference foreign records by their IDs.
-			// Now foreign records are loaded, they get a GUID, and we need to ensure that collections can be referenced by that guid.
-			if (foreign_id in this._collections_by_id) {
-
-				if (Lava.schema.DEBUG && (records[i].guid in this._collections_by_guid)) Lava.t();
-				this._collections_by_guid[records[i].guid] = this._collections_by_id[foreign_id];
-
+			// these records belong to this module and have this field null.
+			// Now, as the foreign record is loaded - the field can be updated.
+			for (local_count = local_records.length, local_index = 0; local_index < local_count; local_index++) {
+				local_record = local_records[local_index];
+				this._storages_by_guid[local_record.guid][this._name] = records[i];
+				this._fireFieldChangedEvents(local_record);
 			}
 
 		}
 
 	},
 
+	/**
+	 * A record was saved to the database and assigned an id. Need to assign foreign keys for loaded records.
+	 * @param foreign_module_id_field
+	 * @param event_args
+	 */
 	_onExternalIdCreated: function(foreign_module_id_field, event_args) {
 
 		var referenced_record = event_args.record, // record belongs to foreign module
 			new_referenced_id = referenced_record.get('id'),
-			collection;
+			collection,
+			i = 0,
+			count;
 
-		if (referenced_record.guid in this._collections_by_guid) {
+		if (referenced_record.guid in this._collections_by_foreign_guid) {
 
-			collection = this._collections_by_guid[referenced_record.guid];
+			collection = this._collections_by_foreign_guid[referenced_record.guid];
 
-			if (new_referenced_id in this._collections_by_id) Lava.t();
-			this._collections_by_id[new_referenced_id] = collection;
-
-			// set the value of foreign ID field in all local records that reference this foreign record
+			// Set the value of foreign ID field in all local records that reference this foreign record.
+			// Situation: there is a new record, which was created in the browser, and some records that reference it
+			// (either new or loaded from database). It's new, so there are no records on server that reference it.
 			if (this._foreign_key_field) {
 
-				if (collection.isEnumerable) {
+				Lava.suspendListener(this._foreign_key_changed_listener);
 
-					this._batchSetForeignKey(collection.getValues(), collection.getCount(), new_referenced_id);
+				for (count = collection.length; i < count; i++) {
 
-				} else {
-
-					this._batchSetForeignKey(collection, collection.length, new_referenced_id);
+					collection[i].set(this._foreign_key_field_name, new_referenced_id);
 
 				}
+
+				Lava.resumeListener(this._foreign_key_changed_listener);
 
 			}
 
@@ -136,7 +142,10 @@ Lava.define(
 
 	/**
 	 * Fires, when local record's foreign id field is assigned a new value.
-	 * Example: record.set('category_id', 123) // 'record' is from local module, 123 - id of foreign record
+	 * Example:
+	 * ```javascript
+	 * record.set('category_id', 123); // 'record' is from local module, 123 - id of foreign record
+	 * ```
 	 * @param foreign_key_field
 	 * @param event_args
 	 */
@@ -201,7 +210,7 @@ Lava.define(
 
 	initNewRecord: function(record, storage) {
 
-		if (this._foreign_key_field) {
+		if (this._foreign_key_field && storage[this._foreign_key_field_name]) {
 
 			this._registerByReferencedId(record, storage, storage[this._foreign_key_field_name]);
 
@@ -211,66 +220,32 @@ Lava.define(
 
 	'import': function(record, storage, raw_properties) {
 
-		if (raw_properties[this._name]) {
+		var foreign_id;
 
-			// actual record could be placed there by mirror Collection field
-			if (raw_properties[this._name].isRecord) {
-
-				if (this._foreign_key_field) {
-
-					if (storage[this._foreign_key_field_name] && storage[this._foreign_key_field_name] != raw_properties[this._name].get('id'))
-						Lava.t("Record field: mismatch of actual referenced record and it's id in import data");
-
-				}
-
-				storage[this._name] = raw_properties[this._name];
-
-			} else {
-
-				storage[this._name] = this._referenced_module.safeLoadRecord(raw_properties[this._name]);
-
-			}
-
-			this._registerRecord(record, storage[this._name]);
-
-		} else if (this._foreign_key_field) {
+		if (this._foreign_key_field) {
 
 			// if foreign id is in import - than it will replace the default value (if foreign kay has default)
-			this._registerByReferencedId(
-				record,
-				storage,
-				raw_properties[this._foreign_key_field_name] || storage[this._foreign_key_field_name]
-			);
+			foreign_id = raw_properties[this._foreign_key_field_name] || storage[this._foreign_key_field_name];
+			if (foreign_id) {
+				this._registerByReferencedId(record, storage, foreign_id);
+			}
 
 		}
 
 	},
 
 	/**
-	 * @param record The local record
-	 * @param storage The storage of local record
+	 * @param {Lava.data.RecordAbstract} record The local record
+	 * @param {Object} storage The storage of local record
 	 * @param referenced_record_id The id of foreign record, which it belongs to
 	 */
 	_registerByReferencedId: function(record, storage, referenced_record_id) {
 
-		if (referenced_record_id) {
+		storage[this._name] = this._referenced_module.getRecordById(referenced_record_id) || null;
 
-			storage[this._name] = this._referenced_module.getRecordById(referenced_record_id);
+		if (storage[this._name]) {
 
-			if (storage[this._name]) {
-
-				this._registerRecord(record, storage[this._name]);
-
-			} else if (referenced_record_id in this._collections_by_id) {
-
-				if (Lava.schema.DEBUG && this._collections_by_id[referenced_record_id].isEnumerable) Lava.t("Assertion failed");
-				this._collections_by_id[referenced_record_id].push(record);
-
-			} else {
-
-				this._collections_by_id[referenced_record_id] = [record];
-
-			}
+			this._registerRecord(record, storage[this._name]);
 
 		}
 
@@ -311,11 +286,12 @@ Lava.define(
 
 			if (new_ref_record != null) {
 
+				// if this module has foreign_key_field than foreign module must have an ID column
 				record.set(this._foreign_key_field_name, new_ref_record.get('id'));
 
 			} else {
 
-				record.set(this._foreign_key_field_name, 0);
+				record.set(this._foreign_key_field_name, this.EMPTY_FOREIGN_ID);
 
 			}
 
@@ -334,181 +310,58 @@ Lava.define(
 	 */
 	_unregisterRecord: function(local_record, referenced_record) {
 
-		var referenced_guid = referenced_record.guid;
-
-		if (this._collections_by_guid[referenced_guid].isEnumerable) {
-
-			Lava.suspendListener(this._collection_listeners_by_guid[referenced_guid].removed);
-			var result = this._collections_by_guid[referenced_guid].remove(local_record);
-			if (Lava.schema.DEBUG && !result) Lava.t();
-			Lava.resumeListener(this._collection_listeners_by_guid[referenced_guid].removed);
-
-		} else {
-
-			var index = this._collections_by_guid[referenced_guid].indexOf(local_record);
-			if (index == -1) Lava.t();
-			this._collections_by_guid[referenced_guid].splice(index, 1);
-
-		}
+		if (!Firestorm.Array.exclude(this._collections_by_foreign_guid[referenced_record.guid], local_record)) Lava.t();
+		this._fire('removed_child', {
+			collection_owner: referenced_record,
+			child: local_record
+		});
 
 	},
 
 	/**
 	 * Add local_record to collection of records from local module, referenced by referenced_record
 	 * @param local_record
-	 * @param referenced_record
+	 * @param referenced_record The collection owner
 	 */
 	_registerRecord: function(local_record, referenced_record) {
 
 		var referenced_guid = referenced_record.guid;
 
-		if (referenced_guid in this._collections_by_guid) {
+		if (referenced_guid in this._collections_by_foreign_guid) {
 
-			if (this._collections_by_guid[referenced_guid].isEnumerable) {
-
-				if (Lava.schema.DEBUG && this._collections_by_guid[referenced_guid].contains(local_record))
-					Lava.t("Duplicate record");
-
-				Lava.suspendListener(this._collection_listeners_by_guid[referenced_guid].added);
-				this._collections_by_guid[referenced_guid].push(local_record);
-				Lava.resumeListener(this._collection_listeners_by_guid[referenced_guid].added);
-
-			} else {
-
-				if (Lava.schema.DEBUG && this._collections_by_guid[referenced_guid].indexOf(local_record) !== -1)
-					Lava.t("Duplicate record");
-				this._collections_by_guid[referenced_guid].push(local_record);
-
-			}
+			if (Lava.schema.DEBUG && this._collections_by_foreign_guid[referenced_guid].indexOf(local_record) != -1)
+				Lava.t("Duplicate record");
+			this._collections_by_foreign_guid[referenced_guid].push(local_record);
 
 		} else {
 
-			this._collections_by_guid[referenced_guid] = [local_record];
+			this._collections_by_foreign_guid[referenced_guid] = [local_record];
 
 		}
+
+		this._fire('added_child', {
+			collection_owner: referenced_record,
+			child: local_record
+		});
 
 	},
 
 	/**
 	 * @param {Lava.data.RecordAbstract} referenced_record The collection's owner record from referenced module
-	 * @returns {Enumerable}
+	 * @returns {Array}
 	 */
 	getCollection: function(referenced_record) {
 
-		var referenced_guid = referenced_record.guid;
-
-		// if needed - turn array into collection
-		if (!(referenced_guid in this._collections_by_guid) || !this._collections_by_guid[referenced_guid].isEnumerable) {
-
-			var collection = new Lava.system.Enumerable(this._collections_by_guid[referenced_guid]);
-			this._collections_by_guid[referenced_guid] = collection;
-			this._collection_listeners_by_guid[referenced_guid] = {
-				added: collection.on('items_added', this._onCollectionRecordsAdded, this),
-				removed: collection.on('items_removed', this._onCollectionRecordsRemoved, this)
-			};
-
-			this._collection_guid_to_foreign_record[collection.guid] = referenced_record;
-
-		}
-
-		return this._collections_by_guid[referenced_guid];
+		return (referenced_record.guid in this._collections_by_foreign_guid)
+			? this._collections_by_foreign_guid[referenced_record.guid].slice()
+			: []; // fast operation: array of objects
 
 	},
 
 	getCollectionCount: function(referenced_record) {
 
-		var referenced_guid = referenced_record.guid,
-			result = 0,
-			collection = this._collections_by_guid[referenced_guid];
-
-		if (collection) {
-
-			result = collection.isEnumerable ? collection.getCount() : collection.length;
-
-		}
-
-		return result;
-
-	},
-
-	/**
-	 * @param {Lava.data.RecordAbstract} referenced_record
-	 * @param {Array.<Lava.data.RecordAbstract>|Enumerable} new_records
-	 */
-	replaceCollection: function(referenced_record, new_records) {
-
-		var collection = this.getCollection(referenced_record);
-		collection.removeAll();
-
-		if (new_records.isEnumerable) {
-
-			new_records = new_records.getValues();
-
-		}
-
-		// everything else will be handled by listeners
-		collection.append(new_records);
-
-	},
-
-	_onCollectionRecordsAdded: function(collection, event_args) {
-
-		var added_records = event_args.values,
-			i = 0,
-			count = added_records.length,
-			record,
-			storage,
-			new_referenced_record = this._collection_guid_to_foreign_record[collection.guid];
-
-		// remove records from old collections before adding them to new one
-		for (; i < count; i++) {
-
-			record = added_records[i];
-			if (!(record.guid in this._storages_by_guid))
-				Lava.t("Record field: added record is either from different module or not record at all (2)");
-			storage = this._storages_by_guid[record.guid];
-
-			if (storage[this._name] != null) {
-				this._unregisterRecord(record, storage[this._name]);
-			}
-
-			storage[this._name] = new_referenced_record;
-
-			this._fireFieldChangedEvents(record);
-
-		}
-
-		if (this._foreign_key_field) {
-
-			this._batchSetForeignKey(added_records, count, new_referenced_record.get('id'));
-
-		}
-
-	},
-
-	_onCollectionRecordsRemoved: function(collection, event_args) {
-
-		var removed_records = event_args.values,
-			i = 0,
-			count = removed_records.length,
-			record,
-			storage;
-
-		for (; i < count; i++) {
-
-			record = removed_records[i];
-			storage = this._storages_by_guid[record.guid];
-			storage[this._name] = 0;
-
-			this._fireFieldChangedEvents(record);
-
-		}
-
-		if (this._foreign_key_field) {
-
-			this._batchSetForeignKey(removed_records, count, 0);
-
-		}
+		var collection = this._collections_by_foreign_guid[referenced_record.guid];
+		return collection ? collection.length : 0;
 
 	},
 
@@ -518,76 +371,40 @@ Lava.define(
 
 	},
 
-	_batchSetForeignKey: function(records, count, value) {
+	_getComparisonValue: function(record) {
 
-		var i = 0;
-
-		Lava.suspendListener(this._foreign_key_changed_listener);
-
-		for (; i < count; i++) {
-
-			records[i].set(this._foreign_key_field_name, value);
-
-		}
-
-		Lava.resumeListener(this._foreign_key_changed_listener);
-
-	},
-
-	_getComparisonValues: function(record_a, record_b) {
-
-		if (Lava.schema.DEBUG && (!(record_a.guid in this._storages_by_guid) || !(record_b.guid in this._storages_by_guid)))
-			Lava.t("isLess: record does not belong to this module");
-
-		var ref_record_a = this._storages_by_guid[record_a.guid][this._name],
-			ref_record_b = this._storages_by_guid[record_b.guid][this._name],
-			value_a,
-			value_b;
-
-		if (ref_record_a) value_a = ref_record_a.get('id');
-		if (ref_record_b) value_b = ref_record_b.get('id');
-
-		return [value_a, value_b];
+		if (Lava.schema.DEBUG && !(record.guid in this._storages_by_guid)) Lava.t("isLess: record does not belong to this module");
+		var ref_record_a = this._storages_by_guid[record.guid][this._name];
+		// must return undefined, cause comparison against nulls behaves differently
+		return ref_record_a ? ref_record_a.get('id') : void 0;
 
 	},
 
 	isLess: function(record_a, record_b) {
 
-		var values = this._getComparisonValues(record_a, record_b);
-		return values[0] < values[1];
+		return this._getComparisonValue(record_a) < this._getComparisonValue(record_b);
 
 	},
 
 	isEqual: function(record_a, record_b) {
 
-		var values = this._getComparisonValues(record_a, record_b);
-		return values[0] == values[1];
+		return this._getComparisonValue(record_a) == this._getComparisonValue(record_b);
 
 	},
 
 	destroy: function() {
 
-		var guid;
-
 		if (this._config.foreign_key_field) {
 
 			this._foreign_key_field.removeListener(this._foreign_key_changed_listener);
 			this._external_id_field.removeListener(this._external_id_changed_listener);
-			this._referenced_module.removeListener(this._external_records_loaded_listener);
 
 		}
 
-		for (guid in this._collections_by_guid) {
-			if (this._collections_by_guid[guid].isEnumerable) {
-				this._collections_by_guid[guid].destroy();
-			}
-		}
+		this._referenced_module.removeListener(this._external_records_loaded_listener);
 
 		this._referenced_module
-			= this._collections_by_guid
-			= this._collections_by_id
-			= this._collection_listeners_by_guid
-			= this._collection_guid_to_foreign_record
+			= this._collections_by_foreign_guid
 			= this._foreign_key_field
 			= this._external_id_field
 			= null;

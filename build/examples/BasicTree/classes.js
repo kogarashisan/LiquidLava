@@ -14,7 +14,7 @@ Lava.ClassManager.define(
 	_onNodeClick: function(dom_event_name, dom_event, view, template_arguments) {
 
 		var node = template_arguments[0];
-		/*H:The only significant line of code*/node.set('is_expanded', !node.get('is_expanded'));/*:H*/
+		node.set('is_expanded', !node.get('is_expanded'));/*H:The only significant line of code*/
 
 	}
 

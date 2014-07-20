@@ -35,28 +35,14 @@ Lava.define(
 
 	get: function(name) {
 
-		var result;
-
-		if (name === 'guid') {
-
-			result = this.guid;
-
-		} else {
-
-			if (Lava.schema.DEBUG && !(name in this._fields)) Lava.t('[Record] No such field: ' + name);
-			result = this._fields[name].getValue(this, this._properties);
-
-		}
-
-		return result;
+		if (Lava.schema.DEBUG && !(name in this._fields)) Lava.t('[Record] No such field: ' + name);
+		return this._fields[name].getValue(this, this._properties);
 
 	},
 
 	set: function(name, value) {
 
-		if (Lava.schema.DEBUG && name == 'guid') Lava.t("trying to set record's GUID");
 		if (Lava.schema.DEBUG && !(name in this._fields)) Lava.t('[Record] No such field: ' + name);
-
 		this._fields[name].setValue(this, this._properties, value);
 
 	},

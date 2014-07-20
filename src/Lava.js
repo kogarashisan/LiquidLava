@@ -289,6 +289,10 @@ var Lava = {
 
 	},
 
+	/**
+	 * Throw an error
+	 * @param {string} [message]
+	 */
 	t: function(message) {
 
 		if (typeof(message) == 'number' && this.KNOWN_EXCEPTIONS && (message in this.KNOWN_EXCEPTIONS)) {

@@ -31,9 +31,9 @@ Lava.define(
 
 		var demo_module = Lava.app.getModule('DemoTree');
 		// clone cause loading modifies the data
-		demo_module.loadRecords(Firestorm.clone(ExampleData.example_tree));
-		this._properties.all_tree_records = new Lava.data.Enumerable(demo_module.getAllRecords());
-		this._properties.tree_records = new Lava.data.Enumerable(demo_module.getAllRecords());
+		demo_module.loadRecords(ExampleData.example_tree);
+		this._properties.all_tree_records = new Lava.system.Enumerable(demo_module.getAllRecords());
+		this._properties.tree_records = new Lava.system.Enumerable(demo_module.getAllRecords());
 		this._properties.tree_records.filter(function(record) {
 			return !record.get('parent')
 		});
