@@ -93,17 +93,19 @@ Lava.define(
 
 	},
 
+	_flushCollection: function() {
+
+		this._collection.removeListener(this._collection_listener);
+		this._collection_listener = null;
+		this._collection = null;
+
+	},
+
 	onDataSourceChanged: function() {
 
 		this._is_dirty = true;
 
-		if (this._collection_listener) {
-
-			this._collection.removeListener(this._collection_listener);
-			this._collection_listener = null;
-			this._collection = null;
-
-		}
+		if (this._collection_listener) this._flushCollection();
 
 		this._queueForRefresh();
 
@@ -144,9 +146,7 @@ Lava.define(
 
 			if (this._argument.getValue() != this._collection) {
 
-				this._collection.removeListener(this._collection_listener);
-				this._collection_listener = null;
-				this._collection = null;
+				this._flushCollection();
 
 			} else {
 
@@ -167,7 +167,7 @@ Lava.define(
 		this._argument.removeListener(this._argument_waits_refresh_listener);
 		this._argument.removeListener(this._argument_changed_listener);
 		this._argument.removeListener(this._argument_refreshed_listener);
-		this._collection_listener && this._collection.removeListener(this._collection_listener);
+		this._collection_listener && this._flushCollection();
 
 		if (this._own_collection) {
 
