@@ -495,10 +495,10 @@ Lava.define(
 
 	/**
 	 * Accepts a function with the following parameters:
-	 * function(value, uid, name, index)
+	 * function(value, name, uid)
 	 * Callback must return TRUE if element needs to stay in the collection, otherwise it will be removed.
 	 *
-	 * @param {function(*, number, string, number)} callback
+	 * @param {function(*, string, number)} callback
 	 */
 	filter: function(callback) {
 
@@ -509,7 +509,7 @@ Lava.define(
 
 		for (; i < count; i++) {
 
-			if (callback(this._data_values[i], this._data_uids[i], this._data_names[i], i)) {
+			if (callback(this._data_values[i], this._data_names[i], this._data_uids[i])) {
 
 				result.push(this._data_uids[i], this._data_values[i], this._data_names[i]);
 
@@ -542,10 +542,26 @@ Lava.define(
 	 */
 	sort: function(less, algorithm) {
 
+		this._sort(less, algorithm, this._data_values);
+
+	},
+
+	/**
+	 * Sort by the array of names.
+	 * @param {function(*, *):boolean} [less] A callback to compare items
+	 * @param {string} [algorithm] The name of the sorting method from Lava.algorithms.sorting
+	 */
+	sortByNames: function(less, algorithm) {
+
+		this._sort(less, algorithm, this._data_names);
+
+	},
+
+	_sort: function(less, algorithm, values) {
+
 		var indices = [],
 			i = 0,
-			_less,
-			values = this._data_values;
+			_less;
 
 		_less = function(a, b) {
 
