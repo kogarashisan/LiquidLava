@@ -51,22 +51,12 @@ var package_content = {
 								evaluator: function() {
 return (this._binds[0].getValue());
 },
-								flags: {
-									hasModifiers: false,
-									hasActiveModifiers: false,
-									isScopeEval: true,
-									isStatic: false,
-									isLiteral: false,
-									isNumber: false,
-									isString: false
-								},
+								flags: {isScopeEval: true},
 								binds: [{
 									locator_type: "Id",
 									locator: "ExamplesApp",
 									tail: ["all_tree_records"]
-								}],
-								modifiers: [],
-								active_modifiers: []
+								}]
 							}
 						},
 						"class": "Lava.WidgetConfigExtensionGateway",

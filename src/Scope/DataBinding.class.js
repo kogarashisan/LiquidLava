@@ -26,6 +26,7 @@ Lava.define(
 	_container_refreshed_listener: null,
 
 	_property_changed_listener: null,
+	_enumerable_changed_listener: null,
 	_property_container: null,
 
 	_is_connected: false,
@@ -64,15 +65,22 @@ Lava.define(
 
 		if (property_container != null) {
 
-			if (property_container.isProperties) {
+			if (property_container.isEnumerable && /^\d+$/.test(this._property_name)) {
+
+				if (this._enumerable_changed_listener == null) {
+
+					this._enumerable_changed_listener = property_container.on('collection_changed', this.onValueChanged, this);
+					this._property_container = property_container;
+
+				}
+
+				value = property_container.getValueAt(+this._property_name);
+
+			} else if (property_container.isProperties) {
 
 				if (this._property_changed_listener == null) {
 
-					this._property_changed_listener = property_container.onPropertyChanged(
-						this._property_name,
-						this.onContainerPropertyChanged,
-						this
-					);
+					this._property_changed_listener = property_container.onPropertyChanged(this._property_name, this.onValueChanged, this);
 					this._property_container = property_container;
 
 				}
@@ -108,12 +116,13 @@ Lava.define(
 
 	onParentDataSourceChanged: function() {
 
-		// parent data source has changed
 		if (this._property_changed_listener && (this._value_container.getValue() != this._property_container)) {
 
 			// currently listening to the parent's old data source
-			this._property_container.removePropertyListener(this._property_changed_listener);
+			this._property_changed_listener && this._property_container.removePropertyListener(this._property_changed_listener);
+			this._enumerable_changed_listener && this._property_container.removeListener(this._enumerable_changed_listener);
 			this._property_changed_listener = null;
+			this._enumerable_changed_listener = null;
 			this._property_container = null;
 
 		}
@@ -130,10 +139,9 @@ Lava.define(
 
 	},
 
-	onContainerPropertyChanged: function() {
+	onValueChanged: function() {
 
 		this._queueForRefresh();
-
 		this._is_dirty = true;
 
 	},
@@ -152,6 +160,12 @@ Lava.define(
 				Lava.suspendListener(this._property_changed_listener);
 				property_container.set(this._property_name, value);
 				Lava.resumeListener(this._property_changed_listener);
+
+			} else if (this._enumerable_changed_listener) {
+
+				Lava.suspendListener(this._enumerable_changed_listener);
+				property_container.replaceAt(+this._property_name, value);
+				Lava.resumeListener(this._enumerable_changed_listener);
 
 			} else if (property_container.isProperties) {
 
@@ -183,6 +197,8 @@ Lava.define(
 		this._value_container.removeListener(this._container_refreshed_listener);
 
 		this._property_changed_listener && this._property_container.removePropertyListener(this._property_changed_listener);
+		this._enumerable_changed_listener && this._property_container.removeListener(this._enumerable_changed_listener);
+		this._property_container = null;
 
 		Lava.schema.DEBUG && Lava.ScopeManager.debugStopTracking(this);
 		this.Abstract$destroy();

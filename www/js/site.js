@@ -640,22 +640,12 @@ Lava.widgets["EditableTable"] = {
 					evaluator: function() {
 return (this._binds[0].getValue());
 },
-					flags: {
-						hasModifiers: false,
-						hasActiveModifiers: false,
-						isScopeEval: true,
-						isStatic: false,
-						isLiteral: false,
-						isNumber: false,
-						isString: false
-					},
+					flags: {isScopeEval: true},
 					binds: [{
 						locator_type: "Name",
 						locator: "table",
 						tail: ["records"]
-					}],
-					modifiers: [],
-					active_modifiers: []
+					}]
 				},
 				as: "row",
 				roles: [{
@@ -672,22 +662,12 @@ return (this._binds[0].getValue());
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Name",
 								locator: "table",
 								tail: ["_columns"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						},
 						as: "column",
 						template: [
@@ -708,21 +688,10 @@ return (this._binds[0].getValue());
 											evaluator: function() {
 return (this._binds[0].getValue() == this._binds[1].getValue());
 },
-											flags: {
-												hasModifiers: false,
-												hasActiveModifiers: false,
-												isScopeEval: false,
-												isStatic: false,
-												isLiteral: false,
-												isNumber: false,
-												isString: false
-											},
 											binds: [
 												{property_name: "row"},
 												{property_name: "_edit_record"}
-											],
-											modifiers: [],
-											active_modifiers: []
+											]
 										},
 										template: [
 											"\r\n\t\t\t\t\t\t\t\t",
@@ -888,18 +857,7 @@ var MainPageTemplate = [{
 										evaluator: function() {
 return ('level-' + this._binds[0].getValue());
 },
-										flags: {
-											hasModifiers: false,
-											hasActiveModifiers: false,
-											isScopeEval: false,
-											isStatic: false,
-											isLiteral: false,
-											isNumber: false,
-											isString: false
-										},
-										binds: [{property_name: "level"}],
-										modifiers: [],
-										active_modifiers: []
+										binds: [{property_name: "level"}]
 									}
 								}
 							},
@@ -912,18 +870,8 @@ return ('level-' + this._binds[0].getValue());
 										evaluator: function() {
 return (this._binds[0].getValue());
 },
-										flags: {
-											hasModifiers: false,
-											hasActiveModifiers: false,
-											isScopeEval: true,
-											isStatic: false,
-											isLiteral: false,
-											isNumber: false,
-											isString: false
-										},
-										binds: [{property_name: "pad"}],
-										modifiers: [],
-										active_modifiers: []
+										flags: {isScopeEval: true},
+										binds: [{property_name: "pad"}]
 									},
 									escape_off: true,
 									template: []
@@ -951,15 +899,6 @@ return (this._binds[0].getValue());
 												evaluator: function() {
 return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() - 1) ? '-bottom' : '-middle') + ((this._binds[2].getValue() == 'folder' && this._binds[3].getValue()) ? (this._binds[4].getValue() ? '-expanded' : '-collapsed') : '-node'));
 },
-												flags: {
-													hasModifiers: false,
-													hasActiveModifiers: false,
-													isScopeEval: false,
-													isStatic: false,
-													isLiteral: false,
-													isNumber: false,
-													isString: false
-												},
 												binds: [
 													{property_name: "foreach_index"},
 													{
@@ -982,9 +921,7 @@ return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() -
 														property_name: "node",
 														tail: ["is_expanded"]
 													}
-												],
-												modifiers: [],
-												active_modifiers: []
+												]
 											}
 										}
 									}
@@ -1001,21 +938,10 @@ return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() -
 												evaluator: function() {
 return ('icon-' + this._binds[0].getValue());
 },
-												flags: {
-													hasModifiers: false,
-													hasActiveModifiers: false,
-													isScopeEval: false,
-													isStatic: false,
-													isLiteral: false,
-													isNumber: false,
-													isString: false
-												},
 												binds: [{
 													property_name: "node",
 													tail: ["type"]
-												}],
-												modifiers: [],
-												active_modifiers: []
+												}]
 											}
 										}
 									}
@@ -1041,15 +967,6 @@ return ('icon-' + this._binds[0].getValue());
 								evaluator: function() {
 return (this._binds[0].getValue() && this._binds[1].getValue());
 },
-								flags: {
-									hasModifiers: false,
-									hasActiveModifiers: false,
-									isScopeEval: false,
-									isStatic: false,
-									isLiteral: false,
-									isNumber: false,
-									isString: false
-								},
 								binds: [
 									{
 										property_name: "node",
@@ -1062,9 +979,7 @@ return (this._binds[0].getValue() && this._binds[1].getValue());
 										property_name: "node",
 										tail: ["is_expanded"]
 									}
-								],
-								modifiers: [],
-								active_modifiers: []
+								]
 							},
 							container: {
 								"class": "Emulated",
@@ -1076,44 +991,22 @@ return (this._binds[0].getValue() && this._binds[1].getValue());
 									evaluator: function() {
 return ((this._binds[0].getValue() == this._binds[1].getValue() - 1) ? this._binds[2].getValue() + '<div class="lava-tree-pad"></div>' : this._binds[3].getValue() + '<div class="lava-tree-pad-line"></div>');
 },
-									flags: {
-										hasModifiers: false,
-										hasActiveModifiers: false,
-										isScopeEval: false,
-										isStatic: false,
-										isLiteral: false,
-										isNumber: false,
-										isString: false
-									},
 									binds: [
 										{property_name: "foreach_index"},
 										{property_name: "count"},
 										{property_name: "pad"},
 										{property_name: "pad"}
-									],
-									modifiers: [],
-									active_modifiers: []
+									]
 								},
 								level: {
 									evaluator: function() {
 return (this._binds[0].getValue() + 1);
 },
-									flags: {
-										hasModifiers: false,
-										hasActiveModifiers: false,
-										isScopeEval: false,
-										isStatic: false,
-										isLiteral: false,
-										isNumber: false,
-										isString: false
-									},
 									binds: [{
 										locator_type: "Label",
 										locator: "parent",
 										property_name: "level"
-									}],
-									modifiers: [],
-									active_modifiers: []
+									}]
 								}
 							},
 							template: [
@@ -1125,21 +1018,11 @@ return (this._binds[0].getValue() + 1);
 										evaluator: function() {
 return (this._binds[0].getValue());
 },
-										flags: {
-											hasModifiers: false,
-											hasActiveModifiers: false,
-											isScopeEval: true,
-											isStatic: false,
-											isLiteral: false,
-											isNumber: false,
-											isString: false
-										},
+										flags: {isScopeEval: true},
 										binds: [{
 											property_name: "node",
 											tail: ["children"]
-										}],
-										modifiers: [],
-										active_modifiers: []
+										}]
 									},
 									as: "node",
 									template: [
@@ -1172,18 +1055,8 @@ return (this._binds[0].getValue());
 						evaluator: function() {
 return (this._binds[0].getValue());
 },
-						flags: {
-							hasModifiers: false,
-							hasActiveModifiers: false,
-							isScopeEval: true,
-							isStatic: false,
-							isLiteral: false,
-							isNumber: false,
-							isString: false
-						},
-						binds: [{property_name: "tree_records"}],
-						modifiers: [],
-						active_modifiers: []
+						flags: {isScopeEval: true},
+						binds: [{property_name: "tree_records"}]
 					}
 				},
 				"class": "Lava.WidgetConfigExtensionGateway",
@@ -1220,18 +1093,8 @@ return (this._binds[0].getValue());
 						evaluator: function() {
 return (this._binds[0].getValue());
 },
-						flags: {
-							hasModifiers: false,
-							hasActiveModifiers: false,
-							isScopeEval: true,
-							isStatic: false,
-							isLiteral: false,
-							isNumber: false,
-							isString: false
-						},
-						binds: [{property_name: "all_tree_records"}],
-						modifiers: [],
-						active_modifiers: []
+						flags: {isScopeEval: true},
+						binds: [{property_name: "all_tree_records"}]
 					}
 				},
 				"class": "Lava.WidgetConfigExtensionGateway",

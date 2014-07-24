@@ -79,7 +79,7 @@ Lava.define(
 		this.Abstract$_initMembers(properties);
 
 		this._argument = new Lava.scope.Argument(this._config.argument, this, this._widget);
-		this._foreach_scope = new Lava.scope.Foreach(this._argument);
+		this._foreach_scope = new Lava.scope.Foreach(this._argument, this, this._widget, this._config.options ? this._config.options.scope : null);
 		this._foreach_scope_changed_listener = this._foreach_scope.on('changed', this._onDataSourceChanged, this);
 		this._foreach_scope.on('new_enumerable', this._onEnumerableChanged, this);
 		this._as = this._config.as;
@@ -137,7 +137,7 @@ Lava.define(
 	_refreshChildren: function() {
 
 		var data_source = this._foreach_scope.getValue(),
-			new_uids = data_source.getLocalUIDs(),
+			new_uids = data_source.getUIDs(),
 			new_uid_to_index_map = data_source.getUIDToIndexMap(),
 			count = data_source.getCount(),
 			i = 0,

@@ -41,7 +41,7 @@ Lava.define(
 			constructor,
 			argument = new Lava.scope.Argument(this._config.argument, this, this._widget);
 
-		this._argument_changed_listeners.push(argument.on('changed', this.onArgumentChanged, this));
+		this._argument_changed_listeners.push(argument.on('changed', this._onArgumentChanged, this));
 		this._arguments.push(argument);
 
 		if ('elseif_arguments' in this._config) {
@@ -49,7 +49,7 @@ Lava.define(
 			for (count = this._config.elseif_arguments.length; i < count; i++) {
 
 				argument = new Lava.scope.Argument(this._config.elseif_arguments[i], this, this._widget);
-				this._argument_changed_listeners.push(argument.on('changed', this.onArgumentChanged, this));
+				this._argument_changed_listeners.push(argument.on('changed', this._onArgumentChanged, this));
 				this._arguments.push(argument);
 
 			}
@@ -121,7 +121,7 @@ Lava.define(
 
 	},
 
-	onArgumentChanged: function() {
+	_onArgumentChanged: function() {
 
 		var active_argument_index = this._getActiveArgumentIndex();
 
@@ -129,7 +129,7 @@ Lava.define(
 
 			this._active_argument_index = active_argument_index;
 
-			if (this._active_template) {
+			if (this._active_template && this._is_inDOM) {
 
 				if (this._refresher) {
 
@@ -208,7 +208,7 @@ Lava.define(
 
 		}
 
-		this.onArgumentChanged();
+		this._onArgumentChanged();
 
 		this.Abstract$_wakeup();
 

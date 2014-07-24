@@ -55,18 +55,8 @@ var package_content = {
 									evaluator: function() {
 return (this._binds[0].getValue());
 },
-									flags: {
-										hasModifiers: false,
-										hasActiveModifiers: false,
-										isScopeEval: true,
-										isStatic: false,
-										isLiteral: false,
-										isNumber: false,
-										isString: false
-									},
-									binds: [{property_name: "is_expanded"}],
-									modifiers: [],
-									active_modifiers: []
+									flags: {isScopeEval: true},
+									binds: [{property_name: "is_expanded"}]
 								},
 								container: {
 									"class": "Emulated",

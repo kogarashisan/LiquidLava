@@ -83,32 +83,20 @@ Lava.define(
 
 		var local_record = event_args.collection_owner;
 		if (local_record.guid in this._collections_by_record_guid) {
-			this._collections_by_record_guid[local_record.guid].push(event_args.child);
+			this._collections_by_record_guid[local_record.guid].include(event_args.child);
 		}
 
 	},
 
 	isValidValue: function(value) {
 
-		return Firestorm.getType(value) == 'array' || value.isEnumerable;
+		return false;
 
 	},
 
 	getInvalidReason: function(value) {
 
-		var reason = this.Abstract$getInvalidReason(value);
-
-		if (!reason) {
-
-			if (Firestorm.getType(value) != 'array' && !value.isEnumerable) {
-
-				reason = "Value is not array or enumerable";
-
-			}
-
-		}
-
-		return  reason;
+		return  'Collection field does not support setValue';
 
 	},
 
@@ -116,7 +104,7 @@ Lava.define(
 
 		if (raw_properties[this._name]) {
 
-			if (Lava.schema.data.VALIDATE_IMPORT_DATA && !this.isValidValue(raw_properties[this._name]))
+			if (Lava.schema.data.VALIDATE_IMPORT_DATA && !Array.isArray(raw_properties[this._name]))
 				Lava.t('Invalid value in import data');
 
 			var i = 0,
@@ -164,7 +152,7 @@ Lava.define(
 
 	},
 
-	_onCollectionRecordsRemoved: function() {
+	_onCollectionRecordsRemoved: function(collection, event_args) {
 
 		this._setCollectionOwner(event_args.values, null);
 

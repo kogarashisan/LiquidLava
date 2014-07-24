@@ -106,7 +106,6 @@ Parsers/ExpressionParser.js
 	- [P5,Feature,Q] macros to shorten the ternary operator, for example: "{is_active -&gt; 'active'}"
 	- [P3,Feature, Performance] currently, each time any variable is referenced in argument's source code - it creates a new binding config.
 		Parser must unite bindings to the same variable referenced multiple times.
-	- [P3,Feature, Performance] too many redundant variables in parse result. Remove flags, which value is false, remove empty arrays.
 	- [P3,Feature] static arguments must have their value in configs
 	- [P5,Refactoring] remove the dn() operator. It's existence is not possible with current architecture.
 		Finish the up() operator, or remove it also.
@@ -115,7 +114,11 @@ System/App.class.js
 System/Enumerable.class.js
 	- [P3,Feature] methods relocateIndex(old_index, new_index) and relocateValue(value, new_index)
 		// is equivalent of removeAt, than insertAt for given value.
-		// They will not fire item_removed/added events, only collection_changed and index_changed
+		// They will not fire item_removed/added events, only collection_changed
+	- [P3, Performance] Enumerable is inherited from Properties, but does not use _properties and _property_listeners.
+		They should not take space in constructed objects.
+	- [P5, Performance] It's possible to optimize updateFromEnumerable - do not calculate diff if there are no listeners.
+		Also inspect other functions for optimization.
 System/PopoverManager.class.js
 	- [P3,Bug] Tooltip blinks when moving cursor towards the tooltip
 System/Sugar.class.js

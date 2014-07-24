@@ -35,18 +35,7 @@ var package_content = {
 											evaluator: function() {
 return ('level-' + this._binds[0].getValue());
 },
-											flags: {
-												hasModifiers: false,
-												hasActiveModifiers: false,
-												isScopeEval: false,
-												isStatic: false,
-												isLiteral: false,
-												isNumber: false,
-												isString: false
-											},
-											binds: [{property_name: "level"}],
-											modifiers: [],
-											active_modifiers: []
+											binds: [{property_name: "level"}]
 										}
 									}
 								},
@@ -62,41 +51,21 @@ return ('level-' + this._binds[0].getValue());
 												evaluator: function() {
 return (this._binds[0].getValue());
 },
-												flags: {
-													hasModifiers: false,
-													hasActiveModifiers: false,
-													isScopeEval: true,
-													isStatic: false,
-													isLiteral: false,
-													isNumber: false,
-													isString: false
-												},
+												flags: {isScopeEval: true},
 												binds: [{
 													property_name: "node",
 													tail: ["is_checked"]
-												}],
-												modifiers: [],
-												active_modifiers: []
+												}]
 											},
 											is_indeterminate: {
 												evaluator: function() {
 return (this._binds[0].getValue());
 },
-												flags: {
-													hasModifiers: false,
-													hasActiveModifiers: false,
-													isScopeEval: true,
-													isStatic: false,
-													isLiteral: false,
-													isNumber: false,
-													isString: false
-												},
+												flags: {isScopeEval: true},
 												binds: [{
 													property_name: "node",
 													tail: ["is_indeterminate"]
-												}],
-												modifiers: [],
-												active_modifiers: []
+												}]
 											}
 										},
 										roles: [{
@@ -124,18 +93,8 @@ return (this._binds[0].getValue());
 											evaluator: function() {
 return (this._binds[0].getValue());
 },
-											flags: {
-												hasModifiers: false,
-												hasActiveModifiers: false,
-												isScopeEval: true,
-												isStatic: false,
-												isLiteral: false,
-												isNumber: false,
-												isString: false
-											},
-											binds: [{property_name: "pad"}],
-											modifiers: [],
-											active_modifiers: []
+											flags: {isScopeEval: true},
+											binds: [{property_name: "pad"}]
 										},
 										escape_off: true,
 										template: []
@@ -163,15 +122,6 @@ return (this._binds[0].getValue());
 													evaluator: function() {
 return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() - 1) ? '-bottom' : '-middle') + ((this._binds[2].getValue() == 'folder' && this._binds[3].getValue()) ? (this._binds[4].getValue() ? '-expanded' : '-collapsed') : '-node'));
 },
-													flags: {
-														hasModifiers: false,
-														hasActiveModifiers: false,
-														isScopeEval: false,
-														isStatic: false,
-														isLiteral: false,
-														isNumber: false,
-														isString: false
-													},
 													binds: [
 														{property_name: "foreach_index"},
 														{
@@ -202,9 +152,7 @@ return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() -
 																"is_expanded"
 															]
 														}
-													],
-													modifiers: [],
-													active_modifiers: []
+													]
 												}
 											}
 										}
@@ -221,21 +169,10 @@ return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() -
 													evaluator: function() {
 return ('icon-' + this._binds[0].getValue());
 },
-													flags: {
-														hasModifiers: false,
-														hasActiveModifiers: false,
-														isScopeEval: false,
-														isStatic: false,
-														isLiteral: false,
-														isNumber: false,
-														isString: false
-													},
 													binds: [{
 														property_name: "node",
 														tail: ["type"]
-													}],
-													modifiers: [],
-													active_modifiers: []
+													}]
 												}
 											}
 										}
@@ -259,22 +196,12 @@ return ('icon-' + this._binds[0].getValue());
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Name",
 								locator: "tree_example",
 								tail: ["records"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						}
 					},
 					"class": "Lava.WidgetConfigExtensionGateway",
@@ -290,22 +217,12 @@ return (this._binds[0].getValue());
 					evaluator: function() {
 return (this._binds[0].getValue());
 },
-					flags: {
-						hasModifiers: false,
-						hasActiveModifiers: false,
-						isScopeEval: true,
-						isStatic: false,
-						isLiteral: false,
-						isNumber: false,
-						isString: false
-					},
+					flags: {isScopeEval: true},
 					binds: [{
 						locator_type: "Id",
 						locator: "ExamplesApp",
 						tail: ["tree_records"]
-					}],
-					modifiers: [],
-					active_modifiers: []
+					}]
 				}
 			}
 		}

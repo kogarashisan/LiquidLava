@@ -53,7 +53,7 @@ Lava.ExpressionParser.parse = function(input, separator) {
 Lava.ExpressionParser.parsePath = function(input) {
 	var configs = this.yy.convertArguments(this.parseRaw(input));
 	if (configs.length != 1) Lava.t("ExpressionParser: single scope expected, got either many expressions or nothing");
-	if (!configs[0].flags.isScopeEval) Lava.t("ExpressionParser: expected scope path, got expression");
+	if (!configs[0].flags || !configs[0].flags.isScopeEval) Lava.t("ExpressionParser: expected scope path, got expression");
 	return configs[0].binds[0];
 };
 
@@ -141,31 +141,32 @@ Lava.ExpressionParser.yy = {
 		this.x_counters.strings = 0;
 	},
 
-	makeFlags: function() {
-		return {
-			hasModifiers: (this.x_counters.widget_modifiers > 0 || this.x_counters.global_modifiers > 0),
-			hasActiveModifiers: (this.x_counters.active_modifiers > 0),
-			isScopeEval: (
-				this.x_argument_binds.length == 1
-					&& this.x_counters.operands == 1
-					&& this.x_counters.expression_tails == 0
-					&& this.x_counters.braces == 0
-				),
-			isStatic: (this.x_argument_binds.length == 0 && this.x_counters.active_modifiers == 0),
-			isLiteral: (this.x_counters.literals == 1 && this.x_counters.operands == 1),
-			isNumber: (this.x_counters.numbers == 1 && this.x_counters.operands == 1),
-			isString: (this.x_counters.strings == 1 && this.x_counters.operands == 1)
-		};
-	},
-
 	finishArgument: function(evaluator_src) {
-		this.x_arguments.push({
-			evaluator_src: evaluator_src,
-			binds: this.x_argument_binds,
-			modifiers: this.x_argument_widget_modifiers,
-			active_modifiers: this.x_argument_active_modifiers,
-			flags: this.makeFlags()
-		});
+		var result = {
+				evaluator_src: evaluator_src
+			},
+			flags = {};
+		if (this.x_argument_binds.length) result.binds = this.x_argument_binds;
+		if (this.x_argument_widget_modifiers.length) result.modifiers = this.x_argument_widget_modifiers;
+		if (this.x_argument_active_modifiers.length) result.active_modifiers = this.x_argument_active_modifiers;
+
+		if (this.x_counters.widget_modifiers > 0 || this.x_counters.global_modifiers > 0) flags.hasModifiers = true;
+		if (this.x_argument_binds.length == 1
+			&& this.x_counters.operands == 1
+			&& this.x_counters.expression_tails == 0
+			&& this.x_counters.braces == 0
+		)
+			flags.isScopeEval = true;
+		if (this.x_argument_binds.length == 0 && this.x_counters.active_modifiers == 0) {
+			flags.isStatic = true;
+			if (this.x_counters.literals == 1 && this.x_counters.operands == 1) flags.isLiteral = true;
+			if (this.x_counters.numbers == 1 && this.x_counters.operands == 1) flags.isNumber = true;
+			if (this.x_counters.strings == 1 && this.x_counters.operands == 1) flags.isString = true;
+		}
+
+		if (!Firestorm.Object.isEmpty(flags)) result.flags = flags;
+		this.x_arguments.push(result);
+
 		this.x_argument_binds = [];
 		this.x_argument_widget_modifiers = [];
 		this.x_argument_active_modifiers = [];
@@ -198,10 +199,10 @@ Lava.ExpressionParser.yy = {
 
 		var src = "return (" + raw_argument.evaluator_src + ");",
 			result = {
-				evaluator: new Function(src),
-				flags: raw_argument.flags
+				evaluator: new Function(src)
 			};
 
+		if ('flags' in raw_argument) result.flags = raw_argument.flags;
 		if ('binds' in raw_argument) result.binds = raw_argument.binds;
 		if ('modifiers' in raw_argument) result.modifiers = raw_argument.modifiers;
 		if ('active_modifiers' in raw_argument) result.active_modifiers = raw_argument.active_modifiers;

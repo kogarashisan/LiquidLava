@@ -154,22 +154,12 @@ var package_content = {
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Id",
 								locator: "ExamplesApp",
 								tail: ["tree_records"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						}
 					},
 					"class": "Lava.WidgetConfigExtensionGateway",
@@ -188,15 +178,6 @@ return (this._binds[0].getValue());
 									evaluator: function() {
 return (this._binds[0].getValue() && this._binds[1].getValue());
 },
-									flags: {
-										hasModifiers: false,
-										hasActiveModifiers: false,
-										isScopeEval: false,
-										isStatic: false,
-										isLiteral: false,
-										isNumber: false,
-										isString: false
-									},
 									binds: [
 										{
 											property_name: "node",
@@ -217,9 +198,7 @@ return (this._binds[0].getValue() && this._binds[1].getValue());
 												"is_expanded"
 											]
 										}
-									],
-									modifiers: [],
-									active_modifiers: []
+									]
 								},
 								container: {
 									"class": "Emulated",
@@ -231,44 +210,22 @@ return (this._binds[0].getValue() && this._binds[1].getValue());
 										evaluator: function() {
 return ((this._binds[0].getValue() == this._binds[1].getValue() - 1) ? this._binds[2].getValue() + '<div class="lava-tree-pad"></div>' : this._binds[3].getValue() + '<div class="lava-tree-pad-line"></div>');
 },
-										flags: {
-											hasModifiers: false,
-											hasActiveModifiers: false,
-											isScopeEval: false,
-											isStatic: false,
-											isLiteral: false,
-											isNumber: false,
-											isString: false
-										},
 										binds: [
 											{property_name: "foreach_index"},
 											{property_name: "count"},
 											{property_name: "pad"},
 											{property_name: "pad"}
-										],
-										modifiers: [],
-										active_modifiers: []
+										]
 									},
 									level: {
 										evaluator: function() {
 return (this._binds[0].getValue() + 1);
 },
-										flags: {
-											hasModifiers: false,
-											hasActiveModifiers: false,
-											isScopeEval: false,
-											isStatic: false,
-											isLiteral: false,
-											isNumber: false,
-											isString: false
-										},
 										binds: [{
 											locator_type: "Label",
 											locator: "parent",
 											property_name: "level"
-										}],
-										modifiers: [],
-										active_modifiers: []
+										}]
 									}
 								},
 								template: [
@@ -280,21 +237,11 @@ return (this._binds[0].getValue() + 1);
 											evaluator: function() {
 return (this._binds[0].getValue());
 },
-											flags: {
-												hasModifiers: false,
-												hasActiveModifiers: false,
-												isScopeEval: true,
-												isStatic: false,
-												isLiteral: false,
-												isNumber: false,
-												isString: false
-											},
+											flags: {isScopeEval: true},
 											binds: [{
 												property_name: "node",
 												tail: ["children"]
-											}],
-											modifiers: [],
-											active_modifiers: []
+											}]
 										},
 										as: "node",
 										template: [
@@ -326,22 +273,12 @@ return (this._binds[0].getValue());
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Id",
 								locator: "ExamplesApp",
 								tail: ["tree_records"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						}
 					},
 					"class": "Lava.WidgetConfigExtensionGateway",

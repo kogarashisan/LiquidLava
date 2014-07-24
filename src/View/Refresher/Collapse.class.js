@@ -15,7 +15,7 @@ Lava.define(
 			animation;
 
 		animation = new Lava.animation.Collapse({}, element);
-		animation.on('complete', this.onAnimationComplete, this);
+		animation.on('complete', this._onAnimationComplete, this);
 
 		this._templates_by_animation_guid[animation.guid] = template;
 		this._animations_by_template_guid[template.guid] = animation;

@@ -18,23 +18,37 @@ Lava.define(
 	_argument_changed_listener: null,
 	_argument_refreshed_listener: null,
 
+	_view: null,
+	_widget: null,
+
 	/**
 	 * @type {Lava.system.Enumerable}
 	 */
 	_value: null,
-	_collection_listener: null,
-	_collection: null,
-	_own_collection: false,
+	_observable_listener: null,
+	_observable: null,
+	_own_enumerable: false,
 
-	init: function(argument) {
+	_create_own_enumerable: false,
+	_after_refresh_callback: null,
+
+	init: function(argument, view, widget, options) {
 
 		this._argument = argument;
+		this._view = view;
+		this._widget = widget;
 		this.level = argument.level;
 
 		if (this._argument.isWaitingRefresh()) {
 			this._count_dependencies_waiting_refresh++;
 			this._waits_refresh = true;
 		}
+
+		if (options) {
+			this._create_own_enumerable = options['create_own_enumerable'] || false;
+			this._after_refresh_callback = options['after_refresh_callback'] || null;
+		}
+
 		this._argument_waits_refresh_listener = this._argument.on('waits_refresh', this._onDependencyWaitsRefresh, this);
 		this._argument_changed_listener = this._argument.on('changed', this.onDataSourceChanged, this);
 		this._argument_refreshed_listener = this._argument.on('refreshed', this._onDependencyRefreshed, this);
@@ -45,76 +59,113 @@ Lava.define(
 
 	_refreshDataSource: function() {
 
-		var data_source = this._argument.getValue();
+		var argument_value = this._argument.getValue();
 
-		if (data_source && data_source.isEnumerable) {
+		if (argument_value) {
 
-			if (this._own_collection) {
+			if (argument_value.isEnumerable) {
 
-				this._value.destroy();
-				this._own_collection = false;
+				if (this._create_own_enumerable) {
 
-			}
+					this._createOrUpdateCollection(argument_value);
 
-			if (this._collection_listener == null) {
+				} else {
 
-				this._collection_listener = data_source.on('collection_changed', this.onCollectionChanged, this);
-				this._collection = data_source;
+					if (this._own_enumerable) {
 
-			}
+						this._value.destroy();
+						this._own_enumerable = false;
+						this._value = null;
 
-			if (this._value != data_source) {
-				this._value = data_source;
-				this._fire('new_enumerable');
-			}
+					}
 
-		} else {
-
-			if (this._own_collection && typeof(data_source == 'object') && this._value.hasSourceObject()) {
-
-				this._value.updateFromSourceObject(data_source);
-
-			} else {
-
-				if (this._own_collection) {
-
-					this._value.destroy();
+					if (this._value != argument_value) {
+						this._value = argument_value;
+						this._fire('new_enumerable');
+					}
 
 				}
 
-				this._own_collection = true;
-				// do not bind any listeners, cause this collection must not be modified by hands (it would make a design flaw)
-				this._value = new Lava.system.Enumerable(data_source);
-				this._fire('new_enumerable');
+			} else {
+
+				this._createOrUpdateCollection(argument_value);
 
 			}
+
+			if (this._observable_listener == null) {
+
+				if (argument_value.isEnumerable) {
+
+					this._observable_listener = argument_value.on('collection_changed', this._onObservableChanged, this);
+					this._observable = argument_value;
+
+				} else if (argument_value.isProperties) {
+
+					this._observable_listener = argument_value.on('property_changed', this._onObservableChanged, this);
+					this._observable = argument_value;
+
+				}
+
+			}
+
+		} else if (this._own_enumerable) {
+
+			this._value.removeAll();
+
+		} else {
+
+			this._createCollection(null);
+
+		}
+
+		if (this._after_refresh_callback) {
+			this._widget[this._after_refresh_callback](this._value, argument_value, this._view);
+		}
+
+	},
+
+	_createOrUpdateCollection: function(argument_value) {
+
+		if (this._own_enumerable) {
+
+			this._value.setSourceObject(argument_value);
+			this._value.updateFromSourceObject();
+
+		} else {
+
+			this._createCollection(argument_value);
 
 		}
 
 	},
 
-	_flushCollection: function() {
+	_createCollection: function(argument_value) {
 
-		this._collection.removeListener(this._collection_listener);
-		this._collection_listener = null;
-		this._collection = null;
+		this._value = new Lava.system.Enumerable(argument_value);
+		this._own_enumerable = true;
+		this._fire('new_enumerable');
+
+	},
+
+	_flushObservable: function() {
+
+		this._observable.removeListener(this._observable_listener);
+		this._observable_listener = null;
+		this._observable = null;
 
 	},
 
 	onDataSourceChanged: function() {
 
+		if (this._observable_listener) this._flushObservable();
 		this._is_dirty = true;
-
-		if (this._collection_listener) this._flushCollection();
-
 		this._queueForRefresh();
 
 	},
 
-	onCollectionChanged: function() {
+	_onObservableChanged: function() {
 
 		this._is_dirty = true;
-
 		this._queueForRefresh();
 
 	},
@@ -122,7 +173,6 @@ Lava.define(
 	_doRefresh: function() {
 
 		this._refreshDataSource();
-
 		this._fire('changed');
 
 	},
@@ -136,21 +186,21 @@ Lava.define(
 	sleep: function() {
 
 		Lava.suspendListener(this._argument_changed_listener);
-		this._collection_listener && Lava.suspendListener(this._collection_listener);
+		this._observable_listener && Lava.suspendListener(this._observable_listener);
 
 	},
 
 	wakeup: function() {
 
-		if (this._collection_listener) {
+		if (this._observable_listener) {
 
-			if (this._argument.getValue() != this._collection) {
+			if (this._argument.getValue() != this._observable) {
 
-				this._flushCollection();
+				this._flushObservable();
 
 			} else {
 
-				Lava.resumeListener(this._collection_listener);
+				Lava.resumeListener(this._observable_listener);
 
 			}
 
@@ -167,9 +217,9 @@ Lava.define(
 		this._argument.removeListener(this._argument_waits_refresh_listener);
 		this._argument.removeListener(this._argument_changed_listener);
 		this._argument.removeListener(this._argument_refreshed_listener);
-		this._collection_listener && this._flushCollection();
+		this._observable_listener && this._flushObservable();
 
-		if (this._own_collection) {
+		if (this._own_enumerable) {
 
 			this._value.destroy();
 

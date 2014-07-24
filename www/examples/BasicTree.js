@@ -33,22 +33,12 @@ var package_content = {
 									evaluator: function() {
 return (this._binds[0].getValue());
 },
-									flags: {
-										hasModifiers: false,
-										hasActiveModifiers: false,
-										isScopeEval: true,
-										isStatic: false,
-										isLiteral: false,
-										isNumber: false,
-										isString: false
-									},
+									flags: {isScopeEval: true},
 									binds: [{
 										locator_type: "Name",
 										locator: "tree_view",
 										tail: ["tree"]
-									}],
-									modifiers: [],
-									active_modifiers: []
+									}]
 								},
 								container: {"class": "Morph"},
 								as: "node",
@@ -80,21 +70,11 @@ return (this._binds[0].getValue());
 										evaluator: function() {
 return (this._binds[0].getValue());
 },
-										flags: {
-											hasModifiers: false,
-											hasActiveModifiers: false,
-											isScopeEval: true,
-											isStatic: false,
-											isLiteral: false,
-											isNumber: false,
-											isString: false
-										},
+										flags: {isScopeEval: true},
 										binds: [{
 											property_name: "node",
 											tail: ["title"]
-										}],
-										modifiers: [],
-										active_modifiers: []
+										}]
 									},
 									container: {
 										"class": "Element",
@@ -116,24 +96,13 @@ return (this._binds[0].getValue());
 												evaluator: function() {
 return ((this._binds[0].getValue()) ? 'yellow' : '');
 },
-												flags: {
-													hasModifiers: false,
-													hasActiveModifiers: false,
-													isScopeEval: false,
-													isStatic: false,
-													isLiteral: false,
-													isNumber: false,
-													isString: false
-												},
 												binds: [{
 													property_name: "node",
 													tail: [
 														"children",
 														"length"
 													]
-												}],
-												modifiers: [],
-												active_modifiers: []
+												}]
 											}
 										}
 									}
@@ -146,15 +115,6 @@ return ((this._binds[0].getValue()) ? 'yellow' : '');
 										evaluator: function() {
 return (this._binds[0].getValue() && this._binds[1].getValue());
 },
-										flags: {
-											hasModifiers: false,
-											hasActiveModifiers: false,
-											isScopeEval: false,
-											isStatic: false,
-											isLiteral: false,
-											isNumber: false,
-											isString: false
-										},
 										binds: [
 											{
 												property_name: "node",
@@ -167,9 +127,7 @@ return (this._binds[0].getValue() && this._binds[1].getValue());
 												property_name: "node",
 												tail: ["is_expanded"]
 											}
-										],
-										modifiers: [],
-										active_modifiers: []
+										]
 									},
 									container: {"class": "Morph"},
 									template: [
@@ -181,21 +139,11 @@ return (this._binds[0].getValue() && this._binds[1].getValue());
 												evaluator: function() {
 return (this._binds[0].getValue());
 },
-												flags: {
-													hasModifiers: false,
-													hasActiveModifiers: false,
-													isScopeEval: true,
-													isStatic: false,
-													isLiteral: false,
-													isNumber: false,
-													isString: false
-												},
+												flags: {isScopeEval: true},
 												binds: [{
 													property_name: "node",
 													tail: ["children"]
-												}],
-												modifiers: [],
-												active_modifiers: []
+												}]
 											},
 											as: "node",
 											template: [
@@ -226,22 +174,12 @@ return (this._binds[0].getValue());
 								evaluator: function() {
 return (this._binds[0].getValue());
 },
-								flags: {
-									hasModifiers: false,
-									hasActiveModifiers: false,
-									isScopeEval: true,
-									isStatic: false,
-									isLiteral: false,
-									isNumber: false,
-									isString: false
-								},
+								flags: {isScopeEval: true},
 								binds: [{
 									locator_type: "Id",
 									locator: "ExamplesApp",
 									tail: ["live_example_tree"]
-								}],
-								modifiers: [],
-								active_modifiers: []
+								}]
 							}
 						}
 					},

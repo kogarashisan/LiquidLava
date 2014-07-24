@@ -60,18 +60,7 @@ var package_content = {
 											evaluator: function() {
 return (this._binds[0].getValue() ? 'block' : 'none');
 },
-											flags: {
-												hasModifiers: false,
-												hasActiveModifiers: false,
-												isScopeEval: false,
-												isStatic: false,
-												isLiteral: false,
-												isNumber: false,
-												isString: false
-											},
-											binds: [{property_name: "is_expanded"}],
-											modifiers: [],
-											active_modifiers: []
+											binds: [{property_name: "is_expanded"}]
 										}
 									}
 								},

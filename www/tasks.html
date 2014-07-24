@@ -245,7 +245,9 @@
 </ul>
 <h3>System/Enumerable.class.js</h3>
 <ul>
-<li><span class="tag-P3">P3</span><span class="tag-Feature">Feature</span> methods relocateIndex(old_index, new_index) and relocateValue(value, new_index)<span class="task-comment">is equivalent of removeAt, than insertAt for given value.<br/> They will not fire item_removed/added events, only collection_changed and index_changed</span></li>
+<li><span class="tag-P3">P3</span><span class="tag-Feature">Feature</span> methods relocateIndex(old_index, new_index) and relocateValue(value, new_index)<span class="task-comment">is equivalent of removeAt, than insertAt for given value.<br/> They will not fire item_removed/added events, only collection_changed</span></li>
+<li><span class="tag-P3">P3</span><span class="tag-Performance">Performance</span> Enumerable is inherited from Properties, but does not use _properties and _property_listeners.<br/>They should not take space in constructed objects.</li>
+<li><span class="tag-P5">P5</span><span class="tag-Performance">Performance</span> It's possible to optimize updateFromEnumerable - do not calculate diff if there are no listeners.<br/>Also inspect other functions for optimization.</li>
 </ul>
 <h3>System/PopoverManager.class.js</h3>
 <ul>

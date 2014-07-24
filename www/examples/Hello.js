@@ -36,18 +36,8 @@ var package_content = {
 					evaluator: function() {
 return (this._binds[0].getValue());
 },
-					flags: {
-						hasModifiers: false,
-						hasActiveModifiers: false,
-						isScopeEval: true,
-						isStatic: false,
-						isLiteral: false,
-						isNumber: false,
-						isString: false
-					},
-					binds: [{property_name: "your_name"}],
-					modifiers: [],
-					active_modifiers: []
+					flags: {isScopeEval: true},
+					binds: [{property_name: "your_name"}]
 				},
 				container: {"class": "Morph"}
 			},

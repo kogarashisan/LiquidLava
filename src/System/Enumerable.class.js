@@ -7,7 +7,8 @@ Lava.define(
  */
 {
 
-	Implements: 'Lava.mixin.Properties',
+	Extends: 'Lava.mixin.Properties',
+	Shared: ['SOURCE_OBJECT_TYPES'],
 
 	isEnumerable: true,
 
@@ -18,9 +19,21 @@ Lava.define(
 	// will hold keys, when Enumerable was constructed from object
 	_data_names: [], // [index] => name
 	_source_object: null,
+	_source_object_type: null,
 	_count: 0,
 
 	_uid: 1,
+
+	/**
+	 * @enum {number}
+	 * @const
+	 */
+	SOURCE_OBJECT_TYPES: {
+		OBJECT: 0,
+		ARRAY: 1,
+		ENUMERABLE: 2,
+		PROPERTIES: 3
+	},
 
 	init: function(data_source) {
 
@@ -29,42 +42,45 @@ Lava.define(
 		if (data_source) {
 
 			var count = 0,
-				i = 0,
-				name;
+				i = 0;
 
-			if (Array.isArray(data_source)) {
+			this.setSourceObject(data_source);
 
-				count = data_source.length;
+			if (this._source_object_type == this.SOURCE_OBJECT_TYPES.ARRAY) {
 
-				for (; i < count; i++) {
+				for (count = data_source.length; i < count; i++) {
 
 					this._push(this._uid++, data_source[i], null);
 
 				}
 
-			} else if (typeof(data_source) == 'object') {
+			} else if (this._source_object_type == this.SOURCE_OBJECT_TYPES.ENUMERABLE) {
 
-				for (name in data_source) {
+				this._data_names = data_source.getNames();
+				this._data_values = data_source.getValues();
+				this._data_uids = data_source.getUIDs();
 
-					if (data_source.hasOwnProperty(name)) {
+			} else if (this._source_object_type == this.SOURCE_OBJECT_TYPES.PROPERTIES) {
 
-						this._push(this._uid++, data_source[name], name)
-
-					}
-
-					count++;
-
-				}
-
-				this._source_object = data_source;
+				this._initFromObject(data_source.getProperties());
 
 			} else {
 
-				Lava.t("Wrong argument supplied for Enumerable constructor");
+				this._initFromObject(data_source);
 
 			}
 
-			this._count = count;
+			this._count = this._data_uids.length;
+
+		}
+
+	},
+
+	_initFromObject: function(data_source) {
+
+		for (var name in data_source) {
+
+			this._push(this._uid++, data_source[name], name);
 
 		}
 
@@ -106,25 +122,11 @@ Lava.define(
 
 	get: function(name) {
 
-		var result;
-
-		if (name == 'length') {
-
-			result = this._count;
-
-		} else {
-
-			if (Lava.schema.DEBUG && !/^\d+$/.test(name)) Lava.t("Enumerable: invalid index (1)");
-
-			result = this.getValueAt(+name); // convert to integer
-
-		}
-
-		return result;
+		return (name == 'length') ? this._count : null;
 
 	},
 
-	getLocalUIDs: function() {
+	getUIDs: function() {
 
 		// we need to copy the local array, to protect it from being altered outside of the class
 		return this._data_uids.slice();
@@ -243,11 +245,9 @@ Lava.define(
 
 	},
 
-	set: function(name, value) {
+	set: function() {
 
-		if (Lava.schema.DEBUG && !/^\d+$/.test(name)) Lava.t("Enumerable: invalid index (2)");
-
-		this.replaceAt(+name, value); // '+' to convert to integer
+		Lava.t('set on Enumerable is not permitted');
 
 	},
 
@@ -269,10 +269,9 @@ Lava.define(
 
 		this._data_uids[index] = new_uid;
 		this._data_values[index] = value;
-		this._data_names[index] = name || null;
-
-		this._fire('index_changed', {index: index});
-		this._firePropertyChanged(index);
+		if (name) {
+			this._data_names[index] = name;
+		}
 
 		this._fire('items_removed', {
 			uids: [old_uid],
@@ -300,12 +299,6 @@ Lava.define(
 		swap(this._data_values, index_a, index_b);
 		swap(this._data_names, index_a, index_b);
 
-		this._fire('index_changed', {index: index_a});
-		this._firePropertyChanged(index_a);
-
-		this._fire('index_changed', {index: index_b});
-		this._firePropertyChanged(index_b);
-
 		this._fire('collection_changed');
 
 	},
@@ -318,8 +311,6 @@ Lava.define(
 		this._push(new_uid, value, name || null);
 
 		this._setLength(count + 1);
-		this._firePropertyChanged(count);
-		this._fire('index_changed', {index: count});
 
 		this._fire('items_added', {
 			uids: [new_uid],
@@ -341,8 +332,6 @@ Lava.define(
 			count = this._count - 1;
 
 		this._setLength(count);
-		this._firePropertyChanged(count); // index
-		this._fire('index_changed', {index: count});
 
 		this._fire('items_removed', {
 			uids: [old_uid],
@@ -357,7 +346,7 @@ Lava.define(
 
 	each: function(callback) {
 
-		// everything is copied in case the collection gets modified during the cycle
+		// everything is copied in case the collection is modified during the cycle
 		var values = this._data_values.slice(),
 			uids = this._data_uids.slice(),
 			names = this._data_names.slice(),
@@ -374,32 +363,6 @@ Lava.define(
 
 	},
 
-	_fireChangedEvents: function(start_index, limit) {
-
-		var i;
-
-		if (!Firestorm.Object.isEmpty(this._property_listeners)) {
-
-			for (i = start_index; i < limit; i++) {
-
-				this._firePropertyChanged(i);
-
-			}
-
-		}
-
-		if (this._listeners['index_changed'] != null) {
-
-			for (i = start_index; i < limit; i++) {
-
-				this._fire('index_changed', {index: i});
-
-			}
-
-		}
-
-	},
-
 	/**
 	 * Removes the first occurrence of value within collection.
 	 *
@@ -408,47 +371,178 @@ Lava.define(
 	 */
 	remove: function(value) {
 
-		var i = 0,
-			result = false;
+		var result = false,
+			index = this._data_values.indexOf(value);
 
-		for (; i < this._count; i++) {
-
-			if (this._data_values[i] === value) {
-				this.removeAt(i);
-				result = true;
-				break;
-			}
-
+		if (index != -1) {
+			this.removeAt(index);
+			result = true;
 		}
 
 		return result;
 
 	},
 
-	updateFromSourceObject: function(new_source_object) {
+	include: function(value) {
 
-		if (!this._source_object) Lava.t("Enumerable was not created from object");
+		var result = false,
+			index = this._data_values.indexOf(value);
 
-		var i = 0,
-			name,
+		if (index == -1) {
+			this.push(value);
+			result = true;
+		}
+
+		return result;
+
+	},
+
+	setSourceObject: function(data_source) {
+
+		if (Lava.schema.DEBUG && typeof(data_source) != 'object') Lava.t("Wrong argument supplied for Enumerable constructor");
+		this._source_object = data_source;
+		this._source_object_type = Array.isArray(data_source)
+			? this.SOURCE_OBJECT_TYPES.ARRAY
+			: (data_source.isEnumerable
+				? this.SOURCE_OBJECT_TYPES.ENUMERABLE
+				: (data_source.isProperties
+					? this.SOURCE_OBJECT_TYPES.PROPERTIES
+					: this.SOURCE_OBJECT_TYPES.OBJECT));
+
+	},
+
+	updateFromSourceObject: function() {
+
+		if (Lava.schema.DEBUG && !this._source_object) Lava.t("Enumerable was not created from object");
+
+		switch (this._source_object_type) {
+			case this.SOURCE_OBJECT_TYPES.PROPERTIES:
+				this._updateFromObject(this._source_object.getProperties());
+				break;
+			case this.SOURCE_OBJECT_TYPES.OBJECT:
+				this._updateFromObject(this._source_object);
+				break;
+			case this.SOURCE_OBJECT_TYPES.ARRAY:
+				this._updateFromArray(this._source_object);
+				break;
+			case this.SOURCE_OBJECT_TYPES.ENUMERABLE:
+				this._updateFromEnumerable(this._source_object);
+				break;
+			default:
+				Lava.t();
+		}
+
+	},
+
+	_updateFromArray: function(source_array) {
+
+		var new_count = source_array.length,
+			count = (new_count < this._count) ? new_count : this._count,
+			i = 0,
 			uid,
-			count,
 			result = this._createHelperStorage(),
 			removed = this._createHelperStorage(),
 			added = this._createHelperStorage();
 
-		if (new_source_object) {
+		for (; i < count; i++) {
 
-			this._source_object = new_source_object;
+			if (this._data_values[i] === source_array[i]) {
+				result.push(this._data_uids[i], this._data_values[i], this._data_names[i]);
+			} else {
+				uid = this._uid++;
+				added.push(uid, source_array[i], null);
+				result.push(uid, source_array[i], null);
+			}
 
 		}
+
+		if (new_count < this._count) {
+
+			for (i = count; i < new_count; i++) {
+
+				uid = this._uid++;
+				added.push(uid, source_array[i], null);
+				result.push(uid, source_array[i], null);
+
+			}
+
+		} else {
+
+			for (i = count; i < this._count; i++) {
+
+				removed.push(this._data_uids[i], this._data_values[i], this._data_names[i]);
+
+			}
+
+		}
+
+		this._assignStorage(result);
+		this._setLength(this._data_uids.length);
+
+		removed.uids.length && this._fire('items_removed', removed.getObject());
+		added.uids.length && this._fire('items_added', added.getObject());
+		this._fire('collection_changed');
+
+	},
+
+	_updateFromEnumerable: function(data_source) {
+
+		var new_names = data_source.getNames(),
+			new_values = data_source.getValues(),
+			new_uids = data_source.getUIDs(),
+			i,
+			count,
+			uid,
+			old_uids_hash = {},
+			new_uids_hash = {},
+			removed = this._createHelperStorage(),
+			added = this._createHelperStorage();
+
+		for (i = 0, count = new_uids.length; i < count; i++) {
+			new_uids_hash[new_uids[i]] = true;
+		}
+
+		for (i = 0, count = this._count; i < count; i++) {
+			uid = this._data_uids[i];
+			old_uids_hash[uid] = true;
+			if (!(uid in new_uids_hash)) {
+				removed.push(uid, this._data_values[i], this._data_names[i]);
+			}
+		}
+
+		for (i = 0, count = new_uids.length; i < count; i++) {
+			uid = new_uids[i];
+			if (!(uid in old_uids_hash)) {
+				added.push(uid, new_values[i], new_names[i]);
+			}
+		}
+
+		this._data_names = new_names;
+		this._data_values = new_values;
+		this._data_uids = new_uids;
+		this._setLength(this._data_uids.length);
+
+		removed.uids.length && this._fire('items_removed', removed.getObject());
+		added.uids.length && this._fire('items_added', added.getObject());
+		this._fire('collection_changed');
+
+	},
+
+	_updateFromObject: function(source_object) {
+
+		var i = 0,
+			name,
+			uid,
+			result = this._createHelperStorage(),
+			removed = this._createHelperStorage(),
+			added = this._createHelperStorage();
 
 		for (; i < this._count; i++) {
 
 			name = this._data_names[i];
-			if (name in this._source_object) {
+			if (name in source_object) {
 
-				if (this._source_object[name] === this._data_values[i]) {
+				if (source_object[name] === this._data_values[i]) {
 
 					result.push(this._data_uids[i], this._data_values[i], this._data_names[i]);
 
@@ -457,8 +551,8 @@ Lava.define(
 					// Attention: the name has NOT changed, but it will be present in both added and removed names!
 					removed.push(this._data_uids[i], this._data_values[i], name);
 					uid = this._uid++;
-					result.push(uid, this._source_object[name], name);
-					added.push(uid, this._source_object[name], name);
+					result.push(uid, source_object[name], name);
+					added.push(uid, source_object[name], name);
 
 				}
 
@@ -470,25 +564,23 @@ Lava.define(
 
 		}
 
-		for (name in this._source_object) {
+		for (name in source_object) {
 
 			if (this._data_names.indexOf(name) == -1) {
 
 				uid = this._uid++;
-				result.push(uid, this._source_object[name], name);
-				added.push(uid, this._source_object[name], name);
+				result.push(uid, source_object[name], name);
+				added.push(uid, source_object[name], name);
 
 			}
 
 		}
 
-		count = this._count;
 		this._assignStorage(result);
 		this._setLength(this._data_uids.length);
-		this._fireChangedEvents(0, (count > this._count) ? count : this._count);
 
-		this._fire('items_removed', removed.getObject());
-		this._fire('items_added', added.getObject());
+		removed.uids.length && this._fire('items_removed', removed.getObject());
+		added.uids.length && this._fire('items_added', added.getObject());
 		this._fire('collection_changed');
 
 	},
@@ -524,13 +616,8 @@ Lava.define(
 		count = this._count;
 		this._assignStorage(result);
 		this._setLength(this._data_uids.length);
-		this._fireChangedEvents(0, (count > this._count) ? count : this._count);
 
-		if (removed.uids.length) {
-
-			this._fire('items_removed', removed.getObject());
-
-		}
+		removed.uids.length && this._fire('items_removed', removed.getObject());
 
 		this._fire('collection_changed');
 
@@ -605,7 +692,6 @@ Lava.define(
 		}
 
 		this._assignStorage(result);
-		this._fireChangedEvents(0, this._count);
 		this._fire('collection_changed');
 
 	},
@@ -620,7 +706,6 @@ Lava.define(
 			removed_names = this._data_names.splice(start_index, count);
 
 		this._setLength(this._count - count);
-		this._fireChangedEvents(start_index, this._count);
 
 		this._fire('items_removed', {
 			uids: removed_uids,
@@ -687,7 +772,6 @@ Lava.define(
 		}
 
 		this._setLength(this._count + count);
-		this._fireChangedEvents(start_index, this._count);
 
 		this._fire('items_added', {
 			uids: added_uids,

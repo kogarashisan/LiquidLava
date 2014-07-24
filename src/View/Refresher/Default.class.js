@@ -223,7 +223,7 @@ Lava.define(
 
 	},
 
-	onAnimationComplete: function(animation) {
+	_onAnimationComplete: function(animation) {
 
 		var template = this._templates_by_animation_guid[animation.guid];
 

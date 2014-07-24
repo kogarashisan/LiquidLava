@@ -202,6 +202,9 @@ IDENTIFIER				[a-zA-Z\_][a-zA-Z0-9\_]*
 \[/[^\s]										{ return 'OPEN_SQUARE'; }
 \]												{ return 'CLOSE_SQUARE'; }
 \s+												{ /* skip whitespace */ }
+\/\/depends:									{ return 'DEPENDS_START'; }
+\{												{ return 'OPEN_CURLY'; }
+\}												{ return 'CLOSE_CURLY'; }
 
 \(												{
 		this.x_lex_brace_levels++;
@@ -257,15 +260,29 @@ root
 	;
 
 expressions
-	: expressions SEMICOLON expression {
+	: expressions SEMICOLON expressionWithOptionalDepends {
 			yy.assertSemicolonAllowed();
 			yy.finishArgument($3.trim());
 		}
-	| expressions COMMA expression {
+	| expressions COMMA expressionWithOptionalDepends {
 			yy.assertCommaAllowed();
 			yy.finishArgument($3.trim());
 		}
-	| expression { yy.finishArgument($1.trim()); }
+	| expressionWithOptionalDepends { yy.finishArgument($1.trim()); }
+	;
+
+depends
+	: DEPENDS_START OPEN_CURLY scopeEvalList CLOSE_CURLY {}
+	;
+
+scopeEvalList
+	: scopeEvalList COMMA scopeEval { yy.x_argument_binds.push($3); }
+	| scopeEval { yy.x_argument_binds.push($1); }
+	;
+
+expressionWithOptionalDepends
+	: expression depends { $$ = $1; }
+	| expression { $$ = $1; }
 	;
 
 expression
@@ -279,6 +296,7 @@ expression
 		}
 	| operand expressionTail {
 			yy.x_counters.operands++;
+			yy.x_counters.expression_tails++;
 			$$ = $1 + ' ' + $2;
 		}
 	;

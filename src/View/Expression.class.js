@@ -23,11 +23,11 @@ Lava.define(
 		if (Lava.schema.DEBUG && !('argument' in this._config)) Lava.t("Expression view requires an argument");
 		this._escape = !this._config.escape_off;
 		this._argument = new Lava.scope.Argument(this._config.argument, this, this._widget);
-		this._argument_changed_listener = this._argument.on('changed', this.onValueChanged, this);
+		this._argument_changed_listener = this._argument.on('changed', this._onValueChanged, this);
 
 	},
 
-	onValueChanged: function() {
+	_onValueChanged: function() {
 
 		this.trySetDirty();
 

@@ -6976,9 +6976,9 @@ Lava.ObjectParser.yy = {
 Lava.ExpressionParser = (function(){
 var parser = {trace: function trace(){},
 yy: {},
-symbols_: {"error":2,"root":3,"EOF":4,"expressions":5,"SEMICOLON":6,"expression":7,"COMMA":8,"expressionTail":9,"operand":10,"OPERATOR":11,"OPEN_BRACE":12,"CLOSE_BRACE":13,"arrayDefinition":14,"NUMBER":15,"RAW_STRING":16,"LITERAL":17,"scopeEval":18,"functionCall":19,"OPEN_SQUARE":20,"expressionList":21,"CLOSE_SQUARE":22,"knownView":23,"VIEW_BY_LABEL":24,"VIEW_BY_ID":25,"VIEW_BY_NAME":26,"lookupOperator":27,"LOOK_UP":28,"LOOK_DOWN":29,"viewLocator":30,"DEEPNESS_OPERATOR":31,"GLOBAL_MODIFIER_CALL":32,"WIDGET_MODIFIER_CALL":33,"ACTIVE_MODIFIER_CALL":34,"IDENTIFIER":35,"scopePath":36,"SEARCH_OPERATOR":37,"scopePathSegment":38,"DOT_PROPERTY":39,"$accept":0,"$end":1},
-terminals_: {2:"error",4:"EOF",6:"SEMICOLON",8:"COMMA",11:"OPERATOR",12:"OPEN_BRACE",13:"CLOSE_BRACE",15:"NUMBER",16:"RAW_STRING",17:"LITERAL",20:"OPEN_SQUARE",22:"CLOSE_SQUARE",24:"VIEW_BY_LABEL",25:"VIEW_BY_ID",26:"VIEW_BY_NAME",28:"LOOK_UP",29:"LOOK_DOWN",31:"DEEPNESS_OPERATOR",32:"GLOBAL_MODIFIER_CALL",33:"WIDGET_MODIFIER_CALL",34:"ACTIVE_MODIFIER_CALL",35:"IDENTIFIER",37:"SEARCH_OPERATOR",39:"DOT_PROPERTY"},
-productions_: [0,[3,1],[3,2],[5,3],[5,3],[5,1],[7,1],[7,1],[7,2],[9,3],[9,2],[10,3],[10,1],[10,1],[10,1],[10,1],[10,1],[10,1],[14,3],[14,2],[21,3],[21,1],[23,1],[23,1],[23,1],[27,1],[27,1],[30,1],[30,2],[30,2],[30,3],[19,3],[19,4],[19,4],[19,5],[19,4],[19,5],[18,1],[18,2],[18,3],[18,2],[18,2],[36,2],[36,1],[38,1],[38,3]],
+symbols_: {"error":2,"root":3,"EOF":4,"expressions":5,"SEMICOLON":6,"expressionWithOptionalDepends":7,"COMMA":8,"depends":9,"DEPENDS_START":10,"OPEN_CURLY":11,"scopeEvalList":12,"CLOSE_CURLY":13,"scopeEval":14,"expression":15,"expressionTail":16,"operand":17,"OPERATOR":18,"OPEN_BRACE":19,"CLOSE_BRACE":20,"arrayDefinition":21,"NUMBER":22,"RAW_STRING":23,"LITERAL":24,"functionCall":25,"OPEN_SQUARE":26,"expressionList":27,"CLOSE_SQUARE":28,"knownView":29,"VIEW_BY_LABEL":30,"VIEW_BY_ID":31,"VIEW_BY_NAME":32,"lookupOperator":33,"LOOK_UP":34,"LOOK_DOWN":35,"viewLocator":36,"DEEPNESS_OPERATOR":37,"GLOBAL_MODIFIER_CALL":38,"WIDGET_MODIFIER_CALL":39,"ACTIVE_MODIFIER_CALL":40,"IDENTIFIER":41,"scopePath":42,"SEARCH_OPERATOR":43,"scopePathSegment":44,"DOT_PROPERTY":45,"$accept":0,"$end":1},
+terminals_: {2:"error",4:"EOF",6:"SEMICOLON",8:"COMMA",10:"DEPENDS_START",11:"OPEN_CURLY",13:"CLOSE_CURLY",18:"OPERATOR",19:"OPEN_BRACE",20:"CLOSE_BRACE",22:"NUMBER",23:"RAW_STRING",24:"LITERAL",26:"OPEN_SQUARE",28:"CLOSE_SQUARE",30:"VIEW_BY_LABEL",31:"VIEW_BY_ID",32:"VIEW_BY_NAME",34:"LOOK_UP",35:"LOOK_DOWN",37:"DEEPNESS_OPERATOR",38:"GLOBAL_MODIFIER_CALL",39:"WIDGET_MODIFIER_CALL",40:"ACTIVE_MODIFIER_CALL",41:"IDENTIFIER",43:"SEARCH_OPERATOR",45:"DOT_PROPERTY"},
+productions_: [0,[3,1],[3,2],[5,3],[5,3],[5,1],[9,4],[12,3],[12,1],[7,2],[7,1],[15,1],[15,1],[15,2],[16,3],[16,2],[17,3],[17,1],[17,1],[17,1],[17,1],[17,1],[17,1],[21,3],[21,2],[27,3],[27,1],[29,1],[29,1],[29,1],[33,1],[33,1],[36,1],[36,2],[36,2],[36,3],[25,3],[25,4],[25,4],[25,5],[25,4],[25,5],[14,1],[14,2],[14,3],[14,2],[14,2],[42,2],[42,1],[44,1],[44,3]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */
 /**/) {
 /* this == yyval */
@@ -7001,152 +7001,161 @@ case 4:
 break;
 case 5: yy.finishArgument($$[$0].trim()); 
 break;
-case 6:
+case 7: yy.x_argument_binds.push($$[$0]); 
+break;
+case 8: yy.x_argument_binds.push($$[$0]); 
+break;
+case 9: this.$ = $$[$0-1]; 
+break;
+case 10: this.$ = $$[$0]; 
+break;
+case 11:
 			yy.x_counters.expression_tails++;
 			this.$ = $$[$0];
 		
 break;
-case 7:
+case 12:
 			yy.x_counters.operands++;
 			this.$ = $$[$0];
 		
 break;
-case 8:
+case 13:
 			yy.x_counters.operands++;
+			yy.x_counters.expression_tails++;
 			this.$ = $$[$0-1] + ' ' + $$[$0];
 		
 break;
-case 9:
+case 14:
 			yy.x_counters.operands++;
 			this.$ = $$[$0-2] + ' ' + $$[$0-1] + ' ' + $$[$0];
 		
 break;
-case 10:
+case 15:
 			yy.x_counters.operands++;
 			this.$ = $$[$0-1] + ' ' + $$[$0];
 		
 break;
-case 11:
+case 16:
 			yy.x_counters.braces++;
 			this.$ = '(' + $$[$0-1] + ')';
 		
 break;
-case 12: this.$ = $$[$0]; 
+case 17: this.$ = $$[$0]; 
 break;
-case 13:
+case 18:
 			yy.x_counters.numbers++;
 			this.$ = $$[$0];
 		
 break;
-case 14:
+case 19:
 			yy.x_counters.strings++;
 			this.$ = $$[$0];
 		
 break;
-case 15:
+case 20:
 			yy.x_counters.literals++;
 			this.$ = $$[$0];
 		
 break;
-case 16:
+case 21:
 			var index = yy.x_argument_binds.push($$[$0]) - 1;
 			this.$ = 'this._binds[' + index + '].getValue()';
 		
 break;
-case 17: this.$ = $$[$0]; 
+case 22: this.$ = $$[$0]; 
 break;
-case 18: this.$ = '[' + $$[$0-1] + ']'; 
+case 23: this.$ = '[' + $$[$0-1] + ']'; 
 break;
-case 19: this.$ = '[]'; 
+case 24: this.$ = '[]'; 
 break;
-case 20: this.$ = $$[$0-2] + ', ' + $$[$0]; 
+case 25: this.$ = $$[$0-2] + ', ' + $$[$0]; 
 break;
-case 21: this.$ = $$[$0]; 
+case 26: this.$ = $$[$0]; 
 break;
-case 22: this.$ = {locator_type: 'Label', locator: $$[$0]}; 
+case 27: this.$ = {locator_type: 'Label', locator: $$[$0]}; 
 break;
-case 23: this.$ = {locator_type: 'Id', locator: $$[$0]}; 
+case 28: this.$ = {locator_type: 'Id', locator: $$[$0]}; 
 break;
-case 24: this.$ = {locator_type: 'Name', locator: $$[$0]}; 
+case 29: this.$ = {locator_type: 'Name', locator: $$[$0]}; 
 break;
-case 25: this.$ = {label: $$[$0], direction: 'look_up'}; 
+case 30: this.$ = {label: $$[$0], direction: 'look_up'}; 
 break;
-case 26: this.$ = {label: $$[$0], direction: 'look_down'}; 
+case 31: this.$ = {label: $$[$0], direction: 'look_down'}; 
 break;
-case 27: this.$ = $$[$0]; 
+case 32: this.$ = $$[$0]; 
 break;
-case 28: Lava.t("Lookup operator is not supported yet."); 
+case 33: Lava.t("Lookup operator is not supported yet."); 
 break;
-case 29:
+case 34:
 			$$[$0-1].depth = parseInt($$[$0]);
 			if (!$$[$0-1].depth) Lava.t('Deepness operator: depth must be > 0');
 			this.$ = $$[$0-1];
 		
 break;
-case 30: Lava.t("Lookup operator is not supported yet."); 
+case 35: Lava.t("Lookup operator is not supported yet."); 
 break;
-case 31:
+case 36:
 			yy.x_counters.global_modifiers++;
 			this.$ = 'this._callGlobalModifier("' + $$[$0-2] + '", [])';
 		
 break;
-case 32:
+case 37:
 			yy.x_counters.global_modifiers++;
 			this.$ = 'this._callGlobalModifier("' + $$[$0-3] + '", [' + $$[$0-1] + '])';
 		
 break;
-case 33:
+case 38:
 			yy.x_counters.widget_modifiers++;
 			$$[$0-3].callback_name = $$[$0-2];
 			var index = yy.x_argument_widget_modifiers.push($$[$0-3]) - 1;
 			this.$ = 'this._callModifier("' + index + '", [])';
 		
 break;
-case 34:
+case 39:
 			yy.x_counters.widget_modifiers++;
 			$$[$0-4].callback_name = $$[$0-3];
 			var index = yy.x_argument_widget_modifiers.push($$[$0-4]) - 1;
 			this.$ = 'this._callModifier("' + index + '", [' + $$[$0-1] + '])';
 		
 break;
-case 35:
+case 40:
 			yy.x_counters.active_modifiers++;
 			$$[$0-3].callback_name = $$[$0-2];
 			var index = yy.x_argument_active_modifiers.push($$[$0-3]) - 1;
 			this.$ = 'this._callActiveModifier("' + index + '", [])';
 		
 break;
-case 36:
+case 41:
 			yy.x_counters.active_modifiers++;
 			$$[$0-4].callback_name = $$[$0-3];
 			var index = yy.x_argument_active_modifiers.push($$[$0-4]) - 1;
 			this.$ = 'this._callActiveModifier("' + index + '", [' + $$[$0-1] + '])';
 		
 break;
-case 37: this.$ = {property_name: $$[$0]}; 
+case 42: this.$ = {property_name: $$[$0]}; 
 break;
-case 38: this.$ = {property_name: $$[$0-1], tail: $$[$0]}; 
+case 43: this.$ = {property_name: $$[$0-1], tail: $$[$0]}; 
 break;
-case 39:
+case 44:
 			$$[$0-2].property_name = $$[$0-1];
 			$$[$0-2].tail = $$[$0];
 			this.$ = $$[$0-2];
 		
 break;
-case 40:
+case 45:
 			$$[$0-1].property_name = $$[$0];
 			this.$ = $$[$0-1];
 		
 break;
-case 41: $$[$0-1].tail = $$[$0]; this.$ = $$[$0-1]; 
+case 46: $$[$0-1].tail = $$[$0]; this.$ = $$[$0-1]; 
 break;
-case 42: $$[$0-1].push($$[$0]); this.$ = $$[$0-1]; 
+case 47: $$[$0-1].push($$[$0]); this.$ = $$[$0-1]; 
 break;
-case 43: this.$ = [$$[$0]]; 
+case 48: this.$ = [$$[$0]]; 
 break;
-case 44: this.$ = $$[$0]; 
+case 49: this.$ = $$[$0]; 
 break;
-case 45:
+case 50:
 			var segments = $$[$0-1].path_segments;
 			if (segments) {
 				for (var i = 0, count = segments.length; i < count; i++) {
@@ -7158,8 +7167,8 @@ case 45:
 break;
 }
 },
-table: [{3:1,4:[1,2],5:3,7:4,9:5,10:6,11:[1,7],12:[1,8],14:9,15:[1,10],16:[1,11],17:[1,12],18:13,19:14,20:[1,15],23:19,24:[1,20],25:[1,21],26:[1,22],30:17,32:[1,18],35:[1,16]},{1:[3]},{1:[2,1]},{4:[1,23],6:[1,24],8:[1,25]},{4:[2,5],6:[2,5],8:[2,5]},{4:[2,6],6:[2,6],8:[2,6],11:[1,26],13:[2,6],22:[2,6]},{4:[2,7],6:[2,7],8:[2,7],9:27,11:[1,7],13:[2,7],22:[2,7]},{10:28,12:[1,8],14:9,15:[1,10],16:[1,11],17:[1,12],18:13,19:14,20:[1,15],23:19,24:[1,20],25:[1,21],26:[1,22],30:17,32:[1,18],35:[1,16]},{7:29,9:5,10:6,11:[1,7],12:[1,8],14:9,15:[1,10],16:[1,11],17:[1,12],18:13,19:14,20:[1,15],23:19,24:[1,20],25:[1,21],26:[1,22],30:17,32:[1,18],35:[1,16]},{4:[2,12],6:[2,12],8:[2,12],11:[2,12],13:[2,12],22:[2,12]},{4:[2,13],6:[2,13],8:[2,13],11:[2,13],13:[2,13],22:[2,13]},{4:[2,14],6:[2,14],8:[2,14],11:[2,14],13:[2,14],22:[2,14]},{4:[2,15],6:[2,15],8:[2,15],11:[2,15],13:[2,15],22:[2,15]},{4:[2,16],6:[2,16],8:[2,16],11:[2,16],13:[2,16],22:[2,16]},{4:[2,17],6:[2,17],8:[2,17],11:[2,17],13:[2,17],22:[2,17]},{7:32,9:5,10:6,11:[1,7],12:[1,8],14:9,15:[1,10],16:[1,11],17:[1,12],18:13,19:14,20:[1,15],21:30,22:[1,31],23:19,24:[1,20],25:[1,21],26:[1,22],30:17,32:[1,18],35:[1,16]},{4:[2,37],6:[2,37],8:[2,37],11:[2,37],13:[2,37],20:[1,36],22:[2,37],36:33,38:34,39:[1,35]},{20:[1,36],36:38,37:[1,37],38:34,39:[1,35]},{12:[1,39]},{20:[2,27],27:42,28:[1,44],29:[1,45],31:[1,43],33:[1,40],34:[1,41],37:[2,27],39:[2,27]},{20:[2,22],28:[2,22],29:[2,22],31:[2,22],33:[2,22],34:[2,22],37:[2,22],39:[2,22]},{20:[2,23],28:[2,23],29:[2,23],31:[2,23],33:[2,23],34:[2,23],37:[2,23],39:[2,23]},{20:[2,24],28:[2,24],29:[2,24],31:[2,24],33:[2,24],34:[2,24],37:[2,24],39:[2,24]},{1:[2,2]},{7:46,9:5,10:6,11:[1,7],12:[1,8],14:9,15:[1,10],16:[1,11],17:[1,12],18:13,19:14,20:[1,15],23:19,24:[1,20],25:[1,21],26:[1,22],30:17,32:[1,18],35:[1,16]},{7:47,9:5,10:6,11:[1,7],12:[1,8],14:9,15:[1,10],16:[1,11],17:[1,12],18:13,19:14,20:[1,15],23:19,24:[1,20],25:[1,21],26:[1,22],30:17,32:[1,18],35:[1,16]},{10:48,12:[1,8],14:9,15:[1,10],16:[1,11],17:[1,12],18:13,19:14,20:[1,15],23:19,24:[1,20],25:[1,21],26:[1,22],30:17,32:[1,18],35:[1,16]},{4:[2,8],6:[2,8],8:[2,8],11:[1,26],13:[2,8],22:[2,8]},{4:[2,10],6:[2,10],8:[2,10],11:[2,10],13:[2,10],22:[2,10]},{13:[1,49]},{8:[1,51],22:[1,50]},{4:[2,19],6:[2,19],8:[2,19],11:[2,19],13:[2,19],22:[2,19]},{8:[2,21],13:[2,21],22:[2,21]},{4:[2,38],6:[2,38],8:[2,38],11:[2,38],13:[2,38],20:[1,36],22:[2,38],38:52,39:[1,35]},{4:[2,43],6:[2,43],8:[2,43],11:[2,43],13:[2,43],20:[2,43],22:[2,43],39:[2,43]},{4:[2,44],6:[2,44],8:[2,44],11:[2,44],13:[2,44],20:[2,44],22:[2,44],39:[2,44]},{18:53,23:54,24:[1,20],25:[1,21],26:[1,22],30:17,35:[1,16]},{4:[2,40],6:[2,40],8:[2,40],11:[2,40],13:[2,40],20:[1,36],22:[2,40],36:55,38:34,39:[1,35]},{4:[2,41],6:[2,41],8:[2,41],11:[2,41],13:[2,41],20:[1,36],22:[2,41],38:52,39:[1,35]},{7:32,9:5,10:6,11:[1,7],12:[1,8],13:[1,56],14:9,15:[1,10],16:[1,11],17:[1,12],18:13,19:14,20:[1,15],21:57,23:19,24:[1,20],25:[1,21],26:[1,22],30:17,32:[1,18],35:[1,16]},{12:[1,58]},{12:[1,59]},{20:[2,28],37:[2,28],39:[2,28]},{20:[2,29],27:60,28:[1,44],29:[1,45],37:[2,29],39:[2,29]},{20:[2,25],37:[2,25],39:[2,25]},{20:[2,26],37:[2,26],39:[2,26]},{4:[2,3],6:[2,3],8:[2,3]},{4:[2,4],6:[2,4],8:[2,4]},{4:[2,9],6:[2,9],8:[2,9],11:[2,9],13:[2,9],22:[2,9]},{4:[2,11],6:[2,11],8:[2,11],11:[2,11],13:[2,11],22:[2,11]},{4:[2,18],6:[2,18],8:[2,18],11:[2,18],13:[2,18],22:[2,18]},{7:61,9:5,10:6,11:[1,7],12:[1,8],14:9,15:[1,10],16:[1,11],17:[1,12],18:13,19:14,20:[1,15],23:19,24:[1,20],25:[1,21],26:[1,22],30:17,32:[1,18],35:[1,16]},{4:[2,42],6:[2,42],8:[2,42],11:[2,42],13:[2,42],20:[2,42],22:[2,42],39:[2,42]},{22:[1,62]},{20:[2,27],27:42,28:[1,44],29:[1,45],31:[1,43],37:[2,27],39:[2,27]},{4:[2,39],6:[2,39],8:[2,39],11:[2,39],13:[2,39],20:[1,36],22:[2,39],38:52,39:[1,35]},{4:[2,31],6:[2,31],8:[2,31],11:[2,31],13:[2,31],22:[2,31]},{8:[1,51],13:[1,63]},{7:32,9:5,10:6,11:[1,7],12:[1,8],13:[1,64],14:9,15:[1,10],16:[1,11],17:[1,12],18:13,19:14,20:[1,15],21:65,23:19,24:[1,20],25:[1,21],26:[1,22],30:17,32:[1,18],35:[1,16]},{7:32,9:5,10:6,11:[1,7],12:[1,8],13:[1,66],14:9,15:[1,10],16:[1,11],17:[1,12],18:13,19:14,20:[1,15],21:67,23:19,24:[1,20],25:[1,21],26:[1,22],30:17,32:[1,18],35:[1,16]},{20:[2,30],37:[2,30],39:[2,30]},{8:[2,20],13:[2,20],22:[2,20]},{4:[2,45],6:[2,45],8:[2,45],11:[2,45],13:[2,45],20:[2,45],22:[2,45],39:[2,45]},{4:[2,32],6:[2,32],8:[2,32],11:[2,32],13:[2,32],22:[2,32]},{4:[2,33],6:[2,33],8:[2,33],11:[2,33],13:[2,33],22:[2,33]},{8:[1,51],13:[1,68]},{4:[2,35],6:[2,35],8:[2,35],11:[2,35],13:[2,35],22:[2,35]},{8:[1,51],13:[1,69]},{4:[2,34],6:[2,34],8:[2,34],11:[2,34],13:[2,34],22:[2,34]},{4:[2,36],6:[2,36],8:[2,36],11:[2,36],13:[2,36],22:[2,36]}],
-defaultActions: {2:[2,1],23:[2,2]},
+table: [{3:1,4:[1,2],5:3,7:4,14:14,15:5,16:6,17:7,18:[1,8],19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:[1,16],29:20,30:[1,21],31:[1,22],32:[1,23],36:18,38:[1,19],41:[1,17]},{1:[3]},{1:[2,1]},{4:[1,24],6:[1,25],8:[1,26]},{4:[2,5],6:[2,5],8:[2,5]},{4:[2,10],6:[2,10],8:[2,10],9:27,10:[1,28]},{4:[2,11],6:[2,11],8:[2,11],10:[2,11],18:[1,29],20:[2,11],28:[2,11]},{4:[2,12],6:[2,12],8:[2,12],10:[2,12],16:30,18:[1,8],20:[2,12],28:[2,12]},{14:14,17:31,19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:[1,16],29:20,30:[1,21],31:[1,22],32:[1,23],36:18,38:[1,19],41:[1,17]},{14:14,15:32,16:6,17:7,18:[1,8],19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:[1,16],29:20,30:[1,21],31:[1,22],32:[1,23],36:18,38:[1,19],41:[1,17]},{4:[2,17],6:[2,17],8:[2,17],10:[2,17],18:[2,17],20:[2,17],28:[2,17]},{4:[2,18],6:[2,18],8:[2,18],10:[2,18],18:[2,18],20:[2,18],28:[2,18]},{4:[2,19],6:[2,19],8:[2,19],10:[2,19],18:[2,19],20:[2,19],28:[2,19]},{4:[2,20],6:[2,20],8:[2,20],10:[2,20],18:[2,20],20:[2,20],28:[2,20]},{4:[2,21],6:[2,21],8:[2,21],10:[2,21],18:[2,21],20:[2,21],28:[2,21]},{4:[2,22],6:[2,22],8:[2,22],10:[2,22],18:[2,22],20:[2,22],28:[2,22]},{14:14,15:35,16:6,17:7,18:[1,8],19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:[1,16],27:33,28:[1,34],29:20,30:[1,21],31:[1,22],32:[1,23],36:18,38:[1,19],41:[1,17]},{4:[2,42],6:[2,42],8:[2,42],10:[2,42],13:[2,42],18:[2,42],20:[2,42],26:[1,39],28:[2,42],42:36,44:37,45:[1,38]},{26:[1,39],42:41,43:[1,40],44:37,45:[1,38]},{19:[1,42]},{26:[2,32],33:45,34:[1,47],35:[1,48],37:[1,46],39:[1,43],40:[1,44],43:[2,32],45:[2,32]},{26:[2,27],34:[2,27],35:[2,27],37:[2,27],39:[2,27],40:[2,27],43:[2,27],45:[2,27]},{26:[2,28],34:[2,28],35:[2,28],37:[2,28],39:[2,28],40:[2,28],43:[2,28],45:[2,28]},{26:[2,29],34:[2,29],35:[2,29],37:[2,29],39:[2,29],40:[2,29],43:[2,29],45:[2,29]},{1:[2,2]},{7:49,14:14,15:5,16:6,17:7,18:[1,8],19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:[1,16],29:20,30:[1,21],31:[1,22],32:[1,23],36:18,38:[1,19],41:[1,17]},{7:50,14:14,15:5,16:6,17:7,18:[1,8],19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:[1,16],29:20,30:[1,21],31:[1,22],32:[1,23],36:18,38:[1,19],41:[1,17]},{4:[2,9],6:[2,9],8:[2,9]},{11:[1,51]},{14:14,17:52,19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:[1,16],29:20,30:[1,21],31:[1,22],32:[1,23],36:18,38:[1,19],41:[1,17]},{4:[2,13],6:[2,13],8:[2,13],10:[2,13],18:[1,29],20:[2,13],28:[2,13]},{4:[2,15],6:[2,15],8:[2,15],10:[2,15],18:[2,15],20:[2,15],28:[2,15]},{20:[1,53]},{8:[1,55],28:[1,54]},{4:[2,24],6:[2,24],8:[2,24],10:[2,24],18:[2,24],20:[2,24],28:[2,24]},{8:[2,26],20:[2,26],28:[2,26]},{4:[2,43],6:[2,43],8:[2,43],10:[2,43],13:[2,43],18:[2,43],20:[2,43],26:[1,39],28:[2,43],44:56,45:[1,38]},{4:[2,48],6:[2,48],8:[2,48],10:[2,48],13:[2,48],18:[2,48],20:[2,48],26:[2,48],28:[2,48],45:[2,48]},{4:[2,49],6:[2,49],8:[2,49],10:[2,49],13:[2,49],18:[2,49],20:[2,49],26:[2,49],28:[2,49],45:[2,49]},{14:57,29:58,30:[1,21],31:[1,22],32:[1,23],36:18,41:[1,17]},{4:[2,45],6:[2,45],8:[2,45],10:[2,45],13:[2,45],18:[2,45],20:[2,45],26:[1,39],28:[2,45],42:59,44:37,45:[1,38]},{4:[2,46],6:[2,46],8:[2,46],10:[2,46],13:[2,46],18:[2,46],20:[2,46],26:[1,39],28:[2,46],44:56,45:[1,38]},{14:14,15:35,16:6,17:7,18:[1,8],19:[1,9],20:[1,60],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:[1,16],27:61,29:20,30:[1,21],31:[1,22],32:[1,23],36:18,38:[1,19],41:[1,17]},{19:[1,62]},{19:[1,63]},{26:[2,33],43:[2,33],45:[2,33]},{26:[2,34],33:64,34:[1,47],35:[1,48],43:[2,34],45:[2,34]},{26:[2,30],43:[2,30],45:[2,30]},{26:[2,31],43:[2,31],45:[2,31]},{4:[2,3],6:[2,3],8:[2,3]},{4:[2,4],6:[2,4],8:[2,4]},{12:65,14:66,29:58,30:[1,21],31:[1,22],32:[1,23],36:18,41:[1,17]},{4:[2,14],6:[2,14],8:[2,14],10:[2,14],18:[2,14],20:[2,14],28:[2,14]},{4:[2,16],6:[2,16],8:[2,16],10:[2,16],18:[2,16],20:[2,16],28:[2,16]},{4:[2,23],6:[2,23],8:[2,23],10:[2,23],18:[2,23],20:[2,23],28:[2,23]},{14:14,15:67,16:6,17:7,18:[1,8],19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:[1,16],29:20,30:[1,21],31:[1,22],32:[1,23],36:18,38:[1,19],41:[1,17]},{4:[2,47],6:[2,47],8:[2,47],10:[2,47],13:[2,47],18:[2,47],20:[2,47],26:[2,47],28:[2,47],45:[2,47]},{28:[1,68]},{26:[2,32],33:45,34:[1,47],35:[1,48],37:[1,46],43:[2,32],45:[2,32]},{4:[2,44],6:[2,44],8:[2,44],10:[2,44],13:[2,44],18:[2,44],20:[2,44],26:[1,39],28:[2,44],44:56,45:[1,38]},{4:[2,36],6:[2,36],8:[2,36],10:[2,36],18:[2,36],20:[2,36],28:[2,36]},{8:[1,55],20:[1,69]},{14:14,15:35,16:6,17:7,18:[1,8],19:[1,9],20:[1,70],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:[1,16],27:71,29:20,30:[1,21],31:[1,22],32:[1,23],36:18,38:[1,19],41:[1,17]},{14:14,15:35,16:6,17:7,18:[1,8],19:[1,9],20:[1,72],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:[1,16],27:73,29:20,30:[1,21],31:[1,22],32:[1,23],36:18,38:[1,19],41:[1,17]},{26:[2,35],43:[2,35],45:[2,35]},{8:[1,75],13:[1,74]},{8:[2,8],13:[2,8]},{8:[2,25],20:[2,25],28:[2,25]},{4:[2,50],6:[2,50],8:[2,50],10:[2,50],13:[2,50],18:[2,50],20:[2,50],26:[2,50],28:[2,50],45:[2,50]},{4:[2,37],6:[2,37],8:[2,37],10:[2,37],18:[2,37],20:[2,37],28:[2,37]},{4:[2,38],6:[2,38],8:[2,38],10:[2,38],18:[2,38],20:[2,38],28:[2,38]},{8:[1,55],20:[1,76]},{4:[2,40],6:[2,40],8:[2,40],10:[2,40],18:[2,40],20:[2,40],28:[2,40]},{8:[1,55],20:[1,77]},{4:[2,6],6:[2,6],8:[2,6]},{14:78,29:58,30:[1,21],31:[1,22],32:[1,23],36:18,41:[1,17]},{4:[2,39],6:[2,39],8:[2,39],10:[2,39],18:[2,39],20:[2,39],28:[2,39]},{4:[2,41],6:[2,41],8:[2,41],10:[2,41],18:[2,41],20:[2,41],28:[2,41]},{8:[2,7],13:[2,7]}],
+defaultActions: {2:[2,1],24:[2,2]},
 parseError: function parseError(str,hash){if(hash.recoverable){this.trace(str)}else{throw new Error(str)}},
 parse: function parse(input) {
     var self = this, stack = [0], vstack = [null], lstack = [], table = this.table, yytext = '', yylineno = 0, yyleng = 0, recovering = 0, TERROR = 2, EOF = 1;
@@ -7360,72 +7369,78 @@ case 3: Lava.t('Spaces in scope path are not allowed (1)');
 break;
 case 4: Lava.t('Spaces in scope path are not allowed (2)'); 
 break;
-case 5: yy_.yytext = yy_.yytext.slice(1); return 24; 
+case 5: yy_.yytext = yy_.yytext.slice(1); return 30; 
 break;
-case 6: yy_.yytext = yy_.yytext.slice(1); return 25; 
+case 6: yy_.yytext = yy_.yytext.slice(1); return 31; 
 break;
-case 7: yy_.yytext = yy_.yytext.slice(1); return 26; 
+case 7: yy_.yytext = yy_.yytext.slice(1); return 32; 
 break;
-case 8: yy_.yytext = yy_.yytext.slice(2); return 34; 
+case 8: yy_.yytext = yy_.yytext.slice(2); return 40; 
 break;
-case 9: yy_.yytext = yy_.yytext.slice(5); return 34; 
+case 9: yy_.yytext = yy_.yytext.slice(5); return 40; 
 break;
-case 10: yy_.yytext = yy_.yytext.slice(1); return 33; 
+case 10: yy_.yytext = yy_.yytext.slice(1); return 39; 
 break;
-case 11: return 32; 
+case 11: return 38; 
 break;
-case 12: yy_.yytext = yy_.yytext.slice(1); return 31; 
+case 12: yy_.yytext = yy_.yytext.slice(1); return 37; 
 break;
-case 13: yy_.yytext = yy_.yytext.slice(1); return 39; 
+case 13: yy_.yytext = yy_.yytext.slice(1); return 45; 
 break;
-case 14: yy_.yytext = yy_.yytext.slice(2); return 37; 
+case 14: yy_.yytext = yy_.yytext.slice(2); return 43; 
 break;
-case 15: yy_.yytext = yy_.yytext.slice(5); return 37; 
+case 15: yy_.yytext = yy_.yytext.slice(5); return 43; 
 break;
-case 16: yy_.yytext = yy_.yytext.substr(4, yy_.yyleng - 5); return 28; 
+case 16: yy_.yytext = yy_.yytext.substr(4, yy_.yyleng - 5); return 34; 
 break;
-case 17: yy_.yytext = yy_.yytext.substr(4, yy_.yyleng - 5); return 29; 
+case 17: yy_.yytext = yy_.yytext.substr(4, yy_.yyleng - 5); return 35; 
 break;
-case 18: yy_.yytext = yy.unescape(yy_.yytext); return 11; /*escaped operator versions*/ 
+case 18: yy_.yytext = yy.unescape(yy_.yytext); return 18; /*escaped operator versions*/ 
 break;
-case 19: yy_.yytext = yy.unescape(yy_.yytext); return 11; /*escaped operator versions + "&", "&&" */ 
+case 19: yy_.yytext = yy.unescape(yy_.yytext); return 18; /*escaped operator versions + "&", "&&" */ 
 break;
-case 20: return 11; /*arithmetic*/ 
+case 20: return 18; /*arithmetic*/ 
 break;
-case 21: return 11; /*logical, without "&&" and "!" */ 
+case 21: return 18; /*logical, without "&&" and "!" */ 
 break;
-case 22: return 11; /*comparison*/ 
+case 22: return 18; /*comparison*/ 
 break;
-case 23: return 11; /*bitwise, without "&" */ 
+case 23: return 18; /*bitwise, without "&" */ 
 break;
-case 24: return 11; /*ternary*/ 
+case 24: return 18; /*ternary*/ 
 break;
-case 25: return 11; /*unary*/ 
+case 25: return 18; /*unary*/ 
 break;
 case 26: return 8; 
 break;
 case 27: return 6; 
 break;
-case 28: return 15; 
+case 28: return 22; 
 break;
-case 29: return 15; 
+case 29: return 22; 
 break;
-case 30: return 16; 
+case 30: return 23; 
 break;
-case 31: return 16; 
+case 31: return 23; 
 break;
-case 32: return 20; 
+case 32: return 26; 
 break;
-case 33: return 22; 
+case 33: return 28; 
 break;
 case 34: /* skip whitespace */ 
 break;
-case 35:
+case 35: return 10; 
+break;
+case 36: return 11; 
+break;
+case 37: return 13; 
+break;
+case 38:
 		this.x_lex_brace_levels++;
-		return 12;
+		return 19;
 	
 break;
-case 36:
+case 39:
 		if (this.x_tail_mode && this.x_lex_brace_levels == 0) {
 			this.x_input_tail_length = this._input.length;
 			this._input = '';
@@ -7433,11 +7448,11 @@ case 36:
 			return 4;
 		} else {
 			this.x_lex_brace_levels--;
-			return 13;
+			return 20;
 		}
 	
 break;
-case 37:
+case 40:
 		var lowercase = yy_.yytext.toLowerCase();
 		var map = {
 			'lt': '<',
@@ -7450,23 +7465,23 @@ case 37:
 
 		if (lowercase in map) {
 			yy_.yytext = map[lowercase];
-			return 11;
+			return 18;
 		}
 
 		if (Lava.parsers.Common.isLiteral(yy_.yytext)) {
 			if (lowercase != yy_.yytext) Lava.t("Expression parser, code style: literals must be lower case");
-			return 17;
+			return 24;
 		}
 
-		return 35;
+		return 41;
 	
 break;
-case 38: return 4; 
+case 41: return 4; 
 break;
 }
 },
-rules: [/^(?:->([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\s+)\()/,/^(?:-&gt;([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\s+)\()/,/^(?:\.([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\s+)\()/,/^(?:\s+[\~\.\[\]])/,/^(?:\[\s\b)/,/^(?:@([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:#([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:\$([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:->([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\())/,/^(?:-&gt;([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\())/,/^(?:\.([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\())/,/^(?:([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\())/,/^(?:~\d+)/,/^(?:\.[a-zA-Z0-9\_]+)/,/^(?:->([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:-&gt;([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?::up\(([a-zA-Z\_][a-zA-Z0-9\_]*)\))/,/^(?::dn\(([a-zA-Z\_][a-zA-Z0-9\_]*)\))/,/^(?:(&lt;|&gt;))/,/^(?:(&amp;|&lt;|&gt;|&)+)/,/^(?:[\+\-\*\/\%])/,/^(?:\|\||!!)/,/^(?:===|!==|==|!=|<=|>=|<|>)/,/^(?:>>>|>>|<<|[\|\^])/,/^(?:[\?\:])/,/^(?:!)/,/^(?:,)/,/^(?:;)/,/^(?:\d+(\.\d+)?((e|E)(\+|-)\d+)?)/,/^(?:0x[a-fA-F0-9]+)/,/^(?:"(\\"|[^"])*")/,/^(?:'(\\'|[^'])*')/,/^(?:\[(?=[^\s]))/,/^(?:\])/,/^(?:\s+)/,/^(?:\()/,/^(?:\))/,/^(?:([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:$)/],
-conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38],"inclusive":true}}
+rules: [/^(?:->([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\s+)\()/,/^(?:-&gt;([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\s+)\()/,/^(?:\.([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\s+)\()/,/^(?:\s+[\~\.\[\]])/,/^(?:\[\s\b)/,/^(?:@([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:#([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:\$([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:->([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\())/,/^(?:-&gt;([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\())/,/^(?:\.([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\())/,/^(?:([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\())/,/^(?:~\d+)/,/^(?:\.[a-zA-Z0-9\_]+)/,/^(?:->([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:-&gt;([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?::up\(([a-zA-Z\_][a-zA-Z0-9\_]*)\))/,/^(?::dn\(([a-zA-Z\_][a-zA-Z0-9\_]*)\))/,/^(?:(&lt;|&gt;))/,/^(?:(&amp;|&lt;|&gt;|&)+)/,/^(?:[\+\-\*\/\%])/,/^(?:\|\||!!)/,/^(?:===|!==|==|!=|<=|>=|<|>)/,/^(?:>>>|>>|<<|[\|\^])/,/^(?:[\?\:])/,/^(?:!)/,/^(?:,)/,/^(?:;)/,/^(?:\d+(\.\d+)?((e|E)(\+|-)\d+)?)/,/^(?:0x[a-fA-F0-9]+)/,/^(?:"(\\"|[^"])*")/,/^(?:'(\\'|[^'])*')/,/^(?:\[(?=[^\s]))/,/^(?:\])/,/^(?:\s+)/,/^(?:\/\/depends\b)/,/^(?:\{)/,/^(?:\})/,/^(?:\()/,/^(?:\))/,/^(?:([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:$)/],
+conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41],"inclusive":true}}
 };
 return lexer;
 })();
@@ -7535,7 +7550,7 @@ Lava.ExpressionParser.parse = function(input, separator) {
 Lava.ExpressionParser.parsePath = function(input) {
 	var configs = this.yy.convertArguments(this.parseRaw(input));
 	if (configs.length != 1) Lava.t("ExpressionParser: single scope expected, got either many expressions or nothing");
-	if (!configs[0].flags.isScopeEval) Lava.t("ExpressionParser: expected scope path, got expression");
+	if (!configs[0].flags || !configs[0].flags.isScopeEval) Lava.t("ExpressionParser: expected scope path, got expression");
 	return configs[0].binds[0];
 };
 
@@ -7623,31 +7638,32 @@ Lava.ExpressionParser.yy = {
 		this.x_counters.strings = 0;
 	},
 
-	makeFlags: function() {
-		return {
-			hasModifiers: (this.x_counters.widget_modifiers > 0 || this.x_counters.global_modifiers > 0),
-			hasActiveModifiers: (this.x_counters.active_modifiers > 0),
-			isScopeEval: (
-				this.x_argument_binds.length == 1
-					&& this.x_counters.operands == 1
-					&& this.x_counters.expression_tails == 0
-					&& this.x_counters.braces == 0
-				),
-			isStatic: (this.x_argument_binds.length == 0 && this.x_counters.active_modifiers == 0),
-			isLiteral: (this.x_counters.literals == 1 && this.x_counters.operands == 1),
-			isNumber: (this.x_counters.numbers == 1 && this.x_counters.operands == 1),
-			isString: (this.x_counters.strings == 1 && this.x_counters.operands == 1)
-		};
-	},
-
 	finishArgument: function(evaluator_src) {
-		this.x_arguments.push({
-			evaluator_src: evaluator_src,
-			binds: this.x_argument_binds,
-			modifiers: this.x_argument_widget_modifiers,
-			active_modifiers: this.x_argument_active_modifiers,
-			flags: this.makeFlags()
-		});
+		var result = {
+				evaluator_src: evaluator_src
+			},
+			flags = {};
+		if (this.x_argument_binds.length) result.binds = this.x_argument_binds;
+		if (this.x_argument_widget_modifiers.length) result.modifiers = this.x_argument_widget_modifiers;
+		if (this.x_argument_active_modifiers.length) result.active_modifiers = this.x_argument_active_modifiers;
+
+		if (this.x_counters.widget_modifiers > 0 || this.x_counters.global_modifiers > 0) flags.hasModifiers = true;
+		if (this.x_argument_binds.length == 1
+			&& this.x_counters.operands == 1
+			&& this.x_counters.expression_tails == 0
+			&& this.x_counters.braces == 0
+		)
+			flags.isScopeEval = true;
+		if (this.x_argument_binds.length == 0 && this.x_counters.active_modifiers == 0) {
+			flags.isStatic = true;
+			if (this.x_counters.literals == 1 && this.x_counters.operands == 1) flags.isLiteral = true;
+			if (this.x_counters.numbers == 1 && this.x_counters.operands == 1) flags.isNumber = true;
+			if (this.x_counters.strings == 1 && this.x_counters.operands == 1) flags.isString = true;
+		}
+
+		if (!Firestorm.Object.isEmpty(flags)) result.flags = flags;
+		this.x_arguments.push(result);
+
 		this.x_argument_binds = [];
 		this.x_argument_widget_modifiers = [];
 		this.x_argument_active_modifiers = [];
@@ -7680,10 +7696,10 @@ Lava.ExpressionParser.yy = {
 
 		var src = "return (" + raw_argument.evaluator_src + ");",
 			result = {
-				evaluator: new Function(src),
-				flags: raw_argument.flags
+				evaluator: new Function(src)
 			};
 
+		if ('flags' in raw_argument) result.flags = raw_argument.flags;
 		if ('binds' in raw_argument) result.binds = raw_argument.binds;
 		if ('modifiers' in raw_argument) result.modifiers = raw_argument.modifiers;
 		if ('active_modifiers' in raw_argument) result.active_modifiers = raw_argument.active_modifiers;
@@ -9807,7 +9823,8 @@ Lava.define(
  */
 {
 
-	Implements: 'Lava.mixin.Properties',
+	Extends: 'Lava.mixin.Properties',
+	Shared: ['SOURCE_OBJECT_TYPES'],
 
 	isEnumerable: true,
 
@@ -9818,9 +9835,21 @@ Lava.define(
 	// will hold keys, when Enumerable was constructed from object
 	_data_names: [], // [index] => name
 	_source_object: null,
+	_source_object_type: null,
 	_count: 0,
 
 	_uid: 1,
+
+	/**
+	 * @enum {number}
+	 * @const
+	 */
+	SOURCE_OBJECT_TYPES: {
+		OBJECT: 0,
+		ARRAY: 1,
+		ENUMERABLE: 2,
+		PROPERTIES: 3
+	},
 
 	init: function(data_source) {
 
@@ -9829,42 +9858,45 @@ Lava.define(
 		if (data_source) {
 
 			var count = 0,
-				i = 0,
-				name;
+				i = 0;
 
-			if (Array.isArray(data_source)) {
+			this.setSourceObject(data_source);
 
-				count = data_source.length;
+			if (this._source_object_type == this.SOURCE_OBJECT_TYPES.ARRAY) {
 
-				for (; i < count; i++) {
+				for (count = data_source.length; i < count; i++) {
 
 					this._push(this._uid++, data_source[i], null);
 
 				}
 
-			} else if (typeof(data_source) == 'object') {
+			} else if (this._source_object_type == this.SOURCE_OBJECT_TYPES.ENUMERABLE) {
 
-				for (name in data_source) {
+				this._data_names = data_source.getNames();
+				this._data_values = data_source.getValues();
+				this._data_uids = data_source.getUIDs();
 
-					if (data_source.hasOwnProperty(name)) {
+			} else if (this._source_object_type == this.SOURCE_OBJECT_TYPES.PROPERTIES) {
 
-						this._push(this._uid++, data_source[name], name)
-
-					}
-
-					count++;
-
-				}
-
-				this._source_object = data_source;
+				this._initFromObject(data_source.getProperties());
 
 			} else {
 
-				Lava.t("Wrong argument supplied for Enumerable constructor");
+				this._initFromObject(data_source);
 
 			}
 
-			this._count = count;
+			this._count = this._data_uids.length;
+
+		}
+
+	},
+
+	_initFromObject: function(data_source) {
+
+		for (var name in data_source) {
+
+			this._push(this._uid++, data_source[name], name);
 
 		}
 
@@ -9906,25 +9938,11 @@ Lava.define(
 
 	get: function(name) {
 
-		var result;
-
-		if (name == 'length') {
-
-			result = this._count;
-
-		} else {
-
-			if (Lava.schema.DEBUG && !/^\d+$/.test(name)) Lava.t("Enumerable: invalid index (1)");
-
-			result = this.getValueAt(+name); // convert to integer
-
-		}
-
-		return result;
+		return (name == 'length') ? this._count : null;
 
 	},
 
-	getLocalUIDs: function() {
+	getUIDs: function() {
 
 		// we need to copy the local array, to protect it from being altered outside of the class
 		return this._data_uids.slice();
@@ -10043,11 +10061,9 @@ Lava.define(
 
 	},
 
-	set: function(name, value) {
+	set: function() {
 
-		if (Lava.schema.DEBUG && !/^\d+$/.test(name)) Lava.t("Enumerable: invalid index (2)");
-
-		this.replaceAt(+name, value); // '+' to convert to integer
+		Lava.t('set on Enumerable is not permitted');
 
 	},
 
@@ -10069,10 +10085,9 @@ Lava.define(
 
 		this._data_uids[index] = new_uid;
 		this._data_values[index] = value;
-		this._data_names[index] = name || null;
-
-		this._fire('index_changed', {index: index});
-		this._firePropertyChanged(index);
+		if (name) {
+			this._data_names[index] = name;
+		}
 
 		this._fire('items_removed', {
 			uids: [old_uid],
@@ -10100,12 +10115,6 @@ Lava.define(
 		swap(this._data_values, index_a, index_b);
 		swap(this._data_names, index_a, index_b);
 
-		this._fire('index_changed', {index: index_a});
-		this._firePropertyChanged(index_a);
-
-		this._fire('index_changed', {index: index_b});
-		this._firePropertyChanged(index_b);
-
 		this._fire('collection_changed');
 
 	},
@@ -10118,8 +10127,6 @@ Lava.define(
 		this._push(new_uid, value, name || null);
 
 		this._setLength(count + 1);
-		this._firePropertyChanged(count);
-		this._fire('index_changed', {index: count});
 
 		this._fire('items_added', {
 			uids: [new_uid],
@@ -10141,8 +10148,6 @@ Lava.define(
 			count = this._count - 1;
 
 		this._setLength(count);
-		this._firePropertyChanged(count); // index
-		this._fire('index_changed', {index: count});
 
 		this._fire('items_removed', {
 			uids: [old_uid],
@@ -10157,7 +10162,7 @@ Lava.define(
 
 	each: function(callback) {
 
-		// everything is copied in case the collection gets modified during the cycle
+		// everything is copied in case the collection is modified during the cycle
 		var values = this._data_values.slice(),
 			uids = this._data_uids.slice(),
 			names = this._data_names.slice(),
@@ -10174,32 +10179,6 @@ Lava.define(
 
 	},
 
-	_fireChangedEvents: function(start_index, limit) {
-
-		var i;
-
-		if (!Firestorm.Object.isEmpty(this._property_listeners)) {
-
-			for (i = start_index; i < limit; i++) {
-
-				this._firePropertyChanged(i);
-
-			}
-
-		}
-
-		if (this._listeners['index_changed'] != null) {
-
-			for (i = start_index; i < limit; i++) {
-
-				this._fire('index_changed', {index: i});
-
-			}
-
-		}
-
-	},
-
 	/**
 	 * Removes the first occurrence of value within collection.
 	 *
@@ -10208,47 +10187,178 @@ Lava.define(
 	 */
 	remove: function(value) {
 
-		var i = 0,
-			result = false;
+		var result = false,
+			index = this._data_values.indexOf(value);
 
-		for (; i < this._count; i++) {
-
-			if (this._data_values[i] === value) {
-				this.removeAt(i);
-				result = true;
-				break;
-			}
-
+		if (index != -1) {
+			this.removeAt(index);
+			result = true;
 		}
 
 		return result;
 
 	},
 
-	updateFromSourceObject: function(new_source_object) {
+	include: function(value) {
 
-		if (!this._source_object) Lava.t("Enumerable was not created from object");
+		var result = false,
+			index = this._data_values.indexOf(value);
 
-		var i = 0,
-			name,
+		if (index == -1) {
+			this.push(value);
+			result = true;
+		}
+
+		return result;
+
+	},
+
+	setSourceObject: function(data_source) {
+
+		if (Lava.schema.DEBUG && typeof(data_source) != 'object') Lava.t("Wrong argument supplied for Enumerable constructor");
+		this._source_object = data_source;
+		this._source_object_type = Array.isArray(data_source)
+			? this.SOURCE_OBJECT_TYPES.ARRAY
+			: (data_source.isEnumerable
+				? this.SOURCE_OBJECT_TYPES.ENUMERABLE
+				: (data_source.isProperties
+					? this.SOURCE_OBJECT_TYPES.PROPERTIES
+					: this.SOURCE_OBJECT_TYPES.OBJECT));
+
+	},
+
+	updateFromSourceObject: function() {
+
+		if (Lava.schema.DEBUG && !this._source_object) Lava.t("Enumerable was not created from object");
+
+		switch (this._source_object_type) {
+			case this.SOURCE_OBJECT_TYPES.PROPERTIES:
+				this._updateFromObject(this._source_object.getProperties());
+				break;
+			case this.SOURCE_OBJECT_TYPES.OBJECT:
+				this._updateFromObject(this._source_object);
+				break;
+			case this.SOURCE_OBJECT_TYPES.ARRAY:
+				this._updateFromArray(this._source_object);
+				break;
+			case this.SOURCE_OBJECT_TYPES.ENUMERABLE:
+				this._updateFromEnumerable(this._source_object);
+				break;
+			default:
+				Lava.t();
+		}
+
+	},
+
+	_updateFromArray: function(source_array) {
+
+		var new_count = source_array.length,
+			count = (new_count < this._count) ? new_count : this._count,
+			i = 0,
 			uid,
-			count,
 			result = this._createHelperStorage(),
 			removed = this._createHelperStorage(),
 			added = this._createHelperStorage();
 
-		if (new_source_object) {
+		for (; i < count; i++) {
 
-			this._source_object = new_source_object;
+			if (this._data_values[i] === source_array[i]) {
+				result.push(this._data_uids[i], this._data_values[i], this._data_names[i]);
+			} else {
+				uid = this._uid++;
+				added.push(uid, source_array[i], null);
+				result.push(uid, source_array[i], null);
+			}
 
 		}
+
+		if (new_count < this._count) {
+
+			for (i = count; i < new_count; i++) {
+
+				uid = this._uid++;
+				added.push(uid, source_array[i], null);
+				result.push(uid, source_array[i], null);
+
+			}
+
+		} else {
+
+			for (i = count; i < this._count; i++) {
+
+				removed.push(this._data_uids[i], this._data_values[i], this._data_names[i]);
+
+			}
+
+		}
+
+		this._assignStorage(result);
+		this._setLength(this._data_uids.length);
+
+		removed.uids.length && this._fire('items_removed', removed.getObject());
+		added.uids.length && this._fire('items_added', added.getObject());
+		this._fire('collection_changed');
+
+	},
+
+	_updateFromEnumerable: function(data_source) {
+
+		var new_names = data_source.getNames(),
+			new_values = data_source.getValues(),
+			new_uids = data_source.getUIDs(),
+			i,
+			count,
+			uid,
+			old_uids_hash = {},
+			new_uids_hash = {},
+			removed = this._createHelperStorage(),
+			added = this._createHelperStorage();
+
+		for (i = 0, count = new_uids.length; i < count; i++) {
+			new_uids_hash[new_uids[i]] = true;
+		}
+
+		for (i = 0, count = this._count; i < count; i++) {
+			uid = this._data_uids[i];
+			old_uids_hash[uid] = true;
+			if (!(uid in new_uids_hash)) {
+				removed.push(uid, this._data_values[i], this._data_names[i]);
+			}
+		}
+
+		for (i = 0, count = new_uids.length; i < count; i++) {
+			uid = new_uids[i];
+			if (!(uid in old_uids_hash)) {
+				added.push(uid, new_values[i], new_names[i]);
+			}
+		}
+
+		this._data_names = new_names;
+		this._data_values = new_values;
+		this._data_uids = new_uids;
+		this._setLength(this._data_uids.length);
+
+		removed.uids.length && this._fire('items_removed', removed.getObject());
+		added.uids.length && this._fire('items_added', added.getObject());
+		this._fire('collection_changed');
+
+	},
+
+	_updateFromObject: function(source_object) {
+
+		var i = 0,
+			name,
+			uid,
+			result = this._createHelperStorage(),
+			removed = this._createHelperStorage(),
+			added = this._createHelperStorage();
 
 		for (; i < this._count; i++) {
 
 			name = this._data_names[i];
-			if (name in this._source_object) {
+			if (name in source_object) {
 
-				if (this._source_object[name] === this._data_values[i]) {
+				if (source_object[name] === this._data_values[i]) {
 
 					result.push(this._data_uids[i], this._data_values[i], this._data_names[i]);
 
@@ -10257,8 +10367,8 @@ Lava.define(
 					// Attention: the name has NOT changed, but it will be present in both added and removed names!
 					removed.push(this._data_uids[i], this._data_values[i], name);
 					uid = this._uid++;
-					result.push(uid, this._source_object[name], name);
-					added.push(uid, this._source_object[name], name);
+					result.push(uid, source_object[name], name);
+					added.push(uid, source_object[name], name);
 
 				}
 
@@ -10270,35 +10380,33 @@ Lava.define(
 
 		}
 
-		for (name in this._source_object) {
+		for (name in source_object) {
 
 			if (this._data_names.indexOf(name) == -1) {
 
 				uid = this._uid++;
-				result.push(uid, this._source_object[name], name);
-				added.push(uid, this._source_object[name], name);
+				result.push(uid, source_object[name], name);
+				added.push(uid, source_object[name], name);
 
 			}
 
 		}
 
-		count = this._count;
 		this._assignStorage(result);
 		this._setLength(this._data_uids.length);
-		this._fireChangedEvents(0, (count > this._count) ? count : this._count);
 
-		this._fire('items_removed', removed.getObject());
-		this._fire('items_added', added.getObject());
+		removed.uids.length && this._fire('items_removed', removed.getObject());
+		added.uids.length && this._fire('items_added', added.getObject());
 		this._fire('collection_changed');
 
 	},
 
 	/**
 	 * Accepts a function with the following parameters:
-	 * function(value, uid, name, index)
+	 * function(value, name, uid)
 	 * Callback must return TRUE if element needs to stay in the collection, otherwise it will be removed.
 	 *
-	 * @param {function(*, number, string, number)} callback
+	 * @param {function(*, string, number)} callback
 	 */
 	filter: function(callback) {
 
@@ -10309,7 +10417,7 @@ Lava.define(
 
 		for (; i < count; i++) {
 
-			if (callback(this._data_values[i], this._data_uids[i], this._data_names[i], i)) {
+			if (callback(this._data_values[i], this._data_names[i], this._data_uids[i])) {
 
 				result.push(this._data_uids[i], this._data_values[i], this._data_names[i]);
 
@@ -10324,13 +10432,8 @@ Lava.define(
 		count = this._count;
 		this._assignStorage(result);
 		this._setLength(this._data_uids.length);
-		this._fireChangedEvents(0, (count > this._count) ? count : this._count);
 
-		if (removed.uids.length) {
-
-			this._fire('items_removed', removed.getObject());
-
-		}
+		removed.uids.length && this._fire('items_removed', removed.getObject());
 
 		this._fire('collection_changed');
 
@@ -10342,10 +10445,26 @@ Lava.define(
 	 */
 	sort: function(less, algorithm) {
 
+		this._sort(less, algorithm, this._data_values);
+
+	},
+
+	/**
+	 * Sort by the array of names.
+	 * @param {function(*, *):boolean} [less] A callback to compare items
+	 * @param {string} [algorithm] The name of the sorting method from Lava.algorithms.sorting
+	 */
+	sortByNames: function(less, algorithm) {
+
+		this._sort(less, algorithm, this._data_names);
+
+	},
+
+	_sort: function(less, algorithm, values) {
+
 		var indices = [],
 			i = 0,
-			_less,
-			values = this._data_values;
+			_less;
 
 		_less = function(a, b) {
 
@@ -10389,7 +10508,6 @@ Lava.define(
 		}
 
 		this._assignStorage(result);
-		this._fireChangedEvents(0, this._count);
 		this._fire('collection_changed');
 
 	},
@@ -10404,7 +10522,6 @@ Lava.define(
 			removed_names = this._data_names.splice(start_index, count);
 
 		this._setLength(this._count - count);
-		this._fireChangedEvents(start_index, this._count);
 
 		this._fire('items_removed', {
 			uids: removed_uids,
@@ -10471,7 +10588,6 @@ Lava.define(
 		}
 
 		this._setLength(this._count + count);
-		this._fireChangedEvents(start_index, this._count);
 
 		this._fire('items_added', {
 			uids: added_uids,
@@ -13006,32 +13122,20 @@ Lava.define(
 
 		var local_record = event_args.collection_owner;
 		if (local_record.guid in this._collections_by_record_guid) {
-			this._collections_by_record_guid[local_record.guid].push(event_args.child);
+			this._collections_by_record_guid[local_record.guid].include(event_args.child);
 		}
 
 	},
 
 	isValidValue: function(value) {
 
-		return Firestorm.getType(value) == 'array' || value.isEnumerable;
+		return false;
 
 	},
 
 	getInvalidReason: function(value) {
 
-		var reason = this.Abstract$getInvalidReason(value);
-
-		if (!reason) {
-
-			if (Firestorm.getType(value) != 'array' && !value.isEnumerable) {
-
-				reason = "Value is not array or enumerable";
-
-			}
-
-		}
-
-		return  reason;
+		return  'Collection field does not support setValue';
 
 	},
 
@@ -13039,7 +13143,7 @@ Lava.define(
 
 		if (raw_properties[this._name]) {
 
-			if (Lava.schema.data.VALIDATE_IMPORT_DATA && !this.isValidValue(raw_properties[this._name]))
+			if (Lava.schema.data.VALIDATE_IMPORT_DATA && !Array.isArray(raw_properties[this._name]))
 				Lava.t('Invalid value in import data');
 
 			var i = 0,
@@ -13087,7 +13191,7 @@ Lava.define(
 
 	},
 
-	_onCollectionRecordsRemoved: function() {
+	_onCollectionRecordsRemoved: function(collection, event_args) {
 
 		this._setCollectionOwner(event_args.values, null);
 
@@ -14843,6 +14947,7 @@ Lava.define(
 	_container_refreshed_listener: null,
 
 	_property_changed_listener: null,
+	_enumerable_changed_listener: null,
 	_property_container: null,
 
 	_is_connected: false,
@@ -14881,15 +14986,22 @@ Lava.define(
 
 		if (property_container != null) {
 
-			if (property_container.isProperties) {
+			if (property_container.isEnumerable && /^\d+$/.test(this._property_name)) {
+
+				if (this._enumerable_changed_listener == null) {
+
+					this._enumerable_changed_listener = property_container.on('collection_changed', this.onValueChanged, this);
+					this._property_container = property_container;
+
+				}
+
+				value = property_container.getValueAt(+this._property_name);
+
+			} else if (property_container.isProperties) {
 
 				if (this._property_changed_listener == null) {
 
-					this._property_changed_listener = property_container.onPropertyChanged(
-						this._property_name,
-						this.onContainerPropertyChanged,
-						this
-					);
+					this._property_changed_listener = property_container.onPropertyChanged(this._property_name, this.onValueChanged, this);
 					this._property_container = property_container;
 
 				}
@@ -14925,12 +15037,13 @@ Lava.define(
 
 	onParentDataSourceChanged: function() {
 
-		// parent data source has changed
 		if (this._property_changed_listener && (this._value_container.getValue() != this._property_container)) {
 
 			// currently listening to the parent's old data source
-			this._property_container.removePropertyListener(this._property_changed_listener);
+			this._property_changed_listener && this._property_container.removePropertyListener(this._property_changed_listener);
+			this._enumerable_changed_listener && this._property_container.removeListener(this._enumerable_changed_listener);
 			this._property_changed_listener = null;
+			this._enumerable_changed_listener = null;
 			this._property_container = null;
 
 		}
@@ -14947,10 +15060,9 @@ Lava.define(
 
 	},
 
-	onContainerPropertyChanged: function() {
+	onValueChanged: function() {
 
 		this._queueForRefresh();
-
 		this._is_dirty = true;
 
 	},
@@ -14969,6 +15081,12 @@ Lava.define(
 				Lava.suspendListener(this._property_changed_listener);
 				property_container.set(this._property_name, value);
 				Lava.resumeListener(this._property_changed_listener);
+
+			} else if (this._enumerable_changed_listener) {
+
+				Lava.suspendListener(this._enumerable_changed_listener);
+				property_container.replaceAt(+this._property_name, value);
+				Lava.resumeListener(this._enumerable_changed_listener);
 
 			} else if (property_container.isProperties) {
 
@@ -15000,6 +15118,8 @@ Lava.define(
 		this._value_container.removeListener(this._container_refreshed_listener);
 
 		this._property_changed_listener && this._property_container.removePropertyListener(this._property_changed_listener);
+		this._enumerable_changed_listener && this._property_container.removeListener(this._enumerable_changed_listener);
+		this._property_container = null;
 
 		Lava.schema.DEBUG && Lava.ScopeManager.debugStopTracking(this);
 		this.Abstract$destroy();
@@ -15027,23 +15147,37 @@ Lava.define(
 	_argument_changed_listener: null,
 	_argument_refreshed_listener: null,
 
+	_view: null,
+	_widget: null,
+
 	/**
 	 * @type {Lava.system.Enumerable}
 	 */
 	_value: null,
-	_collection_listener: null,
-	_collection: null,
-	_own_collection: false,
+	_observable_listener: null,
+	_observable: null,
+	_own_enumerable: false,
 
-	init: function(argument) {
+	_create_own_enumerable: false,
+	_after_refresh_callback: null,
+
+	init: function(argument, view, widget, options) {
 
 		this._argument = argument;
+		this._view = view;
+		this._widget = widget;
 		this.level = argument.level;
 
 		if (this._argument.isWaitingRefresh()) {
 			this._count_dependencies_waiting_refresh++;
 			this._waits_refresh = true;
 		}
+
+		if (options) {
+			this._create_own_enumerable = options['create_own_enumerable'] || false;
+			this._after_refresh_callback = options['after_refresh_callback'] || null;
+		}
+
 		this._argument_waits_refresh_listener = this._argument.on('waits_refresh', this._onDependencyWaitsRefresh, this);
 		this._argument_changed_listener = this._argument.on('changed', this.onDataSourceChanged, this);
 		this._argument_refreshed_listener = this._argument.on('refreshed', this._onDependencyRefreshed, this);
@@ -15054,74 +15188,113 @@ Lava.define(
 
 	_refreshDataSource: function() {
 
-		var data_source = this._argument.getValue();
+		var argument_value = this._argument.getValue();
 
-		if (data_source && data_source.isEnumerable) {
+		if (argument_value) {
 
-			if (this._own_collection) {
+			if (argument_value.isEnumerable) {
 
-				this._value.destroy();
-				this._own_collection = false;
+				if (this._create_own_enumerable) {
 
-			}
+					this._createOrUpdateCollection(argument_value);
 
-			if (this._collection_listener == null) {
+				} else {
 
-				this._collection_listener = data_source.on('collection_changed', this.onCollectionChanged, this);
-				this._collection = data_source;
+					if (this._own_enumerable) {
 
-			}
+						this._value.destroy();
+						this._own_enumerable = false;
+						this._value = null;
 
-			if (this._value != data_source) {
-				this._value = data_source;
-				this._fire('new_enumerable');
-			}
+					}
 
-		} else {
-
-			if (this._own_collection && typeof(data_source == 'object') && this._value.hasSourceObject()) {
-
-				this._value.updateFromSourceObject(data_source);
-
-			} else {
-
-				if (this._own_collection) {
-
-					this._value.destroy();
+					if (this._value != argument_value) {
+						this._value = argument_value;
+						this._fire('new_enumerable');
+					}
 
 				}
 
-				this._own_collection = true;
-				// do not bind any listeners, cause this collection must not be modified by hands (it would make a design flaw)
-				this._value = new Lava.system.Enumerable(data_source);
-				this._fire('new_enumerable');
+			} else {
+
+				this._createOrUpdateCollection(argument_value);
 
 			}
 
+			if (this._observable_listener == null) {
+
+				if (argument_value.isEnumerable) {
+
+					this._observable_listener = argument_value.on('collection_changed', this._onObservableChanged, this);
+					this._observable = argument_value;
+
+				} else if (argument_value.isProperties) {
+
+					this._observable_listener = argument_value.on('property_changed', this._onObservableChanged, this);
+					this._observable = argument_value;
+
+				}
+
+			}
+
+		} else if (this._own_enumerable) {
+
+			this._value.removeAll();
+
+		} else {
+
+			this._createCollection(null);
+
 		}
+
+		if (this._after_refresh_callback) {
+			this._widget[this._after_refresh_callback](this._value, argument_value, this._view);
+		}
+
+	},
+
+	_createOrUpdateCollection: function(argument_value) {
+
+		if (this._own_enumerable) {
+
+			this._value.setSourceObject(argument_value);
+			this._value.updateFromSourceObject();
+
+		} else {
+
+			this._createCollection(argument_value);
+
+		}
+
+	},
+
+	_createCollection: function(argument_value) {
+
+		this._value = new Lava.system.Enumerable(argument_value);
+		this._own_enumerable = true;
+		this._fire('new_enumerable');
+
+	},
+
+	_flushObservable: function() {
+
+		this._observable.removeListener(this._observable_listener);
+		this._observable_listener = null;
+		this._observable = null;
 
 	},
 
 	onDataSourceChanged: function() {
 
+		if (this._observable_listener) this._flushObservable();
 		this._is_dirty = true;
-
-		if (this._collection_listener) {
-
-			this._collection.removeListener(this._collection_listener);
-			this._collection_listener = null;
-			this._collection = null;
-
-		}
-
 		this._queueForRefresh();
 
 	},
 
-	onCollectionChanged: function() {
+	_onObservableChanged: function() {
 
 		this._is_dirty = true;
-
 		this._queueForRefresh();
 
 	},
@@ -15129,7 +15302,6 @@ Lava.define(
 	_doRefresh: function() {
 
 		this._refreshDataSource();
-
 		this._fire('changed');
 
 	},
@@ -15143,23 +15315,21 @@ Lava.define(
 	sleep: function() {
 
 		Lava.suspendListener(this._argument_changed_listener);
-		this._collection_listener && Lava.suspendListener(this._collection_listener);
+		this._observable_listener && Lava.suspendListener(this._observable_listener);
 
 	},
 
 	wakeup: function() {
 
-		if (this._collection_listener) {
+		if (this._observable_listener) {
 
-			if (this._argument.getValue() != this._collection) {
+			if (this._argument.getValue() != this._observable) {
 
-				this._collection.removeListener(this._collection_listener);
-				this._collection_listener = null;
-				this._collection = null;
+				this._flushObservable();
 
 			} else {
 
-				Lava.resumeListener(this._collection_listener);
+				Lava.resumeListener(this._observable_listener);
 
 			}
 
@@ -15176,9 +15346,9 @@ Lava.define(
 		this._argument.removeListener(this._argument_waits_refresh_listener);
 		this._argument.removeListener(this._argument_changed_listener);
 		this._argument.removeListener(this._argument_refreshed_listener);
-		this._collection_listener && this._collection.removeListener(this._collection_listener);
+		this._observable_listener && this._flushObservable();
 
-		if (this._own_collection) {
+		if (this._own_enumerable) {
 
 			this._value.destroy();
 
@@ -16785,7 +16955,7 @@ Lava.define(
 
 	},
 
-	onAnimationComplete: function(animation) {
+	_onAnimationComplete: function(animation) {
 
 		var template = this._templates_by_animation_guid[animation.guid];
 
@@ -16999,7 +17169,7 @@ Lava.define(
 			animation;
 
 		animation = new Lava.animation.Collapse({}, element);
-		animation.on('complete', this.onAnimationComplete, this);
+		animation.on('complete', this._onAnimationComplete, this);
 
 		this._templates_by_animation_guid[animation.guid] = template;
 		this._animations_by_template_guid[template.guid] = animation;
@@ -17590,7 +17760,19 @@ Lava.define(
 
 				property_name = (typeof(tail[i]) == 'object') ? this.evalPathConfig(tail[i]) : tail[i];
 
-				result = (result.isProperties) ? result.get(property_name) : result[property_name];
+				if (result.isEnumerable && /^\d+$/.test(property_name)) {
+
+					result = result.getValueAt(+property_name);
+
+				} else if (result.isProperties) {
+
+					result = result.get(property_name);
+
+				} else {
+
+					result = result[property_name];
+
+				}
 
 				if (!result) {
 
@@ -17796,11 +17978,11 @@ Lava.define(
 		if (Lava.schema.DEBUG && !('argument' in this._config)) Lava.t("Expression view requires an argument");
 		this._escape = !this._config.escape_off;
 		this._argument = new Lava.scope.Argument(this._config.argument, this, this._widget);
-		this._argument_changed_listener = this._argument.on('changed', this.onValueChanged, this);
+		this._argument_changed_listener = this._argument.on('changed', this._onValueChanged, this);
 
 	},
 
-	onValueChanged: function() {
+	_onValueChanged: function() {
 
 		this.trySetDirty();
 
@@ -17940,7 +18122,7 @@ Lava.define(
 		this.Abstract$_initMembers(properties);
 
 		this._argument = new Lava.scope.Argument(this._config.argument, this, this._widget);
-		this._foreach_scope = new Lava.scope.Foreach(this._argument);
+		this._foreach_scope = new Lava.scope.Foreach(this._argument, this, this._widget, this._config.options ? this._config.options.scope : null);
 		this._foreach_scope_changed_listener = this._foreach_scope.on('changed', this._onDataSourceChanged, this);
 		this._foreach_scope.on('new_enumerable', this._onEnumerableChanged, this);
 		this._as = this._config.as;
@@ -17998,7 +18180,7 @@ Lava.define(
 	_refreshChildren: function() {
 
 		var data_source = this._foreach_scope.getValue(),
-			new_uids = data_source.getLocalUIDs(),
+			new_uids = data_source.getUIDs(),
 			new_uid_to_index_map = data_source.getUIDToIndexMap(),
 			count = data_source.getCount(),
 			i = 0,
@@ -18205,7 +18387,7 @@ Lava.define(
 			constructor,
 			argument = new Lava.scope.Argument(this._config.argument, this, this._widget);
 
-		this._argument_changed_listeners.push(argument.on('changed', this.onArgumentChanged, this));
+		this._argument_changed_listeners.push(argument.on('changed', this._onArgumentChanged, this));
 		this._arguments.push(argument);
 
 		if ('elseif_arguments' in this._config) {
@@ -18213,7 +18395,7 @@ Lava.define(
 			for (count = this._config.elseif_arguments.length; i < count; i++) {
 
 				argument = new Lava.scope.Argument(this._config.elseif_arguments[i], this, this._widget);
-				this._argument_changed_listeners.push(argument.on('changed', this.onArgumentChanged, this));
+				this._argument_changed_listeners.push(argument.on('changed', this._onArgumentChanged, this));
 				this._arguments.push(argument);
 
 			}
@@ -18285,7 +18467,7 @@ Lava.define(
 
 	},
 
-	onArgumentChanged: function() {
+	_onArgumentChanged: function() {
 
 		var active_argument_index = this._getActiveArgumentIndex();
 
@@ -18293,7 +18475,7 @@ Lava.define(
 
 			this._active_argument_index = active_argument_index;
 
-			if (this._active_template) {
+			if (this._active_template && this._is_inDOM) {
 
 				if (this._refresher) {
 
@@ -18372,7 +18554,7 @@ Lava.define(
 
 		}
 
-		this.onArgumentChanged();
+		this._onArgumentChanged();
 
 		this.Abstract$_wakeup();
 
@@ -21455,106 +21637,56 @@ Lava.widgets = {
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Name",
 								locator: "checkbox",
 								tail: ["name"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						},
 						value: {
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Name",
 								locator: "checkbox",
 								tail: ["value"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						},
 						disabled: {
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Name",
 								locator: "checkbox",
 								tail: ["is_disabled"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						},
 						required: {
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Name",
 								locator: "checkbox",
 								tail: ["is_required"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						},
 						readonly: {
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Name",
 								locator: "checkbox",
 								tail: ["is_readonly"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						}
 					},
 					resource_id: {
@@ -21626,85 +21758,45 @@ return (this._binds[0].getValue());
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Name",
 								locator: "textarea",
 								tail: ["name"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						},
 						disabled: {
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Name",
 								locator: "textarea",
 								tail: ["is_disabled"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						},
 						required: {
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Name",
 								locator: "textarea",
 								tail: ["is_required"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						},
 						readonly: {
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Name",
 								locator: "textarea",
 								tail: ["is_readonly"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						}
 					},
 					resource_id: {
@@ -21772,85 +21864,45 @@ return (this._binds[0].getValue());
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Name",
 								locator: "text_input",
 								tail: ["name"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						},
 						disabled: {
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Name",
 								locator: "text_input",
 								tail: ["is_disabled"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						},
 						required: {
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Name",
 								locator: "text_input",
 								tail: ["is_required"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						},
 						readonly: {
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Name",
 								locator: "text_input",
 								tail: ["is_readonly"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						}
 					},
 					resource_id: {
@@ -21920,106 +21972,56 @@ return (this._binds[0].getValue());
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Name",
 								locator: "radio",
 								tail: ["name"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						},
 						value: {
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Name",
 								locator: "radio",
 								tail: ["value"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						},
 						disabled: {
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Name",
 								locator: "radio",
 								tail: ["is_disabled"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						},
 						required: {
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Name",
 								locator: "radio",
 								tail: ["is_required"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						},
 						readonly: {
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Name",
 								locator: "radio",
 								tail: ["is_readonly"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						}
 					},
 					resource_id: {
@@ -22081,64 +22083,34 @@ return (this._binds[0].getValue());
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Name",
 								locator: "submit",
 								tail: ["name"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						},
 						value: {
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Name",
 								locator: "submit",
 								tail: ["value"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						},
 						disabled: {
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Name",
 								locator: "submit",
 								tail: ["is_disabled"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						}
 					},
 					resource_id: {
@@ -22193,64 +22165,34 @@ return (this._binds[0].getValue());
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Name",
 								locator: "submit",
 								tail: ["name"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						},
 						value: {
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Name",
 								locator: "submit",
 								tail: ["value"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						},
 						disabled: {
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Name",
 								locator: "submit",
 								tail: ["is_disabled"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						}
 					},
 					resource_id: {
@@ -22322,22 +22264,12 @@ return (this._binds[0].getValue());
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								locator_type: "Name",
 								locator: "select",
 								tail: ["optgroups"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						},
 						as: "optgroup",
 						template: [
@@ -22349,21 +22281,11 @@ return (this._binds[0].getValue());
 									evaluator: function() {
 return (this._binds[0].getValue());
 },
-									flags: {
-										hasModifiers: false,
-										hasActiveModifiers: false,
-										isScopeEval: true,
-										isStatic: false,
-										isLiteral: false,
-										isNumber: false,
-										isString: false
-									},
+									flags: {isScopeEval: true},
 									binds: [{
 										property_name: "optgroup",
 										tail: ["label"]
-									}],
-									modifiers: [],
-									active_modifiers: []
+									}]
 								},
 								template: [
 									"\r\n\t\t\t\t\t",
@@ -22378,41 +22300,21 @@ return (this._binds[0].getValue());
 													evaluator: function() {
 return (this._binds[0].getValue());
 },
-													flags: {
-														hasModifiers: false,
-														hasActiveModifiers: false,
-														isScopeEval: true,
-														isStatic: false,
-														isLiteral: false,
-														isNumber: false,
-														isString: false
-													},
+													flags: {isScopeEval: true},
 													binds: [{
 														property_name: "optgroup",
 														tail: ["label"]
-													}],
-													modifiers: [],
-													active_modifiers: []
+													}]
 												},
 												disabled: {
 													evaluator: function() {
 return (this._binds[0].getValue());
 },
-													flags: {
-														hasModifiers: false,
-														hasActiveModifiers: false,
-														isScopeEval: true,
-														isStatic: false,
-														isLiteral: false,
-														isNumber: false,
-														isString: false
-													},
+													flags: {isScopeEval: true},
 													binds: [{
 														property_name: "optgroup",
 														tail: ["is_disabled"]
-													}],
-													modifiers: [],
-													active_modifiers: []
+													}]
 												}
 											}
 										},
@@ -22449,21 +22351,11 @@ return (this._binds[0].getValue());
 					evaluator: function() {
 return (this._binds[0].getValue());
 },
-					flags: {
-						hasModifiers: false,
-						hasActiveModifiers: false,
-						isScopeEval: true,
-						isStatic: false,
-						isLiteral: false,
-						isNumber: false,
-						isString: false
-					},
+					flags: {isScopeEval: true},
 					binds: [{
 						property_name: "optgroup",
 						tail: ["options"]
-					}],
-					modifiers: [],
-					active_modifiers: []
+					}]
 				},
 				as: "option",
 				template: [
@@ -22475,21 +22367,11 @@ return (this._binds[0].getValue());
 							evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: true,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
+							flags: {isScopeEval: true},
 							binds: [{
 								property_name: "option",
 								tail: ["title"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						},
 						container: {
 							"class": "Element",
@@ -22499,35 +22381,17 @@ return (this._binds[0].getValue());
 									evaluator: function() {
 return (this._binds[0].getValue());
 },
-									flags: {
-										hasModifiers: false,
-										hasActiveModifiers: false,
-										isScopeEval: true,
-										isStatic: false,
-										isLiteral: false,
-										isNumber: false,
-										isString: false
-									},
+									flags: {isScopeEval: true},
 									binds: [{
 										property_name: "option",
 										tail: ["value"]
-									}],
-									modifiers: [],
-									active_modifiers: []
+									}]
 								},
 								selected: {
 									evaluator: function() {
 return (this._callModifier("0", [this._binds[0].getValue()]));
 },
-									flags: {
-										hasModifiers: true,
-										hasActiveModifiers: false,
-										isScopeEval: false,
-										isStatic: false,
-										isLiteral: false,
-										isNumber: false,
-										isString: false
-									},
+									flags: {hasModifiers: true},
 									binds: [{
 										property_name: "option",
 										tail: ["value"]
@@ -22536,28 +22400,17 @@ return (this._callModifier("0", [this._binds[0].getValue()]));
 										locator_type: "Name",
 										locator: "select",
 										callback_name: "isValueSelected"
-									}],
-									active_modifiers: []
+									}]
 								},
 								disabled: {
 									evaluator: function() {
 return (this._binds[0].getValue());
 },
-									flags: {
-										hasModifiers: false,
-										hasActiveModifiers: false,
-										isScopeEval: true,
-										isStatic: false,
-										isLiteral: false,
-										isNumber: false,
-										isString: false
-									},
+									flags: {isScopeEval: true},
 									binds: [{
 										property_name: "option",
 										tail: ["is_disabled"]
-									}],
-									modifiers: [],
-									active_modifiers: []
+									}]
 								}
 							}
 						}
@@ -22790,22 +22643,12 @@ return (this._binds[0].getValue());
 						evaluator: function() {
 return (this._binds[0].getValue());
 },
-						flags: {
-							hasModifiers: false,
-							hasActiveModifiers: false,
-							isScopeEval: true,
-							isStatic: false,
-							isLiteral: false,
-							isNumber: false,
-							isString: false
-						},
+						flags: {isScopeEval: true},
 						binds: [{
 							locator_type: "Name",
 							locator: "collapsible_panel",
 							tail: ["title"]
-						}],
-						modifiers: [],
-						active_modifiers: []
+						}]
 					}
 				},
 				"\r\n\t"
@@ -22819,22 +22662,12 @@ return (this._binds[0].getValue());
 						evaluator: function() {
 return (this._binds[0].getValue());
 },
-						flags: {
-							hasModifiers: false,
-							hasActiveModifiers: false,
-							isScopeEval: true,
-							isStatic: false,
-							isLiteral: false,
-							isNumber: false,
-							isString: false
-						},
+						flags: {isScopeEval: true},
 						binds: [{
 							locator_type: "Name",
 							locator: "collapsible_panel",
 							tail: ["content"]
-						}],
-						modifiers: [],
-						active_modifiers: []
+						}]
 					}
 				},
 				"\r\n\t"
@@ -22958,22 +22791,12 @@ return (this._binds[0].getValue());
 						evaluator: function() {
 return (this._binds[0].getValue());
 },
-						flags: {
-							hasModifiers: false,
-							hasActiveModifiers: false,
-							isScopeEval: true,
-							isStatic: false,
-							isLiteral: false,
-							isNumber: false,
-							isString: false
-						},
+						flags: {isScopeEval: true},
 						binds: [{
 							locator_type: "Name",
 							locator: "collapsible_panel",
 							tail: ["is_expanded"]
-						}],
-						modifiers: [],
-						active_modifiers: []
+						}]
 					},
 					container: {
 						"class": "Emulated",
@@ -23066,22 +22889,12 @@ return (this._binds[0].getValue());
 						evaluator: function() {
 return (this._binds[0].getValue());
 },
-						flags: {
-							hasModifiers: false,
-							hasActiveModifiers: false,
-							isScopeEval: true,
-							isStatic: false,
-							isLiteral: false,
-							isNumber: false,
-							isString: false
-						},
+						flags: {isScopeEval: true},
 						binds: [{
 							locator_type: "Name",
 							locator: "accordion",
 							tail: ["_panels"]
-						}],
-						modifiers: [],
-						active_modifiers: []
+						}]
 					},
 					as: "panel",
 					refresher: {
@@ -23100,21 +22913,11 @@ return (this._binds[0].getValue());
 									evaluator: function() {
 return (this._binds[0].getValue());
 },
-									flags: {
-										hasModifiers: false,
-										hasActiveModifiers: false,
-										isScopeEval: true,
-										isStatic: false,
-										isLiteral: false,
-										isNumber: false,
-										isString: false
-									},
+									flags: {isScopeEval: true},
 									binds: [{
 										property_name: "panel",
 										tail: ["is_expanded"]
-									}],
-									modifiers: [],
-									active_modifiers: []
+									}]
 								}
 							},
 							includes: {
@@ -23255,22 +23058,12 @@ return (this._binds[0].getValue());
 					evaluator: function() {
 return (this._binds[0].getValue());
 },
-					flags: {
-						hasModifiers: false,
-						hasActiveModifiers: false,
-						isScopeEval: true,
-						isStatic: false,
-						isLiteral: false,
-						isNumber: false,
-						isString: false
-					},
+					flags: {isScopeEval: true},
 					binds: [{
 						locator_type: "Name",
 						locator: "tabs",
 						tail: ["_tabs"]
-					}],
-					modifiers: [],
-					active_modifiers: []
+					}]
 				},
 				as: "tab",
 				template: [
@@ -23282,21 +23075,10 @@ return (this._binds[0].getValue());
 							evaluator: function() {
 return (! this._binds[0].getValue());
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: false,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
 							binds: [{
 								property_name: "tab",
 								tail: ["is_hidden"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						},
 						template: [
 							"\r\n\t\t\t\t\t",
@@ -23311,15 +23093,6 @@ return (! this._binds[0].getValue());
 											evaluator: function() {
 return (this._binds[0].getValue() == this._binds[1].getValue() ? 'active' : '');
 },
-											flags: {
-												hasModifiers: false,
-												hasActiveModifiers: false,
-												isScopeEval: false,
-												isStatic: false,
-												isLiteral: false,
-												isNumber: false,
-												isString: false
-											},
 											binds: [
 												{property_name: "tab"},
 												{
@@ -23327,29 +23100,16 @@ return (this._binds[0].getValue() == this._binds[1].getValue() ? 'active' : '');
 													locator: "tabs",
 													tail: ["_active_tab"]
 												}
-											],
-											modifiers: [],
-											active_modifiers: []
+											]
 										},
 										1: {
 											evaluator: function() {
 return (this._binds[0].getValue() ? '' : 'disabled');
 },
-											flags: {
-												hasModifiers: false,
-												hasActiveModifiers: false,
-												isScopeEval: false,
-												isStatic: false,
-												isLiteral: false,
-												isNumber: false,
-												isString: false
-											},
 											binds: [{
 												property_name: "tab",
 												tail: ["is_enabled"]
-											}],
-											modifiers: [],
-											active_modifiers: []
+											}]
 										}
 									}
 								},
@@ -23377,21 +23137,10 @@ return (this._binds[0].getValue() ? '' : 'disabled');
 													evaluator: function() {
 return ('#' + (this._binds[0].getValue() || ''));
 },
-													flags: {
-														hasModifiers: false,
-														hasActiveModifiers: false,
-														isScopeEval: false,
-														isStatic: false,
-														isLiteral: false,
-														isNumber: false,
-														isString: false
-													},
 													binds: [{
 														property_name: "tab",
 														tail: ["name"]
-													}],
-													modifiers: [],
-													active_modifiers: []
+													}]
 												}
 											}
 										},
@@ -23442,22 +23191,12 @@ return ('#' + (this._binds[0].getValue() || ''));
 					evaluator: function() {
 return (this._binds[0].getValue());
 },
-					flags: {
-						hasModifiers: false,
-						hasActiveModifiers: false,
-						isScopeEval: true,
-						isStatic: false,
-						isLiteral: false,
-						isNumber: false,
-						isString: false
-					},
+					flags: {isScopeEval: true},
 					binds: [{
 						locator_type: "Name",
 						locator: "tabs",
 						tail: ["_tabs"]
-					}],
-					modifiers: [],
-					active_modifiers: []
+					}]
 				},
 				as: "tab",
 				refresher: {
@@ -23478,15 +23217,6 @@ return (this._binds[0].getValue());
 									evaluator: function() {
 return (this._binds[0].getValue() == this._binds[1].getValue() ? 'active' : '');
 },
-									flags: {
-										hasModifiers: false,
-										hasActiveModifiers: false,
-										isScopeEval: false,
-										isStatic: false,
-										isLiteral: false,
-										isNumber: false,
-										isString: false
-									},
 									binds: [
 										{property_name: "tab"},
 										{
@@ -23494,9 +23224,7 @@ return (this._binds[0].getValue() == this._binds[1].getValue() ? 'active' : '');
 											locator: "tabs",
 											tail: ["_active_tab"]
 										}
-									],
-									modifiers: [],
-									active_modifiers: []
+									]
 								}
 							}
 						},
@@ -23603,22 +23331,12 @@ return (this._binds[0].getValue() == this._binds[1].getValue() ? 'active' : '');
 					evaluator: function() {
 return (this._binds[0].getValue());
 },
-					flags: {
-						hasModifiers: false,
-						hasActiveModifiers: false,
-						isScopeEval: true,
-						isStatic: false,
-						isLiteral: false,
-						isNumber: false,
-						isString: false
-					},
+					flags: {isScopeEval: true},
 					binds: [{
 						locator_type: "Name",
 						locator: "tooltip",
 						tail: ["html"]
-					}],
-					modifiers: [],
-					active_modifiers: []
+					}]
 				},
 				container: {
 					"class": "Element",
@@ -23637,15 +23355,6 @@ return (this._binds[0].getValue());
 					evaluator: function() {
 return ((this._binds[0].getValue() + this._binds[1].getValue()) + 'px');
 },
-					flags: {
-						hasModifiers: false,
-						hasActiveModifiers: false,
-						isScopeEval: false,
-						isStatic: false,
-						isLiteral: false,
-						isNumber: false,
-						isString: false
-					},
 					binds: [
 						{
 							locator_type: "Name",
@@ -23657,23 +23366,12 @@ return ((this._binds[0].getValue() + this._binds[1].getValue()) + 'px');
 							locator: "tooltip",
 							tail: ["y_offset"]
 						}
-					],
-					modifiers: [],
-					active_modifiers: []
+					]
 				},
 				left: {
 					evaluator: function() {
 return ((this._binds[0].getValue() + this._binds[1].getValue()) + 'px');
 },
-					flags: {
-						hasModifiers: false,
-						hasActiveModifiers: false,
-						isScopeEval: false,
-						isStatic: false,
-						isLiteral: false,
-						isNumber: false,
-						isString: false
-					},
 					binds: [
 						{
 							locator_type: "Name",
@@ -23685,9 +23383,7 @@ return ((this._binds[0].getValue() + this._binds[1].getValue()) + 'px');
 							locator: "tooltip",
 							tail: ["x_offset"]
 						}
-					],
-					modifiers: [],
-					active_modifiers: []
+					]
 				}
 			},
 			class_bindings: {
@@ -23695,22 +23391,11 @@ return ((this._binds[0].getValue() + this._binds[1].getValue()) + 'px');
 					evaluator: function() {
 return (this._binds[0].getValue() ? 'in' : 'hidden');
 },
-					flags: {
-						hasModifiers: false,
-						hasActiveModifiers: false,
-						isScopeEval: false,
-						isStatic: false,
-						isLiteral: false,
-						isNumber: false,
-						isString: false
-					},
 					binds: [{
 						locator_type: "Name",
 						locator: "tooltip",
 						tail: ["is_visible"]
-					}],
-					modifiers: [],
-					active_modifiers: []
+					}]
 				}
 			}
 		},
@@ -23737,22 +23422,12 @@ return (this._binds[0].getValue() ? 'in' : 'hidden');
 					evaluator: function() {
 return (this._binds[0].getValue());
 },
-					flags: {
-						hasModifiers: false,
-						hasActiveModifiers: false,
-						isScopeEval: true,
-						isStatic: false,
-						isLiteral: false,
-						isNumber: false,
-						isString: false
-					},
+					flags: {isScopeEval: true},
 					binds: [{
 						locator_type: "Name",
 						locator: "tree",
 						tail: ["records"]
-					}],
-					modifiers: [],
-					active_modifiers: []
+					}]
 				},
 				container: {"class": "Morph"},
 				as: "node",
@@ -23784,34 +23459,18 @@ return (this._binds[0].getValue());
 return ('');
 },
 				flags: {
-					hasModifiers: false,
-					hasActiveModifiers: false,
-					isScopeEval: false,
 					isStatic: true,
-					isLiteral: false,
-					isNumber: false,
 					isString: true
-				},
-				binds: [],
-				modifiers: [],
-				active_modifiers: []
+				}
 			},
 			level: {
 				evaluator: function() {
 return (0);
 },
 				flags: {
-					hasModifiers: false,
-					hasActiveModifiers: false,
-					isScopeEval: false,
 					isStatic: true,
-					isLiteral: false,
-					isNumber: true,
-					isString: false
-				},
-				binds: [],
-				modifiers: [],
-				active_modifiers: []
+					isNumber: true
+				}
 			}
 		},
 		includes: {
@@ -23847,18 +23506,7 @@ return (0);
 								evaluator: function() {
 return ('level-' + this._binds[0].getValue());
 },
-								flags: {
-									hasModifiers: false,
-									hasActiveModifiers: false,
-									isScopeEval: false,
-									isStatic: false,
-									isLiteral: false,
-									isNumber: false,
-									isString: false
-								},
-								binds: [{property_name: "level"}],
-								modifiers: [],
-								active_modifiers: []
+								binds: [{property_name: "level"}]
 							}
 						}
 					},
@@ -23871,18 +23519,8 @@ return ('level-' + this._binds[0].getValue());
 								evaluator: function() {
 return (this._binds[0].getValue());
 },
-								flags: {
-									hasModifiers: false,
-									hasActiveModifiers: false,
-									isScopeEval: true,
-									isStatic: false,
-									isLiteral: false,
-									isNumber: false,
-									isString: false
-								},
-								binds: [{property_name: "pad"}],
-								modifiers: [],
-								active_modifiers: []
+								flags: {isScopeEval: true},
+								binds: [{property_name: "pad"}]
 							},
 							escape_off: true,
 							template: []
@@ -23910,15 +23548,6 @@ return (this._binds[0].getValue());
 										evaluator: function() {
 return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() - 1) ? '-bottom' : '-middle') + ((this._binds[2].getValue() == 'folder' && this._binds[3].getValue()) ? (this._binds[4].getValue() ? '-expanded' : '-collapsed') : '-node'));
 },
-										flags: {
-											hasModifiers: false,
-											hasActiveModifiers: false,
-											isScopeEval: false,
-											isStatic: false,
-											isLiteral: false,
-											isNumber: false,
-											isString: false
-										},
 										binds: [
 											{property_name: "foreach_index"},
 											{
@@ -23949,9 +23578,7 @@ return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() -
 													"is_expanded"
 												]
 											}
-										],
-										modifiers: [],
-										active_modifiers: []
+										]
 									}
 								}
 							}
@@ -23968,21 +23595,10 @@ return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() -
 										evaluator: function() {
 return ('icon-' + this._binds[0].getValue());
 },
-										flags: {
-											hasModifiers: false,
-											hasActiveModifiers: false,
-											isScopeEval: false,
-											isStatic: false,
-											isLiteral: false,
-											isNumber: false,
-											isString: false
-										},
 										binds: [{
 											property_name: "node",
 											tail: ["type"]
-										}],
-										modifiers: [],
-										active_modifiers: []
+										}]
 									}
 								}
 							}
@@ -24008,15 +23624,6 @@ return ('icon-' + this._binds[0].getValue());
 						evaluator: function() {
 return (this._binds[0].getValue() && this._binds[1].getValue());
 },
-						flags: {
-							hasModifiers: false,
-							hasActiveModifiers: false,
-							isScopeEval: false,
-							isStatic: false,
-							isLiteral: false,
-							isNumber: false,
-							isString: false
-						},
 						binds: [
 							{
 								property_name: "node",
@@ -24037,9 +23644,7 @@ return (this._binds[0].getValue() && this._binds[1].getValue());
 									"is_expanded"
 								]
 							}
-						],
-						modifiers: [],
-						active_modifiers: []
+						]
 					},
 					container: {
 						"class": "Emulated",
@@ -24051,44 +23656,22 @@ return (this._binds[0].getValue() && this._binds[1].getValue());
 							evaluator: function() {
 return ((this._binds[0].getValue() == this._binds[1].getValue() - 1) ? this._binds[2].getValue() + '<div class="lava-tree-pad"></div>' : this._binds[3].getValue() + '<div class="lava-tree-pad-line"></div>');
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: false,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
 							binds: [
 								{property_name: "foreach_index"},
 								{property_name: "count"},
 								{property_name: "pad"},
 								{property_name: "pad"}
-							],
-							modifiers: [],
-							active_modifiers: []
+							]
 						},
 						level: {
 							evaluator: function() {
 return (this._binds[0].getValue() + 1);
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: false,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
 							binds: [{
 								locator_type: "Label",
 								locator: "parent",
 								property_name: "level"
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						}
 					},
 					template: [
@@ -24100,21 +23683,11 @@ return (this._binds[0].getValue() + 1);
 								evaluator: function() {
 return (this._binds[0].getValue());
 },
-								flags: {
-									hasModifiers: false,
-									hasActiveModifiers: false,
-									isScopeEval: true,
-									isStatic: false,
-									isLiteral: false,
-									isNumber: false,
-									isString: false
-								},
+								flags: {isScopeEval: true},
 								binds: [{
 									property_name: "node",
 									tail: ["children"]
-								}],
-								modifiers: [],
-								active_modifiers: []
+								}]
 							},
 							as: "node",
 							template: [
@@ -24147,21 +23720,11 @@ return (this._binds[0].getValue());
 						evaluator: function() {
 return (this._binds[0].getValue());
 },
-						flags: {
-							hasModifiers: false,
-							hasActiveModifiers: false,
-							isScopeEval: true,
-							isStatic: false,
-							isLiteral: false,
-							isNumber: false,
-							isString: false
-						},
+						flags: {isScopeEval: true},
 						binds: [{
 							property_name: "node",
 							tail: ["title"]
-						}],
-						modifiers: [],
-						active_modifiers: []
+						}]
 					},
 					container: {
 						"class": "Element",
@@ -24254,22 +23817,12 @@ return (this._binds[0].getValue());
 								evaluator: function() {
 return (this._binds[0].getValue());
 },
-								flags: {
-									hasModifiers: false,
-									hasActiveModifiers: false,
-									isScopeEval: true,
-									isStatic: false,
-									isLiteral: false,
-									isNumber: false,
-									isString: false
-								},
+								flags: {isScopeEval: true},
 								binds: [{
 									locator_type: "Name",
 									locator: "table",
 									tail: ["_columns"]
-								}],
-								modifiers: [],
-								active_modifiers: []
+								}]
 							},
 							as: "column",
 							template: [
@@ -24301,21 +23854,11 @@ return (this._binds[0].getValue());
 												evaluator: function() {
 return (this._binds[0].getValue());
 },
-												flags: {
-													hasModifiers: false,
-													hasActiveModifiers: false,
-													isScopeEval: true,
-													isStatic: false,
-													isLiteral: false,
-													isNumber: false,
-													isString: false
-												},
+												flags: {isScopeEval: true},
 												binds: [{
 													property_name: "column",
 													tail: ["title"]
-												}],
-												modifiers: [],
-												active_modifiers: []
+												}]
 											},
 											container: {
 												"class": "Element",
@@ -24325,15 +23868,6 @@ return (this._binds[0].getValue());
 														evaluator: function() {
 return (this._binds[0].getValue() == this._binds[1].getValue() ? ('lava-column-sort-' + (this._binds[2].getValue() ? 'de' : 'a') + 'scending') : '');
 },
-														flags: {
-															hasModifiers: false,
-															hasActiveModifiers: false,
-															isScopeEval: false,
-															isStatic: false,
-															isLiteral: false,
-															isNumber: false,
-															isString: false
-														},
 														binds: [
 															{
 																property_name: "column",
@@ -24345,9 +23879,7 @@ return (this._binds[0].getValue() == this._binds[1].getValue() ? ('lava-column-s
 																locator: "table",
 																tail: ["_sort_descending"]
 															}
-														],
-														modifiers: [],
-														active_modifiers: []
+														]
 													}
 												}
 											}
@@ -24376,22 +23908,12 @@ return (this._binds[0].getValue() == this._binds[1].getValue() ? ('lava-column-s
 						evaluator: function() {
 return (this._binds[0].getValue());
 },
-						flags: {
-							hasModifiers: false,
-							hasActiveModifiers: false,
-							isScopeEval: true,
-							isStatic: false,
-							isLiteral: false,
-							isNumber: false,
-							isString: false
-						},
+						flags: {isScopeEval: true},
 						binds: [{
 							locator_type: "Name",
 							locator: "table",
 							tail: ["records"]
-						}],
-						modifiers: [],
-						active_modifiers: []
+						}]
 					},
 					as: "row",
 					template: [
@@ -24403,22 +23925,12 @@ return (this._binds[0].getValue());
 								evaluator: function() {
 return (this._binds[0].getValue());
 },
-								flags: {
-									hasModifiers: false,
-									hasActiveModifiers: false,
-									isScopeEval: true,
-									isStatic: false,
-									isLiteral: false,
-									isNumber: false,
-									isString: false
-								},
+								flags: {isScopeEval: true},
 								binds: [{
 									locator_type: "Name",
 									locator: "table",
 									tail: ["_columns"]
-								}],
-								modifiers: [],
-								active_modifiers: []
+								}]
 							},
 							as: "column",
 							template: [
@@ -24485,24 +23997,14 @@ return (this._binds[0].getValue());
 								evaluator: function() {
 return (this._binds[0].getValue());
 },
-								flags: {
-									hasModifiers: false,
-									hasActiveModifiers: false,
-									isScopeEval: true,
-									isStatic: false,
-									isLiteral: false,
-									isNumber: false,
-									isString: false
-								},
+								flags: {isScopeEval: true},
 								binds: [{
 									property_name: "row",
 									tail: [{
 										property_name: "column",
 										tail: ["name"]
 									}]
-								}],
-								modifiers: [],
-								active_modifiers: []
+								}]
 							}
 						},
 						"\r\n\t\t\t"
@@ -24516,24 +24018,14 @@ return (this._binds[0].getValue());
 								evaluator: function() {
 return (this._callGlobalModifier("translateBoolean", [!! this._binds[0].getValue()]));
 },
-								flags: {
-									hasModifiers: true,
-									hasActiveModifiers: false,
-									isScopeEval: false,
-									isStatic: false,
-									isLiteral: false,
-									isNumber: false,
-									isString: false
-								},
+								flags: {hasModifiers: true},
 								binds: [{
 									property_name: "row",
 									tail: [{
 										property_name: "column",
 										tail: ["name"]
 									}]
-								}],
-								modifiers: [],
-								active_modifiers: []
+								}]
 							}
 						},
 						"\r\n\t\t\t"
@@ -24571,22 +24063,11 @@ return (this._callGlobalModifier("translateBoolean", [!! this._binds[0].getValue
 					evaluator: function() {
 return (this._binds[0].getValue() == 'days');
 },
-					flags: {
-						hasModifiers: false,
-						hasActiveModifiers: false,
-						isScopeEval: false,
-						isStatic: false,
-						isLiteral: false,
-						isNumber: false,
-						isString: false
-					},
 					binds: [{
 						locator_type: "Name",
 						locator: "calendar",
 						tail: ["_selected_view"]
-					}],
-					modifiers: [],
-					active_modifiers: []
+					}]
 				},
 				template: [
 					"\r\n\t\t\t\t",
@@ -24645,22 +24126,12 @@ return (this._binds[0].getValue() == 'days');
 						evaluator: function() {
 return (this._binds[0].getValue());
 },
-						flags: {
-							hasModifiers: false,
-							hasActiveModifiers: false,
-							isScopeEval: true,
-							isStatic: false,
-							isLiteral: false,
-							isNumber: false,
-							isString: false
-						},
+						flags: {isScopeEval: true},
 						binds: [{
 							locator_type: "Name",
 							locator: "calendar",
 							tail: ["_month_year_string"]
-						}],
-						modifiers: [],
-						active_modifiers: []
+						}]
 					},
 					container: {
 						"class": "Element",
@@ -24710,22 +24181,12 @@ return (this._binds[0].getValue());
 						evaluator: function() {
 return (this._binds[0].getValue());
 },
-						flags: {
-							hasModifiers: false,
-							hasActiveModifiers: false,
-							isScopeEval: true,
-							isStatic: false,
-							isLiteral: false,
-							isNumber: false,
-							isString: false
-						},
+						flags: {isScopeEval: true},
 						binds: [{
 							locator_type: "Name",
 							locator: "calendar",
 							tail: ["_today_string"]
-						}],
-						modifiers: [],
-						active_modifiers: []
+						}]
 					},
 					container: {
 						"class": "Element",
@@ -24776,22 +24237,11 @@ return (this._binds[0].getValue());
 							evaluator: function() {
 return (this._binds[0].getValue() + '');
 },
-							flags: {
-								hasModifiers: false,
-								hasActiveModifiers: false,
-								isScopeEval: false,
-								isStatic: false,
-								isLiteral: false,
-								isNumber: false,
-								isString: false
-							},
 							binds: [{
 								locator_type: "Name",
 								locator: "calendar",
 								tail: ["_displayed_year"]
-							}],
-							modifiers: [],
-							active_modifiers: []
+							}]
 						}
 					},
 					"class": "Lava.WidgetConfigExtensionGateway",
@@ -24840,22 +24290,12 @@ return (this._binds[0].getValue() + '');
 						evaluator: function() {
 return (this._binds[0].getValue());
 },
-						flags: {
-							hasModifiers: false,
-							hasActiveModifiers: false,
-							isScopeEval: true,
-							isStatic: false,
-							isLiteral: false,
-							isNumber: false,
-							isString: false
-						},
+						flags: {isScopeEval: true},
 						binds: [{
 							locator_type: "Name",
 							locator: "calendar",
 							tail: ["_months"]
-						}],
-						modifiers: [],
-						active_modifiers: []
+						}]
 					},
 					as: "month",
 					template: [
@@ -24867,22 +24307,12 @@ return (this._binds[0].getValue());
 								evaluator: function() {
 return (this._binds[0].getValue());
 },
-								flags: {
-									hasModifiers: false,
-									hasActiveModifiers: false,
-									isScopeEval: true,
-									isStatic: false,
-									isLiteral: false,
-									isNumber: false,
-									isString: false
-								},
+								flags: {isScopeEval: true},
 								binds: [{
 									locator_type: "Name",
 									locator: "calendar",
 									tail: ["_weekdays"]
-								}],
-								modifiers: [],
-								active_modifiers: []
+								}]
 							},
 							as: "weekday",
 							template: [
@@ -24894,21 +24324,11 @@ return (this._binds[0].getValue());
 										evaluator: function() {
 return (this._binds[0].getValue());
 },
-										flags: {
-											hasModifiers: false,
-											hasActiveModifiers: false,
-											isScopeEval: true,
-											isStatic: false,
-											isLiteral: false,
-											isNumber: false,
-											isString: false
-										},
+										flags: {isScopeEval: true},
 										binds: [{
 											property_name: "weekday",
 											tail: ["title"]
-										}],
-										modifiers: [],
-										active_modifiers: []
+										}]
 									}
 								},
 								"</td>\r\n\t\t\t\t\t\t"
@@ -24922,21 +24342,11 @@ return (this._binds[0].getValue());
 								evaluator: function() {
 return (this._binds[0].getValue());
 },
-								flags: {
-									hasModifiers: false,
-									hasActiveModifiers: false,
-									isScopeEval: true,
-									isStatic: false,
-									isLiteral: false,
-									isNumber: false,
-									isString: false
-								},
+								flags: {isScopeEval: true},
 								binds: [{
 									property_name: "month",
 									tail: ["weeks"]
-								}],
-								modifiers: [],
-								active_modifiers: []
+								}]
 							},
 							as: "week",
 							template: [
@@ -24948,18 +24358,8 @@ return (this._binds[0].getValue());
 										evaluator: function() {
 return (this._binds[0].getValue());
 },
-										flags: {
-											hasModifiers: false,
-											hasActiveModifiers: false,
-											isScopeEval: true,
-											isStatic: false,
-											isLiteral: false,
-											isNumber: false,
-											isString: false
-										},
-										binds: [{property_name: "week"}],
-										modifiers: [],
-										active_modifiers: []
+										flags: {isScopeEval: true},
+										binds: [{property_name: "week"}]
 									},
 									as: "day",
 									template: [
@@ -25005,35 +24405,15 @@ return (this._binds[0].getValue());
 								evaluator: function() {
 return (this._binds[0].getValue() ? 'lava-calendar-today' : '');
 },
-								flags: {
-									hasModifiers: false,
-									hasActiveModifiers: false,
-									isScopeEval: false,
-									isStatic: false,
-									isLiteral: false,
-									isNumber: false,
-									isString: false
-								},
 								binds: [{
 									property_name: "day",
 									tail: ["is_today"]
-								}],
-								modifiers: [],
-								active_modifiers: []
+								}]
 							},
 							1: {
 								evaluator: function() {
 return ((this._binds[0].getValue() != this._binds[1].getValue()) ? 'lava-calendar-other-month-day' : '');
 },
-								flags: {
-									hasModifiers: false,
-									hasActiveModifiers: false,
-									isScopeEval: false,
-									isStatic: false,
-									isLiteral: false,
-									isNumber: false,
-									isString: false
-								},
 								binds: [
 									{
 										property_name: "month",
@@ -25043,23 +24423,12 @@ return ((this._binds[0].getValue() != this._binds[1].getValue()) ? 'lava-calenda
 										property_name: "day",
 										tail: ["month"]
 									}
-								],
-								modifiers: [],
-								active_modifiers: []
+								]
 							},
 							2: {
 								evaluator: function() {
 return ((this._binds[0].getValue() >= this._binds[1].getValue() && this._binds[2].getValue() <= this._binds[3].getValue()) ? 'lava-calendar-selected-day' : '');
 },
-								flags: {
-									hasModifiers: false,
-									hasActiveModifiers: false,
-									isScopeEval: false,
-									isStatic: false,
-									isLiteral: false,
-									isNumber: false,
-									isString: false
-								},
 								binds: [
 									{
 										property_name: "day",
@@ -25079,9 +24448,7 @@ return ((this._binds[0].getValue() >= this._binds[1].getValue() && this._binds[2
 										locator: "calendar",
 										tail: ["_selection_end"]
 									}
-								],
-								modifiers: [],
-								active_modifiers: []
+								]
 							}
 						}
 					},
@@ -25094,21 +24461,11 @@ return ((this._binds[0].getValue() >= this._binds[1].getValue() && this._binds[2
 								evaluator: function() {
 return (this._binds[0].getValue());
 },
-								flags: {
-									hasModifiers: false,
-									hasActiveModifiers: false,
-									isScopeEval: true,
-									isStatic: false,
-									isLiteral: false,
-									isNumber: false,
-									isString: false
-								},
+								flags: {isScopeEval: true},
 								binds: [{
 									property_name: "day",
 									tail: ["day"]
-								}],
-								modifiers: [],
-								active_modifiers: []
+								}]
 							}
 						},
 						"\r\n\t\t"
@@ -25125,22 +24482,12 @@ return (this._binds[0].getValue());
 						evaluator: function() {
 return (this._binds[0].getValue());
 },
-						flags: {
-							hasModifiers: false,
-							hasActiveModifiers: false,
-							isScopeEval: true,
-							isStatic: false,
-							isLiteral: false,
-							isNumber: false,
-							isString: false
-						},
+						flags: {isScopeEval: true},
 						binds: [{
 							locator_type: "Name",
 							locator: "calendar",
 							tail: ["_month_descriptor_rows"]
-						}],
-						modifiers: [],
-						active_modifiers: []
+						}]
 					},
 					as: "row",
 					template: [
@@ -25152,18 +24499,8 @@ return (this._binds[0].getValue());
 								evaluator: function() {
 return (this._binds[0].getValue());
 },
-								flags: {
-									hasModifiers: false,
-									hasActiveModifiers: false,
-									isScopeEval: true,
-									isStatic: false,
-									isLiteral: false,
-									isNumber: false,
-									isString: false
-								},
-								binds: [{property_name: "row"}],
-								modifiers: [],
-								active_modifiers: []
+								flags: {isScopeEval: true},
+								binds: [{property_name: "row"}]
 							},
 							as: "descriptor",
 							template: [
@@ -25175,21 +24512,11 @@ return (this._binds[0].getValue());
 										evaluator: function() {
 return (this._binds[0].getValue());
 },
-										flags: {
-											hasModifiers: false,
-											hasActiveModifiers: false,
-											isScopeEval: true,
-											isStatic: false,
-											isLiteral: false,
-											isNumber: false,
-											isString: false
-										},
+										flags: {isScopeEval: true},
 										binds: [{
 											property_name: "descriptor",
 											tail: ["title"]
-										}],
-										modifiers: [],
-										active_modifiers: []
+										}]
 									},
 									container: {
 										"class": "Element",
@@ -25208,15 +24535,6 @@ return (this._binds[0].getValue());
 												evaluator: function() {
 return (this._binds[0].getValue() == this._binds[1].getValue() ? 'lava-calendar-month-selected' : (this._binds[2].getValue() == this._binds[3].getValue() ? 'lava-calendar-month-current' : ''));
 },
-												flags: {
-													hasModifiers: false,
-													hasActiveModifiers: false,
-													isScopeEval: false,
-													isStatic: false,
-													isLiteral: false,
-													isNumber: false,
-													isString: false
-												},
 												binds: [
 													{
 														locator_type: "Name",
@@ -25236,9 +24554,7 @@ return (this._binds[0].getValue() == this._binds[1].getValue() ? 'lava-calendar-
 														property_name: "descriptor",
 														tail: ["index"]
 													}
-												],
-												modifiers: [],
-												active_modifiers: []
+												]
 											}
 										}
 									}
