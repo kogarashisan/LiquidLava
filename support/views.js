@@ -64,9 +64,14 @@ function _cScopeLocator() {
 
 function _cArgumentCommon() {
 
+	/**
+	 * @type {?Object}
+	 */
 	this.flags = {
-		hasModifiers: false,
-		hasActiveModifiers: false,
+		/**
+		 * Global modifiers are inlined and o not create a config
+		 */
+		hasGlobalModifiers: false,
 		/**
 		 * Argument returns value from a single scope, without expressions.
 		 * This flag is used to construct bindings.
@@ -87,12 +92,12 @@ function _cArgumentCommon() {
 	this.binds = [];
 
 	/**
-	 * @type {Array.<_cModifier>}
+	 * @type {?Array.<_cModifier>}
 	 */
 	this.modifiers = [];
 
 	/**
-	 * @type {Array,<_cModifier>}
+	 * @type {?Array,<_cModifier>}
 	 */
 	this.active_modifiers = [];
 

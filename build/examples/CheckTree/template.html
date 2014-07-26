@@ -18,8 +18,7 @@
 								+ ((foreach_index == @parent->count - 1) ? '-bottom' : '-middle')
 								+ ((node.type == 'folder' && node.children.length)
 									? (@widget.meta_storage[node.guid].is_expanded ? '-expanded' : '-collapsed')
-									: '-node')"></i>{* remove whitespace
-						*}<i x:type="view" class="lava-tree-icon" x:classes="'icon-' + node.type"></i>
+									: '-node')"></i>{>$tree.icon}
 						{>$tree.node_title}
 					</div>
 				</template>

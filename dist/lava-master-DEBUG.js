@@ -2637,7 +2637,7 @@ Lava.extenders = {
 
 	// properties that must be merged with parent configs
 	_widget_config_merged_properties: {
-		includes: '_mergeConfigProperty',
+		includes: '_mergeIncludes',
 		bindings: '_mergeConfigProperty',
 		assigns: '_mergeConfigProperty',
 		options: '_mergeConfigProperty',
@@ -2709,6 +2709,31 @@ Lava.extenders = {
 
 	},
 
+	_mergeIncludes: function(dest_container, source_container, property_name, parent_widget_name) {
+
+		var name,
+			dest = dest_container[property_name],
+			source = source_container[property_name],
+			new_name;
+
+		for (name in source) {
+
+			if (!(name in dest)) {
+
+				dest[name] = source[name];
+
+			} else {
+
+				new_name = parent_widget_name + '$' + name;
+				if (Lava.schema.DEBUG && (new_name in dest)) Lava.t();
+				dest[new_name] = source[name];
+
+			}
+
+		}
+
+	},
+
 	_mergeStorage: function(dest_container, source_container, property_name) {
 
 		var name,
@@ -2771,12 +2796,14 @@ Lava.extenders = {
 	 */
 	Default: function(config) {
 
-		var parent_config;
+		var parent_config,
+			parent_name;
 
 		if ('extends' in config) {
 
+			parent_name = config.extends;
 			// returns already extended configs
-			parent_config = Lava.getWidgetConfig(config.extends);
+			parent_config = Lava.getWidgetConfig(parent_name);
 
 			for (var name in parent_config) {
 
@@ -2786,7 +2813,7 @@ Lava.extenders = {
 
 				} else if (name in this._widget_config_merged_properties) {
 
-					this[this._widget_config_merged_properties[name]](config, parent_config, name);
+					this[this._widget_config_merged_properties[name]](config, parent_config, name, parent_name);
 
 				}
 
@@ -4279,6 +4306,11 @@ Lava.parsers.Common = {
 	_locator_regex: /^[\$\#\@]([a-zA-Z\_][a-zA-Z0-9\_]*)\.([a-zA-Z\_][a-zA-Z0-9\_]*)/,
 	_identifier_regex: /^[a-zA-Z\_][a-zA-Z0-9\_]*/,
 
+	// overridden includes have '$' in their name.
+	// Example: $tree.Tree$node
+	_include_locator_regex: /^[\$\#\@]([a-zA-Z\_][a-zA-Z0-9\_]*)\.([a-zA-Z\_][\$a-zA-Z0-9\_]*)/,
+	_include_identifier_regex: /^[a-zA-Z\_][\$a-zA-Z0-9\_]*/,
+
 	_view_config_property_setters: {
 		id: 'setViewConfigId',
 		label: 'setViewConfigLabel'
@@ -5192,7 +5224,7 @@ Lava.parsers.Common = {
 
 		while (targets_string.length) {
 
-			match = this._locator_regex.exec(targets_string);
+			match = this._include_locator_regex.exec(targets_string);
 			if (!match) guid_match = /^\d+$/.exec(targets_string);
 
 			if (match) {
@@ -5208,7 +5240,7 @@ Lava.parsers.Common = {
 
 			} else {
 
-				match = this._identifier_regex.exec(targets_string);
+				match = this._include_identifier_regex.exec(targets_string);
 				if (!match) Lava.t("Malformed targets (1): " + targets_string);
 				target.name = match[0];
 
@@ -7647,7 +7679,7 @@ Lava.ExpressionParser.yy = {
 		if (this.x_argument_widget_modifiers.length) result.modifiers = this.x_argument_widget_modifiers;
 		if (this.x_argument_active_modifiers.length) result.active_modifiers = this.x_argument_active_modifiers;
 
-		if (this.x_counters.widget_modifiers > 0 || this.x_counters.global_modifiers > 0) flags.hasModifiers = true;
+		if (this.x_counters.global_modifiers > 0) flags.hasGlobalModifiers = true;
 		if (this.x_argument_binds.length == 1
 			&& this.x_counters.operands == 1
 			&& this.x_counters.expression_tails == 0
@@ -9124,6 +9156,9 @@ Lava.define(
 });
 Lava.define(
 'Lava.animator.Units',
+/**
+ * @lends Lava.animator.Units#
+ */
 {
 
 	_property_name: null,
@@ -14450,8 +14485,8 @@ Lava.define(
 Lava.define(
 'Lava.scope.Abstract',
 /**
- @lends Lava.scope.Abstract#
- @extends Lava.mixin.Refreshable
+ * @lends Lava.scope.Abstract#
+ * @extends Lava.mixin.Refreshable
  */
 {
 
@@ -15161,6 +15196,12 @@ Lava.define(
 	_create_own_enumerable: false,
 	_after_refresh_callback: null,
 
+	/**
+	 * @param {Lava.scope.Argument} argument
+	 * @param {Lava.view.Foreach} view
+	 * @param {Lava.widget.Standard} widget
+	 * @param {?_cScopeForeach} options
+	 */
 	init: function(argument, view, widget, options) {
 
 		this._argument = argument;
@@ -22391,7 +22432,6 @@ return (this._binds[0].getValue());
 									evaluator: function() {
 return (this._callModifier("0", [this._binds[0].getValue()]));
 },
-									flags: {hasModifiers: true},
 									binds: [{
 										property_name: "option",
 										tail: ["value"]
@@ -23584,24 +23624,10 @@ return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() -
 							}
 						},
 						{
-							type: "view",
-							"class": "View",
-							container: {
-								"class": "Element",
-								tag_name: "i",
-								static_classes: ["lava-tree-icon"],
-								class_bindings: {
-									0: {
-										evaluator: function() {
-return ('icon-' + this._binds[0].getValue());
-},
-										binds: [{
-											property_name: "node",
-											tail: ["type"]
-										}]
-									}
-								}
-							}
+							locator_type: "Name",
+							locator: "tree",
+							name: "icon",
+							type: "include"
 						},
 						"\r\n\t\t\t",
 						{
@@ -23612,6 +23638,30 @@ return ('icon-' + this._binds[0].getValue());
 						},
 						"\r\n\t\t"
 					]
+				},
+				"\r\n\t"
+			],
+			icon: [
+				"\r\n\t\t",
+				{
+					type: "view",
+					"class": "View",
+					container: {
+						"class": "Element",
+						tag_name: "i",
+						static_classes: ["lava-tree-icon"],
+						class_bindings: {
+							0: {
+								evaluator: function() {
+return ('icon-' + this._binds[0].getValue());
+},
+								binds: [{
+									property_name: "node",
+									tail: ["type"]
+								}]
+							}
+						}
+					}
 				},
 				"\r\n\t"
 			],
@@ -24018,7 +24068,7 @@ return (this._binds[0].getValue());
 								evaluator: function() {
 return (this._callGlobalModifier("translateBoolean", [!! this._binds[0].getValue()]));
 },
-								flags: {hasModifiers: true},
+								flags: {hasGlobalModifiers: true},
 								binds: [{
 									property_name: "row",
 									tail: [{

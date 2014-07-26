@@ -1,8 +1,8 @@
 Lava.define(
 'Lava.scope.Abstract',
 /**
- @lends Lava.scope.Abstract#
- @extends Lava.mixin.Refreshable
+ * @lends Lava.scope.Abstract#
+ * @extends Lava.mixin.Refreshable
  */
 {
 

@@ -1,5 +1,8 @@
 Lava.define(
 'Lava.animator.Units',
+/**
+ * @lends Lava.animator.Units#
+ */
 {
 
 	_property_name: null,

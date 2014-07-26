@@ -206,5 +206,6 @@ module.exports = function(grunt) {
 
 	// Note: all tasks depend on previous tasks
 	grunt.registerTask('default', ['buildLava', 'buildIncludes', 'buildExamples', 'buildWeb', 'buildTasksPage', 'concat']);
+	//grunt.registerTask('default', ['buildDoc']);
 
 };

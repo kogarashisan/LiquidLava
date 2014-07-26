@@ -19,6 +19,11 @@ Lava.parsers.Common = {
 	_locator_regex: /^[\$\#\@]([a-zA-Z\_][a-zA-Z0-9\_]*)\.([a-zA-Z\_][a-zA-Z0-9\_]*)/,
 	_identifier_regex: /^[a-zA-Z\_][a-zA-Z0-9\_]*/,
 
+	// overridden includes have '$' in their name.
+	// Example: $tree.Tree$node
+	_include_locator_regex: /^[\$\#\@]([a-zA-Z\_][a-zA-Z0-9\_]*)\.([a-zA-Z\_][\$a-zA-Z0-9\_]*)/,
+	_include_identifier_regex: /^[a-zA-Z\_][\$a-zA-Z0-9\_]*/,
+
 	_view_config_property_setters: {
 		id: 'setViewConfigId',
 		label: 'setViewConfigLabel'
@@ -932,7 +937,7 @@ Lava.parsers.Common = {
 
 		while (targets_string.length) {
 
-			match = this._locator_regex.exec(targets_string);
+			match = this._include_locator_regex.exec(targets_string);
 			if (!match) guid_match = /^\d+$/.exec(targets_string);
 
 			if (match) {
@@ -948,7 +953,7 @@ Lava.parsers.Common = {
 
 			} else {
 
-				match = this._identifier_regex.exec(targets_string);
+				match = this._include_identifier_regex.exec(targets_string);
 				if (!match) Lava.t("Malformed targets (1): " + targets_string);
 				target.name = match[0];
 

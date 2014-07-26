@@ -927,24 +927,10 @@ return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() -
 									}
 								},
 								{
-									type: "view",
-									"class": "View",
-									container: {
-										"class": "Element",
-										tag_name: "i",
-										static_classes: ["lava-tree-icon"],
-										class_bindings: {
-											0: {
-												evaluator: function() {
-return ('icon-' + this._binds[0].getValue());
-},
-												binds: [{
-													property_name: "node",
-													tail: ["type"]
-												}]
-											}
-										}
-									}
+									locator_type: "Name",
+									locator: "tree",
+									name: "icon",
+									type: "include"
 								},
 								"\r\n\t\t\t\t\t",
 								{

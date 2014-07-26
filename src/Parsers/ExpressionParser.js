@@ -150,7 +150,7 @@ Lava.ExpressionParser.yy = {
 		if (this.x_argument_widget_modifiers.length) result.modifiers = this.x_argument_widget_modifiers;
 		if (this.x_argument_active_modifiers.length) result.active_modifiers = this.x_argument_active_modifiers;
 
-		if (this.x_counters.widget_modifiers > 0 || this.x_counters.global_modifiers > 0) flags.hasModifiers = true;
+		if (this.x_counters.global_modifiers > 0) flags.hasGlobalModifiers = true;
 		if (this.x_argument_binds.length == 1
 			&& this.x_counters.operands == 1
 			&& this.x_counters.expression_tails == 0

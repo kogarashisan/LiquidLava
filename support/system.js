@@ -121,3 +121,13 @@ function _cTranslatablePlural() {
 	this.context = '';
 
 }
+
+function _cScopeForeach() {
+
+	this.create_own_enumerable = false;
+	/**
+	 * @type {?string}
+	 */
+	this.after_refresh_callback = null;
+
+}

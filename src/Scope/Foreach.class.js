@@ -32,6 +32,12 @@ Lava.define(
 	_create_own_enumerable: false,
 	_after_refresh_callback: null,
 
+	/**
+	 * @param {Lava.scope.Argument} argument
+	 * @param {Lava.view.Foreach} view
+	 * @param {Lava.widget.Standard} widget
+	 * @param {?_cScopeForeach} options
+	 */
 	init: function(argument, view, widget, options) {
 
 		this._argument = argument;

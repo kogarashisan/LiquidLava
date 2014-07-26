@@ -261,10 +261,12 @@
 					+ ((foreach_index == @parent->count - 1) ? '-bottom' : '-middle')
 					+ ((node.type == 'folder' && node.children.length)
 						? (@widget.meta_storage[node.guid].is_expanded ? '-expanded' : '-collapsed')
-						: '-node')"></i>{* remove whitespace
-			*}<i x:type="view" class="lava-tree-icon" x:classes="'icon-' + node.type"></i>
+						: '-node')"></i>{>$tree.icon}
 			{>$tree.node_title}
 		</div>
+	</template>
+	<template role="include" name="icon">
+		<i x:type="view" class="lava-tree-icon" x:classes="'icon-' + node.type"></i>
 	</template>
 	<template role="include" name="node_children">
 		{$if(node.children.length && $tree.meta_storage[node.guid].is_expanded)}
@@ -277,11 +279,13 @@
 					}
 				}
 			</x:container_config>
-			<x:assign name="pad">{literal:}
+			<x:assign name="pad">
+				{literal:}
 					(foreach_index == count - 1)
 						? pad + '<div class="lava-tree-pad"></div>'
 						: pad + '<div class="lava-tree-pad-line"></div>'
-				{:literal}</x:assign>
+				{:literal}
+			</x:assign>
 			<x:assign name="level">@parent->level + 1</x:assign>
 			<div x:type="container" class="lava-tree-container">
 				{#foreach(node.children) as=node}

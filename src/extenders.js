@@ -5,7 +5,7 @@ Lava.extenders = {
 
 	// properties that must be merged with parent configs
 	_widget_config_merged_properties: {
-		includes: '_mergeConfigProperty',
+		includes: '_mergeIncludes',
 		bindings: '_mergeConfigProperty',
 		assigns: '_mergeConfigProperty',
 		options: '_mergeConfigProperty',
@@ -77,6 +77,31 @@ Lava.extenders = {
 
 	},
 
+	_mergeIncludes: function(dest_container, source_container, property_name, parent_widget_name) {
+
+		var name,
+			dest = dest_container[property_name],
+			source = source_container[property_name],
+			new_name;
+
+		for (name in source) {
+
+			if (!(name in dest)) {
+
+				dest[name] = source[name];
+
+			} else {
+
+				new_name = parent_widget_name + '$' + name;
+				if (Lava.schema.DEBUG && (new_name in dest)) Lava.t();
+				dest[new_name] = source[name];
+
+			}
+
+		}
+
+	},
+
 	_mergeStorage: function(dest_container, source_container, property_name) {
 
 		var name,
@@ -139,12 +164,14 @@ Lava.extenders = {
 	 */
 	Default: function(config) {
 
-		var parent_config;
+		var parent_config,
+			parent_name;
 
 		if ('extends' in config) {
 
+			parent_name = config.extends;
 			// returns already extended configs
-			parent_config = Lava.getWidgetConfig(config.extends);
+			parent_config = Lava.getWidgetConfig(parent_name);
 
 			for (var name in parent_config) {
 
@@ -154,7 +181,7 @@ Lava.extenders = {
 
 				} else if (name in this._widget_config_merged_properties) {
 
-					this[this._widget_config_merged_properties[name]](config, parent_config, name);
+					this[this._widget_config_merged_properties[name]](config, parent_config, name, parent_name);
 
 				}
 
