@@ -3,15 +3,12 @@ Lava.define(
 'Lava.view.refresher.Default',
 /**
  * Base class for animation support. Does not animate templates, but inserts and removes them separately.
- *
- * Design notes:
- * During one refresh cycle a template may become removed and than active again.
- *
  * @lends Lava.view.refresher.Default#
+ * @extends Lava.mixin.Observable
  */
 {
 
-	Implements: ['Lava.mixin.Observable'],
+	Extends: 'Lava.mixin.Observable',
 
 	Shared: '_insertion_strategies',
 

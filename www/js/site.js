@@ -195,13 +195,141 @@ Lava.define(
 
 });
 
+Lava.define(
+'Lava.widget.ContentLoader',
+{
+
+	Extends: 'Lava.widget.Standard',
+
+	name: 'page',
+
+	_properties: {
+		is_loading: false
+	},
+
+	_event_handlers: {
+		selectItem: '_selectItem'
+	},
+
+	_request: null,
+
+	init: function(config, widget, parent_view, template, properties) {
+
+		this.Standard$init(config, widget, parent_view, template, properties);
+
+		if (window.location.hash) {
+
+			var path = window.location.hash.substr(1),
+				item = this._getItemByHash(path);
+
+			if (item) {
+				this._loadItem(item);
+			} else {
+				window.alert('Page not found: ' + path);
+			}
+
+		}
+
+	},
+
+	_exec: function(script_src) {
+
+		var script = document.createElement('script');
+		script.setAttribute('type', 'text/javascript');
+		script.text = script_src;
+		document.head.appendChild(script);
+
+	},
+
+	_selectItem: function(dom_event_name, dom_event, view, template_arguments) {
+
+		var item = template_arguments[0];
+
+		if (this._request == null) {
+
+			if (item.get('is_loaded')) {
+
+				this._showItem(item);
+
+			} else {
+
+				this._loadItem(item);
+
+			}
+
+		}
+
+	},
+
+	_loadItem: function(item) {
+
+		var self = this;
+		this.set('is_loading', true);
+
+		this._request = new SafeRequest({
+			url: this._getFilePath(item),
+			method: 'GET',
+			onSuccess: function(text) {
+				self._onRequestSuccess(text, item);
+			},
+			onFailure: function() {
+				self._onRequestFailure(item);
+			}
+		});
+
+		this._request.send();
+
+	},
+
+	_onRequestSuccess: function(text, item) {
+
+		item.set('is_loaded', true);
+		this.set('is_loading', false);
+		this._request = null;
+
+		this._onItemLoaded(text, item);
+		this._showItem(item);
+
+	},
+
+	_onRequestFailure: function(item) {
+
+		this.set('is_loading', false);
+		this._request = null;
+
+	},
+
+	_getFilePath: function(item) {
+
+		Lava.t('Abstract function call');
+
+	},
+
+	_getItemByHash: function(path) {
+
+		Lava.t('Abstract function call');
+
+	},
+
+	_onItemLoaded: function(text, item) {
+
+		Lava.t('Abstract function call');
+
+	},
+
+	_showItem: function(item) {
+
+		Lava.t('Abstract function call');
+
+	}
+
+});
 
 Lava.define(
 'Lava.widget.ChangelogPage',
 {
 
-	Extends: 'Lava.widget.Standard',
-	name: 'changelog_page',
+	Extends: 'Lava.widget.ContentLoader',
 
 	_properties: {
 		versions: null,
@@ -210,116 +338,74 @@ Lava.define(
 		}
 	},
 
-	_event_handlers: {
-		selectVersion: '_selectVersion'
-	},
-
-	_request: null,
-
 	VERSIONS_DIR: 'versions/',
 
 	init: function(config, widget, parent_view, template, properties) {
 
 		this._properties.versions = Examples.makeLive(LavaVersions);
-		this.Standard$init(config, widget, parent_view, template, properties);
+		this.ContentLoader$init(config, widget, parent_view, template, properties);
 
 	},
 
-	_onRequestSuccess: function(html, target) {
+	_onItemLoaded: function(text, item) {
 
-		target.set('is_loading', false);
-		this._request = null;
-		target.set('is_loaded', true);
-		target.set('html', html);
-
-		this._showTarget(target);
+		item.set('html', text);
 
 	},
 
-	_onRequestFailure: function(example) {
-
-		example.set('is_loading', false);
-		this._request = null;
-
-	},
-
-	_selectVersion: function(dom_event_name, dom_event, view, template_arguments) {
-
-		var target = template_arguments[0];
-
-		if (this._request == null) {
-
-			if (target.get('is_loaded')) {
-
-				this._showTarget(target);
-
-			} else {
-
-				this._loadTarget(target);
-
-			}
-
-		}
-
-	},
-
-	showInitialVersion: function(name) {
+	_getItemByHash: function(path) {
 
 		var version = null;
 
-		Firestorm.Element.removeClass(Firestorm.getElementById('initial_loading_indicator'), 'hidden');
-
-		if (this._request != null) Lava.t();
-
 		this._properties.versions.each(function(value){
-			if (value.get('name') == name) {
+			if (value.get('name') == path) {
 				version = value;
 				return false;
 			}
 		});
 
-		if (version) {
-			if (version.get('is_loaded')) Lava.t();
-			this._loadTarget(version);
-		} else {
-			window.alert('Page not found: ' + name);
-		}
+		return version;
 
 	},
 
-	_showTarget: function(target) {
+	_showItem: function(item) {
 
 		var example_content_container = Firestorm.getElementById('version_content_container');
 
-		if (this._properties.selected_version != target) {
+		if (this._properties.selected_version != item) {
 
-			Firestorm.Element.setProperty(example_content_container, 'html', target.get('html'));
-			this._set('selected_version', target);
-			target.set('is_selected', true);
+			if (this._properties.selected_version.isProperties) this._properties.selected_version.set('is_selected', false);
+			Firestorm.Element.setProperty(example_content_container, 'html', item.get('html'));
+			this._set('selected_version', item);
+			item.set('is_selected', true);
 			Lava.refreshViews();
 
 		}
 
 	},
 
-	_loadTarget: function(target) {
+	_getFilePath: function(item) {
 
-		var self = this;
+		return this.VERSIONS_DIR + item.get('name') + '.html';
 
-		target.set('is_loading', true);
+	}
 
-		this._request = new SafeRequest({
-			url: this.VERSIONS_DIR + target.get('name') + '.html',
-			method: 'GET',
-			onSuccess: function(text) {
-				self._onRequestSuccess(text, target);
-			},
-			onFailure: function() {
-				self._onRequestFailure(target);
-			}
-		});
+});
 
-		this._request.send();
+Lava.define(
+'Lava.widget.ApiPage',
+{
+
+	Extends: 'Lava.widget.ContentLoader',
+
+	_properties: {
+		records: null
+	},
+
+	init: function(config, widget, parent_view, template, properties) {
+
+		this._properties.records = Examples.makeLive(api_tree_source);
+		this.ContentLoader$init(config, widget, parent_view, template, properties);
 
 	}
 
@@ -329,9 +415,7 @@ Lava.define(
 'Lava.widget.ExamplesPage',
 {
 
-	Extends: 'Lava.widget.Standard',
-
-	name: 'examples_page',
+	Extends: 'Lava.widget.ContentLoader',
 
 	_properties: {
 		examples: null,
@@ -339,14 +423,10 @@ Lava.define(
 		tree_records: null,
 		selected_example: {
 			title: 'Examples'
-		}
+		},
+		live_example_tree: null
 	},
 
-	_event_handlers: {
-		selectExample: '_selectExample'
-	},
-
-	_request: null,
 	_active_example_widget: null,
 
 	EXAMPLES_DIR: 'examples/',
@@ -364,29 +444,17 @@ Lava.define(
 			return !record.get('parent')
 		});
 
-		this.Standard$init(config, widget, parent_view, template, properties);
+		// create a global data object to avoid need for destroy() and garbage collection issues
+		this.set('live_example_tree', Examples.makeLive(ExampleData.example_tree));
+
+		this.ContentLoader$init(config, widget, parent_view, template, properties);
 
 	},
 
-	_exec: function(text) {
+	_onItemLoaded: function(package_json, example) {
 
-		var script = document.createElement('script');
-		script.setAttribute('type', 'text/javascript');
-		script.text = text;
-		document.head.appendChild(script);
-
-	},
-
-	_onRequestSuccess: function(package_json, example) {
-
-		example.set('is_loading', false);
-		this._request = null;
-		example.set('is_loaded', true);
-
-		var package_content = null,
+		var package_content = eval(package_json),
 			widget_config;
-
-		eval(package_json);
 
 		if (package_content['classes']) {
 			Browser.exec(package_content['classes']);
@@ -404,58 +472,20 @@ Lava.define(
 
 		example.set('widget_config', widget_config);
 
-		this._showExample(example);
-
 	},
 
-	_onRequestFailure: function(example) {
-
-		example.set('is_loading', false);
-		this._request = null;
-
-	},
-
-	_selectExample: function(dom_event_name, dom_event, view, template_arguments) {
-
-		var example = template_arguments[0];
-
-		if (this._request == null) {
-
-			if (example.get('is_loaded')) {
-
-				this._showExample(example);
-
-			} else {
-
-				this._loadExample(example);
-
-			}
-
-		}
-
-	},
-
-	showInitialExample: function(name) {
+	_getItemByHash: function(path) {
 
 		var example = null;
 
-		Firestorm.Element.removeClass(Firestorm.getElementById('initial_loading_indicator'), 'hidden');
-
-		if (this._request != null) Lava.t();
-
 		this._properties.examples.each(function(value){
-			if (value.get('name') == name) {
+			if (value.get('name') == path) {
 				example = value;
 				return false;
 			}
 		});
 
-		if (example) {
-			if (example.get('is_loaded')) Lava.t();
-			this._loadExample(example);
-		} else {
-			window.alert('Example not found: ' + name);
-		}
+		return example;
 
 	},
 
@@ -474,7 +504,7 @@ Lava.define(
 
 	},
 
-	_showExample: function(example) {
+	_showItem: function(example) {
 
 		var constructor,
 			widget_config,
@@ -519,28 +549,9 @@ Lava.define(
 
 	},
 
-	_loadExample: function(example) {
+	_getFilePath: function(item) {
 
-		var self = this;
-
-		example.set('is_loading', true);
-
-		this._request = new SafeRequest({
-			url: this.EXAMPLES_DIR + example.get('name') + '.js',
-			method: 'GET',
-			onSuccess: function(text) {
-
-				self._onRequestSuccess(text, example);
-
-			},
-			onFailure: function() {
-
-				self._onRequestFailure(example);
-
-			}
-		});
-
-		this._request.send();
+		return this.EXAMPLES_DIR + item.get('name') + '.js';
 
 	}
 
@@ -853,7 +864,7 @@ var MainPageTemplate = [{
 								static_classes: ["lava-tree-node"],
 								static_properties: {unselectable: "on"},
 								class_bindings: {
-									0: {
+									"0": {
 										evaluator: function() {
 return ('level-' + this._binds[0].getValue());
 },
@@ -895,7 +906,7 @@ return (this._binds[0].getValue());
 											}]
 										},
 										class_bindings: {
-											0: {
+											"0": {
 												evaluator: function() {
 return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() - 1) ? '-bottom' : '-middle') + ((this._binds[2].getValue() == 'folder' && this._binds[3].getValue()) ? (this._binds[4].getValue() ? '-expanded' : '-collapsed') : '-node'));
 },

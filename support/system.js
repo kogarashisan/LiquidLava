@@ -53,7 +53,7 @@ function _cClassData() {
 
 	/**
 	 * Used to build the class constructor.
-	 * @type {{}}
+	 * @type {Object}
 	 */
 	this.skeleton = {};
 

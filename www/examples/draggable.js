@@ -1,4 +1,4 @@
-var package_content = {
+({
 	tabs: [
 		{
 			title: "Classes",
@@ -96,4 +96,4 @@ return (this._binds[0].getValue() + 'px');
 			}
 		}
 	]
-}
+})

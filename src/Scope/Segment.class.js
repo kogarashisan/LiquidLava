@@ -2,6 +2,7 @@ Lava.define(
 'Lava.scope.Segment',
 /**
  * @lends Lava.scope.Segment#
+ * @extends Lava.scope.Abstract
  * @implements _iValueContainer
  */
 {

@@ -3,10 +3,11 @@ Lava.define(
 'Lava.animation.Abstract',
 /**
  * @lends Lava.animation.Abstract#
+ * @extends Lava.mixin.Observable
  */
 {
 
-	Implements: ['Lava.mixin.Observable'],
+	Extends: ['Lava.mixin.Observable'],
 
 	_started_time: 0,
 	_end_time: 0,
@@ -40,7 +41,7 @@ Lava.define(
 
 	/**
 	 * Called by Cron. Assigned in constructor.
-	 * @param {number} now The current time (new Date().getTime())
+	 * @param {number} now The current time (=new Date().getTime())
 	 */
 	onTimer: function(now) {
 

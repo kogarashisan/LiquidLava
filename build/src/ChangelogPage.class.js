@@ -1,11 +1,9 @@
 
-
 Lava.define(
 'Lava.widget.ChangelogPage',
 {
 
-	Extends: 'Lava.widget.Standard',
-	name: 'changelog_page',
+	Extends: 'Lava.widget.ContentLoader',
 
 	_properties: {
 		versions: null,
@@ -14,116 +12,55 @@ Lava.define(
 		}
 	},
 
-	_event_handlers: {
-		selectVersion: '_selectVersion'
-	},
-
-	_request: null,
-
 	VERSIONS_DIR: 'versions/',
 
 	init: function(config, widget, parent_view, template, properties) {
 
 		this._properties.versions = Examples.makeLive(LavaVersions);
-		this.Standard$init(config, widget, parent_view, template, properties);
+		this.ContentLoader$init(config, widget, parent_view, template, properties);
 
 	},
 
-	_onRequestSuccess: function(html, target) {
+	_onItemLoaded: function(text, item) {
 
-		target.set('is_loading', false);
-		this._request = null;
-		target.set('is_loaded', true);
-		target.set('html', html);
-
-		this._showTarget(target);
+		item.set('html', text);
 
 	},
 
-	_onRequestFailure: function(example) {
-
-		example.set('is_loading', false);
-		this._request = null;
-
-	},
-
-	_selectVersion: function(dom_event_name, dom_event, view, template_arguments) {
-
-		var target = template_arguments[0];
-
-		if (this._request == null) {
-
-			if (target.get('is_loaded')) {
-
-				this._showTarget(target);
-
-			} else {
-
-				this._loadTarget(target);
-
-			}
-
-		}
-
-	},
-
-	showInitialVersion: function(name) {
+	_getItemByHash: function(path) {
 
 		var version = null;
 
-		Firestorm.Element.removeClass(Firestorm.getElementById('initial_loading_indicator'), 'hidden');
-
-		if (this._request != null) Lava.t();
-
 		this._properties.versions.each(function(value){
-			if (value.get('name') == name) {
+			if (value.get('name') == path) {
 				version = value;
 				return false;
 			}
 		});
 
-		if (version) {
-			if (version.get('is_loaded')) Lava.t();
-			this._loadTarget(version);
-		} else {
-			window.alert('Page not found: ' + name);
-		}
+		return version;
 
 	},
 
-	_showTarget: function(target) {
+	_showItem: function(item) {
 
 		var example_content_container = Firestorm.getElementById('version_content_container');
 
-		if (this._properties.selected_version != target) {
+		if (this._properties.selected_version != item) {
 
-			Firestorm.Element.setProperty(example_content_container, 'html', target.get('html'));
-			this._set('selected_version', target);
-			target.set('is_selected', true);
+			if (this._properties.selected_version.isProperties) this._properties.selected_version.set('is_selected', false);
+			Firestorm.Element.setProperty(example_content_container, 'html', item.get('html'));
+			this._set('selected_version', item);
+			item.set('is_selected', true);
 			Lava.refreshViews();
 
 		}
 
 	},
 
-	_loadTarget: function(target) {
+	_getFilePath: function(item) {
 
-		var self = this;
-
-		target.set('is_loading', true);
-
-		this._request = new SafeRequest({
-			url: this.VERSIONS_DIR + target.get('name') + '.html',
-			method: 'GET',
-			onSuccess: function(text) {
-				self._onRequestSuccess(text, target);
-			},
-			onFailure: function() {
-				self._onRequestFailure(target);
-			}
-		});
-
-		this._request.send();
+		return this.VERSIONS_DIR + item.get('name') + '.html';
 
 	}
 

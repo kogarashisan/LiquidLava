@@ -46,16 +46,21 @@
 		];
 		window.addEvent('load', function() {
 			Lava.bootstrap();
-
-			if (window.location.hash) {
-				Lava.view_manager.getViewById('changelog_page').showInitialVersion(window.location.hash.substr(1));
-			}
 		});
 	</script>
 </head>
 
 <body lava-app="ChangelogPage" id="changelog_page">
 <x:default_events>['click']</x:default_events>
+
+<!--LAVA_BUILD_INCLUDE:loading.html-->
+<div class="loading-box" x:type="view" x:style:display="($page.is_loading) ? 'block' : 'none'">
+	<div class="loading-box-inner">
+		<div style="position:absolute;width:100%;text-align:center;line-height:128px;font-weight:bold;">LOADING</div>
+		<img src="/www/img/loading.gif" style="margin: 0 auto;" />
+	</div>
+</div>
+<!--LAVA_BUILD_INCLUDE_END-->
 
 <!--LAVA_BUILD_INCLUDE:navbar.html-->
 <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -118,7 +123,7 @@
 					{#foreach(versions) as=version}
 					<li>
 						<a x:type="container"
-						   x:event:click="$changelog_page.selectVersion(version)"
+						   x:event:click="$page.selectItem(version)"
 						   x:style:font-weight="version.is_selected ? 'bold' : null"
 						   x:bind:href="'#' + version.name">
 							{#>version.name + (version.is_loading ? ' (loading...)' : '')}
@@ -138,9 +143,6 @@
 					the framework will not provide any backward compatibility in case of ay breaking changes.
 					Instead, you will receive a detailed upgrade instructions.
 				</p>
-				<div id="initial_loading_indicator" class="hidden initial-loading-indicator">
-					Loading...
-				</div>
 			</div>
 
 		</div>

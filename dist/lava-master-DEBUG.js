@@ -220,6 +220,10 @@ Firestorm.Element = {
 
 	},
 
+	/**
+	 * Remove the element from DOM tree. After removal it may be inserted back.
+	 * @param element
+	 */
 	remove: function(element) {
 
 		if (element.parentNode) {
@@ -1119,7 +1123,7 @@ var Lava = {
 	 * */
 	ELEMENT_ID_PREFIX: 'e',
 	SYSTEM_ID_REGEX: /^e?\\d+$/,
-	VALID_PROPERTY_NAME_REGEX: /^[a-zA-Z0-9\_\$]+$/,
+	VALID_PROPERTY_NAME_REGEX: /^[a-zA-Z\_\$][a-zA-Z0-9\_\$]*$/,
 	EMPTY_REGEX: /^\s*$/,
 	VALID_LABEL_REGEX: /^[A-Za-z\_][A-Za-z\_0-9]*$/,
 
@@ -1459,6 +1463,7 @@ var Lava = {
 		}
 
 		constructor = Lava.ClassManager.getConstructor(class_name || 'Lava.widget.Standard', 'Lava.widget');
+		if (Lava.schema.DEBUG && !constructor) Lava.t('Class not found: ' + class_name);
 		return /** @type {Lava.widget.Standard} */ new constructor(config);
 
 	},
@@ -3627,6 +3632,7 @@ Lava.ClassManager = {
 				name = shared_names[i];
 				if (Lava.schema.DEBUG && !(name in source_object)) Lava.t("Shared member is not in class: " + name);
 				if (Lava.schema.DEBUG && Firestorm.getType(source_object[name]) != 'object') Lava.t("Shared: class member must be an object");
+				if (Lava.schema.DEBUG && class_data.parent_class_data && (name in class_data.parent_class_data.skeleton)) Lava.t("[ClassManager] instance member from parent class may not become shared in descendant: " + name);
 
 				if (!(name in class_data.shared)) {
 
@@ -8987,7 +8993,7 @@ Lava.define(
  */
 {
 
-	Implements: 'Lava.mixin.Observable',
+	Extends: 'Lava.mixin.Observable',
 	level: 0,
 	_requeue: false,
 
@@ -9196,10 +9202,11 @@ Lava.define(
 'Lava.animation.Abstract',
 /**
  * @lends Lava.animation.Abstract#
+ * @extends Lava.mixin.Observable
  */
 {
 
-	Implements: ['Lava.mixin.Observable'],
+	Extends: ['Lava.mixin.Observable'],
 
 	_started_time: 0,
 	_end_time: 0,
@@ -9233,7 +9240,7 @@ Lava.define(
 
 	/**
 	 * Called by Cron. Assigned in constructor.
-	 * @param {number} now The current time (new Date().getTime())
+	 * @param {number} now The current time (=new Date().getTime())
 	 */
 	onTimer: function(now) {
 
@@ -10060,7 +10067,7 @@ Lava.define(
 
 	},
 
-	contains: function(value) {
+	containsValue: function(value) {
 
 		var i = 0,
 			result = false;
@@ -10220,7 +10227,7 @@ Lava.define(
 	 * @param {*} value
 	 * @returns {boolean} Whether the value existed.
 	 */
-	remove: function(value) {
+	removeValue: function(value) {
 
 		var result = false,
 			index = this._data_values.indexOf(value);
@@ -10234,7 +10241,7 @@ Lava.define(
 
 	},
 
-	include: function(value) {
+	includeValue: function(value) {
 
 		var result = false,
 			index = this._data_values.indexOf(value);
@@ -10464,7 +10471,6 @@ Lava.define(
 
 		}
 
-		count = this._count;
 		this._assignStorage(result);
 		this._setLength(this._data_uids.length);
 
@@ -11177,10 +11183,11 @@ Lava.define(
 'Lava.system.ViewManager',
 /**
  * @lends Lava.system.ViewManager#
+ * @extends Lava.mixin.Observable
  */
 {
 
-	Implements: 'Lava.mixin.Observable',
+	Extends: 'Lava.mixin.Observable',
 
 	// views and widgets, sorted by depth level. [level][views_array]
 	_dirty_views: [],
@@ -12018,10 +12025,11 @@ Lava.define(
 'Lava.system.App',
 /**
  * @lends Lava.system.App#
+ * @extends Lava.mixin.Observable
  */
 {
 
-	Implements: 'Lava.mixin.Observable',
+	Extends: 'Lava.mixin.Observable',
 
 	_modules: {},
 
@@ -12858,7 +12866,7 @@ Lava.define(
  */
 {
 
-	Implements: 'Lava.mixin.Observable',
+	Extends: 'Lava.mixin.Observable',
 
 	/**
 	 * @type {string}
@@ -12911,7 +12919,7 @@ Lava.define(
 	/**
 	 * Unlike isValidValue(), this is slow version of this check, which returns a message in case the value is invalid
 	 * @param {*} value
-	 * @returns {(string|null)}
+	 * @returns {?string}
 	 */
 	getInvalidReason: function(value) {
 
@@ -13148,7 +13156,7 @@ Lava.define(
 
 		var local_record = event_args.collection_owner;
 		if (local_record.guid in this._collections_by_record_guid) {
-			this._collections_by_record_guid[local_record.guid].remove(event_args.child);
+			this._collections_by_record_guid[local_record.guid].removeValue(event_args.child);
 		}
 
 	},
@@ -13157,7 +13165,7 @@ Lava.define(
 
 		var local_record = event_args.collection_owner;
 		if (local_record.guid in this._collections_by_record_guid) {
-			this._collections_by_record_guid[local_record.guid].include(event_args.child);
+			this._collections_by_record_guid[local_record.guid].includeValue(event_args.child);
 		}
 
 	},
@@ -13511,8 +13519,7 @@ Lava.define(
 Lava.define(
 'Lava.data.field.Record',
 /**
- * Maintains collections of records, grouped by this field - used by mirror Collection field.
- *
+ * Maintains collections of records, grouped by this field. Also used by mirror Collection field.
  * @lends Lava.data.field.Record#
  * @extends Lava.data.field.Abstract
  */
@@ -13996,7 +14003,7 @@ Lava.define(
  */
 {
 
-	Implements: 'Lava.mixin.Observable',
+	Extends: 'Lava.mixin.Observable',
 
 	_config: null,
 	_fields: {},
@@ -14400,7 +14407,6 @@ Lava.define(
 {
 
 	Extends: 'Lava.data.ModuleAbstract',
-
 	Implements: 'Lava.mixin.Properties',
 
 	//_attached_module: null,
@@ -14490,7 +14496,7 @@ Lava.define(
  */
 {
 
-	Implements: 'Lava.mixin.Refreshable',
+	Extends: 'Lava.mixin.Refreshable',
 
 	isValueContainer: true,
 
@@ -14570,7 +14576,7 @@ Lava.define(
  */
 {
 
-	Implements: 'Lava.mixin.Refreshable',
+	Extends: 'Lava.mixin.Refreshable',
 	isValueContainer: true,
 
 	/**
@@ -15171,7 +15177,7 @@ Lava.define(
  */
 {
 
-	Implements: 'Lava.mixin.Refreshable',
+	Extends: 'Lava.mixin.Refreshable',
 	isValueContainer: true,
 
 	/**
@@ -15405,7 +15411,7 @@ Lava.define(
 'Lava.scope.PropertyBinding',
 /**
  * @lends Lava.scope.PropertyBinding#
- * @extends Lava.mixin.Refreshable
+ * @extends Lava.scope.Abstract
  * @implements _iValueContainer
  */
 {
@@ -15545,6 +15551,7 @@ Lava.define(
 'Lava.scope.Segment',
 /**
  * @lends Lava.scope.Segment#
+ * @extends Lava.scope.Abstract
  * @implements _iValueContainer
  */
 {
@@ -16443,7 +16450,7 @@ Lava.define(
 Lava.define(
 'Lava.view.container.Morph',
 /**
- * Credits:
+ * @ Credits:
  * based on https://github.com/tomhuda/metamorph.js/
  *
  * @lends Lava.view.container.Morph#
@@ -16776,15 +16783,12 @@ Lava.define(
 'Lava.view.refresher.Default',
 /**
  * Base class for animation support. Does not animate templates, but inserts and removes them separately.
- *
- * Design notes:
- * During one refresh cycle a template may become removed and than active again.
- *
  * @lends Lava.view.refresher.Default#
+ * @extends Lava.mixin.Observable
  */
 {
 
-	Implements: ['Lava.mixin.Observable'],
+	Extends: 'Lava.mixin.Observable',
 
 	Shared: '_insertion_strategies',
 
@@ -17092,7 +17096,6 @@ Lava.define(
 'Lava.view.refresher.Animated',
 /**
  * Base class for animation support.
- *
  * @lends Lava.view.refresher.Animated#
  * @extends Lava.view.refresher.Default
  */
@@ -17230,7 +17233,7 @@ Lava.define(
  */
 {
 
-	Implements: 'Lava.mixin.Properties',
+	Extends: 'Lava.mixin.Properties',
 	/** @const */
 	isView: true,
 	/** @readonly */
@@ -17903,7 +17906,7 @@ Lava.define(
 	Extends: 'Lava.view.Abstract',
 
 	/**
-	 * @type {(Lava.system.Template|Lava.view.View)}
+	 * @type {Lava.system.Template}
 	 */
 	_contents: null,
 
@@ -19101,7 +19104,7 @@ Lava.define(
 	 * @param {Lava.widget.Standard} widget
 	 * @param {string} event_name
 	 * @param {string} handler_name
-	 * @param {(Array.<*>|null)} template_arguments
+	 * @param {?Array.<*>} template_arguments
 	 */
 	registerBroadcastTarget: function(widget, event_name, handler_name, template_arguments) {
 
@@ -20259,11 +20262,14 @@ Lava.define(
 
 		}
 
+		this._fire('panel_expanding');
+
 	},
 
 	_onPanelCollapsing: function(panel) {
 
 		Firestorm.Array.exclude(this._active_panels, panel);
+		this._fire('panel_collapsing');
 
 	},
 
@@ -20326,7 +20332,7 @@ Lava.define(
 
 	removePanel: function(panel) {
 
-		this._panels.remove(panel); // everything else will be done by destroy listener
+		this._panels.removeValue(panel); // everything else will be done by destroy listener
 
 	},
 
@@ -20465,7 +20471,7 @@ Lava.define(
 
 	removeTab: function(tab) {
 
-		this._tabs.remove(tab);
+		this._tabs.removeValue(tab);
 
 		if (this._properties._active_tab == tab) {
 
@@ -20725,8 +20731,6 @@ Lava.define(
 'Lava.widget.CollapsiblePanelExt',
 /**
  * A panel that removes it's content from DOM in collapsed state.
- * Uses an IF view with refresher, so in collapsed state the content is removed from DOM.
- *
  * @lends Lava.widget.CollapsiblePanelExt#
  * @extends Lava.widget.Standard#
  */
@@ -21298,17 +21302,6 @@ Lava.define(
 Lava.define(
 'Lava.widget.Calendar',
 /**
- * How the widget works:
- * it builds an array of "day" objects (6 rows of 7 days), then binds to it in the template.
- *
- * The year is limited to at least 3 digits and at most 5, cause of issues with the Date object:
- * 1) if created with 2 or more arguments and year less than three digits - than year starts from 1900
- *      Example: new Date(99, 0) -> Fri Jan 01 1999 00:00:00 GMT+0200...
- * 2) Maximum range for the date is 1970 (+/-) 100 000 000 days
- *
- * UTC time must be used to remove DST adjustment (it adds 1 hour in winter, which breaks the selection)
- * and time zone adjustments.
- *
  * @lends Lava.widget.Calendar#
  * @extends Lava.widget.CalendarAbstract#
  */
@@ -21591,7 +21584,12 @@ Lava.define(
 	name: 'tooltip',
 
 	_property_descriptors: {
-
+		y: {type: 'Integer'},
+		x: {type: 'Integer'},
+		y_offset: {type: 'Integer'},
+		x_offset: {type: 'Integer'},
+		html: {type: 'String'},
+		is_visible: {type: 'Boolean'}
 	},
 
 	_properties: {
@@ -23129,7 +23127,7 @@ return (! this._binds[0].getValue());
 									"class": "Element",
 									tag_name: "li",
 									class_bindings: {
-										0: {
+										"0": {
 											evaluator: function() {
 return (this._binds[0].getValue() == this._binds[1].getValue() ? 'active' : '');
 },
@@ -23142,7 +23140,7 @@ return (this._binds[0].getValue() == this._binds[1].getValue() ? 'active' : '');
 												}
 											]
 										},
-										1: {
+										"1": {
 											evaluator: function() {
 return (this._binds[0].getValue() ? '' : 'disabled');
 },
@@ -23253,7 +23251,7 @@ return (this._binds[0].getValue());
 							tag_name: "div",
 							static_classes: ["tab-pane"],
 							class_bindings: {
-								0: {
+								"0": {
 									evaluator: function() {
 return (this._binds[0].getValue() == this._binds[1].getValue() ? 'active' : '');
 },
@@ -23427,7 +23425,7 @@ return ((this._binds[0].getValue() + this._binds[1].getValue()) + 'px');
 				}
 			},
 			class_bindings: {
-				0: {
+				"0": {
 					evaluator: function() {
 return (this._binds[0].getValue() ? 'in' : 'hidden');
 },
@@ -23542,7 +23540,7 @@ return (0);
 						static_classes: ["lava-tree-node"],
 						static_properties: {unselectable: "on"},
 						class_bindings: {
-							0: {
+							"0": {
 								evaluator: function() {
 return ('level-' + this._binds[0].getValue());
 },
@@ -23584,7 +23582,7 @@ return (this._binds[0].getValue());
 									}]
 								},
 								class_bindings: {
-									0: {
+									"0": {
 										evaluator: function() {
 return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() - 1) ? '-bottom' : '-middle') + ((this._binds[2].getValue() == 'folder' && this._binds[3].getValue()) ? (this._binds[4].getValue() ? '-expanded' : '-collapsed') : '-node'));
 },
@@ -23651,7 +23649,7 @@ return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() -
 						tag_name: "i",
 						static_classes: ["lava-tree-icon"],
 						class_bindings: {
-							0: {
+							"0": {
 								evaluator: function() {
 return ('icon-' + this._binds[0].getValue());
 },
@@ -23914,7 +23912,7 @@ return (this._binds[0].getValue());
 												"class": "Element",
 												tag_name: "span",
 												class_bindings: {
-													0: {
+													"0": {
 														evaluator: function() {
 return (this._binds[0].getValue() == this._binds[1].getValue() ? ('lava-column-sort-' + (this._binds[2].getValue() ? 'de' : 'a') + 'scending') : '');
 },
@@ -24451,7 +24449,7 @@ return (this._binds[0].getValue());
 							}]
 						},
 						class_bindings: {
-							0: {
+							"0": {
 								evaluator: function() {
 return (this._binds[0].getValue() ? 'lava-calendar-today' : '');
 },
@@ -24460,7 +24458,7 @@ return (this._binds[0].getValue() ? 'lava-calendar-today' : '');
 									tail: ["is_today"]
 								}]
 							},
-							1: {
+							"1": {
 								evaluator: function() {
 return ((this._binds[0].getValue() != this._binds[1].getValue()) ? 'lava-calendar-other-month-day' : '');
 },
@@ -24475,7 +24473,7 @@ return ((this._binds[0].getValue() != this._binds[1].getValue()) ? 'lava-calenda
 									}
 								]
 							},
-							2: {
+							"2": {
 								evaluator: function() {
 return ((this._binds[0].getValue() >= this._binds[1].getValue() && this._binds[2].getValue() <= this._binds[3].getValue()) ? 'lava-calendar-selected-day' : '');
 },
@@ -24581,7 +24579,7 @@ return (this._binds[0].getValue());
 											}]
 										},
 										class_bindings: {
-											0: {
+											"0": {
 												evaluator: function() {
 return (this._binds[0].getValue() == this._binds[1].getValue() ? 'lava-calendar-month-selected' : (this._binds[2].getValue() == this._binds[3].getValue() ? 'lava-calendar-month-current' : ''));
 },

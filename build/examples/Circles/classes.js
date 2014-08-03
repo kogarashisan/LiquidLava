@@ -56,7 +56,7 @@ Lava.ClassManager.define(
 	_deleteCircle: function(dom_event_name, dom_event, view, template_arguments) {
 
 		if (this._properties.selected_circle) {
-			this._circles.remove(this._properties.selected_circle);
+			this._circles.removeValue(this._properties.selected_circle);
 			this.set('selected_circle', null);
 		}
 

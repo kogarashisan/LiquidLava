@@ -1,4 +1,4 @@
-var package_content = {
+({
 	tabs: [
 		{
 			title: "Template",
@@ -68,4 +68,4 @@ return (this._binds[0].getValue());
 			}
 		}
 	]
-}
+})

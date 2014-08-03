@@ -121,7 +121,7 @@ Lava.define(
 
 	removeTab: function(tab) {
 
-		this._tabs.remove(tab);
+		this._tabs.removeValue(tab);
 
 		if (this._properties._active_tab == tab) {
 

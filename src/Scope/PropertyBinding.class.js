@@ -3,7 +3,7 @@ Lava.define(
 'Lava.scope.PropertyBinding',
 /**
  * @lends Lava.scope.PropertyBinding#
- * @extends Lava.mixin.Refreshable
+ * @extends Lava.scope.Abstract
  * @implements _iValueContainer
  */
 {

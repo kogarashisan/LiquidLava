@@ -77,7 +77,9 @@ module.exports = function(grunt) {
 			makeTab(packs['editable_table'], 'Classes', 'javascript', grunt.file.read('./build/src/EditableTableExample.class.js'));
 
 			for (var example_name in packs) {
-				var result = 'var package_content = ' + Lava.Serializer.serialize(packs[example_name]);
+				// 1) have to use Lava serializer, cause template config contains functions
+				// 2) wrap the result in braces, cause otherwise my IDE shows the file as invalid (it's not JSON)
+				var result = '(' + Lava.Serializer.serialize(packs[example_name]) + ')';
 				grunt.file.write('./www/examples/' + example_name + '.js', result);
 			}
 

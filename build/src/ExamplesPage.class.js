@@ -3,9 +3,7 @@ Lava.define(
 'Lava.widget.ExamplesPage',
 {
 
-	Extends: 'Lava.widget.Standard',
-
-	name: 'examples_page',
+	Extends: 'Lava.widget.ContentLoader',
 
 	_properties: {
 		examples: null,
@@ -13,14 +11,10 @@ Lava.define(
 		tree_records: null,
 		selected_example: {
 			title: 'Examples'
-		}
+		},
+		live_example_tree: null
 	},
 
-	_event_handlers: {
-		selectExample: '_selectExample'
-	},
-
-	_request: null,
 	_active_example_widget: null,
 
 	EXAMPLES_DIR: 'examples/',
@@ -38,29 +32,17 @@ Lava.define(
 			return !record.get('parent')
 		});
 
-		this.Standard$init(config, widget, parent_view, template, properties);
+		// create a global data object to avoid need for destroy() and garbage collection issues
+		this.set('live_example_tree', Examples.makeLive(ExampleData.example_tree));
+
+		this.ContentLoader$init(config, widget, parent_view, template, properties);
 
 	},
 
-	_exec: function(text) {
+	_onItemLoaded: function(package_json, example) {
 
-		var script = document.createElement('script');
-		script.setAttribute('type', 'text/javascript');
-		script.text = text;
-		document.head.appendChild(script);
-
-	},
-
-	_onRequestSuccess: function(package_json, example) {
-
-		example.set('is_loading', false);
-		this._request = null;
-		example.set('is_loaded', true);
-
-		var package_content = null,
+		var package_content = eval(package_json),
 			widget_config;
-
-		eval(package_json);
 
 		if (package_content['classes']) {
 			Browser.exec(package_content['classes']);
@@ -78,58 +60,20 @@ Lava.define(
 
 		example.set('widget_config', widget_config);
 
-		this._showExample(example);
-
 	},
 
-	_onRequestFailure: function(example) {
-
-		example.set('is_loading', false);
-		this._request = null;
-
-	},
-
-	_selectExample: function(dom_event_name, dom_event, view, template_arguments) {
-
-		var example = template_arguments[0];
-
-		if (this._request == null) {
-
-			if (example.get('is_loaded')) {
-
-				this._showExample(example);
-
-			} else {
-
-				this._loadExample(example);
-
-			}
-
-		}
-
-	},
-
-	showInitialExample: function(name) {
+	_getItemByHash: function(path) {
 
 		var example = null;
 
-		Firestorm.Element.removeClass(Firestorm.getElementById('initial_loading_indicator'), 'hidden');
-
-		if (this._request != null) Lava.t();
-
 		this._properties.examples.each(function(value){
-			if (value.get('name') == name) {
+			if (value.get('name') == path) {
 				example = value;
 				return false;
 			}
 		});
 
-		if (example) {
-			if (example.get('is_loaded')) Lava.t();
-			this._loadExample(example);
-		} else {
-			window.alert('Example not found: ' + name);
-		}
+		return example;
 
 	},
 
@@ -148,7 +92,7 @@ Lava.define(
 
 	},
 
-	_showExample: function(example) {
+	_showItem: function(example) {
 
 		var constructor,
 			widget_config,
@@ -193,28 +137,9 @@ Lava.define(
 
 	},
 
-	_loadExample: function(example) {
+	_getFilePath: function(item) {
 
-		var self = this;
-
-		example.set('is_loading', true);
-
-		this._request = new SafeRequest({
-			url: this.EXAMPLES_DIR + example.get('name') + '.js',
-			method: 'GET',
-			onSuccess: function(text) {
-
-				self._onRequestSuccess(text, example);
-
-			},
-			onFailure: function() {
-
-				self._onRequestFailure(example);
-
-			}
-		});
-
-		this._request.send();
+		return this.EXAMPLES_DIR + item.get('name') + '.js';
 
 	}
 

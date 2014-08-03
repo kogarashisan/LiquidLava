@@ -92,3 +92,6 @@ footer .container {background: #f7f5fa;}
 .lava-code-overlay div, .lava-code-tooltips div {height: 18px;width: 100%;}
 .lava-code-overlay-line {background: yellow; opacity: 0.6; cursor: pointer}
 .lava-code-content {background: transparent !important;}
+
+.loading-box {position: fixed;left: 50%;top: 50%;z-index: 100;opacity: 0.5;margin: 0 auto;display: none}
+.loading-box-inner {width:128px;height:128px;left:-64px;top:-64px;position:relative;}

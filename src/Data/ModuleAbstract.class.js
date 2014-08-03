@@ -7,7 +7,7 @@ Lava.define(
  */
 {
 
-	Implements: 'Lava.mixin.Observable',
+	Extends: 'Lava.mixin.Observable',
 
 	_config: null,
 	_fields: {},

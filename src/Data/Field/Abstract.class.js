@@ -7,7 +7,7 @@ Lava.define(
  */
 {
 
-	Implements: 'Lava.mixin.Observable',
+	Extends: 'Lava.mixin.Observable',
 
 	/**
 	 * @type {string}
@@ -60,7 +60,7 @@ Lava.define(
 	/**
 	 * Unlike isValidValue(), this is slow version of this check, which returns a message in case the value is invalid
 	 * @param {*} value
-	 * @returns {(string|null)}
+	 * @returns {?string}
 	 */
 	getInvalidReason: function(value) {
 

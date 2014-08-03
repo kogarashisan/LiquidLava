@@ -3,8 +3,6 @@ Lava.define(
 'Lava.widget.CollapsiblePanelExt',
 /**
  * A panel that removes it's content from DOM in collapsed state.
- * Uses an IF view with refresher, so in collapsed state the content is removed from DOM.
- *
  * @lends Lava.widget.CollapsiblePanelExt#
  * @extends Lava.widget.Standard#
  */

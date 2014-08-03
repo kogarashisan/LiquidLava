@@ -12,7 +12,12 @@ Lava.define(
 	name: 'tooltip',
 
 	_property_descriptors: {
-
+		y: {type: 'Integer'},
+		x: {type: 'Integer'},
+		y_offset: {type: 'Integer'},
+		x_offset: {type: 'Integer'},
+		html: {type: 'String'},
+		is_visible: {type: 'Boolean'}
 	},
 
 	_properties: {

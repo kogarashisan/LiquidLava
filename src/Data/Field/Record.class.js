@@ -2,8 +2,7 @@
 Lava.define(
 'Lava.data.field.Record',
 /**
- * Maintains collections of records, grouped by this field - used by mirror Collection field.
- *
+ * Maintains collections of records, grouped by this field. Also used by mirror Collection field.
  * @lends Lava.data.field.Record#
  * @extends Lava.data.field.Abstract
  */

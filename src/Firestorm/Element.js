@@ -31,6 +31,10 @@ Firestorm.Element = {
 
 	},
 
+	/**
+	 * Remove the element from DOM tree. After removal it may be inserted back.
+	 * @param element
+	 */
 	remove: function(element) {
 
 		if (element.parentNode) {

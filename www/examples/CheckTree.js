@@ -1,4 +1,4 @@
-var package_content = {
+({
 	tabs: [
 		{
 			title: "Classes",
@@ -31,7 +31,7 @@ var package_content = {
 									static_classes: ["lava-tree-node"],
 									static_properties: {unselectable: "on"},
 									class_bindings: {
-										0: {
+										"0": {
 											evaluator: function() {
 return ('level-' + this._binds[0].getValue());
 },
@@ -118,7 +118,7 @@ return (this._binds[0].getValue());
 												}]
 											},
 											class_bindings: {
-												0: {
+												"0": {
 													evaluator: function() {
 return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() - 1) ? '-bottom' : '-middle') + ((this._binds[2].getValue() == 'folder' && this._binds[3].getValue()) ? (this._binds[4].getValue() ? '-expanded' : '-collapsed') : '-node'));
 },
@@ -213,4 +213,4 @@ return (this._binds[0].getValue());
 			}
 		}
 	]
-}
+})

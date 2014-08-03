@@ -2,11 +2,11 @@
 Lava.define(
 'Lava.view.container.Morph',
 /**
- * Credits:
- * based on https://github.com/tomhuda/metamorph.js/
- *
  * @lends Lava.view.container.Morph#
  * @implements iContainer
+ *
+ * Credits:
+ * based on https://github.com/tomhuda/metamorph.js/
  */
 {
 

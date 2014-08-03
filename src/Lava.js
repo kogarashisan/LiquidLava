@@ -85,7 +85,7 @@ var Lava = {
 	 * */
 	ELEMENT_ID_PREFIX: 'e',
 	SYSTEM_ID_REGEX: /^e?\\d+$/,
-	VALID_PROPERTY_NAME_REGEX: /^[a-zA-Z0-9\_\$]+$/,
+	VALID_PROPERTY_NAME_REGEX: /^[a-zA-Z\_\$][a-zA-Z0-9\_\$]*$/,
 	EMPTY_REGEX: /^\s*$/,
 	VALID_LABEL_REGEX: /^[A-Za-z\_][A-Za-z\_0-9]*$/,
 
@@ -425,6 +425,7 @@ var Lava = {
 		}
 
 		constructor = Lava.ClassManager.getConstructor(class_name || 'Lava.widget.Standard', 'Lava.widget');
+		if (Lava.schema.DEBUG && !constructor) Lava.t('Class not found: ' + class_name);
 		return /** @type {Lava.widget.Standard} */ new constructor(config);
 
 	},

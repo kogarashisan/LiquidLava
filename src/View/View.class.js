@@ -11,7 +11,7 @@ Lava.define(
 	Extends: 'Lava.view.Abstract',
 
 	/**
-	 * @type {(Lava.system.Template|Lava.view.View)}
+	 * @type {Lava.system.Template}
 	 */
 	_contents: null,
 

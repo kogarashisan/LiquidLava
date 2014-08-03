@@ -209,7 +209,7 @@ Lava.define(
 
 	},
 
-	contains: function(value) {
+	containsValue: function(value) {
 
 		var i = 0,
 			result = false;
@@ -369,7 +369,7 @@ Lava.define(
 	 * @param {*} value
 	 * @returns {boolean} Whether the value existed.
 	 */
-	remove: function(value) {
+	removeValue: function(value) {
 
 		var result = false,
 			index = this._data_values.indexOf(value);
@@ -383,7 +383,7 @@ Lava.define(
 
 	},
 
-	include: function(value) {
+	includeValue: function(value) {
 
 		var result = false,
 			index = this._data_values.indexOf(value);
@@ -613,7 +613,6 @@ Lava.define(
 
 		}
 
-		count = this._count;
 		this._assignStorage(result);
 		this._setLength(this._data_uids.length);
 

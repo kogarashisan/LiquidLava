@@ -176,11 +176,14 @@ Lava.define(
 
 		}
 
+		this._fire('panel_expanding');
+
 	},
 
 	_onPanelCollapsing: function(panel) {
 
 		Firestorm.Array.exclude(this._active_panels, panel);
+		this._fire('panel_collapsing');
 
 	},
 
@@ -243,7 +246,7 @@ Lava.define(
 
 	removePanel: function(panel) {
 
-		this._panels.remove(panel); // everything else will be done by destroy listener
+		this._panels.removeValue(panel); // everything else will be done by destroy listener
 
 	},
 

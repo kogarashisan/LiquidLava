@@ -3,10 +3,11 @@ Lava.define(
 'Lava.system.App',
 /**
  * @lends Lava.system.App#
+ * @extends Lava.mixin.Observable
  */
 {
 
-	Implements: 'Lava.mixin.Observable',
+	Extends: 'Lava.mixin.Observable',
 
 	_modules: {},
 

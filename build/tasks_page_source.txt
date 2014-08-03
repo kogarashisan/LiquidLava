@@ -195,6 +195,8 @@ Algorithms/Sorting/
 #Existing widgets
 Panels
 	- [P2,Feature] when panels are collapsed, but the body stays in DOM - they should sleep() their content
+Accordion
+	- [p5,Feature] collapseAll()
 TreeView
 	- [P3,Feature] must not contain Morph containers inside it
 Select
@@ -202,6 +204,7 @@ Select
 		// it will be custom function, which is independent from Sugar class.
 		// Schema will define where to put the result. <br/>
 		// Requires Sugar modification.
+	- [P5,Refactoring] browser fixes and code that accesses elements should be in Firestorm
 DropDown
 	- [P3,Feature] does not support the "disabled" class (is it needed?); "open" class should be assignable via option.
 Calendar

@@ -55,10 +55,6 @@
 		];
 
 		window.addEvent('load', function() {
-			Lava.bootstrap();
-			Lava.schema.widget.ALLOW_REDEFINITION = true;
-			// create a global data object to avoid need for destroy() and garbage collection issues
-			Lava.view_manager.getViewById('ExamplesApp').set('live_example_tree', Examples.makeLive(ExampleData.example_tree));
 
 			var original_define = Lava.ClassManager.define;
 			Lava.ClassManager.define = function(name, body) {
@@ -66,10 +62,10 @@
 					original_define.apply(Lava.ClassManager, [name, body]);
 				}
 			};
+			Lava.schema.widget.ALLOW_REDEFINITION = true;
 
-			if (window.location.hash) {
-				Lava.view_manager.getViewById('ExamplesApp').showInitialExample(window.location.hash.substr(1));
-			}
+			Lava.bootstrap();
+
 		});
 	</script>
 	<style>
@@ -79,6 +75,15 @@
 
 <body lava-app="ExamplesPage" id="ExamplesApp">
 <x:default_events>['click']</x:default_events>
+
+<!--LAVA_BUILD_INCLUDE:loading.html-->
+<div class="loading-box" x:type="view" x:style:display="($page.is_loading) ? 'block' : 'none'">
+	<div class="loading-box-inner">
+		<div style="position:absolute;width:100%;text-align:center;line-height:128px;font-weight:bold;">LOADING</div>
+		<img src="/www/img/loading.gif" style="margin: 0 auto;" />
+	</div>
+</div>
+<!--LAVA_BUILD_INCLUDE_END-->
 
 <!--LAVA_BUILD_INCLUDE:navbar.html-->
 <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -141,7 +146,7 @@
 					{#foreach(examples) as=example}
 					<li>
 						<a x:type="container"
-							x:event:click="$examples_page.selectExample(example)"
+							x:event:click="$page.selectItem(example)"
 							x:style:font-weight="example.is_selected ? 'bold' : null"
 							x:bind:href="'#' + example.name">
 								{#>example.title + (example.is_loading ? ' (loading...)' : '')}
@@ -157,11 +162,7 @@
 			<h1 x:type="container">{#>selected_example.title}</h1>
 
 			<div id="example_content_container" class="example-content-container">
-				<p>These examples serve educational purposes, this is not a technology showcase.</p>
-				<p>Your main source of knowledge must be the framework's source code. To get familiar with the framework, it's recommended to watch the video tutorials.</p>
-				<div id="initial_loading_indicator" class="hidden initial-loading-indicator">
-					Loading...
-				</div>
+				<p>You can find the source of each example in build/examples directory.</p>
 			</div>
 
 			<tabs id="example_tabs"></tabs>

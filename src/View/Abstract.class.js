@@ -8,7 +8,7 @@ Lava.define(
  */
 {
 
-	Implements: 'Lava.mixin.Properties',
+	Extends: 'Lava.mixin.Properties',
 	/** @const */
 	isView: true,
 	/** @readonly */

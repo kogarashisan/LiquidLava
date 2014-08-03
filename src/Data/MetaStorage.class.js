@@ -9,7 +9,6 @@ Lava.define(
 {
 
 	Extends: 'Lava.data.ModuleAbstract',
-
 	Implements: 'Lava.mixin.Properties',
 
 	//_attached_module: null,

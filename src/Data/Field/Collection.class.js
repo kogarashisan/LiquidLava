@@ -74,7 +74,7 @@ Lava.define(
 
 		var local_record = event_args.collection_owner;
 		if (local_record.guid in this._collections_by_record_guid) {
-			this._collections_by_record_guid[local_record.guid].remove(event_args.child);
+			this._collections_by_record_guid[local_record.guid].removeValue(event_args.child);
 		}
 
 	},
@@ -83,7 +83,7 @@ Lava.define(
 
 		var local_record = event_args.collection_owner;
 		if (local_record.guid in this._collections_by_record_guid) {
-			this._collections_by_record_guid[local_record.guid].include(event_args.child);
+			this._collections_by_record_guid[local_record.guid].includeValue(event_args.child);
 		}
 
 	},

@@ -435,7 +435,7 @@ Lava.define(
 	 * @param {Lava.widget.Standard} widget
 	 * @param {string} event_name
 	 * @param {string} handler_name
-	 * @param {(Array.<*>|null)} template_arguments
+	 * @param {?Array.<*>} template_arguments
 	 */
 	registerBroadcastTarget: function(widget, event_name, handler_name, template_arguments) {
 

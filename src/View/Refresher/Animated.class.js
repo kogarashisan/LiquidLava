@@ -3,7 +3,6 @@ Lava.define(
 'Lava.view.refresher.Animated',
 /**
  * Base class for animation support.
- *
  * @lends Lava.view.refresher.Animated#
  * @extends Lava.view.refresher.Default
  */

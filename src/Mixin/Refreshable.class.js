@@ -7,7 +7,7 @@ Lava.define(
  */
 {
 
-	Implements: 'Lava.mixin.Observable',
+	Extends: 'Lava.mixin.Observable',
 	level: 0,
 	_requeue: false,
 

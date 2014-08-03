@@ -3,10 +3,11 @@ Lava.define(
 'Lava.system.ViewManager',
 /**
  * @lends Lava.system.ViewManager#
+ * @extends Lava.mixin.Observable
  */
 {
 
-	Implements: 'Lava.mixin.Observable',
+	Extends: 'Lava.mixin.Observable',
 
 	// views and widgets, sorted by depth level. [level][views_array]
 	_dirty_views: [],

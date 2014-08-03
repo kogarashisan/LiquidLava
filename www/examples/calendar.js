@@ -1,4 +1,4 @@
-var package_content = {
+({
 	tabs: [
 		{
 			title: "Classes",
@@ -33,4 +33,4 @@ var package_content = {
 		},
 		"\r\n"
 	]
-}
+})

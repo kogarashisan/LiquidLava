@@ -6,7 +6,7 @@ Lava.define(
  */
 {
 
-	Implements: 'Lava.mixin.Refreshable',
+	Extends: 'Lava.mixin.Refreshable',
 
 	isValueContainer: true,
 
