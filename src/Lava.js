@@ -110,7 +110,7 @@ var Lava = {
 	_widget_title_to_sugar_instance: {},
 	_sugar_instances: {},
 
-	/** @type {Lavadoc._tGUID} */
+	/** @type {_tGUID} */
 	guid: 1,
 	is_init_done: false,
 	_refresh_timer: null,

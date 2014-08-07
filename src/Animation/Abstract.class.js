@@ -19,7 +19,7 @@ Lava.define(
 
 	_transition: null,
 	/**
-	 * @type {Lavadoc._tGUID}
+	 * @type {_tGUID}
 	 */
 	guid: null,
 

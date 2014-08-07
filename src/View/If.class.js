@@ -18,11 +18,11 @@ Lava.define(
 	_count_arguments: 0,
 	_active_argument_index: null,
 	/**
-	 * @type {Array.<Lavadoc._tRenderable>}
+	 * @type {Array.<_tRenderable>}
 	 */
 	_contents: [],
 	/**
-	 * @type {Lavadoc._tRenderable}
+	 * @type {_tRenderable}
 	 */
 	_else_contents: null,
 

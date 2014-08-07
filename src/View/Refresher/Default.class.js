@@ -26,21 +26,21 @@ Lava.define(
 
 	/**
 	 * Temporary storage for templates which were removed during current refresh cycle
-	 * @type {Object.<Lavadoc._tGUID, Lava.system.Template>}
+	 * @type {Object.<_tGUID, Lava.system.Template>}
 	 */
 	_removed_templates: {},
 
 	/**
-	 * @type {Object.<Lavadoc._tGUID, Lava.system.Template>}
+	 * @type {Object.<_tGUID, Lava.system.Template>}
 	 */
 	_current_templates: [],
 
 	/**
-	 * @type {Object.<Lavadoc._tGUID, Lava.animation.Standard>}
+	 * @type {Object.<_tGUID, Lava.animation.Standard>}
 	 */
 	_animations_by_template_guid: {},
 	/**
-	 * @type {Object.<Lavadoc._tGUID, Lava.system.Template>}
+	 * @type {Object.<_tGUID, Lava.system.Template>}
 	 */
 	_templates_by_animation_guid: {},
 

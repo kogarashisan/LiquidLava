@@ -1148,7 +1148,7 @@ var Lava = {
 	_widget_title_to_sugar_instance: {},
 	_sugar_instances: {},
 
-	/** @type {Lavadoc._tGUID} */
+	/** @type {_tGUID} */
 	guid: 1,
 	is_init_done: false,
 	_refresh_timer: null,
@@ -4402,7 +4402,7 @@ Lava.parsers.Common = {
 	// Start: block handlers
 
 	/**
-	 * @param {Lavadoc._tTemplate} result
+	 * @param {_tTemplate} result
 	 * @param {_cRawDirective} directive
 	 * @param {_cView} view_config
 	 */
@@ -4432,7 +4432,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * @param {Lavadoc._tTemplate} result
+	 * @param {_tTemplate} result
 	 * @param {_cInclude} include_config
 	 */
 	_compileInclude: function(result, include_config) {
@@ -4442,7 +4442,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * @param {Lavadoc._tTemplate} result
+	 * @param {_tTemplate} result
 	 * @param {string} string
 	 */
 	_compileString: function(result, string) {
@@ -4464,7 +4464,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * @param {Lavadoc._tTemplate} result
+	 * @param {_tTemplate} result
 	 * @param {_cRawBlock} raw_block
 	 */
 	_compileBlock: function(result, raw_block) {
@@ -4527,7 +4527,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * @param {Lavadoc._tTemplate} result
+	 * @param {_tTemplate} result
 	 * @param {_cRawExpression} raw_expression
 	 */
 	_compileExpression: function(result, raw_expression) {
@@ -4552,7 +4552,7 @@ Lava.parsers.Common = {
 
 	/**
 	 * Serialize the tag back into text.
-	 * @param {Lavadoc._tTemplate} result
+	 * @param {_tTemplate} result
 	 * @param {_cRawTag} tag
 	 */
 	_compileTag: function(result, tag) {
@@ -4598,7 +4598,7 @@ Lava.parsers.Common = {
 
 	/**
 	 * Tag with x:type='view'
-	 * @param {Lavadoc._tTemplate} result
+	 * @param {_tTemplate} result
 	 * @param {_cRawTag} raw_tag
 	 */
 	_compileView: function(result, raw_tag) {
@@ -4625,7 +4625,7 @@ Lava.parsers.Common = {
 
 	/**
 	 * Tag with x:type='container'
-	 * @param {Lavadoc._tTemplate} result
+	 * @param {_tTemplate} result
 	 * @param {_cRawTag} raw_tag
 	 */
 	_compileContainer: function(result, raw_tag) {
@@ -4721,7 +4721,7 @@ Lava.parsers.Common = {
 
 	/**
 	 * Tag with x:type='static'
-	 * @param {Lavadoc._tTemplate} result
+	 * @param {_tTemplate} result
 	 * @param {_cRawTag} raw_tag
 	 */
 	_compileStaticContainer: function(result, raw_tag) {
@@ -4755,7 +4755,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * @param {Lavadoc._tTemplate} result
+	 * @param {_tTemplate} result
 	 * @param {_cRawTag} raw_tag
 	 */
 	_compileSugar: function(result, raw_tag) {
@@ -4802,7 +4802,7 @@ Lava.parsers.Common = {
 	/**
 	 * Tag with x:widget='WidgetName'. Represents a widget with explicitly defined Element container.
 	 *
-	 * @param {Lavadoc._tTemplate} result
+	 * @param {_tTemplate} result
 	 * @param {_cRawTag} raw_tag
 	 */
 	_compileWidget: function(result, raw_tag) {
@@ -5063,9 +5063,9 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * @param {Lavadoc._tRawTemplate} blocks
+	 * @param {_tRawTemplate} blocks
 	 * @param {_cView} view_config
-	 * @returns {Lavadoc._tTemplate}
+	 * @returns {_tTemplate}
 	 */
 	compileTemplate: function(blocks, view_config) {
 
@@ -5126,7 +5126,7 @@ Lava.parsers.Common = {
 	/**
 	 * Compile template as usual and assert that it contains single view inside. Return that view.
 	 *
-	 * @param {Lavadoc._tRawTemplate} raw_blocks
+	 * @param {_tRawTemplate} raw_blocks
 	 * @returns {_cView}
 	 */
 	compileAsView: function(raw_blocks) {
@@ -5139,7 +5139,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * @param {(Lavadoc._tRawTemplate|Lavadoc._tTemplate)} blocks
+	 * @param {(_tRawTemplate|_tTemplate)} blocks
 	 * @returns {Array}
 	 */
 	asBlocks: function(blocks) {
@@ -8560,7 +8560,7 @@ Lava.TemplateParser._parse = Lava.TemplateParser.parse;
 /**
  * @param {string} input
  * @param {_cView=} view_config
- * @returns {Lavadoc._tTemplate}
+ * @returns {_tTemplate}
  */
 Lava.TemplateParser.parse = function(input, view_config) {
 
@@ -8570,7 +8570,7 @@ Lava.TemplateParser.parse = function(input, view_config) {
 
 /**
  * @param {string} input
- * @returns {Lavadoc._tRawTemplate}
+ * @returns {_tRawTemplate}
  */
 Lava.TemplateParser.parseRaw = function(input) {
 
@@ -9243,7 +9243,7 @@ Lava.define(
 
 	_transition: null,
 	/**
-	 * @type {Lavadoc._tGUID}
+	 * @type {_tGUID}
 	 */
 	guid: null,
 
@@ -10770,7 +10770,7 @@ Lava.define(
 	},
 
 	/**
-	 * @param {Lavadoc._tTemplate} template_config
+	 * @param {_tTemplate} template_config
 	 * @param {Lava.widget.Standard} widget
 	 * @param {Lava.view.Abstract} parent_view
 	 * @param {Object} child_properties
@@ -10788,8 +10788,8 @@ Lava.define(
 	},
 
 	/**
-	 * @param {Array.<Lavadoc._tRenderable>} result
-	 * @param {Lavadoc._tTemplate} children_config
+	 * @param {Array.<_tRenderable>} result
+	 * @param {_tTemplate} children_config
 	 * @param {Array.<string>} include_name_stack
 	 * @param {Object} properties
 	 */
@@ -11371,7 +11371,7 @@ Lava.define(
 	},
 
 	/**
-	 * @param {Lavadoc._tGUID} guid
+	 * @param {_tGUID} guid
 	 * @returns {Lava.view.Abstract}
 	 */
 	getViewByGuid: function(guid) {
@@ -11631,7 +11631,7 @@ Lava.define(
 	/**
 	 * @param {Lava.view.Abstract} starting_view
 	 * @param {_cInclude} config
-	 * @returns {Lavadoc._tTemplate}
+	 * @returns {_tTemplate}
 	 */
 	getInclude: function(starting_view, config) {
 
@@ -12323,9 +12323,9 @@ Lava.define(
 	},
 
 	/**
-	 * @param {Lavadoc._tSugarContent} schema
+	 * @param {_tSugarContent} schema
 	 * @param {_cRawTag} raw_tag
-	 * @returns {Lavadoc._tTemplate}
+	 * @returns {_tTemplate}
 	 */
 	_asTemplate: function(schema, raw_tag) {
 
@@ -12900,7 +12900,7 @@ Lava.define(
 	_module: null,
 	_config: null,
 	/**
-	 * @type {Object.<Lavadoc._tGUID, Object>}
+	 * @type {Object.<_tGUID, Object>}
 	 */
 	_storages_by_guid: null,
 	/**
@@ -13142,7 +13142,7 @@ Lava.define(
 	_collections_by_record_guid: {},
 	_collection_listeners_by_guid: {},
 	/**
-	 * @type {Object.<Lavadoc._tGUID, Lava.data.RecordAbstract>}
+	 * @type {Object.<_tGUID, Lava.data.RecordAbstract>}
 	 */
 	_collection_guid_to_record: {},
 
@@ -14532,7 +14532,7 @@ Lava.define(
 
 	/**
 	 * [name_source_guid} => Segment
-	 * @type {Object.<Lavadoc._tGUID, Lava.scope.Segment>}
+	 * @type {Object.<_tGUID, Lava.scope.Segment>}
 	 */
 	_data_segments: {},
 
@@ -16850,21 +16850,21 @@ Lava.define(
 
 	/**
 	 * Temporary storage for templates which were removed during current refresh cycle
-	 * @type {Object.<Lavadoc._tGUID, Lava.system.Template>}
+	 * @type {Object.<_tGUID, Lava.system.Template>}
 	 */
 	_removed_templates: {},
 
 	/**
-	 * @type {Object.<Lavadoc._tGUID, Lava.system.Template>}
+	 * @type {Object.<_tGUID, Lava.system.Template>}
 	 */
 	_current_templates: [],
 
 	/**
-	 * @type {Object.<Lavadoc._tGUID, Lava.animation.Standard>}
+	 * @type {Object.<_tGUID, Lava.animation.Standard>}
 	 */
 	_animations_by_template_guid: {},
 	/**
-	 * @type {Object.<Lavadoc._tGUID, Lava.system.Template>}
+	 * @type {Object.<_tGUID, Lava.system.Template>}
 	 */
 	_templates_by_animation_guid: {},
 
@@ -17342,7 +17342,7 @@ Lava.define(
 	_property_bindings_by_property: {},
 
 	/**
-	 * @type {Object.<Lavadoc._tGUID, Lava.scope.Segment>}
+	 * @type {Object.<_tGUID, Lava.scope.Segment>}
 	 */
 	_data_segments: {},
 
@@ -17893,7 +17893,7 @@ Lava.define(
 	},
 
 	/**
-	 * @param {(Lava.scope.PropertyBinding|Lavadoc.scope.DataBinding)} name_source_scope
+	 * @param {(Lava.scope.PropertyBinding|Lava.scope.DataBinding)} name_source_scope
 	 * @returns {Lava.scope.Segment}
 	 */
 	getSegment: function(name_source_scope) {
@@ -18154,7 +18154,7 @@ Lava.define(
 	_current_uids: [],
 	/**
 	 * [guid] => template
-	 * @type {Object.<string, Lavadoc._tRenderable>}
+	 * @type {Object.<string, _tRenderable>}
 	 */
 	_current_hash: {},
 
@@ -18452,11 +18452,11 @@ Lava.define(
 	_count_arguments: 0,
 	_active_argument_index: null,
 	/**
-	 * @type {Array.<Lavadoc._tRenderable>}
+	 * @type {Array.<_tRenderable>}
 	 */
 	_contents: [],
 	/**
-	 * @type {Lavadoc._tRenderable}
+	 * @type {_tRenderable}
 	 */
 	_else_contents: null,
 
@@ -18853,7 +18853,7 @@ Lava.define(
 	/**
 	 * @param {string} name
 	 * @param {Array} template_arguments
-	 * @returns {Lavadoc._tTemplate}
+	 * @returns {_tTemplate}
 	 */
 	getInclude: function(name, template_arguments) {
 
@@ -20475,8 +20475,8 @@ Lava.define(
 	 * @param {string} properties.name
 	 * @param {boolean} properties.is_enabled
 	 * @param {boolean} properties.is_hidden
-	 * @param {Lavadoc._tTemplate} properties.content_template Read only
-	 * @param {Lavadoc._tTemplate} properties.title_template Read only
+	 * @param {_tTemplate} properties.content_template Read only
+	 * @param {_tTemplate} properties.title_template Read only
 	 */
 	addTab: function(properties) {
 

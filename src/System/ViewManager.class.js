@@ -166,7 +166,7 @@ Lava.define(
 	},
 
 	/**
-	 * @param {Lavadoc._tGUID} guid
+	 * @param {_tGUID} guid
 	 * @returns {Lava.view.Abstract}
 	 */
 	getViewByGuid: function(guid) {
@@ -426,7 +426,7 @@ Lava.define(
 	/**
 	 * @param {Lava.view.Abstract} starting_view
 	 * @param {_cInclude} config
-	 * @returns {Lavadoc._tTemplate}
+	 * @returns {_tTemplate}
 	 */
 	getInclude: function(starting_view, config) {
 

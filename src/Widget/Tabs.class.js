@@ -75,8 +75,8 @@ Lava.define(
 	 * @param {string} properties.name
 	 * @param {boolean} properties.is_enabled
 	 * @param {boolean} properties.is_hidden
-	 * @param {Lavadoc._tTemplate} properties.content_template Read only
-	 * @param {Lavadoc._tTemplate} properties.title_template Read only
+	 * @param {_tTemplate} properties.content_template Read only
+	 * @param {_tTemplate} properties.title_template Read only
 	 */
 	addTab: function(properties) {
 

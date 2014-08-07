@@ -23,7 +23,7 @@ Lava.define(
 	_current_uids: [],
 	/**
 	 * [guid] => template
-	 * @type {Object.<string, Lavadoc._tRenderable>}
+	 * @type {Object.<string, _tRenderable>}
 	 */
 	_current_hash: {},
 

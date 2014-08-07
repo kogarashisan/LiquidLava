@@ -16,7 +16,7 @@ Lava.define(
 	_module: null,
 	_config: null,
 	/**
-	 * @type {Object.<Lavadoc._tGUID, Object>}
+	 * @type {Object.<_tGUID, Object>}
 	 */
 	_storages_by_guid: null,
 	/**

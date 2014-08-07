@@ -1,7 +1,5 @@
 
-Lavadoc = {};
-
-/** @typedef {number} Lavadoc._tGUID */
+/** @typedef {number} _tGUID */
 
 function _cClassData() {
 
@@ -61,19 +59,6 @@ function _cClassData() {
 	 * @type {Array}
 	 */
 	this.references = [];
-
-	/**
-	 * For each index in the references array - holds path to property in corresponding class.
-	 * Used while loading precompiled classes to build the references array
-	 * @type {Array}
-	 */
-	this.origins = [];
-
-	/**
-	 * Holds keys of this.shared
-	 * @type {Array}
-	 */
-	this.shared_names = [];
 
 	/**
 	 * Holds shared objects

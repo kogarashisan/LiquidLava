@@ -73,7 +73,7 @@ Lava.define(
 	_property_bindings_by_property: {},
 
 	/**
-	 * @type {Object.<Lavadoc._tGUID, Lava.scope.Segment>}
+	 * @type {Object.<_tGUID, Lava.scope.Segment>}
 	 */
 	_data_segments: {},
 
@@ -624,7 +624,7 @@ Lava.define(
 	},
 
 	/**
-	 * @param {(Lava.scope.PropertyBinding|Lavadoc.scope.DataBinding)} name_source_scope
+	 * @param {(Lava.scope.PropertyBinding|Lava.scope.DataBinding)} name_source_scope
 	 * @returns {Lava.scope.Segment}
 	 */
 	getSegment: function(name_source_scope) {

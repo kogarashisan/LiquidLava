@@ -1,6 +1,6 @@
 
 /**
- * @typedef {Array.<(string|_cRawTag|_cRawDirective|_cRawBlock|_cInclude|_cRawExpression)>} Lavadoc._tRawTemplate
+ * @typedef {Array.<(string|_cRawTag|_cRawDirective|_cRawBlock|_cInclude|_cRawExpression)>} _tRawTemplate
  */
 
 function _cRawTag() {
@@ -20,7 +20,7 @@ function _cRawTag() {
 	this.x = {};
 
 	/**
-	 * @type {Lavadoc._tRawTemplate}
+	 * @type {_tRawTemplate}
 	 */
 	this.content = [];
 
@@ -50,7 +50,7 @@ function _cRawDirective() {
 	};
 
 	/**
-	 * @type {Lavadoc._tRawTemplate}
+	 * @type {_tRawTemplate}
 	 */
 	this.content = [];
 
@@ -63,7 +63,7 @@ function _cRawBlock() {
 	// only for dynamic blocks
 	this.class_locator = {
 		/**
-		 * @type {Lavadoc._tKnownViewLocatorType}
+		 * @type {_tKnownViewLocatorType}
 		 */
 		locator_type: null,
 		name: ''
@@ -83,11 +83,11 @@ function _cRawBlock() {
 	 */
 	this.hash = {};
 	/**
-	 * @type {Lavadoc._tRawTemplate}
+	 * @type {_tRawTemplate}
 	 */
 	this.content = [];
 	/**
-	 * @type {Lavadoc._tRawTemplate}
+	 * @type {_tRawTemplate}
 	 */
 	this.else_content = [];
 	/**
@@ -95,7 +95,7 @@ function _cRawBlock() {
 	 */
 	this.elseif_arguments = [];
 	/**
-	 * @type {Array.<Lavadoc._tRawTemplate>}
+	 * @type {Array.<_tRawTemplate>}
 	 */
 	this.elseif_contents = []; // array of arrays
 }

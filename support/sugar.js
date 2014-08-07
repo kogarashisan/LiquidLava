@@ -97,8 +97,9 @@ function _cSugarContentObjectMap() {
 
 }
 
-/** @type {(_cSugarContentObjectMap|_cSugarContentTemplate|_cSugarContentTemplateCollection|_cSugarContentObject|_cSugarContentObjectCollection)} */
-Lavadoc._tSugarContent;
+/**
+ * @typedef {(_cSugarContentObjectMap|_cSugarContentTemplate|_cSugarContentTemplateCollection|_cSugarContentObject|_cSugarContentObjectCollection)} _tSugarContent
+ */
 
 function _cSugarAttribute() {
 
@@ -137,7 +138,7 @@ function _cSugar() {
 	 */
 	this.tag_name = '';
 
-	/** @type {Lavadoc._tSugarContent} */
+	/** @type {_tSugarContent} */
 	this.content_schema = null;
 
 	/** @type {Object.<string, _cSugarAttribute>} */

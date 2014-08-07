@@ -4,7 +4,7 @@ Lava.TemplateParser._parse = Lava.TemplateParser.parse;
 /**
  * @param {string} input
  * @param {_cView=} view_config
- * @returns {Lavadoc._tTemplate}
+ * @returns {_tTemplate}
  */
 Lava.TemplateParser.parse = function(input, view_config) {
 
@@ -14,7 +14,7 @@ Lava.TemplateParser.parse = function(input, view_config) {
 
 /**
  * @param {string} input
- * @returns {Lavadoc._tRawTemplate}
+ * @returns {_tRawTemplate}
  */
 Lava.TemplateParser.parseRaw = function(input) {
 

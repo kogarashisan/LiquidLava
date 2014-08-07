@@ -225,9 +225,9 @@ Lava.define(
 	},
 
 	/**
-	 * @param {Lavadoc._tSugarContent} schema
+	 * @param {_tSugarContent} schema
 	 * @param {_cRawTag} raw_tag
-	 * @returns {Lavadoc._tTemplate}
+	 * @returns {_tTemplate}
 	 */
 	_asTemplate: function(schema, raw_tag) {
 

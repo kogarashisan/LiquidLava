@@ -1,23 +1,23 @@
 
 /**
- * @typedef {(string|_cView|_cInclude|_cStaticValue|_cStaticEval|_cStaticTag|function)} Lavadoc._tTemplateItem
+ * @typedef {(string|_cView|_cInclude|_cStaticValue|_cStaticEval|_cStaticTag|function)} _tTemplateItem
  */
 
-/** @typedef {Array.<_tTemplateItem>} Lavadoc._tTemplate */
+/** @typedef {Array.<_tTemplateItem>} _tTemplate */
 
-/** @typedef {Array.<(Lava.view.Abstract|string|function)>} Lavadoc._tRenderable */
+/** @typedef {Array.<(Lava.view.Abstract|string|function)>} _tRenderable */
 
-/** @typedef {(Array.<string|_cScopeLocator>)} Lavadoc._tPathSegment */
+/** @typedef {(Array.<string|_cScopeLocator>)} _tPathSegment */
 
 /** @enum {string} */
-Lavadoc._tKnownViewLocatorType = {
+_tKnownViewLocatorType = {
 	Name: 'Name',
 	Label: 'Label',
 	Id: 'Id'
 };
 
 /** @enum {string} */
-Lavadoc._tViewLocatorType = {
+_tViewLocatorType = {
 	Name: 'Name',
 	Label: 'Label',
 	Id: 'Id',
@@ -26,7 +26,7 @@ Lavadoc._tViewLocatorType = {
 
 function _cKnownViewLocator() {
 
-	/** @type {Lavadoc._tKnownViewLocatorType} */
+	/** @type {_tKnownViewLocatorType} */
 	this.locator_type = '';
 
 	this.locator = '';
@@ -36,7 +36,7 @@ function _cKnownViewLocator() {
 /** @extends {_cKnownViewLocator} */
 function _cViewLocator() {
 
-	/** @type {Lavadoc._tViewLocatorType} */
+	/** @type {_tViewLocatorType} */
 	this.locator_type = '';
 
 }
@@ -53,7 +53,7 @@ function _cScopeLocator() {
 	this.property_name = '';
 
 	/**
-	 * @type {Array.<Lavadoc._tPathSegment>}
+	 * @type {Array.<_tPathSegment>}
 	 */
 	this.tail = [];
 
@@ -256,12 +256,12 @@ function _cView() {
 	this['class'] = '';
 
 	/**
-	 * @type {!Lavadoc._tTemplate}
+	 * @type {!_tTemplate}
 	 */
 	this.template = [];
 
 	/**
-	 * @type {?Lavadoc._tTemplate}
+	 * @type {?_tTemplate}
 	 */
 	this.else_template = [];
 
@@ -281,7 +281,7 @@ function _cView() {
 	this.elseif_arguments = [];
 
 	/**
-	 * @type {?Array.<Lavadoc._tTemplate>}
+	 * @type {?Array.<_tTemplate>}
 	 */
 	this.elseif_templates = [];
 
@@ -366,7 +366,7 @@ function _cWidget() {
 	this.real_class = '';
 
 	this.class_locator = {
-		/** @type {Lavadoc._tViewLocatorType} */
+		/** @type {_tViewLocatorType} */
 		locator_type: null,
 		name: ''
 	};
@@ -386,7 +386,7 @@ function _cWidget() {
 	this.extends = '';
 
 	/**
-	 * @type {Object.<string, Lavadoc._tTemplate>}
+	 * @type {Object.<string, _tTemplate>}
 	 */
 	this.includes = {};
 
@@ -509,7 +509,7 @@ function _cStaticTag() {
 
 	this.name = '';
 
-	/** @type {Lavadoc._tTemplate} */
+	/** @type {_tTemplate} */
 	this.template = null;
 
 }

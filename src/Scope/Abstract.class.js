@@ -17,7 +17,7 @@ Lava.define(
 
 	/**
 	 * [name_source_guid} => Segment
-	 * @type {Object.<Lavadoc._tGUID, Lava.scope.Segment>}
+	 * @type {Object.<_tGUID, Lava.scope.Segment>}
 	 */
 	_data_segments: {},
 

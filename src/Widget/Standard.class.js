@@ -140,7 +140,7 @@ Lava.define(
 	/**
 	 * @param {string} name
 	 * @param {Array} template_arguments
-	 * @returns {Lavadoc._tTemplate}
+	 * @returns {_tTemplate}
 	 */
 	getInclude: function(name, template_arguments) {
 

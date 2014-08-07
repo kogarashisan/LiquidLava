@@ -31,7 +31,7 @@ Lava.define(
 	},
 
 	/**
-	 * @param {Lavadoc._tTemplate} template_config
+	 * @param {_tTemplate} template_config
 	 * @param {Lava.widget.Standard} widget
 	 * @param {Lava.view.Abstract} parent_view
 	 * @param {Object} child_properties
@@ -49,8 +49,8 @@ Lava.define(
 	},
 
 	/**
-	 * @param {Array.<Lavadoc._tRenderable>} result
-	 * @param {Lavadoc._tTemplate} children_config
+	 * @param {Array.<_tRenderable>} result
+	 * @param {_tTemplate} children_config
 	 * @param {Array.<string>} include_name_stack
 	 * @param {Object} properties
 	 */

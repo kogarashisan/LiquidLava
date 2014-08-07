@@ -35,7 +35,7 @@ Lava.define(
 	_collections_by_record_guid: {},
 	_collection_listeners_by_guid: {},
 	/**
-	 * @type {Object.<Lavadoc._tGUID, Lava.data.RecordAbstract>}
+	 * @type {Object.<_tGUID, Lava.data.RecordAbstract>}
 	 */
 	_collection_guid_to_record: {},
 

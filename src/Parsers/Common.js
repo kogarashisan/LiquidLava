@@ -108,7 +108,7 @@ Lava.parsers.Common = {
 	// Start: block handlers
 
 	/**
-	 * @param {Lavadoc._tTemplate} result
+	 * @param {_tTemplate} result
 	 * @param {_cRawDirective} directive
 	 * @param {_cView} view_config
 	 */
@@ -138,7 +138,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * @param {Lavadoc._tTemplate} result
+	 * @param {_tTemplate} result
 	 * @param {_cInclude} include_config
 	 */
 	_compileInclude: function(result, include_config) {
@@ -148,7 +148,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * @param {Lavadoc._tTemplate} result
+	 * @param {_tTemplate} result
 	 * @param {string} string
 	 */
 	_compileString: function(result, string) {
@@ -170,7 +170,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * @param {Lavadoc._tTemplate} result
+	 * @param {_tTemplate} result
 	 * @param {_cRawBlock} raw_block
 	 */
 	_compileBlock: function(result, raw_block) {
@@ -233,7 +233,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * @param {Lavadoc._tTemplate} result
+	 * @param {_tTemplate} result
 	 * @param {_cRawExpression} raw_expression
 	 */
 	_compileExpression: function(result, raw_expression) {
@@ -258,7 +258,7 @@ Lava.parsers.Common = {
 
 	/**
 	 * Serialize the tag back into text.
-	 * @param {Lavadoc._tTemplate} result
+	 * @param {_tTemplate} result
 	 * @param {_cRawTag} tag
 	 */
 	_compileTag: function(result, tag) {
@@ -304,7 +304,7 @@ Lava.parsers.Common = {
 
 	/**
 	 * Tag with x:type='view'
-	 * @param {Lavadoc._tTemplate} result
+	 * @param {_tTemplate} result
 	 * @param {_cRawTag} raw_tag
 	 */
 	_compileView: function(result, raw_tag) {
@@ -331,7 +331,7 @@ Lava.parsers.Common = {
 
 	/**
 	 * Tag with x:type='container'
-	 * @param {Lavadoc._tTemplate} result
+	 * @param {_tTemplate} result
 	 * @param {_cRawTag} raw_tag
 	 */
 	_compileContainer: function(result, raw_tag) {
@@ -427,7 +427,7 @@ Lava.parsers.Common = {
 
 	/**
 	 * Tag with x:type='static'
-	 * @param {Lavadoc._tTemplate} result
+	 * @param {_tTemplate} result
 	 * @param {_cRawTag} raw_tag
 	 */
 	_compileStaticContainer: function(result, raw_tag) {
@@ -461,7 +461,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * @param {Lavadoc._tTemplate} result
+	 * @param {_tTemplate} result
 	 * @param {_cRawTag} raw_tag
 	 */
 	_compileSugar: function(result, raw_tag) {
@@ -508,7 +508,7 @@ Lava.parsers.Common = {
 	/**
 	 * Tag with x:widget='WidgetName'. Represents a widget with explicitly defined Element container.
 	 *
-	 * @param {Lavadoc._tTemplate} result
+	 * @param {_tTemplate} result
 	 * @param {_cRawTag} raw_tag
 	 */
 	_compileWidget: function(result, raw_tag) {
@@ -769,9 +769,9 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * @param {Lavadoc._tRawTemplate} blocks
+	 * @param {_tRawTemplate} blocks
 	 * @param {_cView} view_config
-	 * @returns {Lavadoc._tTemplate}
+	 * @returns {_tTemplate}
 	 */
 	compileTemplate: function(blocks, view_config) {
 
@@ -832,7 +832,7 @@ Lava.parsers.Common = {
 	/**
 	 * Compile template as usual and assert that it contains single view inside. Return that view.
 	 *
-	 * @param {Lavadoc._tRawTemplate} raw_blocks
+	 * @param {_tRawTemplate} raw_blocks
 	 * @returns {_cView}
 	 */
 	compileAsView: function(raw_blocks) {
@@ -845,7 +845,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * @param {(Lavadoc._tRawTemplate|Lavadoc._tTemplate)} blocks
+	 * @param {(_tRawTemplate|_tTemplate)} blocks
 	 * @returns {Array}
 	 */
 	asBlocks: function(blocks) {
