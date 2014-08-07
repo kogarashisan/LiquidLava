@@ -160,7 +160,7 @@ Lava.define(
 
 	},
 
-	destroyRefreshable: function() {
+	suspendRefreshable: function() {
 
 		if (this._refresh_ticket) {
 			Lava.ScopeManager.cancelScopeRefresh(this._refresh_ticket, this.level);

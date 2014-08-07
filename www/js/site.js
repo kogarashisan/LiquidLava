@@ -399,13 +399,89 @@ Lava.define(
 	Extends: 'Lava.widget.ContentLoader',
 
 	_properties: {
-		records: null
+		api_tree: null,
+		descriptor: null,
+		extended_descriptor: null,
+		member_grouping: true
 	},
+
+	_event_handlers: {
+		node_click: '_onNodeClick'
+	},
+
+	API_DIR: 'api/',
+
+	_class_content_widget: null,
 
 	init: function(config, widget, parent_view, template, properties) {
 
-		this._properties.records = Examples.makeLive(api_tree_source);
+		this._properties.api_tree = Examples.makeLive(api_tree_source);
+		this._class_content_widget = Lava.createWidget('ClassContent');
 		this.ContentLoader$init(config, widget, parent_view, template, properties);
+
+	},
+
+	_onNodeClick: function(dom_event_name, dom_event, view, template_arguments) {
+
+		var node = template_arguments[0];
+		if (node.get('type') == 'class') {
+
+			this._selectItem(dom_event_name, dom_event, view, template_arguments);
+
+		} else {
+
+			node.set('is_expanded', !node.get('is_expanded'));
+
+		}
+
+		dom_event.preventDefault(); // to prevent text selection
+
+	},
+
+	_onItemLoaded: function(text, item) {
+
+		item.set('extended_descriptor', eval('(' + text + ')'));
+
+	},
+
+	_getItemByHash: function(path) {
+
+		/*var version = null;
+
+		this._properties.versions.each(function(value){
+			if (value.get('name') == path) {
+				version = value;
+				return false;
+			}
+		});
+
+		return version;*/
+
+	},
+
+	_showItem: function(item) {
+
+		if (this._properties.descriptor != item) {
+
+			if (this._properties.descriptor) this._properties.descriptor.set('is_selected', false);
+
+			this._set('descriptor', item);
+			this._set('extended_descriptor', item.get('extended_descriptor'));
+			item.set('is_selected', true);
+
+			if (!this._class_content_widget.isInDOM()) {
+				this._class_content_widget.inject(Firestorm.getElementById('content_area'), 'Top');
+			}
+
+			Lava.refreshViews();
+
+		}
+
+	},
+
+	_getFilePath: function(item) {
+
+		return this.API_DIR + item.get('name') + '.js';
 
 	}
 
@@ -588,31 +664,6 @@ Lava.define(
 	}
 
 });
-
-Lava.define(
-'Lava.widget.MainPageTree',
-{
-
-	Extends: 'Lava.widget.Standard',
-	name: 'tree',
-
-	_properties: {
-		records: null
-	},
-
-	_event_handlers: {
-		node_click: '_onNodeClick'
-	},
-
-	_onNodeClick: function(dom_event_name, dom_event, view, template_arguments) {
-
-		var node = template_arguments[0];
-		node.set('is_expanded', !node.get('is_expanded'));
-		dom_event.preventDefault(); // to prevent text selection
-
-	}
-
-});
 Lava.widgets["Example"] = {
 	type: "widget",
 	"class": "Lava.WidgetConfigExtensionGateway",
@@ -639,7 +690,38 @@ Lava.widgets["Example"] = {
 	is_extended: false
 };
 Lava.sugar_map["example"] = {widget_title: "Example"};
-
+Lava.widgets["FolderTree"] = {
+	includes: {
+		icon: [
+			"\r\n\t\t",
+			{
+				type: "view",
+				"class": "View",
+				container: {
+					"class": "Element",
+					tag_name: "i",
+					static_classes: ["lava-tree-icon"],
+					class_bindings: {
+						"0": {
+							evaluator: function() {
+return ('icon-' + this._binds[0].getValue());
+},
+							binds: [{
+								property_name: "node",
+								tail: ["type"]
+							}]
+						}
+					}
+				}
+			},
+			"\r\n\t"
+		]
+	},
+	"extends": "Tree",
+	"class": "Lava.WidgetConfigExtensionGateway",
+	extender_type: "Default",
+	is_extended: false
+};
 Lava.widgets["EditableTable"] = {
 	includes: {
 		tbody: [
@@ -842,264 +924,3 @@ return (this._binds[0].getValue() == this._binds[1].getValue());
 	extender_type: "Default",
 	is_extended: false
 };
-
-var MainPageTemplate = [{
-	type: "widget",
-	"class": "Lava.WidgetConfigExtensionGateway",
-	extender_type: "Default",
-	"extends": "Example",
-	includes: {
-		content: [
-			"\r\n\t<div class=\"col-md-6\" style=\"padding: 1em;overflow: auto;height: 370px;position: relative;\">\r\n\t\t",
-			{
-				includes: {
-					node_body: [
-						"\r\n\t\t\t\t",
-						{
-							type: "view",
-							"class": "View",
-							container: {
-								"class": "Element",
-								tag_name: "div",
-								static_classes: ["lava-tree-node"],
-								static_properties: {unselectable: "on"},
-								class_bindings: {
-									"0": {
-										evaluator: function() {
-return ('level-' + this._binds[0].getValue());
-},
-										binds: [{property_name: "level"}]
-									}
-								}
-							},
-							template: [
-								"\r\n\t\t\t\t\t",
-								{
-									type: "view",
-									"class": "Expression",
-									argument: {
-										evaluator: function() {
-return (this._binds[0].getValue());
-},
-										flags: {isScopeEval: true},
-										binds: [{property_name: "pad"}]
-									},
-									escape_off: true,
-									template: []
-								},
-								{
-									type: "view",
-									"class": "View",
-									container: {
-										"class": "Element",
-										tag_name: "i",
-										static_classes: ["lava-tree-expander"],
-										events: {
-											click: [{
-												locator_type: "Name",
-												locator: "tree",
-												name: "node_click",
-												arguments: [{
-													type: 2,
-													data: {property_name: "node"}
-												}]
-											}]
-										},
-										class_bindings: {
-											"0": {
-												evaluator: function() {
-return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() - 1) ? '-bottom' : '-middle') + ((this._binds[2].getValue() == 'folder' && this._binds[3].getValue()) ? (this._binds[4].getValue() ? '-expanded' : '-collapsed') : '-node'));
-},
-												binds: [
-													{property_name: "foreach_index"},
-													{
-														locator_type: "Label",
-														locator: "parent",
-														property_name: "count"
-													},
-													{
-														property_name: "node",
-														tail: ["type"]
-													},
-													{
-														property_name: "node",
-														tail: [
-															"children",
-															"length"
-														]
-													},
-													{
-														property_name: "node",
-														tail: ["is_expanded"]
-													}
-												]
-											}
-										}
-									}
-								},
-								{
-									locator_type: "Name",
-									locator: "tree",
-									name: "icon",
-									type: "include"
-								},
-								"\r\n\t\t\t\t\t",
-								{
-									locator_type: "Name",
-									locator: "tree",
-									name: "node_title",
-									type: "include"
-								},
-								"\r\n\t\t\t\t"
-							]
-						},
-						"\r\n\t\t\t"
-					],
-					node_children: [
-						"\r\n\t\t\t\t",
-						{
-							type: "view",
-							"class": "If",
-							argument: {
-								evaluator: function() {
-return (this._binds[0].getValue() && this._binds[1].getValue());
-},
-								binds: [
-									{
-										property_name: "node",
-										tail: [
-											"children",
-											"length"
-										]
-									},
-									{
-										property_name: "node",
-										tail: ["is_expanded"]
-									}
-								]
-							},
-							container: {
-								"class": "Emulated",
-								options: {placement: "after-previous"}
-							},
-							refresher: {"class": "Collapse"},
-							assigns: {
-								pad: {
-									evaluator: function() {
-return ((this._binds[0].getValue() == this._binds[1].getValue() - 1) ? this._binds[2].getValue() + '<div class="lava-tree-pad"></div>' : this._binds[3].getValue() + '<div class="lava-tree-pad-line"></div>');
-},
-									binds: [
-										{property_name: "foreach_index"},
-										{property_name: "count"},
-										{property_name: "pad"},
-										{property_name: "pad"}
-									]
-								},
-								level: {
-									evaluator: function() {
-return (this._binds[0].getValue() + 1);
-},
-									binds: [{
-										locator_type: "Label",
-										locator: "parent",
-										property_name: "level"
-									}]
-								}
-							},
-							template: [
-								"\r\n\t\t\t\t\t\r\n\t\t\t\t\t\r\n\t\t\t\t\t\r\n\t\t\t\t\t\r\n\t\t\t\t\t",
-								{
-									type: "view",
-									"class": "Foreach",
-									argument: {
-										evaluator: function() {
-return (this._binds[0].getValue());
-},
-										flags: {isScopeEval: true},
-										binds: [{
-											property_name: "node",
-											tail: ["children"]
-										}]
-									},
-									as: "node",
-									template: [
-										"\r\n\t\t\t\t\t\t\t",
-										{
-											locator_type: "Name",
-											locator: "tree",
-											name: "node",
-											type: "include"
-										},
-										"\r\n\t\t\t\t\t\t"
-									],
-									container: {
-										"class": "Element",
-										tag_name: "div",
-										static_classes: ["lava-tree-container"]
-									}
-								},
-								"\r\n\t\t\t\t"
-							]
-						},
-						"\r\n\t\t\t"
-					]
-				},
-				real_class: "MainPageTree",
-				"extends": "Tree",
-				id: "main_page_tree",
-				assigns: {
-					records: {
-						evaluator: function() {
-return (this._binds[0].getValue());
-},
-						flags: {isScopeEval: true},
-						binds: [{property_name: "tree_records"}]
-					}
-				},
-				"class": "Lava.WidgetConfigExtensionGateway",
-				extender_type: "Default",
-				type: "widget"
-			},
-			"\r\n\t</div>\r\n\t<div class=\"col-md-6\" style=\"padding: 1em\">\r\n\t\t",
-			{
-				options: {
-					columns: [
-						{
-							name: "title",
-							title: "Title",
-							type: "String",
-							is_editable: true
-						},
-						{
-							name: "type",
-							title: "Type",
-							type: "String"
-						},
-						{
-							name: "is_expanded",
-							title: "Expanded?",
-							type: "Boolean",
-							is_editable: true
-						}
-					]
-				},
-				"extends": "EditableTable",
-				id: "main_page_table",
-				assigns: {
-					records: {
-						evaluator: function() {
-return (this._binds[0].getValue());
-},
-						flags: {isScopeEval: true},
-						binds: [{property_name: "all_tree_records"}]
-					}
-				},
-				"class": "Lava.WidgetConfigExtensionGateway",
-				extender_type: "Default",
-				type: "widget"
-			},
-			"\r\n\t</div>\r\n\t<div class=\"clearfix\"></div>\r\n"
-		]
-	},
-	id: "main_page_example"
-}];

@@ -7,7 +7,7 @@ Lava.define(
  */
 {
 
-	Extends: ['Lava.mixin.Observable'],
+	Extends: 'Lava.mixin.Observable',
 
 	_started_time: 0,
 	_end_time: 0,

@@ -56,9 +56,8 @@ module.exports = function(grunt) {
 
 		try { // workaround for a bug in Grunt, https://github.com/gruntjs/grunt/issues/1135
 
-			require('../temp/lava_module.js');
 			Lava = global.Lava;
-			eval(grunt.file.read('./build/temp/example_box_widget.js'));
+			//eval(grunt.file.read('./build/temp/site_widgets.js'));
 
 			for (var i = 0, count = example_names.length; i < count; i++) {
 

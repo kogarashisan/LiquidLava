@@ -150,7 +150,8 @@ Object parser sources: <br/>
 
 <!--
 
-All special characters, like "&<>" and even ";" must be escaped!
+Development note:
+all special characters, like "&<>" and even ";" must be escaped!
 
 -->
 <script type="x-grammar" id="expression_parser_grammar">
@@ -334,6 +335,11 @@ operand
 			var index = yy.x_argument_binds.push($1) - 1;
 			$$ = 'this._binds[' + index + '].getValue()';
 		}
+	| dynamicScope {
+			yy.x_counters.dynamic_scopes++;
+			var index = yy.x_argument_binds.push($1) - 1;
+			$$ = 'this._binds[' + index + '].getValue()';
+		}
 	| functionCall { $$ = $1; }
 	;
 
@@ -401,6 +407,14 @@ functionCall
 			$1.callback_name = $2;
 			var index = yy.x_argument_active_modifiers.push($1) - 1;
 			$$ = 'this._callActiveModifier("' + index + '", [' + $4 + '])';
+		}
+	;
+
+dynamicScope
+	: knownView OPEN_CURLY IDENTIFIER CLOSE_CURLY {
+			$1.isDynamic = true;
+			$1.property_name = $3;
+			$$ = $1;
 		}
 	;
 

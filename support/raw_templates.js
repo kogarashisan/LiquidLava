@@ -1,6 +1,7 @@
 
-/** @typedef {Array.<string|_cRawTag|_cRawDirective|_cRawBlock|_cInclude|_cRawExpression>} */
-Lavadoc._tRawTemplate;
+/**
+ * @typedef {Array.<(string|_cRawTag|_cRawDirective|_cRawBlock|_cInclude|_cRawExpression)>} Lavadoc._tRawTemplate
+ */
 
 function _cRawTag() {
 

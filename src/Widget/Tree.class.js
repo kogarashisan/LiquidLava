@@ -17,10 +17,10 @@ Lava.define(
 			fields: {
 				'is_expanded': {type:'Boolean'}
 			}
-		}
+		},
+		is_expanded_meta_storage_bind_config: Lava.ExpressionParser.parseScopeEval('$tree.meta_storage[node.guid].is_expanded'),
+		is_expanded_direct_bind_config: Lava.ExpressionParser.parseScopeEval('node.is_expanded')
 	},
-
-	_meta_storage: null,
 
 	_properties: {
 		records: null
@@ -30,19 +30,26 @@ Lava.define(
 		node_click: '_onNodeClick'
 	},
 
+	_meta_storage: null,
+	_is_expanded_bind_config: null,
+
 	init: function(config, widget, parent_view, template, properties) {
 
 		this.Standard$init(config, widget, parent_view, template, properties);
 
-		this._meta_storage = new Lava.data.MetaStorage(this._shared.meta_storage_config);
-		this.set('meta_storage', this._meta_storage);
+		this._is_expanded_bind_config = this._shared.is_expanded_direct_bind_config;
+		if (config.options && config.options.use_meta_storage) {
+			this._meta_storage = new Lava.data.MetaStorage(this._shared.meta_storage_config);
+			this.set('meta_storage', this._meta_storage);
+			this._is_expanded_bind_config = this._shared.is_expanded_meta_storage_bind_config;
+		}
 
 	},
 
 	_onNodeClick: function(dom_event_name, dom_event, view, template_arguments) {
 
-		var meta_record = this._meta_storage.get(template_arguments[0].guid);
-		meta_record.set('is_expanded', !meta_record.get('is_expanded'));
+		var property_source = this._meta_storage ? this._meta_storage.get(template_arguments[0].guid) : template_arguments[0];
+		property_source.set('is_expanded', !property_source.get('is_expanded'));
 		dom_event.preventDefault(); // to prevent text selection
 
 	},
@@ -53,7 +60,7 @@ Lava.define(
 			child,
 			i = 0,
 			count = children.getCount(),
-			meta_record;
+			property_source;
 
 		if (count) {
 
@@ -64,8 +71,8 @@ Lava.define(
 				}
 			}
 
-			meta_record = this._meta_storage.get(node.guid);
-			meta_record.set('is_expanded', expanded_state);
+			property_source = this._meta_storage ? this._meta_storage.get(node.guid) : node;
+			property_source.set('is_expanded', expanded_state);
 
 		}
 
@@ -100,10 +107,23 @@ Lava.define(
 
 	},
 
+	/**
+	 * @param {Lava.view.Abstract} view
+	 * @param {_cDynamicScope} config
+	 */
+	getDynamicScope: function(view, config) {
+
+		if (config.property_name != 'is_expanded') Lava.t('unknown dynamic scope: ' + config.property_name);
+		return view.getScopeByPathConfig(this._is_expanded_bind_config);
+
+	},
+
 	destroy: function() {
 
-		this._meta_storage.destroy();
-		this._meta_storage = null;
+		if (this._meta_storage) {
+			this._meta_storage.destroy();
+			this._meta_storage = null;
+		}
 
 		this.Standard$destroy();
 

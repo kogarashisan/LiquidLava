@@ -1,8 +1,7 @@
 
 Lavadoc = {};
 
-/** @typedef {number} */
-Lavadoc._tGUID;
+/** @typedef {number} Lavadoc._tGUID */
 
 function _cClassData() {
 

@@ -71,7 +71,7 @@ Lava.define(
 
 		}
 
-		this.destroyRefreshable();
+		this.suspendRefreshable();
 
 	}
 

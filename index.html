@@ -41,21 +41,6 @@
 		window.addEvent('load', function() {
 
 			Lava.bootstrap();
-			$('main_page_follow_container').setStyle('visibility', 'visible');
-
-			var config,
-				constructor,
-				main_page_widget;
-
-			config = {
-				type: 'widget',
-				is_extended: true,
-				template: MainPageTemplate,
-				container: {class: 'Element', tag_name: 'div'}
-			};
-
-			constructor = Lava.ClassManager.getConstructor('Lava.widget.Standard');
-			main_page_widget = /** @type {Lava.widget.Standard} */ new constructor(config);
 
 			var demo_module = Lava.app.getModule('DemoTree');
 			demo_module.loadRecords(ExampleData.example_tree);
@@ -65,20 +50,28 @@
 				return !record.get('parent')
 			});
 
+			var main_page_widget = Lava.view_manager.getViewById('main_page');
 			main_page_widget.set('tree_records', tree_records);
 			main_page_widget.set('all_tree_records', new Lava.system.Enumerable(demo_module.getAllRecords()));
-			main_page_widget.inject($('main_page_demo_container'), 'Top');
-			Firestorm.Element.remove(Firestorm.getElementById('initial_loading_indicator'));
+			Firestorm.Element.remove(Firestorm.getElementById('loading_indicator'));
 
+			// twitter
 			(function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs'));
+			$('main_page_follow_container').setStyle('visibility', 'visible');
 
 		});
 	</script>
 </head>
 
-<body>
+<body lava-app id="main_page">
 
-<script type="lava/app">
+<div id="loading_indicator" class="loading-box" style="display:block">
+	<div class="loading-box-inner">
+		<div style="position:absolute;width:100%;text-align:center;line-height:128px;font-weight:bold;">LOADING</div>
+		<img src="/www/img/loading.gif" style="margin: 0 auto;" />
+	</div>
+</div>
+
 <!--LAVA_BUILD_INCLUDE:navbar.html-->
 <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
 	<div class="container">
@@ -130,7 +123,6 @@
 	</div>
 </div>
 <!--LAVA_BUILD_INCLUDE_END-->
-</script>
 
 <div class="container">
 
@@ -161,9 +153,28 @@
 	</ul>
 	<p>Tree is purely done in templates, except the click handler.</p>
 	<div class="row" id="main_page_demo_container">
-		<div id="initial_loading_indicator" class="initial-loading-indicator">
-			Loading...
-		</div>
+		<example id="main_page_example">
+			<div class="col-md-6" style="padding: 1em;overflow: auto;height: 370px;position: relative;">
+				<x:widget extends="FolderTree" id="main_page_tree">
+					<assign name="records">#main_page.tree_records</assign>
+				</x:widget>
+			</div>
+			<div class="col-md-6" style="padding: 1em">
+				<x:widget extends="EditableTable" id="main_page_table">
+					<script x:equiv="options" type="application/json">
+						{
+							columns: [
+								{name: 'title', title: 'Title', type: 'String', is_editable: true},
+								{name: 'type', title: 'Type', type: 'String'},
+								{name: 'is_expanded', title: 'Expanded?', type: 'Boolean', is_editable: true}
+							]
+						}
+					</script>
+					<assign name="records">#main_page.all_tree_records</assign>
+				</x:widget>
+			</div>
+			<div class="clearfix"></div>
+		</example>
 	</div>
 
 </div> <!-- /container -->

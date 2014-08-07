@@ -20,6 +20,7 @@ Lava.define(
 
 	_view: null,
 	_widget: null,
+	guid: null,
 
 	/**
 	 * @type {Lava.system.Enumerable}
@@ -40,6 +41,7 @@ Lava.define(
 	 */
 	init: function(argument, view, widget, options) {
 
+		this.guid = Lava.guid++;
 		this._argument = argument;
 		this._view = view;
 		this._widget = widget;
@@ -193,6 +195,7 @@ Lava.define(
 
 		Lava.suspendListener(this._argument_changed_listener);
 		this._observable_listener && Lava.suspendListener(this._observable_listener);
+		this.suspendRefreshable();
 
 	},
 
@@ -231,7 +234,7 @@ Lava.define(
 
 		}
 
-		this.destroyRefreshable();
+		this.suspendRefreshable();
 
 	}
 

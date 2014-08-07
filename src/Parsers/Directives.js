@@ -158,7 +158,7 @@ Lava.parsers.Directives = {
 
 		switch (raw_tag.name) {
 			case 'template':
-				include = Lava.parsers.Common.compileTemplate(raw_tag.content);
+				include = raw_tag.content ? Lava.parsers.Common.compileTemplate(raw_tag.content) : [];
 				break;
 			case 'view':
 				include = [Lava.parsers.Common.compileAsView(raw_tag.content)];

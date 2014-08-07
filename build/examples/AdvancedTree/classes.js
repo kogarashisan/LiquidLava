@@ -1,6 +1,6 @@
 Lava.ClassManager.define(
 'Lava.widget.TreeExample',
-/** @extends {Lavadoc.widget.Standard} */
+/** @extends {Lava.widget.Standard} */
 {
 
 	Extends: 'Lava.widget.Standard',

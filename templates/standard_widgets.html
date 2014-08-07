@@ -85,21 +85,21 @@
 <x:define title="CollapsiblePanelExt" extends="CollapsiblePanel" controller="CollapsiblePanelExt">
 	<template role="include" name="content_wrapper">
 		{$if($collapsible_panel.is_expanded)}
-		<x:container_config>
-			{
-				class: "Emulated",
-				options: {
-					placement: "after-previous"
+			<x:container_config>
+				{
+					class: "Emulated",
+					options: {
+						placement: "after-previous"
+					}
 				}
-			}
-		</x:container_config>
-		<x:roles>$collapsible_panel._content_if</x:roles>
-		<x:refresher>{class: 'Collapse'}</x:refresher>
-		<div x:type="view">
-			<div x:type="static" x:resource_id="$collapsible_panel.COLLAPSIBLE_PANEL_EXT_BODY_CONTAINER">
-				{>$collapsible_panel.content}
+			</x:container_config>
+			<x:roles>$collapsible_panel._content_if</x:roles>
+			<x:refresher>{class: 'Collapse'}</x:refresher>
+			<div x:type="view">
+				<div x:type="static" x:resource_id="$collapsible_panel.COLLAPSIBLE_PANEL_EXT_BODY_CONTAINER">
+					{>$collapsible_panel.content}
+				</div>
 			</div>
-		</div>
 		{/if}
 	</template>
 	<script x:equiv="sugar" type="application/json">
@@ -260,16 +260,14 @@
 			     x:classes="'lava-tree'
 					+ ((foreach_index == @parent->count - 1) ? '-bottom' : '-middle')
 					+ ((node.type == 'folder' && node.children.length)
-						? (@widget.meta_storage[node.guid].is_expanded ? '-expanded' : '-collapsed')
+						? ($tree{is_expanded} ? '-expanded' : '-collapsed')
 						: '-node')"></i>{>$tree.icon}
 			{>$tree.node_title}
 		</div>
 	</template>
-	<template role="include" name="icon">
-		<i x:type="view" class="lava-tree-icon" x:classes="'icon-' + node.type"></i>
-	</template>
+	<template role="include" name="icon"></template>
 	<template role="include" name="node_children">
-		{$if(node.children.length && $tree.meta_storage[node.guid].is_expanded)}
+		{$if(node.children.length && $tree{is_expanded})}
 			<x:refresher>{class: 'Collapse'}</x:refresher>
 			<x:container_config>
 				{

@@ -14,17 +14,20 @@
 
 		{* left tree is a standard widget *}
 		<div style="margin-right: 10px" class="tree-example-container">
-			<x:widget extends="Tree" id="tree_left">
+			<x:widget extends="FolderTree" id="tree_left">
 				<assign name="records">#ExamplesApp.tree_records</assign>
+				<script x:equiv="options" type="application/json">
+					{use_meta_storage: true}
+				</script>
 			</x:widget>
 		</div>
 
 		{* copy of a parent's include with changed refresher *}
 		<div class="tree-example-container">
-			<x:widget extends="Tree" id="tree_right">
+			<x:widget extends="FolderTree" id="tree_right">
 				<assign name="records">#ExamplesApp.tree_records</assign>
 				<template role="include" name="node_children">
-					{$if(node.children.length && $tree.meta_storage[node.guid].is_expanded)}
+					{$if(node.children.length && $tree{is_expanded})}
 						<x:refresher>{class: 'Default'}</x:refresher>{*H:'Default' refresher has no animation support*}
 						<x:container_config>
 							{
@@ -49,6 +52,9 @@
 						</div>
 					{/if}
 				</template>
+				<script x:equiv="options" type="application/json">
+					{use_meta_storage: true}
+				</script>
 			</x:widget>
 		</div>
 		<div class="clearfix"></div>

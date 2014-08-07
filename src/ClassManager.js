@@ -81,6 +81,7 @@ Lava.ClassManager = {
 
 		if ('Extends' in source_object) {
 
+			if (Lava.schema.DEBUG && typeof(source_object.Extends) != 'string') Lava.t('Extends: string expected. ' + class_path);
 			class_data.extends = source_object.Extends;
 			parent_data = this._sources[source_object.Extends];
 			class_data.parent_class_data = parent_data;

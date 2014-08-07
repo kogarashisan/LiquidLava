@@ -24,6 +24,7 @@ Lava.define(
 	 */
 	_evaluator: null,
 	_value: null,
+	guid: null,
 
 	/**
 	 * @type {Array.<_iValueContainer>}
@@ -42,6 +43,7 @@ Lava.define(
 	 */
 	init: function(config, view, widget) {
 
+		this.guid = Lava.guid++;
 		this._view = view;
 		this._widget = widget;
 		this._evaluator = config.evaluator;
@@ -49,13 +51,23 @@ Lava.define(
 		var i = 0,
 			count,
 			bind,
-			first_level;
+			first_level = 0,
+			binds = config.binds;
 
-		if ('binds' in config) {
+		if (binds) {
 
-			for (count = config.binds.length; i < count; i++) {
+			for (count = binds.length; i < count; i++) {
 
-				bind = view.getScopeByPathConfig(config.binds[i]);
+				if (binds[i].isDynamic) {
+
+					bind = view.locateViewByPathConfig(binds[i]).getDynamicScope(view, binds[i]);
+
+				} else {
+
+					bind = view.getScopeByPathConfig(binds[i]);
+
+				}
+
 				if (bind.isWaitingRefresh()) {
 					this._count_dependencies_waiting_refresh++;
 					this._waits_refresh = true;
@@ -73,13 +85,17 @@ Lava.define(
 
 				}
 
-				if (i == 0) {
+				if (first_level != bind.level) {
 
-					first_level = bind.level;
+					if (i == 0) {
 
-				} else if (first_level != bind.level) {
+						first_level = bind.level; // replace default
 
-					this._requeue = true;
+					} else {
+
+						this._requeue = true;
+
+					}
 
 				}
 
@@ -219,7 +235,7 @@ Lava.define(
 
 		}
 
-		this.destroyRefreshable();
+		this.suspendRefreshable();
 
 	},
 
@@ -277,7 +293,7 @@ Lava.define(
 		}
 
 		this._bind_listeners = null;
-		this.destroyRefreshable();
+		this.suspendRefreshable();
 
 	}
 

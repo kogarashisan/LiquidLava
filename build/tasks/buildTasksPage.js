@@ -25,7 +25,6 @@ module.exports = function(grunt) {
 
 		try { // workaround for a bug in Grunt, https://github.com/gruntjs/grunt/issues/1135
 
-			require('../temp/lava_module.js');
 			var Lava = global.Lava;
 
 			var tasks_page_source = grunt.file.read('./build/tasks_page_source.txt');

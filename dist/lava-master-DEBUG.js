@@ -3590,6 +3590,7 @@ Lava.ClassManager = {
 
 		if ('Extends' in source_object) {
 
+			if (Lava.schema.DEBUG && typeof(source_object.Extends) != 'string') Lava.t('Extends: string expected. ' + class_path);
 			class_data.extends = source_object.Extends;
 			parent_data = this._sources[source_object.Extends];
 			class_data.parent_class_data = parent_data;
@@ -5540,7 +5541,7 @@ Lava.parsers.Directives = {
 
 		switch (raw_tag.name) {
 			case 'template':
-				include = Lava.parsers.Common.compileTemplate(raw_tag.content);
+				include = raw_tag.content ? Lava.parsers.Common.compileTemplate(raw_tag.content) : [];
 				break;
 			case 'view':
 				include = [Lava.parsers.Common.compileAsView(raw_tag.content)];
@@ -7014,9 +7015,9 @@ Lava.ObjectParser.yy = {
 Lava.ExpressionParser = (function(){
 var parser = {trace: function trace(){},
 yy: {},
-symbols_: {"error":2,"root":3,"EOF":4,"expressions":5,"SEMICOLON":6,"expressionWithOptionalDepends":7,"COMMA":8,"depends":9,"DEPENDS_START":10,"OPEN_CURLY":11,"scopeEvalList":12,"CLOSE_CURLY":13,"scopeEval":14,"expression":15,"expressionTail":16,"operand":17,"OPERATOR":18,"OPEN_BRACE":19,"CLOSE_BRACE":20,"arrayDefinition":21,"NUMBER":22,"RAW_STRING":23,"LITERAL":24,"functionCall":25,"OPEN_SQUARE":26,"expressionList":27,"CLOSE_SQUARE":28,"knownView":29,"VIEW_BY_LABEL":30,"VIEW_BY_ID":31,"VIEW_BY_NAME":32,"lookupOperator":33,"LOOK_UP":34,"LOOK_DOWN":35,"viewLocator":36,"DEEPNESS_OPERATOR":37,"GLOBAL_MODIFIER_CALL":38,"WIDGET_MODIFIER_CALL":39,"ACTIVE_MODIFIER_CALL":40,"IDENTIFIER":41,"scopePath":42,"SEARCH_OPERATOR":43,"scopePathSegment":44,"DOT_PROPERTY":45,"$accept":0,"$end":1},
-terminals_: {2:"error",4:"EOF",6:"SEMICOLON",8:"COMMA",10:"DEPENDS_START",11:"OPEN_CURLY",13:"CLOSE_CURLY",18:"OPERATOR",19:"OPEN_BRACE",20:"CLOSE_BRACE",22:"NUMBER",23:"RAW_STRING",24:"LITERAL",26:"OPEN_SQUARE",28:"CLOSE_SQUARE",30:"VIEW_BY_LABEL",31:"VIEW_BY_ID",32:"VIEW_BY_NAME",34:"LOOK_UP",35:"LOOK_DOWN",37:"DEEPNESS_OPERATOR",38:"GLOBAL_MODIFIER_CALL",39:"WIDGET_MODIFIER_CALL",40:"ACTIVE_MODIFIER_CALL",41:"IDENTIFIER",43:"SEARCH_OPERATOR",45:"DOT_PROPERTY"},
-productions_: [0,[3,1],[3,2],[5,3],[5,3],[5,1],[9,4],[12,3],[12,1],[7,2],[7,1],[15,1],[15,1],[15,2],[16,3],[16,2],[17,3],[17,1],[17,1],[17,1],[17,1],[17,1],[17,1],[21,3],[21,2],[27,3],[27,1],[29,1],[29,1],[29,1],[33,1],[33,1],[36,1],[36,2],[36,2],[36,3],[25,3],[25,4],[25,4],[25,5],[25,4],[25,5],[14,1],[14,2],[14,3],[14,2],[14,2],[42,2],[42,1],[44,1],[44,3]],
+symbols_: {"error":2,"root":3,"EOF":4,"expressions":5,"SEMICOLON":6,"expressionWithOptionalDepends":7,"COMMA":8,"depends":9,"DEPENDS_START":10,"OPEN_CURLY":11,"scopeEvalList":12,"CLOSE_CURLY":13,"scopeEval":14,"expression":15,"expressionTail":16,"operand":17,"OPERATOR":18,"OPEN_BRACE":19,"CLOSE_BRACE":20,"arrayDefinition":21,"NUMBER":22,"RAW_STRING":23,"LITERAL":24,"dynamicScope":25,"functionCall":26,"OPEN_SQUARE":27,"expressionList":28,"CLOSE_SQUARE":29,"knownView":30,"VIEW_BY_LABEL":31,"VIEW_BY_ID":32,"VIEW_BY_NAME":33,"lookupOperator":34,"LOOK_UP":35,"LOOK_DOWN":36,"viewLocator":37,"DEEPNESS_OPERATOR":38,"GLOBAL_MODIFIER_CALL":39,"WIDGET_MODIFIER_CALL":40,"ACTIVE_MODIFIER_CALL":41,"IDENTIFIER":42,"scopePath":43,"SEARCH_OPERATOR":44,"scopePathSegment":45,"DOT_PROPERTY":46,"$accept":0,"$end":1},
+terminals_: {2:"error",4:"EOF",6:"SEMICOLON",8:"COMMA",10:"DEPENDS_START",11:"OPEN_CURLY",13:"CLOSE_CURLY",18:"OPERATOR",19:"OPEN_BRACE",20:"CLOSE_BRACE",22:"NUMBER",23:"RAW_STRING",24:"LITERAL",27:"OPEN_SQUARE",29:"CLOSE_SQUARE",31:"VIEW_BY_LABEL",32:"VIEW_BY_ID",33:"VIEW_BY_NAME",35:"LOOK_UP",36:"LOOK_DOWN",38:"DEEPNESS_OPERATOR",39:"GLOBAL_MODIFIER_CALL",40:"WIDGET_MODIFIER_CALL",41:"ACTIVE_MODIFIER_CALL",42:"IDENTIFIER",44:"SEARCH_OPERATOR",46:"DOT_PROPERTY"},
+productions_: [0,[3,1],[3,2],[5,3],[5,3],[5,1],[9,4],[12,3],[12,1],[7,2],[7,1],[15,1],[15,1],[15,2],[16,3],[16,2],[17,3],[17,1],[17,1],[17,1],[17,1],[17,1],[17,1],[17,1],[21,3],[21,2],[28,3],[28,1],[30,1],[30,1],[30,1],[34,1],[34,1],[37,1],[37,2],[37,2],[37,3],[26,3],[26,4],[26,4],[26,5],[26,4],[26,5],[25,4],[14,1],[14,2],[14,3],[14,2],[14,2],[43,2],[43,1],[45,1],[45,3]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */
 /**/) {
 /* this == yyval */
@@ -7100,100 +7101,112 @@ case 21:
 			this.$ = 'this._binds[' + index + '].getValue()';
 		
 break;
-case 22: this.$ = $$[$0]; 
+case 22:
+			yy.x_counters.dynamic_scopes++;
+			var index = yy.x_argument_binds.push($$[$0]) - 1;
+			this.$ = 'this._binds[' + index + '].getValue()';
+		
 break;
-case 23: this.$ = '[' + $$[$0-1] + ']'; 
+case 23: this.$ = $$[$0]; 
 break;
-case 24: this.$ = '[]'; 
+case 24: this.$ = '[' + $$[$0-1] + ']'; 
 break;
-case 25: this.$ = $$[$0-2] + ', ' + $$[$0]; 
+case 25: this.$ = '[]'; 
 break;
-case 26: this.$ = $$[$0]; 
+case 26: this.$ = $$[$0-2] + ', ' + $$[$0]; 
 break;
-case 27: this.$ = {locator_type: 'Label', locator: $$[$0]}; 
+case 27: this.$ = $$[$0]; 
 break;
-case 28: this.$ = {locator_type: 'Id', locator: $$[$0]}; 
+case 28: this.$ = {locator_type: 'Label', locator: $$[$0]}; 
 break;
-case 29: this.$ = {locator_type: 'Name', locator: $$[$0]}; 
+case 29: this.$ = {locator_type: 'Id', locator: $$[$0]}; 
 break;
-case 30: this.$ = {label: $$[$0], direction: 'look_up'}; 
+case 30: this.$ = {locator_type: 'Name', locator: $$[$0]}; 
 break;
-case 31: this.$ = {label: $$[$0], direction: 'look_down'}; 
+case 31: this.$ = {label: $$[$0], direction: 'look_up'}; 
 break;
-case 32: this.$ = $$[$0]; 
+case 32: this.$ = {label: $$[$0], direction: 'look_down'}; 
 break;
-case 33: Lava.t("Lookup operator is not supported yet."); 
+case 33: this.$ = $$[$0]; 
 break;
-case 34:
+case 34: Lava.t("Lookup operator is not supported yet."); 
+break;
+case 35:
 			$$[$0-1].depth = parseInt($$[$0]);
 			if (!$$[$0-1].depth) Lava.t('Deepness operator: depth must be > 0');
 			this.$ = $$[$0-1];
 		
 break;
-case 35: Lava.t("Lookup operator is not supported yet."); 
+case 36: Lava.t("Lookup operator is not supported yet."); 
 break;
-case 36:
+case 37:
 			yy.x_counters.global_modifiers++;
 			this.$ = 'this._callGlobalModifier("' + $$[$0-2] + '", [])';
 		
 break;
-case 37:
+case 38:
 			yy.x_counters.global_modifiers++;
 			this.$ = 'this._callGlobalModifier("' + $$[$0-3] + '", [' + $$[$0-1] + '])';
 		
 break;
-case 38:
+case 39:
 			yy.x_counters.widget_modifiers++;
 			$$[$0-3].callback_name = $$[$0-2];
 			var index = yy.x_argument_widget_modifiers.push($$[$0-3]) - 1;
 			this.$ = 'this._callModifier("' + index + '", [])';
 		
 break;
-case 39:
+case 40:
 			yy.x_counters.widget_modifiers++;
 			$$[$0-4].callback_name = $$[$0-3];
 			var index = yy.x_argument_widget_modifiers.push($$[$0-4]) - 1;
 			this.$ = 'this._callModifier("' + index + '", [' + $$[$0-1] + '])';
 		
 break;
-case 40:
+case 41:
 			yy.x_counters.active_modifiers++;
 			$$[$0-3].callback_name = $$[$0-2];
 			var index = yy.x_argument_active_modifiers.push($$[$0-3]) - 1;
 			this.$ = 'this._callActiveModifier("' + index + '", [])';
 		
 break;
-case 41:
+case 42:
 			yy.x_counters.active_modifiers++;
 			$$[$0-4].callback_name = $$[$0-3];
 			var index = yy.x_argument_active_modifiers.push($$[$0-4]) - 1;
 			this.$ = 'this._callActiveModifier("' + index + '", [' + $$[$0-1] + '])';
 		
 break;
-case 42: this.$ = {property_name: $$[$0]}; 
+case 43:
+			$$[$0-3].isDynamic = true;
+			$$[$0-3].property_name = $$[$0-1];
+			this.$ = $$[$0-3];
+		
 break;
-case 43: this.$ = {property_name: $$[$0-1], tail: $$[$0]}; 
+case 44: this.$ = {property_name: $$[$0]}; 
 break;
-case 44:
+case 45: this.$ = {property_name: $$[$0-1], tail: $$[$0]}; 
+break;
+case 46:
 			$$[$0-2].property_name = $$[$0-1];
 			$$[$0-2].tail = $$[$0];
 			this.$ = $$[$0-2];
 		
 break;
-case 45:
+case 47:
 			$$[$0-1].property_name = $$[$0];
 			this.$ = $$[$0-1];
 		
 break;
-case 46: $$[$0-1].tail = $$[$0]; this.$ = $$[$0-1]; 
+case 48: $$[$0-1].tail = $$[$0]; this.$ = $$[$0-1]; 
 break;
-case 47: $$[$0-1].push($$[$0]); this.$ = $$[$0-1]; 
+case 49: $$[$0-1].push($$[$0]); this.$ = $$[$0-1]; 
 break;
-case 48: this.$ = [$$[$0]]; 
+case 50: this.$ = [$$[$0]]; 
 break;
-case 49: this.$ = $$[$0]; 
+case 51: this.$ = $$[$0]; 
 break;
-case 50:
+case 52:
 			var segments = $$[$0-1].path_segments;
 			if (segments) {
 				for (var i = 0, count = segments.length; i < count; i++) {
@@ -7205,8 +7218,8 @@ case 50:
 break;
 }
 },
-table: [{3:1,4:[1,2],5:3,7:4,14:14,15:5,16:6,17:7,18:[1,8],19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:[1,16],29:20,30:[1,21],31:[1,22],32:[1,23],36:18,38:[1,19],41:[1,17]},{1:[3]},{1:[2,1]},{4:[1,24],6:[1,25],8:[1,26]},{4:[2,5],6:[2,5],8:[2,5]},{4:[2,10],6:[2,10],8:[2,10],9:27,10:[1,28]},{4:[2,11],6:[2,11],8:[2,11],10:[2,11],18:[1,29],20:[2,11],28:[2,11]},{4:[2,12],6:[2,12],8:[2,12],10:[2,12],16:30,18:[1,8],20:[2,12],28:[2,12]},{14:14,17:31,19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:[1,16],29:20,30:[1,21],31:[1,22],32:[1,23],36:18,38:[1,19],41:[1,17]},{14:14,15:32,16:6,17:7,18:[1,8],19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:[1,16],29:20,30:[1,21],31:[1,22],32:[1,23],36:18,38:[1,19],41:[1,17]},{4:[2,17],6:[2,17],8:[2,17],10:[2,17],18:[2,17],20:[2,17],28:[2,17]},{4:[2,18],6:[2,18],8:[2,18],10:[2,18],18:[2,18],20:[2,18],28:[2,18]},{4:[2,19],6:[2,19],8:[2,19],10:[2,19],18:[2,19],20:[2,19],28:[2,19]},{4:[2,20],6:[2,20],8:[2,20],10:[2,20],18:[2,20],20:[2,20],28:[2,20]},{4:[2,21],6:[2,21],8:[2,21],10:[2,21],18:[2,21],20:[2,21],28:[2,21]},{4:[2,22],6:[2,22],8:[2,22],10:[2,22],18:[2,22],20:[2,22],28:[2,22]},{14:14,15:35,16:6,17:7,18:[1,8],19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:[1,16],27:33,28:[1,34],29:20,30:[1,21],31:[1,22],32:[1,23],36:18,38:[1,19],41:[1,17]},{4:[2,42],6:[2,42],8:[2,42],10:[2,42],13:[2,42],18:[2,42],20:[2,42],26:[1,39],28:[2,42],42:36,44:37,45:[1,38]},{26:[1,39],42:41,43:[1,40],44:37,45:[1,38]},{19:[1,42]},{26:[2,32],33:45,34:[1,47],35:[1,48],37:[1,46],39:[1,43],40:[1,44],43:[2,32],45:[2,32]},{26:[2,27],34:[2,27],35:[2,27],37:[2,27],39:[2,27],40:[2,27],43:[2,27],45:[2,27]},{26:[2,28],34:[2,28],35:[2,28],37:[2,28],39:[2,28],40:[2,28],43:[2,28],45:[2,28]},{26:[2,29],34:[2,29],35:[2,29],37:[2,29],39:[2,29],40:[2,29],43:[2,29],45:[2,29]},{1:[2,2]},{7:49,14:14,15:5,16:6,17:7,18:[1,8],19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:[1,16],29:20,30:[1,21],31:[1,22],32:[1,23],36:18,38:[1,19],41:[1,17]},{7:50,14:14,15:5,16:6,17:7,18:[1,8],19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:[1,16],29:20,30:[1,21],31:[1,22],32:[1,23],36:18,38:[1,19],41:[1,17]},{4:[2,9],6:[2,9],8:[2,9]},{11:[1,51]},{14:14,17:52,19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:[1,16],29:20,30:[1,21],31:[1,22],32:[1,23],36:18,38:[1,19],41:[1,17]},{4:[2,13],6:[2,13],8:[2,13],10:[2,13],18:[1,29],20:[2,13],28:[2,13]},{4:[2,15],6:[2,15],8:[2,15],10:[2,15],18:[2,15],20:[2,15],28:[2,15]},{20:[1,53]},{8:[1,55],28:[1,54]},{4:[2,24],6:[2,24],8:[2,24],10:[2,24],18:[2,24],20:[2,24],28:[2,24]},{8:[2,26],20:[2,26],28:[2,26]},{4:[2,43],6:[2,43],8:[2,43],10:[2,43],13:[2,43],18:[2,43],20:[2,43],26:[1,39],28:[2,43],44:56,45:[1,38]},{4:[2,48],6:[2,48],8:[2,48],10:[2,48],13:[2,48],18:[2,48],20:[2,48],26:[2,48],28:[2,48],45:[2,48]},{4:[2,49],6:[2,49],8:[2,49],10:[2,49],13:[2,49],18:[2,49],20:[2,49],26:[2,49],28:[2,49],45:[2,49]},{14:57,29:58,30:[1,21],31:[1,22],32:[1,23],36:18,41:[1,17]},{4:[2,45],6:[2,45],8:[2,45],10:[2,45],13:[2,45],18:[2,45],20:[2,45],26:[1,39],28:[2,45],42:59,44:37,45:[1,38]},{4:[2,46],6:[2,46],8:[2,46],10:[2,46],13:[2,46],18:[2,46],20:[2,46],26:[1,39],28:[2,46],44:56,45:[1,38]},{14:14,15:35,16:6,17:7,18:[1,8],19:[1,9],20:[1,60],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:[1,16],27:61,29:20,30:[1,21],31:[1,22],32:[1,23],36:18,38:[1,19],41:[1,17]},{19:[1,62]},{19:[1,63]},{26:[2,33],43:[2,33],45:[2,33]},{26:[2,34],33:64,34:[1,47],35:[1,48],43:[2,34],45:[2,34]},{26:[2,30],43:[2,30],45:[2,30]},{26:[2,31],43:[2,31],45:[2,31]},{4:[2,3],6:[2,3],8:[2,3]},{4:[2,4],6:[2,4],8:[2,4]},{12:65,14:66,29:58,30:[1,21],31:[1,22],32:[1,23],36:18,41:[1,17]},{4:[2,14],6:[2,14],8:[2,14],10:[2,14],18:[2,14],20:[2,14],28:[2,14]},{4:[2,16],6:[2,16],8:[2,16],10:[2,16],18:[2,16],20:[2,16],28:[2,16]},{4:[2,23],6:[2,23],8:[2,23],10:[2,23],18:[2,23],20:[2,23],28:[2,23]},{14:14,15:67,16:6,17:7,18:[1,8],19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:[1,16],29:20,30:[1,21],31:[1,22],32:[1,23],36:18,38:[1,19],41:[1,17]},{4:[2,47],6:[2,47],8:[2,47],10:[2,47],13:[2,47],18:[2,47],20:[2,47],26:[2,47],28:[2,47],45:[2,47]},{28:[1,68]},{26:[2,32],33:45,34:[1,47],35:[1,48],37:[1,46],43:[2,32],45:[2,32]},{4:[2,44],6:[2,44],8:[2,44],10:[2,44],13:[2,44],18:[2,44],20:[2,44],26:[1,39],28:[2,44],44:56,45:[1,38]},{4:[2,36],6:[2,36],8:[2,36],10:[2,36],18:[2,36],20:[2,36],28:[2,36]},{8:[1,55],20:[1,69]},{14:14,15:35,16:6,17:7,18:[1,8],19:[1,9],20:[1,70],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:[1,16],27:71,29:20,30:[1,21],31:[1,22],32:[1,23],36:18,38:[1,19],41:[1,17]},{14:14,15:35,16:6,17:7,18:[1,8],19:[1,9],20:[1,72],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:[1,16],27:73,29:20,30:[1,21],31:[1,22],32:[1,23],36:18,38:[1,19],41:[1,17]},{26:[2,35],43:[2,35],45:[2,35]},{8:[1,75],13:[1,74]},{8:[2,8],13:[2,8]},{8:[2,25],20:[2,25],28:[2,25]},{4:[2,50],6:[2,50],8:[2,50],10:[2,50],13:[2,50],18:[2,50],20:[2,50],26:[2,50],28:[2,50],45:[2,50]},{4:[2,37],6:[2,37],8:[2,37],10:[2,37],18:[2,37],20:[2,37],28:[2,37]},{4:[2,38],6:[2,38],8:[2,38],10:[2,38],18:[2,38],20:[2,38],28:[2,38]},{8:[1,55],20:[1,76]},{4:[2,40],6:[2,40],8:[2,40],10:[2,40],18:[2,40],20:[2,40],28:[2,40]},{8:[1,55],20:[1,77]},{4:[2,6],6:[2,6],8:[2,6]},{14:78,29:58,30:[1,21],31:[1,22],32:[1,23],36:18,41:[1,17]},{4:[2,39],6:[2,39],8:[2,39],10:[2,39],18:[2,39],20:[2,39],28:[2,39]},{4:[2,41],6:[2,41],8:[2,41],10:[2,41],18:[2,41],20:[2,41],28:[2,41]},{8:[2,7],13:[2,7]}],
-defaultActions: {2:[2,1],24:[2,2]},
+table: [{3:1,4:[1,2],5:3,7:4,14:14,15:5,16:6,17:7,18:[1,8],19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:16,27:[1,17],30:20,31:[1,22],32:[1,23],33:[1,24],37:19,39:[1,21],42:[1,18]},{1:[3]},{1:[2,1]},{4:[1,25],6:[1,26],8:[1,27]},{4:[2,5],6:[2,5],8:[2,5]},{4:[2,10],6:[2,10],8:[2,10],9:28,10:[1,29]},{4:[2,11],6:[2,11],8:[2,11],10:[2,11],18:[1,30],20:[2,11],29:[2,11]},{4:[2,12],6:[2,12],8:[2,12],10:[2,12],16:31,18:[1,8],20:[2,12],29:[2,12]},{14:14,17:32,19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:16,27:[1,17],30:20,31:[1,22],32:[1,23],33:[1,24],37:19,39:[1,21],42:[1,18]},{14:14,15:33,16:6,17:7,18:[1,8],19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:16,27:[1,17],30:20,31:[1,22],32:[1,23],33:[1,24],37:19,39:[1,21],42:[1,18]},{4:[2,17],6:[2,17],8:[2,17],10:[2,17],18:[2,17],20:[2,17],29:[2,17]},{4:[2,18],6:[2,18],8:[2,18],10:[2,18],18:[2,18],20:[2,18],29:[2,18]},{4:[2,19],6:[2,19],8:[2,19],10:[2,19],18:[2,19],20:[2,19],29:[2,19]},{4:[2,20],6:[2,20],8:[2,20],10:[2,20],18:[2,20],20:[2,20],29:[2,20]},{4:[2,21],6:[2,21],8:[2,21],10:[2,21],18:[2,21],20:[2,21],29:[2,21]},{4:[2,22],6:[2,22],8:[2,22],10:[2,22],18:[2,22],20:[2,22],29:[2,22]},{4:[2,23],6:[2,23],8:[2,23],10:[2,23],18:[2,23],20:[2,23],29:[2,23]},{14:14,15:36,16:6,17:7,18:[1,8],19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:16,27:[1,17],28:34,29:[1,35],30:20,31:[1,22],32:[1,23],33:[1,24],37:19,39:[1,21],42:[1,18]},{4:[2,44],6:[2,44],8:[2,44],10:[2,44],13:[2,44],18:[2,44],20:[2,44],27:[1,40],29:[2,44],43:37,45:38,46:[1,39]},{27:[1,40],43:42,44:[1,41],45:38,46:[1,39]},{11:[1,43],27:[2,33],34:46,35:[1,48],36:[1,49],38:[1,47],40:[1,44],41:[1,45],44:[2,33],46:[2,33]},{19:[1,50]},{11:[2,28],27:[2,28],35:[2,28],36:[2,28],38:[2,28],40:[2,28],41:[2,28],44:[2,28],46:[2,28]},{11:[2,29],27:[2,29],35:[2,29],36:[2,29],38:[2,29],40:[2,29],41:[2,29],44:[2,29],46:[2,29]},{11:[2,30],27:[2,30],35:[2,30],36:[2,30],38:[2,30],40:[2,30],41:[2,30],44:[2,30],46:[2,30]},{1:[2,2]},{7:51,14:14,15:5,16:6,17:7,18:[1,8],19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:16,27:[1,17],30:20,31:[1,22],32:[1,23],33:[1,24],37:19,39:[1,21],42:[1,18]},{7:52,14:14,15:5,16:6,17:7,18:[1,8],19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:16,27:[1,17],30:20,31:[1,22],32:[1,23],33:[1,24],37:19,39:[1,21],42:[1,18]},{4:[2,9],6:[2,9],8:[2,9]},{11:[1,53]},{14:14,17:54,19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:16,27:[1,17],30:20,31:[1,22],32:[1,23],33:[1,24],37:19,39:[1,21],42:[1,18]},{4:[2,13],6:[2,13],8:[2,13],10:[2,13],18:[1,30],20:[2,13],29:[2,13]},{4:[2,15],6:[2,15],8:[2,15],10:[2,15],18:[2,15],20:[2,15],29:[2,15]},{20:[1,55]},{8:[1,57],29:[1,56]},{4:[2,25],6:[2,25],8:[2,25],10:[2,25],18:[2,25],20:[2,25],29:[2,25]},{8:[2,27],20:[2,27],29:[2,27]},{4:[2,45],6:[2,45],8:[2,45],10:[2,45],13:[2,45],18:[2,45],20:[2,45],27:[1,40],29:[2,45],45:58,46:[1,39]},{4:[2,50],6:[2,50],8:[2,50],10:[2,50],13:[2,50],18:[2,50],20:[2,50],27:[2,50],29:[2,50],46:[2,50]},{4:[2,51],6:[2,51],8:[2,51],10:[2,51],13:[2,51],18:[2,51],20:[2,51],27:[2,51],29:[2,51],46:[2,51]},{14:59,30:60,31:[1,22],32:[1,23],33:[1,24],37:19,42:[1,18]},{4:[2,47],6:[2,47],8:[2,47],10:[2,47],13:[2,47],18:[2,47],20:[2,47],27:[1,40],29:[2,47],43:61,45:38,46:[1,39]},{4:[2,48],6:[2,48],8:[2,48],10:[2,48],13:[2,48],18:[2,48],20:[2,48],27:[1,40],29:[2,48],45:58,46:[1,39]},{42:[1,62]},{19:[1,63]},{19:[1,64]},{27:[2,34],44:[2,34],46:[2,34]},{27:[2,35],34:65,35:[1,48],36:[1,49],44:[2,35],46:[2,35]},{27:[2,31],44:[2,31],46:[2,31]},{27:[2,32],44:[2,32],46:[2,32]},{14:14,15:36,16:6,17:7,18:[1,8],19:[1,9],20:[1,66],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:16,27:[1,17],28:67,30:20,31:[1,22],32:[1,23],33:[1,24],37:19,39:[1,21],42:[1,18]},{4:[2,3],6:[2,3],8:[2,3]},{4:[2,4],6:[2,4],8:[2,4]},{12:68,14:69,30:60,31:[1,22],32:[1,23],33:[1,24],37:19,42:[1,18]},{4:[2,14],6:[2,14],8:[2,14],10:[2,14],18:[2,14],20:[2,14],29:[2,14]},{4:[2,16],6:[2,16],8:[2,16],10:[2,16],18:[2,16],20:[2,16],29:[2,16]},{4:[2,24],6:[2,24],8:[2,24],10:[2,24],18:[2,24],20:[2,24],29:[2,24]},{14:14,15:70,16:6,17:7,18:[1,8],19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:16,27:[1,17],30:20,31:[1,22],32:[1,23],33:[1,24],37:19,39:[1,21],42:[1,18]},{4:[2,49],6:[2,49],8:[2,49],10:[2,49],13:[2,49],18:[2,49],20:[2,49],27:[2,49],29:[2,49],46:[2,49]},{29:[1,71]},{27:[2,33],34:46,35:[1,48],36:[1,49],38:[1,47],44:[2,33],46:[2,33]},{4:[2,46],6:[2,46],8:[2,46],10:[2,46],13:[2,46],18:[2,46],20:[2,46],27:[1,40],29:[2,46],45:58,46:[1,39]},{13:[1,72]},{14:14,15:36,16:6,17:7,18:[1,8],19:[1,9],20:[1,73],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:16,27:[1,17],28:74,30:20,31:[1,22],32:[1,23],33:[1,24],37:19,39:[1,21],42:[1,18]},{14:14,15:36,16:6,17:7,18:[1,8],19:[1,9],20:[1,75],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:16,27:[1,17],28:76,30:20,31:[1,22],32:[1,23],33:[1,24],37:19,39:[1,21],42:[1,18]},{27:[2,36],44:[2,36],46:[2,36]},{4:[2,37],6:[2,37],8:[2,37],10:[2,37],18:[2,37],20:[2,37],29:[2,37]},{8:[1,57],20:[1,77]},{8:[1,79],13:[1,78]},{8:[2,8],13:[2,8]},{8:[2,26],20:[2,26],29:[2,26]},{4:[2,52],6:[2,52],8:[2,52],10:[2,52],13:[2,52],18:[2,52],20:[2,52],27:[2,52],29:[2,52],46:[2,52]},{4:[2,43],6:[2,43],8:[2,43],10:[2,43],18:[2,43],20:[2,43],29:[2,43]},{4:[2,39],6:[2,39],8:[2,39],10:[2,39],18:[2,39],20:[2,39],29:[2,39]},{8:[1,57],20:[1,80]},{4:[2,41],6:[2,41],8:[2,41],10:[2,41],18:[2,41],20:[2,41],29:[2,41]},{8:[1,57],20:[1,81]},{4:[2,38],6:[2,38],8:[2,38],10:[2,38],18:[2,38],20:[2,38],29:[2,38]},{4:[2,6],6:[2,6],8:[2,6]},{14:82,30:60,31:[1,22],32:[1,23],33:[1,24],37:19,42:[1,18]},{4:[2,40],6:[2,40],8:[2,40],10:[2,40],18:[2,40],20:[2,40],29:[2,40]},{4:[2,42],6:[2,42],8:[2,42],10:[2,42],18:[2,42],20:[2,42],29:[2,42]},{8:[2,7],13:[2,7]}],
+defaultActions: {2:[2,1],25:[2,2]},
 parseError: function parseError(str,hash){if(hash.recoverable){this.trace(str)}else{throw new Error(str)}},
 parse: function parse(input) {
     var self = this, stack = [0], vstack = [null], lstack = [], table = this.table, yytext = '', yylineno = 0, yyleng = 0, recovering = 0, TERROR = 2, EOF = 1;
@@ -7407,31 +7420,31 @@ case 3: Lava.t('Spaces in scope path are not allowed (1)');
 break;
 case 4: Lava.t('Spaces in scope path are not allowed (2)'); 
 break;
-case 5: yy_.yytext = yy_.yytext.slice(1); return 30; 
+case 5: yy_.yytext = yy_.yytext.slice(1); return 31; 
 break;
-case 6: yy_.yytext = yy_.yytext.slice(1); return 31; 
+case 6: yy_.yytext = yy_.yytext.slice(1); return 32; 
 break;
-case 7: yy_.yytext = yy_.yytext.slice(1); return 32; 
+case 7: yy_.yytext = yy_.yytext.slice(1); return 33; 
 break;
-case 8: yy_.yytext = yy_.yytext.slice(2); return 40; 
+case 8: yy_.yytext = yy_.yytext.slice(2); return 41; 
 break;
-case 9: yy_.yytext = yy_.yytext.slice(5); return 40; 
+case 9: yy_.yytext = yy_.yytext.slice(5); return 41; 
 break;
-case 10: yy_.yytext = yy_.yytext.slice(1); return 39; 
+case 10: yy_.yytext = yy_.yytext.slice(1); return 40; 
 break;
-case 11: return 38; 
+case 11: return 39; 
 break;
-case 12: yy_.yytext = yy_.yytext.slice(1); return 37; 
+case 12: yy_.yytext = yy_.yytext.slice(1); return 38; 
 break;
-case 13: yy_.yytext = yy_.yytext.slice(1); return 45; 
+case 13: yy_.yytext = yy_.yytext.slice(1); return 46; 
 break;
-case 14: yy_.yytext = yy_.yytext.slice(2); return 43; 
+case 14: yy_.yytext = yy_.yytext.slice(2); return 44; 
 break;
-case 15: yy_.yytext = yy_.yytext.slice(5); return 43; 
+case 15: yy_.yytext = yy_.yytext.slice(5); return 44; 
 break;
-case 16: yy_.yytext = yy_.yytext.substr(4, yy_.yyleng - 5); return 34; 
+case 16: yy_.yytext = yy_.yytext.substr(4, yy_.yyleng - 5); return 35; 
 break;
-case 17: yy_.yytext = yy_.yytext.substr(4, yy_.yyleng - 5); return 35; 
+case 17: yy_.yytext = yy_.yytext.substr(4, yy_.yyleng - 5); return 36; 
 break;
 case 18: yy_.yytext = yy.unescape(yy_.yytext); return 18; /*escaped operator versions*/ 
 break;
@@ -7461,9 +7474,9 @@ case 30: return 23;
 break;
 case 31: return 23; 
 break;
-case 32: return 26; 
+case 32: return 27; 
 break;
-case 33: return 28; 
+case 33: return 29; 
 break;
 case 34: /* skip whitespace */ 
 break;
@@ -7511,7 +7524,7 @@ case 40:
 			return 24;
 		}
 
-		return 41;
+		return 42;
 	
 break;
 case 41: return 4; 
@@ -7632,6 +7645,14 @@ Lava.ExpressionParser.parseWithTail = function(config_ref, separator) {
 	return this.yy.convertArguments(this.parseWithTailRaw(config_ref, separator));
 };
 
+Lava.ExpressionParser.parseScopeEval = function(input) {
+
+	var raw_arguments = this.parseRaw(input);
+	if (Lava.schema.DEBUG && (raw_arguments.length != 1 || !raw_arguments[0].flags.isScopeEval)) Lava.t('parseScopeEval: malformed scope path');
+
+	return raw_arguments[0].binds[0];
+};
+
 Lava.ExpressionParser.yy = {
 
 	is_parsing: false,
@@ -7649,7 +7670,8 @@ Lava.ExpressionParser.yy = {
 		braces: 0,
 		literals: 0,
 		numbers: 0,
-		strings: 0
+		strings: 0,
+		dynamic_scopes: 0
 	},
 
 	unescape: function(string) {
@@ -7674,6 +7696,7 @@ Lava.ExpressionParser.yy = {
 		this.x_counters.literals = 0;
 		this.x_counters.numbers = 0;
 		this.x_counters.strings = 0;
+		this.x_counters.dynamic_scopes = 0;
 	},
 
 	finishArgument: function(evaluator_src) {
@@ -7690,8 +7713,10 @@ Lava.ExpressionParser.yy = {
 			&& this.x_counters.operands == 1
 			&& this.x_counters.expression_tails == 0
 			&& this.x_counters.braces == 0
-		)
+			&& this.x_counters.dynamic_scopes == 0
+		) {
 			flags.isScopeEval = true;
+		}
 		if (this.x_argument_binds.length == 0 && this.x_counters.active_modifiers == 0) {
 			flags.isStatic = true;
 			if (this.x_counters.literals == 1 && this.x_counters.operands == 1) flags.isLiteral = true;
@@ -7748,14 +7773,14 @@ Lava.ExpressionParser.yy = {
 
 	assertSemicolonAllowed: function() {
 
-		if (typeof(this.x_allowed_separator) == 'undefined') Lava.t("ExpressionParser: semicolon encountered, but separator is not set");
+		if (this.x_allowed_separator == null) Lava.t("ExpressionParser: semicolon encountered, but separator is not set");
 		if (this.x_allowed_separator != Lava.ExpressionParser.SEPARATORS.SEMICOLON) Lava.t("ExpressionParser: comma is not allowed as separator here");
 
 	},
 
 	assertCommaAllowed: function() {
 
-		if (typeof(this.x_allowed_separator) == 'undefined') Lava.t("ExpressionParser: comma encountered, but separator is not set");
+		if (this.x_allowed_separator == null) Lava.t("ExpressionParser: comma encountered, but separator is not set");
 		if (this.x_allowed_separator != Lava.ExpressionParser.SEPARATORS.COMMA) Lava.t("ExpressionParser: semicolon is not allowed as separator here");
 
 	}
@@ -9146,7 +9171,7 @@ Lava.define(
 
 	},
 
-	destroyRefreshable: function() {
+	suspendRefreshable: function() {
 
 		if (this._refresh_ticket) {
 			Lava.ScopeManager.cancelScopeRefresh(this._refresh_ticket, this.level);
@@ -9206,7 +9231,7 @@ Lava.define(
  */
 {
 
-	Extends: ['Lava.mixin.Observable'],
+	Extends: 'Lava.mixin.Observable',
 
 	_started_time: 0,
 	_end_time: 0,
@@ -14561,7 +14586,7 @@ Lava.define(
 
 		}
 
-		this.destroyRefreshable();
+		this.suspendRefreshable();
 
 	}
 
@@ -14592,6 +14617,7 @@ Lava.define(
 	 */
 	_evaluator: null,
 	_value: null,
+	guid: null,
 
 	/**
 	 * @type {Array.<_iValueContainer>}
@@ -14610,6 +14636,7 @@ Lava.define(
 	 */
 	init: function(config, view, widget) {
 
+		this.guid = Lava.guid++;
 		this._view = view;
 		this._widget = widget;
 		this._evaluator = config.evaluator;
@@ -14617,13 +14644,23 @@ Lava.define(
 		var i = 0,
 			count,
 			bind,
-			first_level;
+			first_level = 0,
+			binds = config.binds;
 
-		if ('binds' in config) {
+		if (binds) {
 
-			for (count = config.binds.length; i < count; i++) {
+			for (count = binds.length; i < count; i++) {
 
-				bind = view.getScopeByPathConfig(config.binds[i]);
+				if (binds[i].isDynamic) {
+
+					bind = view.locateViewByPathConfig(binds[i]).getDynamicScope(view, binds[i]);
+
+				} else {
+
+					bind = view.getScopeByPathConfig(binds[i]);
+
+				}
+
 				if (bind.isWaitingRefresh()) {
 					this._count_dependencies_waiting_refresh++;
 					this._waits_refresh = true;
@@ -14641,13 +14678,17 @@ Lava.define(
 
 				}
 
-				if (i == 0) {
+				if (first_level != bind.level) {
 
-					first_level = bind.level;
+					if (i == 0) {
 
-				} else if (first_level != bind.level) {
+						first_level = bind.level; // replace default
 
-					this._requeue = true;
+					} else {
+
+						this._requeue = true;
+
+					}
 
 				}
 
@@ -14787,7 +14828,7 @@ Lava.define(
 
 		}
 
-		this.destroyRefreshable();
+		this.suspendRefreshable();
 
 	},
 
@@ -14845,7 +14886,7 @@ Lava.define(
 		}
 
 		this._bind_listeners = null;
-		this.destroyRefreshable();
+		this.suspendRefreshable();
 
 	}
 
@@ -15190,6 +15231,7 @@ Lava.define(
 
 	_view: null,
 	_widget: null,
+	guid: null,
 
 	/**
 	 * @type {Lava.system.Enumerable}
@@ -15210,6 +15252,7 @@ Lava.define(
 	 */
 	init: function(argument, view, widget, options) {
 
+		this.guid = Lava.guid++;
 		this._argument = argument;
 		this._view = view;
 		this._widget = widget;
@@ -15363,6 +15406,7 @@ Lava.define(
 
 		Lava.suspendListener(this._argument_changed_listener);
 		this._observable_listener && Lava.suspendListener(this._observable_listener);
+		this.suspendRefreshable();
 
 	},
 
@@ -15401,7 +15445,7 @@ Lava.define(
 
 		}
 
-		this.destroyRefreshable();
+		this.suspendRefreshable();
 
 	}
 
@@ -16450,11 +16494,11 @@ Lava.define(
 Lava.define(
 'Lava.view.container.Morph',
 /**
- * @ Credits:
- * based on https://github.com/tomhuda/metamorph.js/
- *
  * @lends Lava.view.container.Morph#
  * @implements iContainer
+ *
+ * Credits:
+ * based on https://github.com/tomhuda/metamorph.js/
  */
 {
 
@@ -19149,6 +19193,12 @@ Lava.define(
 
 	},
 
+	getDynamicScope: function(view, config) {
+
+		Lava.t('Not implemented: getDynamicScope');
+
+	},
+
 	/**
 	 * (modifier)
 	 * @param {string} resource_name
@@ -20984,10 +21034,10 @@ Lava.define(
 			fields: {
 				'is_expanded': {type:'Boolean'}
 			}
-		}
+		},
+		is_expanded_meta_storage_bind_config: Lava.ExpressionParser.parseScopeEval('$tree.meta_storage[node.guid].is_expanded'),
+		is_expanded_direct_bind_config: Lava.ExpressionParser.parseScopeEval('node.is_expanded')
 	},
-
-	_meta_storage: null,
 
 	_properties: {
 		records: null
@@ -20997,19 +21047,26 @@ Lava.define(
 		node_click: '_onNodeClick'
 	},
 
+	_meta_storage: null,
+	_is_expanded_bind_config: null,
+
 	init: function(config, widget, parent_view, template, properties) {
 
 		this.Standard$init(config, widget, parent_view, template, properties);
 
-		this._meta_storage = new Lava.data.MetaStorage(this._shared.meta_storage_config);
-		this.set('meta_storage', this._meta_storage);
+		this._is_expanded_bind_config = this._shared.is_expanded_direct_bind_config;
+		if (config.options && config.options.use_meta_storage) {
+			this._meta_storage = new Lava.data.MetaStorage(this._shared.meta_storage_config);
+			this.set('meta_storage', this._meta_storage);
+			this._is_expanded_bind_config = this._shared.is_expanded_meta_storage_bind_config;
+		}
 
 	},
 
 	_onNodeClick: function(dom_event_name, dom_event, view, template_arguments) {
 
-		var meta_record = this._meta_storage.get(template_arguments[0].guid);
-		meta_record.set('is_expanded', !meta_record.get('is_expanded'));
+		var property_source = this._meta_storage ? this._meta_storage.get(template_arguments[0].guid) : template_arguments[0];
+		property_source.set('is_expanded', !property_source.get('is_expanded'));
 		dom_event.preventDefault(); // to prevent text selection
 
 	},
@@ -21020,7 +21077,7 @@ Lava.define(
 			child,
 			i = 0,
 			count = children.getCount(),
-			meta_record;
+			property_source;
 
 		if (count) {
 
@@ -21031,8 +21088,8 @@ Lava.define(
 				}
 			}
 
-			meta_record = this._meta_storage.get(node.guid);
-			meta_record.set('is_expanded', expanded_state);
+			property_source = this._meta_storage ? this._meta_storage.get(node.guid) : node;
+			property_source.set('is_expanded', expanded_state);
 
 		}
 
@@ -21067,10 +21124,23 @@ Lava.define(
 
 	},
 
+	/**
+	 * @param {Lava.view.Abstract} view
+	 * @param {_cDynamicScope} config
+	 */
+	getDynamicScope: function(view, config) {
+
+		if (config.property_name != 'is_expanded') Lava.t('unknown dynamic scope: ' + config.property_name);
+		return view.getScopeByPathConfig(this._is_expanded_bind_config);
+
+	},
+
 	destroy: function() {
 
-		this._meta_storage.destroy();
-		this._meta_storage = null;
+		if (this._meta_storage) {
+			this._meta_storage.destroy();
+			this._meta_storage = null;
+		}
 
 		this.Standard$destroy();
 
@@ -22847,7 +22917,7 @@ return (this._binds[0].getValue());
 					}],
 					refresher: {"class": "Collapse"},
 					template: [
-						"\r\n\t\t\r\n\t\t\r\n\t\t\r\n\t\t",
+						"\r\n\t\t\t\r\n\t\t\t\r\n\t\t\t\r\n\t\t\t",
 						{
 							type: "view",
 							"class": "View",
@@ -22856,7 +22926,7 @@ return (this._binds[0].getValue());
 								tag_name: "div"
 							},
 							template: [
-								"\r\n\t\t\t",
+								"\r\n\t\t\t\t",
 								{
 									type: "static_tag",
 									resource_id: {
@@ -22866,17 +22936,17 @@ return (this._binds[0].getValue());
 									},
 									name: "div",
 									template: [
-										"\r\n\t\t\t\t",
+										"\r\n\t\t\t\t\t",
 										{
 											locator_type: "Name",
 											locator: "collapsible_panel",
 											name: "content",
 											type: "include"
 										},
-										"\r\n\t\t\t"
+										"\r\n\t\t\t\t"
 									]
 								},
-								"\r\n\t\t"
+								"\r\n\t\t\t"
 							]
 						},
 						"\r\n\t\t"
@@ -23605,16 +23675,10 @@ return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() -
 												]
 											},
 											{
-												locator_type: "Label",
-												locator: "widget",
-												tail: [
-													"meta_storage",
-													{
-														property_name: "node",
-														tail: ["guid"]
-													},
-													"is_expanded"
-												]
+												locator_type: "Name",
+												locator: "tree",
+												isDynamic: true,
+												property_name: "is_expanded"
 											}
 										]
 									}
@@ -23639,30 +23703,7 @@ return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() -
 				},
 				"\r\n\t"
 			],
-			icon: [
-				"\r\n\t\t",
-				{
-					type: "view",
-					"class": "View",
-					container: {
-						"class": "Element",
-						tag_name: "i",
-						static_classes: ["lava-tree-icon"],
-						class_bindings: {
-							"0": {
-								evaluator: function() {
-return ('icon-' + this._binds[0].getValue());
-},
-								binds: [{
-									property_name: "node",
-									tail: ["type"]
-								}]
-							}
-						}
-					}
-				},
-				"\r\n\t"
-			],
+			icon: [],
 			node_children: [
 				"\r\n\t\t",
 				{
@@ -23683,14 +23724,8 @@ return (this._binds[0].getValue() && this._binds[1].getValue());
 							{
 								locator_type: "Name",
 								locator: "tree",
-								tail: [
-									"meta_storage",
-									{
-										property_name: "node",
-										tail: ["guid"]
-									},
-									"is_expanded"
-								]
+								isDynamic: true,
+								property_name: "is_expanded"
 							}
 						]
 					},

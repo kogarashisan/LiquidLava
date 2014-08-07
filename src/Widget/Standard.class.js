@@ -480,6 +480,12 @@ Lava.define(
 
 	},
 
+	getDynamicScope: function(view, config) {
+
+		Lava.t('Not implemented: getDynamicScope');
+
+	},
+
 	/**
 	 * (modifier)
 	 * @param {string} resource_name

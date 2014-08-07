@@ -11,28 +11,20 @@ module.exports = function(grunt) {
 
 		try { // workaround for a bug in Grunt, https://github.com/gruntjs/grunt/issues/1135
 
-			require('../temp/lava_module.js');
 			var Lava = global.Lava;
 
 			Lava.TemplateParser.parse(grunt.file.read('./build/templates/example_widget.html'));
-
-			var example_include =
+			var widgets_src =
 				'Lava.widgets["Example"] = ' + Lava.Serializer.serialize(Lava.widgets['Example']) + ';\n'
 				+ 'Lava.sugar_map["example"] = ' + Lava.Serializer.serialize(Lava.sugar_map['example']) + ';\n';
 
-			grunt.file.write('./build/temp/example_box_widget.js', example_include);
-
-			///
+			Lava.TemplateParser.parse(grunt.file.read('./build/templates/FolderTree.html'));
+			widgets_src += 'Lava.widgets["FolderTree"] = ' + Lava.Serializer.serialize(Lava.widgets['FolderTree']) + ';\n';
 
 			Lava.TemplateParser.parse(grunt.file.read('./build/templates/editable_table.html'));
-			var include = 'Lava.widgets["EditableTable"] = ' + Lava.Serializer.serialize(Lava.widgets['EditableTable']) + ';\n';
-			grunt.file.write('./build/temp/editable_table_widget.js', include);
+			widgets_src += 'Lava.widgets["EditableTable"] = ' + Lava.Serializer.serialize(Lava.widgets['EditableTable']) + ';\n';
 
-			///
-
-			var main_page_widgets = Lava.TemplateParser.parse(grunt.file.read('./build/templates/main_page_demo.html'));
-			include = 'var MainPageTemplate = ' + Lava.Serializer.serialize(main_page_widgets) + ';\n';
-			grunt.file.write('./build/temp/main_page_widgets_template.js', include);
+			grunt.file.write('./build/temp/site_widgets.js', widgets_src);
 
 		} catch (e) {
 

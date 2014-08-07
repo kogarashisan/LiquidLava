@@ -1,15 +1,13 @@
 
-/** @typedef {(string|_cView|_cInclude|_cStaticValue|_cStaticEval|_cStaticTag|function)} */
-Lavadoc._tTemplateItem;
+/**
+ * @typedef {(string|_cView|_cInclude|_cStaticValue|_cStaticEval|_cStaticTag|function)} Lavadoc._tTemplateItem
+ */
 
-/** @typedef {Array.<_tTemplateItem>} */
-Lavadoc._tTemplate;
+/** @typedef {Array.<_tTemplateItem>} Lavadoc._tTemplate */
 
-/** @typedef {Array.<(Lava.view.Abstract|string|function)>} */
-Lavadoc._tRenderable;
+/** @typedef {Array.<(Lava.view.Abstract|string|function)>} Lavadoc._tRenderable */
 
-/** @typedef {Array.<string|_cScopeLocator>} */
-Lavadoc._tPathSegment;
+/** @typedef {(Array.<string|_cScopeLocator>)} Lavadoc._tPathSegment */
 
 /** @enum {string} */
 Lavadoc._tKnownViewLocatorType = {
@@ -44,7 +42,6 @@ function _cViewLocator() {
 }
 
 /**
- *
  * @extends {_cKnownViewLocator}
  */
 function _cScopeLocator() {
@@ -59,6 +56,16 @@ function _cScopeLocator() {
 	 * @type {Array.<Lavadoc._tPathSegment>}
 	 */
 	this.tail = [];
+
+}
+
+/**
+ * @extends {_cKnownViewLocator}
+ */
+function _cDynamicScope() {
+
+	this.isDynamic = true;
+	this.property_name = '';
 
 }
 
@@ -87,7 +94,7 @@ function _cArgumentCommon() {
 	};
 
 	/**
-	 * @type {?Array.<_cScopeLocator>}
+	 * @type {?Array.<(_cScopeLocator|_cDynamicScope)>}
 	 */
 	this.binds = [];
 

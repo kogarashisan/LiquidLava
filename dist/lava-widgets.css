@@ -16,9 +16,6 @@ This file contains essential classes for some standard widgets.
 .lava-tree-node {background: no-repeat left center;overflow: visible;vertical-align: top;height: 25px; font-size: 14px;white-space: nowrap;/*text-overflow: ellipsis;-o-text-overflow: ellipsis;*/}
 .lava-tree-node:hover {background: rgb(234, 240, 250);/*box-sizing: border-box;border: 1px solid rgb(163, 168, 180);*/}
 .lava-tree-text {display: inline-block;padding-left: 3px;vertical-align: top;padding-top: 2px;cursor: pointer;line-height: 25px;font-family: helvetica, arial, verdana, sans-serif;font-style: normal;}
-.lava-tree-icon {width: 25px; height: 25px;font-size: 1px;display: inline-block;background: no-repeat left center;}
-.lava-tree .icon-folder {background-image: url(data:image/gif;base64,R0lGODlhFwAUAKIAAAAAAP/////lAP+DAP///wAAAAAAAAAAACH5BAEAAAQALAAAAAAXABQAAAM2OLpM/vCxqaIllF6Y9cZdKI6hYJ5oijJqq7JuLMByS9fpjZ/6Pi++HDDIGxJ/iqOptyM5n6EEADs=);}
-.lava-tree .icon-file {background-image: url(data:image/gif;base64,R0lGODlhEQAUANUAAAAAAP////r6+vX19fPz8+zs7Obm5uXl5eHh4eDg4La2trW1tampqaenp6ampqKiop+fn52dnZmZmZOTk4WFhXBwcFNTU1FRUUJCQj8/Pz4+Pj09PTk5OTg4ODMzMzAwMCgoKP///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAACEALAAAAAARABQAAAZ/wMpDwiAai41JaBl6FEADqDRKQCyYjEEksO1yA4KDYpkNmM9o8OFaTrsFiUnWwLlY7pYLBnImONpuaQMMgIFng3N1eHh6fIgDhoKEA3R2i3l7AY+RaI+Vl5iOk5yHo6SapqSbHh0aGa+vGx8UqIWRg04Duru8uwUPQoTCw8PAQQA7);}
 .lava-tree-container {overflow: hidden;}
 .lava-tree-expander {background-repeat: no-repeat;background-position: left center;display: inline-block;width: 23px;height:25px;cursor: pointer;}
 .lava-tree-middle-expanded {background-image: url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAJYlG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtMigOe6GvS+XwL8hsHhr2jsFXW5ABMnSSp5UmTSagw+d6IayPvCgMe1sIs8M8vS6Jha0m69bWxKAQA7);}
