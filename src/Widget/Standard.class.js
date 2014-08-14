@@ -44,8 +44,8 @@ Lava.define(
 	 * @param {_cWidget} config
 	 * @param {Lava.widget.Standard} widget
 	 * @param {Lava.view.View} parent_view
-	 * @param {Object} properties
 	 * @param {Lava.system.Template} template
+	 * @param {Object} properties
 	 */
 	init: function(config, widget, parent_view, template, properties) {
 

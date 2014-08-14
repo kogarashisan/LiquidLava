@@ -89,7 +89,7 @@
 				{
 					class: "Emulated",
 					options: {
-						placement: "after-previous"
+						appender: 'AfterPrevious'
 					}
 				}
 			</x:container_config>
@@ -254,14 +254,11 @@
 	<template role="include" name="node_body">
 		<div class="lava-tree-node" x:type="view" unselectable="on" x:classes="'level-' + level">
 			{#expression(pad) escape_off}{/expression}{* remove whitespace
-			*}<i x:type="view"
-			     class="lava-tree-expander"
-			     x:event:click="$tree.node_click(node)"
-			     x:classes="'lava-tree'
-					+ ((foreach_index == @parent->count - 1) ? '-bottom' : '-middle')
-					+ ((node.type == 'folder' && node.children.length)
-						? ($tree{is_expanded} ? '-expanded' : '-collapsed')
-						: '-node')"></i>{>$tree.icon}
+			*}<i class="lava-tree-expander" x:type="view"
+				x:event:click="$tree.node_click(node)"
+				x:classes="'lava-tree' + ((foreach_index == @parent->count - 1) ? '-bottom' : '-middle')
+					+ (node.children.length ? ($tree{is_expanded} ? '-expanded' : '-collapsed') : '-node')"></i>
+			{>$tree.icon}
 			{>$tree.node_title}
 		</div>
 	</template>
@@ -273,7 +270,7 @@
 				{
 					class: "Emulated",
 					options: {
-						placement: "after-previous"
+						appender: 'AfterPrevious'
 					}
 				}
 			</x:container_config>
@@ -293,7 +290,9 @@
 		{/if}
 	</template>
 	<template role="include" name="node_title">
-		<span class="lava-tree-text" x:type="container" x:event:click="$tree.node_click(node)">
+		<span class="lava-tree-title" x:type="container"
+			x:classes="node.children.length ? 'lava-tree-title-expandable' : ''"
+			x:event:click="$tree.node_click(node)">
 			{#>node.title}
 		</span>
 	</template>

@@ -67,21 +67,22 @@ function _iProperties() {
  */
 function iContainer() {
 
-	wrap = function(html)  {};
-	setHTML = function(html)  {};
-	appendHTML = function(html)  {};
-	prependHTML = function(html)  {};
-	insertHTMLAfter = function(html)  {};
-	remove = function()  {};
+	this.wrap = function(html)  {};
+	this.setHTML = function(html)  {};
+	this.appendHTML = function(html)  {};
+	this.prependHTML = function(html)  {};
+	this.insertHTMLAfter = function(html)  {};
+	this.insertHTMLBefore = function(html)  {};
+	this.remove = function()  {};
 
-	informInDOM = function()  {};
-	informRemove = function()  {};
-	isInDOM = function() {};
+	this.informInDOM = function()  {};
+	this.informRemove = function()  {};
+	this.isInDOM = function() {};
 
-	release = function()  {};
-	refresh = function()  {};
-	sleep = function()  {};
-	wakeup = function()  {};
-	destroy = function()  {};
+	this.release = function()  {};
+	this.refresh = function()  {};
+	this.sleep = function()  {};
+	this.wakeup = function()  {};
+	this.destroy = function()  {};
 
 }

@@ -115,3 +115,11 @@ function _cScopeForeach() {
 	this.after_refresh_callback = null;
 
 }
+
+/** @typedef {function(x)} _tTransitionCallback */
+
+/**
+ * Animation transition function
+ * @callback _tTransitionCallback
+ * @param {number} x The current animation position, 0 <= x <= 1
+ */

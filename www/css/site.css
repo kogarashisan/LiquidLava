@@ -7620,7 +7620,9 @@ footer .container {background: #f7f5fa;}
 .lava-tree .icon-file {background-image: url(data:image/gif;base64,R0lGODlhEQAUANUAAAAAAP////r6+vX19fPz8+zs7Obm5uXl5eHh4eDg4La2trW1tampqaenp6ampqKiop+fn52dnZmZmZOTk4WFhXBwcFNTU1FRUUJCQj8/Pz4+Pj09PTk5OTg4ODMzMzAwMCgoKP///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAACEALAAAAAARABQAAAZ/wMpDwiAai41JaBl6FEADqDRKQCyYjEEksO1yA4KDYpkNmM9o8OFaTrsFiUnWwLlY7pYLBnImONpuaQMMgIFng3N1eHh6fIgDhoKEA3R2i3l7AY+RaI+Vl5iOk5yHo6SapqSbHh0aGa+vGx8UqIWRg04Duru8uwUPQoTCw8PAQQA7);}
 .lava-tree .icon-class {background-image: url('data:image/gif;base64,R0lGODlhEwAUAOYAAAAAAP///7NEq/eO8bdMs9Vv0/Ga799/3/ee9/Sc9PSd9Pex9//E//3C/fnD+XAScqZEp8pky9Nu1NNw1dx53eKI4+WN5vew+Pi2+t+P4pxytqN5vGJ8r2d9o15wjSxkty1mt2x/nGx/m2p9mG1/mmt9l3KDnY+dsZCesitoui9puiZpvl6T1198oSl1yCp3ySp4yVaa32yq62aQu4PB+H637oTB+Ie/84nC9YzC9YbG+6PW/6TW/6XZ/02e12i69Wm69Wu++FaAivzsk/fli/zqkProkPvpkvbhgvXggvXghPbhhffTWPLSY/LTZPfZaPbZaf/RQf7QQee9Pv/TR//SSNu2QvXOUvTOUvPOVdGySfnVXX9yRsyYCcqaFcSWF9WkIN+wKcmfJbiSIt6vKtCkKN+xLMadJ+i8OMGdMf///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAGoALAAAAAATABQAAAebgGqCg4SFhoNTVoeLamZDSGWMhWFHSVBMYJKCZEZLTVdVX4YHhGhFSk5ZUl2GFg4Vg1pET1hRY1xqHC1CGgMNCwoRg2lbVF6CHYIbGQwXCRMQhGJngyGDBhgIEg+SIoQUBQKaJIUEmmoj54YmhT7nJ4U5NZoohDg8OjGaHiUzNzs2frhQcU5GDxpAXoBQp4ZFEBgfGApakULiokAAOw==');}
 
-.api-extends-box {background: rgb(215, 231, 236);padding: 1em;border: 2px solid lightgray;float: right}
+.api-node-selected {background-color: #DFEAFF !important;}
+
+.api-extends-box {background: rgb(215, 231, 236);padding: 1em;border: 2px solid lightgray;float: right;margin-bottom: 1em}
 .api-extends-box-header {color: #aaa;font-weight: bold;letter-spacing: 1px;font-size: 12px;padding-bottom: 0.5em;}
 .api-extends-box-header-left {}
 .api-extends-box-header-right {float: right;}
@@ -7633,9 +7635,25 @@ footer .container {background: #f7f5fa;}
 
 .api-member-table {width: 100%;border-radius: 5px}
 .api-member-table thead {background: #dfe9ff;font-weight: bold}
-.api-member-table td {border: 1px solid gray;padding: 0.5em}
+.api-member-table thead td {border: 1px solid gray;padding: 1px 0.5em}
+.api-member-table tbody td {border: 1px solid gray;padding: 0.4em}
+.api-member-inner-table thead td {padding: 1px 0.5em}
 .api-method-group-class-name {padding-top: 1em; font-style: italic;font-size: 1.2em}
-.api-member-group-header {font-weight: bold}
+.api-member-group-header {font-weight: bold; margin-bottom:0}
+.api-member-row {}
+.api-member-row-expandable {cursor: pointer;}
+.api-member-row-expandable:hover {cursor: pointer;background: rgb(255, 255, 232);}
+.api-member-extended-row {}
+.api-filter-box {clear:both;background: #dfe9ff;padding: 0.5em;border: 1px solid gray}
+.api-returns-icon {top:3px !important}
+.api-member-cell-expandable {background: rgb(255, 255, 199);width: 1em;padding: 0!important;}
+.api-description-td {padding-top: 0 !important;}
+.api-description-td p {margin:0; padding-top: 0.4em}
+.api-flag-td {width: 1px; white-space: nowrap}
+.api-keyword {font-weight: bold; color: rgb(0,0,128);}
+.api-string {color: rgb(0,128,0);}
+.api-highlight-gray {color: gray;font-weight: bold;}
+.api-highlight-empty {font-weight: bold;}
 
 /*
 This file contains essential classes for some standard widgets.
@@ -7653,13 +7671,14 @@ This file contains essential classes for some standard widgets.
 .lava-tree {}
 .lava-tree-node {background: no-repeat left center;overflow: visible;vertical-align: top;height: 25px; font-size: 14px;white-space: nowrap;/*text-overflow: ellipsis;-o-text-overflow: ellipsis;*/}
 .lava-tree-node:hover {background: rgb(234, 240, 250);/*box-sizing: border-box;border: 1px solid rgb(163, 168, 180);*/}
-.lava-tree-text {display: inline-block;padding-left: 3px;vertical-align: top;padding-top: 2px;cursor: pointer;line-height: 25px;font-family: helvetica, arial, verdana, sans-serif;font-style: normal;}
+.lava-tree-title {display: inline-block;padding-left: 3px;vertical-align: top;padding-top: 2px;line-height: 25px;font-family: helvetica, arial, verdana, sans-serif;font-style: normal;}
+.lava-tree-title-expandable {cursor: pointer;}
 .lava-tree-container {overflow: hidden;}
-.lava-tree-expander {background-repeat: no-repeat;background-position: left center;display: inline-block;width: 23px;height:25px;cursor: pointer;}
-.lava-tree-middle-expanded {background-image: url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAJYlG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtMigOe6GvS+XwL8hsHhr2jsFXW5ABMnSSp5UmTSagw+d6IayPvCgMe1sIs8M8vS6Jha0m69bWxKAQA7);}
-.lava-tree-middle-collapsed {background-image: url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAJclG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtMigOe6GvS+XwL8hEAecGjsEZU8XS7gxEmGyAq1aD1iO79uMLoT1UDjF6aMrpld6dla5m7H3hJ5i26LUwoAOw==);}
-.lava-tree-bottom-expanded {background-image: url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAJPlG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtMigOe6GvS+XwL8hsHhr2jsFXW5ABMnSSp5UmTSagw+d7Wu9wsOi8fksvmMTqspBQA7);}
-.lava-tree-bottom-collapsed {background-image: url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAJUlG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtMigOe6GvS+XwL8hEAecGjsEZU8XS7gxEmGyAq1aD1iO79uMLqricfksvmMTqvX7Lb7TSkAADs=);}
+.lava-tree-expander {background-repeat: no-repeat;background-position: left center;display: inline-block;width: 23px;height:25px;}
+.lava-tree-middle-expanded {background-image: url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAJYlG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtMigOe6GvS+XwL8hsHhr2jsFXW5ABMnSSp5UmTSagw+d6IayPvCgMe1sIs8M8vS6Jha0m69bWxKAQA7);cursor: pointer;}
+.lava-tree-middle-collapsed {background-image: url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAJclG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtMigOe6GvS+XwL8hEAecGjsEZU8XS7gxEmGyAq1aD1iO79uMLoT1UDjF6aMrpld6dla5m7H3hJ5i26LUwoAOw==);cursor: pointer;}
+.lava-tree-bottom-expanded {background-image: url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAJPlG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtMigOe6GvS+XwL8hsHhr2jsFXW5ABMnSSp5UmTSagw+d7Wu9wsOi8fksvmMTqspBQA7);cursor: pointer;}
+.lava-tree-bottom-collapsed {background-image: url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAJUlG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtMigOe6GvS+XwL8hEAecGjsEZU8XS7gxEmGyAq1aD1iO79uMLqricfksvmMTqvX7Lb7TSkAADs=);cursor: pointer;}
 .lava-tree-middle-node {background-image: url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAJFlG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtP1i9Wgjrs8AAwKRz3ZrCjhKW/LYzOGtDmZ1KkV+mxFd1Vst1EAADs=);}
 .lava-tree-bottom-node {background-image: url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAI8lG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtP1i9Wgjrs8AAwKe7qi8YhMKpfMpvMJjUqnVEYBADs=);}
 .lava-tree-pad-line {width: 25px;height: 25px;display: inline-block;background: no-repeat left center url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAJBlG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtP1i9Wgjrv8fwPOerKhMEaUHFtJmzEIfUqRy09zF6VmGwUAOw==)}

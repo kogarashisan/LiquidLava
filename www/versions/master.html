@@ -1,19 +1,30 @@
 <h3>Feature</h3>
-<p>Added "dynamic scopes".</p>
-<p></p>
+<ul>
+	<li>Added "dynamic scopes".</li>
+	<li>Added insertHTMLBefore() to all containers.</li>
+	<li>Emulated container: rewritten the insertion algorithm. New config options available, old gone.</li>
+</ul>
 
 <h3>Refactoring</h3>
-<p>Minor refactorings and improvements, JSDoc fixes.</p>
-<p>Refactored the template of the Tree class, for use of dynamic scopes</p>
-<p>Most classes, that implemented mixins - now extend them.</p>
-<p>Renamed in Enumerable:</p>
 <ul>
-	<li>remove -> removeValue</li>
-	<li>include -> includeValue</li>
-	<li>contains -> containsValue</li>
+	<li>Minor refactorings and improvements, JSDoc fixes.</li>
+	<li>Refactored the template of the Tree class, mainly for use of dynamic scopes.</li>
+	<li>Most classes, that implemented mixins - now extend them.</li>
+	<li>
+		Renamed in Enumerable:
+		<ul>
+			<li>remove -> removeValue</li>
+			<li>include -> includeValue</li>
+			<li>contains -> containsValue</li>
+		</ul>
+	</li>
 </ul>
 
 <h3>Fixes</h3>
-<p>Fixed a serialization issue in Lava.Serializer.</p>
-<p>Fixed a bug in view refresh system.</p>
-<p>Fixed a bug in template compiling algorithm</p>
+<ul>
+	<li>Fixed a serialization issue in Lava.Serializer.</li>
+	<li>Fixed a bug in view refresh system.</li>
+	<li>Fixed a bug in template compiling algorithm.</li>
+	<li>Fixed a bug in resources merging, which created duplicate classes.</li>
+	<li>Enumerable: fixed refresh from array.</li>
+</ul>

@@ -397,25 +397,67 @@ Lava.define(
 {
 
 	Extends: 'Lava.widget.ContentLoader',
+	Shared: ['_shared'],
+
+	_shared: {
+		meta_storage_config: {
+			fields: {
+				is_expanded: {type: 'Boolean', 'default': false}
+			}
+		}
+	},
 
 	_properties: {
 		api_tree: null,
 		descriptor: null,
 		extended_descriptor: null,
-		member_grouping: true
+		member_grouping: true,
+		meta_storage: null,
+
+		//_all_methods: null, // Enumerable
+		//_all_members: null, // Enumerable
+
+		is_show_inherited: true,
+		is_show_mixins: true,
+		is_group_members: true
 	},
 
 	_event_handlers: {
-		node_click: '_onNodeClick'
+		node_click: '_onNodeClick',
+		member_row_click: '_onMemberRowClick',
+		group_header_click: '_onGroupHeaderClicked'
+	},
+
+	_broadcast_handlers: {
+		on_filter_changed: '_onFilterConditionChanged'
 	},
 
 	API_DIR: 'api/',
 
 	_class_content_widget: null,
+	_tree_hash: null,
 
 	init: function(config, widget, parent_view, template, properties) {
 
+		var children,
+			hash = {};
+
 		this._properties.api_tree = Examples.makeLive(api_tree_source);
+
+		function prepareTree(collection, parent) {
+			collection.each(function(record){
+				record.set('parent', parent);
+				if (record.get('type') == 'folder') {
+					hash[record.get('name')] = record;
+				}
+				children = record.get('children');
+				if (children) {
+					prepareTree(children, record);
+				}
+			})
+		}
+
+		this._tree_hash = hash;
 		this._class_content_widget = Lava.createWidget('ClassContent');
 		this.ContentLoader$init(config, widget, parent_view, template, properties);
 
@@ -438,24 +480,85 @@ Lava.define(
 
 	},
 
+	_onMemberRowClick: function(dom_event_name, dom_event, view, template_arguments) {
+
+		var member_descriptor = template_arguments[0];
+		if (member_descriptor.isProperties && (member_descriptor.get('returns') || member_descriptor.get('params'))) {
+			var meta_record = this._properties.meta_storage.get(template_arguments[0].get('guid'));
+			meta_record.set('is_expanded', !meta_record.get('is_expanded'));
+		}
+
+	},
+
+	_onGroupHeaderClicked: function(dom_event_name, dom_event, view, template_arguments) {
+
+		// @todo
+
+	},
+
 	_onItemLoaded: function(text, item) {
 
-		item.set('extended_descriptor', eval('(' + text + ')'));
+		var extended_descriptor = eval('(' + text + ')'),
+			method_chain = extended_descriptor.method_chain,
+			member_chain = extended_descriptor.member_chain,
+			group_index = 0,
+			group_count,
+			i = 0,
+			count,
+			descriptors,
+			all_method_descriptors = [],
+			all_member_descriptors = [];
+
+		item.set('extended_descriptor', extended_descriptor);
+
+		if (method_chain) {
+			for (group_count = method_chain.length; group_index < group_count; group_index++) {
+				descriptors = method_chain[group_index].descriptors;
+				for (i = 0, count = descriptors.length; i < count; i++) {
+					descriptors[i].guid = Lava.guid++;
+					descriptors[i] = new Lava.mixin.Properties(descriptors[i]);
+					all_method_descriptors.push(descriptors[i]);
+				}
+			}
+		}
+
+		if (member_chain) {
+			for (group_count = member_chain.length; group_index < group_count; group_index++) {
+				descriptors = member_chain[group_index].descriptors;
+				for (i = 0, count = descriptors.length; i < count; i++) {
+					descriptors[i].guid = Lava.guid++;
+					descriptors[i] = new Lava.mixin.Properties(descriptors[i]);
+					all_member_descriptors.push(descriptors[i]);
+				}
+			}
+		}
+
+		item.set('all_methods', new Lava.system.Enumerable(all_method_descriptors));
+		item.set('all_members', new Lava.system.Enumerable(all_member_descriptors));
 
 	},
 
 	_getItemByHash: function(path) {
 
-		/*var version = null;
+		var result = null,
+			segments = path.split(';'),
+			parts,
+			i = 0,
+			count = segments.length,
+			hash = {};
 
-		this._properties.versions.each(function(value){
-			if (value.get('name') == path) {
-				version = value;
-				return false;
+		for (; i < count; i++) {
+			parts = segments[i].split('=');
+			if (parts.length == 2) {
+				hash[parts[0]] = parts[1];
 			}
-		});
+		}
 
-		return version;*/
+		if (('class' in hash) && (hash['class'] in this._tree_hash)) {
+			result = this._tree_hash[hash['class']]
+		}
+
+		return result;
 
 	},
 
@@ -463,7 +566,11 @@ Lava.define(
 
 		if (this._properties.descriptor != item) {
 
-			if (this._properties.descriptor) this._properties.descriptor.set('is_selected', false);
+			if (this._properties.descriptor) {
+				this._properties.descriptor.set('is_selected', false);
+				this._properties.meta_storage.destroy();
+			}
+			this._set('meta_storage', new Lava.data.MetaStorage(this._shared.meta_storage_config));
 
 			this._set('descriptor', item);
 			this._set('extended_descriptor', item.get('extended_descriptor'));
@@ -482,6 +589,10 @@ Lava.define(
 	_getFilePath: function(item) {
 
 		return this.API_DIR + item.get('name') + '.js';
+
+	},
+
+	_onFilterConditionChanged: function() {
 
 	}
 

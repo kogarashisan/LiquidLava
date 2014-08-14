@@ -2,20 +2,30 @@
 Lava.define(
 'Lava.mixin.Observable',
 /**
+ * Provides support for events
  * @lends Lava.mixin.Observable#
  * @implements _iObservable
  */
 {
 
+	/**
+	 * Indicates that this class is inherited from Observable and supports events
+	 * @const
+	 */
 	isObservable: true,
 
-	// [event_name] => array_of_listeners
+	/**
+	 * The hash of listeners for each event
+	 * @type {Object.<string, Array.<_iListener>>}
+	 */
 	_listeners: {},
 
 	/**
+	 * Add listener for event `event_name`
+	 *
 	 * @param {string} event_name
 	 * @param {function} fn
-	 * @param {Object} [context]
+	 * @param {Object} context
 	 * @param {*} [listener_args]
 	 * @returns {_iListener}
 	 */
@@ -25,6 +35,16 @@ Lava.define(
 
 	},
 
+	/**
+	 * Create the listener construct and push into the listeners array for given event name
+	 *
+	 * @param {string} event_name
+	 * @param {function} fn
+	 * @param {Object} context
+	 * @param {*} listener_args
+	 * @param {Object} listeners_by_event
+	 * @returns {_iListener}
+	 */
 	_addListener: function(event_name, fn, context, listener_args, listeners_by_event) {
 
 		var listener = {
@@ -50,6 +70,7 @@ Lava.define(
 	},
 
 	/**
+	 * Remove the given listener object from event listeners array.
 	 * @param {_iListener} listener
 	 */
 	removeListener: function(listener) {
@@ -58,6 +79,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Perform removal of the listener construct
+	 * @param {_iListener} listener
+	 * @param {Object} listeners_by_event
+	 */
 	_removeListener: function(listener, listeners_by_event) {
 
 		var list = listeners_by_event[listener.event_name],
@@ -76,6 +102,7 @@ Lava.define(
 	},
 
 	/**
+	 * Fire an event
 	 * @param {string} event_name
 	 * @param {*} [event_args]
 	 */
@@ -92,6 +119,7 @@ Lava.define(
 	},
 
 	/**
+	 * Perform fire
 	 * @param {Array} listeners
 	 * @param {*} event_args
 	 */
@@ -112,7 +140,7 @@ Lava.define(
 	},
 
 	/**
-	 * Does it have any listeners for given event, including suspended instances.
+	 * Does this object have any listeners for given event, including suspended instances.
 	 * @param {string} event_name
 	 * @returns {boolean}
 	 */

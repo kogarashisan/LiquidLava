@@ -9,14 +9,38 @@ Lava.define(
 
 	Extends: 'Lava.mixin.Observable',
 
+	/**
+	 * @type {number}
+	 */
 	_started_time: 0,
+	/**
+	 * @type {number}
+	 */
 	_end_time: 0,
+	/**
+	 * @type {number}
+	 */
 	_duration: 0,
+	/**
+	 * @type {*}
+	 */
 	_target: null,
+	/**
+	 * @type {boolean}
+	 */
 	_is_running: false,
+	/**
+	 * @type {boolean}
+	 */
 	_is_reversed: false,
+	/**
+	 * @type {_cAnimation}
+	 */
 	_config: null,
 
+	/**
+	 * @type {_tTransitionCallback}
+	 */
 	_transition: null,
 	/**
 	 * @type {_tGUID}
@@ -25,7 +49,7 @@ Lava.define(
 
 	/**
 	 * @param {_cAnimation} config
-	 * @param target
+	 * @param {*} target
 	 */
 	init: function(config, target) {
 
@@ -74,6 +98,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * If animation is running forwards - reverse it to backwards direction
+	 */
 	reverseDirection: function() {
 
 		if (!this._is_reversed) {
@@ -84,6 +111,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * If animation is running backwards - reverse it to normal direction
+	 */
 	resetDirection: function() {
 
 		if (this._is_reversed) {
@@ -94,6 +124,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * The actual reversing algorithm
+	 */
 	_mirror: function() {
 
 		this._is_reversed = !this._is_reversed;
@@ -122,46 +155,78 @@ Lava.define(
 
 	},
 
+	/**
+	 * Callback to execute after `_mirror` is done
+	 * @param {number} now The current time in milliseconds
+	 */
 	_afterMirror: function(now) {
 
 	},
 
+	/**
+	 * Get `_is_running`
+	 * @returns {boolean}
+	 */
 	isRunning: function() {
 
 		return this._is_running;
 
 	},
 
+	/**
+	 * Get `_started_time`
+	 * @returns {number}
+	 */
 	getStartedTime: function() {
 
 		return this._started_time;
 
 	},
 
+	/**
+	 * Get `_end_time`
+	 * @returns {number}
+	 */
 	getEndTime: function() {
 
 		return this._end_time;
 
 	},
 
+	/**
+	 * Get `_duration`
+	 * @returns {number}
+	 */
 	getDuration: function() {
 
 		return this._duration;
 
 	},
 
+	/**
+	 * Get `_is_reversed`
+	 * @returns {boolean}
+	 */
 	isReversed: function() {
 
 		return this._is_reversed;
 
 	},
 
+	/**
+	 * Get `_target`
+	 * @returns {*}
+	 */
 	getTarget: function() {
 
 		return this._target;
 
 	},
 
+	/**
+	 * Set `_target`
+	 * @param target
+	 */
 	setTarget: function(target) {
 
 		this._target = target;

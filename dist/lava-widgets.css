@@ -15,13 +15,14 @@ This file contains essential classes for some standard widgets.
 .lava-tree {}
 .lava-tree-node {background: no-repeat left center;overflow: visible;vertical-align: top;height: 25px; font-size: 14px;white-space: nowrap;/*text-overflow: ellipsis;-o-text-overflow: ellipsis;*/}
 .lava-tree-node:hover {background: rgb(234, 240, 250);/*box-sizing: border-box;border: 1px solid rgb(163, 168, 180);*/}
-.lava-tree-text {display: inline-block;padding-left: 3px;vertical-align: top;padding-top: 2px;cursor: pointer;line-height: 25px;font-family: helvetica, arial, verdana, sans-serif;font-style: normal;}
+.lava-tree-title {display: inline-block;padding-left: 3px;vertical-align: top;padding-top: 2px;line-height: 25px;font-family: helvetica, arial, verdana, sans-serif;font-style: normal;}
+.lava-tree-title-expandable {cursor: pointer;}
 .lava-tree-container {overflow: hidden;}
-.lava-tree-expander {background-repeat: no-repeat;background-position: left center;display: inline-block;width: 23px;height:25px;cursor: pointer;}
-.lava-tree-middle-expanded {background-image: url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAJYlG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtMigOe6GvS+XwL8hsHhr2jsFXW5ABMnSSp5UmTSagw+d6IayPvCgMe1sIs8M8vS6Jha0m69bWxKAQA7);}
-.lava-tree-middle-collapsed {background-image: url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAJclG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtMigOe6GvS+XwL8hEAecGjsEZU8XS7gxEmGyAq1aD1iO79uMLoT1UDjF6aMrpld6dla5m7H3hJ5i26LUwoAOw==);}
-.lava-tree-bottom-expanded {background-image: url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAJPlG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtMigOe6GvS+XwL8hsHhr2jsFXW5ABMnSSp5UmTSagw+d7Wu9wsOi8fksvmMTqspBQA7);}
-.lava-tree-bottom-collapsed {background-image: url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAJUlG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtMigOe6GvS+XwL8hEAecGjsEZU8XS7gxEmGyAq1aD1iO79uMLqricfksvmMTqvX7Lb7TSkAADs=);}
+.lava-tree-expander {background-repeat: no-repeat;background-position: left center;display: inline-block;width: 23px;height:25px;}
+.lava-tree-middle-expanded {background-image: url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAJYlG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtMigOe6GvS+XwL8hsHhr2jsFXW5ABMnSSp5UmTSagw+d6IayPvCgMe1sIs8M8vS6Jha0m69bWxKAQA7);cursor: pointer;}
+.lava-tree-middle-collapsed {background-image: url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAJclG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtMigOe6GvS+XwL8hEAecGjsEZU8XS7gxEmGyAq1aD1iO79uMLoT1UDjF6aMrpld6dla5m7H3hJ5i26LUwoAOw==);cursor: pointer;}
+.lava-tree-bottom-expanded {background-image: url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAJPlG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtMigOe6GvS+XwL8hsHhr2jsFXW5ABMnSSp5UmTSagw+d7Wu9wsOi8fksvmMTqspBQA7);cursor: pointer;}
+.lava-tree-bottom-collapsed {background-image: url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAJUlG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtMigOe6GvS+XwL8hEAecGjsEZU8XS7gxEmGyAq1aD1iO79uMLqricfksvmMTqvX7Lb7TSkAADs=);cursor: pointer;}
 .lava-tree-middle-node {background-image: url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAJFlG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtP1i9Wgjrs8AAwKRz3ZrCjhKW/LYzOGtDmZ1KkV+mxFd1Vst1EAADs=);}
 .lava-tree-bottom-node {background-image: url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAI8lG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtP1i9Wgjrs8AAwKe7qi8YhMKpfMpvMJjUqnVEYBADs=);}
 .lava-tree-pad-line {width: 25px;height: 25px;display: inline-block;background: no-repeat left center url(data:image/gif;base64,R0lGODlhFAAxAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAUADEAAAJBlG+Ay6gNz4twUmav0y1z4XGhNl4ldUZp9S1r125xMtP1i9Wgjrv8fwPOerKhMEaUHFtJmzEIfUqRy09zF6VmGwUAOw==)}

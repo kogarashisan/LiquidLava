@@ -571,6 +571,12 @@ Lava.define(
 
 	},
 
+	insertHTMLBefore: function(html) {
+
+		Firestorm.DOM.insertHTMLBefore(this.getDOMElement(), html);
+
+	},
+
 	/**
 	 * Note: does not need to be called after capture.
 	 */

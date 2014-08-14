@@ -7,6 +7,7 @@
 		"www/tasks.html",
 		"www/about.html",
 		"www/changelog.html",
-		"www/development.html"
+		"www/development.html",
+		"www/api.html"
 	]
 }

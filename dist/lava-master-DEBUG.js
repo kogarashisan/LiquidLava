@@ -2812,13 +2812,17 @@ Lava.extenders = {
 
 			for (var name in parent_config) {
 
-				if (!(name in config)) {
+				if (name != 'resources' && name != 'resources_cache') {
 
-					config[name] = parent_config[name];
+					if (!(name in config)) {
 
-				} else if (name in this._widget_config_merged_properties) {
+						config[name] = parent_config[name];
 
-					this[this._widget_config_merged_properties[name]](config, parent_config, name, parent_name);
+					} else if (name in this._widget_config_merged_properties) {
+
+						this[this._widget_config_merged_properties[name]](config, parent_config, name, parent_name);
+
+					}
 
 				}
 
@@ -2843,6 +2847,10 @@ Lava.extenders = {
 		}
 
 		config.is_extended = true;
+
+	},
+
+	_noop: function() {
 
 	}
 
@@ -8763,20 +8771,30 @@ Lava.locales.en = {
 Lava.define(
 'Lava.mixin.Observable',
 /**
+ * Provides support for events
  * @lends Lava.mixin.Observable#
  * @implements _iObservable
  */
 {
 
+	/**
+	 * Indicates that this class is inherited from Observable and supports events
+	 * @const
+	 */
 	isObservable: true,
 
-	// [event_name] => array_of_listeners
+	/**
+	 * The hash of listeners for each event
+	 * @type {Object.<string, Array.<_iListener>>}
+	 */
 	_listeners: {},
 
 	/**
+	 * Add listener for event `event_name`
+	 *
 	 * @param {string} event_name
 	 * @param {function} fn
-	 * @param {Object} [context]
+	 * @param {Object} context
 	 * @param {*} [listener_args]
 	 * @returns {_iListener}
 	 */
@@ -8786,6 +8804,16 @@ Lava.define(
 
 	},
 
+	/**
+	 * Create the listener construct and push into the listeners array for given event name
+	 *
+	 * @param {string} event_name
+	 * @param {function} fn
+	 * @param {Object} context
+	 * @param {*} listener_args
+	 * @param {Object} listeners_by_event
+	 * @returns {_iListener}
+	 */
 	_addListener: function(event_name, fn, context, listener_args, listeners_by_event) {
 
 		var listener = {
@@ -8811,6 +8839,7 @@ Lava.define(
 	},
 
 	/**
+	 * Remove the given listener object from event listeners array.
 	 * @param {_iListener} listener
 	 */
 	removeListener: function(listener) {
@@ -8819,6 +8848,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Perform removal of the listener construct
+	 * @param {_iListener} listener
+	 * @param {Object} listeners_by_event
+	 */
 	_removeListener: function(listener, listeners_by_event) {
 
 		var list = listeners_by_event[listener.event_name],
@@ -8837,6 +8871,7 @@ Lava.define(
 	},
 
 	/**
+	 * Fire an event
 	 * @param {string} event_name
 	 * @param {*} [event_args]
 	 */
@@ -8853,6 +8888,7 @@ Lava.define(
 	},
 
 	/**
+	 * Perform fire
 	 * @param {Array} listeners
 	 * @param {*} event_args
 	 */
@@ -8873,7 +8909,7 @@ Lava.define(
 	},
 
 	/**
-	 * Does it have any listeners for given event, including suspended instances.
+	 * Does this object have any listeners for given event, including suspended instances.
 	 * @param {string} event_name
 	 * @returns {boolean}
 	 */
@@ -8888,6 +8924,7 @@ Lava.define(
 Lava.define(
 'Lava.mixin.Properties',
 /**
+ * Provides the `get()` and `set()` methods, and fires changed events
  * @lends Lava.mixin.Properties#
  * @extends Lava.mixin.Observable
  * @implements _iProperties
@@ -8896,13 +8933,27 @@ Lava.define(
 
 	Extends: 'Lava.mixin.Observable',
 
-	// to signal other classes that this class implements Properties
+	/**
+	 * To signal other classes that this class implements Properties
+	 * @const
+	 */
 	isProperties: true,
 
-	// the actual container for properties, [property_name] => value
+	/**
+	 * Hash with properties
+	 * @type {Object.<name, *>}
+	 */
 	_properties: {},
+	/**
+	 * Separate listeners hash for property changed events, same as {@link Lava.mixin.Observable#_listeners}
+	 * @type {Object.<string, Array.<_iListener>>}
+	 */
 	_property_listeners: {},
 
+	/**
+	 * Constructor
+	 * @param {Object.<string, *>} properties Initial properties
+	 */
 	init: function(properties) {
 
 		for (var name in properties) {
@@ -8913,18 +8964,33 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get property
+	 * @param {string} name
+	 * @returns {*}
+	 */
 	get: function(name) {
 
 		return this._properties[name];
 
 	},
 
+	/**
+	 * Returns true if property exists, even if it's null/undefined
+	 * @param {string} name
+	 * @returns {boolean}
+	 */
 	isset: function(name) {
 
 		return name in this._properties;
 
 	},
 
+	/**
+	 * Set property
+	 * @param {string} name The property name
+	 * @param {*} value Property value
+	 */
 	set: function(name, value) {
 
 		if (this._properties[name] !== value) {
@@ -8933,13 +8999,19 @@ Lava.define(
 
 	},
 
+	/**
+	 * Perform the set operation
+	 * @param {string} name Property name
+	 * @param {*} value Property value
+	 */
 	_set: function(name, value) {
 		this._properties[name] = value;
 		this.firePropertyChangedEvents(name);
 	},
 
 	/**
-	 * @param {Object} properties_object
+	 * Set multiple properties at once
+	 * @param {Object.<string, *>} properties_object
 	 */
 	setProperties: function(properties_object) {
 
@@ -8953,6 +9025,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Return a copy of the properties hash
+	 * @returns {Object.<name, *>}
+	 */
 	getProperties: function() {
 
 		var result = {};
@@ -8961,6 +9037,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * @param property_name
+	 */
 	firePropertyChangedEvents: function(property_name) {
 
 		this._fire('property_changed', {name: property_name});
@@ -8969,11 +9048,11 @@ Lava.define(
 	},
 
 	/**
-	 * The same, as 'on' method in Observable, but returns listener to property_name instead of event_name
+	 * The same, as {@link Lava.mixin.Observable#on}, but returns listener to property_name instead of event_name
 	 *
 	 * @param {string} event_name
 	 * @param {function} fn
-	 * @param {Object} [context]
+	 * @param {Object} context
 	 * @param {*} [listener_args]
 	 * @returns {_iListener}
 	 */
@@ -8984,6 +9063,7 @@ Lava.define(
 	},
 
 	/**
+	 * Removes listeners added with `onPropertyChanged`
 	 * @param {_iListener} listener
 	 */
 	removePropertyListener: function(listener) {
@@ -8993,6 +9073,7 @@ Lava.define(
 	},
 
 	/**
+	 * Same as {@link Lava.mixin.Observable#_fire}, but for property listeners
 	 * @param {string} property_name
 	 * @param {*} event_args
 	 */
@@ -9013,28 +9094,62 @@ Lava.define(
 Lava.define(
 'Lava.mixin.Refreshable',
 /**
+ * Auxiliary class for the scope refresh system
  * @lends Lava.mixin.Refreshable#
  * @extends Lava.mixin.Observable
  */
 {
 
 	Extends: 'Lava.mixin.Observable',
+	/**
+	 * Indicates the priority of this scope in the hierarchy. Scopes with lower priority are refreshed first
+	 * @type {number}
+	 */
 	level: 0,
+	/**
+	 * Force delay of refresh after the last dependency has been updated
+	 * @type {boolean}
+	 */
 	_requeue: false,
 
+	/**
+	 * Scopes may depend on other scopes. Scope may refresh itself, when all dependencies are up-to-date
+	 * @type {number}
+	 */
 	_count_dependencies_waiting_refresh: 0,
+	/**
+	 * Indicates if this scope will participate in the next refresh cycle
+	 * @type {boolean}
+	 */
 	_waits_refresh: false,
+	/**
+	 * The object, which is given by ScopeManager when the scope is placed into the refresh queue
+	 * @type {Object}
+	 */
 	_refresh_ticket: null,
 
+	/**
+	 * Each time the scope is refreshed - it's assigned the id of the current refresh loop
+	 * @type {number}
+	 */
 	_last_refresh_id: 0,
+	/**
+	 * How many times this scope was refreshed during current refresh loop
+	 * @type {number}
+	 */
 	_refresh_cycle_count: 0,
 
+	/**
+	 * Indicates if the scope needs to refresh it's value (dependencies or bindings have changed)
+	 * @type {boolean}
+	 */
 	_is_dirty: false,
 
 	/**
-	 * Called by view manager during refresh loop.
-	 * @param refresh_id
-	 * @param is_safe
+	 * Called by ScopeManager during refresh loop.
+	 *
+	 * @param {number} refresh_id
+	 * @param {boolean} is_safe
 	 * @returns {boolean} true in case of infinite loop
 	 */
 	doRefresh: function(refresh_id, is_safe) {
@@ -9082,6 +9197,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Listens to the waits_refresh event
+	 */
 	_onDependencyWaitsRefresh: function() {
 
 		this._count_dependencies_waiting_refresh++;
@@ -9104,6 +9222,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Listens to the refreshed event
+	 */
 	_onDependencyRefreshed: function() {
 
 		if (Lava.schema.DEBUG && !this._waits_refresh) Lava.t();
@@ -9139,12 +9260,18 @@ Lava.define(
 
 	},
 
+	/**
+	 * Must be overridden in classes that implement Refreshable to perform the actual refresh logic
+	 */
 	_doRefresh: function() {
 
 		// may be overridden in inherited classes
 
 	},
 
+	/**
+	 * Ensure that this scope will participate in the next refresh cycle
+	 */
 	_queueForRefresh: function() {
 
 		if (!this._waits_refresh) {
@@ -9159,18 +9286,28 @@ Lava.define(
 
 	},
 
+	/**
+	 * Internal debug assertion, called to verify that the scope does not need to be refreshed
+	 */
 	debugAssertClean: function() {
 
 		if (this._waits_refresh || this._refresh_ticket || this._is_dirty) Lava.t("Refreshable::debugAssertClean() failed");
 
 	},
 
+	/**
+	 * Get `_waits_refresh`
+	 * @returns {boolean}
+	 */
 	isWaitingRefresh: function() {
 
 		return this._waits_refresh;
 
 	},
 
+	/**
+	 * Cancel the current refresh ticket and ignore next refresh cycle. Does not destroy the Refreshable instance.
+	 */
 	suspendRefreshable: function() {
 
 		if (this._refresh_ticket) {
@@ -9233,14 +9370,38 @@ Lava.define(
 
 	Extends: 'Lava.mixin.Observable',
 
+	/**
+	 * @type {number}
+	 */
 	_started_time: 0,
+	/**
+	 * @type {number}
+	 */
 	_end_time: 0,
+	/**
+	 * @type {number}
+	 */
 	_duration: 0,
+	/**
+	 * @type {*}
+	 */
 	_target: null,
+	/**
+	 * @type {boolean}
+	 */
 	_is_running: false,
+	/**
+	 * @type {boolean}
+	 */
 	_is_reversed: false,
+	/**
+	 * @type {_cAnimation}
+	 */
 	_config: null,
 
+	/**
+	 * @type {_tTransitionCallback}
+	 */
 	_transition: null,
 	/**
 	 * @type {_tGUID}
@@ -9249,7 +9410,7 @@ Lava.define(
 
 	/**
 	 * @param {_cAnimation} config
-	 * @param target
+	 * @param {*} target
 	 */
 	init: function(config, target) {
 
@@ -9298,6 +9459,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * If animation is running forwards - reverse it to backwards direction
+	 */
 	reverseDirection: function() {
 
 		if (!this._is_reversed) {
@@ -9308,6 +9472,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * If animation is running backwards - reverse it to normal direction
+	 */
 	resetDirection: function() {
 
 		if (this._is_reversed) {
@@ -9318,6 +9485,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * The actual reversing algorithm
+	 */
 	_mirror: function() {
 
 		this._is_reversed = !this._is_reversed;
@@ -9346,46 +9516,78 @@ Lava.define(
 
 	},
 
+	/**
+	 * Callback to execute after `_mirror` is done
+	 * @param {number} now The current time in milliseconds
+	 */
 	_afterMirror: function(now) {
 
 	},
 
+	/**
+	 * Get `_is_running`
+	 * @returns {boolean}
+	 */
 	isRunning: function() {
 
 		return this._is_running;
 
 	},
 
+	/**
+	 * Get `_started_time`
+	 * @returns {number}
+	 */
 	getStartedTime: function() {
 
 		return this._started_time;
 
 	},
 
+	/**
+	 * Get `_end_time`
+	 * @returns {number}
+	 */
 	getEndTime: function() {
 
 		return this._end_time;
 
 	},
 
+	/**
+	 * Get `_duration`
+	 * @returns {number}
+	 */
 	getDuration: function() {
 
 		return this._duration;
 
 	},
 
+	/**
+	 * Get `_is_reversed`
+	 * @returns {boolean}
+	 */
 	isReversed: function() {
 
 		return this._is_reversed;
 
 	},
 
+	/**
+	 * Get `_target`
+	 * @returns {*}
+	 */
 	getTarget: function() {
 
 		return this._target;
 
 	},
 
+	/**
+	 * Set `_target`
+	 * @param target
+	 */
 	setTarget: function(target) {
 
 		this._target = target;
@@ -10335,13 +10537,14 @@ Lava.define(
 				uid = this._uid++;
 				added.push(uid, source_array[i], null);
 				result.push(uid, source_array[i], null);
+				removed.push(this._data_uids[i], this._data_values[i], this._data_names[i]);
 			}
 
 		}
 
-		if (new_count < this._count) {
+		if (this._count < new_count) {
 
-			for (i = count; i < new_count; i++) {
+			for (i = this._count; i < new_count; i++) {
 
 				uid = this._uid++;
 				added.push(uid, source_array[i], null);
@@ -10351,7 +10554,7 @@ Lava.define(
 
 		} else {
 
-			for (i = count; i < this._count; i++) {
+			for (i = this._count; i < new_count; i++) {
 
 				removed.push(this._data_uids[i], this._data_values[i], this._data_names[i]);
 
@@ -16313,6 +16516,12 @@ Lava.define(
 
 	},
 
+	insertHTMLBefore: function(html) {
+
+		Firestorm.DOM.insertHTMLBefore(this.getDOMElement(), html);
+
+	},
+
 	/**
 	 * Note: does not need to be called after capture.
 	 */
@@ -16667,6 +16876,12 @@ Lava.define(
 
 	},
 
+	insertHTMLBefore: function(html) {
+
+		Firestorm.DOM.insertHTMLBefore(this.getStartElement(), html);
+
+	},
+
 	informInDOM: function() { this._is_inDOM = true; },
 
 	informRemove: function() {
@@ -16708,26 +16923,18 @@ Lava.define(
 
 	isEmulatedContainer: true,
 
-	Shared: ['_appenders'],
-
-	_appenders: {
-		bottom: '_appendBottom',
-		'after-previous': '_appendAfterPrevious'
-	},
-
 	/**
 	 * @type {Lava.view.View}
 	 */
 	_view: null,
 	_config: null,
+	guid: null,
 	/**
 	 * @type {Lava.widget.Standard}
 	 */
 	_widget: null,
 
 	_is_inDOM: false,
-
-	_placement: null,
 
 	/**
 	 * @param {Lava.view.View} view
@@ -16736,15 +16943,23 @@ Lava.define(
 	 */
 	init: function(view, config, widget) {
 
+		this.guid = Lava.guid++;
 		this._view = view;
 		this._config = config;
 		this._widget = widget;
 
-		if (('options' in config) && config.options.placement) {
-			this._placement = config.options.placement;
-			if (config.options.placement in this._appenders) {
-				this.appendHTML = this[this._appenders[config.options.placement]];
+		if (('options' in config)) {
+
+			if ('appender' in config.options) {
+				if (Lava.schema.DEBUG && !this['_append' + config.options.appender]) Lava.t('[Emulated container] wrong appender: ' + config.options.appender);
+				this.appendHTML = this['_append' + config.options.appender]
 			}
+
+			if ('prepender' in config.options) {
+				if (Lava.schema.DEBUG && !this['_append' + config.options.prepender]) Lava.t('[Emulated container] wrong prepender: ' + config.options.prepender);
+				this.prependHTML = this['_append' + config.options.prepender]
+			}
+
 		}
 
 	},
@@ -16773,9 +16988,21 @@ Lava.define(
 
 	},
 
+	_appendTop: function(html) {
+
+		this._view.getParentView().getContainer().prependHTML(html);
+
+	},
+
 	_appendAfterPrevious: function(html) {
 
 		this._view.getTemplate().getPreviousView(this._view).getContainer().insertHTMLAfter(html);
+
+	},
+
+	_appendBeforeNext: function(html) {
+
+		this._view.getTemplate().getNextView(this._view).getContainer().insertHTMLBefore(html);
 
 	},
 
@@ -16785,19 +17012,25 @@ Lava.define(
 	 */
 	appendHTML: function(html) {
 
-		Lava.t("appendHTML: placement is not supported");
+		Lava.t("appendHTML is not supported or not configured");
 
 	},
 
 	prependHTML: function(html) {
 
-		Lava.t('call to prependHTML() in emulated container');
+		Lava.t("prependHTML is not supported or not configured");
+
+	},
+
+	insertHTMLBefore: function(html) {
+
+		this.prependHTML(html);
 
 	},
 
 	insertHTMLAfter: function(html) {
 
-		Lava.t('call to insertHTMLAfter() in emulated container');
+		this.appendHTML(html);
 
 	},
 
@@ -17350,8 +17583,8 @@ Lava.define(
 	 * @param {_cView} config
 	 * @param {Lava.widget.Standard} widget
 	 * @param {Lava.view.View} parent_view
-	 * @param {Object} properties
 	 * @param {Lava.system.Template} template
+	 * @param {Object} properties
 	 */
 	init: function(config, widget, parent_view, template, properties) {
 
@@ -18757,8 +18990,8 @@ Lava.define(
 	 * @param {_cWidget} config
 	 * @param {Lava.widget.Standard} widget
 	 * @param {Lava.view.View} parent_view
-	 * @param {Object} properties
 	 * @param {Lava.system.Template} template
+	 * @param {Object} properties
 	 */
 	init: function(config, widget, parent_view, template, properties) {
 
@@ -22908,7 +23141,7 @@ return (this._binds[0].getValue());
 					},
 					container: {
 						"class": "Emulated",
-						options: {placement: "after-previous"}
+						options: {appender: "AfterPrevious"}
 					},
 					roles: [{
 						locator_type: "Name",
@@ -23654,7 +23887,7 @@ return (this._binds[0].getValue());
 								class_bindings: {
 									"0": {
 										evaluator: function() {
-return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() - 1) ? '-bottom' : '-middle') + ((this._binds[2].getValue() == 'folder' && this._binds[3].getValue()) ? (this._binds[4].getValue() ? '-expanded' : '-collapsed') : '-node'));
+return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() - 1) ? '-bottom' : '-middle') + (this._binds[2].getValue() ? (this._binds[3].getValue() ? '-expanded' : '-collapsed') : '-node'));
 },
 										binds: [
 											{property_name: "foreach_index"},
@@ -23662,10 +23895,6 @@ return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() -
 												locator_type: "Label",
 												locator: "parent",
 												property_name: "count"
-											},
-											{
-												property_name: "node",
-												tail: ["type"]
 											},
 											{
 												property_name: "node",
@@ -23685,6 +23914,7 @@ return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() -
 								}
 							}
 						},
+						"\r\n\t\t\t",
 						{
 							locator_type: "Name",
 							locator: "tree",
@@ -23731,7 +23961,7 @@ return (this._binds[0].getValue() && this._binds[1].getValue());
 					},
 					container: {
 						"class": "Emulated",
-						options: {placement: "after-previous"}
+						options: {appender: "AfterPrevious"}
 					},
 					refresher: {"class": "Collapse"},
 					assigns: {
@@ -23812,7 +24042,7 @@ return (this._binds[0].getValue());
 					container: {
 						"class": "Element",
 						tag_name: "span",
-						static_classes: ["lava-tree-text"],
+						static_classes: ["lava-tree-title"],
 						events: {
 							click: [{
 								locator_type: "Name",
@@ -23823,6 +24053,20 @@ return (this._binds[0].getValue());
 									data: {property_name: "node"}
 								}]
 							}]
+						},
+						class_bindings: {
+							"0": {
+								evaluator: function() {
+return (this._binds[0].getValue() ? 'lava-tree-title-expandable' : '');
+},
+								binds: [{
+									property_name: "node",
+									tail: [
+										"children",
+										"length"
+									]
+								}]
+							}
 						}
 					}
 				},

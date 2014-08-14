@@ -9,26 +9,18 @@ Lava.define(
 
 	isEmulatedContainer: true,
 
-	Shared: ['_appenders'],
-
-	_appenders: {
-		bottom: '_appendBottom',
-		'after-previous': '_appendAfterPrevious'
-	},
-
 	/**
 	 * @type {Lava.view.View}
 	 */
 	_view: null,
 	_config: null,
+	guid: null,
 	/**
 	 * @type {Lava.widget.Standard}
 	 */
 	_widget: null,
 
 	_is_inDOM: false,
-
-	_placement: null,
 
 	/**
 	 * @param {Lava.view.View} view
@@ -37,15 +29,23 @@ Lava.define(
 	 */
 	init: function(view, config, widget) {
 
+		this.guid = Lava.guid++;
 		this._view = view;
 		this._config = config;
 		this._widget = widget;
 
-		if (('options' in config) && config.options.placement) {
-			this._placement = config.options.placement;
-			if (config.options.placement in this._appenders) {
-				this.appendHTML = this[this._appenders[config.options.placement]];
+		if (('options' in config)) {
+
+			if ('appender' in config.options) {
+				if (Lava.schema.DEBUG && !this['_append' + config.options.appender]) Lava.t('[Emulated container] wrong appender: ' + config.options.appender);
+				this.appendHTML = this['_append' + config.options.appender]
 			}
+
+			if ('prepender' in config.options) {
+				if (Lava.schema.DEBUG && !this['_append' + config.options.prepender]) Lava.t('[Emulated container] wrong prepender: ' + config.options.prepender);
+				this.prependHTML = this['_append' + config.options.prepender]
+			}
+
 		}
 
 	},
@@ -74,9 +74,21 @@ Lava.define(
 
 	},
 
+	_appendTop: function(html) {
+
+		this._view.getParentView().getContainer().prependHTML(html);
+
+	},
+
 	_appendAfterPrevious: function(html) {
 
 		this._view.getTemplate().getPreviousView(this._view).getContainer().insertHTMLAfter(html);
+
+	},
+
+	_appendBeforeNext: function(html) {
+
+		this._view.getTemplate().getNextView(this._view).getContainer().insertHTMLBefore(html);
 
 	},
 
@@ -86,19 +98,25 @@ Lava.define(
 	 */
 	appendHTML: function(html) {
 
-		Lava.t("appendHTML: placement is not supported");
+		Lava.t("appendHTML is not supported or not configured");
 
 	},
 
 	prependHTML: function(html) {
 
-		Lava.t('call to prependHTML() in emulated container');
+		Lava.t("prependHTML is not supported or not configured");
+
+	},
+
+	insertHTMLBefore: function(html) {
+
+		this.prependHTML(html);
 
 	},
 
 	insertHTMLAfter: function(html) {
 
-		Lava.t('call to insertHTMLAfter() in emulated container');
+		this.appendHTML(html);
 
 	},
 

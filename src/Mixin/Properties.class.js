@@ -2,6 +2,7 @@
 Lava.define(
 'Lava.mixin.Properties',
 /**
+ * Provides the `get()` and `set()` methods, and fires changed events
  * @lends Lava.mixin.Properties#
  * @extends Lava.mixin.Observable
  * @implements _iProperties
@@ -10,13 +11,27 @@ Lava.define(
 
 	Extends: 'Lava.mixin.Observable',
 
-	// to signal other classes that this class implements Properties
+	/**
+	 * To signal other classes that this class implements Properties
+	 * @const
+	 */
 	isProperties: true,
 
-	// the actual container for properties, [property_name] => value
+	/**
+	 * Hash with properties
+	 * @type {Object.<name, *>}
+	 */
 	_properties: {},
+	/**
+	 * Separate listeners hash for property changed events, same as {@link Lava.mixin.Observable#_listeners}
+	 * @type {Object.<string, Array.<_iListener>>}
+	 */
 	_property_listeners: {},
 
+	/**
+	 * Constructor
+	 * @param {Object.<string, *>} properties Initial properties
+	 */
 	init: function(properties) {
 
 		for (var name in properties) {
@@ -27,18 +42,33 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get property
+	 * @param {string} name
+	 * @returns {*}
+	 */
 	get: function(name) {
 
 		return this._properties[name];
 
 	},
 
+	/**
+	 * Returns true if property exists, even if it's null/undefined
+	 * @param {string} name
+	 * @returns {boolean}
+	 */
 	isset: function(name) {
 
 		return name in this._properties;
 
 	},
 
+	/**
+	 * Set property
+	 * @param {string} name The property name
+	 * @param {*} value Property value
+	 */
 	set: function(name, value) {
 
 		if (this._properties[name] !== value) {
@@ -47,13 +77,19 @@ Lava.define(
 
 	},
 
+	/**
+	 * Perform the set operation
+	 * @param {string} name Property name
+	 * @param {*} value Property value
+	 */
 	_set: function(name, value) {
 		this._properties[name] = value;
 		this.firePropertyChangedEvents(name);
 	},
 
 	/**
-	 * @param {Object} properties_object
+	 * Set multiple properties at once
+	 * @param {Object.<string, *>} properties_object
 	 */
 	setProperties: function(properties_object) {
 
@@ -67,6 +103,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Return a copy of the properties hash
+	 * @returns {Object.<name, *>}
+	 */
 	getProperties: function() {
 
 		var result = {};
@@ -75,6 +115,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * @param property_name
+	 */
 	firePropertyChangedEvents: function(property_name) {
 
 		this._fire('property_changed', {name: property_name});
@@ -83,11 +126,11 @@ Lava.define(
 	},
 
 	/**
-	 * The same, as 'on' method in Observable, but returns listener to property_name instead of event_name
+	 * The same, as {@link Lava.mixin.Observable#on}, but returns listener to property_name instead of event_name
 	 *
 	 * @param {string} event_name
 	 * @param {function} fn
-	 * @param {Object} [context]
+	 * @param {Object} context
 	 * @param {*} [listener_args]
 	 * @returns {_iListener}
 	 */
@@ -98,6 +141,7 @@ Lava.define(
 	},
 
 	/**
+	 * Removes listeners added with `onPropertyChanged`
 	 * @param {_iListener} listener
 	 */
 	removePropertyListener: function(listener) {
@@ -107,6 +151,7 @@ Lava.define(
 	},
 
 	/**
+	 * Same as {@link Lava.mixin.Observable#_fire}, but for property listeners
 	 * @param {string} property_name
 	 * @param {*} event_args
 	 */

@@ -11,14 +11,11 @@
 							<x:roles>$tree_example._checkbox</x:roles>
 						</checkbox>
 						{#expression(pad) escape_off}{/expression}{* remove whitespace
-						*}<i x:type="view"
-						     class="lava-tree-expander"
-						     x:event:click="$tree.node_click(node)"
-						     x:classes="'lava-tree'
-								+ ((foreach_index == @parent->count - 1) ? '-bottom' : '-middle')
-								+ ((node.type == 'folder' && node.children.length)
-									? ($tree{is_expanded} ? '-expanded' : '-collapsed')
-									: '-node')"></i>{>$tree.icon}
+						*}<i class="lava-tree-expander" x:type="view"
+							x:event:click="$tree.node_click(node)"
+							x:classes="'lava-tree' + ((foreach_index == @parent->count - 1) ? '-bottom' : '-middle')
+								+ (node.children.length ? ($tree{is_expanded} ? '-expanded' : '-collapsed') : '-node')"></i>
+						{>$tree.icon}
 						{>$tree.node_title}
 					</div>
 				</template>

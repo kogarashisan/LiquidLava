@@ -1,4 +1,3 @@
-/*global env: true */
 var template = require('jsdoc/template'),
     fs = require('jsdoc/fs'),
     path = require('jsdoc/path'),
@@ -14,9 +13,8 @@ function import_vars(local, external, map) {
 
 function export_type_data(doclet_param, is_name_required) {
 
-	if (!doclet_param.name && is_name_required) throw new Error('todo');
-	var export_param = {},
-		flags = [];
+	if (!doclet_param.name && is_name_required) throw new Error();
+	var export_param = {};
 
 	import_vars(export_param, doclet_param, {
 		name: 'name',
@@ -25,13 +23,9 @@ function export_type_data(doclet_param, is_name_required) {
 	});
 
 	['optional', 'nullable', 'variable'].forEach(function(name) {
-		if (doclet_param[name]) {
-			flags.push(name);
-			export_param['is_' + name] = true;
-		}
+		if (doclet_param[name]) export_param['is_' + name] = true;
 	});
-
-	if (flags.length) export_param.flags = flags;
+	if (doclet_param['nullable'] === false) export_param['is_non_nullable'] = true;
 	if (doclet_param.type && doclet_param.type.names && doclet_param.type.names.length) export_param.type_names = doclet_param.type.names;
 
 	return export_param;
@@ -44,25 +38,27 @@ Export formats
 		description = <string>
 		default_value
 		is_nullable
-		flags = ['nullable']
+		is_non_nullable
 		type_names = [<string>]
 
 	For function:
+		description = <string>
+		param_names_string = <string>
 		params = [<param>]
 			name = <string>
 			description = <string>
 			default_value
 			is_optional
 			is_nullable
+			is_non_nullable
 			is_variable
-			flags = ['optional', 'nullable', 'variable']
+			//is_subparam // if name contains a dot
 			type_names = [<string>]
 		returns = {}
 			description = <string>
 			is_nullable = <bool>
-			flags = ['nullable']
+			is_non_nullable = <bool>
 			type_names = [<string>]
-		description = <string>
 */
 
 /**
@@ -90,12 +86,37 @@ exports.publish = function(taffyData, opts, tutorials) {
 			if (doclet.kind == 'function') {
 
 				export_descriptor = {};
+				var real_params = doclet.meta.code.node.params,
+					j = 0,
+					param_count = real_params.length,
+					param_names = [];
+
+				// JSDoc does not check the parameters order, have to do it myself
 				if (doclet.params) {
 					if (!doclet.params.length) throw new Error();
 					export_descriptor.params = [];
+					var last_param = '#';
 					doclet.params.forEach(function(doclet_param) {
-						export_descriptor.params.push(export_type_data(doclet_param, true));
-					})
+						var param = export_type_data(doclet_param, true);
+						if (param.name.indexOf('.') != -1) {
+							if (param.name.indexOf(last_param + '.') != 0) throw new Error('Wrong subparam order: ' + longname);
+							//param.is_subparam = true;
+						} else {
+							param_names.push(param.name);
+							last_param = param.name;
+						}
+						export_descriptor.params.push(param);
+					});
+					if (real_params.length != param_names.length) throw new Error('malformed jsdoc for ' + longname);
+					for (; j < param_count; j++) {
+						if (param_names[j] != real_params[j].name) throw new Error('Wrong JSDoc parameters order: ' + longname);
+					}
+					export_descriptor.param_names_string = param_names.join(', ');
+				} else if (param_count) {
+					for (; j < param_count; j++) {
+						param_names.push(real_params[j].name);
+					}
+					export_descriptor.param_names_string = param_names.join(', ');
 				}
 
 				if (doclet.returns) {

@@ -91,13 +91,7 @@ module.exports = function(grunt) {
 				}
 			}
 
-			// create line numbers
-			var count_lines = text.split('\n').length;
-			var lines_text = '';
-			for (i = 1; i <= count_lines; i++) {
-				lines_text += i + '\r\n';
-			}
-
+			var lines_text = this._createLineNumbers(text);
 			var highlighted = this.highlight_js.highlight(type, text).value;
 
 			if (type == 'xml') {
@@ -109,6 +103,20 @@ module.exports = function(grunt) {
 
 			return this._wrapHighlightedCode(highlighted, type, lines_text, overlay_text, tooltip_text);
 
+		},
+
+		_createLineNumbers: function(text) {
+			var count_lines = text.split('\n').length;
+			var lines_text = '';
+			for (i = 1; i <= count_lines; i++) {
+				lines_text += i + '\r\n';
+			}
+			return lines_text;
+		},
+
+		wrapText: function(text) {
+			var lines_text = this._createLineNumbers(text);
+			this._wrapHighlightedCode(text, 'text', lines_text, '', '');
 		},
 
 		_serializeFunction: function(data, padding) {
@@ -172,13 +180,25 @@ module.exports = function(grunt) {
 			return eval(code);
 		},
 
-		_links: {}, // url -> descriptor
+		_links: {}, // target -> descriptor
+		_page_links: {
+			'api': '/www/api.html'
+		},
 
-		registerLink: function(name, url, group) { // in source, links are referenced by name, not URL
-			this._links[name] = {
-				url: url,
-				group: group
-			};
+		registerLink: function(target, descriptor) {
+			if (!(descriptor.page in this._page_links)) throw new Error();
+			this._links[target] = descriptor;
+		},
+
+		generateLink: function(type, link_target, linktitle) {
+			if (!(link_target in this._links)) throw new Error('doc: link is not registered: ' + link_target);
+			var link_descriptor = this._links[link_target];
+			var href = this._page_links[link_descriptor.page] + '#' + link_descriptor.hash;
+			linktitle = linktitle || link_target;
+			if (linktitle == link_target && link_descriptor.title) {
+				linktitle = link_descriptor.title;
+			}
+			return '<a href="' + href + '">' + linktitle + '</a>';
 		},
 
 		processMarkdown: function(content) {
@@ -201,17 +221,16 @@ module.exports = function(grunt) {
 			});
 
 			// replace links
-			content = content.replace(/\{\@(link|linkcode|linkplain|tutorial) ([^\\\}]|\\.)+\}/g, function(match, type) {
-				var name = match.substr(0, match.length - 1).substr(type.length + 3).trim(); // cut the tag and leave only the content
-				var linktitle = name;
-				var separator_index = name.indexOf('|');
-				if (separator_index != -1) {
-					linktitle = name.substr(separator_index + 1);
-					name = name.substr(0, separator_index);
+			content = content.replace(/\{\@(link) ([^\\\}]|\\.)+\}/g, function(match, type) {
+				// type is the content of the first brace (the instruction name): "link", "apilink", "reflink" and so on
+				var linktarget = match.substr(0, match.length - 1).substr(type.length + 3).trim(); // leave only the content
+				var linktitle = linktarget;
+				var separator_index = linktarget.indexOf('|');
+				if (separator_index != -1) { // includes title, not just name/url
+					linktitle = linktarget.substr(separator_index + 1);
+					linktarget = linktarget.substr(0, separator_index);
 				}
-
-				if (!(name in this._links)) throw new Error('doc: link is not registered: ' + name);
-				return '<a href="' + this._links[name].url + '">' + linktitle + '</a>';
+				return LavaBuild.generateLink(type, linktarget, linktitle);
 			});
 
 			return this.marked(content);
@@ -221,18 +240,18 @@ module.exports = function(grunt) {
 	};
 
 	var LavaBuild = global.LavaBuild;
-	LavaBuild.marked.setOptions({
-		highlight: function (code, lang) {
-			var result = '';
-			if (!lang) throw new Error('hightlight: no language specified');
-			if (lang == 'text') {
-				// @todo
-			} else if (lang == 'xml' || lang == 'javascript') {
-				// @todo
-			}
-			return result;
+	LavaBuild.marked.Renderer.prototype.code = function(code, lang, escaped) {
+
+		var result = '';
+		if (!lang) throw new Error('highlight: no language specified');
+		if (lang == 'text') {
+			result = LavaBuild.wrapText(code);
+		} else if (lang == 'xml' || lang == 'javascript') {
+			result = LavaBuild.highlight(lang, code);
 		}
-	});
+		return result;
+
+	};
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

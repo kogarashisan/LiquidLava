@@ -452,13 +452,14 @@ Lava.define(
 				uid = this._uid++;
 				added.push(uid, source_array[i], null);
 				result.push(uid, source_array[i], null);
+				removed.push(this._data_uids[i], this._data_values[i], this._data_names[i]);
 			}
 
 		}
 
-		if (new_count < this._count) {
+		if (this._count < new_count) {
 
-			for (i = count; i < new_count; i++) {
+			for (i = this._count; i < new_count; i++) {
 
 				uid = this._uid++;
 				added.push(uid, source_array[i], null);
@@ -468,7 +469,7 @@ Lava.define(
 
 		} else {
 
-			for (i = count; i < this._count; i++) {
+			for (i = this._count; i < new_count; i++) {
 
 				removed.push(this._data_uids[i], this._data_values[i], this._data_names[i]);
 

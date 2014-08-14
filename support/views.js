@@ -237,7 +237,8 @@ function _cEmulatedContainer() {
 	this['class'] = "Emulated";
 
 	this.options = {
-		placement: 'top' || 'bottom'
+		appender: 'Top' || 'Bottom' || 'AfterPrevious' || 'BeforeNext',
+		prepender: 'Top' || 'Bottom' || 'AfterPrevious' || 'BeforeNext'
 	};
 
 }

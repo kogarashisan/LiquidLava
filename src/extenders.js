@@ -175,13 +175,17 @@ Lava.extenders = {
 
 			for (var name in parent_config) {
 
-				if (!(name in config)) {
+				if (name != 'resources' && name != 'resources_cache') {
 
-					config[name] = parent_config[name];
+					if (!(name in config)) {
 
-				} else if (name in this._widget_config_merged_properties) {
+						config[name] = parent_config[name];
 
-					this[this._widget_config_merged_properties[name]](config, parent_config, name, parent_name);
+					} else if (name in this._widget_config_merged_properties) {
+
+						this[this._widget_config_merged_properties[name]](config, parent_config, name, parent_name);
+
+					}
 
 				}
 
@@ -206,6 +210,10 @@ Lava.extenders = {
 		}
 
 		config.is_extended = true;
+
+	},
+
+	_noop: function() {
 
 	}
 

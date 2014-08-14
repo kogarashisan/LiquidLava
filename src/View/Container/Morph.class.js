@@ -175,6 +175,12 @@ Lava.define(
 
 	},
 
+	insertHTMLBefore: function(html) {
+
+		Firestorm.DOM.insertHTMLBefore(this.getStartElement(), html);
+
+	},
+
 	informInDOM: function() { this._is_inDOM = true; },
 
 	informRemove: function() {
