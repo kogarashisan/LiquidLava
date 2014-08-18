@@ -1,6 +1,6 @@
 
 /**
- * @typedef {(string|_cView|_cInclude|_cStaticValue|_cStaticEval|_cStaticTag|function)} _tTemplateItem
+ * @typedef {(string|_cView|_cInclude|_cStaticValue|_cStaticEval|_cStaticTag)} _tTemplateItem
  */
 
 /** @typedef {Array.<_tTemplateItem>} _tTemplate */
@@ -104,7 +104,7 @@ function _cArgumentCommon() {
 	this.modifiers = [];
 
 	/**
-	 * @type {?Array,<_cModifier>}
+	 * @type {?Array.<_cModifier>}
 	 */
 	this.active_modifiers = [];
 

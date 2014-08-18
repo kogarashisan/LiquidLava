@@ -71,6 +71,8 @@ function _cClassData() {
 	 * @type {number}
 	 */
 	this.own_references_count = 0;
+
+	this.instanceOf = function(class_name) {};
 }
 
 function _iEventTicket() {
