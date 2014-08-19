@@ -57,7 +57,7 @@ Lava.define(
 	 * Called by ScopeManager during refresh loop.
 	 *
 	 * @param {number} refresh_id
-	 * @param {boolean} is_safe
+	 * @param {boolean} [is_safe]
 	 * @returns {boolean} true in case of infinite loop
 	 */
 	doRefresh: function(refresh_id, is_safe) {

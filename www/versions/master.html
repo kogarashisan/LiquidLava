@@ -1,6 +1,7 @@
 <h3>Feature</h3>
 <ul>
 	<li>Added "dynamic scopes".</li>
+	<li>Declarative template editing (via edit_template tag in widget definition).</li>
 	<li>Added insertHTMLBefore() to all containers.</li>
 	<li>Emulated container: rewritten the insertion algorithm. New config options available, old gone.</li>
 </ul>
@@ -10,6 +11,7 @@
 	<li>Minor refactorings and improvements, JSDoc fixes.</li>
 	<li>Refactored the template of the Tree class, mainly for use of dynamic scopes.</li>
 	<li>Most classes, that implemented mixins - now extend them.</li>
+	<li>(container.Element) wrap() was split into 2 methods: renderVoid() for void containers, and wrap(html) for non-void.</li>
 	<li>
 		Renamed in Enumerable:
 		<ul>

@@ -68,12 +68,31 @@ Export formats
  */
 exports.publish = function(taffyData, opts, tutorials) {
 
-	//taffyData({ignore: true}).remove();
+	var ignored_doclets = taffyData({ignore: true}).get();
+	taffyData({ignore: true}).remove();
 	//taffyData({memberof: '<anonymous>'}).remove();
 	taffyData({scope: 'inner'}).remove();
 
+	var ignored_by_object = {
+		Firestorm: [],
+		Lava: []
+	};
+
+	for (i = 0, count = ignored_doclets.length; i < count; i++) {
+
+		doclet = ignored_doclets[i];
+		var filename = doclet.meta.filename;
+		if (filename == 'Firestorm.js' || filename == 'Lava.js') {
+			if (doclet.memberof in ignored_by_object) {
+				ignored_by_object[doclet.memberof].push(doclet.name);
+			}
+		}
+
+	}
+
+	fs.writeFileSync('build/temp/jsdoc_ignored_export.js', JSON.stringify(ignored_by_object));
+
 	var doclets = taffyData().get();
-	var doclet_index = {};
 	var export_data = {};
 	var export_descriptor;
 
@@ -81,7 +100,19 @@ exports.publish = function(taffyData, opts, tutorials) {
 
 		var doclet = doclets[i];
 		var longname = doclet.longname;
-		if (!(longname in doclet_index) && longname.split('#').length == 2 && longname.indexOf('~') == -1) { // export only class members
+
+		if (doclet.name && !doclet.meta.code.name) {
+			// this is produced by @extends comment in Firestorm/ElementSomething.js
+			if (longname == 'Firestorm.Element') continue;
+		}
+
+		var allowed = (doclet.name && doclet.meta.code.name && doclet.meta.code.name.indexOf('this.') != 0);
+		// for the three virtual comments with @name in Parsers/ParserName.js
+		if (doclet.name && ['ExpressionParser', 'ObjectParser', 'TemplateParser'].indexOf(doclet.name) != -1) {
+			allowed = true;
+		}
+
+		if (allowed) { // check meta to get rid of assignment doclets
 
 			if (doclet.kind == 'function') {
 
@@ -91,8 +122,10 @@ exports.publish = function(taffyData, opts, tutorials) {
 					param_count = real_params.length,
 					param_names = [];
 
-				// JSDoc does not check the parameters order, have to do it myself
 				if (doclet.params) {
+					// JSDoc does not check the parameters order, have to do it myself
+					// (or create a JSHint rule)
+					// https://github.com/google/closure-compiler/issues/485
 					if (!doclet.params.length) throw new Error();
 					export_descriptor.params = [];
 					var last_param = '#';
@@ -113,6 +146,8 @@ exports.publish = function(taffyData, opts, tutorials) {
 					}
 					export_descriptor.param_names_string = param_names.join(', ');
 				} else if (param_count) {
+					// In case there is no JSDoc comment - make a string with parameters by hand.
+					// Otherwise, the method will render without params.
 					for (; j < param_count; j++) {
 						param_names.push(real_params[j].name);
 					}
@@ -140,7 +175,11 @@ exports.publish = function(taffyData, opts, tutorials) {
 
 			}
 
+			if (doclet.undocumented) export_descriptor.is_undocumented = true;
+			export_descriptor.longname = doclet.longname;
 			export_descriptor.kind = doclet.kind;
+
+			if (longname in export_descriptor) throw new Error('JSDoc export: duplicate doclet for ' + longname);
 			export_data[longname] = export_descriptor;
 
 		}

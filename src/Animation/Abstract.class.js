@@ -86,7 +86,7 @@ Lava.define(
 
 	/**
 	 * Start only if it's not already running
-	 * @param started_time
+	 * @param [started_time]
 	 */
 	safeStart: function(started_time) {
 

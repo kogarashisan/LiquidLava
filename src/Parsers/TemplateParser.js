@@ -1,4 +1,9 @@
 
+/**
+ * Template parser
+ * @name Lava.TemplateParser
+ */
+
 Lava.TemplateParser._parse = Lava.TemplateParser.parse;
 
 /**
@@ -115,11 +120,13 @@ Lava.TemplateParser.yy = {
 
 		}
 
+		//noinspection LoopStatementThatDoesntLoopJS
 		for (name in x) {
 			tag_config.x = x;
 			break;
 		}
 
+		//noinspection LoopStatementThatDoesntLoopJS
 		for (name in attributes) {
 			tag_config.attributes = attributes;
 			break;
@@ -152,7 +159,7 @@ Lava.TemplateParser.yy = {
 
 		}
 
-		return result;
+		return /** @type {(_cRawTag|_cRawDirective)} */ result;
 
 	},
 

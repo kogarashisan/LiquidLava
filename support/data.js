@@ -1,12 +1,12 @@
 
 
-function _cField() {
+_cField = {
 
 	/**
 	 * Class name
 	 * @type {string}
 	 */
-	this.type = '';
+	type: '',
 
 	/**
 	 * List of other fields which this field depends on.
@@ -14,81 +14,77 @@ function _cField() {
 	 *
 	 * @type {Array.<string>}
 	 */
-	//this.depends = [];
+	//depends: [],
 
-	this['default'] = '';
+	'default': '',
 
-	this.is_nullable = false;
+	is_nullable: false
 
-}
+};
 
 /**
  * @extends {_cField}
  */
-function _cRecordField() {
-
-	_cField.call(this);
+_cRecordField = {
 
 	/**
 	 * Name of the referenced module
 	 * @type {string}
 	 */
-	this.module = '';
+	module: '',
 
 	/**
 	 * Own record's field, which holds ID of the referenced record.
 	 * Used by Relation fields.
 	 * @type {string}
 	 */
-	this.foreign_key_field = '';
+	foreign_key_field: ''
 
-}
+};
 
 /**
  * @extends {_cField}
  */
-function _cCollectionField() {
-
-	_cField.call(this);
+_cCollectionField = {
 
 	/**
 	 * Name of the module which is source for records
 	 * @type {string}
 	 */
-	this.module = '';
+	module: '',
 
 	/**
 	 * Name of the mirror Relation field
 	 * @type {string}
 	 */
-	this.record_field = '';
+	record_field: '',
 
-	this['export'] = false;
+	'export': false
 
-}
+};
 
-function _cModule() {
+_cModule = {
 
 	/**
 	 * Class name of the module itself
 	 * @type {string}
 	 */
-	this.type = 'Module';
+	type: 'Module',
 
-	this.record_class = 'Record';
-
-	/**
-	 * @type {Object.<string, _cField>}
-	 */
-	this.fields = {};
-
-}
-
-function _cMetaStorage() {
+	record_class: 'Record',
 
 	/**
 	 * @type {Object.<string, _cField>}
 	 */
-	this.fields = {};
+	fields: {}
 
-}
+};
+
+_cMetaStorage = {
+
+	/**
+	 * @type {Object.<string, _cField>}
+	 */
+	fields: {}
+
+};

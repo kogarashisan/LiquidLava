@@ -123,7 +123,7 @@ Lava.define(
 				if (Lava.schema.DEBUG && component_resource.type != 'component') Lava.t("resource value is not a component");
 
 				resources = resources
-					? Lava.resources.mergeResources(component_resource.value, resources, true)
+					? Lava.resources.mergeResources(component_resource.value, resources)
 					: component_resource.value;
 
 			}
@@ -571,9 +571,7 @@ Lava.define(
 
 	destroy: function() {
 
-		var name,
-			i,
-			count;
+		var name;
 
 		this._releaseAllEvents();
 

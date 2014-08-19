@@ -4,10 +4,20 @@ Firestorm.String = {
 	// taken from json2
 	QUOTE_ESCAPE_REGEX: /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
 	quote_escape_map: {
+		// without these comments JSDoc throws errors
+		// https://github.com/jsdoc3/jsdoc/issues/549
 		'\b': '\\b',
+		/** @alias _1
+		 * @ignore */
 		'\t': '\\t',
+		/** @alias _2
+		 * @ignore */
 		'\n': '\\n',
+		/** @alias _3
+		 * @ignore */
 		'\f': '\\f',
+		/** @alias _4
+		 * @ignore */
 		'\r': '\\r',
 		'"' : '\\"',
 		'\\': '\\\\'

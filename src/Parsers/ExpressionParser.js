@@ -1,4 +1,9 @@
 
+/**
+ * Expression parser
+ * @name Lava.ExpressionParser
+ */
+
 Lava.ExpressionParser._parse = Lava.ExpressionParser.parse;
 
 /** @enum {number} */
@@ -9,7 +14,7 @@ Lava.ExpressionParser.SEPARATORS = {
 
 /**
  * @param {string} input
- * @param {Lava.ExpressionParser.SEPARATORS} separator
+ * @param {Lava.ExpressionParser.SEPARATORS} [separator]
  * @returns {Array.<_cRawArgument>}
  */
 Lava.ExpressionParser.parseRaw = function(input, separator) {
@@ -39,7 +44,7 @@ Lava.ExpressionParser.parseRaw = function(input, separator) {
 
 /**
  * @param {string} input
- * @param {Lava.ExpressionParser.SEPARATORS} separator
+ * @param {Lava.ExpressionParser.SEPARATORS} [separator]
  * @returns {Array.<_cArgument>}
  */
 Lava.ExpressionParser.parse = function(input, separator) {

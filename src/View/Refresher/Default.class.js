@@ -264,8 +264,9 @@ Lava.define(
 
 	/**
 	 * @param {Lava.system.Template} template
+	 * @param index
 	 */
-	_createAnimation: function(template) {
+	_createAnimation: function(template, index) {
 
 		Lava.t("Abstract function call: _createAnimation");
 

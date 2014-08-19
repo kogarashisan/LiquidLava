@@ -3,39 +3,39 @@
  * @typedef {Array.<(string|_cRawTag|_cRawDirective|_cRawBlock|_cInclude|_cRawExpression)>} _tRawTemplate
  */
 
-function _cRawTag() {
+_cRawTag = {
 
-	this.type = 'tag';
+	type: 'tag',
 
-	this.name = '';
+	name: '',
 
 	/**
 	 * @type {Object.<string, string>}
 	 */
-	this.attributes = {};
+	attributes: {},
 
 	/**
 	 * @type {_cRawX}
 	 */
-	this.x = {};
+	x: {},
 
 	/**
 	 * @type {_tRawTemplate}
 	 */
-	this.content = [];
+	content: []
 
-}
+};
 
-function _cRawDirective() {
+_cRawDirective = {
 
-	this.type = 'directive';
+	type: 'directive',
 
-	this.name = '';
+	name: '',
 
 	/**
 	 * @type {Object.<string, string>}
 	 */
-	this.attributes = {
+	attributes: {
 		/**
 		 * For x:define: name of the JS class, inherited from Widget
 		 */
@@ -47,114 +47,114 @@ function _cRawDirective() {
 		role: '',
 
 		name: ''
-	};
+	},
 
 	/**
 	 * @type {_tRawTemplate}
 	 */
-	this.content = [];
+	content: []
 
-}
+};
 
-function _cRawBlock() {
+_cRawBlock = {
 
-	this.type = 'block';
+	type: 'block',
 
 	// only for dynamic blocks
-	this.class_locator = {
+	class_locator: {
 		/**
 		 * @type {_tKnownViewLocatorType}
 		 */
 		locator_type: null,
 		name: ''
-	};
+	},
 
-	this.real_class = '';
+	real_class: '',
 
-	this.name = '';
+	name: '',
 	/**
 	 * @type {_cArgument}
 	 */
-	this.arguments = null;
+	arguments: null,
 
-	this.prefix = '$' || '#';
+	prefix: '$' || '#',
 	/**
 	 * @type {Object.<string, string>}
 	 */
-	this.hash = {};
+	hash: {},
 	/**
 	 * @type {_tRawTemplate}
 	 */
-	this.content = [];
+	content: [],
 	/**
 	 * @type {_tRawTemplate}
 	 */
-	this.else_content = [];
+	else_content: [],
 	/**
 	 * @type {Array.<_cArgument>}
 	 */
-	this.elseif_arguments = [];
+	elseif_arguments: [],
 	/**
 	 * @type {Array.<_tRawTemplate>}
 	 */
-	this.elseif_contents = []; // array of arrays
-}
+	elseif_contents: [] // array of arrays
+};
 
-function _cRawExpression() {
+_cRawExpression = {
 
-	this.type = 'expression';
+	type: 'expression',
 
-	this.prefix = '$' || '#';
+	prefix: '$' || '#',
 
 	/**
 	 * @type {_cArgument}
 	 */
-	this.arguments = null;
+	arguments: null
 
-}
+};
 
 /**
  * ExpressionParser parsing result
  * @extends _cArgumentCommon
  */
-function _cRawArgument() {
+_cRawArgument = {
 
-	this.evaluator_src = '';
+	evaluator_src: ''
 
-}
+};
 
 /**
  * TemplateParser intermediate objects used when parsing tags
  */
-function _cRawAttribute() {
+_cRawAttribute = {
 
-	this.name = '';
+	name: '',
 
-	this.value = '';
+	value: ''
 
-}
+};
 
 /**
  * TemplateParser intermediate object with contents of all prefixed attributes
  */
-function _cRawX() {
+_cRawX = {
 
-	this.type = 'view' || 'container';
+	type: 'view' || 'container',
 
-	this.event = {};
+	event: {},
 
-	this.bind = {};
+	bind: {},
 
-	this.style = {};
+	style: {},
 
-	this.classes = '';
+	classes: '',
 
 	// comma-separated list of targets
-	this.roles = '';
+	roles: '',
 
-	this.container_class = '';
+	container_class: '',
 
-	this.resource_id = '';
+	resource_id: ''
 
-}
+};
 

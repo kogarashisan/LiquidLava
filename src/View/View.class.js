@@ -37,7 +37,7 @@ Lava.define(
 			// This is the only view, that can have void element containers.
 			// Check is done to speed up the rendering process.
 			result = (this._container.isElementContainer && this._container.isVoid())
-				? this._container.wrap()
+				? this._container.renderVoid()
 				: this._container.wrap(this._renderContents());
 
 		} else {

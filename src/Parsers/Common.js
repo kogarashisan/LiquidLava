@@ -761,6 +761,7 @@ Lava.parsers.Common = {
 
 		}
 
+		//noinspection LoopStatementThatDoesntLoopJS
 		for (name in static_properties) {
 			container_config.static_properties = static_properties;
 			break;
@@ -770,7 +771,7 @@ Lava.parsers.Common = {
 
 	/**
 	 * @param {_tRawTemplate} blocks
-	 * @param {_cView} view_config
+	 * @param {_cView} [view_config]
 	 * @returns {_tTemplate}
 	 */
 	compileTemplate: function(blocks, view_config) {
@@ -1040,6 +1041,7 @@ Lava.parsers.Common = {
 
 		if (!match) Lava.t("Malformed resource id");
 
+		/** @type {_cResourceId} */
 		result = {
 			locator_type: this.locator_types[id_string[0]],
 			locator: match[1],

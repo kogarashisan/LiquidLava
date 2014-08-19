@@ -3,6 +3,7 @@ Firestorm.Object = {
 
 	isEmpty: function(object_instance) {
 		// it's much faster than using Object.keys
+		//noinspection LoopStatementThatDoesntLoopJS
 		for (var name in object_instance) {
 			return false;
 		}

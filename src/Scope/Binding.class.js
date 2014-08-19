@@ -73,8 +73,6 @@ Lava.define(
 
 	onScopeChanged: function() {
 
-		var value = this._scope.getValue();
-
 		// avoid setting nulls to non-nullable fields.
 		if (this._scope.isConnected()) {
 

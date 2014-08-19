@@ -25,6 +25,9 @@ Lava.define(
 		tab_include: '_getTabInclude'
 	},
 
+	/**
+	 * @type {Lava.system.Enumerable}
+	 */
 	_tabs: null,
 
 	init: function(config, widget, parent_view, template, properties) {
@@ -139,10 +142,12 @@ Lava.define(
 		var active_tab = null;
 
 		this._tabs.each(function(tab) {
+			var result = null;
 			if (tab.get('is_enabled') && !tab.get('is_hidden')) {
 				active_tab = tab;
-				return false;
+				result = false;
 			}
+			return result;
 		});
 
 		this.set('_active_tab', active_tab);

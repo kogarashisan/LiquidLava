@@ -61,7 +61,7 @@ Lava.define(
 	},
 
 	/**
-	 * @param {Lava.view.View} view
+	 * @param {Lava.view.Abstract} view
 	 */
 	scheduleViewRefresh: function(view) {
 
@@ -346,7 +346,7 @@ Lava.define(
 	},
 
 	/**
-	 * @param {Lava.view.View} view
+	 * @param {Lava.view.Abstract} view
 	 * @param {Array.<_cTarget>} targets
 	 */
 	dispatchRoles: function(view, targets) {
@@ -783,7 +783,7 @@ Lava.define(
 
 	/**
 	 * @param {Lava.widget.Standard} widget
-	 * @param {Array.<_cTarget>} targets
+	 * @param {Object.<string, Array.<_cTarget>>} targets
 	 */
 	dispatchBroadcast: function(widget, targets) {
 

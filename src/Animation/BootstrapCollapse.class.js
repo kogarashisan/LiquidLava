@@ -31,28 +31,27 @@ Lava.define(
 
 	_start: function() {
 
-		var redraw,
-			Element = Firestorm.Element;
+		var Element = Firestorm.Element;
 
 		if (this._is_reversed) { // collapse an element that is currently open
 
 			// explicitly set the height/width on the element to make transition happen
 			this._property_value = Element.getSize(this._target)[(this._property == 'width') ? 'x' : 'y'];
-			Element.setStyle(this._target, this._property, this._property_value);
-			redraw = this._target.offsetHeight; // force redraw to bypass browser optimizations
+			Element.setStyle(this._target, this._property, '' + this._property_value);
+			this._target.offsetHeight; // force redraw to bypass browser optimizations
 			Element.addClass(this._target, 'collapsing');
 			Element.removeClasses(this._target, ['collapse', 'in']);
-			Element.setStyle(this._target, this._property, 0);
+			Element.setStyle(this._target, this._property, '0');
 
 		} else { // expand a collapsed element
 
 			Element.removeClass(this._target, 'collapse');
 			Element.setStyle(this._target, this._property, 'auto');
 			this._property_value = Element.getSize(this._target)[(this._property == 'width') ? 'x' : 'y'];
-			Element.setStyle(this._target, this._property, 0);
-			redraw = this._target.offsetHeight; // force redraw to bypass browser optimizations
+			Element.setStyle(this._target, this._property, '0');
+			this._target.offsetHeight; // force redraw to bypass browser optimizations
 			Element.addClass(this._target, 'collapsing');
-			Element.setStyle(this._target, this._property, this._property_value);
+			Element.setStyle(this._target, this._property, '' + this._property_value);
 
 		}
 
@@ -81,11 +80,11 @@ Lava.define(
 
 		if (this._is_reversed) {
 
-			Firestorm.Element.setStyle(this._target, this._property, this._property_value);
+			Firestorm.Element.setStyle(this._target, this._property, '' + this._property_value);
 
 		} else {
 
-			Firestorm.Element.setStyle(this._target, this._property, 0);
+			Firestorm.Element.setStyle(this._target, this._property, '0');
 
 		}
 

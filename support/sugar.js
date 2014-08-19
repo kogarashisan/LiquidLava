@@ -11,165 +11,163 @@ var _cSugarContentSchemaTypes = {
 	object: 'object'
 };
 
-function _cSugarContentTemplate() {
+_cSugarContentTemplate = {
 
-	this.type = _cSugarContentSchemaTypes.template;
+	type: _cSugarContentSchemaTypes.template,
 
 	// optional
-	this.name = '';
+	name: ''
 
-}
+};
 
-function _cSugarContentTemplateCollection() {
+_cSugarContentTemplateCollection = {
 
-	this.type = _cSugarContentSchemaTypes.template_collection;
+	type: _cSugarContentSchemaTypes.template_collection,
 
-	this.name = '';
+	name: '',
 
-	this.tag_name = '';
+	tag_name: ''
 
-}
+};
 
-function _cSugarContentTemplateHash() {
+_cSugarContentTemplateHash = {
 
-	this.type = _cSugarContentSchemaTypes.template_hash;
+	type: _cSugarContentSchemaTypes.template_hash,
 
-	this.name = '';
+	name: '',
 
-	this.tag_name = 'template';
+	tag_name: 'template'
 
-}
+};
 
-function _cSugarContentObject() {
+_cSugarContentObject = {
 
-	this.type = _cSugarContentSchemaTypes.object;
+	type: _cSugarContentSchemaTypes.object,
 
-	this.name = '';
-
-	/** @type {Object.<string, _cSugarAttribute>} */
-	this.attribute_mappings = null;
-
-	/** @type {Object.<string, _cSugarObjectTag>} */
-	this.tag_mappings = null;
-
-}
-
-function _cSugarContentObjectCollection() {
-
-	this.type = _cSugarContentSchemaTypes.object_collection;
-
-	this.name = '';
-
-	this.tag_name = '';
+	name: '',
 
 	/** @type {Object.<string, _cSugarAttribute>} */
-	this.attribute_mappings = null;
+	attribute_mappings: null,
 
 	/** @type {Object.<string, _cSugarObjectTag>} */
-	this.tag_mappings = null;
+	tag_mappings: null
 
-}
+};
 
-function _cSugarContentObjectHash() {
+_cSugarContentObjectCollection = {
 
-	this.type = _cSugarContentSchemaTypes.object_hash;
+	type: _cSugarContentSchemaTypes.object_collection,
 
-	this.name = '';
+	name: '',
 
-	this.tag_name = '';
+	tag_name: '',
 
 	/** @type {Object.<string, _cSugarAttribute>} */
-	this.attribute_mappings = null;
+	attribute_mappings: null,
 
 	/** @type {Object.<string, _cSugarObjectTag>} */
-	this.tag_mappings = null;
+	tag_mappings: null
 
-}
+};
 
-function _cSugarContentObjectMap() {
+_cSugarContentObjectHash = {
 
-	this.type = _cSugarContentSchemaTypes.object_map;
+	type: _cSugarContentSchemaTypes.object_hash,
+
+	name: '',
+
+	tag_name: '',
+
+	/** @type {Object.<string, _cSugarAttribute>} */
+	attribute_mappings: null,
+
+	/** @type {Object.<string, _cSugarObjectTag>} */
+	tag_mappings: null
+
+};
+
+_cSugarContentObjectMap = {
+
+	type: _cSugarContentSchemaTypes.object_map,
 
 	/**
 	 * @type {Object.<string, (_cSugarContentTemplate|_cSugarContentTemplateCollection|_cSugarContentObject|_cSugarContentObjectCollection)>}
 	 */
-	this.tag_roles = null;
+	tag_roles: null
 
-}
+};
 
 /**
  * @typedef {(_cSugarContentObjectMap|_cSugarContentTemplate|_cSugarContentTemplateCollection|_cSugarContentObject|_cSugarContentObjectCollection)} _tSugarContent
  */
 
-function _cSugarAttribute() {
+_cSugarAttribute = {
 
-	this.type = '';
+	type: '',
 
-	this.type_name = '';
-
-	/** @type {?string} */
-	this.name = '';
-
-}
-
-function _cSugarObjectTag() {
-
-	this.type = '';
-
-	this.type_name = '';
+	type_name: '',
 
 	/** @type {?string} */
-	this.name = '';
+	name: ''
 
-}
+};
 
+_cSugarObjectTag = {
 
-function _cSugar() {
+	type: '',
+
+	type_name: '',
+
+	/** @type {?string} */
+	name: ''
+
+};
+
+_cSugar = {
 
 	/**
 	 * Lava.system.Sugar inherited (or compatible) class
 	 * @type {string}
 	 */
-	this['class'] = '';
+	'class': '',
 
 	/**
 	 * The name of the real tag, which will be converted into widget configuration
 	 * @type {string}
 	 */
-	this.tag_name = '';
+	tag_name: '',
 
 	/** @type {_tSugarContent} */
-	this.content_schema = null;
+	content_schema: null,
 
 	/** @type {Object.<string, _cSugarAttribute>} */
-	this.attribute_mappings = null;
+	attribute_mappings: null,
 
-	this.unknown_root_attributes = {
+	unknown_root_attributes: {
 		type: '', // callback name
 		container_resource_name: '' // for 'as_resource' action
-	};
-
-}
+	}
+};
 
 /**
  * Must specify either parse() or widget_title
  */
-function _cSugarSchema() {
+_cSugarSchema = {
 
-	this.widget_title = '';
+	widget_title: '',
 
 	/** @param {_cRawTag} raw_tag */
-	this.parse = function(raw_tag) {};
+	parse: function(raw_tag) {}
 
-}
+};
 
-function _iSugarParser() {
+_iSugarParser = {
 
 	/**
 	 * @param {_cSugar} schema
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
-	this.parse = function(schema, raw_tag, widget_config) {};
+	parse: function(schema, raw_tag, widget_config) {}
 
-}
+};

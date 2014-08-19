@@ -6,7 +6,26 @@ module.exports = function(grunt) {
 		try { // workaround for a bug in Grunt, https://github.com/gruntjs/grunt/issues/1135
 
 			var groups = grunt.config('js_files');
-			var filelist = groups['classes'].concat(groups['widgets']);
+			var _filelist =
+				groups['classes']
+				.concat(groups['widgets'])
+				.concat(groups['firestorm'])
+				.concat(groups['core'])
+				.concat(groups['parsers']);
+
+			var filelist = [];
+			var exclusions = [
+				"Firestorm/known_exceptions.js",
+				"Firestorm/init.js",
+				"Parsers/Generated/ObjectParser.js",
+				"Parsers/Generated/ExpressionParser.js",
+				"Parsers/Generated/TemplateParser.js"
+			];
+
+			_filelist.forEach(function(name) {
+				if (exclusions.indexOf(name) == -1) filelist.push(name);
+			});
+
 			var filelist_string = 'src/' + filelist.join(' src/');
 
 			var done = this.async();

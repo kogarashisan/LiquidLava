@@ -3,14 +3,16 @@
  */
 Lava.types = {
 
-	// for extension only
+	/**
+	 * For extension only
+	 */
 	AbstractType: {
 
 		type_name: null,
 
 		/**
 		 * @param {string} value
-		 * @param {Object} descriptor
+		 * @param {Object} [descriptor]
 		 * @returns {boolean}
 		 */
 		fromString: function(value, descriptor) {

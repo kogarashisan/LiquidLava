@@ -6,13 +6,21 @@
 
 var Firestorm = {
 
+	/** @ignore */
 	schema: null,
+	/** @ignore */
 	Environment: null,
+	/** @ignore */
 	DOM: null,
+	/** @ignore */
 	Element: null,
+	/** @ignore */
 	String: null,
+	/** @ignore */
 	Array: null,
+	/** @ignore */
 	Object: null,
+	/** @ignore */
 	Date: null,
 
 	KNOWN_EXCEPTIONS: null,
@@ -322,7 +330,12 @@ Firestorm.Element = {
 
 };
 
-Firestorm.extend(Firestorm.Element, {
+Firestorm.extend(
+Firestorm.Element,
+/**
+ * @lends Firestorm.Element
+ */
+{
 
 	setProperty: function(element, name, value) {
 
@@ -356,7 +369,12 @@ Firestorm.extend(Firestorm.Element, {
 
 });
 
-Firestorm.extend(Firestorm.Element, {
+Firestorm.extend(
+Firestorm.Element,
+/**
+ * @lends Firestorm.Element
+ */
+{
 
 	/**
 	 * @param element
@@ -373,7 +391,12 @@ Firestorm.extend(Firestorm.Element, {
 
 });
 
-Firestorm.extend(Firestorm.Element, {
+Firestorm.extend(
+Firestorm.Element,
+/**
+ * @lends Firestorm.Element
+ */
+{
 
 	/**
 	 * @param element
@@ -885,10 +908,20 @@ Firestorm.String = {
 	// taken from json2
 	QUOTE_ESCAPE_REGEX: /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
 	quote_escape_map: {
+		// without these comments JSDoc throws errors
+		// https://github.com/jsdoc3/jsdoc/issues/549
 		'\b': '\\b',
+		/** @alias _1
+		 * @ignore */
 		'\t': '\\t',
+		/** @alias _2
+		 * @ignore */
 		'\n': '\\n',
+		/** @alias _3
+		 * @ignore */
 		'\f': '\\f',
+		/** @alias _4
+		 * @ignore */
 		'\r': '\\r',
 		'"' : '\\"',
 		'\\': '\\\\'
@@ -994,6 +1027,7 @@ Firestorm.Object = {
 
 	isEmpty: function(object_instance) {
 		// it's much faster than using Object.keys
+		//noinspection LoopStatementThatDoesntLoopJS
 		for (var name in object_instance) {
 			return false;
 		}
@@ -1043,46 +1077,64 @@ var Lava = {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Default namespaces reservation. All root members must be reserved ahead - v8 optimization.
 
+	/** @ignore */
 	schema: null,
-	classes: {},
-	/**
-	 * @type {Object.<string, _cWidget>}
-	 */
-	widgets: {},
-	/**
-	 * @type {Object.<string, _cSugarSchema>}
-	 */
-	sugar_map: {},
+	/** @ignore */
 	ClassManager: null,
+	/** @ignore */
 	ExpressionParser: null,
+	/** @ignore */
 	TemplateParser: null,
+	/** @ignore */
 	ObjectParser: null,
+	/** @ignore */
 	transitions: null,
+	/** @ignore */
 	Cron: null,
+	/** @ignore */
 	Core: null,
+	/** @ignore */
 	ScopeManager: null,
+	/** @ignore */
 	modifiers: null,
+	/** @ignore */
 	Serializer: null,
+	/** @ignore */
 	types: null,
+	/** @ignore */
 	extenders: null,
+	/** @ignore */
 	resources: null,
+	/** @ignore */
 	algorithms: {
 		sorting: {}
 	},
 
+	/** @ignore */
 	animation: {},
+	/** @ignore */
 	animator: {},
+	/** @ignore */
 	data: {
+		/** @ignore */
 		field: {}
 	},
+	/** @ignore */
 	system: {},
+	/** @ignore */
 	mixin: {},
+	/** @ignore */
 	parsers: {},
+	/** @ignore */
 	view: {
+		/** @ignore */
 		refresher: {},
+		/** @ignore */
 		container: {}
 	},
+	/** @ignore */
 	widget: {},
+	/** @ignore */
 	scope: {},
 	user: {
 		// place for any other user defined classes and variables
@@ -1096,6 +1148,16 @@ var Lava = {
 	popover_manager: null,
 
 	locales: {},
+
+	/**
+	 * @type {Object.<string, _cWidget>}
+	 */
+	widgets: {},
+	/**
+	 * @type {Object.<string, _cSugarSchema>}
+	 */
+	sugar_map: {},
+	classes: {},
 
 	// end: default namespaces reservation
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1123,9 +1185,9 @@ var Lava = {
 	 * */
 	ELEMENT_ID_PREFIX: 'e',
 	SYSTEM_ID_REGEX: /^e?\\d+$/,
-	VALID_PROPERTY_NAME_REGEX: /^[a-zA-Z\_\$][a-zA-Z0-9\_\$]*$/,
+	VALID_PROPERTY_NAME_REGEX: /^[a-zA-Z_\$][a-zA-Z0-9_\$]*$/,
 	EMPTY_REGEX: /^\s*$/,
-	VALID_LABEL_REGEX: /^[A-Za-z\_][A-Za-z\_0-9]*$/,
+	VALID_LABEL_REGEX: /^[A-Za-z_][A-Za-z_0-9]*$/,
 
 	/** @returns {boolean} */
 	DEFAULT_LESS: function(a, b) { return a < b; },
@@ -1268,8 +1330,8 @@ var Lava = {
 
 	/**
 	 * @param {string} title
-	 * @param config
-	 * @param properties
+	 * @param [config]
+	 * @param [properties]
 	 * @returns {Lava.widget.Standard}
 	 */
 	createWidget: function(title, config, properties) {
@@ -1472,12 +1534,11 @@ var Lava = {
 	 * Behaves like a widget constructor, but accepts raw (unextended) widget config.
 	 * Extends the config and creates the widget instance with the right class.
 	 *
-	 * @constructor
 	 * @param {_cWidget} config
 	 * @param {Lava.widget.Standard} widget
 	 * @param {Lava.view.View} parent_view
-	 * @param {Object} properties
 	 * @param {Lava.system.Template} template
+	 * @param {Object} properties
 	 * @returns {Lava.widget.Standard}
 	 */
 	WidgetConfigExtensionGateway: function(config, widget, parent_view, template, properties) {
@@ -1574,7 +1635,7 @@ var Lava = {
 	/**
 	 * Feature of the current binding system:
 	 * sometimes, a view may be rendered with dirty bindings. They will be refreshed in the next refresh loop.
-	 * This may happen during widget inject() outside of normal App lifecycle, and user may forget to call Lava.refreshViews().
+	 * This may happen during widget inject() outside of normal App lifecycle, and developer may forget to call Lava.refreshViews().
 	 */
 	scheduleRefresh: function() {
 
@@ -2316,14 +2377,16 @@ Lava.resources =
  */
 Lava.types = {
 
-	// for extension only
+	/**
+	 * For extension only
+	 */
 	AbstractType: {
 
 		type_name: null,
 
 		/**
 		 * @param {string} value
-		 * @param {Object} descriptor
+		 * @param {Object} [descriptor]
 		 * @returns {boolean}
 		 */
 		fromString: function(value, descriptor) {
@@ -2960,7 +3023,7 @@ Lava.Core = {
 	 * @param {string} event_name
 	 * @param {function} fn
 	 * @param {Object} context
-	 * @returns {_iEventTicket}
+	 * @returns {_iListener}
 	 */
 	addGlobalHandler: function(event_name, fn, context) {
 
@@ -3516,6 +3579,263 @@ Lava.algorithms.sorting.mergeSort = (function(){
 
 })();
 
+Lava.TemplateWalker = {
+
+	_handlers_map: {
+		'string': '_handleString',
+		view: '_handleView',
+		widget: '_handleWidget',
+		include: '_handleInclude',
+		static_value: '_handleStaticValue',
+		static_eval: '_handleStaticEval',
+		static_tag: '_handleStaticTag'
+	},
+
+	/**
+	 * @type {_tVisitor}
+	 */
+	_visitor: null,
+	_template_stack: [],
+	_index_stack: [],
+	// local vars for advanced compression
+	_has_enter: false,
+	_has_leave: false,
+	_has_enter_region: false,
+	_has_leave_region: false,
+
+	/**
+	 * @param template
+	 * @param {_tVisitor} visitor
+	 */
+	walkTemplate: function(template, visitor) {
+
+		if (Lava.schema.DEBUG && this._visitor) Lava.t();
+
+		this._visitor = visitor;
+		this._has_enter = !!this._visitor.enter;
+		this._has_leave = !!this._visitor.leave;
+		this._has_enter_region = !!this._visitor.enterRegion;
+		this._has_leave_region = !!this._visitor.leaveRegion;
+
+		this._has_enter_region && this._visitor.enterRegion(this, 'root_template');
+		try {
+			this._walkTemplate(template);
+		} catch (e) {
+			if (e != "WALKER_STOP") throw e;
+		}
+		this._has_leave_region && this._visitor.leaveRegion(this, 'root_template');
+
+		this._visitor = null;
+
+	},
+
+	interrupt: function() {
+		throw "WALKER_STOP";
+	},
+
+	getTemplateStack: function() {
+		return this._template_stack;
+	},
+
+	getIndexStack: function() {
+		return this._index_stack;
+	},
+
+	getCurrentTemplate: function() {
+		return this._template_stack[this._template_stack.length - 1];
+	},
+
+	getCurrentIndex: function() {
+		return this._index_stack[this._index_stack.length - 1];
+	},
+
+	_walkTemplate: function(template) {
+
+		if (Lava.schema.DEBUG && !Array.isArray(template)) Lava.t();
+
+		var i = 0,
+			count = template.length,
+			type,
+			stack_index;
+
+		stack_index = this._template_stack.push(template) - 1;
+		this._index_stack.push(0);
+		this._has_enter_region && this._visitor.enterRegion(this, 'template');
+
+		for (; i < count; i++) {
+
+			this._index_stack[stack_index] = i;
+			type = (typeof (template[i]) == 'string') ? 'string' : template[i].type;
+			this._has_enter && this._visitor.enter(this, type, template[i]);
+			this[this._handlers_map[type]](template[i]);
+			this._has_leave && this._visitor.leave(this, type, template[i]);
+
+		}
+
+		this._has_leave_region && this._visitor.leaveRegion(this, 'template');
+		this._template_stack.pop();
+		this._index_stack.pop();
+
+	},
+
+	_handleViewCommon: function(node) {
+
+		var i = 0,
+			count;
+
+		if ('template' in node) {
+			this._has_enter_region && this._visitor.enterRegion(this, 'main_template');
+			this._walkTemplate(node.template);
+			this._has_leave_region && this._visitor.leaveRegion(this, 'main_template');
+		}
+
+		if ('else_template' in node) {
+			this._has_enter_region && this._visitor.enterRegion(this, 'else_template');
+			this._walkTemplate(node.else_template);
+			this._has_leave_region && this._visitor.leaveRegion(this, 'else_template');
+		}
+
+		if ('elseif_templates' in node) {
+			this._has_enter_region && this._visitor.enterRegion(this, 'elseif_templates');
+			for (count = node.elseif_templates.length; i < count; i++) {
+				this._walkTemplate(node.elseif_templates[i]);
+			}
+			this._has_leave_region && this._visitor.leaveRegion(this, 'elseif_templates');
+		}
+
+	},
+
+	_handleView: function(node) {
+
+		this._visitor.visitView && this._visitor.visitView(this, node);
+		this._handleViewCommon(node);
+
+	},
+
+	_handleWidget: function(node) {
+
+		var name,
+			item,
+			i,
+			count,
+			name_index,
+			names_count,
+			tmp_name,
+			schema,
+			tag_mappings,
+			template_names;
+
+		this._visitor.visitWidget && this._visitor.visitWidget(this, node);
+		this._handleViewCommon(node);
+
+		if (node.includes) {
+			this._has_enter_region && this._visitor.enterRegion(this, 'includes');
+			for (name in node.includes) {
+				this._walkTemplate(node.includes[name]);
+			}
+			this._has_leave_region && this._visitor.leaveRegion(this, 'includes');
+		}
+
+		for (name in node.storage) {
+
+			this._has_enter_region && this._visitor.enterRegion(this, 'storage');
+
+			item = node.storage[name];
+
+			if (['object_collection', 'object_hash', 'object'].indexOf(item.type) != -1) {
+				if (!item.schema) Lava.t('Walker: unable to walk storage item, as schema is missing');
+				tag_mappings = item.schema.tag_mappings;
+				template_names = [];
+				for (tmp_name in tag_mappings) {
+					if (tag_mappings[tmp_name].type == 'template') {
+						template_names.push(tmp_name);
+					}
+				}
+				names_count = template_names.length;
+			}
+
+			switch (item.type) {
+				case 'template_collection':
+					this._has_enter_region && this._visitor.enterRegion(this, 'template_collection');
+					for (i = 0, count = item.value.length; i < count; i++) {
+						this._walkTemplate(item.value[i]);
+					}
+					this._has_leave_region && this._visitor.leaveRegion(this, 'template_collection');
+					break;
+				case 'object_collection':
+					this._has_enter_region && this._visitor.enterRegion(this, 'object_collection');
+					for (i = 0, count = item.value.length; i < count; i++) {
+						for (name_index = 0; name_index < names_count; name_index++) {
+							this._walkTemplate(item.value[i][template_names[name_index]]);
+						}
+					}
+					this._has_leave_region && this._visitor.leaveRegion(this, 'object_collection');
+					break;
+				case 'template_hash':
+					this._has_enter_region && this._visitor.enterRegion(this, 'template_hash');
+					for (tmp_name in item.value) {
+						this._walkTemplate(item.value[tmp_name]);
+					}
+					this._has_leave_region && this._visitor.leaveRegion(this, 'template_hash');
+					break;
+				case 'object_hash':
+					this._has_enter_region && this._visitor.enterRegion(this, 'object_hash');
+					for (tmp_name in item.value) {
+						for (name_index = 0; name_index < names_count; name_index++) {
+							this._walkTemplate(item.value[tmp_name][template_names[name_index]]);
+						}
+					}
+					this._has_leave_region && this._visitor.leaveRegion(this, 'object_hash');
+					break;
+				case 'object':
+					this._has_enter_region && this._visitor.enterRegion(this, 'object');
+					for (name_index = 0; name_index < names_count; name_index++) {
+						this._walkTemplate(item.value[template_names[name_index]]);
+					}
+					this._has_leave_region && this._visitor.leaveRegion(this, 'object');
+					break;
+				default:
+					Lava.t();
+			}
+
+			this._has_leave_region && this._visitor.leaveRegion(this, 'storage');
+
+		}
+
+	},
+
+	_handleString: function(node) {
+
+		this._visitor.visitString && this._visitor.visitString(this, node);
+
+	},
+
+	_handleInclude: function(node) {
+
+		this._visitor.visitInclude && this._visitor.visitInclude(this, node);
+
+	},
+
+	_handleStaticValue: function(node) {
+
+		this._visitor.visitStaticValue && this._visitor.visitStaticValue(this, node);
+
+	},
+
+	_handleStaticEval: function(node) {
+
+		this._visitor.visitStaticEval && this._visitor.visitStaticEval(this, node);
+
+	},
+
+	_handleStaticTag: function(node) {
+
+		this._visitor.visitStaticTag && this._visitor.visitStaticTag(this, node);
+
+	}
+
+};
+
 Lava.ClassManager = {
 
 	/**
@@ -3540,10 +3860,6 @@ Lava.ClassManager = {
 
 	_root: {},
 
-	/**
-	 * Members of the "Class" property of any class.
-	 * @lends _cClassData#
-	 */
 	ClassData: {
 
 		instanceOf: function(class_name) {
@@ -3599,7 +3915,7 @@ Lava.ClassManager = {
 		if ('Extends' in source_object) {
 
 			if (Lava.schema.DEBUG && typeof(source_object.Extends) != 'string') Lava.t('Extends: string expected. ' + class_path);
-			class_data.extends = source_object.Extends;
+			class_data.extends = /** @type {string} */ source_object.Extends;
 			parent_data = this._sources[source_object.Extends];
 			class_data.parent_class_data = parent_data;
 
@@ -3722,10 +4038,10 @@ Lava.ClassManager = {
 	},
 
 	/**
-	 * @param child_skeleton
 	 * @param {_cClassData} child_data
-	 * @param parent_skeleton
+	 * @param child_skeleton
 	 * @param {_cClassData} parent_data
+	 * @param parent_skeleton
 	 * @param {boolean} is_root
 	 * @param {number=} references_offset Also acts as a sign of 'implements' mode
 	 */
@@ -3780,11 +4096,13 @@ Lava.ClassManager = {
 
 	_disassemble: function(class_data, source_object, hierarchy_index, is_root) {
 
-		var skeleton = {},
+		var name,
+			skeleton = {},
 			value,
-			type;
+			type,
+			skeleton_value;
 
-		for (var name in source_object) {
+		for (name in source_object) {
 
 			if (is_root && (this._reserved_members.indexOf(name) != -1 || (name in class_data.shared))) {
 
@@ -3797,48 +4115,49 @@ Lava.ClassManager = {
 
 			switch (type) {
 				case 'object':
-					skeleton[name] = {
+					skeleton_value = {
 						type: 'object',
 						skeleton: this._disassemble(class_data, value, hierarchy_index, false)
 					};
 					break;
 				case 'function':
-					skeleton[name] = {type: 'function', index: class_data.references.length};
+					skeleton_value = {type: 'function', index: class_data.references.length};
 					class_data.references.push(value);
 					break;
 				case 'array':
 					if (value.length == 0) {
-						skeleton[name] = {type: 'inlineArray', is_empty: true};
+						skeleton_value = {type: 'inlineArray', is_empty: true};
 					} else if (this.INLINE_SIMPLE_ARRAYS && this.isInlineArray(value)) {
-						skeleton[name] = {type: 'inlineArray', value: value};
+						skeleton_value = {type: 'inlineArray', value: value};
 					} else {
-						skeleton[name] = {type: 'sliceArray', index: class_data.references.length};
+						skeleton_value = {type: 'sliceArray', index: class_data.references.length};
 						class_data.references.push(value);
 					}
 					break;
 				case 'null':
-					skeleton[name] = {type: 'null'};
+					skeleton_value = {type: 'null'};
 					break;
 				case 'undefined':
-					skeleton[name] = {type: 'undefined'};
+					skeleton_value = {type: 'undefined'};
 					break;
 				case 'boolean':
-					skeleton[name] = {type: 'boolean', value: value};
+					skeleton_value = {type: 'boolean', value: value};
 					break;
 				case 'number':
-					skeleton[name] = {type: 'number', value: value};
+					skeleton_value = {type: 'number', value: value};
 					break;
 				case 'string':
-					skeleton[name] = {type: 'string', value: value};
+					skeleton_value = {type: 'string', value: value};
 					break;
 				case 'regexp':
-					skeleton[name] = {type: 'regexp', value: value};
+					skeleton_value = {type: 'regexp', value: value};
 					break;
 				default:
 					Lava.t("[Class system] Unsupported property type in source object: " + type);
 					break;
-
 			}
+
+			skeleton[name] = skeleton_value;
 
 		}
 
@@ -4318,13 +4637,13 @@ Lava.parsers.Common = {
 	},
 
 	// example: @accordion.accordion_panel
-	_locator_regex: /^[\$\#\@]([a-zA-Z\_][a-zA-Z0-9\_]*)\.([a-zA-Z\_][a-zA-Z0-9\_]*)/,
-	_identifier_regex: /^[a-zA-Z\_][a-zA-Z0-9\_]*/,
+	_locator_regex: /^[\$\#\@]([a-zA-Z_][a-zA-Z0-9_]*)\.([a-zA-Z_][a-zA-Z0-9_]*)/,
+	_identifier_regex: /^[a-zA-Z_][a-zA-Z0-9_]*/,
 
 	// overridden includes have '$' in their name.
 	// Example: $tree.Tree$node
-	_include_locator_regex: /^[\$\#\@]([a-zA-Z\_][a-zA-Z0-9\_]*)\.([a-zA-Z\_][\$a-zA-Z0-9\_]*)/,
-	_include_identifier_regex: /^[a-zA-Z\_][\$a-zA-Z0-9\_]*/,
+	_include_locator_regex: /^[\$\#\@]([a-zA-Z_][a-zA-Z0-9_]*)\.([a-zA-Z_][\$a-zA-Z0-9_]*)/,
+	_include_identifier_regex: /^[a-zA-Z_][\$a-zA-Z0-9_]*/,
 
 	_view_config_property_setters: {
 		id: 'setViewConfigId',
@@ -4499,6 +4818,8 @@ Lava.parsers.Common = {
 		}
 
 		if ('class_locator' in raw_block) {
+			// @todo тут все не так.
+			// по конфигу это только для виджета. Екстендер требует чтобы там был виджет. А это вид!
 			config.class_locator = raw_block.class_locator;
 			config.real_class = raw_block.real_class;
 			config['class'] = Lava.schema.view.DEFAULT_CLASS_LOCATOR_GATEWAY;
@@ -5063,6 +5384,7 @@ Lava.parsers.Common = {
 
 		}
 
+		//noinspection LoopStatementThatDoesntLoopJS
 		for (name in static_properties) {
 			container_config.static_properties = static_properties;
 			break;
@@ -5072,7 +5394,7 @@ Lava.parsers.Common = {
 
 	/**
 	 * @param {_tRawTemplate} blocks
-	 * @param {_cView} view_config
+	 * @param {_cView} [view_config]
 	 * @returns {_tTemplate}
 	 */
 	compileTemplate: function(blocks, view_config) {
@@ -5342,6 +5664,7 @@ Lava.parsers.Common = {
 
 		if (!match) Lava.t("Malformed resource id");
 
+		/** @type {_cResourceId} */
 		result = {
 			locator_type: this.locator_types[id_string[0]],
 			locator: match[1],
@@ -5433,7 +5756,8 @@ Lava.parsers.Directives = {
 		broadcast: '_widgetTagBroadcast',
 		storage: '_widgetTagStorage',
 		resources: '_widgetTagResources',
-		default_events: '_widgetTagDefaultEvents'
+		default_events: '_widgetTagDefaultEvents',
+		edit_template: '_widgetTagEditTemplate'
 	},
 
 	_resource_tag_actions: {
@@ -5446,6 +5770,11 @@ Lava.parsers.Directives = {
 		ntranslate: '_resourceTagTranslatePlural'
 	},
 
+	_known_edit_tasks: {
+		replace_config_option: '_editTaskSetConfigOptions',
+		add_class: '_editTaskAddClass'
+	},
+
 	RESOURCE_ARRAY_ALLOWED_TYPES: ['string', 'boolean', 'null', 'number'],
 
 	/**
@@ -5453,6 +5782,7 @@ Lava.parsers.Directives = {
 	 */
 	_is_processing_define: false,
 	_current_widget_title: null, // the title of the widget in x:define directive, which is currently being processed
+	_widget_directives_stack: [],
 
 	/**
 	 * @param {_cRawDirective} raw_directive
@@ -5744,6 +6074,157 @@ Lava.parsers.Directives = {
 
 	},
 
+	/**
+	 * @param {_tRawTemplate} raw_template
+	 * @returns {Array.<*>}
+	 */
+	_parseTaskArguments: function(raw_template) {
+
+		var blocks = Lava.parsers.Common.asBlockType(raw_template, 'tag'),
+			i = 0,
+			count = blocks.length,
+			temp,
+			item,
+			result = [];
+
+		for (; i < count; i++) {
+
+			switch (blocks[i].name) {
+				case 'template':
+					item = blocks[i].content ? Lava.parsers.Common.compileTemplate(blocks[i].content) : [];
+					break;
+				case 'expression':
+					if (Lava.schema.DEBUG && (!blocks[i].content || blocks[i].content.length != 1)) Lava.t('malformed task arguments');
+					temp = Lava.ExpressionParser.parse(blocks[i].content[0]);
+					if (Lava.schema.DEBUG && temp.length != 1) Lava.t('malformed task arguments: multiple expressions');
+					item = temp[0];
+					break;
+				case 'options':
+					item = Lava.parseOptions(blocks[i].content[0]);
+					break;
+				default:
+					Lava.t('edit_template: unknown or malformed task argument');
+			}
+
+			result.push(item);
+		}
+
+		return result;
+
+	},
+
+	_evalTaskHandler: function(src) {
+		var handler = null;
+		eval(src);
+		if (Lava.schema.DEBUG && typeof(handler) != 'function') Lava.t('malformed task handler');
+		return handler;
+	},
+
+	/**
+	 * @param {_cRawTag} raw_tag
+	 * @param {_cWidget} config_storage
+	 * @param {Object} roles_storage
+	 */
+	_widgetTagEditTemplate: function(raw_tag, config_storage, roles_storage) {
+
+		if (Lava.schema.DEBUG && (!raw_tag.attributes || !raw_tag.attributes['name'])) Lava.t('Malformed edit_template tag');
+
+		var tasks = Lava.parsers.Common.asBlockType(raw_tag.content, 'tag'),
+			i = 0,
+			count = tasks.length,
+			source_widget_config,
+			template,
+			extends_,
+			widget_tag,
+			content_blocks,
+			block_index,
+			block_count,
+			blocks_hash,
+			task_arguments,
+			handler;
+
+		if (raw_tag.attributes['source_widget']) {
+
+			source_widget_config = Lava.widgets[raw_tag.attributes['source_widget']];
+			if (Lava.schema.DEBUG && (!source_widget_config || source_widget_config.is_extended)) Lava.t('edit_template: source widget does not exist or is already extended');
+			if (Lava.schema.DEBUG && (!source_widget_config.includes || !source_widget_config.includes[raw_tag.attributes.name])) Lava.t('[edit_template] source widget does not have the include: ' + raw_tag.attributes.name);
+			template = Firestorm.clone(source_widget_config.includes[raw_tag.attributes.name]);
+
+		} else {
+
+			if (('includes' in config_storage) && config_storage.includes[raw_tag.attributes.name]) {
+
+				template = config_storage.includes[raw_tag.attributes.name];
+
+			} else {
+
+				widget_tag = this._widget_directives_stack[this._widget_directives_stack.length - 1];
+				if (!widget_tag) Lava.t('edit_template: unable to find source template');
+
+				extends_ = widget_tag.attributes.extends;
+				while (true) {
+					if (!extends_) Lava.t('edit_template: unable to find source template');
+					source_widget_config = Lava.widgets[extends_];
+					if (Lava.schema.DEBUG && (!source_widget_config || source_widget_config.is_extended)) Lava.t('edit_template: source widget does not exist or is already extended');
+					if (source_widget_config.includes && source_widget_config.includes[raw_tag.attributes.name]) {
+						template = source_widget_config.includes[raw_tag.attributes.name];
+						break;
+					}
+					extends_ = source_widget_config.extends;
+				}
+
+			}
+			if (!template) Lava.t();
+			template = Firestorm.clone(template);
+
+		}
+
+		for (; i < count; i++) { // collection of <task> tags
+
+			if (Lava.schema.DEBUG && (!tasks[i].attributes || tasks[i].name != 'task')) Lava.t('Malformed edit_template task');
+
+			task_arguments = null;
+			blocks_hash = null;
+
+			if (tasks[i].content) {
+				blocks_hash = {};
+				content_blocks = Lava.parsers.Common.asBlockType(tasks[i].content, 'tag');
+				for (block_index = 0, block_count = content_blocks.length; block_index < block_count; block_index++) {
+					blocks_hash[content_blocks[block_index].name] = content_blocks[block_index];
+				}
+				if ('arguments' in blocks_hash) {
+					if (Lava.schema.DEBUG && !blocks_hash['arguments'].content) Lava.t('edit_template: malformed task arguments');
+					task_arguments = this._parseTaskArguments(blocks_hash['arguments'].content);
+				}
+			}
+
+			switch (tasks[i].attributes.type) {
+				case 'manual':
+					if (Lava.schema.DEBUG && (!blocks_hash['handler'] || !blocks_hash['handler'].content || blocks_hash['handler'].content.length != 1)) Lava.t('edit_template: malformed task handler');
+					handler = this._evalTaskHandler(blocks_hash['handler'].content[0]);
+					handler(template, tasks[i], blocks_hash, task_arguments);
+					break;
+				case 'traverse':
+					if (Lava.schema.DEBUG && (!blocks_hash['handler'] || !blocks_hash['handler'].content || blocks_hash['handler'].content.length != 1)) Lava.t('edit_template: malformed task handler');
+					handler = eval('(' + blocks_hash['handler'].content[0] + ')');
+					if (Lava.schema.DEBUG && typeof(handler) != 'object') Lava.t('edit_template: wrong handler for traverse task');
+					handler.arguments = task_arguments;
+					Lava.TemplateWalker.walkTemplate(template, handler);
+					break;
+				case 'known':
+					if (Lava.schema.DEBUG && !(tasks[i].attributes.name in this._known_edit_tasks)) Lava.t('[edit_template] unknown task: ' + tasks[i].attributes.name);
+					this[this._known_edit_tasks[tasks[i].attributes.name]](template, tasks[i], blocks_hash, task_arguments);
+					break;
+				default:
+					Lava.t('edit_template: task requires the "type" attribute');
+			}
+
+		}
+
+		this._store(config_storage, 'includes', raw_tag.attributes.as || raw_tag.attributes.name, template);
+
+	},
+
 	// end: actions for widget tags and tag roles
 	////////////////////////////////////////////////////////////////////
 
@@ -6012,6 +6493,8 @@ Lava.parsers.Directives = {
 			name,
 			path;
 
+		this._widget_directives_stack.push(raw_directive);
+
 		for (; i < count; i++) {
 
 			tag = tags[i];
@@ -6097,6 +6580,8 @@ Lava.parsers.Directives = {
 
 		if (!widget_config['class']) widget_config['class'] = Lava.schema.widget.DEFAULT_EXTENSION_GATEWAY;
 		if (!widget_config.extender_type) widget_config.extender_type = Lava.schema.widget.DEFAULT_EXTENDER;
+
+		this._widget_directives_stack.pop();
 
 		return widget_config;
 
@@ -6386,7 +6871,7 @@ Lava.parsers.Directives = {
 	/**
 	 * @param {(_cView|_cWidget)} config
 	 * @param {string} name
-	 * @param {_cRawDirective} raw_tag
+	 * @param {(_cRawDirective|_cRawTag)} raw_tag
 	 */
 	_parseObject: function(config, name, raw_tag) {
 
@@ -6477,7 +6962,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
-	 * @param {_cRawDirective} raw_directive
+	 * @param {(_cRawDirective|_cRawTag)} raw_directive
 	 * @param {_cWidget} widget_config
 	 */
 	_xresources: function(raw_directive, widget_config) {
@@ -6588,6 +7073,97 @@ Lava.parsers.Directives = {
 	_xdefault_events: function(raw_directive, widget_config) {
 
 		this._parseDefaultEvents(raw_directive, widget_config);
+
+	},
+
+	_selectFirst: function(template, node_type, condition) {
+
+		var filter,
+			visitor = {},
+			target = null;
+
+		filter = condition
+			? new Function('node', 'return !!(' + condition + ')')
+			: function() { return true; };
+
+		visitor['visit' + node_type] = function(walker, node) {
+			if (filter(node)) {
+				target = node;
+				walker.interrupt();
+			}
+		};
+
+		Lava.TemplateWalker.walkTemplate(template, visitor);
+
+		return target;
+
+	},
+
+	/**
+	 * @param {_tTemplate} template
+	 * @param {_cRawTag} task_tag
+	 * @param {Object.<string,_cRawTag>} content_blocks_hash
+	 * @param {Array.<*>} task_arguments
+	 */
+	_editTaskSetConfigOptions: function(template, task_tag, content_blocks_hash, task_arguments) {
+
+		if (Lava.schema.DEBUG && !task_tag.attributes.node_type) Lava.t('_editTaskSetConfigOptions: malformed attributes');
+
+		var assign = content_blocks_hash.assign,
+			set_path,
+			set_var,
+			set_value,
+			i = 0,
+			count,
+			current_segment,
+			type;
+
+		if (Lava.schema.DEBUG && (!assign || !assign.attributes || !assign.attributes['path'] || !assign.content || assign.content.length != 1))
+			Lava.t('_editTaskSetConfigOptions: malformed or missing assign');
+
+		current_segment = this._selectFirst(template, task_tag.attributes.node_type, task_tag.attributes.condition);
+
+		if (!current_segment) Lava.t('_editTaskSetConfigOptions: target not found');
+
+		set_path = content_blocks_hash.assign.attributes['path'].split('.');
+		set_var = set_path.pop();
+		set_value = Lava.parseOptions(content_blocks_hash.assign.content[0]);
+
+		for (count = set_path.length; i < count; i++) {
+			if (!(set_path[i] in current_segment)) {
+				current_segment[set_path[i]] = {};
+			} else if (Lava.schema.DEBUG) {
+				type = Firestorm.getType(current_segment[set_path[i]]);
+				if (type != 'null' && type != 'object') Lava.t('_editTaskSetConfigOptions: trying to set a path, which is not an object');
+			}
+			current_segment = current_segment[set_path[i]]
+		}
+
+		current_segment[set_var] = set_value;
+
+	},
+
+	_editTaskAddClass: function(template, task_tag, content_blocks_hash, task_arguments) {
+
+		if (Lava.schema.DEBUG && !task_tag.attributes.node_type) Lava.t('_editTaskAddClass: malformed attributes');
+
+		var target,
+			i = 0;
+
+		target = this._selectFirst(template, task_tag.attributes.node_type, task_tag.attributes.condition);
+
+		if (!target || !target.container) Lava.t('_editTaskAddClass: target not found or does not have a container');
+
+		if (target.container.class_bindings) {
+			while (i in target.container.class_bindings) {
+				i++;
+			}
+			target.container.class_bindings[i] = task_arguments[0];
+		} else {
+			target.container.class_bindings = {
+				0: task_arguments[0]
+			};
+		}
 
 	}
 
@@ -6922,6 +7498,11 @@ return new Parser;
 
 
 
+
+/**
+ * Object parser
+ * @name Lava.ObjectParser
+ */
 
 Lava.ObjectParser.yy = {
 
@@ -7555,6 +8136,11 @@ return new Parser;
 
 
 
+/**
+ * Expression parser
+ * @name Lava.ExpressionParser
+ */
+
 Lava.ExpressionParser._parse = Lava.ExpressionParser.parse;
 
 /** @enum {number} */
@@ -7565,7 +8151,7 @@ Lava.ExpressionParser.SEPARATORS = {
 
 /**
  * @param {string} input
- * @param {Lava.ExpressionParser.SEPARATORS} separator
+ * @param {Lava.ExpressionParser.SEPARATORS} [separator]
  * @returns {Array.<_cRawArgument>}
  */
 Lava.ExpressionParser.parseRaw = function(input, separator) {
@@ -7595,7 +8181,7 @@ Lava.ExpressionParser.parseRaw = function(input, separator) {
 
 /**
  * @param {string} input
- * @param {Lava.ExpressionParser.SEPARATORS} separator
+ * @param {Lava.ExpressionParser.SEPARATORS} [separator]
  * @returns {Array.<_cArgument>}
  */
 Lava.ExpressionParser.parse = function(input, separator) {
@@ -8563,6 +9149,11 @@ return new Parser;
 
 
 
+/**
+ * Template parser
+ * @name Lava.TemplateParser
+ */
+
 Lava.TemplateParser._parse = Lava.TemplateParser.parse;
 
 /**
@@ -8679,11 +9270,13 @@ Lava.TemplateParser.yy = {
 
 		}
 
+		//noinspection LoopStatementThatDoesntLoopJS
 		for (name in x) {
 			tag_config.x = x;
 			break;
 		}
 
+		//noinspection LoopStatementThatDoesntLoopJS
 		for (name in attributes) {
 			tag_config.attributes = attributes;
 			break;
@@ -8716,7 +9309,7 @@ Lava.TemplateParser.yy = {
 
 		}
 
-		return result;
+		return /** @type {(_cRawTag|_cRawDirective)} */ result;
 
 	},
 
@@ -9075,7 +9668,7 @@ Lava.define(
 	/**
 	 * Same as {@link Lava.mixin.Observable#_fire}, but for property listeners
 	 * @param {string} property_name
-	 * @param {*} event_args
+	 * @param {*} [event_args]
 	 */
 	_firePropertyChanged: function(property_name, event_args) {
 
@@ -9149,7 +9742,7 @@ Lava.define(
 	 * Called by ScopeManager during refresh loop.
 	 *
 	 * @param {number} refresh_id
-	 * @param {boolean} is_safe
+	 * @param {boolean} [is_safe]
 	 * @returns {boolean} true in case of infinite loop
 	 */
 	doRefresh: function(refresh_id, is_safe) {
@@ -9447,7 +10040,7 @@ Lava.define(
 
 	/**
 	 * Start only if it's not already running
-	 * @param started_time
+	 * @param [started_time]
 	 */
 	safeStart: function(started_time) {
 
@@ -9724,6 +10317,10 @@ Lava.define(
 
 	},
 
+	/**
+	 *
+	 * @param [started_time]
+	 */
 	start: function(started_time) {
 
 		var now = new Date().getTime();
@@ -10022,28 +10619,27 @@ Lava.define(
 
 	_start: function() {
 
-		var redraw,
-			Element = Firestorm.Element;
+		var Element = Firestorm.Element;
 
 		if (this._is_reversed) { // collapse an element that is currently open
 
 			// explicitly set the height/width on the element to make transition happen
 			this._property_value = Element.getSize(this._target)[(this._property == 'width') ? 'x' : 'y'];
-			Element.setStyle(this._target, this._property, this._property_value);
-			redraw = this._target.offsetHeight; // force redraw to bypass browser optimizations
+			Element.setStyle(this._target, this._property, '' + this._property_value);
+			this._target.offsetHeight; // force redraw to bypass browser optimizations
 			Element.addClass(this._target, 'collapsing');
 			Element.removeClasses(this._target, ['collapse', 'in']);
-			Element.setStyle(this._target, this._property, 0);
+			Element.setStyle(this._target, this._property, '0');
 
 		} else { // expand a collapsed element
 
 			Element.removeClass(this._target, 'collapse');
 			Element.setStyle(this._target, this._property, 'auto');
 			this._property_value = Element.getSize(this._target)[(this._property == 'width') ? 'x' : 'y'];
-			Element.setStyle(this._target, this._property, 0);
-			redraw = this._target.offsetHeight; // force redraw to bypass browser optimizations
+			Element.setStyle(this._target, this._property, '0');
+			this._target.offsetHeight; // force redraw to bypass browser optimizations
 			Element.addClass(this._target, 'collapsing');
-			Element.setStyle(this._target, this._property, this._property_value);
+			Element.setStyle(this._target, this._property, '' + this._property_value);
 
 		}
 
@@ -10072,11 +10668,11 @@ Lava.define(
 
 		if (this._is_reversed) {
 
-			Firestorm.Element.setStyle(this._target, this._property, this._property_value);
+			Firestorm.Element.setStyle(this._target, this._property, '' + this._property_value);
 
 		} else {
 
-			Firestorm.Element.setStyle(this._target, this._property, 0);
+			Firestorm.Element.setStyle(this._target, this._property, '0');
 
 		}
 
@@ -11469,7 +12065,7 @@ Lava.define(
 	},
 
 	/**
-	 * @param {Lava.view.View} view
+	 * @param {Lava.view.Abstract} view
 	 */
 	scheduleViewRefresh: function(view) {
 
@@ -11754,7 +12350,7 @@ Lava.define(
 	},
 
 	/**
-	 * @param {Lava.view.View} view
+	 * @param {Lava.view.Abstract} view
 	 * @param {Array.<_cTarget>} targets
 	 */
 	dispatchRoles: function(view, targets) {
@@ -12191,7 +12787,7 @@ Lava.define(
 
 	/**
 	 * @param {Lava.widget.Standard} widget
-	 * @param {Array.<_cTarget>} targets
+	 * @param {Object.<string, Array.<_cTarget>>} targets
 	 */
 	dispatchBroadcast: function(widget, targets) {
 
@@ -14282,9 +14878,9 @@ Lava.define(
 
 	destroy: function() {
 
-		var name,
-			i = 0,
-			count = this._records.length;
+		var name;
+			//i = 0,
+			//count = this._records.length;
 
 		/*for (; i < count; i++) {
 
@@ -14940,7 +15536,7 @@ Lava.define(
 
 		if (Lava.schema.DEBUG && !widget.isWidget) Lava.t("Tried to call a modifier from non-widget view");
 
-		return widget;
+		return /** @type {Lava.widget.Standard} */ widget;
 
 	},
 
@@ -15168,8 +15764,6 @@ Lava.define(
 	},
 
 	onScopeChanged: function() {
-
-		var value = this._scope.getValue();
 
 		// avoid setting nulls to non-nullable fields.
 		if (this._scope.isConnected()) {
@@ -16432,6 +17026,7 @@ Lava.define(
 
 	},
 
+	// @todo разбить на 2 функции - с html и без
 	wrap: function(html) {
 
 		var classes = this._renderClasses(),
@@ -17321,8 +17916,9 @@ Lava.define(
 
 	/**
 	 * @param {Lava.system.Template} template
+	 * @param index
 	 */
-	_createAnimation: function(template) {
+	_createAnimation: function(template, index) {
 
 		Lava.t("Abstract function call: _createAnimation");
 
@@ -17462,13 +18058,7 @@ Lava.define(
 
 	hasAnimations: function() {
 
-		for (var name in this._animations_by_template_guid) {
-
-			return true;
-
-		}
-
-		return false;
+		return !Firestorm.Object.isEmpty(this._animations_by_template_guid);
 
 	}
 
@@ -18414,7 +19004,7 @@ Lava.define(
 
 			if (Lava.schema.DEBUG && !this._container) Lava.t('View/Foreach: refresher needs container to work');
 			var constructor = Lava.ClassManager.getConstructor(this._config.refresher['class'], 'Lava.view.refresher');
-			this._refresher = /** @type {Lava.refresher.Default} */ new constructor(
+			this._refresher = /** @type {Lava.view.refresher.Default} */ new constructor(
 				this._config.refresher,
 				this,
 				this._container
@@ -18731,7 +19321,7 @@ Lava.define(
 			// otherwise, it will not be able to insert the template
 			if (Lava.schema.DEBUG && !this._container) Lava.t('View/If: refresher needs container to work');
 			constructor = Lava.ClassManager.getConstructor(this._config.refresher['class'], 'Lava.view.refresher');
-			this._refresher = /** @type {Lava.refresher.Default} */ new constructor(
+			this._refresher = /** @type {Lava.view.refresher.Default} */ new constructor(
 				this._config.refresher,
 				this, this._container
 			);
@@ -18843,9 +19433,9 @@ Lava.define(
 	_sleep: function() {
 
 		var i = 0,
-			count;
+			count = this._arguments.length;
 
-		for (i = 0, count = this._arguments.length; i < count; i++) {
+		for (; i < count; i++) {
 
 			this._arguments[i].sleep();
 
@@ -19069,7 +19659,7 @@ Lava.define(
 				if (Lava.schema.DEBUG && component_resource.type != 'component') Lava.t("resource value is not a component");
 
 				resources = resources
-					? Lava.resources.mergeResources(component_resource.value, resources, true)
+					? Lava.resources.mergeResources(component_resource.value, resources)
 					: component_resource.value;
 
 			}
@@ -19517,9 +20107,7 @@ Lava.define(
 
 	destroy: function() {
 
-		var name,
-			i,
-			count;
+		var name;
 
 		this._releaseAllEvents();
 
@@ -20018,6 +20606,7 @@ Lava.define(
 
 		var element = this._input_container.getDOMElement();
 		// https://mootools.lighthouseapp.com/projects/2706/tickets/578-elementgetselected-behaves-differently-between-ffie-safari
+		//noinspection BadExpressionStatementJS
 		element.selectedIndex;
 		this.set('value', element.value);
 
@@ -20658,6 +21247,9 @@ Lava.define(
 		tab_include: '_getTabInclude'
 	},
 
+	/**
+	 * @type {Lava.system.Enumerable}
+	 */
 	_tabs: null,
 
 	init: function(config, widget, parent_view, template, properties) {
@@ -20772,10 +21364,12 @@ Lava.define(
 		var active_tab = null;
 
 		this._tabs.each(function(tab) {
+			var result = null;
 			if (tab.get('is_enabled') && !tab.get('is_hidden')) {
 				active_tab = tab;
-				return false;
+				result = false;
 			}
+			return result;
 		});
 
 		this.set('_active_tab', active_tab);

@@ -153,7 +153,7 @@ Lava.define(
 	/**
 	 * Same as {@link Lava.mixin.Observable#_fire}, but for property listeners
 	 * @param {string} property_name
-	 * @param {*} event_args
+	 * @param {*} [event_args]
 	 */
 	_firePropertyChanged: function(property_name, event_args) {
 

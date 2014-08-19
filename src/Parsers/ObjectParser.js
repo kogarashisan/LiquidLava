@@ -1,4 +1,9 @@
 
+/**
+ * Object parser
+ * @name Lava.ObjectParser
+ */
+
 Lava.ObjectParser.yy = {
 
 	/**

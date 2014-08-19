@@ -37,8 +37,6 @@ System-wide or uncategorized
 	- [P5,Refactoring] some DEBUG checks should become permanent
 	- [P3,Refactoring] _cRawBlock.class_locator.name - rename to locator and change type to _cViewLocator.
 		Same for _cWidgetConfig.class_locator.
-	- [P3,Fix] when parsing sugar inside x:define and x:widget: sugar config must be merged with parent,
-		and class name of sugar must be taken from config.
 	- [P3,Refactoring] ScopeManager::scheduleScopeRefresh: do not return an object, use property of the Refreshable.
 	- [P2,Dev] recursive x:binding and x:assign protection.
 		// Currently, you can create an assign of any property to itself
@@ -59,8 +57,6 @@ Animation/BootstrapCollapse.class.js
 Animation/Toggle.class.js
 	- [P5,Refactoring] must inherit from Emulated, + missing some important code
 Data/
-	- [P2,Refactoring] make Guid field, and remove the check in record::get
-		// guid is needed for MetaStorage
 	- [P2,Feature] schema switch to turn off validation
 	- [P2,Feature] an ability to unload records from modules to free memory.
 	- [P3,Feature] DateTime field. Will be serialized to integer, but internal value will be a Date object.
@@ -89,12 +85,14 @@ Parsers/
 		// text should depend on context
 	- [P3,Feature] x:controller control attribute - similar to x:widget
 		// create an inline widget from element, with specified controller class. Also should work on sugar.
-	- [P3,Feature] allow to set default widget config in sugar options. Such config must be merged properly.
-		// Reason: sometimes you will want to add options and other settings to sugar.
 	- [P5,Feature,Q] static_value directive should treat it's content as default value.
 Parsers/Directives.js
 	- [P2,Refactoring] get rid of roles_storage to simplify logic
 	- [P5,Dev,Q] resources: need &lt;component path="..."&gt; tag inside &lt;resources&gt; to shorten paths
+	- [P4,Dev] set_config_options template editing task:
+		1) allow to set several options at once (via &lt;assigns&gt; collection) <br/>
+		2) allow to use user-defined function as filter condition <br/>
+		3) allow to select several items at once
 Parsers/TemplateParser.js
 	- [P5,Feature,Q] allow to set class for widget extenders
 	- [P4,Feature] implement removal of empty space from templates
@@ -112,9 +110,8 @@ Parsers/ExpressionParser.js
 System/App.class.js
 	- [P3,Feature] app.createModule(config) - create a module with given schema
 System/Enumerable.class.js
-	- [P3,Feature] methods relocateIndex(old_index, new_index) and relocateValue(value, new_index)
-		// is equivalent of removeAt, than insertAt for given value.
-		// They will not fire item_removed/added events, only collection_changed
+	- [P3,Feature] methods moveIndex(old_index, new_index) and moveValue(value, new_index)
+		// is equivalent of removeAt, than insertAt for given value. Preserves UID.
 	- [P3, Performance] Enumerable is inherited from Properties, but does not use _properties and _property_listeners.
 		They should not take space in constructed objects.
 	- [P5, Performance] It's possible to optimize updateFromEnumerable - do not calculate diff if there are no listeners.
@@ -125,7 +122,11 @@ System/Sugar.class.js
 	- [P5,Dev] always check that there are no redundant attributes on sugar tags
 		// it's checked on root tag, but not on objects
 	- [P5,Feature] allow to set the default widget config in sugar. It will allow to create a sugar with default options.
+		// Reason: sometimes you will want to add options and other settings to sugar.
+		// Such config must be merged properly.
 	- [P5,Refactoring,Q] control attributes of sugar should be handled in Sugar class
+	- [P3,Feature] when parsing sugar inside x:define and x:widget: sugar config must be merged with parent,
+		and class name of sugar must be taken from config.
 System/Template.class.js
 	- [P5,Performance,Q] render() function compilation.
 		// Take into account that code may be compressed
@@ -193,8 +194,8 @@ Algorithms/Sorting/
 Panels
 	- [P2,Feature] when panels are collapsed, but the body stays in DOM - they should sleep() their content
 Accordion
-	- [p5,Feature] collapseAll()
-TreeView
+	- [P5,Feature] collapseAll()
+Tree
 	- [P3,Feature] must not contain Morph containers inside it
 Select
 	- [P3,Feature] there must be a sugar which parses it's content (optgroup and option tags)

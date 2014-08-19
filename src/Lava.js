@@ -5,46 +5,64 @@ var Lava = {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Default namespaces reservation. All root members must be reserved ahead - v8 optimization.
 
+	/** @ignore */
 	schema: null,
-	classes: {},
-	/**
-	 * @type {Object.<string, _cWidget>}
-	 */
-	widgets: {},
-	/**
-	 * @type {Object.<string, _cSugarSchema>}
-	 */
-	sugar_map: {},
+	/** @ignore */
 	ClassManager: null,
+	/** @ignore */
 	ExpressionParser: null,
+	/** @ignore */
 	TemplateParser: null,
+	/** @ignore */
 	ObjectParser: null,
+	/** @ignore */
 	transitions: null,
+	/** @ignore */
 	Cron: null,
+	/** @ignore */
 	Core: null,
+	/** @ignore */
 	ScopeManager: null,
+	/** @ignore */
 	modifiers: null,
+	/** @ignore */
 	Serializer: null,
+	/** @ignore */
 	types: null,
+	/** @ignore */
 	extenders: null,
+	/** @ignore */
 	resources: null,
+	/** @ignore */
 	algorithms: {
 		sorting: {}
 	},
 
+	/** @ignore */
 	animation: {},
+	/** @ignore */
 	animator: {},
+	/** @ignore */
 	data: {
+		/** @ignore */
 		field: {}
 	},
+	/** @ignore */
 	system: {},
+	/** @ignore */
 	mixin: {},
+	/** @ignore */
 	parsers: {},
+	/** @ignore */
 	view: {
+		/** @ignore */
 		refresher: {},
+		/** @ignore */
 		container: {}
 	},
+	/** @ignore */
 	widget: {},
+	/** @ignore */
 	scope: {},
 	user: {
 		// place for any other user defined classes and variables
@@ -58,6 +76,16 @@ var Lava = {
 	popover_manager: null,
 
 	locales: {},
+
+	/**
+	 * @type {Object.<string, _cWidget>}
+	 */
+	widgets: {},
+	/**
+	 * @type {Object.<string, _cSugarSchema>}
+	 */
+	sugar_map: {},
+	classes: {},
 
 	// end: default namespaces reservation
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -230,8 +258,8 @@ var Lava = {
 
 	/**
 	 * @param {string} title
-	 * @param config
-	 * @param properties
+	 * @param [config]
+	 * @param [properties]
 	 * @returns {Lava.widget.Standard}
 	 */
 	createWidget: function(title, config, properties) {
@@ -434,12 +462,11 @@ var Lava = {
 	 * Behaves like a widget constructor, but accepts raw (unextended) widget config.
 	 * Extends the config and creates the widget instance with the right class.
 	 *
-	 * @constructor
 	 * @param {_cWidget} config
 	 * @param {Lava.widget.Standard} widget
 	 * @param {Lava.view.View} parent_view
-	 * @param {Object} properties
 	 * @param {Lava.system.Template} template
+	 * @param {Object} properties
 	 * @returns {Lava.widget.Standard}
 	 */
 	WidgetConfigExtensionGateway: function(config, widget, parent_view, template, properties) {
@@ -463,10 +490,10 @@ var Lava = {
 
 	ClassLocatorGateway: function(config, widget, parent_view, template, properties) {
 
-		var target = Lava.view_manager.locateTarget(widget, config.class_locator.locator_type, config.class_locator.name);
-		if (Lava.schema.DEBUG && (!target || !target.isWidget)) Lava.t("[ClassLocatorGateway] Target is null or not a widget");
+		var name_source = Lava.view_manager.locateTarget(widget, config.class_locator.locator_type, config.class_locator.name);
+		if (Lava.schema.DEBUG && (!name_source || !name_source.isWidget)) Lava.t("[ClassLocatorGateway] Target is null or not a widget");
 
-		var constructor = target.getPackageConstructor(config.real_class);
+		var constructor = name_source.getPackageConstructor(config.real_class);
 		return new constructor(config, widget, parent_view, template, properties);
 
 	},
@@ -536,7 +563,7 @@ var Lava = {
 	/**
 	 * Feature of the current binding system:
 	 * sometimes, a view may be rendered with dirty bindings. They will be refreshed in the next refresh loop.
-	 * This may happen during widget inject() outside of normal App lifecycle, and user may forget to call Lava.refreshViews().
+	 * This may happen during widget inject() outside of normal App lifecycle, and developer may forget to call Lava.refreshViews().
 	 */
 	scheduleRefresh: function() {
 

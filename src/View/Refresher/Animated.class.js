@@ -92,13 +92,7 @@ Lava.define(
 
 	hasAnimations: function() {
 
-		for (var name in this._animations_by_template_guid) {
-
-			return true;
-
-		}
-
-		return false;
+		return !Firestorm.Object.isEmpty(this._animations_by_template_guid);
 
 	}
 

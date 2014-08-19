@@ -1,122 +1,136 @@
 
 /** @typedef {number} _tGUID */
 
-function _cClassData() {
+_cClassData = {
 
 	/**
 	 * Short name of the class (without namespace)
 	 * @type {string}
 	 */
-	this.name = '';
+	name: '',
 
 	/**
 	 * Long name (including namespace)
 	 * @type {string}
 	 */
-	this.path = '';
+	path: '',
 
 	/**
 	 * The raw class object, from which it was constructed
 	 * @type {Object}
 	 */
-	this.source_object = {};
+	source_object: {},
 
 	/**
 	 * How many parents does it have (via Extends directive)
 	 * @type {number}
 	 */
-	this.hierarchy_index = 0;
+	hierarchy_index: 0,
 
 	/**
 	 * When Extends is present - a string with full name of the parent
 	 * @type {string}
 	 */
-	this.extends = null;
+	extends: null,
 
 	/** @type {Array.<string>} */
-	this.implements = [];
+	implements: [],
 
 	/**
 	 * Class data of parent
 	 * @type {_cClassData}
 	 */
-	this.parent_class_data = null;
+	parent_class_data: null,
 
 	/**
 	 * List of full paths to classes in the hierarchy, with this one being the last.
 	 * @type {Array.<string>}
 	 */
-	this.hierarchy_paths = [];
+	hierarchy_paths: [],
 
 	/**
 	 * Used to build the class constructor.
 	 * @type {Object}
 	 */
-	this.skeleton = {};
+	skeleton: {},
 
 	/**
 	 * For each function (and sometimes array) reference in skeleton - holds the actual data
 	 * @type {Array}
 	 */
-	this.references = [];
+	references: [],
 
 	/**
 	 * Holds shared objects
 	 * @type {Object}
 	 */
-	this.shared = {};
+	shared: {},
 
 	/**
 	 * Temporary counter for class serialization
 	 * @type {number}
 	 */
-	this.own_references_count = 0;
+	own_references_count: 0,
 
-	this.instanceOf = function(class_name) {};
-}
+	instanceOf: function(class_name) {}
+};
 
-function _iEventTicket() {
+_iEventTicket = {
 
-	this.remove = function() {};
+	remove: function() {}
 
-}
+};
 
-function _cEnumerableEventArgs() {
+_cEnumerableEventArgs = {
 
-	this.uids = [];
-	this.values = [];
-	this.names = [];
+	uids: [],
+	values: [],
+	names: []
 
-}
+};
 
-function _cTranslatableString() {
+_cTranslatableString = {
 
-	this.type = 'translate';
-	this.value = '';
-	this.description = '';
-	this.context = '';
+	type: 'translate',
+	value: '',
+	description: '',
+	context: ''
 
-}
+};
 
-function _cTranslatablePlural() {
+_cTranslatablePlural = {
 
-	this.type = 'ntranslate';
+	type: 'ntranslate',
 	/** @type {Array.<string>} */
-	this.value = [];
-	this.description = '';
-	this.context = '';
+	value: [],
+	description: '',
+	context: ''
 
-}
+};
 
-function _cScopeForeach() {
+_cScopeForeach = {
 
-	this.create_own_enumerable = false;
+	create_own_enumerable: false,
 	/**
 	 * @type {?string}
 	 */
-	this.after_refresh_callback = null;
+	after_refresh_callback: null
 
-}
+};
+
+_tVisitor = {
+	enter: function(walker, block_type, block) {},
+	leave: function(walker, block_type, block) {},
+	enterRegion: function(walker, region_name) {},
+	leaveRegion: function(walker, region_name) {},
+	visitView: function(walker, node) {},
+	visitWidget: function(walker, node) {},
+	visitString: function(walker, node) {},
+	visitInclude: function(walker, node) {},
+	visitStaticValue: function(walker, node) {},
+	visitStaticEval: function(walker, node) {},
+	visitStaticTag: function(walker, node) {}
+};
 
 /** @typedef {function(x)} _tTransitionCallback */
 

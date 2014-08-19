@@ -6,13 +6,21 @@
 
 var Firestorm = {
 
+	/** @ignore */
 	schema: null,
+	/** @ignore */
 	Environment: null,
+	/** @ignore */
 	DOM: null,
+	/** @ignore */
 	Element: null,
+	/** @ignore */
 	String: null,
+	/** @ignore */
 	Array: null,
+	/** @ignore */
 	Object: null,
+	/** @ignore */
 	Date: null,
 
 	KNOWN_EXCEPTIONS: null,

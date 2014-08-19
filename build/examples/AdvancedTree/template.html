@@ -12,7 +12,7 @@
 			x:event:click="$tree_example.expand_collapse('tree_right', false)">Collapse</button>
 		<div class="clearfix"></div>
 
-		{* left tree is a standard widget *}
+		{* left tree is a standard widget without modifications *}
 		<div style="margin-right: 10px" class="tree-example-container">
 			<x:widget extends="FolderTree" id="tree_left">
 				<assign name="records">#ExamplesApp.tree_records</assign>
@@ -22,36 +22,14 @@
 			</x:widget>
 		</div>
 
-		{* copy of a parent's include with changed refresher *}
 		<div class="tree-example-container">
 			<x:widget extends="FolderTree" id="tree_right">
 				<assign name="records">#ExamplesApp.tree_records</assign>
-				<template role="include" name="node_children">
-					{$if(node.children.length && $tree{is_expanded})}
-						<x:refresher>{class: 'Default'}</x:refresher>{*H:'Default' refresher has no animation support*}
-						<x:container_config>
-							{
-								class: "Emulated",
-								options: {
-									appender: 'AfterPrevious'
-								}
-							}
-						</x:container_config>
-						<x:assign name="pad">
-							{literal:}
-								(foreach_index == count - 1)
-									? pad + '<div class="lava-tree-pad"></div>'
-									: pad + '<div class="lava-tree-pad-line"></div>'
-							{:literal}
-						</x:assign>
-						<x:assign name="level">@parent->level + 1</x:assign>
-						<div x:type="container" class="lava-tree-container">
-							{#foreach(node.children) as=node}
-								{>$tree.node}
-							{/foreach}
-						</div>
-					{/if}
-				</template>
+				<edit_template name="node_children">
+					<task type="known" name="replace_config_option" node_type="View" condition="node.refresher">
+						<assign path="refresher.class">"Default"</assign>{*H:Change refresher to 'Default' - without animation support*}
+					</task>
+				</edit_template>
 				<script x:equiv="options" type="application/json">
 					{use_meta_storage: true}
 				</script>

@@ -15,18 +15,24 @@ Lava.define(
 	},
 
 	_properties: {
+		// navigation tree to the left
 		api_tree: null,
+		// another navigation tree - for Firestorm API
+		firestorm_api_tree: null,
+		// current class descriptors (which are selected in the nav tree)
 		descriptor: null,
 		extended_descriptor: null,
+		// how to display the members: grouped by class or all in one table
+		// @todo not implemented
 		member_grouping: true,
-		meta_storage: null,
+		meta_storage: null
 
 		//_all_methods: null, // Enumerable
 		//_all_members: null, // Enumerable
 
-		is_show_inherited: true,
-		is_show_mixins: true,
-		is_group_members: true
+		//is_show_inherited: true,
+		//is_show_mixins: true,
+		//is_group_members: true
 	},
 
 	_event_handlers: {
@@ -35,13 +41,15 @@ Lava.define(
 		group_header_click: '_onGroupHeaderClicked'
 	},
 
-	_broadcast_handlers: {
-		on_filter_changed: '_onFilterConditionChanged'
-	},
+	//_broadcast_handlers: {
+	//	on_filter_changed: '_onFilterConditionChanged'
+	//},
 
 	API_DIR: 'api/',
 
+	// one global instance
 	_class_content_widget: null,
+	// name -> short descriptor, for loading classes by hash
 	_tree_hash: null,
 
 	init: function(config, widget, parent_view, template, properties) {
@@ -50,8 +58,9 @@ Lava.define(
 			hash = {};
 
 		this._properties.api_tree = Examples.makeLive(api_tree_source);
+		this._properties.firestorm_api_tree = Examples.makeLive(firestorm_api_tree_source);
 
-		function prepareTree(collection, parent) {
+		/*function prepareTree(collection, parent) {
 			collection.each(function(record){
 				record.set('parent', parent);
 				if (record.get('type') == 'folder') {
@@ -62,9 +71,9 @@ Lava.define(
 					prepareTree(children, record);
 				}
 			})
-		}
+		}*/
 
-		this._tree_hash = hash;
+		this._tree_hash = hash; // @todo
 		this._class_content_widget = Lava.createWidget('ClassContent');
 		this.ContentLoader$init(config, widget, parent_view, template, properties);
 
@@ -94,12 +103,6 @@ Lava.define(
 			var meta_record = this._properties.meta_storage.get(template_arguments[0].get('guid'));
 			meta_record.set('is_expanded', !meta_record.get('is_expanded'));
 		}
-
-	},
-
-	_onGroupHeaderClicked: function(dom_event_name, dom_event, view, template_arguments) {
-
-		// @todo
 
 	},
 
@@ -173,8 +176,10 @@ Lava.define(
 
 		if (this._properties.descriptor != item) {
 
+			// it may be null if the page has just loaded and no class was selected
 			if (this._properties.descriptor) {
 				this._properties.descriptor.set('is_selected', false);
+				// each time a class is selected - the expanded state of all members needs to be forgotten
 				this._properties.meta_storage.destroy();
 			}
 			this._set('meta_storage', new Lava.data.MetaStorage(this._shared.meta_storage_config));
@@ -199,7 +204,15 @@ Lava.define(
 
 	},
 
+	_onGroupHeaderClicked: function(dom_event_name, dom_event, view, template_arguments) {
+
+		// @todo
+
+	},
+
 	_onFilterConditionChanged: function() {
+
+		// @todo
 
 	}
 

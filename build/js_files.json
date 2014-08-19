@@ -12,6 +12,7 @@
 		"Core.js",
 		"ScopeManager.js",
 		"Algorithms/Sorting/mergeSort.js",
+		"TemplateWalker.js",
 		"ClassManager.js"
 	],
 	"parsers": [

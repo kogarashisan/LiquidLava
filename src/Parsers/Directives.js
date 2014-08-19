@@ -42,7 +42,8 @@ Lava.parsers.Directives = {
 		broadcast: '_widgetTagBroadcast',
 		storage: '_widgetTagStorage',
 		resources: '_widgetTagResources',
-		default_events: '_widgetTagDefaultEvents'
+		default_events: '_widgetTagDefaultEvents',
+		edit_template: '_widgetTagEditTemplate'
 	},
 
 	_resource_tag_actions: {
@@ -55,6 +56,11 @@ Lava.parsers.Directives = {
 		ntranslate: '_resourceTagTranslatePlural'
 	},
 
+	_known_edit_tasks: {
+		replace_config_option: '_editTaskSetConfigOptions',
+		add_class: '_editTaskAddClass'
+	},
+
 	RESOURCE_ARRAY_ALLOWED_TYPES: ['string', 'boolean', 'null', 'number'],
 
 	/**
@@ -62,6 +68,7 @@ Lava.parsers.Directives = {
 	 */
 	_is_processing_define: false,
 	_current_widget_title: null, // the title of the widget in x:define directive, which is currently being processed
+	_widget_directives_stack: [],
 
 	/**
 	 * @param {_cRawDirective} raw_directive
@@ -353,6 +360,157 @@ Lava.parsers.Directives = {
 
 	},
 
+	/**
+	 * @param {_tRawTemplate} raw_template
+	 * @returns {Array.<*>}
+	 */
+	_parseTaskArguments: function(raw_template) {
+
+		var blocks = Lava.parsers.Common.asBlockType(raw_template, 'tag'),
+			i = 0,
+			count = blocks.length,
+			temp,
+			item,
+			result = [];
+
+		for (; i < count; i++) {
+
+			switch (blocks[i].name) {
+				case 'template':
+					item = blocks[i].content ? Lava.parsers.Common.compileTemplate(blocks[i].content) : [];
+					break;
+				case 'expression':
+					if (Lava.schema.DEBUG && (!blocks[i].content || blocks[i].content.length != 1)) Lava.t('malformed task arguments');
+					temp = Lava.ExpressionParser.parse(blocks[i].content[0]);
+					if (Lava.schema.DEBUG && temp.length != 1) Lava.t('malformed task arguments: multiple expressions');
+					item = temp[0];
+					break;
+				case 'options':
+					item = Lava.parseOptions(blocks[i].content[0]);
+					break;
+				default:
+					Lava.t('edit_template: unknown or malformed task argument');
+			}
+
+			result.push(item);
+		}
+
+		return result;
+
+	},
+
+	_evalTaskHandler: function(src) {
+		var handler = null;
+		eval(src);
+		if (Lava.schema.DEBUG && typeof(handler) != 'function') Lava.t('malformed task handler');
+		return handler;
+	},
+
+	/**
+	 * @param {_cRawTag} raw_tag
+	 * @param {_cWidget} config_storage
+	 * @param {Object} roles_storage
+	 */
+	_widgetTagEditTemplate: function(raw_tag, config_storage, roles_storage) {
+
+		if (Lava.schema.DEBUG && (!raw_tag.attributes || !raw_tag.attributes['name'])) Lava.t('Malformed edit_template tag');
+
+		var tasks = Lava.parsers.Common.asBlockType(raw_tag.content, 'tag'),
+			i = 0,
+			count = tasks.length,
+			source_widget_config,
+			template,
+			extends_,
+			widget_tag,
+			content_blocks,
+			block_index,
+			block_count,
+			blocks_hash,
+			task_arguments,
+			handler;
+
+		if (raw_tag.attributes['source_widget']) {
+
+			source_widget_config = Lava.widgets[raw_tag.attributes['source_widget']];
+			if (Lava.schema.DEBUG && (!source_widget_config || source_widget_config.is_extended)) Lava.t('edit_template: source widget does not exist or is already extended');
+			if (Lava.schema.DEBUG && (!source_widget_config.includes || !source_widget_config.includes[raw_tag.attributes.name])) Lava.t('[edit_template] source widget does not have the include: ' + raw_tag.attributes.name);
+			template = Firestorm.clone(source_widget_config.includes[raw_tag.attributes.name]);
+
+		} else {
+
+			if (('includes' in config_storage) && config_storage.includes[raw_tag.attributes.name]) {
+
+				template = config_storage.includes[raw_tag.attributes.name];
+
+			} else {
+
+				widget_tag = this._widget_directives_stack[this._widget_directives_stack.length - 1];
+				if (!widget_tag) Lava.t('edit_template: unable to find source template');
+
+				extends_ = widget_tag.attributes.extends;
+				while (true) {
+					if (!extends_) Lava.t('edit_template: unable to find source template');
+					source_widget_config = Lava.widgets[extends_];
+					if (Lava.schema.DEBUG && (!source_widget_config || source_widget_config.is_extended)) Lava.t('edit_template: source widget does not exist or is already extended');
+					if (source_widget_config.includes && source_widget_config.includes[raw_tag.attributes.name]) {
+						template = source_widget_config.includes[raw_tag.attributes.name];
+						break;
+					}
+					extends_ = source_widget_config.extends;
+				}
+
+			}
+			if (!template) Lava.t();
+			template = Firestorm.clone(template);
+
+		}
+
+		for (; i < count; i++) { // collection of <task> tags
+
+			if (Lava.schema.DEBUG && (!tasks[i].attributes || tasks[i].name != 'task')) Lava.t('Malformed edit_template task');
+
+			task_arguments = null;
+			blocks_hash = null;
+
+			if (tasks[i].content) {
+				blocks_hash = {};
+				content_blocks = Lava.parsers.Common.asBlockType(tasks[i].content, 'tag');
+				for (block_index = 0, block_count = content_blocks.length; block_index < block_count; block_index++) {
+					blocks_hash[content_blocks[block_index].name] = content_blocks[block_index];
+				}
+				if ('arguments' in blocks_hash) {
+					if (Lava.schema.DEBUG && !blocks_hash['arguments'].content) Lava.t('edit_template: malformed task arguments');
+					task_arguments = this._parseTaskArguments(blocks_hash['arguments'].content);
+				}
+			}
+
+			switch (tasks[i].attributes.type) {
+				case 'manual':
+					if (Lava.schema.DEBUG && (!blocks_hash['handler'] || !blocks_hash['handler'].content || blocks_hash['handler'].content.length != 1)) Lava.t('edit_template: malformed task handler');
+					handler = this._evalTaskHandler(blocks_hash['handler'].content[0]);
+					handler(template, tasks[i], blocks_hash, task_arguments);
+					break;
+				case 'traverse':
+					if (Lava.schema.DEBUG && (!blocks_hash['handler'] || !blocks_hash['handler'].content || blocks_hash['handler'].content.length != 1)) Lava.t('edit_template: malformed task handler');
+					handler = eval('(' + blocks_hash['handler'].content[0] + ')');
+					if (Lava.schema.DEBUG && typeof(handler) != 'object') Lava.t('edit_template: wrong handler for traverse task');
+					handler.arguments = task_arguments;
+					Lava.TemplateWalker.walkTemplate(template, handler);
+					break;
+				case 'known':
+					if (Lava.schema.DEBUG && !(tasks[i].attributes.name in this._known_edit_tasks)) Lava.t('[edit_template] unknown task: ' + tasks[i].attributes.name);
+					this[this._known_edit_tasks[tasks[i].attributes.name]](template, tasks[i], blocks_hash, task_arguments);
+					break;
+				default:
+					Lava.t('edit_template: task requires the "type" attribute');
+			}
+
+		}
+
+		this._store(config_storage, 'includes', raw_tag.attributes.as || raw_tag.attributes.name, template);
+
+	},
+
 	// end: actions for widget tags and tag roles
 	////////////////////////////////////////////////////////////////////
 
@@ -621,6 +779,8 @@ Lava.parsers.Directives = {
 			name,
 			path;
 
+		this._widget_directives_stack.push(raw_directive);
+
 		for (; i < count; i++) {
 
 			tag = tags[i];
@@ -706,6 +866,8 @@ Lava.parsers.Directives = {
 
 		if (!widget_config['class']) widget_config['class'] = Lava.schema.widget.DEFAULT_EXTENSION_GATEWAY;
 		if (!widget_config.extender_type) widget_config.extender_type = Lava.schema.widget.DEFAULT_EXTENDER;
+
+		this._widget_directives_stack.pop();
 
 		return widget_config;
 
@@ -995,7 +1157,7 @@ Lava.parsers.Directives = {
 	/**
 	 * @param {(_cView|_cWidget)} config
 	 * @param {string} name
-	 * @param {_cRawDirective} raw_tag
+	 * @param {(_cRawDirective|_cRawTag)} raw_tag
 	 */
 	_parseObject: function(config, name, raw_tag) {
 
@@ -1086,7 +1248,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
-	 * @param {_cRawDirective} raw_directive
+	 * @param {(_cRawDirective|_cRawTag)} raw_directive
 	 * @param {_cWidget} widget_config
 	 */
 	_xresources: function(raw_directive, widget_config) {
@@ -1197,6 +1359,97 @@ Lava.parsers.Directives = {
 	_xdefault_events: function(raw_directive, widget_config) {
 
 		this._parseDefaultEvents(raw_directive, widget_config);
+
+	},
+
+	_selectFirst: function(template, node_type, condition) {
+
+		var filter,
+			visitor = {},
+			target = null;
+
+		filter = condition
+			? new Function('node', 'return !!(' + condition + ')')
+			: function() { return true; };
+
+		visitor['visit' + node_type] = function(walker, node) {
+			if (filter(node)) {
+				target = node;
+				walker.interrupt();
+			}
+		};
+
+		Lava.TemplateWalker.walkTemplate(template, visitor);
+
+		return target;
+
+	},
+
+	/**
+	 * @param {_tTemplate} template
+	 * @param {_cRawTag} task_tag
+	 * @param {Object.<string,_cRawTag>} content_blocks_hash
+	 * @param {Array.<*>} task_arguments
+	 */
+	_editTaskSetConfigOptions: function(template, task_tag, content_blocks_hash, task_arguments) {
+
+		if (Lava.schema.DEBUG && !task_tag.attributes.node_type) Lava.t('_editTaskSetConfigOptions: malformed attributes');
+
+		var assign = content_blocks_hash.assign,
+			set_path,
+			set_var,
+			set_value,
+			i = 0,
+			count,
+			current_segment,
+			type;
+
+		if (Lava.schema.DEBUG && (!assign || !assign.attributes || !assign.attributes['path'] || !assign.content || assign.content.length != 1))
+			Lava.t('_editTaskSetConfigOptions: malformed or missing assign');
+
+		current_segment = this._selectFirst(template, task_tag.attributes.node_type, task_tag.attributes.condition);
+
+		if (!current_segment) Lava.t('_editTaskSetConfigOptions: target not found');
+
+		set_path = content_blocks_hash.assign.attributes['path'].split('.');
+		set_var = set_path.pop();
+		set_value = Lava.parseOptions(content_blocks_hash.assign.content[0]);
+
+		for (count = set_path.length; i < count; i++) {
+			if (!(set_path[i] in current_segment)) {
+				current_segment[set_path[i]] = {};
+			} else if (Lava.schema.DEBUG) {
+				type = Firestorm.getType(current_segment[set_path[i]]);
+				if (type != 'null' && type != 'object') Lava.t('_editTaskSetConfigOptions: trying to set a path, which is not an object');
+			}
+			current_segment = current_segment[set_path[i]]
+		}
+
+		current_segment[set_var] = set_value;
+
+	},
+
+	_editTaskAddClass: function(template, task_tag, content_blocks_hash, task_arguments) {
+
+		if (Lava.schema.DEBUG && !task_tag.attributes.node_type) Lava.t('_editTaskAddClass: malformed attributes');
+
+		var target,
+			i = 0;
+
+		target = this._selectFirst(template, task_tag.attributes.node_type, task_tag.attributes.condition);
+
+		if (!target || !target.container) Lava.t('_editTaskAddClass: target not found or does not have a container');
+
+		if (target.container.class_bindings) {
+			while (i in target.container.class_bindings) {
+				i++;
+			}
+			target.container.class_bindings[i] = task_arguments[0];
+		} else {
+			target.container.class_bindings = {
+				0: task_arguments[0]
+			};
+		}
 
 	}
 

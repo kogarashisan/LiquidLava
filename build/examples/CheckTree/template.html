@@ -3,22 +3,28 @@
 		<div style="position: relative;height: 320px;width: 350px;overflow: auto;border: 1px solid gray;">
 			<x:widget extends="FolderTree">
 				<assign name="records">$tree_example.records</assign>
-				<template role="include" name="node_body">
-					<div class="lava-tree-node" x:type="view" unselectable="on" x:classes="'level-' + level">
-						<checkbox style="float: right">
-							<x:assign name="is_checked">node.is_checked</x:assign>
-							<x:assign name="is_indeterminate">node.is_indeterminate</x:assign>
-							<x:roles>$tree_example._checkbox</x:roles>
-						</checkbox>
-						{#expression(pad) escape_off}{/expression}{* remove whitespace
-						*}<i class="lava-tree-expander" x:type="view"
-							x:event:click="$tree.node_click(node)"
-							x:classes="'lava-tree' + ((foreach_index == @parent->count - 1) ? '-bottom' : '-middle')
-								+ (node.children.length ? ($tree{is_expanded} ? '-expanded' : '-collapsed') : '-node')"></i>
-						{>$tree.icon}
-						{>$tree.node_title}
-					</div>
-				</template>
+				<edit_template name="node_body">
+					<task type="traverse">
+						<script x:equiv="handler">
+							({
+								arguments: null, /*H:Will be assigned by framework, see the &lt;arguments&gt; below*/
+								visitView: function(walker, node) {
+									node.template = this.arguments[0].concat(node.template); /*H:Prepend template with checkbox to the first view's content*/
+									walker.interrupt();
+								}
+							})
+						</script>
+						<arguments>
+							<template>
+								<checkbox style="float: right">
+									<x:assign name="is_checked">node.is_checked</x:assign>
+									<x:assign name="is_indeterminate">node.is_indeterminate</x:assign>
+									<x:roles>$tree_example._checkbox</x:roles>
+								</checkbox>
+							</template>
+						</arguments>
+					</task>
+				</edit_template>
 				<script x:equiv="options" type="application/json">
 					{use_meta_storage: true}
 				</script>

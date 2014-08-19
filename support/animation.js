@@ -1,50 +1,50 @@
 
-function _cAnimator() {
+_cAnimator = {
 
-	this.type = '';
+	type: ''
 
-}
+};
 
 /**
  * @extends _cAnimator
  */
-function _cAnimator_Units() {
+_cAnimator_Units = {
 
 	/**
 	 * 'height' or 'width'
 	 * @type {string}
 	 */
-	this.property = null;
+	property: null,
 	/**
 	 * Starting value
 	 * @type {number}
 	 */
-	this.from = null;
+	from: null,
 	/**
 	 * Distance
 	 * @type {number}
 	 */
-	this.delta = null;
+	delta: null,
 	/**
 	 * Will be appended to style value.
 	 * @type {string}
 	 */
-	this.unit = 'px';
+	unit: 'px'
 
-}
+};
 
-function _cAnimation() {
+_cAnimation = {
 
 	/**
 	 * @type {number}
 	 */
-	this.duration = null;
+	duration: null,
 
-	this.transition = 'linear';
+	transition: 'linear',
 
 	/**
 	 * @type {Array.<_cAnimator>}
 	 */
-	this.animators = [];
+	animators: []
 
-}
+};

@@ -35,7 +35,7 @@ Lava.Core = {
 	 * @param {string} event_name
 	 * @param {function} fn
 	 * @param {Object} context
-	 * @returns {_iEventTicket}
+	 * @returns {_iListener}
 	 */
 	addGlobalHandler: function(event_name, fn, context) {
 

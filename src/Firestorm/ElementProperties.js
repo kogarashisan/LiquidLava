@@ -1,5 +1,10 @@
 
-Firestorm.extend(Firestorm.Element, {
+Firestorm.extend(
+Firestorm.Element,
+/**
+ * @lends Firestorm.Element
+ */
+{
 
 	setProperty: function(element, name, value) {
 

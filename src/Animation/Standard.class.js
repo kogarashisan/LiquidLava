@@ -127,6 +127,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * @param [started_time]
+	 */
 	start: function(started_time) {
 
 		var now = new Date().getTime();

@@ -23,10 +23,6 @@ Lava.ClassManager = {
 
 	_root: {},
 
-	/**
-	 * Members of the "Class" property of any class.
-	 * @lends _cClassData#
-	 */
 	ClassData: {
 
 		instanceOf: function(class_name) {
@@ -82,7 +78,7 @@ Lava.ClassManager = {
 		if ('Extends' in source_object) {
 
 			if (Lava.schema.DEBUG && typeof(source_object.Extends) != 'string') Lava.t('Extends: string expected. ' + class_path);
-			class_data.extends = source_object.Extends;
+			class_data.extends = /** @type {string} */ source_object.Extends;
 			parent_data = this._sources[source_object.Extends];
 			class_data.parent_class_data = parent_data;
 
@@ -205,10 +201,10 @@ Lava.ClassManager = {
 	},
 
 	/**
-	 * @param child_skeleton
 	 * @param {_cClassData} child_data
-	 * @param parent_skeleton
+	 * @param child_skeleton
 	 * @param {_cClassData} parent_data
+	 * @param parent_skeleton
 	 * @param {boolean} is_root
 	 * @param {number=} references_offset Also acts as a sign of 'implements' mode
 	 */
@@ -263,11 +259,13 @@ Lava.ClassManager = {
 
 	_disassemble: function(class_data, source_object, hierarchy_index, is_root) {
 
-		var skeleton = {},
+		var name,
+			skeleton = {},
 			value,
-			type;
+			type,
+			skeleton_value;
 
-		for (var name in source_object) {
+		for (name in source_object) {
 
 			if (is_root && (this._reserved_members.indexOf(name) != -1 || (name in class_data.shared))) {
 
@@ -280,48 +278,49 @@ Lava.ClassManager = {
 
 			switch (type) {
 				case 'object':
-					skeleton[name] = {
+					skeleton_value = {
 						type: 'object',
 						skeleton: this._disassemble(class_data, value, hierarchy_index, false)
 					};
 					break;
 				case 'function':
-					skeleton[name] = {type: 'function', index: class_data.references.length};
+					skeleton_value = {type: 'function', index: class_data.references.length};
 					class_data.references.push(value);
 					break;
 				case 'array':
 					if (value.length == 0) {
-						skeleton[name] = {type: 'inlineArray', is_empty: true};
+						skeleton_value = {type: 'inlineArray', is_empty: true};
 					} else if (this.INLINE_SIMPLE_ARRAYS && this.isInlineArray(value)) {
-						skeleton[name] = {type: 'inlineArray', value: value};
+						skeleton_value = {type: 'inlineArray', value: value};
 					} else {
-						skeleton[name] = {type: 'sliceArray', index: class_data.references.length};
+						skeleton_value = {type: 'sliceArray', index: class_data.references.length};
 						class_data.references.push(value);
 					}
 					break;
 				case 'null':
-					skeleton[name] = {type: 'null'};
+					skeleton_value = {type: 'null'};
 					break;
 				case 'undefined':
-					skeleton[name] = {type: 'undefined'};
+					skeleton_value = {type: 'undefined'};
 					break;
 				case 'boolean':
-					skeleton[name] = {type: 'boolean', value: value};
+					skeleton_value = {type: 'boolean', value: value};
 					break;
 				case 'number':
-					skeleton[name] = {type: 'number', value: value};
+					skeleton_value = {type: 'number', value: value};
 					break;
 				case 'string':
-					skeleton[name] = {type: 'string', value: value};
+					skeleton_value = {type: 'string', value: value};
 					break;
 				case 'regexp':
-					skeleton[name] = {type: 'regexp', value: value};
+					skeleton_value = {type: 'regexp', value: value};
 					break;
 				default:
 					Lava.t("[Class system] Unsupported property type in source object: " + type);
 					break;
-
 			}
+
+			skeleton[name] = skeleton_value;
 
 		}
 

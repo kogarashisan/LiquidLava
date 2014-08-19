@@ -17,6 +17,7 @@ Lava.define(
 
 		var element = this._input_container.getDOMElement();
 		// https://mootools.lighthouseapp.com/projects/2706/tickets/578-elementgetselected-behaves-differently-between-ffie-safari
+		//noinspection BadExpressionStatementJS
 		element.selectedIndex;
 		this.set('value', element.value);
 

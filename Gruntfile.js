@@ -60,23 +60,24 @@ module.exports = function(grunt) {
 				text = text.replace(/\t/g, '  ');
 			}
 
-			var tooltip_pattern = type == 'xml' ? /\{\*H\:([\s\S]+?)\*\}/g : /\/\*H\:([\s\S]+?)\*\//g;
 			var tooltips = {};
 			var max_tooltip_index = 0;
 			var tooltip_text = '';
 			var overlay_text = '';
 
 			// extract regions with tooltips
-			text = text.replace(tooltip_pattern, function(full_comment, tooltip_text, index, source) {
+			[/\{\*H\:([\s\S]+?)\*\}/g, /\/\*H\:([\s\S]+?)\*\//g].forEach(function(tooltip_pattern){
+				text = text.replace(tooltip_pattern, function(full_comment, tooltip_text, index, source) {
 
-				// count the lines before the tooltip
-				var tooltip_index = source.substr(0, index).split('\n').length;
-				if (tooltip_index > max_tooltip_index) {
-					max_tooltip_index = tooltip_index;
-				}
-				tooltips[tooltip_index - 1] = tooltip_text;
-				return '';
+					// count the lines before the tooltip
+					var tooltip_index = source.substr(0, index).split('\n').length;
+					if (tooltip_index > max_tooltip_index) {
+						max_tooltip_index = tooltip_index;
+					}
+					tooltips[tooltip_index - 1] = tooltip_text;
+					return '';
 
+				});
 			});
 
 			if (max_tooltip_index > 0 || ('0' in tooltips)) {

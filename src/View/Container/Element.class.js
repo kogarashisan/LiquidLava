@@ -487,13 +487,12 @@ Lava.define(
 
 	},
 
-	wrap: function(html) {
+	_renderOpenTag: function() {
 
 		var classes = this._renderClasses(),
 			style = this._renderStyles(),
 			properties_string = '',
-			name,
-			result;
+			name;
 
 		// view calls this function in render(), and before that it must wake up itself and it's container
 		if (Lava.schema.DEBUG && this._is_sleeping) Lava.t();
@@ -524,23 +523,25 @@ Lava.define(
 
 		}
 
-		result = "<" + this._tag_name + " id=\"" + this._id + "\" "
+		return "<" + this._tag_name + " id=\"" + this._id + "\" "
 			// + this._writeEvents()
 			+ properties_string; //+ ">"
 
-		if (this._is_void) {
+	},
 
-			if (Lava.schema.DEBUG && html) Lava.t('Trying to wrap content in void tag');
+	wrap: function(html) {
 
-			result += "/>";
+		if (Lava.schema.DEBUG && this._is_void) Lava.t('Trying to wrap content in void tag');
 
-		} else {
+		return this._renderOpenTag() + ">" + html + "</" + this._tag_name + ">";
 
-			result += ">" + html + "</" + this._tag_name + ">";
+	},
 
-		}
+	renderVoid: function() {
 
-		return result;
+		if (Lava.schema.DEBUG && !this._is_void) Lava.t('Trying to render non-void container as void');
+
+		return this._renderOpenTag() + "/>";
 
 	},
 

@@ -7619,6 +7619,7 @@ footer .container {background: #f7f5fa;}
 .lava-tree .icon-folder {background-image: url(data:image/gif;base64,R0lGODlhFwAUAKIAAAAAAP/////lAP+DAP///wAAAAAAAAAAACH5BAEAAAQALAAAAAAXABQAAAM2OLpM/vCxqaIllF6Y9cZdKI6hYJ5oijJqq7JuLMByS9fpjZ/6Pi++HDDIGxJ/iqOptyM5n6EEADs=);}
 .lava-tree .icon-file {background-image: url(data:image/gif;base64,R0lGODlhEQAUANUAAAAAAP////r6+vX19fPz8+zs7Obm5uXl5eHh4eDg4La2trW1tampqaenp6ampqKiop+fn52dnZmZmZOTk4WFhXBwcFNTU1FRUUJCQj8/Pz4+Pj09PTk5OTg4ODMzMzAwMCgoKP///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAACEALAAAAAARABQAAAZ/wMpDwiAai41JaBl6FEADqDRKQCyYjEEksO1yA4KDYpkNmM9o8OFaTrsFiUnWwLlY7pYLBnImONpuaQMMgIFng3N1eHh6fIgDhoKEA3R2i3l7AY+RaI+Vl5iOk5yHo6SapqSbHh0aGa+vGx8UqIWRg04Duru8uwUPQoTCw8PAQQA7);}
 .lava-tree .icon-class {background-image: url('data:image/gif;base64,R0lGODlhEwAUAOYAAAAAAP///7NEq/eO8bdMs9Vv0/Ga799/3/ee9/Sc9PSd9Pex9//E//3C/fnD+XAScqZEp8pky9Nu1NNw1dx53eKI4+WN5vew+Pi2+t+P4pxytqN5vGJ8r2d9o15wjSxkty1mt2x/nGx/m2p9mG1/mmt9l3KDnY+dsZCesitoui9puiZpvl6T1198oSl1yCp3ySp4yVaa32yq62aQu4PB+H637oTB+Ie/84nC9YzC9YbG+6PW/6TW/6XZ/02e12i69Wm69Wu++FaAivzsk/fli/zqkProkPvpkvbhgvXggvXghPbhhffTWPLSY/LTZPfZaPbZaf/RQf7QQee9Pv/TR//SSNu2QvXOUvTOUvPOVdGySfnVXX9yRsyYCcqaFcSWF9WkIN+wKcmfJbiSIt6vKtCkKN+xLMadJ+i8OMGdMf///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAGoALAAAAAATABQAAAebgGqCg4SFhoNTVoeLamZDSGWMhWFHSVBMYJKCZEZLTVdVX4YHhGhFSk5ZUl2GFg4Vg1pET1hRY1xqHC1CGgMNCwoRg2lbVF6CHYIbGQwXCRMQhGJngyGDBhgIEg+SIoQUBQKaJIUEmmoj54YmhT7nJ4U5NZoohDg8OjGaHiUzNzs2frhQcU5GDxpAXoBQp4ZFEBgfGApakULiokAAOw==');}
+.lava-tree .icon-object {background-image: url(data:image/gif;base64,R0lGODlhEwAUAPcAAAAAAP///2qJrm6NtGOAonueyHOVvG2NsprH+n+kznSWvZvJ+4u04Yat2JzJ+5zK+4+35Yuz357N/ZzK+oiw2oGnz53L+omx2kNXa6DO/aDP/Z7M+3+kyaLQ/qHO+6LS/3icvKPT/qXU/6LR+6fV/3abumWEnmiHoqLR+qbX/6XV/meIonacuafY/6bW/KnZ/6na/6ra/3GWsUpic2B/lF16j6rc/63d/63f/63g/67g/22TqGGClFt6i2KClFNufU5ndnWbsGuOoWWGmGB/kF9+j1t4iK/i/7Dj/7Hj/5HG4X2rwnuov3KbsU1peEhicJjP64y/2Ia3z4W1zoKxyYCvxn+txX+sxH+txH2qwXunvm2UqWqQpGmOop/Y9ZfM6JDD3o/C3Ie30IW1zX6rwn2pwH2qwHWftG+Xq2ySpl+AkVx8jVVzgmqOoWOFlmCBkl9/kF5+j01ndXCVqW6TpmqOoGiLnWCAkVFsejNETX2mvHOZrW2RpGuPoWOElWKCk2CAkFp4h0xlckpib2WGl1t5iLHk/7Ll/2eNn1p7i4OzyoKyyG+Yq2qRozxRW01odEhhbWOFlU5pdSc0OrPn/3Sgs3ektnSfsUpkb1Vzf1l3g3imuHSgsU5qdFRxfFd1gEplbrju/7nu/7vx/7zy/771/8D4/////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAAKcALAAAAAATABQAAAj/AE8JHDiQAwaCCBMqoGRKVIKECQ3YGBUCgYZQhgpAPEXARqkUDjaIfBCCFJIDBAWgKNVigciXIh2oKOViwKkZH5Lo6PAA5ksLGl7cyLFCUiYaFUYcyWDhpwQbHiiwuMQICB1NoGo0iIEjwwQJMEhEkNFoU5Qtcuq8IfQJkwkGLw6JgFACkSVFZKTskNPmzh0ekTw9OnEBRBdOi7CUySJmb1+/d3z46QSpkiIrWTIzdgwZciE1VJZoztyYb+c7bwKtsUJm9OYffYh0Tr269WgpTQTpsVMEkF/arDVrGeMFzak8f4IMiYNadXAmVb5McULQkZA9buA4N4NFCZhEGwfxGJljpMeVMEq4bCSIp08aKGfWJ5zE5snGgAA7);}
 
 .api-node-selected {background-color: #DFEAFF !important;}
 
@@ -7650,10 +7651,12 @@ footer .container {background: #f7f5fa;}
 .api-description-td {padding-top: 0 !important;}
 .api-description-td p {margin:0; padding-top: 0.4em}
 .api-flag-td {width: 1px; white-space: nowrap}
-.api-keyword {font-weight: bold; color: rgb(0,0,128);}
+.api-keyword {color: rgb(0,0,128);}
 .api-string {color: rgb(0,128,0);}
 .api-highlight-gray {color: gray;font-weight: bold;}
 .api-highlight-empty {font-weight: bold;}
+
+.api-tree-header {margin: 0.5em 0;padding: 0.5em 1em;background-image: linear-gradient(to bottom,#4B5057 0,#1B1D25 100%);background-repeat: repeat-x;color: rgb(255,128,0);font-weight: bold;border-radius: 5px;}
 
 /*
 This file contains essential classes for some standard widgets.

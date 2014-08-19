@@ -2,87 +2,95 @@
 /**
  * @interface
  */
-function _iObservable() {
+_iObservable = {
 
-	this.on = function(event_name, fn, context, listener_args) {};
+	/**
+	 * @param event_name
+	 * @param fn
+	 * @param context
+	 * @param [listener_args]
+	 */
+	on: function(event_name, fn, context, listener_args) {}
 
-}
+};
 
 /**
  * Implemented by most classes inside the scope folder
  * @interface
  * @implements _iObservable
  */
-function _iValueContainer() {
+_iValueContainer = {
 
 	// fires:
 	//   waits_refresh
 	//   changed
 	//   refreshed
 
-	this.getValue = function() {};
+	getValue: function() {},
 
-	this.isValueContainer = true;
+	isWaitingRefresh: function() {},
 
-	this.level = 0;
+	isValueContainer: true,
 
-}
+	level: 0
+
+};
 
 /**
  * Implemented by classes inside the Views folder.
  * @interface
  */
-function _iViewHierarchyMember() {
+_iViewHierarchyMember = {
 
-	this.render = function() {};
+	render: function() {},
 
-	this.broadcastRemove = function() {};
+	broadcastRemove: function() {},
 
-	this.broadcastInDOM = function() {};
+	broadcastInDOM: function() {},
 
-	this.broadcastSleep = function() {};
+	broadcastSleep: function() {},
 
-	this.broadcastWakeup = function() {};
+	broadcastWakeup: function() {}
 
-}
-
-/**
- * @interface
- */
-function _iListener() {}
+};
 
 /**
  * @interface
  */
-function _iProperties() {
-
-	this.get = function(name) {};
-
-	this.set = function(name, value) {};
-
-}
+_iListener = {};
 
 /**
  * @interface
  */
-function iContainer() {
+_iProperties = {
 
-	this.wrap = function(html)  {};
-	this.setHTML = function(html)  {};
-	this.appendHTML = function(html)  {};
-	this.prependHTML = function(html)  {};
-	this.insertHTMLAfter = function(html)  {};
-	this.insertHTMLBefore = function(html)  {};
-	this.remove = function()  {};
+	get: function(name) {},
 
-	this.informInDOM = function()  {};
-	this.informRemove = function()  {};
-	this.isInDOM = function() {};
+	set: function(name, value) {}
 
-	this.release = function()  {};
-	this.refresh = function()  {};
-	this.sleep = function()  {};
-	this.wakeup = function()  {};
-	this.destroy = function()  {};
+};
 
-}
+/**
+ * @interface
+ */
+iContainer = {
+
+	wrap: function(html)  {},
+	setHTML: function(html)  {},
+	appendHTML: function(html)  {},
+	prependHTML: function(html)  {},
+	insertHTMLAfter: function(html)  {},
+	insertHTMLBefore: function(html)  {},
+	remove: function()  {},
+
+	informInDOM: function()  {},
+	informRemove: function()  {},
+	isInDOM: function() {},
+
+	release: function()  {},
+	refresh: function()  {},
+	sleep: function()  {},
+	wakeup: function()  {},
+	destroy: function()  {}
+
+};

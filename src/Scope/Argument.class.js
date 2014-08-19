@@ -144,7 +144,7 @@ Lava.define(
 
 		if (Lava.schema.DEBUG && !widget.isWidget) Lava.t("Tried to call a modifier from non-widget view");
 
-		return widget;
+		return /** @type {Lava.widget.Standard} */ widget;
 
 	},
 

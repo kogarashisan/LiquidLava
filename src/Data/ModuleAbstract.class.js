@@ -58,9 +58,9 @@ Lava.define(
 
 	destroy: function() {
 
-		var name,
-			i = 0,
-			count = this._records.length;
+		var name;
+			//i = 0,
+			//count = this._records.length;
 
 		/*for (; i < count; i++) {
 
