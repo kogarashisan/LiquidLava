@@ -1,3 +1,8 @@
+/**
+ * Requires JSDoc 3.3.0-alpha9
+ * @file
+ */
+
 var template = require('jsdoc/template'),
     fs = require('jsdoc/fs'),
     path = require('jsdoc/path'),

@@ -1,23 +1,7 @@
 
 /**
- * @interface
- */
-_iObservable = {
-
-	/**
-	 * @param event_name
-	 * @param fn
-	 * @param context
-	 * @param [listener_args]
-	 */
-	on: function(event_name, fn, context, listener_args) {}
-
-};
-
-/**
  * Implemented by most classes inside the scope folder
  * @interface
- * @implements _iObservable
  */
 _iValueContainer = {
 
@@ -25,6 +9,11 @@ _iValueContainer = {
 	//   waits_refresh
 	//   changed
 	//   refreshed
+
+	/**
+	 * @type {function}
+	 */
+	on: null,
 
 	getValue: function() {},
 
@@ -58,17 +47,6 @@ _iViewHierarchyMember = {
  * @interface
  */
 _iListener = {};
-
-/**
- * @interface
- */
-_iProperties = {
-
-	get: function(name) {},
-
-	set: function(name, value) {}
-
-};
 
 /**
  * @interface

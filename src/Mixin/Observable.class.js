@@ -4,7 +4,6 @@ Lava.define(
 /**
  * Provides support for events
  * @lends Lava.mixin.Observable#
- * @implements _iObservable
  */
 {
 

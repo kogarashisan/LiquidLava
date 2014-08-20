@@ -5,7 +5,6 @@ Lava.define(
  * Provides the `get()` and `set()` methods, and fires changed events
  * @lends Lava.mixin.Properties#
  * @extends Lava.mixin.Observable
- * @implements _iProperties
  */
 {
 

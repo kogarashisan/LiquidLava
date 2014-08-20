@@ -1185,9 +1185,9 @@ var Lava = {
 	 * */
 	ELEMENT_ID_PREFIX: 'e',
 	SYSTEM_ID_REGEX: /^e?\\d+$/,
-	VALID_PROPERTY_NAME_REGEX: /^[a-zA-Z_\$][a-zA-Z0-9_\$]*$/,
+	VALID_PROPERTY_NAME_REGEX: /^[a-zA-Z\_\$][a-zA-Z0-9\_\$]*$/,
 	EMPTY_REGEX: /^\s*$/,
-	VALID_LABEL_REGEX: /^[A-Za-z_][A-Za-z_0-9]*$/,
+	VALID_LABEL_REGEX: /^[A-Za-z\_][A-Za-z\_0-9]*$/,
 
 	/** @returns {boolean} */
 	DEFAULT_LESS: function(a, b) { return a < b; },
@@ -1562,10 +1562,10 @@ var Lava = {
 
 	ClassLocatorGateway: function(config, widget, parent_view, template, properties) {
 
-		var target = Lava.view_manager.locateTarget(widget, config.class_locator.locator_type, config.class_locator.name);
-		if (Lava.schema.DEBUG && (!target || !target.isWidget)) Lava.t("[ClassLocatorGateway] Target is null or not a widget");
+		var name_source = Lava.view_manager.locateTarget(widget, config.class_locator.locator_type, config.class_locator.name);
+		if (Lava.schema.DEBUG && (!name_source || !name_source.isWidget)) Lava.t("[ClassLocatorGateway] Target is null or not a widget");
 
-		var constructor = target.getPackageConstructor(config.real_class);
+		var constructor = name_source.getPackageConstructor(config.real_class);
 		return new constructor(config, widget, parent_view, template, properties);
 
 	},
@@ -4637,13 +4637,13 @@ Lava.parsers.Common = {
 	},
 
 	// example: @accordion.accordion_panel
-	_locator_regex: /^[\$\#\@]([a-zA-Z_][a-zA-Z0-9_]*)\.([a-zA-Z_][a-zA-Z0-9_]*)/,
-	_identifier_regex: /^[a-zA-Z_][a-zA-Z0-9_]*/,
+	_locator_regex: /^[\$\#\@]([a-zA-Z\_][a-zA-Z0-9\_]*)\.([a-zA-Z\_][a-zA-Z0-9\_]*)/,
+	_identifier_regex: /^[a-zA-Z\_][a-zA-Z0-9\_]*/,
 
 	// overridden includes have '$' in their name.
 	// Example: $tree.Tree$node
-	_include_locator_regex: /^[\$\#\@]([a-zA-Z_][a-zA-Z0-9_]*)\.([a-zA-Z_][\$a-zA-Z0-9_]*)/,
-	_include_identifier_regex: /^[a-zA-Z_][\$a-zA-Z0-9_]*/,
+	_include_locator_regex: /^[\$\#\@]([a-zA-Z\_][a-zA-Z0-9\_]*)\.([a-zA-Z\_][\$a-zA-Z0-9\_]*)/,
+	_include_identifier_regex: /^[a-zA-Z\_][\$a-zA-Z0-9\_]*/,
 
 	_view_config_property_setters: {
 		id: 'setViewConfigId',
@@ -4818,8 +4818,6 @@ Lava.parsers.Common = {
 		}
 
 		if ('class_locator' in raw_block) {
-			// @todo тут все не так.
-			// по конфигу это только для виджета. Екстендер требует чтобы там был виджет. А это вид!
 			config.class_locator = raw_block.class_locator;
 			config.real_class = raw_block.real_class;
 			config['class'] = Lava.schema.view.DEFAULT_CLASS_LOCATOR_GATEWAY;
@@ -9366,7 +9364,6 @@ Lava.define(
 /**
  * Provides support for events
  * @lends Lava.mixin.Observable#
- * @implements _iObservable
  */
 {
 
@@ -9520,7 +9517,6 @@ Lava.define(
  * Provides the `get()` and `set()` methods, and fires changed events
  * @lends Lava.mixin.Properties#
  * @extends Lava.mixin.Observable
- * @implements _iProperties
  */
 {
 
@@ -10318,7 +10314,6 @@ Lava.define(
 	},
 
 	/**
-	 *
 	 * @param [started_time]
 	 */
 	start: function(started_time) {
@@ -17026,14 +17021,12 @@ Lava.define(
 
 	},
 
-	// @todo разбить на 2 функции - с html и без
-	wrap: function(html) {
+	_renderOpenTag: function() {
 
 		var classes = this._renderClasses(),
 			style = this._renderStyles(),
 			properties_string = '',
-			name,
-			result;
+			name;
 
 		// view calls this function in render(), and before that it must wake up itself and it's container
 		if (Lava.schema.DEBUG && this._is_sleeping) Lava.t();
@@ -17064,23 +17057,25 @@ Lava.define(
 
 		}
 
-		result = "<" + this._tag_name + " id=\"" + this._id + "\" "
+		return "<" + this._tag_name + " id=\"" + this._id + "\" "
 			// + this._writeEvents()
 			+ properties_string; //+ ">"
 
-		if (this._is_void) {
+	},
 
-			if (Lava.schema.DEBUG && html) Lava.t('Trying to wrap content in void tag');
+	wrap: function(html) {
 
-			result += "/>";
+		if (Lava.schema.DEBUG && this._is_void) Lava.t('Trying to wrap content in void tag');
 
-		} else {
+		return this._renderOpenTag() + ">" + html + "</" + this._tag_name + ">";
 
-			result += ">" + html + "</" + this._tag_name + ">";
+	},
 
-		}
+	renderVoid: function() {
 
-		return result;
+		if (Lava.schema.DEBUG && !this._is_void) Lava.t('Trying to render non-void container as void');
+
+		return this._renderOpenTag() + "/>";
 
 	},
 
@@ -18799,7 +18794,7 @@ Lava.define(
 			// This is the only view, that can have void element containers.
 			// Check is done to speed up the rendering process.
 			result = (this._container.isElementContainer && this._container.isVoid())
-				? this._container.wrap()
+				? this._container.renderVoid()
 				: this._container.wrap(this._renderContents());
 
 		} else {
