@@ -23,9 +23,11 @@ Lava.define(
 		descriptor: null,
 		extended_descriptor: null,
 		// how to display the members: grouped by class or all in one table
-		// @todo not implemented
-		member_grouping: true,
-		meta_storage: null
+		member_grouping: true, // @todo not implemented
+		meta_storage: null,
+
+		sugar_descriptor: null,
+		support_descriptor: null
 
 		//_all_methods: null, // Enumerable
 		//_all_members: null, // Enumerable
@@ -39,6 +41,11 @@ Lava.define(
 		node_click: '_onNodeClick',
 		member_row_click: '_onMemberRowClick',
 		group_header_click: '_onGroupHeaderClicked'
+	},
+
+	_modifiers: {
+		render_params: '_renderParams',
+		render_method_extended: '_renderMethodExtended'
 	},
 
 	//_broadcast_handlers: {
@@ -75,6 +82,16 @@ Lava.define(
 
 		this._tree_hash = hash; // @todo
 		this._class_content_widget = Lava.createWidget('ClassContent');
+		this._properties.sugar_descriptor = new Lava.mixin.Properties({
+			type: 'object',
+			name: 'Sugar',
+			title: 'Sugar'
+		});
+		this._properties.support_descriptor = new Lava.mixin.Properties({
+			type: 'object',
+			name: 'Support',
+			title: 'Support'
+		});
 		this.ContentLoader$init(config, widget, parent_view, template, properties);
 
 	},
@@ -82,17 +99,22 @@ Lava.define(
 	_onNodeClick: function(dom_event_name, dom_event, view, template_arguments) {
 
 		var node = template_arguments[0];
-		if (node.get('type') == 'class') {
+
+		if (node.get('type') == 'class' || node.get('type') == 'object') {
 
 			this._selectItem(dom_event_name, dom_event, view, template_arguments);
 
-		} else {
+		} else if (node.get('type') == 'folder') {
 
 			node.set('is_expanded', !node.get('is_expanded'));
 
+		} else {
+
+			Lava.t();
+
 		}
 
-		dom_event.preventDefault(); // to prevent text selection
+		dom_event.preventDefault(); // @todo remove this to enable hash change
 
 	},
 
@@ -106,45 +128,57 @@ Lava.define(
 
 	},
 
+	_loadGroup: function(chain) {
+
+		var group_count = chain.length,
+			group_index = 0,
+			descriptors,
+			i,
+			count;
+
+		for (; group_index < group_count; group_index++) {
+			descriptors = chain[group_index].descriptors;
+			for (i = 0, count = descriptors.length; i < count; i++) {
+				descriptors[i].guid = Lava.guid++;
+				descriptors[i] = new Lava.mixin.Properties(descriptors[i]);
+				//all_member_descriptors.push(descriptors[i]);
+			}
+		}
+
+	},
+
 	_onItemLoaded: function(text, item) {
 
 		var extended_descriptor = eval('(' + text + ')'),
 			method_chain = extended_descriptor.method_chain,
 			member_chain = extended_descriptor.member_chain,
-			group_index = 0,
-			group_count,
+			events = extended_descriptor.events,
+			support_objects = extended_descriptor.support_objects,
 			i = 0,
 			count,
-			descriptors,
 			all_method_descriptors = [],
 			all_member_descriptors = [];
 
 		item.set('extended_descriptor', extended_descriptor);
 
-		if (method_chain) {
-			for (group_count = method_chain.length; group_index < group_count; group_index++) {
-				descriptors = method_chain[group_index].descriptors;
-				for (i = 0, count = descriptors.length; i < count; i++) {
-					descriptors[i].guid = Lava.guid++;
-					descriptors[i] = new Lava.mixin.Properties(descriptors[i]);
-					all_method_descriptors.push(descriptors[i]);
-				}
+		if (method_chain) this._loadGroup(method_chain);
+		//if (member_chain) this._loadGroup(member_chain);
+
+		if (events) {
+			for (i = 0, count = events.length; i < count; i++) {
+				events[i].guid = Lava.guid++;
+				events[i] = new Lava.mixin.Properties(events[i]);
 			}
 		}
 
-		if (member_chain) {
-			for (group_count = member_chain.length; group_index < group_count; group_index++) {
-				descriptors = member_chain[group_index].descriptors;
-				for (i = 0, count = descriptors.length; i < count; i++) {
-					descriptors[i].guid = Lava.guid++;
-					descriptors[i] = new Lava.mixin.Properties(descriptors[i]);
-					all_member_descriptors.push(descriptors[i]);
-				}
+		if (support_objects) {
+			for (i = 0, count = support_objects.length; i < count; i++) {
+				if (support_objects[i].method_chain) this._loadGroup(support_objects[i].method_chain);
 			}
 		}
 
-		item.set('all_methods', new Lava.system.Enumerable(all_method_descriptors));
-		item.set('all_members', new Lava.system.Enumerable(all_member_descriptors));
+		//item.set('all_methods', new Lava.system.Enumerable(all_method_descriptors));
+		//item.set('all_members', new Lava.system.Enumerable(all_member_descriptors));
 
 	},
 
@@ -213,6 +247,27 @@ Lava.define(
 	_onFilterConditionChanged: function() {
 
 		// @todo
+
+	},
+
+	_renderParams: function(params, table_class) {
+
+		return ApiCommon.renderParamsTable(params, table_class);
+
+	},
+
+	_renderMethodExtended: function(descriptor, table_class) {
+
+		var result = '';
+		if (descriptor.get('params')) {
+			result += '<b class="api-member-extended-header">Arguments</b>';
+			result += ApiCommon.renderParamsTable(descriptor.get('params'), table_class);
+		}
+		if (descriptor.get('returns')) {
+			if (result) result += '<br/>';
+			result += ApiCommon.renderReturns(descriptor.get('returns'));
+		}
+		return result;
 
 	}
 

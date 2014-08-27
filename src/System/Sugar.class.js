@@ -20,7 +20,7 @@ Lava.define(
 	},
 
 	/**
-	 * When root is parsed as object_map - handlers tag types
+	 * When root is parsed as object_map - handlers for tag types
 	 */
 	_tag_handlers: {
 		template_collection: '_parseTagAsTemplateCollection',
@@ -101,6 +101,8 @@ Lava.define(
 	},
 
 	/**
+	 * Public API for widget directives
+	 *
 	 * @param {_cSugarContentTemplateCollection|_cSugarContentTemplateHash|_cSugarContentObject|_cSugarContentObjectCollection|_cSugarContentObjectHash} schema
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config

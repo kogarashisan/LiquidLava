@@ -1,3 +1,16 @@
+/**
+ * Panel is expanding
+ * @event Lava.widget.Accordion#panel_expanding
+ * @type {Object}
+ * @property {Lava.widget.Standard} panel The panel, which triggered the event
+ */
+
+/**
+ * Panel is collapsing
+ * @event Lava.widget.Accordion#panel_collapsing
+ * @type {Object}
+ * @property {Lava.widget.Standard} panel The panel, which triggered the event
+ */
 
 Lava.define(
 'Lava.widget.Accordion',
@@ -34,6 +47,15 @@ Lava.define(
 	_active_panels: [],
 	_listeners_by_panel_guid: {},
 
+	/**
+	 * @param config
+	 * @param config.options.keep_expanded_on_add If you add another expanded panel to accordion - it's collapsed by default.
+	 * You may set this option to keep it expanded - in this case all expanded panels will be collapsed as soon as any panel is expanded by user.
+	 * @param widget
+	 * @param parent_view
+	 * @param template
+	 * @param properties
+	 */
 	init: function(config, widget, parent_view, template, properties) {
 
 		this._panels = new Lava.system.Enumerable();
@@ -176,14 +198,18 @@ Lava.define(
 
 		}
 
-		this._fire('panel_expanding');
+		this._fire('panel_expanding', {
+			panel: panel
+		});
 
 	},
 
 	_onPanelCollapsing: function(panel) {
 
 		Firestorm.Array.exclude(this._active_panels, panel);
-		this._fire('panel_collapsing');
+		this._fire('panel_collapsing', {
+			panel: panel
+		});
 
 	},
 

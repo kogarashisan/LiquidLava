@@ -51,7 +51,7 @@ Lava.define(
 	_parent_with_container: null,
 
 	/**
-	 * @type {iContainer}
+	 * @type {_iContainer}
 	 */
 	_container: null,
 

@@ -188,6 +188,7 @@ module.exports = function(grunt) {
 
 		registerLink: function(target, descriptor) {
 			if (!(descriptor.page in this._page_links)) throw new Error();
+			if (target in this._links) throw new Error();
 			this._links[target] = descriptor;
 		},
 
@@ -292,6 +293,7 @@ module.exports = function(grunt) {
 							"./build/src/ApiPage.class.js",
 							"./build/src/ExamplesPage.class.js",
 							"./build/src/WidgetsPage.class.js",
+							"./build/src/ApiCommon.js",
 							"./build/temp/site_widgets.js"
 						],
 						dest: './www/js/site.js'
@@ -308,6 +310,6 @@ module.exports = function(grunt) {
 
 	// Note: all tasks depend on previous tasks
 	grunt.registerTask('default', ['buildLava', 'buildIncludes', 'buildExamples', 'buildWeb', 'buildTasksPage', 'concat']);
-	grunt.registerTask('doc', ['jsdocExport', 'buildDoc']);
+	grunt.registerTask('doc', ['jsdocExport', 'buildSugar', 'buildSupport', 'buildDoc']);
 
 };

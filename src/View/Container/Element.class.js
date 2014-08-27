@@ -3,7 +3,7 @@ Lava.define(
 'Lava.view.container.Element',
 /**
  * @lends Lava.view.container.Element#
- * @implements iContainer
+ * @implements _iContainer
  */
 {
 

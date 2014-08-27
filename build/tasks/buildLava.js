@@ -74,6 +74,8 @@ module.exports = function(grunt) {
 				'Lava.widgets = ' + Lava.Serializer.serialize(Lava.widgets) + ';\n'
 				+ 'Lava.sugar_map = ' + Lava.Serializer.serialize(Lava.sugar_map) + ';\n';
 
+			grunt.file.write('./build/temp/lava_widgets.js', compiled_templates);
+
 			// End
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

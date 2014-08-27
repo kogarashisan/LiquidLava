@@ -13,7 +13,7 @@ var _cSugarContentSchemaTypes = {
 
 _cSugarContentTemplate = {
 
-	type: _cSugarContentSchemaTypes.template,
+	type: 'template',
 
 	// optional
 	name: ''
@@ -22,7 +22,7 @@ _cSugarContentTemplate = {
 
 _cSugarContentTemplateCollection = {
 
-	type: _cSugarContentSchemaTypes.template_collection,
+	type: 'template_collection',
 
 	name: '',
 
@@ -32,7 +32,7 @@ _cSugarContentTemplateCollection = {
 
 _cSugarContentTemplateHash = {
 
-	type: _cSugarContentSchemaTypes.template_hash,
+	type: 'template_hash',
 
 	name: '',
 
@@ -42,11 +42,14 @@ _cSugarContentTemplateHash = {
 
 _cSugarContentObject = {
 
-	type: _cSugarContentSchemaTypes.object,
+	type: 'object',
 
 	name: '',
 
-	/** @type {Object.<string, _cSugarAttribute>} */
+	/**
+	 * If root is object - it must not have this setting
+	 * @type {Object.<string, _cSugarAttribute>}
+	 */
 	attribute_mappings: null,
 
 	/** @type {Object.<string, _cSugarObjectTag>} */
@@ -56,7 +59,7 @@ _cSugarContentObject = {
 
 _cSugarContentObjectCollection = {
 
-	type: _cSugarContentSchemaTypes.object_collection,
+	type: 'object_collection',
 
 	name: '',
 
@@ -72,7 +75,7 @@ _cSugarContentObjectCollection = {
 
 _cSugarContentObjectHash = {
 
-	type: _cSugarContentSchemaTypes.object_hash,
+	type: 'object_hash',
 
 	name: '',
 
@@ -88,7 +91,7 @@ _cSugarContentObjectHash = {
 
 _cSugarContentObjectMap = {
 
-	type: _cSugarContentSchemaTypes.object_map,
+	type: 'object_map',
 
 	/**
 	 * @type {Object.<string, (_cSugarContentTemplate|_cSugarContentTemplateCollection|_cSugarContentObject|_cSugarContentObjectCollection)>}

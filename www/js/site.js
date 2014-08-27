@@ -416,9 +416,11 @@ Lava.define(
 		descriptor: null,
 		extended_descriptor: null,
 		// how to display the members: grouped by class or all in one table
-		// @todo not implemented
-		member_grouping: true,
-		meta_storage: null
+		member_grouping: true, // @todo not implemented
+		meta_storage: null,
+
+		sugar_descriptor: null,
+		support_descriptor: null
 
 		//_all_methods: null, // Enumerable
 		//_all_members: null, // Enumerable
@@ -432,6 +434,11 @@ Lava.define(
 		node_click: '_onNodeClick',
 		member_row_click: '_onMemberRowClick',
 		group_header_click: '_onGroupHeaderClicked'
+	},
+
+	_modifiers: {
+		render_params: '_renderParams',
+		render_method_extended: '_renderMethodExtended'
 	},
 
 	//_broadcast_handlers: {
@@ -468,6 +475,16 @@ Lava.define(
 
 		this._tree_hash = hash; // @todo
 		this._class_content_widget = Lava.createWidget('ClassContent');
+		this._properties.sugar_descriptor = new Lava.mixin.Properties({
+			type: 'object',
+			name: 'Sugar',
+			title: 'Sugar'
+		});
+		this._properties.support_descriptor = new Lava.mixin.Properties({
+			type: 'object',
+			name: 'Support',
+			title: 'Support'
+		});
 		this.ContentLoader$init(config, widget, parent_view, template, properties);
 
 	},
@@ -475,17 +492,22 @@ Lava.define(
 	_onNodeClick: function(dom_event_name, dom_event, view, template_arguments) {
 
 		var node = template_arguments[0];
-		if (node.get('type') == 'class') {
+
+		if (node.get('type') == 'class' || node.get('type') == 'object') {
 
 			this._selectItem(dom_event_name, dom_event, view, template_arguments);
 
-		} else {
+		} else if (node.get('type') == 'folder') {
 
 			node.set('is_expanded', !node.get('is_expanded'));
 
+		} else {
+
+			Lava.t();
+
 		}
 
-		dom_event.preventDefault(); // to prevent text selection
+		dom_event.preventDefault(); // @todo remove this to enable hash change
 
 	},
 
@@ -499,45 +521,57 @@ Lava.define(
 
 	},
 
+	_loadGroup: function(chain) {
+
+		var group_count = chain.length,
+			group_index = 0,
+			descriptors,
+			i,
+			count;
+
+		for (; group_index < group_count; group_index++) {
+			descriptors = chain[group_index].descriptors;
+			for (i = 0, count = descriptors.length; i < count; i++) {
+				descriptors[i].guid = Lava.guid++;
+				descriptors[i] = new Lava.mixin.Properties(descriptors[i]);
+				//all_member_descriptors.push(descriptors[i]);
+			}
+		}
+
+	},
+
 	_onItemLoaded: function(text, item) {
 
 		var extended_descriptor = eval('(' + text + ')'),
 			method_chain = extended_descriptor.method_chain,
 			member_chain = extended_descriptor.member_chain,
-			group_index = 0,
-			group_count,
+			events = extended_descriptor.events,
+			support_objects = extended_descriptor.support_objects,
 			i = 0,
 			count,
-			descriptors,
 			all_method_descriptors = [],
 			all_member_descriptors = [];
 
 		item.set('extended_descriptor', extended_descriptor);
 
-		if (method_chain) {
-			for (group_count = method_chain.length; group_index < group_count; group_index++) {
-				descriptors = method_chain[group_index].descriptors;
-				for (i = 0, count = descriptors.length; i < count; i++) {
-					descriptors[i].guid = Lava.guid++;
-					descriptors[i] = new Lava.mixin.Properties(descriptors[i]);
-					all_method_descriptors.push(descriptors[i]);
-				}
+		if (method_chain) this._loadGroup(method_chain);
+		//if (member_chain) this._loadGroup(member_chain);
+
+		if (events) {
+			for (i = 0, count = events.length; i < count; i++) {
+				events[i].guid = Lava.guid++;
+				events[i] = new Lava.mixin.Properties(events[i]);
 			}
 		}
 
-		if (member_chain) {
-			for (group_count = member_chain.length; group_index < group_count; group_index++) {
-				descriptors = member_chain[group_index].descriptors;
-				for (i = 0, count = descriptors.length; i < count; i++) {
-					descriptors[i].guid = Lava.guid++;
-					descriptors[i] = new Lava.mixin.Properties(descriptors[i]);
-					all_member_descriptors.push(descriptors[i]);
-				}
+		if (support_objects) {
+			for (i = 0, count = support_objects.length; i < count; i++) {
+				if (support_objects[i].method_chain) this._loadGroup(support_objects[i].method_chain);
 			}
 		}
 
-		item.set('all_methods', new Lava.system.Enumerable(all_method_descriptors));
-		item.set('all_members', new Lava.system.Enumerable(all_member_descriptors));
+		//item.set('all_methods', new Lava.system.Enumerable(all_method_descriptors));
+		//item.set('all_members', new Lava.system.Enumerable(all_member_descriptors));
 
 	},
 
@@ -606,6 +640,27 @@ Lava.define(
 	_onFilterConditionChanged: function() {
 
 		// @todo
+
+	},
+
+	_renderParams: function(params, table_class) {
+
+		return ApiCommon.renderParamsTable(params, table_class);
+
+	},
+
+	_renderMethodExtended: function(descriptor, table_class) {
+
+		var result = '';
+		if (descriptor.get('params')) {
+			result += '<b class="api-member-extended-header">Arguments</b>';
+			result += ApiCommon.renderParamsTable(descriptor.get('params'), table_class);
+		}
+		if (descriptor.get('returns')) {
+			if (result) result += '<br/>';
+			result += ApiCommon.renderReturns(descriptor.get('returns'));
+		}
+		return result;
 
 	}
 
@@ -788,6 +843,156 @@ Lava.define(
 	}
 
 });
+/**
+ * Shared code between client and server
+ */
+var ApiCommon = {
+
+	/**
+	 * Does not render empty columns
+	 */
+	renderAPITable: function(rows, descriptions, header_titles, options) {
+
+		var column_index,
+			column_count = header_titles.length,
+			row_index,
+			row_count = rows.length,
+			has_content_flags = new Array(column_count),
+			columns_with_content = 0,
+			thead_content = '',
+			tbody_content = '',
+			row_content = '',
+			header_cell_attributes = new Array(column_count),
+			column_cell_attributes = new Array(column_count),
+			description_attributes = '',
+			table_attributes = '';
+
+		if (options) {
+			if (options.header_cell_attributes) header_cell_attributes = options.header_cell_attributes;
+			if (options.column_cell_attributes) column_cell_attributes = options.column_cell_attributes;
+			if (options.description_attributes) description_attributes = options.description_attributes;
+			if (options.table_attributes) table_attributes = options.table_attributes;
+		}
+
+		for (row_index = 0; row_index < row_count; row_index++) {
+			for (column_index = 0; column_index < column_count; column_index++) {
+				if (rows[row_index][column_index]) {
+					has_content_flags[column_index] = true;
+				}
+			}
+		}
+
+		for (column_index = 0; column_index < column_count; column_index++) {
+			if (has_content_flags[column_index]) {
+				thead_content += '<td ' + (header_cell_attributes[column_index] || '') + '>' + header_titles[column_index] + '</td>';
+				columns_with_content++;
+			}
+		}
+
+		for (row_index = 0; row_index < row_count; row_index++) {
+			row_content = '<tr>';
+			for (column_index = 0; column_index < column_count; column_index++) {
+				if (has_content_flags[column_index]) {
+					row_content += '<td ' + (column_cell_attributes[column_index] || '') + '>' + rows[row_index][column_index] + '</td>';
+				}
+			}
+			tbody_content += row_content + '</tr>';
+
+			if (descriptions && descriptions[row_index]) {
+				tbody_content += '<tr><td ' + description_attributes + ' colspan="' + columns_with_content + '">' + descriptions[row_index] + '</td></tr>';
+			}
+		}
+
+		return '<table ' + table_attributes + '>'
+				+ '<thead><tr>' + thead_content + '</tr></thead>'
+				+ '<tbody>' + tbody_content + '</tbody>'
+			+ '</table>';
+
+	},
+
+	escapeTypeNames: function(type_names) {
+
+		var result = [],
+			i = 0,
+			count = type_names.length;
+
+		for (; i < count; i++) {
+			result.push(Firestorm.String.escape(type_names[i], Firestorm.String.HTML_ESCAPE_REGEX))
+		}
+
+		return result;
+
+	},
+
+	renderParamsTable: function(params, table_class) {
+
+		var row_index,
+			row_count = params.length,
+			column_index,
+			column_count = 4,
+			rows = [],
+			descriptions = [],
+			row,
+			cell_content,
+			param,
+			i,
+			count,
+			tmp;
+
+		for (row_index = 0; row_index < row_count; row_index++) {
+			row = [];
+			param = params[row_index];
+			for (column_index = 0; column_index < column_count; column_index++) {
+				cell_content = '';
+				if (param.is_nullable) cell_content += '<img title="Nullable" src="/www/design/nullable.png" />';
+				if (param.is_non_nullable) cell_content += '<img title="Non-nullable" src="/www/design/non-nullable.png" />';
+				if (param.is_optional) cell_content += '[optional]';
+				if (param.is_variable) cell_content += '[...variable]';
+				row.push(cell_content); // 1 - flags
+				row.push(param.name); // 2
+				if (param.type_names) {
+					row.push(this.escapeTypeNames(param.type_names).join('<br/>')); // 3
+				} else {
+					row.push(''); // 3
+				}
+				row.push(param.default_value || ''); // 4
+
+				descriptions.push(param.description);
+			}
+			rows.push(row);
+		}
+
+		return this.renderAPITable(rows, descriptions, ['', 'Name', 'Types', 'Default'], {
+			table_attributes: 'class="' + table_class + '"',
+			header_cell_attributes: ['class="api-flag-td"'],
+			column_cell_attributes: ['class="api-flag-td"', 'class="api-name-column"'],
+			description_attributes: 'class="api-description-td"'
+		});
+
+	},
+
+	renderReturns: function(returns) {
+
+		var result = '<div><b>Returns:</b> ';
+		if (returns.is_nullable) result += '<img title="Nullable" src="/www/design/nullable.png" />';
+		if (returns.is_non_nullable) result += '<img title="Non-nullable" src="/www/design/non-nullable.png" />';
+		if (returns.type_names) {
+			if (returns.type_names.length > 1) {
+				result += '(' + ApiCommon.escapeTypeNames(returns.type_names).join('|') + ')';
+			} else {
+				result += returns.type_names[0] || '';
+			}
+		}
+		result += '</div>';
+		if (returns.description) {
+			result += '<div class="api-pad-left">' + returns.description + '</div>';
+		}
+
+		return result;
+
+	}
+
+};
 Lava.widgets["Example"] = {
 	type: "widget",
 	"class": "Lava.WidgetConfigExtensionGateway",

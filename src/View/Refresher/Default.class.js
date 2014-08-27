@@ -49,7 +49,7 @@ Lava.define(
 	/**
 	 * @param {_cRefresher} config
 	 * @param {Lava.view.Abstract} view
-	 * @param {iContainer} container
+	 * @param {_iContainer} container
 	 */
 	init: function(config, view, container) {
 

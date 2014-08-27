@@ -3,7 +3,7 @@ Lava.define(
 'Lava.view.container.Morph',
 /**
  * @lends Lava.view.container.Morph#
- * @implements iContainer
+ * @implements _iContainer
  *
  * Credits:
  * based on https://github.com/tomhuda/metamorph.js/

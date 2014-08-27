@@ -46,6 +46,12 @@ Lava.modifiers = {
 		if (Lava.schema.DEBUG && typeof(value) != 'boolean') Lava.t("translateBoolean: argument is not boolean type");
 		return Lava.locales[Lava.schema.LOCALE].booleans[+value];
 
+	},
+
+	joinArray: function(array, glue) {
+
+		return array ? array.join(glue) : '';
+
 	}
 
 };

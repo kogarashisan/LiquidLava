@@ -11,6 +11,9 @@
 
 /** @enum {string} */
 _tKnownViewLocatorType = {
+	/**
+	 * test description: Name
+	 */
 	Name: 'Name',
 	Label: 'Label',
 	Id: 'Id'

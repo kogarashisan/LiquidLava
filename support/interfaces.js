@@ -51,7 +51,7 @@ _iListener = {};
 /**
  * @interface
  */
-iContainer = {
+_iContainer = {
 
 	wrap: function(html)  {},
 	setHTML: function(html)  {},

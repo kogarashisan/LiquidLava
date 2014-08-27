@@ -1,3 +1,12 @@
+/*
+DANGER! This file is haunted by ghosts, monsters and aliens!
+Access limited to qualified personnel only!
+
+This is the underground of the Lava framework.
+Get out of here, if you don't want your brain to be eaten!
+P.S.
+Have you seen the skeleton? It's there! (use the search spell: Ctrl+F 'skeleton')
+*/
 
 /*
 directory (short) // for the navigation tree
@@ -6,45 +15,60 @@ directory (short) // for the navigation tree
 	title
 	children: [] // array or short directory and class descriptors
 
-class (short)  // for the navigation tree
+objects and classes (short)  // for the navigation tree
 	type: 'class',
 	name // full class name
 	title // short class name
-	file_path
-	file_name
+	[file_path] // full path, "src/...". some objects do not have paths
+	[file_name] // name with extension
+	description // short summary, from class comment
+
+	// class
 	has_implements: bool
 	'extends' // full class name
 	implements // full class name
 	extends_chain = []
 		extends = string // full class name
 		implements = [<string>] // list of full class names
-	description // short summary, from class comment.
 	is_mixin: bool
-	has_implements: bool
 
-class (extended) // page content
+objects and classes (extended) // page content
 	description // long description, from file
 	method_chain = []
-		class_name // the class in which these methods were defined
-		is_mixin // the owner class is mixin (name starts with "Lava.mixin.*")
-		is_implements // if the block was implemented via Implements directive
+		class_name // CLASS ONLY. the class in which these methods were defined
+		is_mixin // CLASS ONLY. the owner class is mixin (name starts with "Lava.mixin.*")
+		is_implements // CLASS ONLY. if the block was implemented via Implements directive
 		descriptors = [<member_descriptor>]
-	property_chain = []
+	member_chain = []
 		// same format as method_chain
+	events = [] // same as in JSDoc export task
+	properties: [] // widgets only
+		name
+		description
+		lava_type // the name from Lava.types
+		is_nullable
+		is_non_nullable
+		is_private
+		default_value
+	config_options = []
+		// method params from JSDoc export
 
 member descriptor:
+	// for objects
 	name
 	description
 	type // 'function' || 'member'
+	is_private // name starts with '_'
+
+	// for classes
 	is_inherited // all members, that are not defined in current class, are marked as inherited.
 	is_overridden // when member in parent class is overridden with member in child class, the child member receives this flag
-	is_private // name starts with '_'
 	is_implemented // NOT inherited. ember belongs to implemented class
 	is_from_mixin // NOT inherited. Indicates, that the member came from mixin class (from Lava.mixin.*).
 	belongs // the last class in chain which has overridden this member
 	defined // INHERITED. The class which originally defined the member.
 
-	// for function
+	// for methods
 	param_names_string // string with a comma-separated list of parameter names
 	params // taken from exported JSDoc block
 	returns // taken from exported JSDoc block
@@ -53,17 +77,44 @@ member descriptor:
 	is_nullable: bool // INHERITED
 	is_non_nullable: bool // INHERITED
 	is_constant: bool // INHERITED
-	is_shared: bool // INHERITED
+	is_shared: bool // INHERITED. CLASSES ONLY.
 	default_value // is taken from actual code, not from JSDoc comment
 	type_names // taken from JSDoc block
 
  */
 
+var ApiHelper = require('../ApiHelper.js');
+
 module.exports = function(grunt) {
 
 	grunt.registerTask('buildDoc', function() {
 
-		var jsdoc_data;
+		// export Lava and Firestorm. remove members, which should be hidden
+		function exportGlobalContainer(src_object, object_name) {
+			var export_object = Firestorm.Object.copy(src_object);
+			jsdoc_ignored[object_name].forEach(function(name){
+				delete export_object[name];
+			});
+			return exportGlobalObject(object_name, export_object);
+		}
+
+		function postProcessGlobalObject(extended_object_descriptor) {
+			processDescription(extended_object_descriptor);
+			if (extended_object_descriptor.method_chain) {
+				extended_object_descriptor.method_chain[0].descriptors.forEach(function(method_descriptor){
+					processDescription(method_descriptor);
+					if (method_descriptor.returns) processDescription(method_descriptor.returns);
+					if (method_descriptor.params) method_descriptor.params.forEach(function(param) {
+						processDescription(param);
+					});
+				})
+			}
+			if (extended_object_descriptor.member_chain) {
+				extended_object_descriptor.member_chain[0].descriptors.forEach(function(property_descriptor){
+					processDescription(property_descriptor);
+				})
+			}
+		}
 
 		function groupByName(array) {
 			var i = 0, count = array.length, result = {};
@@ -94,6 +145,26 @@ module.exports = function(grunt) {
 
 		}
 
+		// when child and parent method has JSDoc comment, but child is missing some subparameters.
+		// find the parent with longest path and insert new parameter after it
+		function insertMissingParameter(destination, parameter) {
+			var last_parent_index = -1;
+			var longest_path_length = 0;
+			for (var _i = 0, _count = destination.length; _i < _count; _i++) {
+				if (parameter.name.indexOf(destination[_i].name) == 0) {
+					if (longest_path_length <= destination[_i].name.length) {
+						longest_path_length = destination[_i].name.length;
+						last_parent_index = _i;
+					}
+				}
+			}
+			if (last_parent_index != -1) {
+				destination.splice(last_parent_index + 1, 0, parameter);
+			} else {
+				destination.push(parameter);
+			}
+		}
+
 		function inheritMemberDocs(child_descriptor, parent_descriptor) {
 
 			if (child_descriptor.type != parent_descriptor.type) throw new Error();
@@ -104,42 +175,33 @@ module.exports = function(grunt) {
 
 			if (child_descriptor.type == 'function') {
 
-				// @todo validity check: if parent has "returns" and inherited function has JSDoc block - than inherited member also must have "returns"
-				// the following code does the merge, but does not check for JSDoc comment validity
 				if (parent_descriptor.returns) {
 					if (!child_descriptor.returns) {
 						child_descriptor.returns = parent_descriptor.returns;
 					} else {
-
 						inheritDescription(child_descriptor.returns, parent_descriptor.returns, parent_descriptor.belongs);
-						if (parent_descriptor.returns.is_nullable) child_descriptor.returns.is_nullable = true;
-						if (!child_descriptor.returns.type_names && parent_descriptor.returns.type_names) {
-							child_descriptor.returns.type_names = parent_descriptor.returns.type_names;
-						}
-
+						ApiHelper.importVars(child_descriptor.returns, parent_descriptor.returns, ['is_nullable', 'is_non_nullable', 'type_names']);
 					}
 				}
 
+				// JSDoc export task already checks that if the JSDoc comment is present - it has proper count of parameters
+				// and they are listed in the right order
 				if (parent_descriptor.params) {
 					if (!child_descriptor.params) {
-						child_descriptor.params = parent_descriptor.params;
+						child_descriptor.params = parent_descriptor.params.slice();
 					} else {
 
 						// parameters may be listed in wrong/different order
 						var child_hash = groupByName(child_descriptor.params);
 						var parent_hash = groupByName(parent_descriptor.params);
 						for (var name in parent_hash) {
-							if (!(name in child_hash)) throw new Error('doc: inherited function accepts less parameters than it should: ' + name);
-							inheritDescription(child_hash[name], parent_hash[name], parent_descriptor.belongs);
-							if (('default_value' in parent_hash[name]) && !('default_value' in child_hash[name])) {
-								child_hash[name].default_value = parent_hash[name].default_value;
+							if (!(name in child_hash)) {
+								if (child_hash[name].name.indexOf('.') == -1) throw new Error('Child member must have all parameters from parent: ' + child_hash[name]);
+								insertMissingParameter(child_descriptor.params, child_hash[name]);
+							} else {
+								inheritDescription(child_hash[name], parent_hash[name], parent_descriptor.belongs);
+								ApiHelper.importVars(child_hash[name], parent_hash[name], ['default_value','type_names','is_nullable','is_non_nullable','is_optional','is_variable']);
 							}
-							if (('type_names' in parent_hash[name]) && !('type_names' in child_hash[name])) {
-								child_hash[name].type_names = parent_hash[name].type_names;
-							}
-							if (parent_hash[name].is_optional) child_hash[name].is_optional = true;
-							if (parent_hash[name].is_nullable) child_hash[name].is_nullable = true;
-							if (parent_hash[name].is_variable) child_hash[name].is_variable = true;
 						}
 
 					}
@@ -147,16 +209,7 @@ module.exports = function(grunt) {
 
 			} else {
 
-				if (('default_value' in parent_descriptor) && !('default_value' in child_descriptor)) {
-					child_descriptor.default_value = parent_descriptor.default_value;
-				}
-				if (('type_names' in parent_descriptor) && !('type_names' in child_descriptor)) {
-					child_descriptor.type_names = parent_descriptor.type_names;
-				}
-				if (parent_descriptor.is_nullable) child_descriptor.is_nullable = true;
-				if (parent_descriptor.is_non_nullable) child_descriptor.is_non_nullable = true;
-				if (parent_descriptor.is_shared) child_descriptor.is_shared = true;
-				if (parent_descriptor.is_constant) child_descriptor.is_constant = true;
+				ApiHelper.importVars(child_descriptor, parent_descriptor, ['default_value','type_names','is_nullable','is_non_nullable','is_shared','is_constant']);
 
 			}
 
@@ -173,11 +226,10 @@ module.exports = function(grunt) {
 
 			for (var name in source_object) { // leave only own members
 
-				if (name in skeleton) { // name may be Shared or directive, like Extends
+				if (name in skeleton) { // name may be a directive, like Shared or Extends
 
 					longname = cd.path + '#' + name;
-					if (!(longname in jsdoc_data)) throw new Error("JSDoc descriptor is missing for " + cd.path + '#' + name);
-					var jsdoc_descriptor = jsdoc_data[longname];
+					var jsdoc_descriptor = getJSDocDescriptor(longname, (skeleton[name].type == 'function'));
 
 					member_descriptor = {
 						name: name,
@@ -187,15 +239,12 @@ module.exports = function(grunt) {
 						type: (skeleton[name].type == 'function') ? 'function' : 'member'
 					};
 					if (is_mixin) member_descriptor.is_from_mixin = true;
-					if (jsdoc_descriptor.description) member_descriptor.description = jsdoc_descriptor.description;
 
 					if (member_descriptor.type == 'function') {
 
 						if (jsdoc_descriptor.kind != 'function') throw new Error('jsdoc descriptor: function expected, got :' + jsdoc_descriptor.kind);
 
-						if ('params' in jsdoc_descriptor) member_descriptor.params = jsdoc_descriptor.params;
-						if (jsdoc_descriptor.param_names_string) member_descriptor.param_names_string = jsdoc_descriptor.param_names_string;
-						if ('returns' in jsdoc_descriptor) member_descriptor.returns = jsdoc_descriptor.returns;
+						ApiHelper.importVars(member_descriptor, jsdoc_descriptor, ['params', 'param_names_string', 'returns', 'description']);
 
 					} else {
 
@@ -204,34 +253,12 @@ module.exports = function(grunt) {
 						// currently, we take the default value from actual code, rather than JSDoc comment
 						if ('default_value' in jsdoc_descriptor) {
 							//descriptor.default = jsdoc_descriptor.default_value;
-							throw new Error('TODO buildDoc: member with default value in import data: ' + skeleton.path + '#' + name);
+							throw new Error('TODO buildDoc: member with default value in import data: ' + longname);
 						}
-						if (['null','undefined'].indexOf(skeleton[name].type) != -1) {
-							member_descriptor.default_value = '<span class="api-keyword">' + skeleton[name].type + '</span>';
-						} else if (skeleton[name].type == 'boolean') {
-							member_descriptor.default_value = '<span class="api-keyword">' + skeleton[name].value + '</span>';
-						} else if (skeleton[name].type == 'object') {
-							if (Firestorm.Object.isEmpty(skeleton[name].skeleton)) {
-								member_descriptor.default_value = '<span class="api-highlight-empty">{ }</span>';
-							} else {
-								member_descriptor.default_value = '<span class="api-highlight-gray">{ ... }</span>';
-							}
-						} else if (skeleton[name].type == 'inlineArray' && skeleton[name].is_empty) {
-							member_descriptor.default_value = '<span class="api-highlight-empty">[ ]</span>';
-						} else if (skeleton[name].type == 'inlineArray' || skeleton[name].type == 'sliceArray') {
-							member_descriptor.default_value = '<span class="api-highlight-gray">[ ... ]</span>';
-						} else if (skeleton[name].type == 'number') {
-							member_descriptor.default_value = skeleton[name].value;
-						} else if (skeleton[name].type == 'string') {
-							member_descriptor.default_value = '<span class="api-string">' + Firestorm.String.quote(skeleton[name].value) + '</span>';
-						} else if (skeleton[name].type == 'regexp') {
-							member_descriptor.default_value = '<span class="api-highlight-gray">/ ... /</span>';
-						}
+						var is_empty = skeleton[name].is_empty || (skeleton[name].type == 'object' && Firestorm.Object.isEmpty(skeleton[name].skeleton));
+						ApiHelper.setDefaultValue(member_descriptor, skeleton[name].type, skeleton[name].value, is_empty);
 
-						if (jsdoc_descriptor.is_nullable) member_descriptor.is_nullable = true;
-						if (jsdoc_descriptor.is_non_nullable) member_descriptor.is_non_nullable = true;
-						if ('type_names' in jsdoc_descriptor) member_descriptor.type_names = jsdoc_descriptor.type_names;
-						if (jsdoc_descriptor.kind == 'constant') member_descriptor.is_constant = true;
+						ApiHelper.importVars(member_descriptor, jsdoc_descriptor, ['is_nullable', 'is_non_nullable', 'type_names', 'is_constant', 'description']);
 
 					}
 
@@ -250,8 +277,7 @@ module.exports = function(grunt) {
 					if (!(name in source_object)) throw new Error();
 
 					longname = cd.path + '#' + name;
-					if (!(longname in jsdoc_data)) throw new Error("JSDoc descriptor is missing for " + cd.path + '#' + name);
-					jsdoc_descriptor = jsdoc_data[longname];
+					var jsdoc_descriptor = getJSDocDescriptor(longname, false);
 					if (['member', 'constant'].indexOf(jsdoc_descriptor.kind) == -1) throw new Error('jsdoc descriptor: member expected, got :' + jsdoc_descriptor.kind);
 
 					member_descriptor = {
@@ -263,7 +289,6 @@ module.exports = function(grunt) {
 						is_shared: true
 					};
 					if (is_mixin) member_descriptor.is_from_mixin = true;
-					if (jsdoc_descriptor.description) member_descriptor.description = jsdoc_descriptor.description;
 
 					if ('default_value' in jsdoc_descriptor) {
 						//descriptor.default = jsdoc_descriptor.default_value;
@@ -275,9 +300,7 @@ module.exports = function(grunt) {
 						member_descriptor.default_value = '<span class="api-highlight-gray">{ ... }</span>';
 					}
 
-					if (jsdoc_descriptor.is_nullable) member_descriptor.is_nullable = true;
-					if (jsdoc_descriptor.is_non_nullable) member_descriptor.is_non_nullable = true;
-					if ('type_names' in jsdoc_descriptor) member_descriptor.type_names = jsdoc_descriptor.type_names;
+					ApiHelper.importVars(member_descriptor, jsdoc_descriptor, ['is_nullable', 'is_non_nullable', 'type_names', 'description']);
 
 					if (name in result) throw new Error();
 					result[name] = member_descriptor;
@@ -292,11 +315,11 @@ module.exports = function(grunt) {
 				if (last_dot_index != -1) {
 					title = cd.path.substr(last_dot_index + 1) + '#' + name;
 				}
-				LavaBuild.registerLink(cd.path + '#' + name, {
-					hash: 'class=' + cd.path + ';member=' + name,
+				LavaBuild.registerLink(cd.path + '#' + name, { // the name in {@link} directives
+					hash: 'class=' + cd.path + ';member=' + name, // the hash in browser
 					page: 'api',
-					context: 'api',
-					title: title
+					title: title,
+					type: 'member'
 				});
 			}
 
@@ -304,6 +327,7 @@ module.exports = function(grunt) {
 
 		}
 
+		// short descriptors for classes (Lava.define). full_class_name => descriptor
 		var class_descriptors = {};
 		var extended_class_descriptors = {};
 
@@ -312,7 +336,8 @@ module.exports = function(grunt) {
 			var cd = Lava.ClassManager.getClassData(path),
 				member_descriptors_hash = buildMemberDocs(cd),
 				short_class_descriptor = class_descriptors[path],
-				extended_class_descriptor = {};
+				extended_class_descriptor = {},
+				parent_class_ext_descriptor;
 
 			extended_class_descriptors[path] = extended_class_descriptor;
 
@@ -347,6 +372,8 @@ module.exports = function(grunt) {
 				///////////////////////////////
 				if (short_parent_descriptor.has_implements || short_class_descriptor.implements) short_class_descriptor.has_implements = true;
 
+				parent_class_ext_descriptor = extended_class_descriptors[cd.extends];
+
 			}
 
 			extended_class_descriptor.doc_chain = [current_class_member_docs_block];
@@ -369,8 +396,6 @@ module.exports = function(grunt) {
 
 			// inherit member documentation
 			if (cd.extends) {
-
-				var parent_class_ext_descriptor = extended_class_descriptors[cd.extends];
 
 				// copy inheritance blocks from parent's class and filter them to hide overridden members
 				parent_class_ext_descriptor.doc_chain.forEach(function(doc_block) {
@@ -410,6 +435,63 @@ module.exports = function(grunt) {
 
 			exported_paths.push(path);
 
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			// describe _properties
+
+			if (cd.hierarchy_paths.indexOf('Lava.widget.Standard') != -1) {
+				var proeprties_skeleton = cd.skeleton._properties.skeleton;
+				var property_descriptors = cd.shared._property_descriptors;
+				var properties_export = {};
+				for (name in proeprties_skeleton) {
+					var longname = path + '#_properties.' + name;
+					var export_descriptor = {
+						name: name
+					};
+					if (name[0] == '_') export_descriptor.is_private = true;
+					var is_empty = proeprties_skeleton[name].is_empty || (proeprties_skeleton[name].type == 'object' && Firestorm.Object.isEmpty(proeprties_skeleton[name].skeleton));
+					ApiHelper.setDefaultValue(export_descriptor, proeprties_skeleton[name].type, proeprties_skeleton[name].value, is_empty);
+
+					if (longname in jsdoc_data) {
+						var jsdoc_descriptor = getJSDocDescriptor(longname, false);
+						ApiHelper.importVars(export_descriptor, jsdoc_descriptor, ['description', 'type_names']);
+					}
+
+					if (name in property_descriptors) {
+						if (property_descriptors[name].type) export_descriptor.lava_type = property_descriptors[name].type;
+						if (property_descriptors[name].is_nullable) export_descriptor.is_nullable = true;
+					}
+					if (!export_descriptor.is_nullable) export_descriptor.is_non_nullable = true; // properties are non-nullable by default
+					properties_export[name] = export_descriptor;
+				}
+				if (!Firestorm.Object.isEmpty(properties_export)) {
+					extended_class_descriptor.properties_hash = properties_export;
+				}
+			}
+
+			if (parent_class_ext_descriptor && extended_class_descriptor.properties_hash) {
+				for (name in parent_class_ext_descriptor.properties_hash) {
+
+					if (!(name in extended_class_descriptor.properties_hash)) throw new Error();
+					var child_ext_descriptor = extended_class_descriptor.properties_hash[name];
+					var parent_ext_descriptor = parent_class_ext_descriptor.properties_hash[name];
+					inheritDescription(child_ext_descriptor, parent_ext_descriptor, cd.extends);
+					if (!child_ext_descriptor.lava_type && !child_ext_descriptor.type_names) {
+						if (parent_ext_descriptor.lava_type) {
+							child_ext_descriptor.lava_type = parent_ext_descriptor.lava_type;
+						} else if (parent_ext_descriptor.type_names) {
+							child_ext_descriptor.type_names = parent_ext_descriptor.type_names;
+						}
+					}
+					// nullable flags will be inherited by class manager
+				}
+			}
+
+			// end
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			// attach widget names associated with this controller (exported drom buildSugar task)
+			if (global.associated_widgets_by_controller[path]) extended_class_descriptor.associated_widgets = global.associated_widgets_by_controller[path];
+
 		}
 
 		var root = []; // root of the navigation tree. Contains descriptors for folders and classes
@@ -436,6 +518,114 @@ module.exports = function(grunt) {
 			return directories_by_path[dirname];
 		}
 
+		function exportGlobalObject(source_object_name, source_object, file_path) {
+
+			var short_descriptor = {
+				type: 'object',
+				name: source_object_name,
+				title: null
+			};
+			short_descriptor.title = (source_object_name.indexOf('.') != -1)
+				? source_object_name.split('.').pop()
+				: source_object_name;
+
+			if (file_path) {
+				short_descriptor.file_path = file_path;
+				short_descriptor.file_name = file_path.split('/').pop();
+			}
+
+			var jsdoc_descriptor = getJSDocDescriptor(source_object_name, false);
+			if (jsdoc_descriptor.description) short_descriptor.description = jsdoc_descriptor.description;
+
+			var extended_descriptor = {};
+			var property_descriptors = [];
+			var method_descriptors = [];
+
+			if (grunt.file.exists('build/api_docs/' + source_object_name + '.md')) {
+				extended_descriptor.description = grunt.file.read('build/api_docs/' + source_object_name + '.md'); // long description, 'remarks'
+			}
+
+			for (var name in source_object) {
+
+				var longname = source_object_name + '.' + name;
+				jsdoc_descriptor = getJSDocDescriptor(longname, (typeof(source_object[name]) == 'function'));
+
+				var member_descriptor = {
+					name: name,
+					is_private: name[0] == '_',
+					type: (typeof(source_object[name]) == 'function') ? 'function' : 'member'
+				};
+
+				if (member_descriptor.type == 'function') {
+
+					ApiHelper.importVars(member_descriptor, jsdoc_descriptor, ['params', 'param_names_string', 'returns', 'description']);
+					method_descriptors.push(member_descriptor);
+
+				} else {
+
+					if (['member', 'constant'].indexOf(jsdoc_descriptor.kind) == -1) throw new Error('jsdoc descriptor: member expected, got :' + jsdoc_descriptor.kind);
+
+					// currently, we take the default value from actual code, rather than JSDoc comment
+					if ('default_value' in jsdoc_descriptor) {
+						//descriptor.default = jsdoc_descriptor.default_value;
+						throw new Error('TODO buildDoc: member with default value in import data: ' + longname);
+					}
+
+					ApiHelper.setDefaultFromValue(member_descriptor, source_object[name]);
+					ApiHelper.importVars(member_descriptor, jsdoc_descriptor, ['is_nullable', 'is_non_nullable', 'type_names', 'is_constant', 'description']);
+
+					property_descriptors.push(member_descriptor);
+
+				}
+
+				if (property_descriptors.length) {
+					extended_descriptor.member_chain = [{
+						descriptors: Lava.algorithms.sorting[Lava.schema.data.DEFAULT_SORT_ALGORITHM](property_descriptors, function(a, b) {
+							return a.name < b.name;
+						})
+					}];
+				}
+
+				if (method_descriptors.length) {
+					extended_descriptor.method_chain = [{
+						descriptors: Lava.algorithms.sorting[Lava.schema.data.DEFAULT_SORT_ALGORITHM](method_descriptors, function(a, b) {
+							return a.name < b.name;
+						})
+					}];
+				}
+
+				var last_dot_index = source_object_name.lastIndexOf('.');
+				var title = source_object_name + '.' + name;
+				if (last_dot_index != -1) {
+					title = source_object_name.substr(last_dot_index + 1) + '.' + name;
+				}
+				LavaBuild.registerLink(longname, {
+					hash: 'class=' + source_object_name + ';member=' + name,
+					page: 'api',
+					title: title,
+					type: 'member'
+				});
+
+			}
+
+			return {
+				short_descriptor: short_descriptor,
+				extended_descriptor: extended_descriptor
+			}
+
+		}
+
+		var schema_export = {};
+		function exportSchemaPaths(schema_object, path) {
+			for (var name in schema_object) {
+				if (Firestorm.getType(schema_object[name]) == 'object') {
+					exportSchemaPaths(schema_object[name], path ? (path + '.' + name) : name);
+				} else {
+					schema_export[path ? (path + '.' + name) : name] = schema_object[name];
+				}
+			}
+		}
+
 		try { // workaround for a bug in Grunt, https://github.com/gruntjs/grunt/issues/1135
 
 			if (!global.Lava) {
@@ -446,14 +636,27 @@ module.exports = function(grunt) {
 				LavaBuild = global.LavaBuild,
 				fs = require('fs'),
 				groups = grunt.config('js_files'),
-				filelist = groups['classes'].concat(groups['widgets']);
+				filelist = groups['classes'].concat(groups['widgets']),
+				support_names = [];
 
 			// ensure that previous task was run just before this one
 			if ((+new Date(fs.statSync('build/temp/jsdoc_classes_export.js').mtime)) - (+new Date()) > 5000) throw new Error('jsdocExport task was not run?');
-			jsdoc_data = eval('(' + grunt.file.read('build/temp/jsdoc_classes_export.js') + ')');
+			var jsdoc_data = eval('(' + grunt.file.read('build/temp/jsdoc_classes_export.js') + ')');
+			var jsdoc_ignored = eval('(' + grunt.file.read('build/temp/jsdoc_ignored_export.js') + ')');
 
-			LavaBuild.recursiveRemoveDirectory('www/api/');
-			fs.mkdirSync('www/api/');
+			var support_links = eval('(' + grunt.file.read('build/temp/jsdoc_support_links_export.js') + ')');
+			support_links.forEach(function(link_data){
+				LavaBuild.registerLink(link_data.title, link_data);
+				support_names.push(link_data.title);
+			});
+
+			var getJSDocDescriptor = function(longname, is_function) {
+				if (!(longname in jsdoc_data)) throw new Error('JSDoc descriptor is missing for ' + longname);
+				if (jsdoc_data[longname].kind == 'function' ^ is_function) {
+					if (longname.indexOf('Lava.algorithms.sorting.') != 0) throw new Error('doclet is different kind for: ' + longname);
+				}
+				return jsdoc_data[longname];
+			};
 
 			filelist.forEach(function(file_path){
 
@@ -466,7 +669,7 @@ module.exports = function(grunt) {
 					name: path.length ? ('Lava.' + path.join('.').toLowerCase() + '.' + filename) : 'Lava.' + filename,
 					title: filename,
 					file_path: file_path,
-					file_name: filename
+					file_name: filename + '.class.js'
 					//has_implements: null
 					//'extends': null,
 					//implements: null,
@@ -477,8 +680,8 @@ module.exports = function(grunt) {
 				class_descriptors[short_descriptor.name] = short_descriptor;
 
 				if (path.length) {
-					var parent_dit = get_data_dir(path);
-					parent_dit.children.push(short_descriptor);
+					var parent_dir = get_data_dir(path);
+					parent_dir.children.push(short_descriptor);
 				} else {
 					root.push(short_descriptor);
 				}
@@ -490,7 +693,7 @@ module.exports = function(grunt) {
 					// match Lava.define with the comment before the class
 					// [1] = class name
 					// [2] = comment
-					matches = file_content.match(/^\s*Lava\.define\(\s*[\'\"]([^\'\"]+)[\'\"]\,\s*(\/\*\*[\s\S]+?\*\/)\s*\{/);
+					matches = file_content.match(/Lava\.define\(\s*[\'\"]([^\'\"]+)[\'\"]\,\s*(\/\*\*[\s\S]+?\*\/)\s*\{/);
 
 				if (!matches) throw new Error('Doc: wrong content format in ' + file_path + '. Must contain Lava.define with JSDoc comment');
 				if (matches[1] != short_descriptor.name) throw new Error('[Doc] class name does not match the file name: ' + file_path);
@@ -538,9 +741,152 @@ module.exports = function(grunt) {
 
 			}
 
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			// build objects
+
+			var global_object_names = [
+				'Lava.ClassManager',
+				'Lava.Core',
+				'Lava.Cron',
+				'Lava.ScopeManager',
+				'Lava.Serializer',
+				'Lava.TemplateWalker',
+				'Lava.parsers.Common',
+				'Lava.parsers.Directives',
+				'Lava.extenders',
+				'Lava.modifiers',
+				'Lava.resources',
+				'Lava.transitions',
+				'Lava.types',
+				'Lava.schema',
+				'Lava.ObjectParser',
+				'Lava.ExpressionParser',
+				'Lava.TemplateParser'
+			];
+
+			var global_object_filenames = [];
+			for (i = 0, count = global_object_names.length; i < count; i++) {
+				global_object_filenames[i] = global_object_names[i].replace('.parsers.', '.Parsers.').replace('Lava.', 'src/').replace('.', '/').replace(/\/(.*?Parser)$/, function(match, parser_name) {
+					return '/Parsers/' + parser_name;
+				}) + '.js';
+			}
+
+			exportSchemaPaths(Lava.schema, ''); // will populate the schema_export variable
+			var lava_schema_export = schema_export;
+			schema_export = {};
+
+			var global_objects = [
+				Lava.ClassManager,
+				Lava.Core,
+				Lava.Cron,
+				Lava.ScopeManager,
+				Lava.Serializer,
+				Lava.TemplateWalker,
+				Lava.parsers.Common,
+				Lava.parsers.Directives,
+				Lava.extenders,
+				Lava.modifiers,
+				Lava.resources,
+				Lava.transitions,
+				Lava.types,
+				lava_schema_export,
+				{
+					'yy.valid_globals': Lava.ObjectParser.yy.valid_globals
+				},
+				{
+					SEPARATORS: Lava.ExpressionParser.SEPARATORS,
+					parseRaw: Lava.ExpressionParser.parseRaw,
+					parse: Lava.ExpressionParser.parse,
+					parsePath: Lava.ExpressionParser.parsePath,
+					parseWithTailRaw: Lava.ExpressionParser.parseWithTailRaw,
+					parseWithTail: Lava.ExpressionParser.parseWithTail,
+					parseScopeEval: Lava.ExpressionParser.parseScopeEval
+				},
+				{
+					parse: Lava.TemplateParser.parse,
+					parseRaw: Lava.TemplateParser.parseRaw,
+					'yy.CONTROL_ATTRIBUTE_PREFIX': Lava.TemplateParser.yy.CONTROL_ATTRIBUTE_PREFIX
+				}
+			];
+
+			var global_object_extended_descriptors = {};
+			var global_object_short_descriptors = {};
+			for (var i = 0, count = global_object_names.length; i < count; i++) {
+				var temp = exportGlobalObject(global_object_names[i], global_objects[i], global_object_filenames[i]);
+				if (global_object_names[i].indexOf('.parsers.') != -1 || global_object_names[i].substr(-6) == 'Parser') {
+					get_data_dir(['Parsers']).children.push(temp.short_descriptor);
+				} else {
+					root.push(temp.short_descriptor);
+				}
+				global_object_short_descriptors[temp.short_descriptor.name] = temp.short_descriptor;
+				global_object_extended_descriptors[temp.short_descriptor.name] = temp.extended_descriptor;
+			}
+
+			temp = exportGlobalContainer(Lava, 'Lava', 'src/Lava.js');
+			root.push(temp.short_descriptor);
+			global_object_extended_descriptors[temp.short_descriptor.name] = temp.extended_descriptor;
+			global_object_short_descriptors[temp.short_descriptor.name] = temp.short_descriptor;
+
+			temp = exportGlobalObject('Lava.algorithms.sorting', Lava.algorithms.sorting);
+			var dir = get_data_dir(['Algorithms']);
+			dir.children.push(temp.short_descriptor);
+			global_object_extended_descriptors[temp.short_descriptor.name] = temp.extended_descriptor;
+			global_object_short_descriptors[temp.short_descriptor.name] = temp.short_descriptor;
+
+			// end build objects
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			// build Firestorm docs
+
+			exportSchemaPaths(Firestorm.schema, '');
+			var firestorm_schema_export = schema_export;
+			schema_export = {};
+
+			var firestorm_export_object_names = [
+				'Firestorm.Environment',
+				'Firestorm.Element',
+				'Firestorm.DOM',
+				'Firestorm.Array',
+				'Firestorm.String',
+				'Firestorm.Object',
+				'Firestorm.Date',
+				'Firestorm.schema'
+			];
+
+			var firestorm_export_objects = [
+				Firestorm.Environment,
+				Firestorm.Element,
+				Firestorm.DOM,
+				Firestorm.Array,
+				Firestorm.String,
+				Firestorm.Object,
+				Firestorm.Date,
+				firestorm_schema_export
+			];
+
+			var firestorm_nav_root = [];
+			var firestorm_extended_descriptors = {};
+			for (i = 0, count = firestorm_export_object_names.length; i < count; i++) {
+
+				temp = exportGlobalObject(firestorm_export_object_names[i], firestorm_export_objects[i], 'src/' + firestorm_export_object_names[i].replace('.', '/'));
+				firestorm_nav_root.push(temp.short_descriptor);
+				firestorm_extended_descriptors[temp.short_descriptor.name] = temp.extended_descriptor;
+
+			}
+
+			temp = exportGlobalContainer(Firestorm, 'Firestorm', 'src/Firestorm.js');
+			firestorm_nav_root.push(temp.short_descriptor);
+			firestorm_extended_descriptors[temp.short_descriptor.name] = temp.extended_descriptor;
+
+			firestorm_nav_root = Lava.algorithms.sorting[Lava.schema.data.DEFAULT_SORT_ALGORITHM](firestorm_nav_root, function(a, b) {
+				return a.title < b.title;
+			});
+			// end export Firestorm
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
 			// sort navigation tree
-
 			function sortDataTree(array) {
 				array.forEach(function(value) {
 					if (value.type == 'folder' && value.children) value.children = sortDataTree(value.children);
@@ -553,9 +899,33 @@ module.exports = function(grunt) {
 				});
 			}
 			root = sortDataTree(root);
-
 			// end sort
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////
+			// load and attach events
+
+			// full class name => [<event>]
+			var jsdoc_events = eval('(' + grunt.file.read('build/temp/jsdoc_events_export.js') + ')');
+			for (name in jsdoc_events) {
+				if (!(name in extended_class_descriptors)) throw new Error();
+				extended_class_descriptors[name].events = jsdoc_events[name];
+				extended_class_descriptors[name].events.forEach(function(event_descriptor){
+					LavaBuild.registerLink(name + '#event:' + event_descriptor.name, {
+						hash: 'class=' + name + ';event=' + event_descriptor.name,
+						page: 'api',
+						title: event_descriptor.name,
+						type: 'event'
+					});
+				});
+			}
+
+			// end: load and attach events
+			////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////
+			// final stage: format descriptions and write data.
+			// this must be done after all links are known
 
 			for (var name in extended_class_descriptors) {
 
@@ -583,9 +953,24 @@ module.exports = function(grunt) {
 						if (descriptor.type == 'function') {
 							methods.push(descriptor);
 							if (descriptor.returns) processDescription(descriptor.returns);
-							if (descriptor.params) descriptor.params.forEach(function(param) {
-								processDescription(param);
-							});
+							if (descriptor.params) {
+								descriptor.params.forEach(function(param) {
+									processDescription(param);
+								});
+								if (descriptor.name == 'init') {
+									var config_options = [];
+									var new_params = [];
+									descriptor.params.forEach(function(param) {
+										if (param.name.indexOf('config.') == 0) {
+											config_options.push(param);
+										} else {
+											new_params.push(param);
+										}
+									});
+									descriptor.params = new_params;
+									if (config_options.length) extended_class_descriptor.config_options = config_options;
+								}
+							}
 						} else {
 							members.push(descriptor);
 						}
@@ -631,6 +1016,35 @@ module.exports = function(grunt) {
 				if (method_chain.length) extended_class_descriptor.method_chain = method_chain;
 				if (member_chain.length) extended_class_descriptor.member_chain = member_chain;
 
+				if (extended_class_descriptor.events) {
+					extended_class_descriptor.events.forEach(function(event_descriptor){
+						processDescription(event_descriptor);
+						if (event_descriptor.params) {
+							event_descriptor.params.forEach(function(param_descriptor){
+								processDescription(param_descriptor);
+							})
+						}
+					});
+				}
+
+				if (extended_class_descriptor.properties_hash) {
+					var properties_result = [];
+					for (var property_name in extended_class_descriptor.properties_hash) {
+						properties_result.push(extended_class_descriptor.properties_hash[property_name]);
+						processDescription(extended_class_descriptor.properties_hash[property_name]);
+					}
+					extended_class_descriptor.properties = properties_result;
+					delete extended_class_descriptor.properties_hash;
+				}
+
+				if (class_descriptors[name].extends) {
+					var parent_extended_descriptor = extended_class_descriptors[class_descriptors[name].extends];
+					if (parent_extended_descriptor.events) {
+						if (!extended_class_descriptor.events) extended_class_descriptor.events = [];
+						extended_class_descriptor.events = extended_class_descriptor.events.concat(parent_extended_descriptor.events);
+					}
+				}
+
 				grunt.file.write('www/api/' + name + '.js', JSON.stringify(extended_class_descriptor));
 
 			}
@@ -640,6 +1054,28 @@ module.exports = function(grunt) {
 			}
 
 			grunt.file.write('www/js/api_tree.js', 'var api_tree_source = ' + JSON.stringify(root));
+			grunt.file.write('www/js/firestorm_api_tree.js', 'var firestorm_api_tree_source = ' + JSON.stringify(firestorm_nav_root));
+
+			for (name in global_object_short_descriptors) {
+				processDescription(global_object_short_descriptors[name]);
+			}
+
+			for (name in global_object_extended_descriptors) {
+				postProcessGlobalObject(global_object_extended_descriptors[name]);
+				grunt.file.write('www/api/' + name + '.js', JSON.stringify(global_object_extended_descriptors[name]));
+			}
+
+			for (i = 0, count = firestorm_nav_root.length; i < count; i++) {
+				processDescription(firestorm_nav_root[i]);
+			}
+
+			for (name in firestorm_extended_descriptors) {
+				postProcessGlobalObject(firestorm_extended_descriptors[name]);
+				grunt.file.write('www/api/' + name + '.js', JSON.stringify(firestorm_extended_descriptors[name]));
+			}
+
+			//
+			////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			// build reference

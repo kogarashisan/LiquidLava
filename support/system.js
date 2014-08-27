@@ -1,4 +1,17 @@
 
+/**
+ * // A comment for PHPStorm, cause it does not recognize @callback //
+ * @typedef {function(x)} _tTransitionCallback
+ * @ignore
+ */
+
+/**
+ * Animation transition function
+ * @callback _tTransitionCallback
+ * @param {number} x Current animation position, 0 <= x <= 1
+ * @returns {number} The distance value
+ */
+
 /** @typedef {number} _tGUID */
 
 _cClassData = {
@@ -131,11 +144,3 @@ _tVisitor = {
 	visitStaticEval: function(walker, node) {},
 	visitStaticTag: function(walker, node) {}
 };
-
-/** @typedef {function(x)} _tTransitionCallback */
-
-/**
- * Animation transition function
- * @callback _tTransitionCallback
- * @param {number} x The current animation position, 0 <= x <= 1
- */

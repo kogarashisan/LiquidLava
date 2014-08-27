@@ -125,17 +125,17 @@ Lava.define(
 	},
 
 	/**
-	 * The same, as {@link Lava.mixin.Observable#on}, but returns listener to property_name instead of event_name
+	 * The same, as {@link Lava.mixin.Observable#on}, but returns listener to `property_name` instead of `event_name`
 	 *
-	 * @param {string} event_name
+	 * @param {string} property_name
 	 * @param {function} fn
 	 * @param {Object} context
 	 * @param {*} [listener_args]
 	 * @returns {_iListener}
 	 */
-	onPropertyChanged: function(event_name, fn, context, listener_args) {
+	onPropertyChanged: function(property_name, fn, context, listener_args) {
 
-		return this._addListener(event_name, fn, context, listener_args, this._property_listeners)
+		return this._addListener(property_name, fn, context, listener_args, this._property_listeners);
 
 	},
 

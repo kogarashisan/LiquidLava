@@ -45,7 +45,8 @@ Lava.define(
 
 	_onMouseoverStackChanged: function(view_manager, stack) {
 
-		var new_tooltip_target = null;
+		var new_tooltip_target = null,
+			html;
 
 		for (var i = 0, count = stack.length; i < count; i++) {
 
@@ -76,7 +77,8 @@ Lava.define(
 
 			if (new_tooltip_target) {
 
-				this._tooltip.set('html', Firestorm.Element.getAttribute(new_tooltip_target, this._attribute_name));
+				html = Firestorm.Element.getAttribute(new_tooltip_target, this._attribute_name);
+				this._tooltip.set('html', html.replace(/\r?\n/g, '<br/>'));
 
 			}
 

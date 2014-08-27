@@ -2034,6 +2034,12 @@ Lava.modifiers = {
 		if (Lava.schema.DEBUG && typeof(value) != 'boolean') Lava.t("translateBoolean: argument is not boolean type");
 		return Lava.locales[Lava.schema.LOCALE].booleans[+value];
 
+	},
+
+	joinArray: function(array, glue) {
+
+		return array ? array.join(glue) : '';
+
 	}
 
 };
@@ -9637,17 +9643,17 @@ Lava.define(
 	},
 
 	/**
-	 * The same, as {@link Lava.mixin.Observable#on}, but returns listener to property_name instead of event_name
+	 * The same, as {@link Lava.mixin.Observable#on}, but returns listener to `property_name` instead of `event_name`
 	 *
-	 * @param {string} event_name
+	 * @param {string} property_name
 	 * @param {function} fn
 	 * @param {Object} context
 	 * @param {*} [listener_args]
 	 * @returns {_iListener}
 	 */
-	onPropertyChanged: function(event_name, fn, context, listener_args) {
+	onPropertyChanged: function(property_name, fn, context, listener_args) {
 
-		return this._addListener(event_name, fn, context, listener_args, this._property_listeners)
+		return this._addListener(property_name, fn, context, listener_args, this._property_listeners);
 
 	},
 
@@ -12912,7 +12918,7 @@ Lava.define(
 	},
 
 	/**
-	 * When root is parsed as object_map - handlers tag types
+	 * When root is parsed as object_map - handlers for tag types
 	 */
 	_tag_handlers: {
 		template_collection: '_parseTagAsTemplateCollection',
@@ -12993,6 +12999,8 @@ Lava.define(
 	},
 
 	/**
+	 * Public API for widget directives
+	 *
 	 * @param {_cSugarContentTemplateCollection|_cSugarContentTemplateHash|_cSugarContentObject|_cSugarContentObjectCollection|_cSugarContentObjectHash} schema
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
@@ -13627,7 +13635,8 @@ Lava.define(
 
 	_onMouseoverStackChanged: function(view_manager, stack) {
 
-		var new_tooltip_target = null;
+		var new_tooltip_target = null,
+			html;
 
 		for (var i = 0, count = stack.length; i < count; i++) {
 
@@ -13658,7 +13667,8 @@ Lava.define(
 
 			if (new_tooltip_target) {
 
-				this._tooltip.set('html', Firestorm.Element.getAttribute(new_tooltip_target, this._attribute_name));
+				html = Firestorm.Element.getAttribute(new_tooltip_target, this._attribute_name);
+				this._tooltip.set('html', html.replace(/\r?\n/g, '<br/>'));
 
 			}
 
@@ -16537,7 +16547,7 @@ Lava.define(
 'Lava.view.container.Element',
 /**
  * @lends Lava.view.container.Element#
- * @implements iContainer
+ * @implements _iContainer
  */
 {
 
@@ -17294,7 +17304,7 @@ Lava.define(
 'Lava.view.container.Morph',
 /**
  * @lends Lava.view.container.Morph#
- * @implements iContainer
+ * @implements _iContainer
  *
  * Credits:
  * based on https://github.com/tomhuda/metamorph.js/
@@ -17507,7 +17517,7 @@ Lava.define(
 'Lava.view.container.Emulated',
 /**
  * @lends Lava.view.container.Emulated#
- * @implements iContainer
+ * @implements _iContainer
  */
 {
 
@@ -17696,7 +17706,7 @@ Lava.define(
 	/**
 	 * @param {_cRefresher} config
 	 * @param {Lava.view.Abstract} view
-	 * @param {iContainer} container
+	 * @param {_iContainer} container
 	 */
 	init: function(config, view, container) {
 
@@ -18138,7 +18148,7 @@ Lava.define(
 	_parent_with_container: null,
 
 	/**
-	 * @type {iContainer}
+	 * @type {_iContainer}
 	 */
 	_container: null,
 
@@ -20951,6 +20961,19 @@ Lava.define(
 	}
 
 });
+/**
+ * Panel is expanding
+ * @event Lava.widget.Accordion#panel_expanding
+ * @type {Object}
+ * @property {Lava.widget.Standard} panel The panel, which triggered the event
+ */
+
+/**
+ * Panel is collapsing
+ * @event Lava.widget.Accordion#panel_collapsing
+ * @type {Object}
+ * @property {Lava.widget.Standard} panel The panel, which triggered the event
+ */
 
 Lava.define(
 'Lava.widget.Accordion',
@@ -20987,6 +21010,15 @@ Lava.define(
 	_active_panels: [],
 	_listeners_by_panel_guid: {},
 
+	/**
+	 * @param config
+	 * @param config.options.keep_expanded_on_add If you add another expanded panel to accordion - it's collapsed by default.
+	 * You may set this option to keep it expanded - in this case all expanded panels will be collapsed as soon as any panel is expanded by user.
+	 * @param widget
+	 * @param parent_view
+	 * @param template
+	 * @param properties
+	 */
 	init: function(config, widget, parent_view, template, properties) {
 
 		this._panels = new Lava.system.Enumerable();
@@ -21129,14 +21161,18 @@ Lava.define(
 
 		}
 
-		this._fire('panel_expanding');
+		this._fire('panel_expanding', {
+			panel: panel
+		});
 
 	},
 
 	_onPanelCollapsing: function(panel) {
 
 		Firestorm.Array.exclude(this._active_panels, panel);
-		this._fire('panel_collapsing');
+		this._fire('panel_collapsing', {
+			panel: panel
+		});
 
 	},
 
@@ -24268,6 +24304,8 @@ return (this._binds[0].getValue());
 						tail: ["html"]
 					}]
 				},
+				escape_off: true,
+				template: [],
 				container: {
 					"class": "Element",
 					tag_name: "div",

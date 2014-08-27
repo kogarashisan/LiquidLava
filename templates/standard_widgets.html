@@ -222,7 +222,7 @@
 				x:style:left="($tooltip.x + $tooltip.x_offset) + 'px'"
 				x:classes="$tooltip.is_visible ? 'in' : 'hidden'">
 			<div class="tooltip-inner" x:type="container">
-				{#>$tooltip.html}
+				{#expression($tooltip.html) escape_off}{/expression}
 			</div>
 			<div class="tooltip-arrow"></div>
 		</div>
