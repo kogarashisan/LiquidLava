@@ -87,7 +87,6 @@ Parsers/
 		// create an inline widget from element, with specified controller class. Also should work on sugar.
 	- [P5,Feature,Q] static_value directive should treat it's content as default value.
 Parsers/Directives.js
-	- [P2,Refactoring] get rid of roles_storage to simplify logic
 	- [P5,Dev,Q] resources: need &lt;component path="..."&gt; tag inside &lt;resources&gt; to shorten paths
 	- [P4,Dev] set_config_options template editing task:
 		1) allow to set several options at once (via &lt;assigns&gt; collection) <br/>

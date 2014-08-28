@@ -555,7 +555,7 @@ Lava.define(
 	/**
 	 * @param {_cWidget} widget_config
 	 * @param {string} attribute_value
-	 * @param {_cSugarAttribute} descriptor
+	 * @param {_cSugarRootAttribute} descriptor
 	 * @param {string} name
 	 */
 	_parseRootOptionAttribute: function(widget_config, attribute_value, descriptor, name) {
@@ -568,7 +568,7 @@ Lava.define(
 	 * Same as 'option', but empty value is treated as boolean TRUE, to allow value-less attributes.
 	 * @param {_cWidget} widget_config
 	 * @param {string} attribute_value
-	 * @param {_cSugarAttribute} descriptor
+	 * @param {_cSugarRootAttribute} descriptor
 	 * @param {string} name
 	 */
 	_parseRootSwitchAttribute: function(widget_config, attribute_value, descriptor, name) {
@@ -580,7 +580,7 @@ Lava.define(
 	/**
 	 * @param {_cWidget} widget_config
 	 * @param {string} attribute_value
-	 * @param {_cSugarAttribute} descriptor
+	 * @param {_cSugarRootAttribute} descriptor
 	 * @param {string} name
 	 */
 	_parseRootPropertyAttribute: function(widget_config, attribute_value, descriptor, name) {
@@ -663,7 +663,7 @@ Lava.define(
 	/**
 	 * @param {_cWidget} widget_config
 	 * @param {string} attribute_value
-	 * @param {_cSugarAttribute} descriptor
+	 * @param {_cSugarRootAttribute} descriptor
 	 * @param {string} name
 	 */
 	_parseRootTargetsOptionAttribute: function(widget_config, attribute_value, descriptor, name) {
@@ -675,7 +675,7 @@ Lava.define(
 	/**
 	 * @param {_cWidget} widget_config
 	 * @param {string} attribute_value
-	 * @param {_cSugarAttribute} descriptor
+	 * @param {_cSugarRootAttribute} descriptor
 	 * @param {string} name
 	 */
 	_parseRootExpressionOptionAttribute: function(widget_config, attribute_value, descriptor, name) {

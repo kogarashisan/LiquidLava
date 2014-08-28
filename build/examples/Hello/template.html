@@ -1,10 +1,10 @@
 <x:widget extends="Example" controller="HelloExample">
-	<template role="main">
+	<main_template>
 		<label>Name:</label>
 		<x:widget extends="TextInput">
 			<bind name="value">your_name</bind>
 		</x:widget>
 		<br/>
 		<h1>Hello {$>your_name}!</h1>
-	</template>
+	</main_template>
 </x:widget>

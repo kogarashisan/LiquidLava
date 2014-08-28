@@ -1,5 +1,5 @@
 <x:widget extends="Example" controller="TreeExample">
-	<template role="main">
+	<main_template>
 		Left:
 		<button type="button" class="btn btn-primary" x:type="view"
 			x:event:click="$tree_example.expand_collapse('tree_left', true)">Expand</button>
@@ -36,6 +36,6 @@
 			</x:widget>
 		</div>
 		<div class="clearfix"></div>
-	</template>
+	</main_template>
 	<default_events>['click']</default_events>
 </x:widget>

@@ -1,8 +1,8 @@
 
 <x:define title="InputAbstract">
-	<template role="main">
+	<main_template>
 		{>input_view}
-	</template>
+	</main_template>
 	<script x:equiv="sugar" type="application/json">
 		{
 			attribute_mappings: {
@@ -17,7 +17,7 @@
 </x:define>
 
 <x:define controller="input.CheckBox" title="CheckBox" extends="InputAbstract">
-	<view role="include" name="input_view">
+	<include name="input_view">
 		<input
 			x:type="view"
 			x:roles="_input_view"
@@ -31,7 +31,7 @@
 			x:bind:disabled="$checkbox.is_disabled"
 			x:bind:required="$checkbox.is_required"
 			x:bind:readonly="$checkbox.is_readonly" />
-	</view>
+	</include>
 	<script x:equiv="sugar" type="application/json">
 		{
 			tag_name: 'checkbox',
@@ -49,7 +49,7 @@
 </x:define>
 
 <x:define controller="input.TextArea" title="TextArea" extends="InputAbstract">
-	<view role="include" name="input_view">
+	<include name="input_view">
 		<textarea
 			x:type="view"
 			x:roles="_input_view"
@@ -63,7 +63,7 @@
 			x:bind:disabled="$textarea.is_disabled"
 			x:bind:required="$textarea.is_required"
 			x:bind:readonly="$textarea.is_readonly"></textarea>
-	</view>
+	</include>
 	<script x:equiv="sugar" type="application/json">
 		{
 			tag_name: 'text_area',
@@ -80,7 +80,7 @@
 </x:define>
 
 <x:define controller="input.Text" title="TextInput" extends="InputAbstract">
-	<view role="include" name="input_view">
+	<include name="input_view">
 		<input
 			x:type="view"
 			x:roles="_input_view"
@@ -94,7 +94,7 @@
 			x:bind:disabled="$text_input.is_disabled"
 			x:bind:required="$text_input.is_required"
 			x:bind:readonly="$text_input.is_readonly"/>
-	</view>
+	</include>
 	<script x:equiv="sugar" type="application/json">
 		{
 			tag_name: 'text_input',
@@ -113,7 +113,7 @@
 <x:define controller="input.Numeric" title="Numeric" extends="TextInput"></x:define>
 
 <x:define controller="input.Radio" title="Radio" extends="InputAbstract">
-	<view role="include" name="input_view">
+	<include name="input_view">
 		<input
 			x:type="view"
 			x:roles="_input_view"
@@ -127,7 +127,7 @@
 			x:bind:disabled="$radio.is_disabled"
 			x:bind:required="$radio.is_required"
 			x:bind:readonly="$radio.is_readonly" />
-	</view>
+	</include>
 	<script x:equiv="sugar" type="application/json">
 		{
 			tag_name: 'radio',
@@ -144,7 +144,7 @@
 </x:define>
 
 <x:define controller="input.Submit" title="SubmitInput" extends="InputAbstract">
-	<view role="include" name="input_view">
+	<include name="input_view">
 		<input
 			x:type="view"
 			x:roles="_input_view"
@@ -156,7 +156,7 @@
 			x:bind:name="$submit.name"
 			x:bind:value="$submit.value"
 			x:bind:disabled="$submit.is_disabled" />
-	</view>
+	</include>
 	<script x:equiv="sugar" type="application/json">
 		{
 			tag_name: 'submit_input',
@@ -170,7 +170,7 @@
 </x:define>
 
 <x:define controller="input.Submit" title="SubmitButton" extends="InputAbstract">
-	<view role="include" name="input_view">
+	<include name="input_view">
 		<button
 			x:type="view"
 			x:roles="_input_view"
@@ -184,9 +184,8 @@
 			x:bind:disabled="$submit.is_disabled">
 				{>content}
 		</button>
-	</view>
-	<template role="include" name="content">
-	</template>
+	</include>
+	<include name="content"></include>
 	<script x:equiv="sugar" type="application/json">
 		{
 			tag_name: 'submit_button',
@@ -204,7 +203,7 @@
 </x:define>
 
 <x:define title="SelectAbstract" extends="InputAbstract">
-	<view role="include" name="input_view">
+	<include name="input_view">
 		<select x:type="view"
 				x:roles="_input_view"
 				x:event:change="$select.value_changed"
@@ -220,8 +219,8 @@
 				{/if}
 			{/foreach}
 		</select>
-	</view>
-	<view role="include" name="group_options">
+	</include>
+	<include name="group_options">
 		{#foreach(optgroup.options) as=option}
 			<option
 					x:type="container"
@@ -231,7 +230,7 @@
 				{#>option.title}
 			</option>
 		{/foreach}
-	</view>
+	</include>
 	<default_events>['change']</default_events>
 </x:define>
 
@@ -239,18 +238,17 @@
 <x:define controller="input.MultipleSelect" title="MultipleSelect" extends="SelectAbstract"></x:define>
 
 <!--x:define controller="Form" title="Form">
-	<template role="main">
+	<main_template>
 		{>main_view}
-	</template>
-	<view role="include" name="main_view">
+	</main_template>
+	<include name="main_view">
 		<form x:type="view"
 			x:roles="$form.main_view"
 			x:resource_id="$form.FORM_ELEMENT">
 			{>$form.content}
 		</form>
-	</view>
-	<template role="include" name="content">
-	</template>
+	</include>
+	<include name="content"></include>
 	<script x:equiv="sugar" type="application/json">
 		{
 			tag_name: 'form_widget',

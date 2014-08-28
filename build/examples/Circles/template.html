@@ -1,5 +1,5 @@
 <x:widget extends="Example" controller="CirclesExample">
-	<template role="main">
+	<main_template>
 		<div style="width:500px; height: 500px;border: 1px solid gray;position: relative;overflow: hidden;float:left" x:type="view">
 			<img src="img/goods.jpg" style="position: absolute">
 			{$foreach($circles_example.circles) as=circle}
@@ -28,6 +28,6 @@
 			{/if}
 		</div>
 		<div class="clearfix"></div>
-	</template>
+	</main_template>
 	<default_events>['click', 'mousedown']</default_events>
 </x:widget>

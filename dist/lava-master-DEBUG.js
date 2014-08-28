@@ -5742,12 +5742,6 @@ Lava.parsers.Directives = {
 		default_events: {view_config_presence: true, is_top_directive: true}
 	},
 
-	_widget_role_actions: {
-		main: '_widgetRoleMain',
-		//storage: '_widgetRoleStorage',
-		include: '_widgetRoleInclude'
-	},
-
 	_widget_tag_actions: {
 		bind: '_widgetTagBind',
 		assign: '_widgetTagAssign',
@@ -5761,7 +5755,8 @@ Lava.parsers.Directives = {
 		storage: '_widgetTagStorage',
 		resources: '_widgetTagResources',
 		default_events: '_widgetTagDefaultEvents',
-		edit_template: '_widgetTagEditTemplate'
+		edit_template: '_widgetTagEditTemplate',
+		include: '_widgetTagInclude'
 	},
 
 	_resource_tag_actions: {
@@ -5820,189 +5815,113 @@ Lava.parsers.Directives = {
 
 	},
 
+	_importVars: function(destination, source, name_list) {
+		for (var i = 0, count = name_list.length; i < count; i++) {
+			var name = name_list[i];
+			if (name in source) destination[name] = source[name];
+		}
+	},
+
 	////////////////////////////////////////////////////////////////////
-	// start: actions for widget tags and tag roles
+	// start: actions for widget tags
 
 	/**
 	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
+	 * @param {_cWidget} widget_config
 	 */
-	_widgetRoleMain: function(raw_tag, config_storage, roles_storage) {
+	_widgetTagBind: function(raw_tag, widget_config) {
 
-		if ('widget_config' in roles_storage) Lava.t("multiple tags with role=main in widget definition");
-
-		var view_config,
-			name,
-			widget_config = Lava.parsers.Common.createDefaultWidgetConfig();
-
-		if (raw_tag.name == 'template') {
-
-			widget_config.template = Lava.parsers.Common.compileTemplate(raw_tag.content);
-
-		} else if (raw_tag.name == 'view') {
-
-			view_config = Lava.parsers.Common.compileAsView(raw_tag.content);
-			if (view_config['class'] != 'View') Lava.t("define: view in 'main' role must be pure View, not subclass");
-			if ('argument' in view_config) Lava.t("Widgets do not support arguments");
-			if ('roles' in view_config) Lava.t("Widget definition: move the roles from main view to widget");
-
-			widget_config.template = view_config.template;
-
-			if ('container' in view_config) widget_config.container = view_config.container;
-			if ('assigns' in view_config) widget_config.assigns = view_config.assigns;
-			if ('options' in view_config) widget_config.options = view_config.options;
-
-			if (Lava.schema.DEBUG) {
-				for (name in view_config) {
-					if (['assigns', 'options', 'class', 'type', 'template', 'container'].indexOf(name) == -1) {
-						Lava.t("[role='main'] view has an option, which can not be copied to widget: " + name
-							+ ". Probably, it must be specified via separate tag");
-					}
-				}
-			}
-
-		} else {
-
-			Lava.t("Widget definition: role=main may be applied to templates and views only");
-
-		}
-
-		roles_storage.widget_config = widget_config;
+		this._parseBinding(widget_config, raw_tag);
 
 	},
 
 	/**
 	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
+	 * @param {_cWidget} widget_config
 	 */
-	_widgetRoleInclude: function(raw_tag, config_storage, roles_storage) {
+	_widgetTagAssign: function(raw_tag, widget_config) {
 
-		var include;
-
-		switch (raw_tag.name) {
-			case 'template':
-				include = raw_tag.content ? Lava.parsers.Common.compileTemplate(raw_tag.content) : [];
-				break;
-			case 'view':
-				include = [Lava.parsers.Common.compileAsView(raw_tag.content)];
-				break;
-			default:
-				Lava.t("Only templates and views may have role=include");
-		}
-
-		this._store(config_storage, 'includes', raw_tag.attributes.name, include);
+		this._parseAssign(widget_config, raw_tag);
 
 	},
 
 	/**
 	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
+	 * @param {_cWidget} widget_config
 	 */
-	_widgetTagBind: function(raw_tag, config_storage, roles_storage) {
+	_widgetTagOption: function(raw_tag, widget_config) {
 
-		this._parseBinding(config_storage, raw_tag);
+		this._parseOption(widget_config, raw_tag, 'options');
 
 	},
 
 	/**
 	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
+	 * @param {_cWidget} widget_config
 	 */
-	_widgetTagAssign: function(raw_tag, config_storage, roles_storage) {
+	_widgetTagProperty: function(raw_tag, widget_config) {
 
-		this._parseAssign(roles_storage, raw_tag);
+		this._parseProperty(widget_config, raw_tag, 'properties');
 
 	},
 
 	/**
 	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
+	 * @param {_cWidget} widget_config
 	 */
-	_widgetTagOption: function(raw_tag, config_storage, roles_storage) {
+	_widgetTagOptions: function(raw_tag, widget_config) {
 
-		this._parseOption(roles_storage, raw_tag, 'options');
+		this._parseObject(widget_config, 'options', raw_tag);
 
 	},
 
 	/**
 	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
+	 * @param {_cWidget} widget_config
 	 */
-	_widgetTagProperty: function(raw_tag, config_storage, roles_storage) {
+	_widgetTagProperties: function(raw_tag, widget_config) {
 
-		this._parseProperty(config_storage, raw_tag, 'properties');
+		this._parseObject(widget_config, 'properties', raw_tag);
 
 	},
 
 	/**
 	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
+	 * @param {_cWidget} widget_config
 	 */
-	_widgetTagOptions: function(raw_tag, config_storage, roles_storage) {
+	_widgetTagRoles: function(raw_tag, widget_config) {
 
-		this._parseObject(config_storage, 'options', raw_tag);
+		this._parseRoles(widget_config, raw_tag);
 
 	},
 
 	/**
 	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
+	 * @param {_cWidget} widget_config
 	 */
-	_widgetTagProperties: function(raw_tag, config_storage, roles_storage) {
+	_widgetTagSugar: function(raw_tag, widget_config) {
 
-		this._parseObject(config_storage, 'properties', raw_tag);
-
-	},
-
-	/**
-	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
-	 */
-	_widgetTagRoles: function(raw_tag, config_storage, roles_storage) {
-
-		this._parseRoles(roles_storage, raw_tag);
-
-	},
-
-	/**
-	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
-	 */
-	_widgetTagSugar: function(raw_tag, config_storage, roles_storage) {
-
-		if ('sugar' in config_storage) Lava.t("Sugar is already defined");
+		if ('sugar' in widget_config) Lava.t("Sugar is already defined");
 		if (Lava.schema.DEBUG && raw_tag.content.length != 1) Lava.t("Malformed option: " + raw_tag.attributes.name);
-		config_storage.sugar = Lava.parseOptions(raw_tag.content[0]);
+		widget_config.sugar = Lava.parseOptions(raw_tag.content[0]);
 
 	},
 
 	/**
 	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
+	 * @param {_cWidget} widget_config
 	 */
-	_widgetTagBroadcast: function(raw_tag, config_storage, roles_storage) {
+	_widgetTagBroadcast: function(raw_tag, widget_config) {
 
-		this._parseBroadcast(config_storage, raw_tag);
+		this._parseBroadcast(widget_config, raw_tag);
 
 	},
 
 	/**
 	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
+	 * @param {_cWidget} widget_config
 	 */
-	_widgetTagStorage: function(raw_tag, config_storage, roles_storage) {
+	_widgetTagStorage: function(raw_tag, widget_config) {
 
 		var tags = Lava.parsers.Common.asBlockType(raw_tag.content, 'tag'),
 			i = 0,
@@ -6020,7 +5939,7 @@ Lava.parsers.Directives = {
 
 			if (Lava.schema.DEBUG) {
 				if (!tag.attributes || !tag.attributes.name) Lava.t("<" + "storage>: tag without a name attribute");
-				if (config_storage.storage && (tag.attributes.name in config_storage.storage)) Lava.t("Duplicate item in storage: " + tag.attributes.name);
+				if (widget_config.storage && (tag.attributes.name in widget_config.storage)) Lava.t("Duplicate item in storage: " + tag.attributes.name);
 			}
 
 			type = tag.name;
@@ -6050,7 +5969,7 @@ Lava.parsers.Directives = {
 
 			}
 
-			Lava.getSugarInstance(Lava.schema.widget.DEFAULT_SUGAR_CLASS).parseStorageTag(schema, parse_target, config_storage);
+			Lava.getSugarInstance(Lava.schema.widget.DEFAULT_SUGAR_CLASS).parseStorageTag(schema, parse_target, widget_config);
 
 		}
 
@@ -6058,23 +5977,21 @@ Lava.parsers.Directives = {
 
 	/**
 	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
+	 * @param {_cWidget} widget_config
 	 */
-	_widgetTagDefaultEvents: function(raw_tag, config_storage, roles_storage) {
+	_widgetTagDefaultEvents: function(raw_tag, widget_config) {
 
-		this._parseDefaultEvents(raw_tag, config_storage);
+		this._parseDefaultEvents(raw_tag, widget_config);
 
 	},
 
 	/**
 	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
+	 * @param {_cWidget} widget_config
 	 */
-	_widgetTagResources: function(raw_tag, config_storage, roles_storage) {
+	_widgetTagResources: function(raw_tag, widget_config) {
 
-		this._xresources(raw_tag, config_storage);
+		this._xresources(raw_tag, widget_config);
 
 	},
 
@@ -6126,10 +6043,9 @@ Lava.parsers.Directives = {
 
 	/**
 	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
+	 * @param {_cWidget} widget_config
 	 */
-	_widgetTagEditTemplate: function(raw_tag, config_storage, roles_storage) {
+	_widgetTagEditTemplate: function(raw_tag, widget_config) {
 
 		if (Lava.schema.DEBUG && (!raw_tag.attributes || !raw_tag.attributes['name'])) Lava.t('Malformed edit_template tag');
 
@@ -6156,9 +6072,9 @@ Lava.parsers.Directives = {
 
 		} else {
 
-			if (('includes' in config_storage) && config_storage.includes[raw_tag.attributes.name]) {
+			if (('includes' in widget_config) && widget_config.includes[raw_tag.attributes.name]) {
 
-				template = config_storage.includes[raw_tag.attributes.name];
+				template = widget_config.includes[raw_tag.attributes.name];
 
 			} else {
 
@@ -6225,11 +6141,22 @@ Lava.parsers.Directives = {
 
 		}
 
-		this._store(config_storage, 'includes', raw_tag.attributes.as || raw_tag.attributes.name, template);
+		this._store(widget_config, 'includes', raw_tag.attributes.as || raw_tag.attributes.name, template);
 
 	},
 
-	// end: actions for widget tags and tag roles
+	/**
+	 * @param {_cRawTag} raw_tag
+	 * @param {_cWidget} widget_config
+	 */
+	_widgetTagInclude: function(raw_tag, widget_config) {
+
+		var include = raw_tag.content ? Lava.parsers.Common.compileTemplate(raw_tag.content) : [];
+		this._store(widget_config, 'includes', raw_tag.attributes.name, include);
+
+	},
+
+	// end: actions for widget tags
 	////////////////////////////////////////////////////////////////////
 
 	////////////////////////////////////////////////////////////////////
@@ -6480,6 +6407,32 @@ Lava.parsers.Directives = {
 	////////////////////////////////////////////////////////////////////
 
 	/**
+	 * @param {_cRawTag} raw_tag
+	 */
+	_asMainWidget: function(raw_tag) {
+
+		var view_config = Lava.parsers.Common.compileAsView(raw_tag.content),
+			widget_config = Lava.parsers.Common.createDefaultWidgetConfig(),
+			name;
+
+		if (Lava.schema.DEBUG) {
+			if (view_config['class'] != 'View') Lava.t("define: view in 'main' role must be pure View, not subclass");
+			if ('argument' in view_config) Lava.t("Widgets do not support arguments");
+			if ('roles' in view_config) Lava.t("Widget definition: move the roles from main view to widget");
+			for (name in view_config) {
+				if (['assigns', 'options', 'class', 'type', 'template', 'container'].indexOf(name) == -1) {
+					Lava.t("main_view: view has an option, which can not be copied to widget: " + name + ". Probably, it must be specified via separate tag");
+				}
+			}
+		}
+
+		this._importVars(widget_config, view_config, ['template', 'container', 'assigns', 'options']);
+
+		return widget_config;
+
+	},
+
+	/**
 	 * @param {_cRawDirective} raw_directive
 	 * @returns {_cWidget}
 	 */
@@ -6488,9 +6441,7 @@ Lava.parsers.Directives = {
 		if (Lava.schema.DEBUG && !('attributes' in raw_directive)) Lava.t("Widget definition is missing attributes");
 
 		var tags = raw_directive.content ? Lava.parsers.Common.asBlockType(raw_directive.content, 'tag') : [],
-			config_storage = {},
-			roles_storage = {},
-			widget_config,
+			widget_config = {},
 			i = 0,
 			count = tags.length,
 			tag,
@@ -6499,36 +6450,30 @@ Lava.parsers.Directives = {
 
 		this._widget_directives_stack.push(raw_directive);
 
-		for (; i < count; i++) {
+		if (count) {
 
-			tag = tags[i];
+			if (tags[0].name == 'main_view') {
 
-			if (('attributes' in tag) && tag.attributes.role) {
+				widget_config = this._asMainWidget(tags[0]);
+				i = 1;
 
-				if (!(tag.attributes.role in this._widget_role_actions)) Lava.t("Unknown role in widget definition: " + tag.attributes.role);
-				this[this._widget_role_actions[tag.attributes.role]](tag, config_storage, roles_storage);
+			} else if (tags[0].name == 'main_template') {
 
-			} else {
-
-				if (!(tag.name in this._widget_tag_actions)) Lava.t("Unknown tag in widget definition: " + tag.name + ". Maybe missing the 'role' attribute.");
-				this[this._widget_tag_actions[tag.name]](tag, config_storage, roles_storage);
+				widget_config.template = Lava.parsers.Common.compileTemplate(tags[0].content);
+				i = 1;
 
 			}
 
 		}
 
-		if ('widget_config' in roles_storage) {
+		for (; i < count; i++) {
 
-			widget_config = roles_storage.widget_config;
-			Firestorm.extend(widget_config, config_storage);
-
-		} else {
-
-			widget_config = config_storage;
+			tag = tags[i];
+			if (!(tag.name in this._widget_tag_actions)) Lava.t("Unknown tag in widget definition: " + tag.name + ". Note, that main_template and main_view tags must be on top.");
+			this[this._widget_tag_actions[tag.name]](tag, widget_config);
 
 		}
 
-		if ('roles' in roles_storage) widget_config.roles = roles_storage.roles;
 		if (raw_directive.attributes.controller) {
 
 			path = raw_directive.attributes.controller;
@@ -6556,30 +6501,6 @@ Lava.parsers.Directives = {
 		if (raw_directive.attributes.id) {
 			if (Lava.schema.DEBUG && widget_config.id) Lava.t("[Widget configuration] widget id was already set via main view configuration: " + raw_directive.attributes.id);
 			Lava.parsers.Common.setViewConfigId(widget_config, raw_directive.attributes.id);
-		}
-
-		if ('options' in roles_storage) {
-
-			if ('options' in widget_config) {
-
-				for (name in roles_storage.options) {
-
-					if (name in widget_config.options) Lava.t("Duplicate option: " + name);
-					widget_config.options[name] = roles_storage.options[name];
-
-				}
-
-			} else {
-
-				widget_config.options = roles_storage.options;
-
-			}
-
-		}
-
-		if ('assigns' in roles_storage) {
-			if ('assigns' in widget_config) Lava.t("Please, move assigns to one place: either to widget tag, or view directives");
-			widget_config.assigns = roles_storage.assigns;
 		}
 
 		if (!widget_config['class']) widget_config['class'] = Lava.schema.widget.DEFAULT_EXTENSION_GATEWAY;
@@ -13453,7 +13374,7 @@ Lava.define(
 	/**
 	 * @param {_cWidget} widget_config
 	 * @param {string} attribute_value
-	 * @param {_cSugarAttribute} descriptor
+	 * @param {_cSugarRootAttribute} descriptor
 	 * @param {string} name
 	 */
 	_parseRootOptionAttribute: function(widget_config, attribute_value, descriptor, name) {
@@ -13466,7 +13387,7 @@ Lava.define(
 	 * Same as 'option', but empty value is treated as boolean TRUE, to allow value-less attributes.
 	 * @param {_cWidget} widget_config
 	 * @param {string} attribute_value
-	 * @param {_cSugarAttribute} descriptor
+	 * @param {_cSugarRootAttribute} descriptor
 	 * @param {string} name
 	 */
 	_parseRootSwitchAttribute: function(widget_config, attribute_value, descriptor, name) {
@@ -13478,7 +13399,7 @@ Lava.define(
 	/**
 	 * @param {_cWidget} widget_config
 	 * @param {string} attribute_value
-	 * @param {_cSugarAttribute} descriptor
+	 * @param {_cSugarRootAttribute} descriptor
 	 * @param {string} name
 	 */
 	_parseRootPropertyAttribute: function(widget_config, attribute_value, descriptor, name) {
@@ -13561,7 +13482,7 @@ Lava.define(
 	/**
 	 * @param {_cWidget} widget_config
 	 * @param {string} attribute_value
-	 * @param {_cSugarAttribute} descriptor
+	 * @param {_cSugarRootAttribute} descriptor
 	 * @param {string} name
 	 */
 	_parseRootTargetsOptionAttribute: function(widget_config, attribute_value, descriptor, name) {
@@ -13573,7 +13494,7 @@ Lava.define(
 	/**
 	 * @param {_cWidget} widget_config
 	 * @param {string} attribute_value
-	 * @param {_cSugarAttribute} descriptor
+	 * @param {_cSugarRootAttribute} descriptor
 	 * @param {string} name
 	 */
 	_parseRootExpressionOptionAttribute: function(widget_config, attribute_value, descriptor, name) {
@@ -22532,9 +22453,6 @@ Lava.define(
 });
 Lava.widgets = {
 	InputAbstract: {
-		type: "widget",
-		"class": "Lava.WidgetConfigExtensionGateway",
-		extender_type: "Default",
 		template: [
 			"\r\n\t\t",
 			{
@@ -22572,98 +22490,104 @@ Lava.widgets = {
 				}
 			}
 		},
+		"class": "Lava.WidgetConfigExtensionGateway",
+		extender_type: "Default",
 		is_extended: false
 	},
 	CheckBox: {
 		includes: {
-			input_view: [{
-				type: "view",
-				"class": "View",
-				container: {
-					"class": "Element",
-					tag_name: "input",
-					events: {
-						change: [{
+			input_view: [
+				"\r\n\t\t",
+				{
+					type: "view",
+					"class": "View",
+					container: {
+						"class": "Element",
+						tag_name: "input",
+						events: {
+							change: [{
+								locator_type: "Name",
+								locator: "checkbox",
+								name: "checked_changed"
+							}],
+							focus: [{
+								locator_type: "Name",
+								locator: "checkbox",
+								name: "_focused"
+							}],
+							blur: [{
+								locator_type: "Name",
+								locator: "checkbox",
+								name: "_blurred"
+							}]
+						},
+						property_bindings: {
+							name: {
+								evaluator: function() {
+return (this._binds[0].getValue());
+},
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "checkbox",
+									tail: ["name"]
+								}]
+							},
+							value: {
+								evaluator: function() {
+return (this._binds[0].getValue());
+},
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "checkbox",
+									tail: ["value"]
+								}]
+							},
+							disabled: {
+								evaluator: function() {
+return (this._binds[0].getValue());
+},
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "checkbox",
+									tail: ["is_disabled"]
+								}]
+							},
+							required: {
+								evaluator: function() {
+return (this._binds[0].getValue());
+},
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "checkbox",
+									tail: ["is_required"]
+								}]
+							},
+							readonly: {
+								evaluator: function() {
+return (this._binds[0].getValue());
+},
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "checkbox",
+									tail: ["is_readonly"]
+								}]
+							}
+						},
+						resource_id: {
 							locator_type: "Name",
 							locator: "checkbox",
-							name: "checked_changed"
-						}],
-						focus: [{
-							locator_type: "Name",
-							locator: "checkbox",
-							name: "_focused"
-						}],
-						blur: [{
-							locator_type: "Name",
-							locator: "checkbox",
-							name: "_blurred"
-						}]
-					},
-					property_bindings: {
-						name: {
-							evaluator: function() {
-return (this._binds[0].getValue());
-},
-							flags: {isScopeEval: true},
-							binds: [{
-								locator_type: "Name",
-								locator: "checkbox",
-								tail: ["name"]
-							}]
-						},
-						value: {
-							evaluator: function() {
-return (this._binds[0].getValue());
-},
-							flags: {isScopeEval: true},
-							binds: [{
-								locator_type: "Name",
-								locator: "checkbox",
-								tail: ["value"]
-							}]
-						},
-						disabled: {
-							evaluator: function() {
-return (this._binds[0].getValue());
-},
-							flags: {isScopeEval: true},
-							binds: [{
-								locator_type: "Name",
-								locator: "checkbox",
-								tail: ["is_disabled"]
-							}]
-						},
-						required: {
-							evaluator: function() {
-return (this._binds[0].getValue());
-},
-							flags: {isScopeEval: true},
-							binds: [{
-								locator_type: "Name",
-								locator: "checkbox",
-								tail: ["is_required"]
-							}]
-						},
-						readonly: {
-							evaluator: function() {
-return (this._binds[0].getValue());
-},
-							flags: {isScopeEval: true},
-							binds: [{
-								locator_type: "Name",
-								locator: "checkbox",
-								tail: ["is_readonly"]
-							}]
+							name: "CHECKBOX_ELEMENT"
 						}
 					},
-					resource_id: {
-						locator_type: "Name",
-						locator: "checkbox",
-						name: "CHECKBOX_ELEMENT"
-					}
+					roles: [{name: "_input_view"}]
 				},
-				roles: [{name: "_input_view"}]
-			}]
+				"\r\n\t"
+			]
 		},
 		sugar: {
 			tag_name: "checkbox",
@@ -22692,88 +22616,92 @@ return (this._binds[0].getValue());
 	},
 	TextArea: {
 		includes: {
-			input_view: [{
-				type: "view",
-				"class": "View",
-				container: {
-					"class": "Element",
-					tag_name: "textarea",
-					events: {
-						change: [{
-							locator_type: "Name",
-							locator: "textarea",
-							name: "value_changed"
-						}],
-						input: [{
-							locator_type: "Name",
-							locator: "textarea",
-							name: "input"
-						}],
-						focus: [{
-							locator_type: "Name",
-							locator: "textarea",
-							name: "_focused"
-						}],
-						blur: [{
-							locator_type: "Name",
-							locator: "textarea",
-							name: "_blurred"
-						}]
-					},
-					property_bindings: {
-						name: {
-							evaluator: function() {
-return (this._binds[0].getValue());
-},
-							flags: {isScopeEval: true},
-							binds: [{
+			input_view: [
+				"\r\n\t\t",
+				{
+					type: "view",
+					"class": "View",
+					container: {
+						"class": "Element",
+						tag_name: "textarea",
+						events: {
+							change: [{
 								locator_type: "Name",
 								locator: "textarea",
-								tail: ["name"]
+								name: "value_changed"
+							}],
+							input: [{
+								locator_type: "Name",
+								locator: "textarea",
+								name: "input"
+							}],
+							focus: [{
+								locator_type: "Name",
+								locator: "textarea",
+								name: "_focused"
+							}],
+							blur: [{
+								locator_type: "Name",
+								locator: "textarea",
+								name: "_blurred"
 							}]
 						},
-						disabled: {
-							evaluator: function() {
+						property_bindings: {
+							name: {
+								evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {isScopeEval: true},
-							binds: [{
-								locator_type: "Name",
-								locator: "textarea",
-								tail: ["is_disabled"]
-							}]
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "textarea",
+									tail: ["name"]
+								}]
+							},
+							disabled: {
+								evaluator: function() {
+return (this._binds[0].getValue());
+},
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "textarea",
+									tail: ["is_disabled"]
+								}]
+							},
+							required: {
+								evaluator: function() {
+return (this._binds[0].getValue());
+},
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "textarea",
+									tail: ["is_required"]
+								}]
+							},
+							readonly: {
+								evaluator: function() {
+return (this._binds[0].getValue());
+},
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "textarea",
+									tail: ["is_readonly"]
+								}]
+							}
 						},
-						required: {
-							evaluator: function() {
-return (this._binds[0].getValue());
-},
-							flags: {isScopeEval: true},
-							binds: [{
-								locator_type: "Name",
-								locator: "textarea",
-								tail: ["is_required"]
-							}]
-						},
-						readonly: {
-							evaluator: function() {
-return (this._binds[0].getValue());
-},
-							flags: {isScopeEval: true},
-							binds: [{
-								locator_type: "Name",
-								locator: "textarea",
-								tail: ["is_readonly"]
-							}]
+						resource_id: {
+							locator_type: "Name",
+							locator: "textarea",
+							name: "TEXTAREA_ELEMENT"
 						}
 					},
-					resource_id: {
-						locator_type: "Name",
-						locator: "textarea",
-						name: "TEXTAREA_ELEMENT"
-					}
+					roles: [{name: "_input_view"}]
 				},
-				roles: [{name: "_input_view"}]
-			}]
+				"\r\n\t"
+			]
 		},
 		sugar: {
 			tag_name: "text_area",
@@ -22798,88 +22726,92 @@ return (this._binds[0].getValue());
 	},
 	TextInput: {
 		includes: {
-			input_view: [{
-				type: "view",
-				"class": "View",
-				container: {
-					"class": "Element",
-					tag_name: "input",
-					events: {
-						change: [{
-							locator_type: "Name",
-							locator: "text_input",
-							name: "value_changed"
-						}],
-						input: [{
-							locator_type: "Name",
-							locator: "text_input",
-							name: "input"
-						}],
-						focus: [{
-							locator_type: "Name",
-							locator: "text_input",
-							name: "_focused"
-						}],
-						blur: [{
-							locator_type: "Name",
-							locator: "text_input",
-							name: "_blurred"
-						}]
-					},
-					property_bindings: {
-						name: {
-							evaluator: function() {
-return (this._binds[0].getValue());
-},
-							flags: {isScopeEval: true},
-							binds: [{
+			input_view: [
+				"\r\n\t\t",
+				{
+					type: "view",
+					"class": "View",
+					container: {
+						"class": "Element",
+						tag_name: "input",
+						events: {
+							change: [{
 								locator_type: "Name",
 								locator: "text_input",
-								tail: ["name"]
+								name: "value_changed"
+							}],
+							input: [{
+								locator_type: "Name",
+								locator: "text_input",
+								name: "input"
+							}],
+							focus: [{
+								locator_type: "Name",
+								locator: "text_input",
+								name: "_focused"
+							}],
+							blur: [{
+								locator_type: "Name",
+								locator: "text_input",
+								name: "_blurred"
 							}]
 						},
-						disabled: {
-							evaluator: function() {
+						property_bindings: {
+							name: {
+								evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {isScopeEval: true},
-							binds: [{
-								locator_type: "Name",
-								locator: "text_input",
-								tail: ["is_disabled"]
-							}]
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "text_input",
+									tail: ["name"]
+								}]
+							},
+							disabled: {
+								evaluator: function() {
+return (this._binds[0].getValue());
+},
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "text_input",
+									tail: ["is_disabled"]
+								}]
+							},
+							required: {
+								evaluator: function() {
+return (this._binds[0].getValue());
+},
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "text_input",
+									tail: ["is_required"]
+								}]
+							},
+							readonly: {
+								evaluator: function() {
+return (this._binds[0].getValue());
+},
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "text_input",
+									tail: ["is_readonly"]
+								}]
+							}
 						},
-						required: {
-							evaluator: function() {
-return (this._binds[0].getValue());
-},
-							flags: {isScopeEval: true},
-							binds: [{
-								locator_type: "Name",
-								locator: "text_input",
-								tail: ["is_required"]
-							}]
-						},
-						readonly: {
-							evaluator: function() {
-return (this._binds[0].getValue());
-},
-							flags: {isScopeEval: true},
-							binds: [{
-								locator_type: "Name",
-								locator: "text_input",
-								tail: ["is_readonly"]
-							}]
+						resource_id: {
+							locator_type: "Name",
+							locator: "text_input",
+							name: "TEXT_INPUT_ELEMENT"
 						}
 					},
-					resource_id: {
-						locator_type: "Name",
-						locator: "text_input",
-						name: "TEXT_INPUT_ELEMENT"
-					}
+					roles: [{name: "_input_view"}]
 				},
-				roles: [{name: "_input_view"}]
-			}]
+				"\r\n\t"
+			]
 		},
 		sugar: {
 			tag_name: "text_input",
@@ -22911,94 +22843,98 @@ return (this._binds[0].getValue());
 	},
 	Radio: {
 		includes: {
-			input_view: [{
-				type: "view",
-				"class": "View",
-				container: {
-					"class": "Element",
-					tag_name: "input",
-					events: {
-						change: [{
+			input_view: [
+				"\r\n\t\t",
+				{
+					type: "view",
+					"class": "View",
+					container: {
+						"class": "Element",
+						tag_name: "input",
+						events: {
+							change: [{
+								locator_type: "Name",
+								locator: "radio",
+								name: "checked_changed"
+							}],
+							focus: [{
+								locator_type: "Name",
+								locator: "radio",
+								name: "_focused"
+							}],
+							blur: [{
+								locator_type: "Name",
+								locator: "radio",
+								name: "_blurred"
+							}]
+						},
+						property_bindings: {
+							name: {
+								evaluator: function() {
+return (this._binds[0].getValue());
+},
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "radio",
+									tail: ["name"]
+								}]
+							},
+							value: {
+								evaluator: function() {
+return (this._binds[0].getValue());
+},
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "radio",
+									tail: ["value"]
+								}]
+							},
+							disabled: {
+								evaluator: function() {
+return (this._binds[0].getValue());
+},
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "radio",
+									tail: ["is_disabled"]
+								}]
+							},
+							required: {
+								evaluator: function() {
+return (this._binds[0].getValue());
+},
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "radio",
+									tail: ["is_required"]
+								}]
+							},
+							readonly: {
+								evaluator: function() {
+return (this._binds[0].getValue());
+},
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "radio",
+									tail: ["is_readonly"]
+								}]
+							}
+						},
+						resource_id: {
 							locator_type: "Name",
 							locator: "radio",
-							name: "checked_changed"
-						}],
-						focus: [{
-							locator_type: "Name",
-							locator: "radio",
-							name: "_focused"
-						}],
-						blur: [{
-							locator_type: "Name",
-							locator: "radio",
-							name: "_blurred"
-						}]
-					},
-					property_bindings: {
-						name: {
-							evaluator: function() {
-return (this._binds[0].getValue());
-},
-							flags: {isScopeEval: true},
-							binds: [{
-								locator_type: "Name",
-								locator: "radio",
-								tail: ["name"]
-							}]
-						},
-						value: {
-							evaluator: function() {
-return (this._binds[0].getValue());
-},
-							flags: {isScopeEval: true},
-							binds: [{
-								locator_type: "Name",
-								locator: "radio",
-								tail: ["value"]
-							}]
-						},
-						disabled: {
-							evaluator: function() {
-return (this._binds[0].getValue());
-},
-							flags: {isScopeEval: true},
-							binds: [{
-								locator_type: "Name",
-								locator: "radio",
-								tail: ["is_disabled"]
-							}]
-						},
-						required: {
-							evaluator: function() {
-return (this._binds[0].getValue());
-},
-							flags: {isScopeEval: true},
-							binds: [{
-								locator_type: "Name",
-								locator: "radio",
-								tail: ["is_required"]
-							}]
-						},
-						readonly: {
-							evaluator: function() {
-return (this._binds[0].getValue());
-},
-							flags: {isScopeEval: true},
-							binds: [{
-								locator_type: "Name",
-								locator: "radio",
-								tail: ["is_readonly"]
-							}]
+							name: "RADIO_ELEMENT"
 						}
 					},
-					resource_id: {
-						locator_type: "Name",
-						locator: "radio",
-						name: "RADIO_ELEMENT"
-					}
+					roles: [{name: "_input_view"}]
 				},
-				roles: [{name: "_input_view"}]
-			}]
+				"\r\n\t"
+			]
 		},
 		sugar: {
 			tag_name: "radio",
@@ -23022,72 +22958,76 @@ return (this._binds[0].getValue());
 	},
 	SubmitInput: {
 		includes: {
-			input_view: [{
-				type: "view",
-				"class": "View",
-				container: {
-					"class": "Element",
-					tag_name: "input",
-					events: {
-						click: [{
-							locator_type: "Name",
-							locator: "submit",
-							name: "clicked"
-						}],
-						focus: [{
-							locator_type: "Name",
-							locator: "submit",
-							name: "_focused"
-						}],
-						blur: [{
-							locator_type: "Name",
-							locator: "submit",
-							name: "_blurred"
-						}]
-					},
-					property_bindings: {
-						name: {
-							evaluator: function() {
-return (this._binds[0].getValue());
-},
-							flags: {isScopeEval: true},
-							binds: [{
+			input_view: [
+				"\r\n\t\t",
+				{
+					type: "view",
+					"class": "View",
+					container: {
+						"class": "Element",
+						tag_name: "input",
+						events: {
+							click: [{
 								locator_type: "Name",
 								locator: "submit",
-								tail: ["name"]
+								name: "clicked"
+							}],
+							focus: [{
+								locator_type: "Name",
+								locator: "submit",
+								name: "_focused"
+							}],
+							blur: [{
+								locator_type: "Name",
+								locator: "submit",
+								name: "_blurred"
 							}]
 						},
-						value: {
-							evaluator: function() {
+						property_bindings: {
+							name: {
+								evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {isScopeEval: true},
-							binds: [{
-								locator_type: "Name",
-								locator: "submit",
-								tail: ["value"]
-							}]
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "submit",
+									tail: ["name"]
+								}]
+							},
+							value: {
+								evaluator: function() {
+return (this._binds[0].getValue());
+},
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "submit",
+									tail: ["value"]
+								}]
+							},
+							disabled: {
+								evaluator: function() {
+return (this._binds[0].getValue());
+},
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "submit",
+									tail: ["is_disabled"]
+								}]
+							}
 						},
-						disabled: {
-							evaluator: function() {
-return (this._binds[0].getValue());
-},
-							flags: {isScopeEval: true},
-							binds: [{
-								locator_type: "Name",
-								locator: "submit",
-								tail: ["is_disabled"]
-							}]
+						resource_id: {
+							locator_type: "Name",
+							locator: "submit",
+							name: "SUBMIT_INPUT_ELEMENT"
 						}
 					},
-					resource_id: {
-						locator_type: "Name",
-						locator: "submit",
-						name: "SUBMIT_INPUT_ELEMENT"
-					}
+					roles: [{name: "_input_view"}]
 				},
-				roles: [{name: "_input_view"}]
-			}]
+				"\r\n\t"
+			]
 		},
 		sugar: {
 			tag_name: "submit_input",
@@ -23104,81 +23044,85 @@ return (this._binds[0].getValue());
 	},
 	SubmitButton: {
 		includes: {
-			input_view: [{
-				type: "view",
-				"class": "View",
-				container: {
-					"class": "Element",
-					tag_name: "button",
-					events: {
-						click: [{
-							locator_type: "Name",
-							locator: "submit",
-							name: "clicked"
-						}],
-						focus: [{
-							locator_type: "Name",
-							locator: "submit",
-							name: "_focused"
-						}],
-						blur: [{
-							locator_type: "Name",
-							locator: "submit",
-							name: "_blurred"
-						}]
-					},
-					property_bindings: {
-						name: {
-							evaluator: function() {
-return (this._binds[0].getValue());
-},
-							flags: {isScopeEval: true},
-							binds: [{
+			input_view: [
+				"\r\n\t\t",
+				{
+					type: "view",
+					"class": "View",
+					container: {
+						"class": "Element",
+						tag_name: "button",
+						events: {
+							click: [{
 								locator_type: "Name",
 								locator: "submit",
-								tail: ["name"]
+								name: "clicked"
+							}],
+							focus: [{
+								locator_type: "Name",
+								locator: "submit",
+								name: "_focused"
+							}],
+							blur: [{
+								locator_type: "Name",
+								locator: "submit",
+								name: "_blurred"
 							}]
 						},
-						value: {
-							evaluator: function() {
+						property_bindings: {
+							name: {
+								evaluator: function() {
 return (this._binds[0].getValue());
 },
-							flags: {isScopeEval: true},
-							binds: [{
-								locator_type: "Name",
-								locator: "submit",
-								tail: ["value"]
-							}]
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "submit",
+									tail: ["name"]
+								}]
+							},
+							value: {
+								evaluator: function() {
+return (this._binds[0].getValue());
+},
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "submit",
+									tail: ["value"]
+								}]
+							},
+							disabled: {
+								evaluator: function() {
+return (this._binds[0].getValue());
+},
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "submit",
+									tail: ["is_disabled"]
+								}]
+							}
 						},
-						disabled: {
-							evaluator: function() {
-return (this._binds[0].getValue());
-},
-							flags: {isScopeEval: true},
-							binds: [{
-								locator_type: "Name",
-								locator: "submit",
-								tail: ["is_disabled"]
-							}]
+						resource_id: {
+							locator_type: "Name",
+							locator: "submit",
+							name: "SUBMIT_BUTTON_ELEMENT"
 						}
 					},
-					resource_id: {
-						locator_type: "Name",
-						locator: "submit",
-						name: "SUBMIT_BUTTON_ELEMENT"
-					}
+					roles: [{name: "_input_view"}],
+					template: [
+						"\r\n\t\t\t\t",
+						{
+							name: "content",
+							type: "include"
+						},
+						"\r\n\t\t"
+					]
 				},
-				roles: [{name: "_input_view"}],
-				template: [
-					"\r\n\t\t\t\t",
-					{
-						name: "content",
-						type: "include"
-					},
-					"\r\n\t\t"
-				]
-			}],
-			content: ["\r\n\t"]
+				"\r\n\t"
+			],
+			content: []
 		},
 		sugar: {
 			tag_name: "submit_button",
@@ -23197,193 +23141,201 @@ return (this._binds[0].getValue());
 	},
 	SelectAbstract: {
 		includes: {
-			input_view: [{
-				type: "view",
-				"class": "View",
-				container: {
-					"class": "Element",
-					tag_name: "select",
-					events: {
-						change: [{
-							locator_type: "Name",
-							locator: "select",
-							name: "value_changed"
-						}],
-						focus: [{
-							locator_type: "Name",
-							locator: "select",
-							name: "_focused"
-						}],
-						blur: [{
-							locator_type: "Name",
-							locator: "select",
-							name: "_blurred"
-						}]
-					}
-				},
-				roles: [{name: "_input_view"}],
-				template: [
-					"\r\n\t\t\t",
-					{
-						type: "view",
-						"class": "Foreach",
-						argument: {
-							evaluator: function() {
-return (this._binds[0].getValue());
-},
-							flags: {isScopeEval: true},
-							binds: [{
+			input_view: [
+				"\r\n\t\t",
+				{
+					type: "view",
+					"class": "View",
+					container: {
+						"class": "Element",
+						tag_name: "select",
+						events: {
+							change: [{
 								locator_type: "Name",
 								locator: "select",
-								tail: ["optgroups"]
+								name: "value_changed"
+							}],
+							focus: [{
+								locator_type: "Name",
+								locator: "select",
+								name: "_focused"
+							}],
+							blur: [{
+								locator_type: "Name",
+								locator: "select",
+								name: "_blurred"
 							}]
-						},
-						as: "optgroup",
-						template: [
-							"\r\n\t\t\t\t",
-							{
-								type: "view",
-								"class": "If",
-								argument: {
-									evaluator: function() {
-return (this._binds[0].getValue());
-},
-									flags: {isScopeEval: true},
-									binds: [{
-										property_name: "optgroup",
-										tail: ["label"]
-									}]
-								},
-								template: [
-									"\r\n\t\t\t\t\t",
-									{
-										type: "view",
-										"class": "View",
-										container: {
-											"class": "Element",
-											tag_name: "optgroup",
-											property_bindings: {
-												label: {
-													evaluator: function() {
-return (this._binds[0].getValue());
-},
-													flags: {isScopeEval: true},
-													binds: [{
-														property_name: "optgroup",
-														tail: ["label"]
-													}]
-												},
-												disabled: {
-													evaluator: function() {
-return (this._binds[0].getValue());
-},
-													flags: {isScopeEval: true},
-													binds: [{
-														property_name: "optgroup",
-														tail: ["is_disabled"]
-													}]
-												}
-											}
-										},
-										template: [
-											"\r\n\t\t\t\t\t\t",
-											{
-												name: "group_options",
-												type: "include"
-											},
-											"\r\n\t\t\t\t\t"
-										]
-									},
-									"\r\n\t\t\t\t"
-								],
-								else_template: [
-									"\r\n\t\t\t\t\t",
-									{
-										name: "group_options",
-										type: "include"
-									},
-									"\r\n\t\t\t\t"
-								]
-							},
-							"\r\n\t\t\t"
-						]
-					},
-					"\r\n\t\t"
-				]
-			}],
-			group_options: [{
-				type: "view",
-				"class": "Foreach",
-				argument: {
-					evaluator: function() {
-return (this._binds[0].getValue());
-},
-					flags: {isScopeEval: true},
-					binds: [{
-						property_name: "optgroup",
-						tail: ["options"]
-					}]
-				},
-				as: "option",
-				template: [
-					"\r\n\t\t\t",
-					{
-						type: "view",
-						"class": "Expression",
-						argument: {
-							evaluator: function() {
-return (this._binds[0].getValue());
-},
-							flags: {isScopeEval: true},
-							binds: [{
-								property_name: "option",
-								tail: ["title"]
-							}]
-						},
-						container: {
-							"class": "Element",
-							tag_name: "option",
-							property_bindings: {
-								value: {
-									evaluator: function() {
-return (this._binds[0].getValue());
-},
-									flags: {isScopeEval: true},
-									binds: [{
-										property_name: "option",
-										tail: ["value"]
-									}]
-								},
-								selected: {
-									evaluator: function() {
-return (this._callModifier("0", [this._binds[0].getValue()]));
-},
-									binds: [{
-										property_name: "option",
-										tail: ["value"]
-									}],
-									modifiers: [{
-										locator_type: "Name",
-										locator: "select",
-										callback_name: "isValueSelected"
-									}]
-								},
-								disabled: {
-									evaluator: function() {
-return (this._binds[0].getValue());
-},
-									flags: {isScopeEval: true},
-									binds: [{
-										property_name: "option",
-										tail: ["is_disabled"]
-									}]
-								}
-							}
 						}
 					},
-					"\r\n\t\t"
-				]
-			}]
+					roles: [{name: "_input_view"}],
+					template: [
+						"\r\n\t\t\t",
+						{
+							type: "view",
+							"class": "Foreach",
+							argument: {
+								evaluator: function() {
+return (this._binds[0].getValue());
+},
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "select",
+									tail: ["optgroups"]
+								}]
+							},
+							as: "optgroup",
+							template: [
+								"\r\n\t\t\t\t",
+								{
+									type: "view",
+									"class": "If",
+									argument: {
+										evaluator: function() {
+return (this._binds[0].getValue());
+},
+										flags: {isScopeEval: true},
+										binds: [{
+											property_name: "optgroup",
+											tail: ["label"]
+										}]
+									},
+									template: [
+										"\r\n\t\t\t\t\t",
+										{
+											type: "view",
+											"class": "View",
+											container: {
+												"class": "Element",
+												tag_name: "optgroup",
+												property_bindings: {
+													label: {
+														evaluator: function() {
+return (this._binds[0].getValue());
+},
+														flags: {isScopeEval: true},
+														binds: [{
+															property_name: "optgroup",
+															tail: ["label"]
+														}]
+													},
+													disabled: {
+														evaluator: function() {
+return (this._binds[0].getValue());
+},
+														flags: {isScopeEval: true},
+														binds: [{
+															property_name: "optgroup",
+															tail: ["is_disabled"]
+														}]
+													}
+												}
+											},
+											template: [
+												"\r\n\t\t\t\t\t\t",
+												{
+													name: "group_options",
+													type: "include"
+												},
+												"\r\n\t\t\t\t\t"
+											]
+										},
+										"\r\n\t\t\t\t"
+									],
+									else_template: [
+										"\r\n\t\t\t\t\t",
+										{
+											name: "group_options",
+											type: "include"
+										},
+										"\r\n\t\t\t\t"
+									]
+								},
+								"\r\n\t\t\t"
+							]
+						},
+						"\r\n\t\t"
+					]
+				},
+				"\r\n\t"
+			],
+			group_options: [
+				"\r\n\t\t",
+				{
+					type: "view",
+					"class": "Foreach",
+					argument: {
+						evaluator: function() {
+return (this._binds[0].getValue());
+},
+						flags: {isScopeEval: true},
+						binds: [{
+							property_name: "optgroup",
+							tail: ["options"]
+						}]
+					},
+					as: "option",
+					template: [
+						"\r\n\t\t\t",
+						{
+							type: "view",
+							"class": "Expression",
+							argument: {
+								evaluator: function() {
+return (this._binds[0].getValue());
+},
+								flags: {isScopeEval: true},
+								binds: [{
+									property_name: "option",
+									tail: ["title"]
+								}]
+							},
+							container: {
+								"class": "Element",
+								tag_name: "option",
+								property_bindings: {
+									value: {
+										evaluator: function() {
+return (this._binds[0].getValue());
+},
+										flags: {isScopeEval: true},
+										binds: [{
+											property_name: "option",
+											tail: ["value"]
+										}]
+									},
+									selected: {
+										evaluator: function() {
+return (this._callModifier("0", [this._binds[0].getValue()]));
+},
+										binds: [{
+											property_name: "option",
+											tail: ["value"]
+										}],
+										modifiers: [{
+											locator_type: "Name",
+											locator: "select",
+											callback_name: "isValueSelected"
+										}]
+									},
+									disabled: {
+										evaluator: function() {
+return (this._binds[0].getValue());
+},
+										flags: {isScopeEval: true},
+										binds: [{
+											property_name: "option",
+											tail: ["is_disabled"]
+										}]
+									}
+								}
+							}
+						},
+						"\r\n\t\t"
+					]
+				},
+				"\r\n\t"
+			]
 		},
 		"extends": "InputAbstract",
 		"class": "Lava.WidgetConfigExtensionGateway",
@@ -23405,9 +23357,6 @@ return (this._binds[0].getValue());
 		is_extended: false
 	},
 	Collapsible: {
-		type: "widget",
-		"class": "Lava.widget.Collapsible",
-		extender_type: "Default",
 		template: [
 			"\r\n\t\t",
 			{
@@ -23472,6 +23421,8 @@ return (this._binds[0].getValue());
 			}
 		},
 		real_class: "Collapsible",
+		"class": "Lava.widget.Collapsible",
+		extender_type: "Default",
 		is_extended: true,
 		resources_cache: {
 			en: {
@@ -23832,9 +23783,6 @@ return (this._binds[0].getValue());
 		is_extended: false
 	},
 	Accordion: {
-		type: "widget",
-		"class": "Lava.WidgetConfigExtensionGateway",
-		extender_type: "Default",
 		template: [
 			"\r\n\t\t",
 			{
@@ -24009,12 +23957,11 @@ return (this._binds[0].getValue());
 			}
 		},
 		real_class: "Accordion",
+		"class": "Lava.WidgetConfigExtensionGateway",
+		extender_type: "Default",
 		is_extended: false
 	},
 	Tabs: {
-		type: "widget",
-		"class": "Lava.WidgetConfigExtensionGateway",
-		extender_type: "Default",
 		template: [
 			"\r\n\t\t",
 			{
@@ -24282,6 +24229,8 @@ return (this._binds[0].getValue() == this._binds[1].getValue() ? 'active' : '');
 			}
 		},
 		real_class: "Tabs",
+		"class": "Lava.WidgetConfigExtensionGateway",
+		extender_type: "Default",
 		is_extended: false
 	},
 	Tooltip: {
@@ -25180,12 +25129,6 @@ return (this._binds[0].getValue());
 				},
 				"\r\n\t\t\t",
 				{
-					roles: [{
-						locator_type: "Name",
-						locator: "calendar",
-						name: "_year_input"
-					}],
-					"extends": "TextInput",
 					assigns: {
 						value: {
 							evaluator: function() {
@@ -25198,6 +25141,12 @@ return (this._binds[0].getValue() + '');
 							}]
 						}
 					},
+					roles: [{
+						locator_type: "Name",
+						locator: "calendar",
+						name: "_year_input"
+					}],
+					"extends": "TextInput",
 					"class": "Lava.WidgetConfigExtensionGateway",
 					extender_type: "Default",
 					resource_id: {

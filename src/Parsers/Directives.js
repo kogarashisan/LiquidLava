@@ -24,12 +24,6 @@ Lava.parsers.Directives = {
 		default_events: {view_config_presence: true, is_top_directive: true}
 	},
 
-	_widget_role_actions: {
-		main: '_widgetRoleMain',
-		//storage: '_widgetRoleStorage',
-		include: '_widgetRoleInclude'
-	},
-
 	_widget_tag_actions: {
 		bind: '_widgetTagBind',
 		assign: '_widgetTagAssign',
@@ -43,7 +37,8 @@ Lava.parsers.Directives = {
 		storage: '_widgetTagStorage',
 		resources: '_widgetTagResources',
 		default_events: '_widgetTagDefaultEvents',
-		edit_template: '_widgetTagEditTemplate'
+		edit_template: '_widgetTagEditTemplate',
+		include: '_widgetTagInclude'
 	},
 
 	_resource_tag_actions: {
@@ -102,189 +97,113 @@ Lava.parsers.Directives = {
 
 	},
 
+	_importVars: function(destination, source, name_list) {
+		for (var i = 0, count = name_list.length; i < count; i++) {
+			var name = name_list[i];
+			if (name in source) destination[name] = source[name];
+		}
+	},
+
 	////////////////////////////////////////////////////////////////////
-	// start: actions for widget tags and tag roles
+	// start: actions for widget tags
 
 	/**
 	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
+	 * @param {_cWidget} widget_config
 	 */
-	_widgetRoleMain: function(raw_tag, config_storage, roles_storage) {
+	_widgetTagBind: function(raw_tag, widget_config) {
 
-		if ('widget_config' in roles_storage) Lava.t("multiple tags with role=main in widget definition");
-
-		var view_config,
-			name,
-			widget_config = Lava.parsers.Common.createDefaultWidgetConfig();
-
-		if (raw_tag.name == 'template') {
-
-			widget_config.template = Lava.parsers.Common.compileTemplate(raw_tag.content);
-
-		} else if (raw_tag.name == 'view') {
-
-			view_config = Lava.parsers.Common.compileAsView(raw_tag.content);
-			if (view_config['class'] != 'View') Lava.t("define: view in 'main' role must be pure View, not subclass");
-			if ('argument' in view_config) Lava.t("Widgets do not support arguments");
-			if ('roles' in view_config) Lava.t("Widget definition: move the roles from main view to widget");
-
-			widget_config.template = view_config.template;
-
-			if ('container' in view_config) widget_config.container = view_config.container;
-			if ('assigns' in view_config) widget_config.assigns = view_config.assigns;
-			if ('options' in view_config) widget_config.options = view_config.options;
-
-			if (Lava.schema.DEBUG) {
-				for (name in view_config) {
-					if (['assigns', 'options', 'class', 'type', 'template', 'container'].indexOf(name) == -1) {
-						Lava.t("[role='main'] view has an option, which can not be copied to widget: " + name
-							+ ". Probably, it must be specified via separate tag");
-					}
-				}
-			}
-
-		} else {
-
-			Lava.t("Widget definition: role=main may be applied to templates and views only");
-
-		}
-
-		roles_storage.widget_config = widget_config;
+		this._parseBinding(widget_config, raw_tag);
 
 	},
 
 	/**
 	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
+	 * @param {_cWidget} widget_config
 	 */
-	_widgetRoleInclude: function(raw_tag, config_storage, roles_storage) {
+	_widgetTagAssign: function(raw_tag, widget_config) {
 
-		var include;
-
-		switch (raw_tag.name) {
-			case 'template':
-				include = raw_tag.content ? Lava.parsers.Common.compileTemplate(raw_tag.content) : [];
-				break;
-			case 'view':
-				include = [Lava.parsers.Common.compileAsView(raw_tag.content)];
-				break;
-			default:
-				Lava.t("Only templates and views may have role=include");
-		}
-
-		this._store(config_storage, 'includes', raw_tag.attributes.name, include);
+		this._parseAssign(widget_config, raw_tag);
 
 	},
 
 	/**
 	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
+	 * @param {_cWidget} widget_config
 	 */
-	_widgetTagBind: function(raw_tag, config_storage, roles_storage) {
+	_widgetTagOption: function(raw_tag, widget_config) {
 
-		this._parseBinding(config_storage, raw_tag);
+		this._parseOption(widget_config, raw_tag, 'options');
 
 	},
 
 	/**
 	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
+	 * @param {_cWidget} widget_config
 	 */
-	_widgetTagAssign: function(raw_tag, config_storage, roles_storage) {
+	_widgetTagProperty: function(raw_tag, widget_config) {
 
-		this._parseAssign(roles_storage, raw_tag);
+		this._parseProperty(widget_config, raw_tag, 'properties');
 
 	},
 
 	/**
 	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
+	 * @param {_cWidget} widget_config
 	 */
-	_widgetTagOption: function(raw_tag, config_storage, roles_storage) {
+	_widgetTagOptions: function(raw_tag, widget_config) {
 
-		this._parseOption(roles_storage, raw_tag, 'options');
+		this._parseObject(widget_config, 'options', raw_tag);
 
 	},
 
 	/**
 	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
+	 * @param {_cWidget} widget_config
 	 */
-	_widgetTagProperty: function(raw_tag, config_storage, roles_storage) {
+	_widgetTagProperties: function(raw_tag, widget_config) {
 
-		this._parseProperty(config_storage, raw_tag, 'properties');
+		this._parseObject(widget_config, 'properties', raw_tag);
 
 	},
 
 	/**
 	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
+	 * @param {_cWidget} widget_config
 	 */
-	_widgetTagOptions: function(raw_tag, config_storage, roles_storage) {
+	_widgetTagRoles: function(raw_tag, widget_config) {
 
-		this._parseObject(config_storage, 'options', raw_tag);
+		this._parseRoles(widget_config, raw_tag);
 
 	},
 
 	/**
 	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
+	 * @param {_cWidget} widget_config
 	 */
-	_widgetTagProperties: function(raw_tag, config_storage, roles_storage) {
+	_widgetTagSugar: function(raw_tag, widget_config) {
 
-		this._parseObject(config_storage, 'properties', raw_tag);
-
-	},
-
-	/**
-	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
-	 */
-	_widgetTagRoles: function(raw_tag, config_storage, roles_storage) {
-
-		this._parseRoles(roles_storage, raw_tag);
-
-	},
-
-	/**
-	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
-	 */
-	_widgetTagSugar: function(raw_tag, config_storage, roles_storage) {
-
-		if ('sugar' in config_storage) Lava.t("Sugar is already defined");
+		if ('sugar' in widget_config) Lava.t("Sugar is already defined");
 		if (Lava.schema.DEBUG && raw_tag.content.length != 1) Lava.t("Malformed option: " + raw_tag.attributes.name);
-		config_storage.sugar = Lava.parseOptions(raw_tag.content[0]);
+		widget_config.sugar = Lava.parseOptions(raw_tag.content[0]);
 
 	},
 
 	/**
 	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
+	 * @param {_cWidget} widget_config
 	 */
-	_widgetTagBroadcast: function(raw_tag, config_storage, roles_storage) {
+	_widgetTagBroadcast: function(raw_tag, widget_config) {
 
-		this._parseBroadcast(config_storage, raw_tag);
+		this._parseBroadcast(widget_config, raw_tag);
 
 	},
 
 	/**
 	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
+	 * @param {_cWidget} widget_config
 	 */
-	_widgetTagStorage: function(raw_tag, config_storage, roles_storage) {
+	_widgetTagStorage: function(raw_tag, widget_config) {
 
 		var tags = Lava.parsers.Common.asBlockType(raw_tag.content, 'tag'),
 			i = 0,
@@ -302,7 +221,7 @@ Lava.parsers.Directives = {
 
 			if (Lava.schema.DEBUG) {
 				if (!tag.attributes || !tag.attributes.name) Lava.t("<" + "storage>: tag without a name attribute");
-				if (config_storage.storage && (tag.attributes.name in config_storage.storage)) Lava.t("Duplicate item in storage: " + tag.attributes.name);
+				if (widget_config.storage && (tag.attributes.name in widget_config.storage)) Lava.t("Duplicate item in storage: " + tag.attributes.name);
 			}
 
 			type = tag.name;
@@ -332,7 +251,7 @@ Lava.parsers.Directives = {
 
 			}
 
-			Lava.getSugarInstance(Lava.schema.widget.DEFAULT_SUGAR_CLASS).parseStorageTag(schema, parse_target, config_storage);
+			Lava.getSugarInstance(Lava.schema.widget.DEFAULT_SUGAR_CLASS).parseStorageTag(schema, parse_target, widget_config);
 
 		}
 
@@ -340,23 +259,21 @@ Lava.parsers.Directives = {
 
 	/**
 	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
+	 * @param {_cWidget} widget_config
 	 */
-	_widgetTagDefaultEvents: function(raw_tag, config_storage, roles_storage) {
+	_widgetTagDefaultEvents: function(raw_tag, widget_config) {
 
-		this._parseDefaultEvents(raw_tag, config_storage);
+		this._parseDefaultEvents(raw_tag, widget_config);
 
 	},
 
 	/**
 	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
+	 * @param {_cWidget} widget_config
 	 */
-	_widgetTagResources: function(raw_tag, config_storage, roles_storage) {
+	_widgetTagResources: function(raw_tag, widget_config) {
 
-		this._xresources(raw_tag, config_storage);
+		this._xresources(raw_tag, widget_config);
 
 	},
 
@@ -408,10 +325,9 @@ Lava.parsers.Directives = {
 
 	/**
 	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} config_storage
-	 * @param {Object} roles_storage
+	 * @param {_cWidget} widget_config
 	 */
-	_widgetTagEditTemplate: function(raw_tag, config_storage, roles_storage) {
+	_widgetTagEditTemplate: function(raw_tag, widget_config) {
 
 		if (Lava.schema.DEBUG && (!raw_tag.attributes || !raw_tag.attributes['name'])) Lava.t('Malformed edit_template tag');
 
@@ -438,9 +354,9 @@ Lava.parsers.Directives = {
 
 		} else {
 
-			if (('includes' in config_storage) && config_storage.includes[raw_tag.attributes.name]) {
+			if (('includes' in widget_config) && widget_config.includes[raw_tag.attributes.name]) {
 
-				template = config_storage.includes[raw_tag.attributes.name];
+				template = widget_config.includes[raw_tag.attributes.name];
 
 			} else {
 
@@ -507,11 +423,22 @@ Lava.parsers.Directives = {
 
 		}
 
-		this._store(config_storage, 'includes', raw_tag.attributes.as || raw_tag.attributes.name, template);
+		this._store(widget_config, 'includes', raw_tag.attributes.as || raw_tag.attributes.name, template);
 
 	},
 
-	// end: actions for widget tags and tag roles
+	/**
+	 * @param {_cRawTag} raw_tag
+	 * @param {_cWidget} widget_config
+	 */
+	_widgetTagInclude: function(raw_tag, widget_config) {
+
+		var include = raw_tag.content ? Lava.parsers.Common.compileTemplate(raw_tag.content) : [];
+		this._store(widget_config, 'includes', raw_tag.attributes.name, include);
+
+	},
+
+	// end: actions for widget tags
 	////////////////////////////////////////////////////////////////////
 
 	////////////////////////////////////////////////////////////////////
@@ -762,6 +689,32 @@ Lava.parsers.Directives = {
 	////////////////////////////////////////////////////////////////////
 
 	/**
+	 * @param {_cRawTag} raw_tag
+	 */
+	_asMainWidget: function(raw_tag) {
+
+		var view_config = Lava.parsers.Common.compileAsView(raw_tag.content),
+			widget_config = Lava.parsers.Common.createDefaultWidgetConfig(),
+			name;
+
+		if (Lava.schema.DEBUG) {
+			if (view_config['class'] != 'View') Lava.t("define: view in 'main' role must be pure View, not subclass");
+			if ('argument' in view_config) Lava.t("Widgets do not support arguments");
+			if ('roles' in view_config) Lava.t("Widget definition: move the roles from main view to widget");
+			for (name in view_config) {
+				if (['assigns', 'options', 'class', 'type', 'template', 'container'].indexOf(name) == -1) {
+					Lava.t("main_view: view has an option, which can not be copied to widget: " + name + ". Probably, it must be specified via separate tag");
+				}
+			}
+		}
+
+		this._importVars(widget_config, view_config, ['template', 'container', 'assigns', 'options']);
+
+		return widget_config;
+
+	},
+
+	/**
 	 * @param {_cRawDirective} raw_directive
 	 * @returns {_cWidget}
 	 */
@@ -770,9 +723,7 @@ Lava.parsers.Directives = {
 		if (Lava.schema.DEBUG && !('attributes' in raw_directive)) Lava.t("Widget definition is missing attributes");
 
 		var tags = raw_directive.content ? Lava.parsers.Common.asBlockType(raw_directive.content, 'tag') : [],
-			config_storage = {},
-			roles_storage = {},
-			widget_config,
+			widget_config = {},
 			i = 0,
 			count = tags.length,
 			tag,
@@ -781,36 +732,30 @@ Lava.parsers.Directives = {
 
 		this._widget_directives_stack.push(raw_directive);
 
-		for (; i < count; i++) {
+		if (count) {
 
-			tag = tags[i];
+			if (tags[0].name == 'main_view') {
 
-			if (('attributes' in tag) && tag.attributes.role) {
+				widget_config = this._asMainWidget(tags[0]);
+				i = 1;
 
-				if (!(tag.attributes.role in this._widget_role_actions)) Lava.t("Unknown role in widget definition: " + tag.attributes.role);
-				this[this._widget_role_actions[tag.attributes.role]](tag, config_storage, roles_storage);
+			} else if (tags[0].name == 'main_template') {
 
-			} else {
-
-				if (!(tag.name in this._widget_tag_actions)) Lava.t("Unknown tag in widget definition: " + tag.name + ". Maybe missing the 'role' attribute.");
-				this[this._widget_tag_actions[tag.name]](tag, config_storage, roles_storage);
+				widget_config.template = Lava.parsers.Common.compileTemplate(tags[0].content);
+				i = 1;
 
 			}
 
 		}
 
-		if ('widget_config' in roles_storage) {
+		for (; i < count; i++) {
 
-			widget_config = roles_storage.widget_config;
-			Firestorm.extend(widget_config, config_storage);
-
-		} else {
-
-			widget_config = config_storage;
+			tag = tags[i];
+			if (!(tag.name in this._widget_tag_actions)) Lava.t("Unknown tag in widget definition: " + tag.name + ". Note, that main_template and main_view tags must be on top.");
+			this[this._widget_tag_actions[tag.name]](tag, widget_config);
 
 		}
 
-		if ('roles' in roles_storage) widget_config.roles = roles_storage.roles;
 		if (raw_directive.attributes.controller) {
 
 			path = raw_directive.attributes.controller;
@@ -838,30 +783,6 @@ Lava.parsers.Directives = {
 		if (raw_directive.attributes.id) {
 			if (Lava.schema.DEBUG && widget_config.id) Lava.t("[Widget configuration] widget id was already set via main view configuration: " + raw_directive.attributes.id);
 			Lava.parsers.Common.setViewConfigId(widget_config, raw_directive.attributes.id);
-		}
-
-		if ('options' in roles_storage) {
-
-			if ('options' in widget_config) {
-
-				for (name in roles_storage.options) {
-
-					if (name in widget_config.options) Lava.t("Duplicate option: " + name);
-					widget_config.options[name] = roles_storage.options[name];
-
-				}
-
-			} else {
-
-				widget_config.options = roles_storage.options;
-
-			}
-
-		}
-
-		if ('assigns' in roles_storage) {
-			if ('assigns' in widget_config) Lava.t("Please, move assigns to one place: either to widget tag, or view directives");
-			widget_config.assigns = roles_storage.assigns;
 		}
 
 		if (!widget_config['class']) widget_config['class'] = Lava.schema.widget.DEFAULT_EXTENSION_GATEWAY;

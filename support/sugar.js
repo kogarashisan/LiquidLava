@@ -106,7 +106,34 @@ _cSugarContentObjectMap = {
 
 _cSugarAttribute = {
 
-	type: '',
+	type: 'object_property',
+
+	type_name: '',
+
+	/** @type {?string} */
+	name: ''
+
+};
+
+/**
+ * Equals to keys in {@link Lava.system.Sugar#_root_attributes_handlers}
+ * @enum {string}
+ */
+_cSugarRootAttributeTypes = {
+	id: 'id',
+	option: 'option',
+	'switch': 'switch',
+	property: 'property',
+	targets_option: 'targets_option',
+	expression_option: 'expression_option'
+};
+
+_cSugarRootAttribute = {
+
+	/**
+	 * @type {_cSugarRootAttributeTypes}
+	 */
+	type: null,
 
 	type_name: '',
 
@@ -143,7 +170,7 @@ _cSugar = {
 	/** @type {_tSugarContent} */
 	content_schema: null,
 
-	/** @type {Object.<string, _cSugarAttribute>} */
+	/** @type {Object.<string, _cSugarRootAttribute>} */
 	attribute_mappings: null,
 
 	unknown_root_attributes: {

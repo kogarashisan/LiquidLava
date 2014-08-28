@@ -1,5 +1,5 @@
 <x:widget extends="Example" controller="CheckTreeExample">
-	<template role="main">
+	<main_template>
 		<div style="position: relative;height: 320px;width: 350px;overflow: auto;border: 1px solid gray;">
 			<x:widget extends="FolderTree">
 				<assign name="records">$tree_example.records</assign>
@@ -30,6 +30,6 @@
 				</script>
 			</x:widget>
 		</div>
-	</template>
+	</main_template>
 	<assign name="records">#ExamplesApp.tree_records</assign>
 </x:widget>

@@ -1,13 +1,13 @@
 <example>
 	<x:widget controller="TreeView1">
-		<view role="main">
+		<main_view>
 			<div x:type="view" style="border: 1px solid black">
 				{$foreach($tree_view.tree) as=node}
 					{>$tree_view.node}
 				{/foreach}
 			</div>
-		</view>
-		<template role="include" name="node">
+		</main_view>
+		<include name="node">
 			<div x:type="container" style="border: 1px solid black"
 				x:event:click="$tree_view.node_click(node)"
 				x:style:background="(node.children.length) ? 'yellow' : ''">
@@ -20,7 +20,7 @@
 					{/foreach}
 				</div>
 			{/if}
-		</template>
+		</include>
 		<assign name="tree">#ExamplesApp.live_example_tree</assign>
 		<default_events>['click']</default_events>
 	</x:widget>

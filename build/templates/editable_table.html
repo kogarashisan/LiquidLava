@@ -1,6 +1,6 @@
 <!-- This is part of examples, moved into separate file for technical reasons -->
 <x:define controller="EditableTableExample" extends="Table" title="EditableTable">
-	<template role="include" name="tbody">
+	<include name="tbody">
 		<tbody x:type="container" x:resource_id="$table.TBODY_ELEMENT">
 			{#foreach($table.records) as=row}
 				<x:roles>$table._tbody</x:roles>
@@ -17,7 +17,7 @@
 				</tr>
 			{/foreach}
 		</tbody>
-	</template>
+	</include>
 	<storage>
 		<template_hash name="edit_cells">
 			<template name="String">
