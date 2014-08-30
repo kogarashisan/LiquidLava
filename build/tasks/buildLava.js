@@ -13,9 +13,6 @@ module.exports = function(grunt) {
 
 		var groups = grunt.config('js_files');
 		var fs = require('fs');
-		// it's believed, that if you require() a JS file immediately after writing it to disk - node may load the old version.
-		// Although it may be false, but this voodoo spell is made to force it to load the fresh version.
-		fs.unlinkSync('./build/temp/lava_module.js');
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// read files from disk
@@ -54,7 +51,12 @@ module.exports = function(grunt) {
 		module_content += '\n\n' + 'global.Lava = Lava;' + '\n' + 'global.Firestorm = Firestorm;\n\n';
 		module_content += '\n' + 'Lava.init();\n';
 
-		grunt.file.write('./build/temp/lava_module.js', module_content);
+		if (grunt.file.read('./build/temp/lava_module.js') != module_content) {
+			grunt.file.write('./build/temp/lava_module.js', module_content);
+			// @todo if you require() this file immediately - node will load the old (stale) version,
+			// How to force it to write the file before require()?
+			throw new Error('continue');
+		}
 
 		// End
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////

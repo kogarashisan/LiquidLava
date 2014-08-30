@@ -10,7 +10,7 @@
 /** @typedef {(Array.<string|_cScopeLocator>)} _tPathSegment */
 
 /** @enum {string} */
-_tKnownViewLocatorType = {
+_eKnownViewLocatorType = {
 	/**
 	 * test description: Name
 	 */
@@ -20,7 +20,7 @@ _tKnownViewLocatorType = {
 };
 
 /** @enum {string} */
-_tViewLocatorType = {
+_eViewLocatorType = {
 	Name: 'Name',
 	Label: 'Label',
 	Id: 'Id',
@@ -29,7 +29,7 @@ _tViewLocatorType = {
 
 _cKnownViewLocator = {
 
-	/** @type {_tKnownViewLocatorType} */
+	/** @type {_eKnownViewLocatorType} */
 	locator_type: '',
 
 	locator: ''
@@ -39,7 +39,7 @@ _cKnownViewLocator = {
 /** @extends {_cKnownViewLocator} */
 _cViewLocator = {
 
-	/** @type {_tViewLocatorType} */
+	/** @type {_eViewLocatorType} */
 	locator_type: ''
 
 };
@@ -266,7 +266,7 @@ _cView = {
 	real_class: '',
 
 	class_locator: {
-		/** @type {_tViewLocatorType} */
+		/** @type {_eViewLocatorType} */
 		locator_type: null,
 		name: ''
 	},
@@ -342,29 +342,6 @@ _cRefresher = {
 
 };
 
-/** @enum {string} */
-_cStorageItemTypes = {
-	template_collection: 'template_collection',
-	object_collection: 'object_collection',
-	template_hash: 'template_hash',
-	object_hash: 'object_hash',
-	object: 'object'
-};
-
-_cStorageItem = {
-
-	/** @type {_cStorageItemTypes} */
-	type: '',
-
-	/**
-	 * @type {_cSugarContentTemplateCollection|_cSugarContentTemplateHash|_cSugarContentObjectCollection|_cSugarContentObjectHash|_cSugarContentObject}
-	 */
-	schema: null,
-
-	value: null
-
-};
-
 /**
  * @extends {_cView}
  */
@@ -407,7 +384,12 @@ _cWidget = {
 	properties: {},
 
 	/**
-	 * @type {Object.<string, _cStorageItem>}
+	 * @type {Object.<name, _cStorageItemSchema>}
+	 */
+	storage_schema: {},
+
+	/**
+	 * @type {Object.<string, (Array|Object)>}
 	 */
 	storage: {},
 

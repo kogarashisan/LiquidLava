@@ -21,8 +21,8 @@
 				content: [
 					"\r\n\t",
 					{
-						real_class: "DemoCalendar",
 						"extends": "Calendar",
+						real_class: "DemoCalendar",
 						"class": "Lava.WidgetConfigExtensionGateway",
 						extender_type: "Default",
 						type: "widget"

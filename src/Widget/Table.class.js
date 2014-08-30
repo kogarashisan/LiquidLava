@@ -61,7 +61,7 @@ Lava.define(
 	_getCellInclude: function(template_arguments) {
 
 		// var column = template_arguments[0];
-		return this._config.storage.cells.value[template_arguments[0].type];
+		return this._config.storage.cells[template_arguments[0].type];
 
 	}
 

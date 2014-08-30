@@ -74,13 +74,13 @@ Lava.define(
 
 		if (this._config.storage && this._config.storage.panels) {
 
-			data = this._config.storage.panels.value;
+			data = this._config.storage.panels;
 			for (i = 0, count = data.length; i < count; i++) {
 
 				this.addPanel({
 					is_expanded: data[i].is_expanded || false,
-					title_template: data[i].title,
-					content_template: data[i].content
+					title: data[i].title,
+					content: data[i].content
 				});
 
 			}
@@ -91,10 +91,12 @@ Lava.define(
 
 	addPanel: function(properties) {
 
+		if (Lava.schema.DEBUG && (properties.title && !Array.isArray(properties.title)) || (properties.content && !Array.isArray(properties.content))) Lava.t('Accordion: title and content must be templates');
+
 		var panel = new Lava.mixin.Properties({
 			is_expanded: false,
-			title_template: null,
-			content_template: null
+			title: null,
+			content: null
 		});
 		panel.setProperties(properties);
 		this._panels.push(panel);

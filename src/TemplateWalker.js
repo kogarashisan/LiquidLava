@@ -12,11 +12,13 @@ Lava.TemplateWalker = {
 	},
 
 	/**
-	 * @type {_tVisitor}
+	 * @type {_iVisitor}
 	 */
 	_visitor: null,
 	_template_stack: [],
 	_index_stack: [],
+	_view_config_stack: [],
+
 	// local vars for advanced compression
 	_has_enter: false,
 	_has_leave: false,
@@ -25,7 +27,7 @@ Lava.TemplateWalker = {
 
 	/**
 	 * @param template
-	 * @param {_tVisitor} visitor
+	 * @param {_iVisitor} visitor
 	 */
 	walkTemplate: function(template, visitor) {
 
@@ -67,6 +69,14 @@ Lava.TemplateWalker = {
 
 	getCurrentIndex: function() {
 		return this._index_stack[this._index_stack.length - 1];
+	},
+
+	getViewConfigStack: function() {
+		return this._view_config_stack;
+	},
+
+	getCurrentViewConfig: function() {
+		return this._view_config_stack[this._view_config_stack.length];
 	},
 
 	_walkTemplate: function(template) {
@@ -127,8 +137,24 @@ Lava.TemplateWalker = {
 
 	_handleView: function(node) {
 
+		this._view_config_stack.push(node);
 		this._visitor.visitView && this._visitor.visitView(this, node);
 		this._handleViewCommon(node);
+		this._view_config_stack.pop();
+
+	},
+
+	_walkStorageObject: function(object, properties_schema) {
+
+		var name;
+
+		this._has_enter_region && this._visitor.enterRegion(this, 'object');
+		for (name in properties_schema) {
+			if (properties_schema[name].type == 'template') {
+				this._walkTemplate(object[name]);
+			}
+		}
+		this._has_leave_region && this._visitor.leaveRegion(this, 'object');
 
 	},
 
@@ -138,13 +164,11 @@ Lava.TemplateWalker = {
 			item,
 			i,
 			count,
-			name_index,
-			names_count,
 			tmp_name,
-			schema,
-			tag_mappings,
-			template_names;
+			item_schema,
+			storage_schema;
 
+		this._view_config_stack.push(node);
 		this._visitor.visitWidget && this._visitor.visitWidget(this, node);
 		this._handleViewCommon(node);
 
@@ -156,71 +180,59 @@ Lava.TemplateWalker = {
 			this._has_leave_region && this._visitor.leaveRegion(this, 'includes');
 		}
 
-		for (name in node.storage) {
+		if (node.storage) {
 
-			this._has_enter_region && this._visitor.enterRegion(this, 'storage');
+			storage_schema = Lava.parsers.Storage.getMergedStorageSchema(node);
+			for (name in node.storage) {
 
-			item = node.storage[name];
+				this._has_enter_region && this._visitor.enterRegion(this, 'storage');
 
-			if (['object_collection', 'object_hash', 'object'].indexOf(item.type) != -1) {
-				if (!item.schema) Lava.t('Walker: unable to walk storage item, as schema is missing');
-				tag_mappings = item.schema.tag_mappings;
-				template_names = [];
-				for (tmp_name in tag_mappings) {
-					if (tag_mappings[tmp_name].type == 'template') {
-						template_names.push(tmp_name);
-					}
+				item_schema = storage_schema[name];
+				item = node.storage[name];
+
+				switch (item_schema.type) {
+					case 'template_collection':
+						this._has_enter_region && this._visitor.enterRegion(this, 'template_collection');
+						for (i = 0, count = item.length; i < count; i++) {
+							this._walkTemplate(item[i]);
+						}
+						this._has_leave_region && this._visitor.leaveRegion(this, 'template_collection');
+						break;
+					case 'object_collection':
+						this._has_enter_region && this._visitor.enterRegion(this, 'object_collection');
+						for (i = 0, count = item.length; i < count; i++) {
+							this._walkStorageObject(item[i], item_schema.properties);
+						}
+						this._has_leave_region && this._visitor.leaveRegion(this, 'object_collection');
+						break;
+					case 'template_hash':
+						this._has_enter_region && this._visitor.enterRegion(this, 'template_hash');
+						for (tmp_name in item) {
+							this._walkTemplate(item[tmp_name]);
+						}
+						this._has_leave_region && this._visitor.leaveRegion(this, 'template_hash');
+						break;
+					case 'object_hash':
+						this._has_enter_region && this._visitor.enterRegion(this, 'object_hash');
+						for (tmp_name in item) {
+							this._walkStorageObject(item[tmp_name], item_schema.properties);
+						}
+						this._has_leave_region && this._visitor.leaveRegion(this, 'object_hash');
+						break;
+					case 'object':
+						this._walkStorageObject(item, item_schema.properties);
+						break;
+					default:
+						Lava.t();
 				}
-				names_count = template_names.length;
-			}
 
-			switch (item.type) {
-				case 'template_collection':
-					this._has_enter_region && this._visitor.enterRegion(this, 'template_collection');
-					for (i = 0, count = item.value.length; i < count; i++) {
-						this._walkTemplate(item.value[i]);
-					}
-					this._has_leave_region && this._visitor.leaveRegion(this, 'template_collection');
-					break;
-				case 'object_collection':
-					this._has_enter_region && this._visitor.enterRegion(this, 'object_collection');
-					for (i = 0, count = item.value.length; i < count; i++) {
-						for (name_index = 0; name_index < names_count; name_index++) {
-							this._walkTemplate(item.value[i][template_names[name_index]]);
-						}
-					}
-					this._has_leave_region && this._visitor.leaveRegion(this, 'object_collection');
-					break;
-				case 'template_hash':
-					this._has_enter_region && this._visitor.enterRegion(this, 'template_hash');
-					for (tmp_name in item.value) {
-						this._walkTemplate(item.value[tmp_name]);
-					}
-					this._has_leave_region && this._visitor.leaveRegion(this, 'template_hash');
-					break;
-				case 'object_hash':
-					this._has_enter_region && this._visitor.enterRegion(this, 'object_hash');
-					for (tmp_name in item.value) {
-						for (name_index = 0; name_index < names_count; name_index++) {
-							this._walkTemplate(item.value[tmp_name][template_names[name_index]]);
-						}
-					}
-					this._has_leave_region && this._visitor.leaveRegion(this, 'object_hash');
-					break;
-				case 'object':
-					this._has_enter_region && this._visitor.enterRegion(this, 'object');
-					for (name_index = 0; name_index < names_count; name_index++) {
-						this._walkTemplate(item.value[template_names[name_index]]);
-					}
-					this._has_leave_region && this._visitor.leaveRegion(this, 'object');
-					break;
-				default:
-					Lava.t();
-			}
+				this._has_leave_region && this._visitor.leaveRegion(this, 'storage');
 
-			this._has_leave_region && this._visitor.leaveRegion(this, 'storage');
+			}
 
 		}
+
+		this._view_config_stack.pop();
 
 	},
 

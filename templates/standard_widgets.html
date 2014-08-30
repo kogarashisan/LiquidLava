@@ -15,10 +15,7 @@
 	<script x:equiv="sugar" type="application/json">
 		{
 			tag_name: 'collapsible',
-			is_content_allowed: true,
-			content_schema: {
-				type: 'template'
-			},
+			content_schema: {type: 'include', name: 'content'},
 			attribute_mappings: {
 				'is-expanded': {type: 'property', type_name: 'Boolean', name: 'is_expanded'},
 				'is-animation-enabled': {type: 'property', type_name: 'Boolean', name: 'is_animation_enabled'}
@@ -61,12 +58,11 @@
 	<script x:equiv="sugar" type="application/json">
 		{
 			tag_name: 'collapsible-panel',
-			is_content_allowed: true,
 			content_schema: {
-				type: 'object_map',
+				type: 'union',
 				tag_roles: {
-					title: {type: 'template', name: 'title'},
-					content: {type: 'template'}
+					title: {type: 'include'},
+					content: {type: 'include'}
 				}
 			},
 			attribute_mappings: {
@@ -123,36 +119,35 @@
 				<collapsible-panel x:roles="$accordion.panel" x:resource_id="$accordion.panel">
 					<x:assign name="is_expanded">panel.is_expanded</x:assign>
 					<title>
-						{>$accordion.panel_include(panel, 'title_template')}
+						{>$accordion.panel_include(panel, 'title')}
 					</title>
 					<content>
-						{>$accordion.panel_include(panel, 'content_template')}
+						{>$accordion.panel_include(panel, 'content')}
 					</content>
 				</collapsible-panel>
 			{/foreach}
 		</div>
 	</include>
+	<script x:equiv="storage_schema" type="application/json">
+		{
+			panels: {
+				type: 'object_collection',
+				tag_name: 'panel',
+				properties: {
+					title: {type: 'template'},
+					content: {type: 'template'},
+					'is-expanded': {type: 'lava_type', type_name: 'Boolean', is_attribute: true, name: 'is_expanded'}
+				}
+			}
+		}
+	</script>
 	<script x:equiv="sugar" type="application/json">
 		{
 			tag_name: 'accordion',
 			content_schema: {
-				type: 'object_map',
+				type: 'union',
 				tag_roles: {
-					content: {
-						type: 'template'
-					},
-					panels: {
-						type: 'object_collection',
-						name: 'panels',
-						tag_name: 'panel',
-						tag_mappings: {
-							title: {type: 'template'},
-							content: {type: 'template'}
-						},
-						attribute_mappings: {
-							'is-expanded': {type: 'object_property', name: 'is_expanded', type_name: 'Boolean'}
-						}
-					}
+					content: {type: 'include'}
 				}
 			},
 			attribute_mappings: {
@@ -174,7 +169,7 @@
 					<li x:type="view" x:classes="tab == $tabs._active_tab ? 'active' : '';
 							tab.is_enabled ? '' : 'disabled'">
 						<a x:type="view" x:bind:href="'#' + (tab.name || '')" x:event:click="$tabs.header_click(tab)">
-							{>$tabs.tab_include(tab, 'title_template')}
+							{>$tabs.tab_include(tab, 'title')}
 						</a>
 					</li>
 				{/if}
@@ -189,22 +184,27 @@
 			{/foreach}
 		</div>
 	</main_template>
+	<script x:equiv="storage_schema" type="application/json">
+		{
+			tabs: {
+				type: 'object_collection',
+				tag_name: 'tab',
+				properties: {
+					title: {type: 'template'},
+					content: {type: 'template'},
+					name: {type: 'lava_type', is_attribute: true, type_name: 'Boolean'},
+					'is-enabled': {type: 'lava_type', is_attribute: true, type_name: 'Boolean', name: 'is_enabled'},
+					'is-hidden': {type: 'lava_type', is_attribute: true, type_name: 'Boolean', name: 'is_hidden'}
+				}
+			}
+		}
+	</script>
 	<script x:equiv="sugar" type="application/json">
 		{
 			tag_name: 'tabs',
 			content_schema: {
-				type: 'object_collection',
-				name: 'tabs',
-				tag_name: 'tab',
-				tag_mappings: {
-					title: {type: 'template', name: 'title_template'},
-					content: {type: 'template', name: 'content_template'}
-				},
-				attribute_mappings: {
-					name: {type: 'object_property'},
-					'is-enabled': {type: 'object_property', type_name: 'Boolean', name: 'is_enabled'},
-					'is-hidden': {type: 'object_property', type_name: 'Boolean', name: 'is_hidden'}
-				}
+				type: 'storage_object',
+				name: 'tabs'
 			}
 		}
 	</script>
@@ -336,15 +336,20 @@
 			{/foreach}
 		</tbody>
 	</include>
+	<script type="application/json" x:equiv="storage_schema">
+		{
+			cells: {type: 'template_hash', tag_name: 'cell'}
+		}
+	</script>
 	<storage>
-		<template_hash name="cells">
-			<template name="String">
+		<cells>
+			<cell name="String">
 				{#> row[column.name]}
-			</template>
-			<template name="Boolean">
+			</cell>
+			<cell name="Boolean">
 				{#> translateBoolean(!!row[column.name])}
-			</template>
-		</template_hash>
+			</cell>
+		</cells>
 	</storage>
 	<resources locale="default">
 		<container path="TABLE_ELEMENT">

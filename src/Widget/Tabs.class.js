@@ -49,7 +49,7 @@ Lava.define(
 
 		if (this._config.storage && this._config.storage.tabs) {
 
-			sugar_tabs = this._config.storage.tabs.value;
+			sugar_tabs = this._config.storage.tabs;
 			i = 0;
 			count = sugar_tabs.length;
 
@@ -78,18 +78,20 @@ Lava.define(
 	 * @param {string} properties.name
 	 * @param {boolean} properties.is_enabled
 	 * @param {boolean} properties.is_hidden
-	 * @param {_tTemplate} properties.content_template Read only
-	 * @param {_tTemplate} properties.title_template Read only
+	 * @param {_tTemplate} properties.content Read only
+	 * @param {_tTemplate} properties.title Read only
 	 */
 	addTab: function(properties) {
+
+		if (Lava.schema.DEBUG && (properties.title && !Array.isArray(properties.title)) || (properties.content && !Array.isArray(properties.content))) Lava.t('Tabs: title and content must be templates');
 
 		var tab = new Lava.mixin.Properties({
 			guid: Lava.guid++,
 			name: '',
 			is_enabled: true,
 			is_hidden: false,
-			title_template: null,
-			content_template: null
+			title: null,
+			content: null
 		});
 		tab.setProperties(properties);
 		tab.onPropertyChanged('is_enabled', this._onTabStateChanged, this);

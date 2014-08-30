@@ -10,20 +10,20 @@ Lava.extenders = {
 		assigns: '_mergeConfigProperty',
 		options: '_mergeConfigProperty',
 		properties: '_mergeConfigProperty',
-		storage: '_mergeStorage',
 		sugar: '_mergeSugar',
-		broadcast: '_mergeConfigProperty'
+		broadcast: '_mergeConfigProperty',
+		storage_schema: '_mergeStorageSchema'
 	},
 
 	// property_name => needs_implement || property_merge_map
 	_sugar_merge_map: {
 		attribute_mappings: true,
 		content_schema: {
-			attribute_mappings: true,
-			tag_mappings: true,
 			tag_roles: true
 		}
 	},
+
+	_exceptions: ['resources', 'resources_cache', 'storage'],
 
 	_mergeConfigProperty: function(dest_container, source_container, property_name) {
 
@@ -105,6 +105,7 @@ Lava.extenders = {
 	_mergeStorage: function(dest_container, source_container, property_name) {
 
 		var name,
+			storage_schema = dest_container['storage_schema'],
 			dest = dest_container[property_name],
 			source = source_container[property_name];
 
@@ -116,8 +117,7 @@ Lava.extenders = {
 
 			} else {
 
-				if (Lava.schema.DEBUG && dest[name].type != source[name].type) Lava.t("[Config storage] property types must match: " + name);
-				if (['template_hash', 'object_hash', 'object'].indexOf(dest[name].type) != -1) {
+				if (['template_hash', 'object_hash', 'object'].indexOf(storage_schema[name].type) != -1) {
 
 					Firestorm.implement(dest[name], source[name]);
 
@@ -159,23 +159,29 @@ Lava.extenders = {
 
 	},
 
+	_mergeStorageSchema: function(dest_container, source_container, property_name) {
+
+		Lava.mergeStorageSchema(dest_container[property_name], source_container[property_name]);
+
+	},
+
 	/**
 	 * @param {_cWidget} config
 	 */
 	Default: function(config) {
 
 		var parent_config,
-			parent_name;
+			parent_widget_name;
 
 		if ('extends' in config) {
 
-			parent_name = config.extends;
+			parent_widget_name = config.extends;
 			// returns already extended configs
-			parent_config = Lava.getWidgetConfig(parent_name);
+			parent_config = Lava.getWidgetConfig(parent_widget_name);
 
 			for (var name in parent_config) {
 
-				if (name != 'resources' && name != 'resources_cache') {
+				if (this._exceptions.indexOf(name) == -1) {
 
 					if (!(name in config)) {
 
@@ -183,12 +189,21 @@ Lava.extenders = {
 
 					} else if (name in this._widget_config_merged_properties) {
 
-						this[this._widget_config_merged_properties[name]](config, parent_config, name, parent_name);
+						this[this._widget_config_merged_properties[name]](config, parent_config, name, parent_widget_name);
 
 					}
 
 				}
 
+			}
+
+			// delay merging of storage until storage_schema is merged
+			if ('storage' in parent_config) {
+				if (!('storage' in config)) {
+					config['storage'] = parent_config['storage'];
+				} else {
+					this._mergeStorage(config, parent_config, 'storage', parent_widget_name);
+				}
 			}
 
 		}

@@ -52,7 +52,11 @@ var Lava = {
 	/** @ignore */
 	mixin: {},
 	/** @ignore */
-	parsers: {},
+	parsers: {
+		Common: null,
+		Directives: null,
+		Storage: null
+	},
 	/** @ignore */
 	view: {
 		/** @ignore */
@@ -601,6 +605,65 @@ var Lava = {
 	isVoidTag: function(name) {
 
 		return this.VOID_TAGS.indexOf(name) != -1;
+
+	},
+
+	mergeStorageSchema: function(dest, source) {
+
+		var name;
+
+		for (name in source) {
+
+			if (!(name in dest)) {
+
+				dest[name] = source[name];
+
+			} else {
+
+				if (Lava.schema.DEBUG && dest[name].type != source[name].type) Lava.t("[Config storage_schema] property types must match: " + name);
+
+				if (('content_schema' in dest[name]) && ('content_schema' in source[name])) {
+
+					// copy object property descriptors
+					Firestorm.implement(dest[name].content_schema, source[name].content_schema);
+
+				}
+
+				Firestorm.implement(dest[name], source[name]);
+
+			}
+
+		}
+
+	},
+
+	/**
+	 * Utility method used in parsers and sugar
+	 *
+	 * @param {_cWidget} widget_config
+	 * @param {string} storage_name
+	 * @param {string} item_name
+	 * @param {*} value
+	 */
+	store: function(widget_config, storage_name, item_name, value) {
+
+		if (!(storage_name in widget_config)) widget_config[storage_name] = {};
+		if (Lava.schema.DEBUG && (item_name in widget_config[storage_name])) Lava.t("Duplicate item in storage: " + item_name);
+		widget_config[storage_name][item_name] = value;
+
+	},
+
+	/**
+	 * Utility method used in parsers and sugar
+	 *
+	 * @param {Object} descriptor
+	 * @param {string} value
+	 * @returns {*}
+	 */
+	valueToType: function(descriptor, value) {
+
+		if (Lava.schema.DEBUG && !Lava.types[descriptor.type_name].isValidString(value, descriptor)) Lava.t("Invalid attribute value: " + value);
+		return Lava.types[descriptor.type_name].fromSafeString(value, descriptor);
 
 	},
 

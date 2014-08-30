@@ -7,7 +7,7 @@
 					<task type="traverse">
 						<script x:equiv="handler">
 							({
-								arguments: null, /*H:Will be assigned by framework, see the &lt;arguments&gt; below*/
+								arguments: null, /*H:Will be assigned by framework, see the &amp;lt;arguments&amp;gt; below*/
 								visitView: function(walker, node) {
 									node.template = this.arguments[0].concat(node.template); /*H:Prepend template with checkbox to the first view's content*/
 									walker.interrupt();

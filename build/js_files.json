@@ -18,6 +18,7 @@
 	"parsers": [
 		"Parsers/Common.js",
 		"Parsers/Directives.js",
+		"Parsers/Storage.js",
 		"Parsers/Generated/ObjectParser.js",
 		"Parsers/ObjectParser.js",
 		"Parsers/Generated/ExpressionParser.js",

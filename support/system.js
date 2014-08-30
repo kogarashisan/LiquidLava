@@ -88,6 +88,9 @@ _cClassData = {
 	instanceOf: function(class_name) {}
 };
 
+/**
+ * @interface
+ */
 _iEventTicket = {
 
 	remove: function() {}
@@ -131,7 +134,10 @@ _cScopeForeach = {
 
 };
 
-_tVisitor = {
+/**
+ * @interface
+ */
+_iVisitor = {
 	enter: function(walker, block_type, block) {},
 	leave: function(walker, block_type, block) {},
 	enterRegion: function(walker, region_name) {},

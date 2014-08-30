@@ -1,117 +1,53 @@
 
-
 /** @enum {string} */
-var _cSugarContentSchemaTypes = {
-	template_collection: 'template_collection',
-	template_hash: 'template_hash',
-	object_collection: 'object_collection',
-	object_hash: 'object_hash',
-	template: 'template',
-	object_map: 'object_map',
-	object: 'object'
+_eSugarRootContentType = {
+	storage_object: 'storage_object',
+	include: 'include',
+	storage: 'storage',
+	tag_map: 'union'
+	//main_template: 'main_template'
 };
 
-_cSugarContentTemplate = {
+_cSugarTag = {
 
-	type: 'template',
-
-	// optional
-	name: ''
-
-};
-
-_cSugarContentTemplateCollection = {
-
-	type: 'template_collection',
-
-	name: '',
-
-	tag_name: ''
-
-};
-
-_cSugarContentTemplateHash = {
-
-	type: 'template_hash',
-
-	name: '',
-
-	tag_name: 'template'
-
-};
-
-_cSugarContentObject = {
-
-	type: 'object',
-
-	name: '',
-
+	type: 'include',
 	/**
-	 * If root is object - it must not have this setting
-	 * @type {Object.<string, _cSugarAttribute>}
+	 * Only for `type='include'` - the name of include
 	 */
-	attribute_mappings: null,
-
-	/** @type {Object.<string, _cSugarObjectTag>} */
-	tag_mappings: null
+	name: null
 
 };
 
-_cSugarContentObjectCollection = {
+_cSugarContent = {
 
-	type: 'object_collection',
+	/** @type {_eSugarRootContentType} */
+	type: null,
+	/**
+	 * For `type='include'` - name of the include,
+	 * For `type='storage_object'` - name of the object in storage
+	 */
+	name: null,
+	/**
+	 * for `type='map'`:
+	 * @type {Object.<string, _cSugarTag>}
+	 */
+	tag_roles: {}
 
-	name: '',
+};
+
+_cSugar = {
+
+	'class': '',
 
 	tag_name: '',
 
-	/** @type {Object.<string, _cSugarAttribute>} */
+	/** @type {_cSugarContent} */
+	content_schema: null,
+
+	/** @type {Object.<string, _cSugarRootAttribute>} */
 	attribute_mappings: null,
 
-	/** @type {Object.<string, _cSugarObjectTag>} */
-	tag_mappings: null
-
-};
-
-_cSugarContentObjectHash = {
-
-	type: 'object_hash',
-
-	name: '',
-
-	tag_name: '',
-
-	/** @type {Object.<string, _cSugarAttribute>} */
-	attribute_mappings: null,
-
-	/** @type {Object.<string, _cSugarObjectTag>} */
-	tag_mappings: null
-
-};
-
-_cSugarContentObjectMap = {
-
-	type: 'object_map',
-
-	/**
-	 * @type {Object.<string, (_cSugarContentTemplate|_cSugarContentTemplateCollection|_cSugarContentObject|_cSugarContentObjectCollection)>}
-	 */
-	tag_roles: null
-
-};
-
-/**
- * @typedef {(_cSugarContentObjectMap|_cSugarContentTemplate|_cSugarContentTemplateCollection|_cSugarContentObject|_cSugarContentObjectCollection)} _tSugarContent
- */
-
-_cSugarAttribute = {
-
-	type: 'object_property',
-
-	type_name: '',
-
-	/** @type {?string} */
-	name: ''
+	root_resource_name: '' // for attributes without schema
 
 };
 
@@ -119,68 +55,30 @@ _cSugarAttribute = {
  * Equals to keys in {@link Lava.system.Sugar#_root_attributes_handlers}
  * @enum {string}
  */
-_cSugarRootAttributeTypes = {
-	id: 'id',
-	option: 'option',
-	'switch': 'switch',
-	property: 'property',
+_eSugarRootAttributeType = {
+	expression_option: 'expression_option',
 	targets_option: 'targets_option',
-	expression_option: 'expression_option'
+	property: 'property',
+	'switch': 'switch',
+	option: 'option',
+	id: 'id'
 };
 
 _cSugarRootAttribute = {
 
 	/**
-	 * @type {_cSugarRootAttributeTypes}
+	 * @type {_eSugarRootAttributeType}
 	 */
 	type: null,
 
 	type_name: '',
 
-	/** @type {?string} */
-	name: ''
+	name: '' // the name in widget config
 
-};
-
-_cSugarObjectTag = {
-
-	type: '',
-
-	type_name: '',
-
-	/** @type {?string} */
-	name: ''
-
-};
-
-_cSugar = {
-
-	/**
-	 * Lava.system.Sugar inherited (or compatible) class
-	 * @type {string}
-	 */
-	'class': '',
-
-	/**
-	 * The name of the real tag, which will be converted into widget configuration
-	 * @type {string}
-	 */
-	tag_name: '',
-
-	/** @type {_tSugarContent} */
-	content_schema: null,
-
-	/** @type {Object.<string, _cSugarRootAttribute>} */
-	attribute_mappings: null,
-
-	unknown_root_attributes: {
-		type: '', // callback name
-		container_resource_name: '' // for 'as_resource' action
-	}
 };
 
 /**
- * Must specify either parse() or widget_title
+ * Must have either `parse()` or `widget_title`
  */
 _cSugarSchema = {
 
@@ -191,6 +89,9 @@ _cSugarSchema = {
 
 };
 
+/**
+ * @interface
+ */
 _iSugarParser = {
 
 	/**

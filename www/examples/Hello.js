@@ -14,13 +14,13 @@
 		template: [
 			"\r\n\t\t<label>Name:</label>\r\n\t\t",
 			{
+				"extends": "TextInput",
 				bindings: {
 					value: {
 						property_name: "value",
 						path_config: {property_name: "your_name"}
 					}
 				},
-				"extends": "TextInput",
 				"class": "Lava.WidgetConfigExtensionGateway",
 				extender_type: "Default",
 				type: "widget"
@@ -40,8 +40,8 @@ return (this._binds[0].getValue());
 			},
 			"!</h1>\r\n\t"
 		],
-		real_class: "HelloExample",
 		"extends": "Example",
+		real_class: "HelloExample",
 		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Default",
 		type: "widget"

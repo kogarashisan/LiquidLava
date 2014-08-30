@@ -6,8 +6,8 @@
 	<script x:equiv="sugar" type="application/json">
 		{
 			attribute_mappings: {
-				'name': {type: 'property', type_name: 'String', name: 'name'},
-				'value': {type: 'property', type_name: 'String', name: 'value'},
+				'name': {type: 'property', type_name: 'String'},
+				'value': {type: 'property', type_name: 'String'},
 				'disabled': {type: 'property', type_name: 'SwitchAttribute', name: 'is_disabled'},
 				'required': {type: 'property', type_name: 'SwitchAttribute', name: 'is_required'},
 				'readonly': {type: 'property', type_name: 'SwitchAttribute', name: 'is_readonly'}
@@ -35,10 +35,7 @@
 	<script x:equiv="sugar" type="application/json">
 		{
 			tag_name: 'checkbox',
-			unknown_root_attributes: {
-				type: 'as_resource',
-				container_resource_name: 'CHECKBOX_ELEMENT'
-			},
+			root_resource_name: 'CHECKBOX_ELEMENT',
 			attribute_mappings: {
 				'checked': {type: 'property', type_name: 'SwitchAttribute', name: 'is_checked'},
 				'indeterminate': {type: 'property', type_name: 'SwitchAttribute', name: 'is_indeterminate'}
@@ -67,12 +64,9 @@
 	<script x:equiv="sugar" type="application/json">
 		{
 			tag_name: 'text_area',
-			unknown_root_attributes: {
-				type: 'as_resource',
-				container_resource_name: 'TEXTAREA_ELEMENT'
-			},
+			root_resource_name: 'TEXTAREA_ELEMENT',
 			attribute_mappings: {
-				'value': {type: 'property', type_name: 'String', name: 'value'}
+				'value': {type: 'property', type_name: 'String'}
 			}
 		}
 	</script>
@@ -98,12 +92,9 @@
 	<script x:equiv="sugar" type="application/json">
 		{
 			tag_name: 'text_input',
-			unknown_root_attributes: {
-				type: 'as_resource',
-				container_resource_name: 'TEXT_INPUT_ELEMENT'
-			},
+			root_resource_name: 'TEXT_INPUT_ELEMENT',
 			attribute_mappings: {
-				'value': {type: 'property', type_name: 'String', name: 'value'}
+				'value': {type: 'property', type_name: 'String'}
 			}
 		}
 	</script>
@@ -131,10 +122,7 @@
 	<script x:equiv="sugar" type="application/json">
 		{
 			tag_name: 'radio',
-			unknown_root_attributes: {
-				type: 'as_resource',
-				container_resource_name: 'RADIO_ELEMENT'
-			},
+			root_resource_name: 'RADIO_ELEMENT',
 			attribute_mappings: {
 				'checked': {type: 'property', type_name: 'SwitchAttribute', name: 'is_checked'}
 			}
@@ -160,10 +148,7 @@
 	<script x:equiv="sugar" type="application/json">
 		{
 			tag_name: 'submit_input',
-			unknown_root_attributes: {
-				type: 'as_resource',
-				container_resource_name: 'SUBMIT_INPUT_ELEMENT'
-			}
+			root_resource_name: 'SUBMIT_INPUT_ELEMENT'
 		}
 	</script>
 	<default_events>['click']</default_events>
@@ -189,14 +174,8 @@
 	<script x:equiv="sugar" type="application/json">
 		{
 			tag_name: 'submit_button',
-			is_content_allowed: true,
-			content_schema: {
-				type: 'template'
-			},
-			unknown_root_attributes: {
-				type: 'as_resource',
-				container_resource_name: 'SUBMIT_BUTTON_ELEMENT'
-			}
+			content_schema: {type: 'include', name: 'content'},
+			root_resource_name: 'SUBMIT_BUTTON_ELEMENT'
 		}
 	</script>
 	<default_events>['click']</default_events>
@@ -252,9 +231,9 @@
 	<script x:equiv="sugar" type="application/json">
 		{
 			tag_name: 'form_widget',
-			is_content_allowed: true,
 			content_schema: {
-				type: 'template'
+				type: 'include',
+				name: 'content'
 			},
 			unknown_root_attributes: {
 				type: 'as_resource',

@@ -846,24 +846,24 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * @param {(_tRawTemplate|_tTemplate)} blocks
+	 * @param {(_tRawTemplate|_tTemplate)} template
 	 * @returns {Array}
 	 */
-	asBlocks: function(blocks) {
+	asBlocks: function(template) {
 
 		var i = 0,
-			count = blocks.length,
+			count = template.length,
 			result = [];
 
 		for (; i < count; i++) {
 
-			if (typeof(blocks[i]) == 'string') {
+			if (typeof(template[i]) == 'string') {
 
-				if (!Lava.EMPTY_REGEX.test(blocks[i])) Lava.t("Text between tags is not allowed in this context");
+				if (!Lava.EMPTY_REGEX.test(template[i])) Lava.t("Text between tags is not allowed in this context");
 
 			} else {
 
-				result.push(blocks[i]);
+				result.push(template[i]);
 
 			}
 

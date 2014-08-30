@@ -57,8 +57,8 @@ Lava.define(
 
 			column = template_arguments[0];
 			result = column.is_editable
-				? this._config.storage.edit_cells.value[column.type]
-				: this._config.storage.cells.value[column.type];
+				? this._config.storage.edit_cells[column.type]
+				: this._config.storage.cells[column.type];
 
 		} else {
 

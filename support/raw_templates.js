@@ -63,7 +63,7 @@ _cRawBlock = {
 	// only for dynamic blocks
 	class_locator: {
 		/**
-		 * @type {_tKnownViewLocatorType}
+		 * @type {_eKnownViewLocatorType}
 		 */
 		locator_type: null,
 		name: ''

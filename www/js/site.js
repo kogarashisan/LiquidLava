@@ -174,8 +174,8 @@ Lava.define(
 
 			column = template_arguments[0];
 			result = column.is_editable
-				? this._config.storage.edit_cells.value[column.type]
-				: this._config.storage.cells.value[column.type];
+				? this._config.storage.edit_cells[column.type]
+				: this._config.storage.cells[column.type];
 
 		} else {
 
@@ -753,8 +753,8 @@ Lava.define(
 		var tabs_widget = this._getTabsWidget();
 
 		tabs_widget.addTab({
-			title_template: [title],
-			content_template: [text]
+			title: [title],
+			content: [text]
 		});
 
 	},
@@ -1012,14 +1012,17 @@ Lava.widgets["Example"] = {
 	},
 	sugar: {
 		tag_name: "example",
-		is_content_allowed: true,
-		content_schema: {type: "template"}
+		content_schema: {
+			type: "include",
+			name: "content"
+		}
 	},
 	real_class: "Standard",
 	is_extended: false
 };
 Lava.sugar_map["example"] = {widget_title: "Example"};
 Lava.widgets["FolderTree"] = {
+	"extends": "Tree",
 	includes: {
 		icon: [
 			"\r\n\t\t",
@@ -1046,12 +1049,12 @@ return ('icon-' + this._binds[0].getValue());
 			"\r\n\t"
 		]
 	},
-	"extends": "Tree",
 	"class": "Lava.WidgetConfigExtensionGateway",
 	extender_type: "Default",
 	is_extended: false
 };
 Lava.widgets["EditableTable"] = {
+	"extends": "Table",
 	includes: {
 		tbody: [
 			"\r\n\t\t",
@@ -1180,60 +1183,58 @@ return (this._binds[0].getValue() == this._binds[1].getValue());
 			"\r\n\t"
 		]
 	},
-	storage: {
+	storage_schema: {
 		edit_cells: {
 			type: "template_hash",
-			schema: {
-				type: "template_hash",
-				tag_name: "template",
-				name: "edit_cells"
-			},
-			value: {
-				String: [
-					"\r\n\t\t\t\t",
-					{
-						type: "widget",
-						"class": "Lava.WidgetConfigExtensionGateway",
-						extender_type: "Default",
-						"extends": "TextInput",
-						bindings: {
-							value: {
-								property_name: "value",
-								path_config: {
-									property_name: "row",
-									tail: [{
-										property_name: "column",
-										tail: ["name"]
-									}]
-								}
+			tag_name: "cell"
+		}
+	},
+	storage: {
+		edit_cells: {
+			String: [
+				"\r\n\t\t\t\t",
+				{
+					type: "widget",
+					"class": "Lava.WidgetConfigExtensionGateway",
+					extender_type: "Default",
+					"extends": "TextInput",
+					bindings: {
+						value: {
+							property_name: "value",
+							path_config: {
+								property_name: "row",
+								tail: [{
+									property_name: "column",
+									tail: ["name"]
+								}]
 							}
 						}
-					},
-					"\r\n\t\t\t"
-				],
-				Boolean: [
-					"\r\n\t\t\t\t",
-					{
-						type: "widget",
-						"class": "Lava.WidgetConfigExtensionGateway",
-						extender_type: "Default",
-						"extends": "CheckBox",
-						bindings: {
-							is_checked: {
-								property_name: "is_checked",
-								path_config: {
-									property_name: "row",
-									tail: [{
-										property_name: "column",
-										tail: ["name"]
-									}]
-								}
+					}
+				},
+				"\r\n\t\t\t"
+			],
+			Boolean: [
+				"\r\n\t\t\t\t",
+				{
+					type: "widget",
+					"class": "Lava.WidgetConfigExtensionGateway",
+					extender_type: "Default",
+					"extends": "CheckBox",
+					bindings: {
+						is_checked: {
+							property_name: "is_checked",
+							path_config: {
+								property_name: "row",
+								tail: [{
+									property_name: "column",
+									tail: ["name"]
+								}]
 							}
 						}
-					},
-					"\r\n\t\t\t"
-				]
-			}
+					}
+				},
+				"\r\n\t\t\t"
+			]
 		}
 	},
 	resources: {
@@ -1248,7 +1249,6 @@ return (this._binds[0].getValue() == this._binds[1].getValue());
 		}
 	},
 	real_class: "EditableTableExample",
-	"extends": "Table",
 	"class": "Lava.WidgetConfigExtensionGateway",
 	extender_type: "Default",
 	is_extended: false

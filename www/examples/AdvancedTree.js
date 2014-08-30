@@ -144,6 +144,7 @@
 				},
 				"\r\n\t\t<div class=\"clearfix\"></div>\r\n\r\n\t\t\r\n\t\t<div style=\"margin-right: 10px\" class=\"tree-example-container\">\r\n\t\t\t",
 				{
+					"extends": "FolderTree",
 					assigns: {
 						records: {
 							evaluator: function() {
@@ -158,7 +159,6 @@ return (this._binds[0].getValue());
 						}
 					},
 					options: {use_meta_storage: true},
-					"extends": "FolderTree",
 					id: "tree_left",
 					"class": "Lava.WidgetConfigExtensionGateway",
 					extender_type: "Default",
@@ -166,6 +166,7 @@ return (this._binds[0].getValue());
 				},
 				"\r\n\t\t</div>\r\n\r\n\t\t<div class=\"tree-example-container\">\r\n\t\t\t",
 				{
+					"extends": "FolderTree",
 					assigns: {
 						records: {
 							evaluator: function() {
@@ -272,7 +273,6 @@ return (this._binds[0].getValue());
 						]
 					},
 					options: {use_meta_storage: true},
-					"extends": "FolderTree",
 					id: "tree_right",
 					"class": "Lava.WidgetConfigExtensionGateway",
 					extender_type: "Default",
@@ -280,8 +280,8 @@ return (this._binds[0].getValue());
 				},
 				"\r\n\t\t</div>\r\n\t\t<div class=\"clearfix\"></div>\r\n\t"
 			],
-			real_class: "TreeExample",
 			"extends": "Example",
+			real_class: "TreeExample",
 			"class": "Lava.WidgetConfigExtensionGateway",
 			extender_type: "Default",
 			type: "widget"

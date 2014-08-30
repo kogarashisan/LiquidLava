@@ -35,6 +35,7 @@ Lava.parsers.Directives = {
 		sugar: '_widgetTagSugar',
 		broadcast: '_widgetTagBroadcast',
 		storage: '_widgetTagStorage',
+		storage_schema: '_widgetTagStorageSchema',
 		resources: '_widgetTagResources',
 		default_events: '_widgetTagDefaultEvents',
 		edit_template: '_widgetTagEditTemplate',
@@ -86,14 +87,6 @@ Lava.parsers.Directives = {
 		if (config.is_top_directive && !is_top_directive) Lava.t("Directive must be at the top of the block content: " + directive_name);
 
 		return this['_x' + directive_name](raw_directive, view_config);
-
-	},
-
-	_store: function(widget_config, storage_name, item_name, value) {
-
-		if (!(storage_name in widget_config)) widget_config[storage_name] = {};
-		if (Lava.schema.DEBUG && (item_name in widget_config[storage_name])) Lava.t("Duplicate item in '" + storage_name + "': " + item_name);
-		widget_config[storage_name][item_name] = value;
 
 	},
 
@@ -161,6 +154,16 @@ Lava.parsers.Directives = {
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
+	_widgetTagStorageSchema: function(raw_tag, widget_config) {
+
+		this._parseObject(widget_config, 'storage_schema', raw_tag);
+
+	},
+
+	/**
+	 * @param {_cRawTag} raw_tag
+	 * @param {_cWidget} widget_config
+	 */
 	_widgetTagProperties: function(raw_tag, widget_config) {
 
 		this._parseObject(widget_config, 'properties', raw_tag);
@@ -205,55 +208,7 @@ Lava.parsers.Directives = {
 	 */
 	_widgetTagStorage: function(raw_tag, widget_config) {
 
-		var tags = Lava.parsers.Common.asBlockType(raw_tag.content, 'tag'),
-			i = 0,
-			count = tags.length,
-			tag,
-			type,
-			schema,
-			inner_tags,
-			name,
-			parse_target;
-
-		for (; i < count; i++) {
-
-			tag = tags[i];
-
-			if (Lava.schema.DEBUG) {
-				if (!tag.attributes || !tag.attributes.name) Lava.t("<" + "storage>: tag without a name attribute");
-				if (widget_config.storage && (tag.attributes.name in widget_config.storage)) Lava.t("Duplicate item in storage: " + tag.attributes.name);
-			}
-
-			type = tag.name;
-			schema = {};
-			name = tag.attributes['name'];
-
-			if (type == 'template_collection' || type == 'template_hash') {
-
-				schema = {type: type, tag_name: 'template', name: name};
-				parse_target = tag;
-
-			} else if (type == 'object' || type == 'object_collection' || type == 'object_hash') {
-
-				inner_tags = Lava.parsers.Common.asBlockType(tag.content, 'tag');
-				if (Lava.schema.DEBUG && (inner_tags.length != 2 || !inner_tags[0].content || !inner_tags[1].content)) Lava.t("storage: malformed tag");
-				if (Lava.schema.DEBUG && (inner_tags[0].name != 'schema' || inner_tags[1].name != 'content')) Lava.t("storage: malformed tag");
-				schema = Lava.parseOptions(inner_tags[0].content[0]);
-				if (Lava.schema.DEBUG && (('name' in schema) || ('type' in schema))) Lava.t("storage tag schema: 'name' and 'type' are not allowed");
-				schema.name = name;
-				schema.type = type;
-
-				parse_target = inner_tags[1];
-
-			} else {
-
-				Lava.t("Unknown storage tag: " + type);
-
-			}
-
-			Lava.getSugarInstance(Lava.schema.widget.DEFAULT_SUGAR_CLASS).parseStorageTag(schema, parse_target, widget_config);
-
-		}
+		Lava.parsers.Storage.parse(widget_config, raw_tag.content);
 
 	},
 
@@ -423,7 +378,7 @@ Lava.parsers.Directives = {
 
 		}
 
-		this._store(widget_config, 'includes', raw_tag.attributes.as || raw_tag.attributes.name, template);
+		Lava.store(widget_config, 'includes', raw_tag.attributes.as || raw_tag.attributes.name, template);
 
 	},
 
@@ -434,7 +389,7 @@ Lava.parsers.Directives = {
 	_widgetTagInclude: function(raw_tag, widget_config) {
 
 		var include = raw_tag.content ? Lava.parsers.Common.compileTemplate(raw_tag.content) : [];
-		this._store(widget_config, 'includes', raw_tag.attributes.name, include);
+		Lava.store(widget_config, 'includes', raw_tag.attributes.name, include);
 
 	},
 
@@ -728,7 +683,8 @@ Lava.parsers.Directives = {
 			count = tags.length,
 			tag,
 			name,
-			path;
+			path,
+			is_storage_parsed = false;
 
 		this._widget_directives_stack.push(raw_directive);
 
@@ -748,11 +704,16 @@ Lava.parsers.Directives = {
 
 		}
 
+		// extends must be set before <storage> (required by Lava.parsers.Storage.getMergedStorageSchema())
+		if (raw_directive.attributes.extends) widget_config.extends = raw_directive.attributes.extends;
+
 		for (; i < count; i++) {
 
 			tag = tags[i];
+			if (tag.name == 'storage_schema' && is_storage_parsed) Lava.t('Widget definition: `storage_schema` must preceed the `storage` tag');
 			if (!(tag.name in this._widget_tag_actions)) Lava.t("Unknown tag in widget definition: " + tag.name + ". Note, that main_template and main_view tags must be on top.");
 			this[this._widget_tag_actions[tag.name]](tag, widget_config);
+			if (tag.name == 'storage') is_storage_parsed = true;
 
 		}
 
@@ -777,9 +738,7 @@ Lava.parsers.Directives = {
 
 		}
 
-		if (raw_directive.attributes.extends) widget_config.extends = raw_directive.attributes.extends;
 		if (raw_directive.attributes.label) Lava.parsers.Common.setViewConfigLabel(widget_config, raw_directive.attributes.label);
-
 		if (raw_directive.attributes.id) {
 			if (Lava.schema.DEBUG && widget_config.id) Lava.t("[Widget configuration] widget id was already set via main view configuration: " + raw_directive.attributes.id);
 			Lava.parsers.Common.setViewConfigId(widget_config, raw_directive.attributes.id);
@@ -935,12 +894,12 @@ Lava.parsers.Directives = {
 
 		}
 
-		this._store(storage, storage_property_name, raw_tag.attributes.name, result);
+		Lava.store(storage, storage_property_name, raw_tag.attributes.name, result);
 
 	},
 
 	/**
-	 * @param {Object} storage
+	 * @param {_cWidget} storage
 	 * @param {(_cRawDirective|_cRawTag)} raw_tag
 	 * @param {string} storage_property_name
 	 */
@@ -948,7 +907,7 @@ Lava.parsers.Directives = {
 
 		if (Lava.schema.DEBUG && !('attributes' in raw_tag)) Lava.t("option: missing attributes");
 		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.t("Malformed option: " + raw_tag.attributes.name);
-		this._store(storage, storage_property_name, raw_tag.attributes.name, Lava.parseOptions(raw_tag.content[0]));
+		Lava.store(storage, storage_property_name, raw_tag.attributes.name, Lava.parseOptions(raw_tag.content[0]));
 
 	},
 
@@ -1060,7 +1019,7 @@ Lava.parsers.Directives = {
 				Lava.t("Unknown binding direction: " + raw_element.attributes.direction);
 			binding.direction = Lava.BINDING_DIRECTIONS[raw_element.attributes.direction];
 		}
-		this._store(widget_config, 'bindings', raw_element.attributes.name, binding);
+		Lava.store(widget_config, 'bindings', raw_element.attributes.name, binding);
 
 	},
 
@@ -1126,7 +1085,7 @@ Lava.parsers.Directives = {
 
 		if (Lava.schema.DEBUG && !('attributes' in raw_directive)) Lava.t("option: missing attributes");
 		if (Lava.schema.DEBUG && (!raw_directive.content || raw_directive.content.length != 1)) Lava.t("Malformed property: " + raw_directive.attributes.name);
-		this._store(widget_config, storage_name, raw_directive.attributes.name, raw_directive.content[0]);
+		Lava.store(widget_config, storage_name, raw_directive.attributes.name, raw_directive.content[0]);
 
 	},
 

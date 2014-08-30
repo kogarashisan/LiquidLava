@@ -86,8 +86,8 @@ Lava.define(
 		var tabs_widget = this._getTabsWidget();
 
 		tabs_widget.addTab({
-			title_template: [title],
-			content_template: [text]
+			title: [title],
+			content: [text]
 		});
 
 	},

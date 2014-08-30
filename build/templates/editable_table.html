@@ -18,19 +18,24 @@
 			{/foreach}
 		</tbody>
 	</include>
+	<script type="application/json" x:equiv="storage_schema">
+		{
+			edit_cells: {type: 'template_hash', tag_name: 'cell'}
+		}
+	</script>
 	<storage>
-		<template_hash name="edit_cells">
-			<template name="String">
+		<edit_cells>
+			<cell name="String">
 				<text_input>
 					<x:bind name="value">row[column.name]</x:bind>
 				</text_input>
-			</template>
-			<template name="Boolean">
+			</cell>
+			<cell name="Boolean">
 				<checkbox>
 					<x:bind name="is_checked">row[column.name]</x:bind>
 				</checkbox>
-			</template>
-		</template_hash>
+			</cell>
+		</edit_cells>
 	</storage>
 	<resources locale="default">
 		<container path="TABLE_ELEMENT" add_classes="demo-table"></container>
