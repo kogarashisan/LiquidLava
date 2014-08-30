@@ -1709,6 +1709,36 @@ var Lava = {
 
 	},
 
+	/**
+	 * Utility method used in parsers and sugar
+	 *
+	 * @param {_cWidget} widget_config
+	 * @param {string} storage_name
+	 * @param {string} item_name
+	 * @param {*} value
+	 */
+	store: function(widget_config, storage_name, item_name, value) {
+
+		if (!(storage_name in widget_config)) widget_config[storage_name] = {};
+		if (Lava.schema.DEBUG && (item_name in widget_config[storage_name])) Lava.t("Duplicate item in storage: " + item_name);
+		widget_config[storage_name][item_name] = value;
+
+	},
+
+	/**
+	 * Utility method used in parsers and sugar
+	 *
+	 * @param {Object} descriptor
+	 * @param {string} value
+	 * @returns {*}
+	 */
+	valueToType: function(descriptor, value) {
+
+		if (Lava.schema.DEBUG && !Lava.types[descriptor.type_name].isValidString(value, descriptor)) Lava.t("Invalid attribute value: " + value);
+		return Lava.types[descriptor.type_name].fromSafeString(value, descriptor);
+
+	},
+
 	suspendListener: function(listener) {
 		listener.fn = this.noop;
 	},
@@ -5868,14 +5898,6 @@ Lava.parsers.Directives = {
 
 	},
 
-	_store: function(widget_config, storage_name, item_name, value) {
-
-		if (!(storage_name in widget_config)) widget_config[storage_name] = {};
-		if (Lava.schema.DEBUG && (item_name in widget_config[storage_name])) Lava.t("Duplicate item in '" + storage_name + "': " + item_name);
-		widget_config[storage_name][item_name] = value;
-
-	},
-
 	_importVars: function(destination, source, name_list) {
 		for (var i = 0, count = name_list.length; i < count; i++) {
 			var name = name_list[i];
@@ -6164,7 +6186,7 @@ Lava.parsers.Directives = {
 
 		}
 
-		this._store(widget_config, 'includes', raw_tag.attributes.as || raw_tag.attributes.name, template);
+		Lava.store(widget_config, 'includes', raw_tag.attributes.as || raw_tag.attributes.name, template);
 
 	},
 
@@ -6175,7 +6197,7 @@ Lava.parsers.Directives = {
 	_widgetTagInclude: function(raw_tag, widget_config) {
 
 		var include = raw_tag.content ? Lava.parsers.Common.compileTemplate(raw_tag.content) : [];
-		this._store(widget_config, 'includes', raw_tag.attributes.name, include);
+		Lava.store(widget_config, 'includes', raw_tag.attributes.name, include);
 
 	},
 
@@ -6680,12 +6702,12 @@ Lava.parsers.Directives = {
 
 		}
 
-		this._store(storage, storage_property_name, raw_tag.attributes.name, result);
+		Lava.store(storage, storage_property_name, raw_tag.attributes.name, result);
 
 	},
 
 	/**
-	 * @param {Object} storage
+	 * @param {_cWidget} storage
 	 * @param {(_cRawDirective|_cRawTag)} raw_tag
 	 * @param {string} storage_property_name
 	 */
@@ -6693,7 +6715,7 @@ Lava.parsers.Directives = {
 
 		if (Lava.schema.DEBUG && !('attributes' in raw_tag)) Lava.t("option: missing attributes");
 		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.t("Malformed option: " + raw_tag.attributes.name);
-		this._store(storage, storage_property_name, raw_tag.attributes.name, Lava.parseOptions(raw_tag.content[0]));
+		Lava.store(storage, storage_property_name, raw_tag.attributes.name, Lava.parseOptions(raw_tag.content[0]));
 
 	},
 
@@ -6805,7 +6827,7 @@ Lava.parsers.Directives = {
 				Lava.t("Unknown binding direction: " + raw_element.attributes.direction);
 			binding.direction = Lava.BINDING_DIRECTIONS[raw_element.attributes.direction];
 		}
-		this._store(widget_config, 'bindings', raw_element.attributes.name, binding);
+		Lava.store(widget_config, 'bindings', raw_element.attributes.name, binding);
 
 	},
 
@@ -6871,7 +6893,7 @@ Lava.parsers.Directives = {
 
 		if (Lava.schema.DEBUG && !('attributes' in raw_directive)) Lava.t("option: missing attributes");
 		if (Lava.schema.DEBUG && (!raw_directive.content || raw_directive.content.length != 1)) Lava.t("Malformed property: " + raw_directive.attributes.name);
-		this._store(widget_config, storage_name, raw_directive.attributes.name, raw_directive.content[0]);
+		Lava.store(widget_config, storage_name, raw_directive.attributes.name, raw_directive.content[0]);
 
 	},
 
@@ -7121,22 +7143,6 @@ Lava.parsers.Directives = {
 
 };
 
-/*
- @todo
-
- _widgetTagStorage - переделать
-
- переименовать template в include в
- sugar.class + support/sugar
-
- Найти слово storage в коде и исправить
-
- исправить template walker и редактор шаблонов
-
- после переделки сахара и _widgetTagStorage: исправить шаблоны
-
- */
-
 Lava.parsers.Storage = {
 
 	_root_handlers: {
@@ -7156,6 +7162,10 @@ Lava.parsers.Storage = {
 		lava_type: '_parseAttributeAsLavaType'
 	},
 
+	/**
+	 * @param {_cWidget} widget_config
+	 * @param {_tRawTemplate} raw_template
+	 */
 	parse: function(widget_config, raw_template) {
 
 		var storage_schema = this.getMergedStorageSchema(widget_config),
@@ -7168,32 +7178,9 @@ Lava.parsers.Storage = {
 
 			item_schema = storage_schema[tags[i].name];
 			if (Lava.schema.DEBUG && !item_schema) Lava.t('parsing storage; no schema for ' + tags[i].name);
-			this._store(widget_config, 'storage', tags[i].name, this[this._root_handlers[item_schema.type]](item_schema, tags[i]));
+			Lava.store(widget_config, 'storage', tags[i].name, this[this._root_handlers[item_schema.type]](item_schema, tags[i]));
 
 		}
-
-	},
-
-	/**
-	 * @todo дубликат
-	 *
-	 * @param {_cWidget} widget_config
-	 * @param {string} storage_name
-	 * @param {string} item_name
-	 * @param {*} value
-	 */
-	_store: function(widget_config, storage_name, item_name, value) {
-
-		if (!(storage_name in widget_config)) widget_config[storage_name] = {};
-		if (Lava.schema.DEBUG && (item_name in widget_config[storage_name])) Lava.t("Duplicate item in storage: " + item_name);
-		widget_config[storage_name][item_name] = value;
-
-	},
-
-	_valueToType: function(descriptor, value) {
-
-		if (Lava.schema.DEBUG && !Lava.types[descriptor.type_name].isValidString(value, descriptor)) Lava.t("Invalid attribute value: " + value);
-		return Lava.types[descriptor.type_name].fromSafeString(value, descriptor);
 
 	},
 
@@ -7301,6 +7288,10 @@ Lava.parsers.Storage = {
 
 	},
 
+	/**
+	 * @param {_cWidget} widget_config
+	 * @returns {Object.<name, _cStorageItemSchema>}
+	 */
 	getMergedStorageSchema: function(widget_config) {
 
 		var parent_schema,
@@ -7397,13 +7388,18 @@ Lava.parsers.Storage = {
 	_parsePropertyAsLavaType: function(schema, raw_tag) {
 
 		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1 || typeof (raw_tag.content[0]) != 'string')) Lava.t("One string expected in tag content: " + raw_tag.name);
-		return this._valueToType(schema, raw_tag.content[0]);
+		return Lava.valueToType(schema, raw_tag.content[0]);
 
 	},
 
+	/**
+	 * @param {_cStorageObjectPropertySchema} descriptor
+	 * @param {string} value
+	 * @returns {*}
+	 */
 	_parseAttributeAsLavaType: function(descriptor, value) {
 
-		return this._valueToType(descriptor, value);
+		return Lava.valueToType(descriptor, value);
 
 	}
 
@@ -13199,20 +13195,6 @@ Lava.define(
 	},
 
 	/**
-	 * @param {_cWidget} widget_config
-	 * @param {string} storage_name
-	 * @param {string} item_name
-	 * @param {*} value
-	 */
-	_store: function(widget_config, storage_name, item_name, value) {
-
-		if (!(storage_name in widget_config)) widget_config[storage_name] = {};
-		if (Lava.schema.DEBUG && (item_name in widget_config[storage_name])) Lava.t("Duplicate item in storage: " + item_name);
-		widget_config[storage_name][item_name] = value;
-
-	},
-
-	/**
 	 * @param {_tRawTemplate} raw_blocks
 	 * @param {_cWidget} widget_config
 	 * @returns {_tRawTemplate}
@@ -13249,7 +13231,7 @@ Lava.define(
 	_parseInclude: function(content_schema, raw_tag, widget_config, name) {
 
 		if (Lava.schema.DEBUG && !name) Lava.t('Sugar: name for include is not provided');
-		this._store(
+		Lava.store(
 			widget_config,
 			'includes',
 			name,
@@ -13425,19 +13407,6 @@ Lava.define(
 
 	},
 
-	// @todo copy-paste with Storage
-	/**
-	 * @param {_cSugarRootAttribute} descriptor
-	 * @param {string} attribute_value
-	 * @returns {*}
-	 */
-	_valueToType: function(descriptor, attribute_value) {
-
-		if (Lava.schema.DEBUG && !Lava.types[descriptor.type_name].isValidString(attribute_value, descriptor)) Lava.t("Invalid attribute value: " + attribute_value);
-		return Lava.types[descriptor.type_name].fromSafeString(attribute_value, descriptor);
-
-	},
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// root attribute actions
 
@@ -13460,7 +13429,7 @@ Lava.define(
 	 */
 	_parseRootOptionAttribute: function(widget_config, attribute_value, descriptor, name) {
 
-		this._store(widget_config, 'options', name, this._valueToType(descriptor, attribute_value));
+		Lava.store(widget_config, 'options', name, Lava.valueToType(descriptor, attribute_value));
 
 	},
 
@@ -13473,7 +13442,7 @@ Lava.define(
 	 */
 	_parseRootSwitchAttribute: function(widget_config, attribute_value, descriptor, name) {
 
-		this._store(widget_config, 'options',  name, (attribute_value == '') ? true : Lava.types.Boolean.fromString(attribute_value));
+		Lava.store(widget_config, 'options',  name, (attribute_value == '') ? true : Lava.types.Boolean.fromString(attribute_value));
 
 	},
 
@@ -13485,7 +13454,7 @@ Lava.define(
 	 */
 	_parseRootPropertyAttribute: function(widget_config, attribute_value, descriptor, name) {
 
-		this._store(widget_config, 'properties', name, this._valueToType(descriptor, attribute_value));
+		Lava.store(widget_config, 'properties', name, Lava.valueToType(descriptor, attribute_value));
 
 	},
 
@@ -13499,7 +13468,7 @@ Lava.define(
 	 */
 	_parseRootTargetsOptionAttribute: function(widget_config, attribute_value, descriptor, name) {
 
-		this._store(widget_config, 'options', name, Lava.parsers.Common.parseTargets(attribute_value));
+		Lava.store(widget_config, 'options', name, Lava.parsers.Common.parseTargets(attribute_value));
 
 	},
 
@@ -13511,7 +13480,7 @@ Lava.define(
 	 */
 	_parseRootExpressionOptionAttribute: function(widget_config, attribute_value, descriptor, name) {
 
-		this._store(
+		Lava.store(
 			widget_config,
 			'options',
 			name,
@@ -23908,11 +23877,10 @@ return (this._binds[0].getValue());
 				properties: {
 					title: {type: "template"},
 					content: {type: "template"},
-					"is-expanded": {
+					is_expanded: {
 						type: "lava_type",
 						type_name: "Boolean",
-						is_attribute: true,
-						name: "is_expanded"
+						is_attribute: true
 					}
 				}
 			}
@@ -24187,17 +24155,15 @@ return (this._binds[0].getValue() == this._binds[1].getValue() ? 'active' : '');
 						is_attribute: true,
 						type_name: "Boolean"
 					},
-					"is-enabled": {
+					is_enabled: {
 						type: "lava_type",
 						is_attribute: true,
-						type_name: "Boolean",
-						name: "is_enabled"
+						type_name: "Boolean"
 					},
-					"is-hidden": {
+					is_hidden: {
 						type: "lava_type",
 						is_attribute: true,
-						type_name: "Boolean",
-						name: "is_hidden"
+						type_name: "Boolean"
 					}
 				}
 			}
