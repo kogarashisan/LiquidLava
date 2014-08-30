@@ -179,7 +179,7 @@
 			{#foreach($tabs._tabs) as=tab}
 				<x:refresher>{class: 'Default', insertion_strategy: 'sequential_elements'}</x:refresher>
 				<div x:type="view" class="tab-pane" x:classes="tab == $tabs._active_tab ? 'active' : ''">
-					{>$tabs.tab_include(tab, 'content_template'))}
+					{>$tabs.tab_include(tab, 'content'))}
 				</div>
 			{/foreach}
 		</div>
@@ -192,7 +192,7 @@
 				properties: {
 					title: {type: 'template'},
 					content: {type: 'template'},
-					name: {type: 'lava_type', is_attribute: true, type_name: 'Boolean'},
+					name: {type: 'lava_type', is_attribute: true, type_name: 'String'},
 					is_enabled: {type: 'lava_type', is_attribute: true, type_name: 'Boolean'},
 					is_hidden: {type: 'lava_type', is_attribute: true, type_name: 'Boolean'}
 				}

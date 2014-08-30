@@ -13224,9 +13224,10 @@ Lava.define(
 	// root parsers
 
 	/**
-	 * @param content_schema
-	 * @param raw_tag
-	 * @param widget_config
+	 * @param {_cSugarContent} content_schema
+	 * @param {_cRawTag} raw_tag
+	 * @param {_cWidget} widget_config
+	 * @param {string} name
 	 */
 	_parseInclude: function(content_schema, raw_tag, widget_config, name) {
 
@@ -24121,7 +24122,7 @@ return (this._binds[0].getValue() == this._binds[1].getValue() ? 'active' : '');
 									},
 									{
 										type: 1,
-										data: "content_template"
+										data: "content"
 									}
 								],
 								type: "include"
@@ -24153,7 +24154,7 @@ return (this._binds[0].getValue() == this._binds[1].getValue() ? 'active' : '');
 					name: {
 						type: "lava_type",
 						is_attribute: true,
-						type_name: "Boolean"
+						type_name: "String"
 					},
 					is_enabled: {
 						type: "lava_type",

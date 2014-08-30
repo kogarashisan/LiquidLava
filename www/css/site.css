@@ -7690,6 +7690,13 @@ footer .container {background: #f7f5fa;}
 .api-sugar-tag-outer-wrapper {}
 .api-sugar-object-content-wrapper {padding-left: 2em}
 
+.api-tabs-header {list-style: none;padding: 0;margin-top: 1em}
+.api-tabs-header-item {display: inline-block;}
+.api-tabs-header-link {margin-right: 2px;line-height: 1.428571429;border: 3px solid transparent;border-radius: 4px;position: relative;display: block;padding: 8px 10px;text-decoration: none;}
+.api-tabs-header-link-active {color: #555555;cursor: default;border: 3px solid rgb(255, 153, 50);font-weight: bold}
+.api-tabs-container {}
+.api-tabs-tab {display: none}
+
 /*
 This file contains essential classes for some standard widgets.
 */

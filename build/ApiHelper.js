@@ -42,7 +42,7 @@ var ApiHelper = {
 				var param = {};
 				ApiHelper.export_type_data(doclet_param, param, true);
 				if (param.name.indexOf('.') != -1) {
-					if (param.name.indexOf(last_param + '.') != 0) throw new Error('Wrong subparam order: ' + longname);
+					if (param.name.indexOf(last_param + '.') != 0) throw new Error('Wrong subparam order: ' + doclet.longname);
 					//param.is_subparam = true;
 				} else {
 					param_names.push(param.name);
@@ -50,9 +50,9 @@ var ApiHelper = {
 				}
 				export_descriptor.params.push(param);
 			});
-			if (real_params.length != param_names.length) throw new Error('malformed jsdoc for ' + longname);
+			if (real_params.length != param_names.length) throw new Error('malformed jsdoc for ' + doclet.longname);
 			for (; j < param_count; j++) {
-				if (param_names[j] != real_params[j].name) throw new Error('Wrong JSDoc parameters order: ' + longname);
+				if (param_names[j] != real_params[j].name) throw new Error('Wrong JSDoc parameters order: ' + doclet.longname);
 			}
 			export_descriptor.param_names_string = param_names.join(', ');
 

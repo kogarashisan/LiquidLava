@@ -94,9 +94,10 @@ Lava.define(
 	// root parsers
 
 	/**
-	 * @param content_schema
-	 * @param raw_tag
-	 * @param widget_config
+	 * @param {_cSugarContent} content_schema
+	 * @param {_cRawTag} raw_tag
+	 * @param {_cWidget} widget_config
+	 * @param {string} name
 	 */
 	_parseInclude: function(content_schema, raw_tag, widget_config, name) {
 
