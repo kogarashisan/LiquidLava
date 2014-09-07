@@ -16,8 +16,16 @@ Lava.define(
 
 	init: function(config, widget, parent_view, template, properties) {
 
+		var hash = window.location.hash;
+
 		this._properties.versions = Examples.makeLive(LavaVersions);
 		this.ContentLoader$init(config, widget, parent_view, template, properties);
+
+		if (hash) {
+
+			this._loadItemByHash(hash);
+
+		}
 
 	},
 

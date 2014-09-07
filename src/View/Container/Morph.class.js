@@ -13,7 +13,7 @@ Lava.define(
 	isMorphContainer: true,
 
 	/**
-	 * @type {Lava.view.View}
+	 * @type {Lava.view.Abstract}
 	 */
 	_view: null,
 	_config: null,
@@ -30,7 +30,7 @@ Lava.define(
 	_end_element: null,
 
 	/**
-	 * @param {Lava.view.View} view
+	 * @param {Lava.view.Abstract} view
 	 * @param {_cEmulatedContainer} config
 	 * @param {Lava.widget.Standard} widget
 	 */

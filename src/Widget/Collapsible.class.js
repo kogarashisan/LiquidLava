@@ -77,7 +77,7 @@ Lava.define(
 
 	},
 
-	_setExpanded: function(name, value) {
+	_setExpanded: function(value, name) {
 
 		var new_display = 'none';
 

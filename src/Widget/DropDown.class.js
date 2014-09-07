@@ -96,7 +96,7 @@ Lava.define(
 
 	},
 
-	_setIsOpen: function(name, value) {
+	_setIsOpen: function(value, name) {
 
 		var open_target_container = this._getTargetContainer();
 		if (Lava.schema.DEBUG && !open_target_container) Lava.t("DropDown was created without container and target");

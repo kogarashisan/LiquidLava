@@ -6,7 +6,7 @@
  */
 
 /**
- * Animation transition function
+ * Animation transition function (easing)
  * @callback _tTransitionCallback
  * @param {number} x Current animation position, 0 <= x <= 1
  * @returns {number} The distance value

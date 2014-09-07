@@ -129,6 +129,12 @@ Firestorm.Element = {
 
 		context.parentNode.insertBefore(target_element, context.nextSibling);
 
+	},
+
+	selectElements: function(element, selector) {
+
+		return Slick.search(element, selector, new Elements);
+
 	}
 
 };

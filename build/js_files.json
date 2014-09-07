@@ -47,7 +47,8 @@
 		"Mixin/Properties.class.js",
 		"Mixin/Refreshable.class.js",
 
-		"Animator/Units.class.js",
+		"Animator/Integer.class.js",
+		"Animator/Color.class.js",
 
 		"Animation/Abstract.class.js",
 		"Animation/Standard.class.js",

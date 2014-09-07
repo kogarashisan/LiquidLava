@@ -11,7 +11,7 @@ Lava.define(
 
 	_id: null,
 	/**
-	 * @type {Lava.view.View}
+	 * @type {Lava.view.Abstract}
 	 */
 	_view: null,
 	/**
@@ -58,7 +58,7 @@ Lava.define(
 	_is_element_owner: true,
 
 	/**
-	 * @param {Lava.view.View} view
+	 * @param {Lava.view.Abstract} view
 	 * @param {_cElementContainer} config
 	 * @param {Lava.widget.Standard} widget
 	 */

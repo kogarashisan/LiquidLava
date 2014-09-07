@@ -80,7 +80,7 @@ Lava.define(
 	/**
 	 * @param {_cView} config
 	 * @param {Lava.widget.Standard} widget
-	 * @param {Lava.view.View} parent_view
+	 * @param {Lava.view.Abstract} parent_view
 	 * @param {Lava.system.Template} template
 	 * @param {Object} properties
 	 */

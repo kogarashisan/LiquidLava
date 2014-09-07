@@ -23,7 +23,7 @@ Firestorm.DOM = {
 		this._needs_shy = e.STRIPS_INNER_HTML_SCRIPT_AND_STYLE_TAGS;
 		this._moves_whitespace = e.MOVES_WHITESPACE_BEFORE_SCRIPT;
 
-		if (Firestorm.schema.DOM.PREFER_RANGE_API && e.SUPPORTS_RANGE) {
+		if (Firestorm.schema.dom.PREFER_RANGE_API && e.SUPPORTS_RANGE) {
 
 			this.insertHTMLBefore = this.insertHTMLBefore_Range;
 			this.insertHTMLAfter = this.insertHTMLAfter_Range;

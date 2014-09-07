@@ -10,7 +10,7 @@ Lava.define(
 	isEmulatedContainer: true,
 
 	/**
-	 * @type {Lava.view.View}
+	 * @type {Lava.view.Abstract}
 	 */
 	_view: null,
 	_config: null,
@@ -23,7 +23,7 @@ Lava.define(
 	_is_inDOM: false,
 
 	/**
-	 * @param {Lava.view.View} view
+	 * @param {Lava.view.Abstract} view
 	 * @param {_cEmulatedContainer} config
 	 * @param {Lava.widget.Standard} widget
 	 */

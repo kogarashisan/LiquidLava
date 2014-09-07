@@ -14,7 +14,11 @@ Lava.define(
 	_properties: {
 		/** @type {Lava.system.Enumerable} */
 		_tabs: null,
-		_active_tab: null
+		active_tab: null
+	},
+
+	_property_descriptors: {
+		active_tab: {setter: '_setActiveTab'}
 	},
 
 	_event_handlers: {
@@ -67,8 +71,10 @@ Lava.define(
 
 		var tab = template_arguments[0];
 		if (tab.get('is_enabled')) {
-			this.set('_active_tab', tab);
+			this._setActiveTab(tab);
 		}
+		// to remove dotted outline in FF. This can be done with CSS, but CSS will disable it completely
+		view.getContainer().getDOMElement().blur();
 		dom_event.preventDefault();
 
 	},
@@ -90,27 +96,68 @@ Lava.define(
 			name: '',
 			is_enabled: true,
 			is_hidden: false,
+			is_active: false,
 			title: null,
 			content: null
 		});
 		tab.setProperties(properties);
-		tab.onPropertyChanged('is_enabled', this._onTabStateChanged, this);
-		tab.onPropertyChanged('is_hidden', this._onTabStateChanged, this);
 
-		if (this._properties._active_tab == null && tab.get('is_enabled') && !tab.get('is_hidden')) {
+		if (Lava.schema.DEBUG && tab.get('is_active') && (!tab.get('is_enabled') || tab.get('is_hidden'))) Lava.t('Tabs: added tab cannot be active and disabled/hidden at the same time');
 
-			this._set('_active_tab', tab);
+		if (this._properties.active_tab == null && tab.get('is_enabled') && !tab.get('is_hidden')) {
+
+			this._setActiveTab(tab);
 
 		}
 
+		if (tab.get('is_active') && this._properties.active_tab != tab) {
+			if (this._properties.active_tab) {
+				this._properties.active_tab.set('is_active', false);
+			}
+			this._set('active_tab', tab);
+		}
+
 		this._tabs.push(tab);
+
+		tab.onPropertyChanged('is_enabled', this._onTabStateChanged, this);
+		tab.onPropertyChanged('is_hidden', this._onTabStateChanged, this);
+		tab.onPropertyChanged('is_active', this._onTabIsActiveChanged, this);
+
 		return tab;
+
+	},
+
+	_onTabIsActiveChanged: function(tab) {
+
+		if (tab.get('is_active')) {
+
+			this._setActiveTab(tab);
+
+		} else if (this._properties.active_tab == tab) {
+
+			this._setActiveTab(null);
+
+		}
+
+	},
+
+	_setActiveTab: function(new_tab) {
+
+		var old_active_tab = this._properties.active_tab;
+
+		if (old_active_tab != new_tab) {
+
+			this._set('active_tab', new_tab);
+			if (new_tab) new_tab.set('is_active', true);
+			if (old_active_tab) old_active_tab.set('is_active', false);
+
+		}
 
 	},
 
 	_onTabStateChanged: function(tab) {
 
-		if (!tab.get('is_enabled') || tab.get('is_hidden')) {
+		if (tab.get('is_active') && (!tab.get('is_enabled') || tab.get('is_hidden'))) {
 
 			this._fixActiveTab();
 
@@ -128,7 +175,7 @@ Lava.define(
 
 		this._tabs.removeValue(tab);
 
-		if (this._properties._active_tab == tab) {
+		if (this._properties.active_tab == tab) {
 
 			this._fixActiveTab();
 
@@ -152,7 +199,7 @@ Lava.define(
 			return result;
 		});
 
-		this.set('_active_tab', active_tab);
+		this._setActiveTab(active_tab);
 
 	},
 
@@ -172,13 +219,7 @@ Lava.define(
 			this.removeTab(tabs[i]);
 		}
 
-		this.set('_active_tab', null);
-
-	},
-
-	setActiveTab: function(tab) {
-
-		this.set('_active_tab', tab);
+		this._setActiveTab(null);
 
 	},
 

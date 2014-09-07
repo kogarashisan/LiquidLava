@@ -215,7 +215,7 @@ Lava.define(
 
 	},
 
-	_setIsEnabled: function(name, value) {
+	_setIsEnabled: function(value, name) {
 
 		var turnoff_panels = [],
 			i = 0,

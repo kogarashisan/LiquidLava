@@ -1,7 +1,7 @@
 Lava.define(
-'Lava.animator.Units',
+'Lava.animator.Integer',
 /**
- * @lends Lava.animator.Units#
+ * @lends Lava.animator.Integer#
  */
 {
 
@@ -11,7 +11,7 @@ Lava.define(
 	unit: null,
 
 	/**
-	 * @param {_cAnimator_Units} config
+	 * @param {_cAnimator_Integer} config
 	 */
 	init: function(config) {
 

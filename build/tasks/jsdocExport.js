@@ -9,9 +9,12 @@ module.exports = function(grunt) {
 
 		function callJSDoc(template_name, filelist_string) {
 
+			var cmd_string = 'jsdoc --private --destination generated_docs --template ./build/' + template_name + ' ' + filelist_string;
+			grunt.log.ok('Running: ' + cmd_string);
+
 			var child = child_process.spawn(
 				'cmd',
-				['/c jsdoc --private --destination generated_docs --template ./build/' + template_name + ' ' + filelist_string],
+				['/c ' + cmd_string],
 				{
 					windowsVerbatimArguments: true
 				}
@@ -26,7 +29,7 @@ module.exports = function(grunt) {
 			});
 			child.on('exit', function(code){
 				if(code === 0){
-					grunt.log.write('jsdoc exited normally');
+					grunt.log.write('jsdoc exited normally (' + completed_processes + ')\n');
 					completed_processes++;
 					if (completed_processes == 2) {
 						done(true);
@@ -67,7 +70,7 @@ module.exports = function(grunt) {
 				if (exclusions.indexOf(name) == -1) filelist.push(name);
 			});
 
-			var filelist_string = 'src/' + filelist.join(' src/');
+			var filelist_string = 'src/' + filelist.join(' src/') + ' build/jsdoc_support.js';
 			callJSDoc('jsdoc_classes_template', filelist_string);
 
 			var fs = require('fs');

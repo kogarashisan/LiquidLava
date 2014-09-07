@@ -61,13 +61,13 @@ Lava.define(
 
 		if (new_tooltip_target != this._tooltip_target) {
 
-			if (!this._tooltip_target) {
+			if (!this._tooltip_target) { // if there was no tooltip
 
 				if (Lava.schema.DEBUG && this._mousemove_listener) Lava.t();
 				this._mousemove_listener = Lava.Core.addGlobalHandler('mousemove', this._onMouseMove, this);
 				this._tooltip.set('is_visible', true);
 
-			} else if (!new_tooltip_target) {
+			} else if (!new_tooltip_target) { // if there was a tooltip, and now it should be hidden
 
 				Lava.Core.removeGlobalHandler(this._mousemove_listener);
 				this._mousemove_listener = null;
@@ -77,8 +77,9 @@ Lava.define(
 
 			if (new_tooltip_target) {
 
-				html = Firestorm.Element.getAttribute(new_tooltip_target, this._attribute_name);
-				this._tooltip.set('html', html.replace(/\r?\n/g, '<br/>'));
+				html = Firestorm.Element.getAttribute(new_tooltip_target, this._attribute_name).replace(/\r?\n/g, '<br/>');
+				this._tooltip.set('html', html);
+				this._tooltip.set('is_visible', !!(html || !Lava.schema.popover_manager.HIDE_EMPTY_TOOLTIPS));
 
 			}
 

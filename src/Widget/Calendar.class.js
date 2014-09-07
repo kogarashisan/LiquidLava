@@ -68,7 +68,7 @@ Lava.define(
 		this.CalendarAbstract$init(config, widget, parent_view, template, properties);
 
 		if (this._properties.value == null) {
-			this._setValue('value', current_date);
+			this._setValue(current_date, 'value');
 		}
 
 		this.set(
@@ -250,7 +250,7 @@ Lava.define(
 
 	},
 
-	_setValue: function(name, value) {
+	_setValue: function(value, name) {
 
 		var year = value.getFullYear(),
 			month = value.getMonth(),

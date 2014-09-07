@@ -28,7 +28,7 @@ Lava.define(
 
 	},
 
-	_setIsChecked: function(name, value) {
+	_setIsChecked: function(value, name) {
 
 		if (this._properties.is_checked != value) {
 

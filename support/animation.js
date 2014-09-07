@@ -8,7 +8,7 @@ _cAnimator = {
 /**
  * @extends _cAnimator
  */
-_cAnimator_Units = {
+_cAnimator_Integer = {
 
 	/**
 	 * 'height' or 'width'
@@ -40,7 +40,10 @@ _cAnimation = {
 	 */
 	duration: null,
 
-	transition: 'linear',
+	transition_name: 'linear',
+
+	/** @type {_tTransitionCallback} */
+	transition: null,
 
 	/**
 	 * @type {Array.<_cAnimator>}

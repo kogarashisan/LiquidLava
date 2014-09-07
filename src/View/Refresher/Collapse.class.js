@@ -9,12 +9,16 @@ Lava.define(
 
 	Extends: 'Lava.view.refresher.Animated',
 
+	ANIMATION_NAME: 'Lava.animation.Collapse',
+
 	_createAnimation: function(template, index) {
 
 		var element = this._getAnimationTarget(template),
+			constructor,
 			animation;
 
-		animation = new Lava.animation.Collapse({}, element);
+		constructor = Lava.ClassManager.getConstructor(this.ANIMATION_NAME, 'Lava.animation');
+		animation = new constructor({}, element);
 		animation.on('complete', this._onAnimationComplete, this);
 
 		this._templates_by_animation_guid[animation.guid] = template;

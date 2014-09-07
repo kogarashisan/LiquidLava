@@ -11,6 +11,9 @@ Lava.schema = {
 	VALIDATE_OPTIONS: true,
 	/** @const */
 	VALIDATE_OBJECT_PATHS: true,
+	/** @const */
+	DEFAULT_STABLE_SORT_ALGORITHM: 'mergeSort',
+	DEFAULT_UNSTABLE_SORT_ALGORITHM: 'mergeSort',
 	system: {
 		/** @const */
 		APP_CLASS: 'Lava.system.App',
@@ -25,8 +28,15 @@ Lava.schema = {
 			'change', 'focus', 'blur'
 		],
 
-		POPOVER_MANAGER_ENABLED: true,
-		POPOVER_MANAGER_CLASS: 'Lava.system.PopoverManager'
+		/**
+		 * Lava.Cron uses it for animation
+		 */
+		ALLOW_REQUEST_ANIMATION_FRAME: true
+	},
+	popover_manager: {
+		IS_ENABLED: true,
+		CLASS: 'Lava.system.PopoverManager',
+		HIDE_EMPTY_TOOLTIPS: true
 	},
 	data: {
 		/** @const */
@@ -38,9 +48,7 @@ Lava.schema = {
 		/**
 		 * Generally, it's NOT recommended to turn this off in production
 		 */
-		VALIDATE_IMPORT_DATA: true,
-		/** @const */
-		DEFAULT_SORT_ALGORITHM: 'mergeSort'
+		VALIDATE_IMPORT_DATA: true
 	},
 	modules: {},
 	view: {
@@ -75,7 +83,7 @@ Lava.schema = {
 		DEFAULT_CLASS_LOCATOR_GATEWAY: 'Lava.ClassLocatorGateway',
 		DEFAULT_EXTENDER: 'Default'
 	},
-	sugar_classes: ['Lava.system.Sugar'],
+	SUGAR_CLASSES: ['Lava.system.Sugar'],
 
 	/**
 	 * Current locale. Must not be null or 'default'

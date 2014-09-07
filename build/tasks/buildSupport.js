@@ -23,10 +23,12 @@ module.exports = function(grunt) {
 			if (jsdoc_support.typedefs) {
 				result += '<h2 class="api-member-group-header">Type definitions</h2>\n\n';
 				jsdoc_support.typedefs.forEach(function(data){
-					result += '<h3>' + data.name + '</h3>\n';
-					if (data.description) result += '<div>' + LavaBuild.processMarkdown(data.description) + '</div>\n';
+					result += '<h3 data-scroll-name="member:' + data.name + '">' + data.name + '</h3>\n';
+					LavaBuild.processDescriptorMarkdown(data);
+					if (data.description) result += '<div>' + data.description + '</div>\n';
 					result += '<table class="api-member-table"><thead><tr><td>Types</td></tr></thead><tbody>';
 					data.type_names.forEach(function(name){
+						// they should be already escaped
 						result += '<tr><td class="api-name-column">' + name + '</td></tr>\n'
 					});
 					result += '</tbody></table>\n\n';
@@ -36,8 +38,9 @@ module.exports = function(grunt) {
 			if (jsdoc_support.enums) {
 				result += '<h2 class="api-member-group-header">Enums</h2>\n\n';
 				jsdoc_support.enums.forEach(function(data){
-					result += '<h3>' + data.name + '</h3>\n';
-					if (data.description) result += '<div>' + LavaBuild.processMarkdown(data.description) + '</div>\n';
+					result += '<h3 data-scroll-name="member:' + data.name + '">' + data.name + '</h3>\n';
+					LavaBuild.processDescriptorMarkdown(data);
+					if (data.description) result += '<div>' + data.description + '</div>\n';
 					if (data.type_names) {
 						if (['number', 'string'].indexOf(data.type_names[0]) == -1) throw new Error(); // unknown type
 						result += '<div><b>Type: </b> ' + data.type_names[0] + '</div>';
@@ -50,10 +53,11 @@ module.exports = function(grunt) {
 					data.properties.forEach(function(property_data){
 						var tmp = {};
 						ApiHelper.setDefaultFromValue(tmp, property_data.value);
+						LavaBuild.processDescriptorMarkdown(property_data);
 						result += '<tr>' +
 							'<td class="api-name-column">' + property_data.name + '</td>' +
 							'<td>' + tmp.default_value + '</td>' +
-							'<td>' + (property_data.description ? LavaBuild.processMarkdown(property_data.description) : '') + '</td>' +
+							'<td>' + (property_data.description || '') + '</td>' +
 							'</tr>\n'
 					});
 					result += '</tbody></table>\n\n';
@@ -63,18 +67,19 @@ module.exports = function(grunt) {
 			if (jsdoc_support.callbacks) {
 				result += '<h2 class="api-member-group-header">Callbacks</h2>\n\n';
 				jsdoc_support.callbacks.forEach(function(data){
-					result += '<h3>' + data.name + '</h3>\n';
-					if (data.description) result += '<div>' + LavaBuild.processMarkdown(data.description) + '</div>\n';
+					result += '<h3 data-scroll-name="member:' + data.name + '">' + data.name + '</h3>\n';
+					LavaBuild.processDescriptorMarkdown(data);
+					if (data.description) result += '<div>' + data + '</div>\n';
 					if (data.params) {
 						data.params.forEach(function(param_descriptor) {
-							if (param_descriptor.description) param_descriptor.description = LavaBuild.processMarkdown(param_descriptor.description);
+							LavaBuild.processDescriptorMarkdown(param_descriptor);
 						});
 						result += '<div><b>Arguments:</b></div>';
 						result += ApiCommon.renderParamsTable(data.params, 'api-member-table');
 						result += '\n\n';
 					}
 					if (data.returns) {
-						if (data.returns.description) data.returns.description = LavaBuild.processMarkdown(data.returns.description);
+						LavaBuild.processDescriptorMarkdown(data.returns);
 						result += '<br/>' + ApiCommon.renderReturns(data.returns);
 					}
 				});
@@ -82,27 +87,25 @@ module.exports = function(grunt) {
 
 			if (jsdoc_support.objects) {
 				jsdoc_support.objects.forEach(function(descriptor){
-					if (descriptor.description) descriptor.description = LavaBuild.processMarkdown(descriptor.description);
+					LavaBuild.processDescriptorMarkdown(descriptor);
 					if (descriptor.member_chain) {
 						descriptor.member_chain.forEach(function(block){
 							block.descriptors.forEach(function(descriptor){
-								if (descriptor.description) descriptor.description = LavaBuild.processMarkdown(descriptor.description);
+								LavaBuild.processDescriptorMarkdown(descriptor);
 							})
 						})
 					}
 					if (descriptor.method_chain) {
 						descriptor.method_chain.forEach(function(block){
 							block.descriptors.forEach(function(descriptor){
-								if (descriptor.description) descriptor.description = LavaBuild.processMarkdown(descriptor.description);
+								LavaBuild.processDescriptorMarkdown(descriptor);
 								if (descriptor.params) {
 									descriptor.params.forEach(function(descriptor){
-										if (descriptor.description) descriptor.description = LavaBuild.processMarkdown(descriptor.description);
+										LavaBuild.processDescriptorMarkdown(descriptor);
 									})
 								}
 								if (descriptor.returns) {
-									descriptor.returns.forEach(function(descriptor){
-										if (descriptor.description) descriptor.description = LavaBuild.processMarkdown(descriptor.description);
-									})
+									LavaBuild.processDescriptorMarkdown(descriptor.returns);
 								}
 							})
 						})

@@ -66,7 +66,7 @@ exports.publish = function(taffyData, opts, tutorials) {
 		if (doclet.description) export_descriptor.description = doclet.description;
 
 		support_links.push({
-			hash: 'object=support;member=' + longname,
+			hash: 'object=Support;member=' + longname,
 			page: 'api',
 			title: longname,
 			type: 'support'

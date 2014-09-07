@@ -13,7 +13,7 @@ Lava.define(
 
 	isWidget: true,
 	/** @readonly */
-	name: null,
+	name: 'widget',
 
 	/** @type {Object.<string, _cPropertyDescriptor>} */
 	_property_descriptors: {},
@@ -43,7 +43,7 @@ Lava.define(
 	/**
 	 * @param {_cWidget} config
 	 * @param {Lava.widget.Standard} widget
-	 * @param {Lava.view.View} parent_view
+	 * @param {Lava.view.Abstract} parent_view
 	 * @param {Lava.system.Template} template
 	 * @param {Object} properties
 	 */
@@ -353,7 +353,7 @@ Lava.define(
 
 	/**
 	 * @param {string} role
-	 * @param {Lava.view.View} view
+	 * @param {Lava.view.Abstract} view
 	 * @param {Array.<*>} template_arguments
 	 * @returns {boolean}
 	 */
@@ -407,7 +407,7 @@ Lava.define(
 				//	Lava.logException(e);
 				//}
 
-				this[descriptor.setter](name, value);
+				this[descriptor.setter](value, name);
 
 			} else {
 
@@ -439,6 +439,8 @@ Lava.define(
 	 */
 	registerBroadcastTarget: function(widget, event_name, handler_name, template_arguments) {
 
+		// There is no need to save listener, cause broadcast is designed to route events from widgets inside
+		// current widget's template. The source of events will always be destroyed before the target.
 		widget.on(
 			event_name,
 			this[this._broadcast_handlers[handler_name]],

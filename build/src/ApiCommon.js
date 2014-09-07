@@ -20,13 +20,15 @@ var ApiCommon = {
 			header_cell_attributes = new Array(column_count),
 			column_cell_attributes = new Array(column_count),
 			description_attributes = '',
-			table_attributes = '';
+			table_attributes = '',
+			scroll_prefix = '';
 
 		if (options) {
 			if (options.header_cell_attributes) header_cell_attributes = options.header_cell_attributes;
 			if (options.column_cell_attributes) column_cell_attributes = options.column_cell_attributes;
 			if (options.description_attributes) description_attributes = options.description_attributes;
 			if (options.table_attributes) table_attributes = options.table_attributes;
+			if (options.scroll_prefix) scroll_prefix = options.scroll_prefix;
 		}
 
 		for (row_index = 0; row_index < row_count; row_index++) {
@@ -45,7 +47,7 @@ var ApiCommon = {
 		}
 
 		for (row_index = 0; row_index < row_count; row_index++) {
-			row_content = '<tr>';
+			row_content = '<tr' + (scroll_prefix ? (' data-scroll-name="' + scroll_prefix + '"') : '') + '>';
 			for (column_index = 0; column_index < column_count; column_index++) {
 				if (has_content_flags[column_index]) {
 					row_content += '<td ' + (column_cell_attributes[column_index] || '') + '>' + rows[row_index][column_index] + '</td>';
@@ -65,21 +67,7 @@ var ApiCommon = {
 
 	},
 
-	escapeTypeNames: function(type_names) {
-
-		var result = [],
-			i = 0,
-			count = type_names.length;
-
-		for (; i < count; i++) {
-			result.push(Firestorm.String.escape(type_names[i], Firestorm.String.HTML_ESCAPE_REGEX))
-		}
-
-		return result;
-
-	},
-
-	renderParamsTable: function(params, table_class) {
+	renderParamsTable: function(params, table_class, scroll_prefix) {
 
 		var row_index,
 			row_count = params.length,
@@ -89,10 +77,7 @@ var ApiCommon = {
 			descriptions = [],
 			row,
 			cell_content,
-			param,
-			i,
-			count,
-			tmp;
+			param;
 
 		for (row_index = 0; row_index < row_count; row_index++) {
 			row = [];
@@ -106,14 +91,13 @@ var ApiCommon = {
 				row.push(cell_content); // 1 - flags
 				row.push(param.name); // 2
 				if (param.type_names) {
-					row.push(this.escapeTypeNames(param.type_names).join('<br/>')); // 3
+					row.push(param.type_names.join('<br/>')); // 3
 				} else {
 					row.push(''); // 3
 				}
 				row.push(param.default_value || ''); // 4
-
-				descriptions.push(param.description);
 			}
+			descriptions.push(param.description);
 			rows.push(row);
 		}
 
@@ -121,7 +105,8 @@ var ApiCommon = {
 			table_attributes: 'class="' + table_class + '"',
 			header_cell_attributes: ['class="api-flag-td"'],
 			column_cell_attributes: ['class="api-flag-td"', 'class="api-name-column"'],
-			description_attributes: 'class="api-description-td"'
+			description_attributes: 'class="api-description-td"',
+			scroll_prefix: scroll_prefix || ''
 		});
 
 	},
@@ -133,7 +118,7 @@ var ApiCommon = {
 		if (returns.is_non_nullable) result += '<img title="Non-nullable" src="/www/design/non-nullable.png" />';
 		if (returns.type_names) {
 			if (returns.type_names.length > 1) {
-				result += '(' + ApiCommon.escapeTypeNames(returns.type_names).join('|') + ')';
+				result += '(' + returns.type_names.join('|') + ')';
 			} else {
 				result += returns.type_names[0] || '';
 			}

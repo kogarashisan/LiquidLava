@@ -8,7 +8,7 @@ System-wide or uncategorized
 	- [P5,Performance,Q] turn off view bindings in sleep() (*)
 	- [P5,Feature,Q] hard_refresh event for views hierarchy
 		// to force refresh of views, which are bound to plain JS objects (like Angular refresh cycle)
-	- [P5,Feature,Performance,Q] new kind of template includes - inlineInclude. Will be replaced in config, one time and forever.
+	- [P5,Feature,Performance,Q] new kind of template includes - inlineInclude. Will be replaced in config, once and forever.
 	- [P2,Refactoring] Widget and Refresher* must not access Firestorm.Element
 	- [P3,Refactoring] CONTROL_ATTRIBUTE_PREFIX and some other constants must be moved into Lava or schema
 	- [P5,Refactoring] remove "active modifiers" (see parsers, Argument and support)
@@ -18,7 +18,7 @@ System-wide or uncategorized
 		Firestorm.Array.exclude and Firestorm.Object.copy
 		// Firestorm.Object.copy may be used in ClassManager in place of extend()
 	- [P3,Feature] config extenders should be turned into normal class, and created in Lava.init()
-	- [P5,Feature] {&gt;property: $path.to.include} - an include, which takes template from property.
+	- [P5,Feature] View/Include.class.js - view, which takes it's template config from a variable (dynamic include)
 	- [P3,Feature, Performance] new kind of argument - StaticArgument for one-time calculations. Use it in static_eval
 		// must not attach listeners
 	- [P3,Refactoring,Performance] Possible optimization: if Argument is equal to scope binding, than do not create an argument, get the binding.
@@ -52,6 +52,9 @@ Animation/
 		// most likely, there will be another independent class - AnimationSequence
 	- [P5,Feature,Q] animations should switch to transitions, if browser supports them
 		// there must be a separate setting in the shema, USE_TRANSITIONS
+	- [P5,Feature] native Scroll animation, which adjusts it's duration in dependency to acroll distance
+		// Dependency should be logarithmic. Use it in documentation page, instead of Fx.Scroll
+	- [P3,Feature] add reverse_direction option to config (when animation is created - it's already reversed)
 Animation/BootstrapCollapse.class.js
 	- [P5,Feature] check for transitions support. If browser does not support transitions - apply end state immediately, without waiting.
 Animation/Toggle.class.js
@@ -79,6 +82,9 @@ Firestorm/
 	- [P5,Performance] use insertAdjacentHTML where possible (*)
 	- [P5,Performance] implement fast offset calculation algorithm (*)
 	- [P4,Performance] use native element's classList property in addClass(es), removeClass(es), hasClass
+	- [P5,Feature] hashchange event emulation for old/mobile browsers (not supported in Opera mini)
+	- [P3,Feature] native setters like setClass and setHTML
+	- [P2,Feature] Array.select(), selectFirst() - like filter, but returns another array
 Parsers/
 	- [P5,Feature] x:classBinding directive - alternative form for x:class attribute
 	- [P2,Dev] make the text for exception "Text is not allowed in this context" inside asBlocks() more meaningful
@@ -92,6 +98,10 @@ Parsers/Directives.js
 		1) allow to set several options at once (via &lt;assigns&gt; collection) <br/>
 		2) allow to use user-defined function as filter condition <br/>
 		3) allow to select several items at once
+	- [P3,Refactoring] known tasks for edit_template: move into separate object. Rename 'known' -> 'predefined'
+	- [P2, Feature] Refactoring for the &lt;x:refresher&gt; directive
+		// 1) Allow attributes like 'class'. <br/>
+		// 2) Allow packages for view refreshers (&lt;x:refresher class="$classname/RefresherName"&gt;)
 Parsers/TemplateParser.js
 	- [P5,Feature,Q] allow to set class for widget extenders
 	- [P4,Feature] implement removal of empty space from templates
@@ -99,6 +109,7 @@ Parsers/TemplateParser.js
 	- [P5,Refactoring] remove unused lexer switch preserve_whitespace
 	- [P5,Fix,Dev] _parseStyleAttribute: currently will not parse style strings which contain strings with semicolon inside them as style value
 		// do not use such styles, use classes!
+	- [P4,Fix] sequential strings are not always united into one
 Parsers/ExpressionParser.js
 	- [P5,Feature,Q] macros to shorten the ternary operator, for example: "{is_active -&gt; 'active'}"
 	- [P3,Feature, Performance] currently, each time any variable is referenced in argument's source code - it creates a new binding config.
@@ -111,12 +122,15 @@ System/App.class.js
 System/Enumerable.class.js
 	- [P3,Feature] methods moveIndex(old_index, new_index) and moveValue(value, new_index)
 		// is equivalent of removeAt, than insertAt for given value. Preserves UID.
-	- [P3, Performance] Enumerable is inherited from Properties, but does not use _properties and _property_listeners.
+	- [P3,Performance] Enumerable is inherited from Properties, but does not use _properties and _property_listeners.
 		They should not take space in constructed objects.
-	- [P5, Performance] It's possible to optimize updateFromEnumerable - do not calculate diff if there are no listeners.
+	- [P5,Performance] It's possible to optimize updateFromEnumerable - do not calculate diff if there are no listeners.
 		Also inspect other functions for optimization.
+	- [P2,Feature] - select(), selectFirst() - like filter, but returns array, instead of modifying the instance
+		// also, refactor the site:build/src/ContentLoader class for usage of new methods
 System/PopoverManager.class.js
 	- [P3,Bug] Tooltip blinks when moving cursor towards the tooltip
+	- [P2,Feature] add an option to show empty tooltips
 System/Sugar.class.js
 	- [P5,Dev] always check that there are no redundant attributes on sugar tags
 		// it's checked on root tag, but not on objects
@@ -170,6 +184,10 @@ ClassManager.class.js
 Serializer.js
 	- [P5,Feature,Q] currently, serializing a string preserves the "\r\n" sequence.
 		Convert it to "\n" by default and make a schema switch to return the old behaviour.
+	- [P1,Feature] Serializer must be a separate class with config
+		// 1) Add an option to serialize into valid JSON format (with quoted attributes) <br/>
+		// 2) Option to remove padding and spaces <br/>
+		// 3) Ability to indent functions (take from LavaBuild helper class)
 transitions.js
 	- [P2,Fix] more transitions (*)
 Cron.js
@@ -178,6 +196,7 @@ Lava.js
 	- [P5,Refactoring] namespaces reservation: move to a separate file (this will allow to generate it in user projects)
 	- [P5,Feature] create a script, which generates the file with namespaces in Lava.
 	- [P2,Feature] bootstrap() should process the control (x:) attributes, for example x:resource_id
+	- [P3,Feature] Lava.addType() - add a new type to Lava.types
 Algorithms/Sorting/
 	- [P5,Feature,Performance] Need fast unstable sort algorithm (*)
 

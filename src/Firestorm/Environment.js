@@ -7,10 +7,13 @@ Firestorm.Environment = {
 	STRIPS_INNER_HTML_SCRIPT_AND_STYLE_TAGS: false,
 	MOVES_WHITESPACE_BEFORE_SCRIPT: false,
 
+	requestAnimationFrame: null,
+
 	init: function() {
 
 		var document = window.document,
-			testEl;
+			testEl,
+			requestAnimationFrame;
 
 		// all, even old browsers, must be able to convert a function back to sources
 		//this.SUPPORTS_FUNCTION_SERIALIZATION = /xyz/.test(function(){xyz;});
@@ -29,6 +32,16 @@ Firestorm.Environment = {
 		// accidentally remove whitespace when updating a morph.
 		testEl.innerHTML = "Test: <script type='text/x-placeholder'></script>Value";
 		this.MOVES_WHITESPACE_BEFORE_SCRIPT = testEl.childNodes[0].nodeValue === 'Test:' && testEl.childNodes[2].nodeValue === ' Value';
+
+		requestAnimationFrame =
+			window.requestAnimationFrame
+			|| window.mozRequestAnimationFrame
+			|| window.webkitRequestAnimationFrame
+			|| window.msRequestAnimationFrame;
+
+		this.requestAnimationFrame = function(fn) {
+			requestAnimationFrame.call(window, fn);
+		}
 
 	}
 

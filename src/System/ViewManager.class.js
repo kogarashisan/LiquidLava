@@ -371,7 +371,7 @@ Lava.define(
 	},
 
 	/**
-	 * @param {Lava.view.View} view
+	 * @param {Lava.view.Abstract} view
 	 * @param {string} event_name
 	 * @param dom_event
 	 */
@@ -507,7 +507,7 @@ Lava.define(
 
 	/**
 	 * @param element
-	 * @returns {Lava.view.View}
+	 * @returns {Lava.view.Abstract}
 	 */
 	getViewByElement: function(element) {
 

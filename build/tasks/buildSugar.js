@@ -202,7 +202,7 @@ module.exports = function(grunt) {
 				}
 
 				if (!widget_config.real_class) throw new Error();
-				var html = '<h2 id="' + title + '">' + title + '</h2>\n';
+				var html = '<h2 id="' + title + '" data-scroll-name="member:' + title + '">' + title + '</h2>\n';
 				if (widget_config.extends) html += '<div>Extends: ' + widget_config.extends + '</div>';
 				html += '<div>Controller: <a href="#object=' + class_path + '">' + class_path + '</a></div>\n';
 
@@ -241,7 +241,7 @@ module.exports = function(grunt) {
 					+ '</div>\n\n';
 
 				LavaBuild.registerLink('sugar:' + title, {
-					hash: 'object=sugar;member=' + title,
+					hash: 'object=Sugar;member=' + title,
 					page: 'api',
 					title: title,
 					type: 'sugar'

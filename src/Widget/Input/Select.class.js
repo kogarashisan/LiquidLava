@@ -23,7 +23,7 @@ Lava.define(
 
 	},
 
-	_setValue: function(name, value) {
+	_setValue: function(value, name) {
 
 		var element;
 		if (this._properties.value != value) {

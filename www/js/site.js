@@ -213,21 +213,15 @@ Lava.define(
 
 	_request: null,
 
-	init: function(config, widget, parent_view, template, properties) {
+	_loadItemByHash: function(hash) {
 
-		this.Standard$init(config, widget, parent_view, template, properties);
+		var path = hash.substr(1),
+			item = this._getItemByHash(path);
 
-		if (window.location.hash) {
-
-			var path = window.location.hash.substr(1),
-				item = this._getItemByHash(path);
-
-			if (item) {
-				this._loadItem(item);
-			} else {
-				window.alert('Page not found: ' + path);
-			}
-
+		if (item) {
+			this._loadItem(item);
+		} else {
+			window.alert('Page not found: ' + path);
 		}
 
 	},
@@ -342,8 +336,16 @@ Lava.define(
 
 	init: function(config, widget, parent_view, template, properties) {
 
+		var hash = window.location.hash;
+
 		this._properties.versions = Examples.makeLive(LavaVersions);
 		this.ContentLoader$init(config, widget, parent_view, template, properties);
+
+		if (hash) {
+
+			this._loadItemByHash(hash);
+
+		}
 
 	},
 
@@ -393,7 +395,7 @@ Lava.define(
 });
 
 Lava.define(
-'Lava.widget.ApiPage',
+'Lava.widget.DocPage',
 {
 
 	Extends: 'Lava.widget.ContentLoader',
@@ -406,34 +408,33 @@ Lava.define(
 			}
 		}
 	},
+	_tab_names: ['tutorials', 'reference', 'api'],
+	_type_to_tab_map: {
+		tutorial: 'tutorials',
+		reference: 'reference',
+		object: 'api',
+		class: 'api'
+	},
 
 	_properties: {
 		// navigation tree to the left
 		api_tree: null,
 		// another navigation tree - for Firestorm API
 		firestorm_api_tree: null,
-		// current class descriptors (which are selected in the nav tree)
-		descriptor: null,
-		extended_descriptor: null,
-		// how to display the members: grouped by class or all in one table
-		member_grouping: true, // @todo not implemented
+		reference_nav_tree: null,
 		meta_storage: null,
 
-		sugar_descriptor: null,
+		sugar_descriptor: null, // short descriptors for links in navigation tree
 		support_descriptor: null
-
-		//_all_methods: null, // Enumerable
-		//_all_members: null, // Enumerable
-
-		//is_show_inherited: true,
-		//is_show_mixins: true,
-		//is_group_members: true
 	},
 
 	_event_handlers: {
 		node_click: '_onNodeClick',
-		member_row_click: '_onMemberRowClick',
-		group_header_click: '_onGroupHeaderClicked'
+		member_row_click: '_onMemberRowClick'
+	},
+
+	_role_handlers: {
+		nav_tabs: '_handleNavTabs'
 	},
 
 	_modifiers: {
@@ -441,51 +442,78 @@ Lava.define(
 		render_method_extended: '_renderMethodExtended'
 	},
 
-	//_broadcast_handlers: {
-	//	on_filter_changed: '_onFilterConditionChanged'
-	//},
+	DIRS: {
+		object: 'api/',
+		'class': 'api/',
+		reference: 'reference/',
+		tutorial: 'tutorial/'
+	},
 
-	API_DIR: 'api/',
+	_tabs_widget: null, // registered via role
+	_color_animation: null,
+	_hashchange_listener: null,
+	_active_tab_changed_listener: null,
 
-	// one global instance
-	_class_content_widget: null,
-	// name -> short descriptor, for loading classes by hash
-	_tree_hash: null,
+	_name_groups: {object: {}, reference: {}, tutorial: {}}, // used to find items from navigation trees by hash
+	_tab_hash_data: {object: {}, reference: {}, tutorial: {}},
+	_tab_content_widgets: {},
+	_tab_items: {},
+	_active_tab_name: 'reference',
 
 	init: function(config, widget, parent_view, template, properties) {
 
-		var children,
-			hash = {};
+		this._color_animation = new Lava.animation.Standard({
+			duration: 1500,
+			transition: function(x) {
+				return (x < 0.5) ? Lava.transitions.inOutCubic(x*2) : Lava.transitions.inOutCubic(1 - (x - 0.5)*2);
+			},
+			animators: [
+				{type: 'Color', from: [255, 255, 255], to: [255, 128, 128], property: 'background-color'}
+			]
+		}, null);
 
 		this._properties.api_tree = Examples.makeLive(api_tree_source);
+		this._prepareTree(this._name_groups.object, this._properties.api_tree, 'api', null);
 		this._properties.firestorm_api_tree = Examples.makeLive(firestorm_api_tree_source);
+		this._prepareTree(this._name_groups.object, this._properties.firestorm_api_tree, 'api', null);
+		this._properties.reference_nav_tree = Examples.makeLive(reference_nav_tree_source);
+		this._prepareTree(this._name_groups.reference, this._properties.reference_nav_tree, 'reference', null);
 
-		/*function prepareTree(collection, parent) {
-			collection.each(function(record){
-				record.set('parent', parent);
-				if (record.get('type') == 'folder') {
-					hash[record.get('name')] = record;
-				}
-				children = record.get('children');
-				if (children) {
-					prepareTree(children, record);
-				}
-			})
-		}*/
-
-		this._tree_hash = hash; // @todo
-		this._class_content_widget = Lava.createWidget('ClassContent');
+		this._tab_content_widgets.api = Lava.createWidget('ClassContent');
 		this._properties.sugar_descriptor = new Lava.mixin.Properties({
-			type: 'object',
-			name: 'Sugar',
-			title: 'Sugar'
+			type: 'object', name: 'Sugar', title: 'Sugar', tab_name: 'api', parent: null
 		});
+		this._name_groups.object['Sugar'] = this._properties.sugar_descriptor;
 		this._properties.support_descriptor = new Lava.mixin.Properties({
-			type: 'object',
-			name: 'Support',
-			title: 'Support'
+			type: 'object', name: 'Support', title: 'Support', tab_name: 'api', parent: null
 		});
+		this._name_groups.object['Support'] = this._properties.support_descriptor;
+
 		this.ContentLoader$init(config, widget, parent_view, template, properties);
+
+		this._hashchange_listener = Lava.Core.addGlobalHandler('hashchange', this._onHashChange, this);
+		if (window.location.hash) {
+			this._loadItemByHash(window.location.hash);
+		}
+
+	},
+
+	_prepareTree: function(hash, collection, tab_name, parent) {
+
+		var children,
+			self = this;
+
+		collection.each(function(record) {
+			record.set('parent', parent);
+			record.set('tab_name', tab_name);
+			if (record.get('type') != 'folder') {
+				hash[record.get('name')] = record;
+			}
+			children = record.get('children');
+			if (children) {
+				self._prepareTree(hash, children, tab_name, record);
+			}
+		})
 
 	},
 
@@ -493,35 +521,29 @@ Lava.define(
 
 		var node = template_arguments[0];
 
-		if (node.get('type') == 'class' || node.get('type') == 'object') {
-
-			this._selectItem(dom_event_name, dom_event, view, template_arguments);
-
-		} else if (node.get('type') == 'folder') {
+		if (node.get('type') == 'folder') {
 
 			node.set('is_expanded', !node.get('is_expanded'));
 
-		} else {
-
-			Lava.t();
-
 		}
-
-		dom_event.preventDefault(); // @todo remove this to enable hash change
 
 	},
 
 	_onMemberRowClick: function(dom_event_name, dom_event, view, template_arguments) {
 
 		var member_descriptor = template_arguments[0];
-		if (member_descriptor.isProperties && (member_descriptor.get('returns') || member_descriptor.get('params'))) {
-			var meta_record = this._properties.meta_storage.get(template_arguments[0].get('guid'));
-			meta_record.set('is_expanded', !meta_record.get('is_expanded'));
+		if (dom_event.target.nodeName.toLowerCase() != 'a') { // links inside member description
+
+			if (member_descriptor.isProperties && (member_descriptor.get('returns') || member_descriptor.get('params'))) {
+				var meta_record = this._properties.meta_storage.get(template_arguments[0].get('guid'));
+				meta_record.set('is_expanded', !meta_record.get('is_expanded'));
+			}
+
 		}
 
 	},
 
-	_loadGroup: function(chain) {
+	_initItemChain: function(chain) {
 
 		var group_count = chain.length,
 			group_index = 0,
@@ -534,54 +556,68 @@ Lava.define(
 			for (i = 0, count = descriptors.length; i < count; i++) {
 				descriptors[i].guid = Lava.guid++;
 				descriptors[i] = new Lava.mixin.Properties(descriptors[i]);
-				//all_member_descriptors.push(descriptors[i]);
 			}
 		}
 
 	},
 
-	_onItemLoaded: function(text, item) {
+	_onItemLoaded: function(text, short_descriptor) {
 
-		var extended_descriptor = eval('(' + text + ')'),
-			method_chain = extended_descriptor.method_chain,
-			member_chain = extended_descriptor.member_chain,
-			events = extended_descriptor.events,
-			support_objects = extended_descriptor.support_objects,
+		var type = short_descriptor.get('type'),
+			extended_descriptor,
+			events,
+			support_objects,
 			i = 0,
-			count,
-			all_method_descriptors = [],
-			all_member_descriptors = [];
+			count;
 
-		item.set('extended_descriptor', extended_descriptor);
+		if (type == 'class' || type == 'object') {
 
-		if (method_chain) this._loadGroup(method_chain);
-		//if (member_chain) this._loadGroup(member_chain);
+			extended_descriptor = eval('(' + text + ')');
+			events = extended_descriptor.events;
+			support_objects = extended_descriptor.support_objects;
 
-		if (events) {
-			for (i = 0, count = events.length; i < count; i++) {
-				events[i].guid = Lava.guid++;
-				events[i] = new Lava.mixin.Properties(events[i]);
+			if (extended_descriptor.method_chain) this._initItemChain(extended_descriptor.method_chain);
+			//if (extended_descriptor.member_chain) this._initItemChain(extended_descriptor.member_chain);
+
+			if (events) {
+				for (i = 0, count = events.length; i < count; i++) {
+					events[i].guid = Lava.guid++;
+					events[i] = new Lava.mixin.Properties(events[i]);
+				}
 			}
-		}
 
-		if (support_objects) {
-			for (i = 0, count = support_objects.length; i < count; i++) {
-				if (support_objects[i].method_chain) this._loadGroup(support_objects[i].method_chain);
+			if (support_objects) {
+				for (i = 0, count = support_objects.length; i < count; i++) {
+					if (support_objects[i].method_chain) this._initItemChain(support_objects[i].method_chain);
+				}
 			}
-		}
 
-		//item.set('all_methods', new Lava.system.Enumerable(all_method_descriptors));
-		//item.set('all_members', new Lava.system.Enumerable(all_member_descriptors));
+			short_descriptor.set('extended_descriptor', extended_descriptor);
+
+		} else if (type == 'reference' || type == 'tutorials') {
+
+			short_descriptor.set('widget_config', eval('(' + text + ')'));
+
+		} else {
+
+			Lava.t('unknown item type: ' + type);
+
+		}
 
 	},
 
-	_getItemByHash: function(path) {
+	_parseHash: function(hash_string) {
 
-		var result = null,
-			segments = path.split(';'),
+		var result = {
+				hash: hash_string
+			},
+			segments = hash_string.substr(1).split(';'),
 			parts,
 			i = 0,
 			count = segments.length,
+			name_group,
+			item_name,
+			item_type,
 			hash = {};
 
 		for (; i < count; i++) {
@@ -591,61 +627,195 @@ Lava.define(
 			}
 		}
 
-		if (('class' in hash) && (hash['class'] in this._tree_hash)) {
-			result = this._tree_hash[hash['class']]
+		for (item_type in this._type_to_tab_map) {
+			if (item_type in hash) {
+				result['tab'] = this._type_to_tab_map[item_type];
+				break;
+			}
+		}
+
+		if (('tab' in hash) && result['tab'] && result['tab'] != hash['tab']) {
+			result.is_invalid = true; // malformed URL
+		}
+		if (('tab' in hash)) {
+			if (this._tab_names.indexOf(hash['tab']) == -1) {
+				result.is_invalid = true;
+			} else if (!result['tab']) {
+				result['tab'] = hash['tab'];
+			}
+		}
+
+		result['item'] = null;
+		if (item_type && hash[item_type]) {
+			name_group = this._name_groups[item_type == 'class' ? 'object' : item_type];
+			item_name = hash[item_type];
+			if (item_name in name_group) {
+				result['item'] = name_group[item_name];
+			} else {
+				result.is_invalid = true;
+			}
+		}
+
+		var scroll_targets = ['config', 'property', 'event', 'member'];
+		for (i = 0, count = scroll_targets.length; i < count; i++) {
+			if (scroll_targets[i] in hash) {
+				result['scroll_target'] = scroll_targets[i] + ':' + hash[scroll_targets[i]];
+			}
 		}
 
 		return result;
 
 	},
 
-	_showItem: function(item) {
+	_loadItemByHash: function(hash) {
 
-		if (this._properties.descriptor != item) {
+		var hash_data = this._parseHash(hash),
+			item = hash_data['item'];
 
-			// it may be null if the page has just loaded and no class was selected
-			if (this._properties.descriptor) {
-				this._properties.descriptor.set('is_selected', false);
-				// each time a class is selected - the expanded state of all members needs to be forgotten
-				this._properties.meta_storage.destroy();
+		if (hash['tab']) this._selectTab(hash['tab']);
+
+		if (item) {
+
+			if (item.get('is_loaded')) {
+
+				this._showItem(item);
+				this._scrollToTarget();
+
+			} else {
+
+				this._loadItem(item);
+
 			}
-			this._set('meta_storage', new Lava.data.MetaStorage(this._shared.meta_storage_config));
 
-			this._set('descriptor', item);
-			this._set('extended_descriptor', item.get('extended_descriptor'));
-			item.set('is_selected', true);
+			this._tab_hash_data[hash_data['tab']] = hash_data;
 
-			if (!this._class_content_widget.isInDOM()) {
-				this._class_content_widget.inject(Firestorm.getElementById('content_area'), 'Top');
-			}
+		} else if (hash_data.is_invalid) {
 
-			Lava.refreshViews();
+			window.alert('Invalid URL: ' + hash);
 
 		}
 
 	},
 
-	_getFilePath: function(item) {
+	_showItem: function(item) {
 
-		return this.API_DIR + item.get('name') + '.js';
+		var content_area = Firestorm.getElementById('content_area'),
+			item_tab = item.get('tab_name'),
+			is_item_changed = (this._tab_items[item_tab] != item),
+			is_tab_changed = (this._active_tab_name != item_tab),
+			active_widget = this._tab_content_widgets[this._active_tab_name],
+			tab_widget = this._tab_content_widgets[item_tab];
+
+		this._selectTab(item_tab);
+		if (is_item_changed || is_tab_changed) {
+			if (item_tab != 'api' && active_widget && active_widget.isInDOM()) active_widget.remove();
+		}
+
+		if (is_item_changed) {
+
+			if (item_tab == 'api') {
+				// each time a class is selected - the expanded state of all members needs to be forgotten
+				this._properties.meta_storage && this._properties.meta_storage.destroy();
+				this._set('meta_storage', new Lava.data.MetaStorage(this._shared.meta_storage_config));
+				tab_widget.set('descriptor', item);
+				tab_widget.set('extended_descriptor', item.get('extended_descriptor'));
+			} else {
+				tab_widget && tab_widget.destroy();
+				tab_widget = new Lava.widget.Standard(item.get('widget_config'));
+				this._tab_content_widgets[item_tab] = tab_widget;
+			}
+
+			if (this._tab_items[item_tab]) {
+				this._tab_items[item_tab].set('is_selected', false);
+			}
+			this._tab_items[item_tab] = item;
+			this._expandItemParents(item);
+			item.set('is_selected', true);
+		}
+
+		if (is_item_changed || is_tab_changed) {
+			if (tab_widget && !tab_widget.isInDOM()) tab_widget.inject(content_area, 'Top');
+		}
+
+		Lava.refreshViews();
 
 	},
 
-	_onGroupHeaderClicked: function(dom_event_name, dom_event, view, template_arguments) {
+	_scrollToTarget: function() {
 
-		// @todo
+		var self = this,
+			content_area,
+			scroll_animation,
+			scroll_target_attribute = this._tab_hash_data[this._active_tab_name]['scroll_target'],
+			scroll_target;
+
+		if (scroll_target_attribute) {
+
+			window.setTimeout(function(){
+
+				content_area = Firestorm.getElementById('content_area');
+				scroll_target = Firestorm.Element.selectElements(content_area, '*[data-scroll-name=' + scroll_target_attribute + ']')[0];
+				if (scroll_target) {
+
+					scroll_animation = new Fx.Scroll(window, {duration: 1000}); // @todo MooTools dependency
+					scroll_animation.addEvent('complete', function(){
+						self._color_animation.finish(); // finish with the old target
+						self._color_animation.setTarget(scroll_target);
+						self._color_animation.start();
+					});
+					scroll_animation.toElementCenter(scroll_target);
+
+				}
+
+			}, 0);
+
+		} else {
+
+			window.scrollTo(0,0);
+
+		}
 
 	},
 
-	_onFilterConditionChanged: function() {
+	_onTabSelected: function(tabs_widget) {
 
-		// @todo
+		var new_tab_name = tabs_widget.get('active_tab').get('name'),
+			new_tab_hash_data = this._tab_hash_data[new_tab_name],
+			new_tab_widget = this._tab_content_widgets[new_tab_name],
+			current_active_widget = this._tab_content_widgets[this._active_tab_name];
+
+		if (this._request == null && new_tab_name != this._active_tab_name) {
+
+			current_active_widget && current_active_widget.isInDOM() && current_active_widget.remove();
+			new_tab_widget && !new_tab_widget.isInDOM() && new_tab_widget.inject(Firestorm.getElementById('content_area'), 'Top');
+			new_tab_hash_data && this._setWindowHash(new_tab_hash_data.hash);
+			this._active_tab_name = new_tab_name;
+
+		}
 
 	},
 
-	_renderParams: function(params, table_class) {
+	_onHashChange: function(event_name, event) {
 
-		return ApiCommon.renderParamsTable(params, table_class);
+		if (this._request == null && window.location.hash) {
+
+			this._loadItemByHash(window.location.hash);
+
+		}
+
+	},
+
+	_onRequestSuccess: function(text, item) {
+
+		this.ContentLoader$_onRequestSuccess(text, item);
+		this._scrollToTarget();
+		this._setWindowHash(this._tab_hash_data[this._active_tab_name].hash);
+
+	},
+
+	_renderParams: function(params, table_class, scroll_prefix) {
+
+		return ApiCommon.renderParamsTable(params, table_class, scroll_prefix);
 
 	},
 
@@ -662,6 +832,46 @@ Lava.define(
 		}
 		return result;
 
+	},
+
+	_getFilePath: function(item) {
+
+		var path = item.get('type') == 'reference' ? item.get('relative_path') : item.get('name');
+		return this.DIRS[item.get('type')] + path + '.js';
+
+	},
+
+	_handleNavTabs: function(tabs_widget) {
+
+		this._tabs_widget = tabs_widget;
+		tabs_widget.getTabs()[this._tab_names.indexOf(this._active_tab_name)].set('is_active', true);
+		this._active_tab_changed_listener = tabs_widget.onPropertyChanged('active_tab', this._onTabSelected, this);
+
+	},
+
+	_setWindowHash: function(new_hash) {
+		Lava.suspendListener(this._hashchange_listener);
+		window.location.hash = new_hash;
+		Lava.resumeListener(this._hashchange_listener);
+	},
+	
+	_selectTab: function(tab_name) {
+
+		if (this._tabs_widget) {
+			Lava.suspendListener(this._active_tab_changed_listener);
+			this._tabs_widget.getTabs()[this._tab_names.indexOf(tab_name)].set('is_active', true);
+			Lava.resumeListener(this._active_tab_changed_listener);
+			this._active_tab_name = tab_name;
+		}
+		
+	},
+
+	_expandItemParents: function(item) {
+		var parent = item.get('parent');
+		while (parent) {
+			parent.set('is_expanded', true);
+			parent = parent.get('parent');
+		}
 	}
 
 });
@@ -690,7 +900,9 @@ Lava.define(
 
 		this._properties.examples = Examples.makeLive(LavaExamples);
 
-		var demo_module = Lava.app.getModule('DemoTree');
+		var demo_module = Lava.app.getModule('DemoTree'),
+			hash = window.location.hash;
+
 		// clone cause loading modifies the data
 		demo_module.loadRecords(ExampleData.example_tree);
 		this._properties.all_tree_records = new Lava.system.Enumerable(demo_module.getAllRecords());
@@ -703,6 +915,12 @@ Lava.define(
 		this.set('live_example_tree', Examples.makeLive(ExampleData.example_tree));
 
 		this.ContentLoader$init(config, widget, parent_view, template, properties);
+
+		if (hash) {
+
+			this._loadItemByHash(hash);
+
+		}
 
 	},
 
@@ -865,13 +1083,15 @@ var ApiCommon = {
 			header_cell_attributes = new Array(column_count),
 			column_cell_attributes = new Array(column_count),
 			description_attributes = '',
-			table_attributes = '';
+			table_attributes = '',
+			scroll_prefix = '';
 
 		if (options) {
 			if (options.header_cell_attributes) header_cell_attributes = options.header_cell_attributes;
 			if (options.column_cell_attributes) column_cell_attributes = options.column_cell_attributes;
 			if (options.description_attributes) description_attributes = options.description_attributes;
 			if (options.table_attributes) table_attributes = options.table_attributes;
+			if (options.scroll_prefix) scroll_prefix = options.scroll_prefix;
 		}
 
 		for (row_index = 0; row_index < row_count; row_index++) {
@@ -890,7 +1110,7 @@ var ApiCommon = {
 		}
 
 		for (row_index = 0; row_index < row_count; row_index++) {
-			row_content = '<tr>';
+			row_content = '<tr' + (scroll_prefix ? (' data-scroll-name="' + scroll_prefix + '"') : '') + '>';
 			for (column_index = 0; column_index < column_count; column_index++) {
 				if (has_content_flags[column_index]) {
 					row_content += '<td ' + (column_cell_attributes[column_index] || '') + '>' + rows[row_index][column_index] + '</td>';
@@ -910,21 +1130,7 @@ var ApiCommon = {
 
 	},
 
-	escapeTypeNames: function(type_names) {
-
-		var result = [],
-			i = 0,
-			count = type_names.length;
-
-		for (; i < count; i++) {
-			result.push(Firestorm.String.escape(type_names[i], Firestorm.String.HTML_ESCAPE_REGEX))
-		}
-
-		return result;
-
-	},
-
-	renderParamsTable: function(params, table_class) {
+	renderParamsTable: function(params, table_class, scroll_prefix) {
 
 		var row_index,
 			row_count = params.length,
@@ -934,10 +1140,7 @@ var ApiCommon = {
 			descriptions = [],
 			row,
 			cell_content,
-			param,
-			i,
-			count,
-			tmp;
+			param;
 
 		for (row_index = 0; row_index < row_count; row_index++) {
 			row = [];
@@ -951,14 +1154,13 @@ var ApiCommon = {
 				row.push(cell_content); // 1 - flags
 				row.push(param.name); // 2
 				if (param.type_names) {
-					row.push(this.escapeTypeNames(param.type_names).join('<br/>')); // 3
+					row.push(param.type_names.join('<br/>')); // 3
 				} else {
 					row.push(''); // 3
 				}
 				row.push(param.default_value || ''); // 4
-
-				descriptions.push(param.description);
 			}
+			descriptions.push(param.description);
 			rows.push(row);
 		}
 
@@ -966,7 +1168,8 @@ var ApiCommon = {
 			table_attributes: 'class="' + table_class + '"',
 			header_cell_attributes: ['class="api-flag-td"'],
 			column_cell_attributes: ['class="api-flag-td"', 'class="api-name-column"'],
-			description_attributes: 'class="api-description-td"'
+			description_attributes: 'class="api-description-td"',
+			scroll_prefix: scroll_prefix || ''
 		});
 
 	},
@@ -978,7 +1181,7 @@ var ApiCommon = {
 		if (returns.is_non_nullable) result += '<img title="Non-nullable" src="/www/design/non-nullable.png" />';
 		if (returns.type_names) {
 			if (returns.type_names.length > 1) {
-				result += '(' + ApiCommon.escapeTypeNames(returns.type_names).join('|') + ')';
+				result += '(' + returns.type_names.join('|') + ')';
 			} else {
 				result += returns.type_names[0] || '';
 			}
@@ -993,6 +1196,191 @@ var ApiCommon = {
 	}
 
 };
+MooTools.More = {
+	version: '1.5.2-dev',
+	build: '%build%'
+};
+
+/*
+---
+
+script: Fx.Scroll.js
+
+name: Fx.Scroll
+
+description: Effect to smoothly scroll any element, including the window.
+
+license: MIT-style license
+
+authors:
+  - Valerio Proietti
+
+requires:
+  - Core/Fx
+  - Core/Element.Event
+  - Core/Element.Dimensions
+  - MooTools.More
+
+provides: [Fx.Scroll]
+
+...
+*/
+
+(function(){
+
+Fx.Scroll = new Class({
+
+	Extends: Fx,
+
+	options: {
+		offset: {x: 0, y: 0},
+		wheelStops: true
+	},
+
+	initialize: function(element, options){
+		this.element = this.subject = document.id(element);
+		this.parent(options);
+
+		if (typeOf(this.element) != 'element') this.element = document.id(this.element.getDocument().body);
+
+		if (this.options.wheelStops){
+			var stopper = this.element,
+				cancel = this.cancel.pass(false, this);
+			this.addEvent('start', function(){
+				stopper.addEvent('mousewheel', cancel);
+			}, true);
+			this.addEvent('complete', function(){
+				stopper.removeEvent('mousewheel', cancel);
+			}, true);
+		}
+	},
+
+	set: function(){
+		var now = Array.flatten(arguments);
+		this.element.scrollTo(now[0], now[1]);
+		return this;
+	},
+
+	compute: function(from, to, delta){
+		return [0, 1].map(function(i){
+			return Fx.compute(from[i], to[i], delta);
+		});
+	},
+
+	start: function(x, y){
+		if (!this.check(x, y)) return this;
+		var scroll = this.element.getScroll();
+		return this.parent([scroll.x, scroll.y], [x, y]);
+	},
+
+	calculateScroll: function(x, y){
+		var element = this.element,
+			scrollSize = element.getScrollSize(),
+			scroll = element.getScroll(),
+			size = element.getSize(),
+			offset = this.options.offset,
+			values = {x: x, y: y};
+
+		for (var z in values){
+			if (!values[z] && values[z] !== 0) values[z] = scroll[z];
+			if (typeOf(values[z]) != 'number') values[z] = scrollSize[z] - size[z];
+			values[z] += offset[z];
+		}
+
+		return [values.x, values.y];
+	},
+
+	toTop: function(){
+		return this.start.apply(this, this.calculateScroll(false, 0));
+	},
+
+	toLeft: function(){
+		return this.start.apply(this, this.calculateScroll(0, false));
+	},
+
+	toRight: function(){
+		return this.start.apply(this, this.calculateScroll('right', false));
+	},
+
+	toBottom: function(){
+		return this.start.apply(this, this.calculateScroll(false, 'bottom'));
+	},
+
+	toElement: function(el, axes){
+		axes = axes ? Array.from(axes) : ['x', 'y'];
+		var scroll = isBody(this.element) ? {x: 0, y: 0} : this.element.getScroll();
+		var position = Object.map(document.id(el).getPosition(this.element), function(value, axis){
+			return axes.contains(axis) ? value + scroll[axis] : false;
+		});
+		return this.start.apply(this, this.calculateScroll(position.x, position.y));
+	},
+
+	toElementEdge: function(el, axes, offset){
+		axes = axes ? Array.from(axes) : ['x', 'y'];
+		el = document.id(el);
+		var to = {},
+			position = el.getPosition(this.element),
+			size = el.getSize(),
+			scroll = this.element.getScroll(),
+			containerSize = this.element.getSize(),
+			edge = {
+				x: position.x + size.x,
+				y: position.y + size.y
+			};
+
+		['x', 'y'].each(function(axis){
+			if (axes.contains(axis)){
+				if (edge[axis] > scroll[axis] + containerSize[axis]) to[axis] = edge[axis] - containerSize[axis];
+				if (position[axis] < scroll[axis]) to[axis] = position[axis];
+			}
+			if (to[axis] == null) to[axis] = scroll[axis];
+			if (offset && offset[axis]) to[axis] = to[axis] + offset[axis];
+		}, this);
+
+		if (to.x != scroll.x || to.y != scroll.y) this.start(to.x, to.y);
+		return this;
+	},
+
+	toElementCenter: function(el, axes, offset){
+		axes = axes ? Array.from(axes) : ['x', 'y'];
+		el = document.id(el);
+		var to = {},
+			position = el.getPosition(this.element),
+			size = el.getSize(),
+			scroll = this.element.getScroll(),
+			containerSize = this.element.getSize();
+
+		['x', 'y'].each(function(axis){
+			if (axes.contains(axis)){
+				to[axis] = position[axis] - (containerSize[axis] - size[axis]) / 2;
+			}
+			if (to[axis] == null) to[axis] = scroll[axis];
+			if (offset && offset[axis]) to[axis] = to[axis] + offset[axis];
+		}, this);
+
+		if (to.x != scroll.x || to.y != scroll.y) this.start(to.x, to.y);
+		return this;
+	}
+
+});
+
+//<1.2compat>
+Fx.Scroll.implement({
+	scrollToCenter: function(){
+		return this.toElementCenter.apply(this, arguments);
+	},
+	scrollIntoView: function(){
+		return this.toElementEdge.apply(this, arguments);
+	}
+});
+//</1.2compat>
+
+function isBody(element){
+	return (/^(?:body|html)$/i).test(element.tagName);
+}
+
+})();
+
 Lava.widgets["Example"] = {
 	type: "widget",
 	"class": "Lava.WidgetConfigExtensionGateway",
@@ -1031,12 +1419,23 @@ Lava.widgets["FolderTree"] = {
 				"class": "View",
 				container: {
 					"class": "Element",
-					tag_name: "i",
+					tag_name: "img",
 					static_classes: ["lava-tree-icon"],
+					property_bindings: {
+						src: {
+							evaluator: function() {
+return ('/www/design/tree/' + this._binds[0].getValue() + '.gif');
+},
+							binds: [{
+								property_name: "node",
+								tail: ["type"]
+							}]
+						}
+					},
 					class_bindings: {
 						"0": {
 							evaluator: function() {
-return ('icon-' + this._binds[0].getValue());
+return ('lava-tree-icon-' + this._binds[0].getValue());
 },
 							binds: [{
 								property_name: "node",

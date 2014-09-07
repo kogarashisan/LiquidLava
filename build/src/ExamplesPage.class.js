@@ -23,7 +23,9 @@ Lava.define(
 
 		this._properties.examples = Examples.makeLive(LavaExamples);
 
-		var demo_module = Lava.app.getModule('DemoTree');
+		var demo_module = Lava.app.getModule('DemoTree'),
+			hash = window.location.hash;
+
 		// clone cause loading modifies the data
 		demo_module.loadRecords(ExampleData.example_tree);
 		this._properties.all_tree_records = new Lava.system.Enumerable(demo_module.getAllRecords());
@@ -36,6 +38,12 @@ Lava.define(
 		this.set('live_example_tree', Examples.makeLive(ExampleData.example_tree));
 
 		this.ContentLoader$init(config, widget, parent_view, template, properties);
+
+		if (hash) {
+
+			this._loadItemByHash(hash);
+
+		}
 
 	},
 
@@ -130,7 +138,6 @@ Lava.define(
 			for (; i < count; i++) {
 				this._addTab(tabs[i].title, tabs[i].content);
 			}
-
 			Lava.refreshViews();
 
 		}

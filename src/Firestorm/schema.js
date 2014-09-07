@@ -1,6 +1,6 @@
 
 Firestorm.schema = {
-	DOM: {
+	dom: {
 		/** @const */
 		PREFER_RANGE_API: true
 	},

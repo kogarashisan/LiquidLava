@@ -16,6 +16,8 @@ var Lava = {
 	/** @ignore */
 	ObjectParser: null,
 	/** @ignore */
+	TemplateWalker: null,
+	/** @ignore */
 	transitions: null,
 	/** @ignore */
 	Cron: null,
@@ -154,7 +156,7 @@ var Lava = {
 
 		var path,
 			i = 0,
-			count = this.schema.sugar_classes.length;
+			count = this.schema.SUGAR_CLASSES.length;
 
 		// You must know this yourself
 		// for (var name in {}) Lava.t("LiquidLava framework can not coexist with frameworks that modify native object's prototype");
@@ -177,7 +179,7 @@ var Lava = {
 
 		for (; i < count; i++) {
 
-			this.registerSugar(this.schema.sugar_classes[i]);
+			this.registerSugar(this.schema.SUGAR_CLASSES[i]);
 
 		}
 
@@ -193,8 +195,8 @@ var Lava = {
 		constructor = this.ClassManager.getConstructor(Lava.schema.system.APP_CLASS);
 		this.app = new constructor();
 
-		if (Lava.schema.system.POPOVER_MANAGER_ENABLED) {
-			constructor = this.ClassManager.getConstructor(Lava.schema.system.POPOVER_MANAGER_CLASS);
+		if (Lava.schema.popover_manager.IS_ENABLED) {
+			constructor = this.ClassManager.getConstructor(Lava.schema.popover_manager.CLASS);
 			this.popover_manager = new constructor();
 		}
 
@@ -429,7 +431,7 @@ var Lava = {
 
 		}
 
-		if (Lava.schema.system.POPOVER_MANAGER_ENABLED) {
+		if (Lava.schema.popover_manager.IS_ENABLED) {
 			this.popover_manager.enable();
 		}
 
@@ -468,7 +470,7 @@ var Lava = {
 	 *
 	 * @param {_cWidget} config
 	 * @param {Lava.widget.Standard} widget
-	 * @param {Lava.view.View} parent_view
+	 * @param {Lava.view.Abstract} parent_view
 	 * @param {Lava.system.Template} template
 	 * @param {Object} properties
 	 * @returns {Lava.widget.Standard}

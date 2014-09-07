@@ -34,7 +34,7 @@ Lava.define(
 
 	},
 
-	_setValue: function(name, value) {
+	_setValue: function(value, name) {
 
 		if (this._properties.value != value) {
 

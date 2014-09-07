@@ -7,6 +7,9 @@ var Lava = global.Lava,
 
 var ApiHelper = {
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// static methods for JSDoc themes
+
 	export_type_data: function(doclet_param, export_param, is_name_required) {
 
 		if (!doclet_param.name && is_name_required) throw new Error();
@@ -15,7 +18,7 @@ var ApiHelper = {
 		if (doclet_param.description) export_param.description = doclet_param.description;
 		if (doclet_param.defaultValue) export_param.default_value = doclet_param.defaultValue;
 
-		['optional', 'nullable', 'variable'].forEach(function(name) {
+		['optional', 'nullable', 'variable', 'readonly'].forEach(function(name) {
 			if (doclet_param[name]) export_param['is_' + name] = true;
 		});
 		if (doclet_param['nullable'] === false) export_param['is_non_nullable'] = true;
@@ -86,6 +89,7 @@ var ApiHelper = {
 		}
 	},
 
+	// end: methods for JSDoc themes
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	importVars: function(destination, source, name_list) {
@@ -146,7 +150,27 @@ var ApiHelper = {
 		}
 		ApiHelper.setDefaultValue(member_descriptor, member_type, value, is_empty);
 
+	},
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// recursively walk the schema and make a list of paths, like "schema.system.APP_CLASS"
+	_schema_export: {},
+	_exportSchemaPaths: function(schema_object, path) {
+		for (var name in schema_object) {
+			if (Firestorm.getType(schema_object[name]) == 'object') {
+				this._exportSchemaPaths(schema_object[name], path ? (path + '.' + name) : name);
+			} else {
+				this._schema_export[path ? (path + '.' + name) : name] = schema_object[name];
+			}
+		}
+	},
+	exportSchemaPaths: function(schema_object) {
+		this._schema_export = {};
+		this._exportSchemaPaths(schema_object, '');
+		return this._schema_export;
 	}
+	//
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 };
 

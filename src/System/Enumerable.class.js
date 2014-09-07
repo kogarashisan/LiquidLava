@@ -624,27 +624,27 @@ Lava.define(
 	},
 
 	/**
-	 * @param {function(*, *):boolean} [less] A callback to compare items
-	 * @param {string} [algorithm] The name of the sorting method from Lava.algorithms.sorting
+	 * @param {function(*, *):boolean} less A callback to compare items
+	 * @param {string} [algorithm_name] The name of the sorting method from Lava.algorithms.sorting
 	 */
-	sort: function(less, algorithm) {
+	sort: function(less, algorithm_name) {
 
-		this._sort(less, algorithm, this._data_values);
+		this._sort(less, algorithm_name, this._data_values);
 
 	},
 
 	/**
 	 * Sort by the array of names.
-	 * @param {function(*, *):boolean} [less] A callback to compare items
-	 * @param {string} [algorithm] The name of the sorting method from Lava.algorithms.sorting
+	 * @param {function(*, *):boolean} less A callback to compare items
+	 * @param {string} [algorithm_name] The name of the sorting method from Lava.algorithms.sorting
 	 */
-	sortByNames: function(less, algorithm) {
+	sortByNames: function(less, algorithm_name) {
 
-		this._sort(less, algorithm, this._data_names);
+		this._sort(less, algorithm_name, this._data_names);
 
 	},
 
-	_sort: function(less, algorithm, values) {
+	_sort: function(less, algorithm_name, values) {
 
 		var indices = [],
 			i = 0,
@@ -663,7 +663,7 @@ Lava.define(
 
 		}
 
-		indices = Lava.algorithms.sorting[algorithm || Lava.schema.data.DEFAULT_SORT_ALGORITHM](indices, _less);
+		indices = Lava.algorithms.sorting[algorithm_name || Lava.schema.DEFAULT_STABLE_SORT_ALGORITHM](indices, _less);
 
 		this.reorder(indices);
 

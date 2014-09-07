@@ -166,7 +166,7 @@
 		<ul x:type="container" x:resource_id="$tabs.TABS_HEADERS_CONTAINER">
 			{#foreach($tabs._tabs) as=tab}
 				{#if(!tab.is_hidden)}
-					<li x:type="view" x:classes="tab == $tabs._active_tab ? 'active' : '';
+					<li x:type="view" x:classes="tab.is_active ? 'active' : '';
 							tab.is_enabled ? '' : 'disabled'">
 						<a x:type="view" x:bind:href="'#' + (tab.name || '')" x:event:click="$tabs.header_click(tab)">
 							{>$tabs.tab_include(tab, 'title')}
@@ -178,7 +178,7 @@
 		<div x:type="container" x:resource_id="$tabs.TABS_CONTENT_CONTAINER">
 			{#foreach($tabs._tabs) as=tab}
 				<x:refresher>{class: 'Default', insertion_strategy: 'sequential_elements'}</x:refresher>
-				<div x:type="view" class="tab-pane" x:classes="tab == $tabs._active_tab ? 'active' : ''">
+				<div x:type="view" class="tab-pane" x:classes="tab.is_active ? 'active' : ''">
 					{>$tabs.tab_include(tab, 'content'))}
 				</div>
 			{/foreach}
@@ -194,7 +194,8 @@
 					content: {type: 'template'},
 					name: {type: 'lava_type', is_attribute: true, type_name: 'String'},
 					is_enabled: {type: 'lava_type', is_attribute: true, type_name: 'Boolean'},
-					is_hidden: {type: 'lava_type', is_attribute: true, type_name: 'Boolean'}
+					is_hidden: {type: 'lava_type', is_attribute: true, type_name: 'Boolean'},
+					is_active: {type: 'lava_type', is_attribute: true, type_name: 'Boolean'}
 				}
 			}
 		}

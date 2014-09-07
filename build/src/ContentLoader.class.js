@@ -17,21 +17,15 @@ Lava.define(
 
 	_request: null,
 
-	init: function(config, widget, parent_view, template, properties) {
+	_loadItemByHash: function(hash) {
 
-		this.Standard$init(config, widget, parent_view, template, properties);
+		var path = hash.substr(1),
+			item = this._getItemByHash(path);
 
-		if (window.location.hash) {
-
-			var path = window.location.hash.substr(1),
-				item = this._getItemByHash(path);
-
-			if (item) {
-				this._loadItem(item);
-			} else {
-				window.alert('Page not found: ' + path);
-			}
-
+		if (item) {
+			this._loadItem(item);
+		} else {
+			window.alert('Page not found: ' + path);
 		}
 
 	},
@@ -82,6 +76,7 @@ Lava.define(
 		});
 
 		this._request.send();
+		Lava.refreshViews();
 
 	},
 
@@ -100,6 +95,7 @@ Lava.define(
 
 		this.set('is_loading', false);
 		this._request = null;
+		Lava.refreshViews();
 
 	},
 

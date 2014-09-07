@@ -48,6 +48,7 @@ objects and classes (extended) // page content
 		lava_type // the name from Lava.types
 		is_nullable
 		is_non_nullable
+		is_readonly
 		is_private
 		default_value
 	config_options = []
@@ -78,6 +79,7 @@ member descriptor:
 	is_non_nullable: bool // INHERITED
 	is_constant: bool // INHERITED
 	is_shared: bool // INHERITED. CLASSES ONLY.
+	is_readonly // INHERITED
 	default_value // is taken from actual code, not from JSDoc comment
 	type_names // taken from JSDoc block
 
@@ -90,28 +92,28 @@ module.exports = function(grunt) {
 	grunt.registerTask('buildDoc', function() {
 
 		// export Lava and Firestorm. remove members, which should be hidden
-		function exportGlobalContainer(src_object, object_name) {
+		function exportGlobalContainer(src_object, object_name, file_path) {
 			var export_object = Firestorm.Object.copy(src_object);
 			jsdoc_ignored[object_name].forEach(function(name){
 				delete export_object[name];
 			});
-			return exportGlobalObject(object_name, export_object);
+			return exportGlobalObject(object_name, export_object, file_path);
 		}
 
 		function postProcessGlobalObject(extended_object_descriptor) {
-			processDescription(extended_object_descriptor);
+			LavaBuild.processDescriptorMarkdown(extended_object_descriptor);
 			if (extended_object_descriptor.method_chain) {
 				extended_object_descriptor.method_chain[0].descriptors.forEach(function(method_descriptor){
-					processDescription(method_descriptor);
-					if (method_descriptor.returns) processDescription(method_descriptor.returns);
+					LavaBuild.processDescriptorMarkdown(method_descriptor);
+					if (method_descriptor.returns) LavaBuild.processDescriptorMarkdown(method_descriptor.returns);
 					if (method_descriptor.params) method_descriptor.params.forEach(function(param) {
-						processDescription(param);
+						LavaBuild.processDescriptorMarkdown(param);
 					});
 				})
 			}
 			if (extended_object_descriptor.member_chain) {
 				extended_object_descriptor.member_chain[0].descriptors.forEach(function(property_descriptor){
-					processDescription(property_descriptor);
+					LavaBuild.processDescriptorMarkdown(property_descriptor);
 				})
 			}
 		}
@@ -122,14 +124,6 @@ module.exports = function(grunt) {
 				result[array[i].name] = array[i];
 			}
 			return result;
-		}
-
-		var objects_with_processed_description = [];
-		function processDescription(descriptor) {
-			if (descriptor.description && objects_with_processed_description.indexOf(descriptor) == -1) {
-				descriptor.description = LavaBuild.processMarkdown(descriptor.description);
-				objects_with_processed_description.push(descriptor);
-			}
 		}
 
 		function inheritDescription(child_object, parent_object, parent_belongs) {
@@ -209,7 +203,7 @@ module.exports = function(grunt) {
 
 			} else {
 
-				ApiHelper.importVars(child_descriptor, parent_descriptor, ['default_value','type_names','is_nullable','is_non_nullable','is_shared','is_constant']);
+				ApiHelper.importVars(child_descriptor, parent_descriptor, ['default_value','type_names','is_nullable','is_non_nullable','is_readonly','is_shared','is_constant']);
 
 			}
 
@@ -258,7 +252,7 @@ module.exports = function(grunt) {
 						var is_empty = skeleton[name].is_empty || (skeleton[name].type == 'object' && Firestorm.Object.isEmpty(skeleton[name].skeleton));
 						ApiHelper.setDefaultValue(member_descriptor, skeleton[name].type, skeleton[name].value, is_empty);
 
-						ApiHelper.importVars(member_descriptor, jsdoc_descriptor, ['is_nullable', 'is_non_nullable', 'type_names', 'is_constant', 'description']);
+						ApiHelper.importVars(member_descriptor, jsdoc_descriptor, ['is_nullable', 'is_non_nullable', 'is_readonly', 'type_names', 'is_constant', 'description']);
 
 					}
 
@@ -300,7 +294,7 @@ module.exports = function(grunt) {
 						member_descriptor.default_value = '<span class="api-highlight-gray">{ ... }</span>';
 					}
 
-					ApiHelper.importVars(member_descriptor, jsdoc_descriptor, ['is_nullable', 'is_non_nullable', 'type_names', 'description']);
+					ApiHelper.importVars(member_descriptor, jsdoc_descriptor, ['is_nullable', 'is_non_nullable', 'is_readonly', 'type_names', 'description']);
 
 					if (name in result) throw new Error();
 					result[name] = member_descriptor;
@@ -459,6 +453,7 @@ module.exports = function(grunt) {
 					if (name in property_descriptors) {
 						if (property_descriptors[name].type) export_descriptor.lava_type = property_descriptors[name].type;
 						if (property_descriptors[name].is_nullable) export_descriptor.is_nullable = true;
+						if (property_descriptors[name].is_readonly) export_descriptor.is_readonly = true;
 					}
 					if (!export_descriptor.is_nullable) export_descriptor.is_non_nullable = true; // properties are non-nullable by default
 					properties_export[name] = export_descriptor;
@@ -535,7 +530,11 @@ module.exports = function(grunt) {
 			}
 
 			var jsdoc_descriptor = getJSDocDescriptor(source_object_name, false);
-			if (jsdoc_descriptor.description) short_descriptor.description = jsdoc_descriptor.description;
+			if (jsdoc_descriptor.description) {
+				short_descriptor.description = jsdoc_descriptor.description;
+			} else {
+				missing_descriptions_log.push({priority: 1, text: 'Global object is missing description: ' + source_object_name});
+			}
 
 			var extended_descriptor = {};
 			var property_descriptors = [];
@@ -544,6 +543,13 @@ module.exports = function(grunt) {
 			if (grunt.file.exists('build/api_docs/' + source_object_name + '.md')) {
 				extended_descriptor.description = grunt.file.read('build/api_docs/' + source_object_name + '.md'); // long description, 'remarks'
 			}
+
+			LavaBuild.registerLink(short_descriptor.name, {
+				hash: 'object=' + short_descriptor.name,
+				page: 'api',
+				title: short_descriptor.name,
+				type: 'object'
+			});
 
 			for (var name in source_object) {
 
@@ -572,7 +578,7 @@ module.exports = function(grunt) {
 					}
 
 					ApiHelper.setDefaultFromValue(member_descriptor, source_object[name]);
-					ApiHelper.importVars(member_descriptor, jsdoc_descriptor, ['is_nullable', 'is_non_nullable', 'type_names', 'is_constant', 'description']);
+					ApiHelper.importVars(member_descriptor, jsdoc_descriptor, ['is_nullable', 'is_non_nullable', 'is_readonly', 'type_names', 'is_constant', 'description']);
 
 					property_descriptors.push(member_descriptor);
 
@@ -580,7 +586,7 @@ module.exports = function(grunt) {
 
 				if (property_descriptors.length) {
 					extended_descriptor.member_chain = [{
-						descriptors: Lava.algorithms.sorting[Lava.schema.data.DEFAULT_SORT_ALGORITHM](property_descriptors, function(a, b) {
+						descriptors: Lava.algorithms.sorting[Lava.schema.DEFAULT_UNSTABLE_SORT_ALGORITHM](property_descriptors, function(a, b) {
 							return a.name < b.name;
 						})
 					}];
@@ -588,7 +594,7 @@ module.exports = function(grunt) {
 
 				if (method_descriptors.length) {
 					extended_descriptor.method_chain = [{
-						descriptors: Lava.algorithms.sorting[Lava.schema.data.DEFAULT_SORT_ALGORITHM](method_descriptors, function(a, b) {
+						descriptors: Lava.algorithms.sorting[Lava.schema.DEFAULT_UNSTABLE_SORT_ALGORITHM](method_descriptors, function(a, b) {
 							return a.name < b.name;
 						})
 					}];
@@ -599,8 +605,8 @@ module.exports = function(grunt) {
 				if (last_dot_index != -1) {
 					title = source_object_name.substr(last_dot_index + 1) + '.' + name;
 				}
-				LavaBuild.registerLink(longname, {
-					hash: 'class=' + source_object_name + ';member=' + name,
+				LavaBuild.registerLink(source_object_name + '#' + name, {
+					hash: 'object=' + source_object_name + ';member=' + name,
 					page: 'api',
 					title: title,
 					type: 'member'
@@ -615,17 +621,6 @@ module.exports = function(grunt) {
 
 		}
 
-		var schema_export = {};
-		function exportSchemaPaths(schema_object, path) {
-			for (var name in schema_object) {
-				if (Firestorm.getType(schema_object[name]) == 'object') {
-					exportSchemaPaths(schema_object[name], path ? (path + '.' + name) : name);
-				} else {
-					schema_export[path ? (path + '.' + name) : name] = schema_object[name];
-				}
-			}
-		}
-
 		try { // workaround for a bug in Grunt, https://github.com/gruntjs/grunt/issues/1135
 
 			if (!global.Lava) {
@@ -637,7 +632,8 @@ module.exports = function(grunt) {
 				fs = require('fs'),
 				groups = grunt.config('js_files'),
 				filelist = groups['classes'].concat(groups['widgets']),
-				support_names = [];
+				support_names = [],
+				missing_descriptions_log = [];
 
 			// ensure that previous task was run just before this one
 			if ((+new Date(fs.statSync('build/temp/jsdoc_classes_export.js').mtime)) - (+new Date()) > 5000) throw new Error('jsdocExport task was not run?');
@@ -686,6 +682,13 @@ module.exports = function(grunt) {
 					root.push(short_descriptor);
 				}
 
+				LavaBuild.registerLink(short_descriptor.name, {
+					hash: 'class=' + short_descriptor.name,
+					page: 'api',
+					title: short_descriptor.name,
+					type: 'class'
+				});
+
 				////////////////////////////////////////////////////////////////////////////////////////////////////////
 				// check the correctness of file content. Wrong JSDoc comments may result in very unwanted consequences.
 
@@ -711,6 +714,7 @@ module.exports = function(grunt) {
 					});
 				} else {
 					if (/[a-zA-Z]/.test(comment.substr(0, comment.indexOf('@')))) throw new Error('Malformed class description: ' + file_path);
+					missing_descriptions_log.push({priority: 1, text: 'Class is missing description: ' + file_path});
 				}
 
 				var cd = Lava.ClassManager.getClassData(short_descriptor.name);
@@ -772,9 +776,7 @@ module.exports = function(grunt) {
 				}) + '.js';
 			}
 
-			exportSchemaPaths(Lava.schema, ''); // will populate the schema_export variable
-			var lava_schema_export = schema_export;
-			schema_export = {};
+			var lava_schema_export = ApiHelper.exportSchemaPaths(Lava.schema);
 
 			var global_objects = [
 				Lava.ClassManager,
@@ -793,7 +795,8 @@ module.exports = function(grunt) {
 				Lava.types,
 				lava_schema_export,
 				{
-					'yy.valid_globals': Lava.ObjectParser.yy.valid_globals
+					'yy.valid_globals': Lava.ObjectParser.yy.valid_globals,
+					parse: function(input) {}
 				},
 				{
 					SEPARATORS: Lava.ExpressionParser.SEPARATORS,
@@ -841,9 +844,7 @@ module.exports = function(grunt) {
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			// build Firestorm docs
 
-			exportSchemaPaths(Firestorm.schema, '');
-			var firestorm_schema_export = schema_export;
-			schema_export = {};
+			var firestorm_schema_export = ApiHelper.exportSchemaPaths(Firestorm.schema);
 
 			var firestorm_export_object_names = [
 				'Firestorm.Environment',
@@ -881,7 +882,7 @@ module.exports = function(grunt) {
 			firestorm_nav_root.push(temp.short_descriptor);
 			firestorm_extended_descriptors[temp.short_descriptor.name] = temp.extended_descriptor;
 
-			firestorm_nav_root = Lava.algorithms.sorting[Lava.schema.data.DEFAULT_SORT_ALGORITHM](firestorm_nav_root, function(a, b) {
+			firestorm_nav_root = Lava.algorithms.sorting[Lava.schema.DEFAULT_UNSTABLE_SORT_ALGORITHM](firestorm_nav_root, function(a, b) {
 				return a.title < b.title;
 			});
 			// end export Firestorm
@@ -893,7 +894,7 @@ module.exports = function(grunt) {
 				array.forEach(function(value) {
 					if (value.type == 'folder' && value.children) value.children = sortDataTree(value.children);
 				});
-				return Lava.algorithms.sorting[Lava.schema.data.DEFAULT_SORT_ALGORITHM](array, function(a, b) {
+				return Lava.algorithms.sorting[Lava.schema.DEFAULT_UNSTABLE_SORT_ALGORITHM](array, function(a, b) {
 					if (a.type != b.type) {
 						return a.type == 'folder';
 					}
@@ -926,13 +927,88 @@ module.exports = function(grunt) {
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
+			// build reference:
+
+			function NavTree() { // @todo use this for Lava and Firestorm trees
+
+				this.directories_by_path = {};
+				this.root = [];
+				this.entries_by_name = [];
+
+			}
+
+			NavTree.prototype.getDirectory = function(path_array) {
+
+				var dirname = path_array.join('/'),
+					descriptor,
+					parent_path;
+
+				if (!(dirname in this.directories_by_path)) {
+					descriptor = {
+						type: 'folder',
+						name: path_array[path_array.length - 1],
+						title: path_array[path_array.length - 1],
+						children: []
+					};
+
+					if (path_array.length > 1) { // has parent
+						parent_path = path_array.slice();
+						parent_path.pop();
+						this.getDirectory(parent_path).children.push(descriptor);
+					} else { // ==1
+						this.root.push(descriptor);
+					}
+
+					this.directories_by_path[dirname] = descriptor;
+				}
+
+				return this.directories_by_path[dirname];
+
+			};
+
+			NavTree.prototype.putEntry = function(path, entry) {
+				if (path) {
+					this.getDirectory(path).children.push(entry);
+				} else {
+					this.root.push(entry);
+				}
+				if (this.entries_by_name[entry.name]) throw new Error('duplicate name in tree: ' + entry.name);
+				this.entries_by_name[entry.name] = entry;
+			};
+
+			var reference_nav_tree = new NavTree();
+			var names_ext = LavaBuild.expand('./build/reference/', '.md');
+			reference_nav_tree.names_ext = names_ext;
+
+			for (i = 0, count = names_ext.length; i < count; i++) {
+
+				reference_nav_tree.putEntry(names_ext[i].path_segments, {
+					type: 'reference',
+					name: names_ext[i].name,
+					title: names_ext[i].name,
+					relative_path: names_ext[i].relative_path
+				});
+
+				LavaBuild.registerLink('reference:' + names_ext[i].name, {
+					hash: 'reference=' + names_ext[i].name,
+					page: 'reference',
+					title: names_ext[i].name,
+					type: 'reference'
+				});
+
+			}
+
+			// end: build reference
+			////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////
 			// final stage: format descriptions and write data.
 			// this must be done after all links are known
 
 			for (var name in extended_class_descriptors) {
 
 				var extended_class_descriptor = extended_class_descriptors[name];
-				processDescription(extended_class_descriptor); // long class description, 'remarks'
+				LavaBuild.processDescriptorMarkdown(extended_class_descriptor); // long class description, 'remarks'
 
 				var method_chain = [];
 				var member_chain = [];
@@ -948,16 +1024,16 @@ module.exports = function(grunt) {
 
 					for (var descriptor_name in members_block.descriptors_hash) {
 						descriptor = members_block.descriptors_hash[descriptor_name];
-						processDescription(descriptor);
+						LavaBuild.processDescriptorMarkdown(descriptor);
 						descriptor = Firestorm.Object.copy(descriptor);
 						if (is_inherited) descriptor.is_inherited = true;
 						if (members_block.is_implements) descriptor.is_implemented = true;
 						if (descriptor.type == 'function') {
 							methods.push(descriptor);
-							if (descriptor.returns) processDescription(descriptor.returns);
+							if (descriptor.returns) LavaBuild.processDescriptorMarkdown(descriptor.returns);
 							if (descriptor.params) {
 								descriptor.params.forEach(function(param) {
-									processDescription(param);
+									LavaBuild.processDescriptorMarkdown(param);
 								});
 								if (descriptor.name == 'init') {
 									var config_options = [];
@@ -965,6 +1041,12 @@ module.exports = function(grunt) {
 									descriptor.params.forEach(function(param) {
 										if (param.name.indexOf('config.') == 0) {
 											config_options.push(param);
+											LavaBuild.registerLink(name + '#config:' + param.name, {
+												hash: 'class=' + name + ';config=' + param.name,
+												page: 'api',
+												title: param.name,
+												type: 'config'
+											});
 										} else {
 											new_params.push(param);
 										}
@@ -979,7 +1061,7 @@ module.exports = function(grunt) {
 					}
 
 					if (methods.length) {
-						methods = Lava.algorithms.sorting[Lava.schema.data.DEFAULT_SORT_ALGORITHM](methods, function(a, b) {
+						methods = Lava.algorithms.sorting[Lava.schema.DEFAULT_UNSTABLE_SORT_ALGORITHM](methods, function(a, b) {
 							if (a.is_private != b.is_private) {
 								return b.is_private;
 							}
@@ -995,7 +1077,7 @@ module.exports = function(grunt) {
 					}
 
 					if (members.length) {
-						members = Lava.algorithms.sorting[Lava.schema.data.DEFAULT_SORT_ALGORITHM](members, function(a, b) {
+						members = Lava.algorithms.sorting[Lava.schema.DEFAULT_UNSTABLE_SORT_ALGORITHM](members, function(a, b) {
 							if (a.is_private != b.is_private) {
 								return b.is_private;
 							}
@@ -1020,10 +1102,10 @@ module.exports = function(grunt) {
 
 				if (extended_class_descriptor.events) {
 					extended_class_descriptor.events.forEach(function(event_descriptor){
-						processDescription(event_descriptor);
+						LavaBuild.processDescriptorMarkdown(event_descriptor);
 						if (event_descriptor.params) {
 							event_descriptor.params.forEach(function(param_descriptor){
-								processDescription(param_descriptor);
+								LavaBuild.processDescriptorMarkdown(param_descriptor);
 							})
 						}
 					});
@@ -1033,7 +1115,13 @@ module.exports = function(grunt) {
 					var properties_result = [];
 					for (var property_name in extended_class_descriptor.properties_hash) {
 						properties_result.push(extended_class_descriptor.properties_hash[property_name]);
-						processDescription(extended_class_descriptor.properties_hash[property_name]);
+						LavaBuild.processDescriptorMarkdown(extended_class_descriptor.properties_hash[property_name]);
+						LavaBuild.registerLink(name + '#property:' + property_name, {
+							hash: 'class=' + name + ';property=' + property_name,
+							page: 'api',
+							title: property_name,
+							type: 'property'
+						});
 					}
 					extended_class_descriptor.properties = properties_result;
 					delete extended_class_descriptor.properties_hash;
@@ -1052,14 +1140,11 @@ module.exports = function(grunt) {
 			}
 
 			for (name in class_descriptors) {
-				processDescription(class_descriptors[name]); // short class description
+				LavaBuild.processDescriptorMarkdown(class_descriptors[name]); // short class description
 			}
 
-			grunt.file.write('www/js/api_tree.js', 'var api_tree_source = ' + JSON.stringify(root));
-			grunt.file.write('www/js/firestorm_api_tree.js', 'var firestorm_api_tree_source = ' + JSON.stringify(firestorm_nav_root));
-
 			for (name in global_object_short_descriptors) {
-				processDescription(global_object_short_descriptors[name]);
+				LavaBuild.processDescriptorMarkdown(global_object_short_descriptors[name]);
 			}
 
 			for (name in global_object_extended_descriptors) {
@@ -1068,7 +1153,7 @@ module.exports = function(grunt) {
 			}
 
 			for (i = 0, count = firestorm_nav_root.length; i < count; i++) {
-				processDescription(firestorm_nav_root[i]);
+				LavaBuild.processDescriptorMarkdown(firestorm_nav_root[i]);
 			}
 
 			for (name in firestorm_extended_descriptors) {
@@ -1080,16 +1165,42 @@ module.exports = function(grunt) {
 			////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			// build reference
+			// write reference
 
-//			var names = grunt.file.expand('./build/reference/**/*.md');
-//			for (i = 0, count = names.length; i < count; i++) {
-//				var content = grunt.file.read(names[i]);
-//				//grunt.file.write('./www/reference/' + names[i].substr(0, names[i].length - 3) + '.html', marked(content));
-//			}
+			names_ext = reference_nav_tree.names_ext;
+			for (i = 0, count = names_ext.length; i < count; i++) {
 
-			// end: build reference
+				var content = grunt.file.read(names_ext[i].full_name);
+				var widget_config = {
+					type: 'widget',
+					is_extended: true,
+					template: Lava.TemplateParser.parse(LavaBuild.processMarkdown(content)),
+					container: {'class': 'Element', tag_name: 'div'}
+				};
+
+				grunt.file.write('./www/reference/' + names_ext[i].relative_path + '.js', Lava.Serializer.serialize(widget_config));
+
+			}
+
+			// end: write reference
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			grunt.file.write(
+				'www/js/doc_nav_trees.js',
+				'var api_tree_source = ' + JSON.stringify(root) + ';\n\n'
+					+ 'var firestorm_api_tree_source = ' + JSON.stringify(firestorm_nav_root) + ';\n\n'
+					+ 'var reference_nav_tree_source = ' + JSON.stringify(reference_nav_tree.root) + ';\n\n'
+			);
+
+			missing_descriptions_log = Lava.algorithms.sorting[Lava.schema.DEFAULT_UNSTABLE_SORT_ALGORITHM](missing_descriptions_log, function(a, b) {
+				return a.priority > b.priority;
+			});
+			var missing_descriptions_log_count = missing_descriptions_log.length;
+			missing_descriptions_log = missing_descriptions_log.slice(0, 50);
+			missing_descriptions_log.forEach(function(log_entry, index){
+				grunt.log.ok(log_entry.text);
+			});
+			grunt.log.ok('Total warnings: ' + missing_descriptions_log_count);
 
 		} catch (e) {
 

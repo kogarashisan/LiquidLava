@@ -11,6 +11,7 @@ For property:
 	default_value
 	is_nullable
 	is_non_nullable
+	is_readonly
 	type_names = [<string>]
 
 For function:
@@ -98,8 +99,8 @@ exports.publish = function(taffyData, opts, tutorials) {
 		if (doclet.name && ['ExpressionParser', 'ObjectParser', 'TemplateParser'].indexOf(doclet.name) != -1) {
 			allowed = true;
 		}
-
 		if (doclet.kind == 'event') allowed = true;
+
 		if (!allowed) continue;
 
 		if (doclet.description) export_descriptor.description = doclet.description;

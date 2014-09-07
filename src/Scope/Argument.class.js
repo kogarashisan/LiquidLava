@@ -12,7 +12,7 @@ Lava.define(
 	isValueContainer: true,
 
 	/**
-	 * @type {Lava.view.View}
+	 * @type {Lava.view.Abstract}
 	 */
 	_view: null,
 	/**

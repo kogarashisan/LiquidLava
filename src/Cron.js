@@ -3,12 +3,25 @@ Lava.Cron = {
 
 	DEFAULT_TIMER_DELAY: 20, // up to 50 fps
 
-	_timer: null,
+	timer: null,
+	is_running: false,
 	_active_tasks: [],
 
 	timeout_callback: function() {
 
-		Lava.Cron.onTimer();
+		var self = Lava.Cron;
+		self.onTimer();
+		if (!self.is_running) {
+			clearInterval(self.timer);
+			self.timer = null;
+		}
+
+	},
+
+	animation_frame_callback: function() {
+		var self = Lava.Cron;
+		self.onTimer();
+		if (self.is_running) Firestorm.Environment.requestAnimationFrame(self.animation_frame_callback);
 
 	},
 
@@ -22,15 +35,20 @@ Lava.Cron = {
 
 		this._enable();
 
+		if (!this.is_running) {
+			this._enable();
+			this.is_running = true;
+		}
+
 	},
 
 	_enable: function() {
 
-		if (this._timer == null) {
+		this._enable = (Firestorm.Environment.requestAnimationFrame && Lava.schema.system.ALLOW_REQUEST_ANIMATION_FRAME)
+			? function() { Firestorm.Environment.requestAnimationFrame(this.animation_frame_callback); }
+			: function() { this.timer = window.setInterval(this.timeout_callback, this.DEFAULT_TIMER_DELAY); };
 
-			this._timer = window.setInterval(this.timeout_callback, this.DEFAULT_TIMER_DELAY);
-
-		}
+		this._enable();
 
 	},
 
@@ -56,8 +74,7 @@ Lava.Cron = {
 
 		if (!active_tasks.length) {
 
-			clearInterval(this._timer);
-			this._timer = null;
+			this.is_running = false;
 
 		}
 

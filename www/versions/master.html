@@ -4,6 +4,8 @@
 	<li>Declarative template editing (via edit_template tag in widget definition).</li>
 	<li>Added insertHTMLBefore() to all containers.</li>
 	<li>Emulated container: rewritten the insertion algorithm. New config options available, old gone.</li>
+	<li>Added Animator/Color.class.js</li>
+	<li>Animation now uses requestAnimationFrame()</li>
 </ul>
 
 <h3>Refactoring</h3>
@@ -24,6 +26,10 @@
 	<li>Widget definitions: <cpde>&lt;view role="..."&gt;</cpde> and <code>&lt;template role="..."&gt;</code> are split
 		into 3 new tags: &lt;include&gt;, &lt;main_view&gt; and &lt;main_template&gt;.</li>
 	<li>Completely rewritten Sugar class, and all _cWidget.storage functionality. Added separate schema for storage.</li>
+	<li>Tabs widget: added 'is_active' property to each tab, refactored.</li>
+	<li>Animation: renamed config options. 'transition' -> 'transition_name', and 'transition' is now a function.</li>
+	<li>All widget setters now accept arguments in different order: _setSomething(value, name)</li>
+	<li>Standard widget now has a name: 'widget'</li>
 </ul>
 
 <h3>Fixes</h3>
@@ -32,5 +38,6 @@
 	<li>Fixed a bug in view refresh system.</li>
 	<li>Fixed a bug in template compiling algorithm.</li>
 	<li>Fixed a bug in resources merging, which created duplicate classes.</li>
+	<li>Tooltip now hides empty tooltips by default.</li>
 	<li>Enumerable: fixed refresh from array.</li>
 </ul>

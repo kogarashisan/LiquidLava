@@ -4,7 +4,6 @@ Lava.define(
 /**
  * @lends Lava.view.Expression#
  * @extends Lava.view.Abstract
- * @extends Lava.view.Abstract
  * @implements _iViewHierarchyMember
  */
 {

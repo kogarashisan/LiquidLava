@@ -43,14 +43,14 @@ Lava.define(
 
 	},
 
-	_setIsChecked: function(name, value) {
+	_setIsChecked: function(value, name) {
 
-		this.RadioAbstract$_setIsChecked(name, value);
-		this._setIsIndeterminate('is_indeterminate', false);
+		this.RadioAbstract$_setIsChecked(value, name);
+		this._setIsIndeterminate(false);
 
 	},
 
-	_setIsIndeterminate: function(name, value) {
+	_setIsIndeterminate: function(value) {
 
 		if (this._properties.is_indeterminate != value) {
 			this._set('is_indeterminate', value);

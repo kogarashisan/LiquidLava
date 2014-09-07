@@ -76,7 +76,7 @@ Lava.define(
 
 	},
 
-	_setAnimationEnabled: function(name, value) {
+	_setAnimationEnabled: function(value, name) {
 
 		if (this._properties.is_animation_enabled != value) {
 

@@ -26,8 +26,7 @@ Lava.transitions = {
 	},
 
 	inOutQuad: function (x) {
-		if (x < .5) return 2 * x * x;
-		return 1 - 2 * (x -= 1) * x;
+		return (x < .5) ? (2 * x * x) : (1 - 2 * (x -= 1) * x);
 	},
 
 	inCubic: function (x) {
@@ -39,8 +38,7 @@ Lava.transitions = {
 	},
 
 	inOutCubic: function (x) {
-		if (x < .5) return 4 * x * x * x;
-		return 4 * (x -= 1) * x * x + 1;
+		return (x < .5) ? (4 * x * x * x) : (4 * (x -= 1) * x * x + 1);
 	}
 
 };

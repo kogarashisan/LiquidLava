@@ -148,7 +148,7 @@ var Firestorm = {
 };
 
 Firestorm.schema = {
-	DOM: {
+	dom: {
 		/** @const */
 		PREFER_RANGE_API: true
 	},
@@ -169,10 +169,13 @@ Firestorm.Environment = {
 	STRIPS_INNER_HTML_SCRIPT_AND_STYLE_TAGS: false,
 	MOVES_WHITESPACE_BEFORE_SCRIPT: false,
 
+	requestAnimationFrame: null,
+
 	init: function() {
 
 		var document = window.document,
-			testEl;
+			testEl,
+			requestAnimationFrame;
 
 		// all, even old browsers, must be able to convert a function back to sources
 		//this.SUPPORTS_FUNCTION_SERIALIZATION = /xyz/.test(function(){xyz;});
@@ -191,6 +194,16 @@ Firestorm.Environment = {
 		// accidentally remove whitespace when updating a morph.
 		testEl.innerHTML = "Test: <script type='text/x-placeholder'></script>Value";
 		this.MOVES_WHITESPACE_BEFORE_SCRIPT = testEl.childNodes[0].nodeValue === 'Test:' && testEl.childNodes[2].nodeValue === ' Value';
+
+		requestAnimationFrame =
+			window.requestAnimationFrame
+			|| window.mozRequestAnimationFrame
+			|| window.webkitRequestAnimationFrame
+			|| window.msRequestAnimationFrame;
+
+		this.requestAnimationFrame = function(fn) {
+			requestAnimationFrame.call(window, fn);
+		}
 
 	}
 
@@ -326,6 +339,12 @@ Firestorm.Element = {
 
 		context.parentNode.insertBefore(target_element, context.nextSibling);
 
+	},
+
+	selectElements: function(element, selector) {
+
+		return Slick.search(element, selector, new Elements);
+
 	}
 
 };
@@ -382,7 +401,7 @@ Firestorm.Element,
 	 */
 	getSize: function(element) {
 
-		if (Firestorm.schema.DEBUG && (element.tagName == 'body' || element.tagName == 'html'))
+		if (Firestorm.schema.DEBUG && (['body', 'html'].indexOf(element.tagName.toLowerCase()) != -1))
 			Firestorm.t('This method requires an element inside the body tag.');
 
 		return {x: element.offsetWidth, y: element.offsetHeight};
@@ -511,7 +530,7 @@ Firestorm.DOM = {
 		this._needs_shy = e.STRIPS_INNER_HTML_SCRIPT_AND_STYLE_TAGS;
 		this._moves_whitespace = e.MOVES_WHITESPACE_BEFORE_SCRIPT;
 
-		if (Firestorm.schema.DOM.PREFER_RANGE_API && e.SUPPORTS_RANGE) {
+		if (Firestorm.schema.dom.PREFER_RANGE_API && e.SUPPORTS_RANGE) {
 
 			this.insertHTMLBefore = this.insertHTMLBefore_Range;
 			this.insertHTMLAfter = this.insertHTMLAfter_Range;
@@ -1088,6 +1107,8 @@ var Lava = {
 	/** @ignore */
 	ObjectParser: null,
 	/** @ignore */
+	TemplateWalker: null,
+	/** @ignore */
 	transitions: null,
 	/** @ignore */
 	Cron: null,
@@ -1226,7 +1247,7 @@ var Lava = {
 
 		var path,
 			i = 0,
-			count = this.schema.sugar_classes.length;
+			count = this.schema.SUGAR_CLASSES.length;
 
 		// You must know this yourself
 		// for (var name in {}) Lava.t("LiquidLava framework can not coexist with frameworks that modify native object's prototype");
@@ -1249,7 +1270,7 @@ var Lava = {
 
 		for (; i < count; i++) {
 
-			this.registerSugar(this.schema.sugar_classes[i]);
+			this.registerSugar(this.schema.SUGAR_CLASSES[i]);
 
 		}
 
@@ -1265,8 +1286,8 @@ var Lava = {
 		constructor = this.ClassManager.getConstructor(Lava.schema.system.APP_CLASS);
 		this.app = new constructor();
 
-		if (Lava.schema.system.POPOVER_MANAGER_ENABLED) {
-			constructor = this.ClassManager.getConstructor(Lava.schema.system.POPOVER_MANAGER_CLASS);
+		if (Lava.schema.popover_manager.IS_ENABLED) {
+			constructor = this.ClassManager.getConstructor(Lava.schema.popover_manager.CLASS);
 			this.popover_manager = new constructor();
 		}
 
@@ -1501,7 +1522,7 @@ var Lava = {
 
 		}
 
-		if (Lava.schema.system.POPOVER_MANAGER_ENABLED) {
+		if (Lava.schema.popover_manager.IS_ENABLED) {
 			this.popover_manager.enable();
 		}
 
@@ -1540,7 +1561,7 @@ var Lava = {
 	 *
 	 * @param {_cWidget} config
 	 * @param {Lava.widget.Standard} widget
-	 * @param {Lava.view.View} parent_view
+	 * @param {Lava.view.Abstract} parent_view
 	 * @param {Lava.system.Template} template
 	 * @param {Object} properties
 	 * @returns {Lava.widget.Standard}
@@ -1763,6 +1784,9 @@ Lava.schema = {
 	VALIDATE_OPTIONS: true,
 	/** @const */
 	VALIDATE_OBJECT_PATHS: true,
+	/** @const */
+	DEFAULT_STABLE_SORT_ALGORITHM: 'mergeSort',
+	DEFAULT_UNSTABLE_SORT_ALGORITHM: 'mergeSort',
 	system: {
 		/** @const */
 		APP_CLASS: 'Lava.system.App',
@@ -1777,8 +1801,15 @@ Lava.schema = {
 			'change', 'focus', 'blur'
 		],
 
-		POPOVER_MANAGER_ENABLED: true,
-		POPOVER_MANAGER_CLASS: 'Lava.system.PopoverManager'
+		/**
+		 * Lava.Cron uses it for animation
+		 */
+		ALLOW_REQUEST_ANIMATION_FRAME: true
+	},
+	popover_manager: {
+		IS_ENABLED: true,
+		CLASS: 'Lava.system.PopoverManager',
+		HIDE_EMPTY_TOOLTIPS: true
 	},
 	data: {
 		/** @const */
@@ -1790,9 +1821,7 @@ Lava.schema = {
 		/**
 		 * Generally, it's NOT recommended to turn this off in production
 		 */
-		VALIDATE_IMPORT_DATA: true,
-		/** @const */
-		DEFAULT_SORT_ALGORITHM: 'mergeSort'
+		VALIDATE_IMPORT_DATA: true
 	},
 	modules: {},
 	view: {
@@ -1827,7 +1856,7 @@ Lava.schema = {
 		DEFAULT_CLASS_LOCATOR_GATEWAY: 'Lava.ClassLocatorGateway',
 		DEFAULT_EXTENDER: 'Default'
 	},
-	sugar_classes: ['Lava.system.Sugar'],
+	SUGAR_CLASSES: ['Lava.system.Sugar'],
 
 	/**
 	 * Current locale. Must not be null or 'default'
@@ -2134,8 +2163,7 @@ Lava.transitions = {
 	},
 
 	inOutQuad: function (x) {
-		if (x < .5) return 2 * x * x;
-		return 1 - 2 * (x -= 1) * x;
+		return (x < .5) ? (2 * x * x) : (1 - 2 * (x -= 1) * x);
 	},
 
 	inCubic: function (x) {
@@ -2147,8 +2175,7 @@ Lava.transitions = {
 	},
 
 	inOutCubic: function (x) {
-		if (x < .5) return 4 * x * x * x;
-		return 4 * (x -= 1) * x * x + 1;
+		return (x < .5) ? (4 * x * x * x) : (4 * (x -= 1) * x * x + 1);
 	}
 
 };
@@ -3007,12 +3034,25 @@ Lava.Cron = {
 
 	DEFAULT_TIMER_DELAY: 20, // up to 50 fps
 
-	_timer: null,
+	timer: null,
+	is_running: false,
 	_active_tasks: [],
 
 	timeout_callback: function() {
 
-		Lava.Cron.onTimer();
+		var self = Lava.Cron;
+		self.onTimer();
+		if (!self.is_running) {
+			clearInterval(self.timer);
+			self.timer = null;
+		}
+
+	},
+
+	animation_frame_callback: function() {
+		var self = Lava.Cron;
+		self.onTimer();
+		if (self.is_running) Firestorm.Environment.requestAnimationFrame(self.animation_frame_callback);
 
 	},
 
@@ -3026,15 +3066,20 @@ Lava.Cron = {
 
 		this._enable();
 
+		if (!this.is_running) {
+			this._enable();
+			this.is_running = true;
+		}
+
 	},
 
 	_enable: function() {
 
-		if (this._timer == null) {
+		this._enable = (Firestorm.Environment.requestAnimationFrame && Lava.schema.system.ALLOW_REQUEST_ANIMATION_FRAME)
+			? function() { Firestorm.Environment.requestAnimationFrame(this.animation_frame_callback); }
+			: function() { this.timer = window.setInterval(this.timeout_callback, this.DEFAULT_TIMER_DELAY); };
 
-			this._timer = window.setInterval(this.timeout_callback, this.DEFAULT_TIMER_DELAY);
-
-		}
+		this._enable();
 
 	},
 
@@ -3060,8 +3105,7 @@ Lava.Cron = {
 
 		if (!active_tasks.length) {
 
-			clearInterval(this._timer);
-			this._timer = null;
+			this.is_running = false;
 
 		}
 
@@ -3114,6 +3158,7 @@ Lava.Core = {
 		var listener = {
 				event_name: event_name,
 				fn: fn,
+				fn_original: fn,
 				context: context
 			};
 
@@ -10150,9 +10195,9 @@ Lava.define(
 
 });
 Lava.define(
-'Lava.animator.Units',
+'Lava.animator.Integer',
 /**
- * @lends Lava.animator.Units#
+ * @lends Lava.animator.Integer#
  */
 {
 
@@ -10162,7 +10207,7 @@ Lava.define(
 	unit: null,
 
 	/**
-	 * @param {_cAnimator_Units} config
+	 * @param {_cAnimator_Integer} config
 	 */
 	init: function(config) {
 
@@ -10181,6 +10226,47 @@ Lava.define(
 			element,
 			this._property_name,
 			Math.floor(raw_result) + this.unit
+		);
+
+	}
+
+});
+Lava.define(
+'Lava.animator.Color',
+/**
+ * @lends Lava.animator.Color#
+ */
+{
+
+	_property_name: null,
+	from: null,
+	to: null,
+	delta: null,
+
+	/**
+	 * @param {_cAnimator} config
+	 */
+	init: function(config) {
+
+		this._property_name = config.property;
+		this.from = config.from || [0,0,0];
+		this.to = config.to || [0,0,0];
+		this.delta = [this.to[0] - this.from[0], this.to[1] - this.from[1], this.to[2] - this.from[2]];
+
+	},
+
+	animate: function(element, transition_value) {
+
+		var current_value = [
+			Math.floor(this.from[0] + this.delta[0] * transition_value),
+			Math.floor(this.from[1] + this.delta[1] * transition_value),
+			Math.floor(this.from[2] + this.delta[2] * transition_value)
+		];
+
+		Firestorm.Element.setStyle(
+			element,
+			this._property_name,
+			'rgb(' + current_value.join(',') + ')'
 		);
 
 	}
@@ -10246,7 +10332,7 @@ Lava.define(
 			this._duration = config.duration;
 		}
 		this._target = target;
-		this._transition = Lava.transitions[config.transition || 'linear'];
+		this._transition = config.transition || Lava.transitions[config.transition_name || 'linear'];
 		this._config = config;
 
 	},
@@ -10622,13 +10708,14 @@ Lava.define(
 {
 
 	Extends: 'Lava.animation.Standard',
+	Shared: ['_shared'],
 
 	_shared: {
 		default_config: {
 			// duration is set dynamically
-			transition: 'outQuad',
+			transition_name: 'outQuad',
 			animators: [{
-				type: 'Units',
+				type: 'Integer',
 				property: 'height',
 				delta: 0 // actual height will be set at run time
 			}]
@@ -10643,7 +10730,7 @@ Lava.define(
 		Firestorm.extend(new_config, this._shared.default_config);
 		Firestorm.extend(new_config, config);
 
-		// assuming that the first animator is Units
+		// assuming that the first animator is Integer
 		if (Lava.schema.DEBUG && !new_config.animators[0].property) Lava.t("Collapse: malformed animation config");
 		this._property = new_config.animators[0].property;
 
@@ -11538,27 +11625,27 @@ Lava.define(
 	},
 
 	/**
-	 * @param {function(*, *):boolean} [less] A callback to compare items
-	 * @param {string} [algorithm] The name of the sorting method from Lava.algorithms.sorting
+	 * @param {function(*, *):boolean} less A callback to compare items
+	 * @param {string} [algorithm_name] The name of the sorting method from Lava.algorithms.sorting
 	 */
-	sort: function(less, algorithm) {
+	sort: function(less, algorithm_name) {
 
-		this._sort(less, algorithm, this._data_values);
+		this._sort(less, algorithm_name, this._data_values);
 
 	},
 
 	/**
 	 * Sort by the array of names.
-	 * @param {function(*, *):boolean} [less] A callback to compare items
-	 * @param {string} [algorithm] The name of the sorting method from Lava.algorithms.sorting
+	 * @param {function(*, *):boolean} less A callback to compare items
+	 * @param {string} [algorithm_name] The name of the sorting method from Lava.algorithms.sorting
 	 */
-	sortByNames: function(less, algorithm) {
+	sortByNames: function(less, algorithm_name) {
 
-		this._sort(less, algorithm, this._data_names);
+		this._sort(less, algorithm_name, this._data_names);
 
 	},
 
-	_sort: function(less, algorithm, values) {
+	_sort: function(less, algorithm_name, values) {
 
 		var indices = [],
 			i = 0,
@@ -11577,7 +11664,7 @@ Lava.define(
 
 		}
 
-		indices = Lava.algorithms.sorting[algorithm || Lava.schema.data.DEFAULT_SORT_ALGORITHM](indices, _less);
+		indices = Lava.algorithms.sorting[algorithm_name || Lava.schema.DEFAULT_STABLE_SORT_ALGORITHM](indices, _less);
 
 		this.reorder(indices);
 
@@ -12608,7 +12695,7 @@ Lava.define(
 	},
 
 	/**
-	 * @param {Lava.view.View} view
+	 * @param {Lava.view.Abstract} view
 	 * @param {string} event_name
 	 * @param dom_event
 	 */
@@ -12744,7 +12831,7 @@ Lava.define(
 
 	/**
 	 * @param element
-	 * @returns {Lava.view.View}
+	 * @returns {Lava.view.Abstract}
 	 */
 	getViewByElement: function(element) {
 
@@ -13558,13 +13645,13 @@ Lava.define(
 
 		if (new_tooltip_target != this._tooltip_target) {
 
-			if (!this._tooltip_target) {
+			if (!this._tooltip_target) { // if there was no tooltip
 
 				if (Lava.schema.DEBUG && this._mousemove_listener) Lava.t();
 				this._mousemove_listener = Lava.Core.addGlobalHandler('mousemove', this._onMouseMove, this);
 				this._tooltip.set('is_visible', true);
 
-			} else if (!new_tooltip_target) {
+			} else if (!new_tooltip_target) { // if there was a tooltip, and now it should be hidden
 
 				Lava.Core.removeGlobalHandler(this._mousemove_listener);
 				this._mousemove_listener = null;
@@ -13574,8 +13661,9 @@ Lava.define(
 
 			if (new_tooltip_target) {
 
-				html = Firestorm.Element.getAttribute(new_tooltip_target, this._attribute_name);
-				this._tooltip.set('html', html.replace(/\r?\n/g, '<br/>'));
+				html = Firestorm.Element.getAttribute(new_tooltip_target, this._attribute_name).replace(/\r?\n/g, '<br/>');
+				this._tooltip.set('html', html);
+				this._tooltip.set('is_visible', !!(html || !Lava.schema.popover_manager.HIDE_EMPTY_TOOLTIPS));
 
 			}
 
@@ -15316,7 +15404,7 @@ Lava.define(
 	isValueContainer: true,
 
 	/**
-	 * @type {Lava.view.View}
+	 * @type {Lava.view.Abstract}
 	 */
 	_view: null,
 	/**
@@ -16462,7 +16550,7 @@ Lava.define(
 
 	_id: null,
 	/**
-	 * @type {Lava.view.View}
+	 * @type {Lava.view.Abstract}
 	 */
 	_view: null,
 	/**
@@ -16509,7 +16597,7 @@ Lava.define(
 	_is_element_owner: true,
 
 	/**
-	 * @param {Lava.view.View} view
+	 * @param {Lava.view.Abstract} view
 	 * @param {_cElementContainer} config
 	 * @param {Lava.widget.Standard} widget
 	 */
@@ -17221,7 +17309,7 @@ Lava.define(
 	isMorphContainer: true,
 
 	/**
-	 * @type {Lava.view.View}
+	 * @type {Lava.view.Abstract}
 	 */
 	_view: null,
 	_config: null,
@@ -17238,7 +17326,7 @@ Lava.define(
 	_end_element: null,
 
 	/**
-	 * @param {Lava.view.View} view
+	 * @param {Lava.view.Abstract} view
 	 * @param {_cEmulatedContainer} config
 	 * @param {Lava.widget.Standard} widget
 	 */
@@ -17431,7 +17519,7 @@ Lava.define(
 	isEmulatedContainer: true,
 
 	/**
-	 * @type {Lava.view.View}
+	 * @type {Lava.view.Abstract}
 	 */
 	_view: null,
 	_config: null,
@@ -17444,7 +17532,7 @@ Lava.define(
 	_is_inDOM: false,
 
 	/**
-	 * @param {Lava.view.View} view
+	 * @param {Lava.view.Abstract} view
 	 * @param {_cEmulatedContainer} config
 	 * @param {Lava.widget.Standard} widget
 	 */
@@ -17986,12 +18074,16 @@ Lava.define(
 
 	Extends: 'Lava.view.refresher.Animated',
 
+	ANIMATION_NAME: 'Lava.animation.Collapse',
+
 	_createAnimation: function(template, index) {
 
 		var element = this._getAnimationTarget(template),
+			constructor,
 			animation;
 
-		animation = new Lava.animation.Collapse({}, element);
+		constructor = Lava.ClassManager.getConstructor(this.ANIMATION_NAME, 'Lava.animation');
+		animation = new constructor({}, element);
 		animation.on('complete', this._onAnimationComplete, this);
 
 		this._templates_by_animation_guid[animation.guid] = template;
@@ -18084,7 +18176,7 @@ Lava.define(
 	/**
 	 * @param {_cView} config
 	 * @param {Lava.widget.Standard} widget
-	 * @param {Lava.view.View} parent_view
+	 * @param {Lava.view.Abstract} parent_view
 	 * @param {Lava.system.Template} template
 	 * @param {Object} properties
 	 */
@@ -18782,7 +18874,6 @@ Lava.define(
 /**
  * @lends Lava.view.Expression#
  * @extends Lava.view.Abstract
- * @extends Lava.view.Abstract
  * @implements _iViewHierarchyMember
  */
 {
@@ -19461,7 +19552,7 @@ Lava.define(
 
 	isWidget: true,
 	/** @readonly */
-	name: null,
+	name: 'widget',
 
 	/** @type {Object.<string, _cPropertyDescriptor>} */
 	_property_descriptors: {},
@@ -19491,7 +19582,7 @@ Lava.define(
 	/**
 	 * @param {_cWidget} config
 	 * @param {Lava.widget.Standard} widget
-	 * @param {Lava.view.View} parent_view
+	 * @param {Lava.view.Abstract} parent_view
 	 * @param {Lava.system.Template} template
 	 * @param {Object} properties
 	 */
@@ -19801,7 +19892,7 @@ Lava.define(
 
 	/**
 	 * @param {string} role
-	 * @param {Lava.view.View} view
+	 * @param {Lava.view.Abstract} view
 	 * @param {Array.<*>} template_arguments
 	 * @returns {boolean}
 	 */
@@ -19855,7 +19946,7 @@ Lava.define(
 				//	Lava.logException(e);
 				//}
 
-				this[descriptor.setter](name, value);
+				this[descriptor.setter](value, name);
 
 			} else {
 
@@ -19887,6 +19978,8 @@ Lava.define(
 	 */
 	registerBroadcastTarget: function(widget, event_name, handler_name, template_arguments) {
 
+		// There is no need to save listener, cause broadcast is designed to route events from widgets inside
+		// current widget's template. The source of events will always be destroyed before the target.
 		widget.on(
 			event_name,
 			this[this._broadcast_handlers[handler_name]],
@@ -20168,7 +20261,7 @@ Lava.define(
 
 	},
 
-	_setValue: function(name, value) {
+	_setValue: function(value, name) {
 
 		if (this._properties.value != value) {
 
@@ -20282,7 +20375,7 @@ Lava.define(
 
 	},
 
-	_setIsChecked: function(name, value) {
+	_setIsChecked: function(value, name) {
 
 		if (this._properties.is_checked != value) {
 
@@ -20354,14 +20447,14 @@ Lava.define(
 
 	},
 
-	_setIsChecked: function(name, value) {
+	_setIsChecked: function(value, name) {
 
-		this.RadioAbstract$_setIsChecked(name, value);
-		this._setIsIndeterminate('is_indeterminate', false);
+		this.RadioAbstract$_setIsChecked(value, name);
+		this._setIsIndeterminate(false);
 
 	},
 
-	_setIsIndeterminate: function(name, value) {
+	_setIsIndeterminate: function(value) {
 
 		if (this._properties.is_indeterminate != value) {
 			this._set('is_indeterminate', value);
@@ -20524,7 +20617,7 @@ Lava.define(
 
 	},
 
-	_setValue: function(name, value) {
+	_setValue: function(value, name) {
 
 		var element;
 		if (this._properties.value != value) {
@@ -20610,7 +20703,7 @@ Lava.define(
 
 	},
 
-	_setValue: function(name, value) {
+	_setValue: function(value, name) {
 
 		var element,
 			options,
@@ -20747,9 +20840,9 @@ Lava.define(
 
 	},
 
-	_setValue: function(name, value) {
+	_setValue: function(value, name) {
 
-		this.Text$_setValue(name, value);
+		this.Text$_setValue(value, name);
 		this._setValidity(true);
 
 	},
@@ -21085,7 +21178,7 @@ Lava.define(
 
 	},
 
-	_setIsEnabled: function(name, value) {
+	_setIsEnabled: function(value, name) {
 
 		var turnoff_panels = [],
 			i = 0,
@@ -21176,7 +21269,11 @@ Lava.define(
 	_properties: {
 		/** @type {Lava.system.Enumerable} */
 		_tabs: null,
-		_active_tab: null
+		active_tab: null
+	},
+
+	_property_descriptors: {
+		active_tab: {setter: '_setActiveTab'}
 	},
 
 	_event_handlers: {
@@ -21229,8 +21326,10 @@ Lava.define(
 
 		var tab = template_arguments[0];
 		if (tab.get('is_enabled')) {
-			this.set('_active_tab', tab);
+			this._setActiveTab(tab);
 		}
+		// to remove dotted outline in FF. This can be done with CSS, but CSS will disable it completely
+		view.getContainer().getDOMElement().blur();
 		dom_event.preventDefault();
 
 	},
@@ -21252,27 +21351,68 @@ Lava.define(
 			name: '',
 			is_enabled: true,
 			is_hidden: false,
+			is_active: false,
 			title: null,
 			content: null
 		});
 		tab.setProperties(properties);
-		tab.onPropertyChanged('is_enabled', this._onTabStateChanged, this);
-		tab.onPropertyChanged('is_hidden', this._onTabStateChanged, this);
 
-		if (this._properties._active_tab == null && tab.get('is_enabled') && !tab.get('is_hidden')) {
+		if (Lava.schema.DEBUG && tab.get('is_active') && (!tab.get('is_enabled') || tab.get('is_hidden'))) Lava.t('Tabs: added tab cannot be active and disabled/hidden at the same time');
 
-			this._set('_active_tab', tab);
+		if (this._properties.active_tab == null && tab.get('is_enabled') && !tab.get('is_hidden')) {
+
+			this._setActiveTab(tab);
 
 		}
 
+		if (tab.get('is_active') && this._properties.active_tab != tab) {
+			if (this._properties.active_tab) {
+				this._properties.active_tab.set('is_active', false);
+			}
+			this._set('active_tab', tab);
+		}
+
 		this._tabs.push(tab);
+
+		tab.onPropertyChanged('is_enabled', this._onTabStateChanged, this);
+		tab.onPropertyChanged('is_hidden', this._onTabStateChanged, this);
+		tab.onPropertyChanged('is_active', this._onTabIsActiveChanged, this);
+
 		return tab;
+
+	},
+
+	_onTabIsActiveChanged: function(tab) {
+
+		if (tab.get('is_active')) {
+
+			this._setActiveTab(tab);
+
+		} else if (this._properties.active_tab == tab) {
+
+			this._setActiveTab(null);
+
+		}
+
+	},
+
+	_setActiveTab: function(new_tab) {
+
+		var old_active_tab = this._properties.active_tab;
+
+		if (old_active_tab != new_tab) {
+
+			this._set('active_tab', new_tab);
+			if (new_tab) new_tab.set('is_active', true);
+			if (old_active_tab) old_active_tab.set('is_active', false);
+
+		}
 
 	},
 
 	_onTabStateChanged: function(tab) {
 
-		if (!tab.get('is_enabled') || tab.get('is_hidden')) {
+		if (tab.get('is_active') && (!tab.get('is_enabled') || tab.get('is_hidden'))) {
 
 			this._fixActiveTab();
 
@@ -21290,7 +21430,7 @@ Lava.define(
 
 		this._tabs.removeValue(tab);
 
-		if (this._properties._active_tab == tab) {
+		if (this._properties.active_tab == tab) {
 
 			this._fixActiveTab();
 
@@ -21314,7 +21454,7 @@ Lava.define(
 			return result;
 		});
 
-		this.set('_active_tab', active_tab);
+		this._setActiveTab(active_tab);
 
 	},
 
@@ -21334,13 +21474,7 @@ Lava.define(
 			this.removeTab(tabs[i]);
 		}
 
-		this.set('_active_tab', null);
-
-	},
-
-	setActiveTab: function(tab) {
-
-		this.set('_active_tab', tab);
+		this._setActiveTab(null);
 
 	},
 
@@ -21446,7 +21580,7 @@ Lava.define(
 
 	},
 
-	_setExpanded: function(name, value) {
+	_setExpanded: function(value, name) {
 
 		var new_display = 'none';
 
@@ -21623,7 +21757,7 @@ Lava.define(
 
 	},
 
-	_setAnimationEnabled: function(name, value) {
+	_setAnimationEnabled: function(value, name) {
 
 		if (this._properties.is_animation_enabled != value) {
 
@@ -21747,7 +21881,7 @@ Lava.define(
 
 	},
 
-	_setIsOpen: function(name, value) {
+	_setIsOpen: function(value, name) {
 
 		var open_target_container = this._getTargetContainer();
 		if (Lava.schema.DEBUG && !open_target_container) Lava.t("DropDown was created without container and target");
@@ -22207,7 +22341,7 @@ Lava.define(
 		this.CalendarAbstract$init(config, widget, parent_view, template, properties);
 
 		if (this._properties.value == null) {
-			this._setValue('value', current_date);
+			this._setValue(current_date, 'value');
 		}
 
 		this.set(
@@ -22389,7 +22523,7 @@ Lava.define(
 
 	},
 
-	_setValue: function(name, value) {
+	_setValue: function(value, name) {
 
 		var year = value.getFullYear(),
 			month = value.getMonth(),
@@ -23972,16 +24106,12 @@ return (! this._binds[0].getValue());
 									class_bindings: {
 										"0": {
 											evaluator: function() {
-return (this._binds[0].getValue() == this._binds[1].getValue() ? 'active' : '');
+return (this._binds[0].getValue() ? 'active' : '');
 },
-											binds: [
-												{property_name: "tab"},
-												{
-													locator_type: "Name",
-													locator: "tabs",
-													tail: ["_active_tab"]
-												}
-											]
+											binds: [{
+												property_name: "tab",
+												tail: ["is_active"]
+											}]
 										},
 										"1": {
 											evaluator: function() {
@@ -24096,16 +24226,12 @@ return (this._binds[0].getValue());
 							class_bindings: {
 								"0": {
 									evaluator: function() {
-return (this._binds[0].getValue() == this._binds[1].getValue() ? 'active' : '');
+return (this._binds[0].getValue() ? 'active' : '');
 },
-									binds: [
-										{property_name: "tab"},
-										{
-											locator_type: "Name",
-											locator: "tabs",
-											tail: ["_active_tab"]
-										}
-									]
+									binds: [{
+										property_name: "tab",
+										tail: ["is_active"]
+									}]
 								}
 							}
 						},
@@ -24162,6 +24288,11 @@ return (this._binds[0].getValue() == this._binds[1].getValue() ? 'active' : '');
 						type_name: "Boolean"
 					},
 					is_hidden: {
+						type: "lava_type",
+						is_attribute: true,
+						type_name: "Boolean"
+					},
+					is_active: {
 						type: "lava_type",
 						is_attribute: true,
 						type_name: "Boolean"

@@ -79,9 +79,9 @@ Lava.define(
 
 	},
 
-	_setValue: function(name, value) {
+	_setValue: function(value, name) {
 
-		this.Text$_setValue(name, value);
+		this.Text$_setValue(value, name);
 		this._setValidity(true);
 
 	},

@@ -1,5 +1,5 @@
 <x:define extends="Tree" title="FolderTree">
 	<include name="icon">
-		<i x:type="view" class="lava-tree-icon" x:classes="'icon-' + node.type"></i>
+		<img x:type="view" class="lava-tree-icon" x:classes="'lava-tree-icon-' + node.type" x:bind:src="'/www/design/tree/' + node.type + '.gif'" />
 	</include>
 </x:define>
