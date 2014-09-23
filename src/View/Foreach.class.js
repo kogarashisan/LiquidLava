@@ -2,6 +2,8 @@
 Lava.define(
 'Lava.view.Foreach',
 /**
+ * Iterate over a sequence of items and render a template for each item
+ *
  * @lends Lava.view.Foreach#
  * @extends Lava.view.Abstract
  * @implements _iViewHierarchyMember
@@ -11,22 +13,41 @@ Lava.define(
 	Extends: 'Lava.view.Abstract',
 
 	/**
+	 * Argument, that returns an array or Enumerable
 	 * @type {Lava.scope.Argument}
 	 */
 	_argument: null,
+	/**
+	 * Scope, that is preparing results from argument
+	 * @type {Lava.scope.Foreach}
+	 */
 	_foreach_scope: null,
+	/**
+	 * Listener for {@link Lava.scope.Foreach#event:changed} event
+	 * @type {_tListener}
+	 */
 	_foreach_scope_changed_listener: null,
 
-	// = _current_uids.length
+	/**
+	 * Equals to `_current_uids.length`
+	 * @type {number}
+	 */
 	_current_count: 0,
-	// [index] => uid
+	/**
+	 * Unique IDs, received from Enumerable, that was returned from Foreach scope
+	 * @type {Array.<number>}
+	 */
 	_current_uids: [],
 	/**
-	 * [guid] => template
-	 * @type {Object.<string, _tRenderable>}
+	 * Enumerable UID => Template
+	 * @type {Object.<string, Lava.system.Template>}
 	 */
 	_current_hash: {},
 
+	/**
+	 * Templates that correspond to each item in Enumerable
+	 * @type {Array.<Lava.system.Template>}
+	 */
 	_current_templates: [],
 
 	/**
@@ -36,11 +57,15 @@ Lava.define(
 	_as: null,
 
 	/**
-	 * @type {(Lava.view.refresher.Default)}
+	 * Refreshers perform insertion, removal and animation of items
+	 * @type {Lava.view.refresher.Default}
 	 */
 	_refresher: null,
 
 	_properties: {
+		/**
+		 * Number of items in Foreach
+		 */
 		count: 0
 	},
 
@@ -64,6 +89,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_refresher`
+	 * @returns {Lava.view.refresher.Default}
+	 */
 	getRefresher: function() {
 
 		return this._refresher;
@@ -90,8 +119,8 @@ Lava.define(
 	},
 
 	/**
-	 * Scope hac created a new instance of Enumerable.
-	 * Now all UIDs belong to the old enumerable, so must get rid of all templates.
+	 * Scope has created a new instance of Enumerable.
+	 * Now all UIDs belong to the old enumerable, so must get rid of all templates
 	 */
 	_onEnumerableChanged: function() {
 
@@ -113,6 +142,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Callback that removes templates for removed Enumerable items
+	 * @param {Array.<Lava.system.Template>} removed_templates
+	 */
 	_removeTemplates: function(removed_templates) {
 
 		var i = 0,
@@ -134,6 +167,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Remove old templates, create new
+	 */
 	_refreshChildren: function() {
 
 		var data_source = this._foreach_scope.getValue(),
@@ -196,6 +232,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Callback for {@link Lava.scope.Foreach#event:changed} event
+	 */
 	_onDataSourceChanged: function() {
 
 		this._refreshChildren();
@@ -203,6 +242,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Animation has ended and refresher has removed the `template` from DOM
+	 * @param template
+	 */
 	_onRemovalComplete: function(template) {
 
 		template.destroy();
@@ -243,9 +286,6 @@ Lava.define(
 
 	},
 
-	/**
-	 * @param {string} function_name
-	 */
 	_broadcastToChildren: function(function_name) {
 
 		for (var name in this._current_hash) {

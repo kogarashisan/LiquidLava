@@ -1,4 +1,6 @@
-
+/**
+ * Easings for animation
+ */
 Lava.transitions = {
 
 	linear: function(x) {

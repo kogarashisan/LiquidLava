@@ -2,6 +2,7 @@
 Lava.define(
 'Lava.data.MetaStorage',
 /**
+ * Module that is designed to extend normal modules with additional fields. Cannot have an ID field
  * @lends Lava.data.MetaStorage#
  * @extends Lava.data.ModuleAbstract
  * @extends Lava.mixin.Properties
@@ -11,9 +12,8 @@ Lava.define(
 	Extends: 'Lava.data.ModuleAbstract',
 	Implements: 'Lava.mixin.Properties',
 
-	//_attached_module: null,
-
 	/**
+	 * Create an instance of MetaStorage
 	 * @param {_cMetaStorage} config
 	 */
 	init: function(config) {
@@ -21,7 +21,6 @@ Lava.define(
 		if ('id' in config.fields) Lava.t("Id field in MetaStorage is not permitted");
 
 		this._config = config;
-		//this._attached_module = attached_module;
 
 		var default_storage = this._initFields(config),
 			field;
@@ -39,6 +38,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get or create an extension record by GUID of record in a normal module
+	 * @param {_tGUID} guid
+	 * @returns {Lava.data.MetaRecord}
+	 * @lava-param-renamed name -> guid
+	 */
 	get: function(guid) {
 
 		if (!(guid in this._properties)) {
@@ -51,18 +56,19 @@ Lava.define(
 
 	},
 
-	set: function(name, value) {
+	/**
+	 * Throws an error
+	 */
+	set: function() {
 
 		Lava.t("MetaStorage: set operation is not permitted");
 
 	},
 
-//	getAttachedModule: function() {
-//
-//		return this._attached_module;
-//
-//	},
-
+	/**
+	 * Create an instance of {@link Lava.data.MetaRecord}
+	 * @returns {Lava.data.MetaRecord}
+	 */
 	_createRecordInstance: function() {
 
 		var storage = this._createEmptyRecordStorage(),
@@ -76,6 +82,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get all records in this module
+	 * @returns {Array.<Lava.data.MetaRecord>}
+	 */
 	getAllRecords: function() {
 
 		var result = [],

@@ -2,6 +2,7 @@
 Lava.define(
 'Lava.data.field.Collection',
 /**
+ * Field, that holds collection of records (usually, from another module)
  * @lends Lava.data.field.Collection#
  * @extends Lava.data.field.Abstract
  */
@@ -9,41 +10,62 @@ Lava.define(
 
 	Extends: 'Lava.data.field.Abstract',
 
+	/**
+	 * Instance belongs to Collection field
+	 * @type {boolean}
+	 * @const
+	 */
 	isCollectionField: true,
 
 	/**
-	 * Collection field holds an array of records from this module
+	 * Collection field holds array of records from this module instance
+	 * @type {Lava.data.Module}
 	 */
 	_target_module: null,
 
 	/**
+	 * The mirror {@link Lava.data.field.Record} field name
 	 * @type {string}
 	 */
 	_target_record_field_name: null,
 	/**
-	 * Each Collection field has corresponding Record field, they always come in pairs, like 'parent' and 'children'
+	 * Each Collection field has corresponding Record field, they always come in pairs, like 'parent' (Record) and 'children' (Collection)
 	 * @type {Lava.data.field.Record}
 	 */
 	_target_record_field: null,
 
+	/**
+	 * Listener for {@link Lava.data.field.Record#event:removed_child}
+	 * @type {_tListener}
+	 */
 	_record_removed_listener: null,
+	/**
+	 * Listener for {@link Lava.data.field.Record#event:added_child}
+	 * @type {_tListener}
+	 */
 	_record_added_listener: null,
 
 	/**
+	 * Collections of foreign records that belong to local record
 	 * @type {Object.<string, Lava.system.Enumerable>}
 	 */
 	_collections_by_record_guid: {},
+	/**
+	 * Listeners for each Enumerable from `_collections_by_record_guid`
+	 * @type {Object}
+	 */
 	_collection_listeners_by_guid: {},
 	/**
+	 * Hash of global unique identifiers of Enumerables from `_collections_by_record_guid` to their owner record (local)
 	 * @type {Object.<_tGUID, Lava.data.RecordAbstract>}
 	 */
 	_collection_guid_to_record: {},
 
 	/**
-	 * @param {Lava.data.Module} module
-	 * @param {string} name
+	 * @param module
+	 * @param name
 	 * @param {_cCollectionField} config
-	 * @param {object} module_storages
+	 * @param module_storages
 	 */
 	init: function(module, name, config, module_storages) {
 
@@ -70,6 +92,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Record was removed from collection by setting it's related Record field. Update local collection
+	 * @param {Lava.data.field.Record} field
+	 * @param {Lava.data.field.Record#event:removed_child} event_args
+	 */
 	_onRecordRemoved: function(field, event_args) {
 
 		var local_record = event_args.collection_owner;
@@ -79,6 +106,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Record was added to collection by setting it's related Record field. Update local collection
+	 * @param {Lava.data.field.Record} field
+	 * @param {Lava.data.field.Record#event:removed_child} event_args
+	 */
 	_onRecordAdded: function(field, event_args) {
 
 		var local_record = event_args.collection_owner;
@@ -88,13 +120,13 @@ Lava.define(
 
 	},
 
-	isValidValue: function(value) {
+	isValidValue: function() {
 
 		return false;
 
 	},
 
-	getInvalidReason: function(value) {
+	getInvalidReason: function() {
 
 		return  'Collection field does not support setValue';
 
@@ -146,18 +178,33 @@ Lava.define(
 
 	},
 
+	/**
+	 * When directly adding records to collection - their related Record field must be set to correct collection owner
+	 * @param {Lava.system.Enumerable} collection Collection of records that belong to local record ("children")
+	 * @param {Lava.system.Enumerable#event:items_added} event_args
+	 */
 	_onCollectionRecordsAdded: function(collection, event_args) {
 
 		this._setCollectionOwner(event_args.values, this._collection_guid_to_record[collection.guid]);
 
 	},
 
+	/**
+	 * When directly removing records from collection - their related Record field must be set to null
+	 * @param {Lava.system.Enumerable} collection Collection of records that belong to local record ("children")
+	 * @param {Lava.system.Enumerable#event:items_removed} event_args
+	 */
 	_onCollectionRecordsRemoved: function(collection, event_args) {
 
 		this._setCollectionOwner(event_args.values, null);
 
 	},
 
+	/**
+	 * Set the related {@link Lava.data.field.Record} field of the `records` array to `new_value`
+	 * @param {Array.<Lava.data.RecordAbstract>} records
+	 * @param {?Lava.data.RecordAbstract} new_value
+	 */
 	_setCollectionOwner: function(records, new_value) {
 
 		var i = 0,
@@ -175,13 +222,19 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get count of items in record's collection of this field
+	 * @param {Lava.data.RecordAbstract} record
+	 * @param {Object} storage
+	 * @returns {Number}
+	 */
 	getCount: function(record, storage) {
 
 		return this._target_record_field.getCollectionCount(record);
 
 	},
 
-	setValue: function(record, storage, new_records) {
+	setValue: function() {
 
 		Lava.t('Trying to set Collection field value');
 

@@ -10,7 +10,7 @@
 
 <h3>Refactoring</h3>
 <ul>
-	<li>Minor refactorings and improvements, JSDoc fixes.</li>
+	<li>Lots of refactorings and improvements, JSDoc fixes.</li>
 	<li>Refactored the template of the Tree class, mainly for use of dynamic scopes.</li>
 	<li>Most classes, that implemented mixins - now extend them.</li>
 	<li>(container.Element) wrap() was split into 2 methods: renderVoid() for void containers, and wrap(html) for non-void.</li>
@@ -30,10 +30,12 @@
 	<li>Animation: renamed config options. 'transition' -> 'transition_name', and 'transition' is now a function.</li>
 	<li>All widget setters now accept arguments in different order: _setSomething(value, name)</li>
 	<li>Standard widget now has a name: 'widget'</li>
+	<li>Enumerable.each(): changed the callback parameters order. New order: value, name, uid, index.</li>
 </ul>
 
 <h3>Fixes</h3>
 <ul>
+	<li>Lots of small undocumented bug fixes</li>
 	<li>Fixed a serialization issue in Lava.Serializer.</li>
 	<li>Fixed a bug in view refresh system.</li>
 	<li>Fixed a bug in template compiling algorithm.</li>

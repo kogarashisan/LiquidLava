@@ -252,7 +252,7 @@
 </ul>
 <h3>System/Enumerable.class.js</h3>
 <ul>
-<li><span class="tag-P3">P3</span><span class="tag-Feature">Feature</span> methods moveIndex(old_index, new_index) and moveValue(value, new_index)<span class="task-comment">is equivalent of removeAt, than insertAt for given value. Preserves UID.</span></li>
+<li><span class="tag-P3">P3</span><span class="tag-Feature">Feature</span> methods moveIndex(old_index, new_index) and moveValue(value, new_index)<span class="task-comment">is equivalent of removeAt, then insertAt for given value. Preserves UID.</span></li>
 <li><span class="tag-P3">P3</span><span class="tag-Performance">Performance</span> Enumerable is inherited from Properties, but does not use _properties and _property_listeners.<br/>They should not take space in constructed objects.</li>
 <li><span class="tag-P5">P5</span><span class="tag-Performance">Performance</span> It's possible to optimize updateFromEnumerable - do not calculate diff if there are no listeners.<br/>Also inspect other functions for optimization.</li>
 <li><span class="tag-P2">P2</span><span class="tag-Feature">Feature</span> - select(), selectFirst() - like filter, but returns array, instead of modifying the instance<span class="task-comment">also, refactor the site:build/src/ContentLoader class for usage of new methods</span></li>
@@ -260,6 +260,7 @@
 <h3>System/PopoverManager.class.js</h3>
 <ul>
 <li><span class="tag-P3">P3</span><span class="tag-Bug">Bug</span> Tooltip blinks when moving cursor towards the tooltip</li>
+<li><span class="tag-P2">P2</span><span class="tag-Feature">Feature</span> add an option to show empty tooltips</li>
 </ul>
 <h3>System/Sugar.class.js</h3>
 <ul>
@@ -284,7 +285,7 @@
 </ul>
 <h3>View/Container/Element.class.js</h3>
 <ul>
-<li><span class="tag-P1">P1</span><span class="tag-Fix">Fix</span><span class="tag-Dev">Dev</span> if you render it's content and change any attribute before it's in DOM,<br/>than you will get wrong content in DOM. Make protection from such lifecycle.<span class="task-comment">make "is_rendered"/"waits_insertion" switch and throw an error, if setting a property while it's on</span></li>
+<li><span class="tag-P1">P1</span><span class="tag-Fix">Fix</span><span class="tag-Dev">Dev</span> if you render it's content and change any attribute before it's in DOM,<br/>then you will get wrong content in DOM. Make protection from such lifecycle.<span class="task-comment">make "is_rendered"/"waits_insertion" switch and throw an error, if setting a property while it's on</span></li>
 </ul>
 <h3>ClassManager.class.js</h3>
 <ul>

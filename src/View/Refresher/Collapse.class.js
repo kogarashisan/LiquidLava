@@ -2,6 +2,7 @@
 Lava.define(
 'Lava.view.refresher.Collapse',
 /**
+ * Animation that expands and collapses elements in one direction
  * @lends Lava.view.refresher.Collapse#
  * @extends Lava.view.refresher.Animated
  */
@@ -9,6 +10,11 @@ Lava.define(
 
 	Extends: 'Lava.view.refresher.Animated',
 
+	/**
+	 * Animation class to use when expanding and collapsing templates
+	 * @type {string}
+	 * @readonly
+	 */
 	ANIMATION_NAME: 'Lava.animation.Collapse',
 
 	_createAnimation: function(template, index) {

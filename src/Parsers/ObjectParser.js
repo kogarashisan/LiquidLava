@@ -1,9 +1,4 @@
 
-/**
- * Object parser
- * @name Lava.ObjectParser
- */
-
 Lava.ObjectParser.yy = {
 
 	/**
@@ -12,7 +7,7 @@ Lava.ObjectParser.yy = {
 	valid_globals: ['Lava'],
 
 	/**
-	 * Keep in mind: configs must be serializable.
+	 * Keep in mind: configs must be serializable
 	 * @param {Array} path_segments
 	 */
 	assertPathValid: function(path_segments) {

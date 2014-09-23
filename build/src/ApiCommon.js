@@ -105,7 +105,7 @@ var ApiCommon = {
 			table_attributes: 'class="' + table_class + '"',
 			header_cell_attributes: ['class="api-flag-td"'],
 			column_cell_attributes: ['class="api-flag-td"', 'class="api-name-column"'],
-			description_attributes: 'class="api-description-td"',
+			description_attributes: 'class="api-description-td api-description-row-td"',
 			scroll_prefix: scroll_prefix || ''
 		});
 
@@ -126,6 +126,41 @@ var ApiCommon = {
 		result += '</div>';
 		if (returns.description) {
 			result += '<div class="api-pad-left">' + returns.description + '</div>';
+		}
+
+		return result;
+
+	},
+
+	renderEventExt: function(descriptor) {
+
+		var result = '';
+
+		if (descriptor.type_names) {
+
+			result = '<div><b>Event argument:</b> ';
+			if (descriptor.is_nullable) result += '<img title="Nullable" src="/www/design/nullable.png" />';
+			if (descriptor.is_non_nullable) result += '<img title="Non-nullable" src="/www/design/non-nullable.png" />';
+			if (descriptor.is_optional) result += '[optional]';
+			if (descriptor.type_names) {
+				if (descriptor.type_names.length > 1) {
+					result += '(' + descriptor.type_names.join('|') + ')';
+				} else {
+					result += descriptor.type_names[0] || '';
+				}
+			}
+			result += '</div>';
+			if (descriptor.argument_description) {
+				result += '<div class="api-pad-left">' + descriptor.argument_description + '</div>';
+			}
+
+		}
+
+		if (descriptor.params) {
+
+			result += '<b class="api-member-extended-header">Argument properties</b>';
+			result += ApiCommon.renderParamsTable(descriptor.params, 'api-member-inner-table');
+
 		}
 
 		return result;

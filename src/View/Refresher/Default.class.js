@@ -2,26 +2,37 @@
 Lava.define(
 'Lava.view.refresher.Default',
 /**
- * Base class for animation support. Does not animate templates, but inserts and removes them separately.
+ * Base class for animation support in views. Default refresher does not animate templates, but inserts and removes them separately
  * @lends Lava.view.refresher.Default#
  * @extends Lava.mixin.Observable
  */
 {
 
 	Extends: 'Lava.mixin.Observable',
-
 	Shared: '_insertion_strategies',
 
-	// all functions are called in context of THIS class, not the shared object
+	/**
+	 * Map of callbacks for dynamic insertion of templates
+	 * @type {Object.<string, string>}
+	 */
 	_insertion_strategies: {
 		sequential_elements: '_insertSequentialElements'
 	},
 
+	/**
+	 * Settings for this instance
+	 * @type {_cRefresher}
+	 */
 	_config: null,
 	/**
+	 * View, that owns this refresher instance
 	 * @type {Lava.view.Abstract}
 	 */
 	_view: null,
+	/**
+	 * View's container
+	 * @type {_iContainer}
+	 */
 	_container: null,
 
 	/**
@@ -31,22 +42,29 @@ Lava.define(
 	_removed_templates: {},
 
 	/**
+	 * Templates, that are currently in DOM
 	 * @type {Object.<_tGUID, Lava.system.Template>}
 	 */
 	_current_templates: [],
 
 	/**
+	 * Animation instances for each template
 	 * @type {Object.<_tGUID, Lava.animation.Standard>}
 	 */
 	_animations_by_template_guid: {},
 	/**
+	 * Template of each animation
 	 * @type {Object.<_tGUID, Lava.system.Template>}
 	 */
 	_templates_by_animation_guid: {},
-
+	/**
+	 * Whether to perform template insertion and removal animations
+	 * @type {boolean}
+	 */
 	_is_animation_enabled: false,
 
 	/**
+	 * Create refresher instance
 	 * @param {_cRefresher} config
 	 * @param {Lava.view.Abstract} view
 	 * @param {_iContainer} container
@@ -65,6 +83,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Queue templates for removal
+	 * @param {Array.<Lava.system.Template>} templates
+	 */
 	removeTemplates: function(templates) {
 
 		for (var i = 0, count = templates.length; i < count; i++) {
@@ -77,8 +99,9 @@ Lava.define(
 	},
 
 	/**
-	 * @param current_templates Templates, that refresher must render and insert in DOM. Some of them are already there,
-	 * some are in DOM but sleeping, and others are not in DOM.
+	 * Insert new templates into DOM and remove those, which are queued for removal
+	 * @param {Array.<Lava.system.Template>} current_templates Templates, that refresher must render and insert into DOM.
+	 *  Some of them are already there, some are in DOM but sleeping, and others are not yet in DOM
 	 */
 	refresh: function(current_templates) {
 
@@ -119,6 +142,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * View's render callback
+	 * @param {Array.<Lava.system.Template>} current_templates Templates that must be in DOM
+	 */
 	onRender: function(current_templates) {
 
 		var i = 0,
@@ -148,6 +175,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Insert the template into DOM and apply corresponding animation
+	 * @param {Lava.system.Template} template
+	 * @param {number} index Index of this template in list of all active templates
+	 */
 	_animateInsertion: function(template, index) {
 
 		var animation = this._animations_by_template_guid[template.guid];
@@ -176,6 +208,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Apply template removal animation and remove element from DOM in the end of it
+	 * @param {Lava.system.Template} template
+	 */
 	_animateRemoval: function(template) {
 
 		var animation = this._animations_by_template_guid[template.guid];
@@ -195,6 +231,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Insert template into DOM
+	 * @param {Lava.system.Template} template
+	 * @param {number} index Index of this template in list of all active templates
+	 */
 	_insertTemplate: function(template, index) {
 
 		this._view.getContainer().appendHTML(template.render());
@@ -202,6 +243,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Remove template from DOM
+	 * @param {Lava.system.Template} template
+	 */
 	_removeTemplate: function(template) {
 
 		// save, cause element container will throw an error if we try to do it after broadcastRemove
@@ -213,6 +258,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get the element of the template, that will be animated
+	 * @param {Lava.system.Template} template
+	 * @returns {HTMLElement}
+	 */
 	_getAnimationTarget: function(template) {
 
 		// get the only element inside the template
@@ -220,6 +270,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Cleanup animation instance and update state of it's template
+	 * @param {Lava.animation.Abstract} animation
+	 */
 	_onAnimationComplete: function(animation) {
 
 		var template = this._templates_by_animation_guid[animation.guid];
@@ -241,12 +295,22 @@ Lava.define(
 
 	},
 
+	/**
+	 * Removal animation has ended. Remove template from DOM
+	 * @param {Lava.animation.Abstract} animation
+	 * @param {Lava.system.Template} template
+	 */
 	_onRemovalComplete: function(animation, template) {
 
 		this._removeTemplate(template);
 
 	},
 
+	/**
+	 * Insertion animation has ended. Update state of the template
+	 * @param {Lava.animation.Abstract} animation
+	 * @param {Lava.system.Template} template
+	 */
 	_onInsertionComplete: function(animation, template) {
 
 		// if animation was reversed, then template must be sleeping now
@@ -256,6 +320,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Are there any active animations
+	 * @returns {boolean}
+	 */
 	hasAnimations: function() {
 
 		return false;
@@ -263,8 +331,9 @@ Lava.define(
 	},
 
 	/**
+	 * Create animation instance
 	 * @param {Lava.system.Template} template
-	 * @param index
+	 * @param {number} index Index of the template in the list of all active templates
 	 */
 	_createAnimation: function(template, index) {
 
@@ -272,12 +341,19 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_is_animation_enabled`
+	 * @returns {boolean}
+	 */
 	isAnimationEnabled: function() {
 
 		return this._is_animation_enabled;
 
 	},
 
+	/**
+	 * Stop all active animations
+	 */
 	stopAnimations: function() {
 
 	},
@@ -285,9 +361,9 @@ Lava.define(
 	/**
 	 * (insertion strategy)
 	 * With this callback you can insert Foreach elements at the right place.
-	 * All templates inside Foreach are treated as single view with Element container.
-	 * @param template
-	 * @param index
+	 * All templates inside Foreach are treated as single view with Element container
+	 * @param {Lava.system.Template} template
+	 * @param {number} index Index of the template in the list of all active templates
 	 */
 	_insertSequentialElements: function(template, index) {
 
@@ -305,6 +381,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Free resources and make this instance unusable
+	 */
 	destroy: function() {
 
 		this.stopAnimations();

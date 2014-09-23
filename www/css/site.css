@@ -7628,7 +7628,7 @@ footer .container {background: #f7f5fa;}
 .api-system-link {background: url(/www/design/gear.png);background-position: left center;background-repeat: no-repeat;line-height: 23px;display: inline-block;padding-left: 33px;margin-left: 25px;margin-top: 4px;display: block;}
 .api-filter-box {clear:both;background: #dfe9ff;padding: 0.5em;border: 1px solid gray}
 .api-support-interface-tag {background: #800043;color:white;font-size: 0.5em;padding: 2px 6px;border-radius: 5px;}
-.api-support-extends-list {color: lightgray;font-size: 0.8em}
+.api-support-extends-list {color: gray;font-size: 0.8em}
 
 /* API page: extends box*/
 .api-extends-box {background: rgb(215, 231, 236);padding: 1em;border: 2px solid lightgray;float: right;margin-bottom: 1em}
@@ -7657,10 +7657,12 @@ footer .container {background: #f7f5fa;}
 .api-returns-icon {top:3px !important}
 .api-member-cell-expandable {background: rgb(255, 255, 199);width: 1em;padding: 0!important;}
 .api-description-td {padding-top: 0 !important;}
+.api-description-row-td {padding-left: 1em !important;}
 .api-description-td p {margin:0; padding-top: 0.4em}
 .api-flag-td {width: 1px; white-space: nowrap}
 .api-name-column {font-family: monospace}
 .api-pad-left {padding-left: 2em}
+.api-pad-left p {margin: 0!important;}
 .api-lava-type-link {color: #800043;font-weight: bold;}
 
 /* cell content styles */

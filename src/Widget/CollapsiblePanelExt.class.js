@@ -1,8 +1,28 @@
 
+/**
+ * Panel started to expand it's body
+ * @event Lava.widget.CollapsiblePanelExt#expanding
+ */
+
+/**
+ * Panel started to collapse it's body
+ * @event Lava.widget.CollapsiblePanelExt#collapsing
+ */
+
+/**
+ * Panel's body has fully expanded
+ * @event Lava.widget.CollapsiblePanelExt#expanded
+ */
+
+/**
+ * Panel's body is collapsed
+ * @event Lava.widget.CollapsiblePanelExt#collapsed
+ */
+
 Lava.define(
 'Lava.widget.CollapsiblePanelExt',
 /**
- * A panel that removes it's content from DOM in collapsed state.
+ * An expandable panel that removes it's content from DOM in collapsed state
  * @lends Lava.widget.CollapsiblePanelExt#
  * @extends Lava.widget.Standard#
  */
@@ -19,10 +39,15 @@ Lava.define(
 	},
 
 	_properties: {
+		/** Is panel expanded */
 		is_expanded: true,
+		/** When panel is locked - it does not respond to header clicks */
 		is_locked: false,
+		/** Does panel use animation to expand and collapse it's body */
 		is_animation_enabled: true,
+		/** Panel's title */
 		title: '',
+		/** Content for the default panel's template */
 		content: ''
 	},
 
@@ -34,9 +59,17 @@ Lava.define(
 		_content_if: '_handleContentIf'
 	},
 
+	/**
+	 * Refresher of the panel's body
+	 * @type {Lava.view.refresher.Default}
+	 */
 	_content_refresher: null,
 
-	_handleContentIf: function(view, template_arguments) {
+	/**
+	 * Handle view with the panel's body
+	 * @param {Lava.view.Abstract} view
+	 */
+	_handleContentIf: function(view) {
 
 		var refresher = view.getRefresher();
 
@@ -51,18 +84,27 @@ Lava.define(
 
 	},
 
+	/**
+	 * Refresher has expanded the body, fire "expanded" event
+	 */
 	_onInsertionComplete: function() {
 
 		this._fire('expanded');
 
 	},
 
+	/**
+	 * Refresher has collapsed and removed the body, fire "collapsed" event
+	 */
 	_onRemovalComplete: function() {
 
 		this._fire('collapsed');
 
 	},
 
+	/**
+	 * Toggle <i>is_expanded</i> property, if not locked
+	 */
 	_onHeaderClick: function() {
 
 		if (!this._properties.is_locked) {
@@ -76,6 +118,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Setter for `is_animation_enabled`
+	 * @param {boolean} value
+	 * @param {string} name
+	 */
 	_setAnimationEnabled: function(value, name) {
 
 		if (this._properties.is_animation_enabled != value) {

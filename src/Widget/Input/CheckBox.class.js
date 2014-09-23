@@ -2,6 +2,7 @@
 Lava.define(
 'Lava.widget.input.CheckBox',
 /**
+ * CheckBox input
  * @lends Lava.widget.input.CheckBox#
  * @extends Lava.widget.input.RadioAbstract#
  */
@@ -10,17 +11,20 @@ Lava.define(
 	Extends: 'Lava.widget.input.RadioAbstract',
 
 	name: 'checkbox',
+	_type: "checkbox",
 
 	_property_descriptors: {
 		is_indeterminate: {type: 'Boolean', setter: '_setIsIndeterminate'}
 	},
 
 	_properties: {
+		/** Is checkbox in indeterminate state */
 		is_indeterminate: false
 	},
 
-	_type: "checkbox",
-
+	/**
+	 * Set "indeterminate" property on checkbox input element
+	 */
 	_refreshIndeterminate: function() {
 
 		if (this._input_container && this._input_container.getDOMElement()) {
@@ -50,6 +54,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Setter for <i>is_indeterminate</i> property
+	 * @param {boolean} value
+	 */
 	_setIsIndeterminate: function(value) {
 
 		if (this._properties.is_indeterminate != value) {

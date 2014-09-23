@@ -1,34 +1,80 @@
 
+/**
+ * Common methods and properties for working with widget templates
+ */
 Lava.parsers.Common = {
 
-	// same as in Firestorm.String, but without quotes and backslash.
+	/**
+	 * Same as regex in {@link Firestorm.String}, but without quotes and backslash
+	 */
 	UNQUOTE_ESCAPE_REGEX: /[\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
 
+	/**
+	 * The only allowed options on view's hash
+	 * @type {Array.<string>}
+	 */
 	_allowed_hash_options: ['id', 'label', 'as', 'escape_off'],
+	/**
+	 * Allowed "x:" attributes on elements
+	 * @type {Array.<string>}
+	 */
 	_allowed_control_attributes: ['event', 'bind', 'style', 'classes', 'container_class', 'type', 'options', 'label', 'roles', 'resource_id', 'widget'],
+	/**
+	 * Words, that cannot be used as a label
+	 * @type {Array.<string>}
+	 */
 	_reserved_labels: ['parent', 'widget', 'this', 'root'],
+	/**
+	 * The only control attributes ("x:") that can be placed on widget's sugar tag
+	 * @type {Array.<string>}
+	 */
 	_allowed_sugar_control_attributes: ['label', 'roles', 'resource_id'],
 
+	/**
+	 * When widgets are referenced in expressions - they are prefixed with these special characters, which define the kind of reference
+	 * @type {Object.<string, string>}
+	 */
 	locator_types: {
 		'#': 'Id',
 		'@': 'Label',
 		'$': 'Name'
 	},
 
-	// example: @accordion.accordion_panel
+	/**
+	 * A widget with a name after dot. Example: <kw>"@accordion.accordion_panel"</kw>
+	 * @type {RegExp}
+	 */
 	_locator_regex: /^[\$\#\@]([a-zA-Z\_][a-zA-Z0-9\_]*)\.([a-zA-Z\_][a-zA-Z0-9\_]*)/,
+	/**
+	 * Valid name of a variable
+	 * @type {RegExp}
+	 */
 	_identifier_regex: /^[a-zA-Z\_][a-zA-Z0-9\_]*/,
 
-	// overridden includes have '$' in their name.
-	// Example: $tree.Tree$node
+	/**
+	 * Same as `_locator_regex`, but allows the <kw>"$"</kw> symbol in include name
+	 * (overridden includes have '$' in their name). Example: <kw>"$tree.Tree$node"</kw>
+	 */
 	_include_locator_regex: /^[\$\#\@]([a-zA-Z\_][a-zA-Z0-9\_]*)\.([a-zA-Z\_][\$a-zA-Z0-9\_]*)/,
+	/**
+	 * Same as `_identifier_regex`, but <kw>"$"</kw> symbol is also allowed
+	 * @type {RegExp}
+	 */
 	_include_identifier_regex: /^[a-zA-Z\_][\$a-zA-Z0-9\_]*/,
 
+	/**
+	 * Special setters for some properties in view config
+	 * @type {Object.<string, string>}
+	 */
 	_view_config_property_setters: {
 		id: 'setViewConfigId',
 		label: 'setViewConfigLabel'
 	},
 
+	/**
+	 * For each type of item in raw templates: callbacks that return it's "compiled" version
+	 * @type {Object.<string, string>}
+	 */
 	_compile_handlers: {
 		string: '_compileString',
 		include: '_compileInclude',
@@ -45,6 +91,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
+	 * Does given string represent a JavaScript literal ('true', 'false', 'null', 'undefined')
 	 * @param {string} string
 	 * @returns {boolean}
 	 */
@@ -54,12 +101,22 @@ Lava.parsers.Common = {
 
 	},
 
+	/**
+	 * Translate name of the view to name of it's class
+	 * @param {string} name
+	 * @returns {string}
+	 */
 	_viewNameToClass: function(name) {
 
 		return Lava.schema.parsers.view_name_to_class_map[name] || name;
 
 	},
 
+	/**
+	 * Store values from view's hash as config properties
+	 * @param {_cView} view_config
+	 * @param {Object} raw_hash
+	 */
 	_parseViewHash: function(view_config, raw_hash) {
 
 		for (var name in raw_hash) {
@@ -79,6 +136,7 @@ Lava.parsers.Common = {
 	// Start: config property setters
 
 	/**
+	 * Check {@link _cView#id} for validity before assignment
 	 * @param {_cView} view_config
 	 * @param {string} id
 	 */
@@ -90,6 +148,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
+	 * Check {@link _cView#label} for validity before assignment
 	 * @param {_cView} view_config
 	 * @param {string} label
 	 */
@@ -108,6 +167,7 @@ Lava.parsers.Common = {
 	// Start: block handlers
 
 	/**
+	 * Compile a raw directive. Directives either produce widget configs, or modify the config of their parent view
 	 * @param {_tTemplate} result
 	 * @param {_cRawDirective} directive
 	 * @param {_cView} view_config
@@ -138,6 +198,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
+	 * Compile raw include (push as is)
 	 * @param {_tTemplate} result
 	 * @param {_cInclude} include_config
 	 */
@@ -148,6 +209,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
+	 * Compile raw string (push or append to the last string in result)
 	 * @param {_tTemplate} result
 	 * @param {string} string
 	 */
@@ -170,6 +232,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
+	 * Compile raw block (represents a view)
 	 * @param {_tTemplate} result
 	 * @param {_cRawBlock} raw_block
 	 */
@@ -233,6 +296,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
+	 * Compile raw expression view. Will produce a view config with class="Expression"
 	 * @param {_tTemplate} result
 	 * @param {_cRawExpression} raw_expression
 	 */
@@ -257,7 +321,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * Serialize the tag back into text.
+	 * Serialize the tag back into text
 	 * @param {_tTemplate} result
 	 * @param {_cRawTag} tag
 	 */
@@ -303,7 +367,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * Tag with x:type='view'
+	 * Compile raw tag with x:type="view". Will produce a {@link Lava.view.View} with an Element container
 	 * @param {_tTemplate} result
 	 * @param {_cRawTag} raw_tag
 	 */
@@ -330,7 +394,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * Tag with x:type='container'
+	 * Compile raw tag with x:type="container". Extract the wrapped view and set this tag as it's container
 	 * @param {_tTemplate} result
 	 * @param {_cRawTag} raw_tag
 	 */
@@ -426,7 +490,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * Tag with x:type='static'
+	 * Compile tag with x:type="static"
 	 * @param {_tTemplate} result
 	 * @param {_cRawTag} raw_tag
 	 */
@@ -461,6 +525,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
+	 * Compile a tag which belongs to widget's sugar. Parse it into tag config using {@link Lava.system.Sugar} class instance
 	 * @param {_tTemplate} result
 	 * @param {_cRawTag} raw_tag
 	 */
@@ -506,7 +571,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * Tag with x:widget='WidgetName'. Represents a widget with explicitly defined Element container.
+	 * Compile tag with x:widget="WidgetName". Represents a widget with explicitly defined Element container
 	 *
 	 * @param {_tTemplate} result
 	 * @param {_cRawTag} raw_tag
@@ -532,6 +597,7 @@ Lava.parsers.Common = {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
+	 * Assign some attributes of an element to `view_config`
 	 * @param {_cView} view_config
 	 * @param {_cRawTag} raw_tag
 	 */
@@ -557,6 +623,10 @@ Lava.parsers.Common = {
 
 	},
 
+	/**
+	 * Check validity of control attributes and throw exception, in case they are invalid
+	 * @param {_cRawX} x
+	 */
 	_assertControlAttributesValid: function(x) {
 
 		for (var name in x) {
@@ -565,6 +635,11 @@ Lava.parsers.Common = {
 
 	},
 
+	/**
+	 * Convert raw tag to an Element container config
+	 * @param {_cRawTag} raw_tag
+	 * @returns {_cElementContainer}
+	 */
 	_toContainer: function(raw_tag) {
 
 		var container_config = {
@@ -575,11 +650,12 @@ Lava.parsers.Common = {
 		if ('attributes' in raw_tag) this._parseContainerStaticAttributes(container_config, raw_tag.attributes);
 		if ('x' in raw_tag) this._parseContainerControlAttributes(container_config, raw_tag.x);
 
-		return container_config;
+		return /** @type {_cElementContainer} */ container_config;
 
 	},
 
 	/**
+	 * Take raw control attributes, parse them, and store in `container_config`
 	 * @param {_cElementContainer} container_config
 	 * @param {_cRawX} x
 	 */
@@ -644,11 +720,10 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * Parse object as (name => expression) pairs
+	 * Parse object as [name] => &lt;expression&gt; pairs
 	 *
 	 * @param {Object.<string, string>} hash
 	 * @returns {Object.<string, _cArgument>}
-	 * @private
 	 */
 	_parseBindingsHash: function(hash) {
 
@@ -673,7 +748,7 @@ Lava.parsers.Common = {
 
 	/**
 	 * Parse style attribute contents (plain string) into object with keys being individual style names,
-	 * and values being actual style values.
+	 * and values being actual style values
 	 *
 	 * @param {string} styles_string
 	 * @returns {Object.<string, string>}
@@ -723,10 +798,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * Fills the following properties of the container:
-	 *      static_styles
-	 *      static_classes
-	 *      static_properties
+	 * Fills the following properties of the container: static_styles, static_classes and static_properties
 	 *
 	 * @param {_cElementContainer} container_config
 	 * @param {Object.<string, string>} raw_attributes
@@ -770,6 +842,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
+	 * Compile raw template config
 	 * @param {_tRawTemplate} blocks
 	 * @param {_cView} [view_config]
 	 * @returns {_tTemplate}
@@ -831,7 +904,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * Compile template as usual and assert that it contains single view inside. Return that view.
+	 * Compile template as usual and assert that it contains single view inside. Return that view
 	 *
 	 * @param {_tRawTemplate} raw_blocks
 	 * @returns {_cView}
@@ -846,6 +919,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
+	 * Remove strings from template and assert they are empty
 	 * @param {(_tRawTemplate|_tTemplate)} template
 	 * @returns {Array}
 	 */
@@ -874,7 +948,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 *
+	 * Extract blocks/tags from template and assert they all have specific type
 	 * @param {Array} blocks
 	 * @param {string} type
 	 * @returns {Array}
@@ -896,9 +970,9 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * Convert an object as <name,value> pairs back into plain string.
+	 * Convert an object with element's attributes ([name] => &lt;value&gt; pairs) back into plain string
 	 *
-	 * @param {Object.<string,string>} attributes_object
+	 * @param {Object.<string, string>} attributes_object
 	 * @returns {string}
 	 */
 	renderTagAttributes: function(attributes_object) {
@@ -917,6 +991,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
+	 * Parse a string with semicolon-delimited list of widget targets (optionally, with arguments)
 	 * @param {string} targets_string
 	 * @returns {Array.<_cTarget>}
 	 */
@@ -1030,6 +1105,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
+	 * Parse value of x:resource_id attribute
 	 * @param {string} id_string
 	 * @returns {_cResourceId}
 	 */
@@ -1052,6 +1128,10 @@ Lava.parsers.Common = {
 
 	},
 
+	/**
+	 * Create an empty widget config with default class and extender from schema
+	 * @returns {_cWidget}
+	 */
 	createDefaultWidgetConfig: function() {
 
 		return {
@@ -1063,9 +1143,12 @@ Lava.parsers.Common = {
 	},
 
 	/**
+	 * Turn a serialized and quoted string back into it's JavaScript representation.
+	 *
 	 * Assume that everything that follows a backslash is a valid escape sequence
 	 * (all backslashes are prefixed with another backslash).
-	 * Quotes inside string: lexer's regex will match all escaped quotes.
+	 *
+	 * Quotes inside string: lexer's regex will match all escaped quotes
 	 *
 	 * @param {string} raw_string
 	 * @returns {string}

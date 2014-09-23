@@ -2,6 +2,7 @@
 Lava.define(
 'Lava.data.field.Integer',
 /**
+ * Holds integer values
  * @lends Lava.data.field.Integer#
  * @extends Lava.data.field.Basic
  */

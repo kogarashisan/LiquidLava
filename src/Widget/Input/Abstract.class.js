@@ -1,7 +1,17 @@
+/**
+ * Input's element got focus
+ * @event Lava.widget.input.Abstract#focused
+ */
+
+/**
+ * Input's element lost it's focus
+ * @event Lava.widget.input.Abstract#blurred
+ */
 
 Lava.define(
 'Lava.widget.input.Abstract',
 /**
+ * Base class for support of html &lt;input&gt; fields
  * @lends Lava.widget.input.Abstract#
  * @extends Lava.widget.Standard#
  */
@@ -9,9 +19,6 @@ Lava.define(
 
 	Extends: 'Lava.widget.Standard',
 
-	/**
-	 * @type {Object.<string, _cPropertyDescriptor>}
-	 */
 	_property_descriptors: {
 		name: {type: 'String', is_nullable: true},
 		value: {type: 'String', is_nullable: true},
@@ -22,11 +29,17 @@ Lava.define(
 	},
 
 	_properties: {
+		/** Input's "name" attribute */
 		name: null,
+		/** Input's "value" attribute */
 		value: null,
+		/** "disabled" attribute of the input */
 		is_disabled: false,
+		/** "required" attribute of the input */
 		is_required: false,
+		/** "readonly" attribute of the input */
 		is_readonly: false,
+		/** Is current input of HTML element valid for this kind of field */
 		is_valid: true
 	},
 
@@ -39,7 +52,15 @@ Lava.define(
 		_input_view: '_handleInputView'
 	},
 
+	/**
+	 * The input's "type" attribute
+	 * @type {string}
+	 */
 	_type: null,
+	/**
+	 * DOM input element
+	 * @type {Lava.view.container.Element}
+	 */
 	_input_container: null,
 
 	init: function(config, widget, parent_view, template, properties) {
@@ -49,7 +70,11 @@ Lava.define(
 
 	},
 
-	_handleInputView: function(view, template_arguments) {
+	/**
+	 * Save container of the DOM input element and set it's type
+	 * @param {Lava.view.Abstract} view
+	 */
+	_handleInputView: function(view) {
 
 		this._input_container = view.getContainer();
 
@@ -62,18 +87,28 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_input_container`
+	 * @returns {Lava.view.container.Element}
+	 */
 	getMainContainer: function() {
 
 		return this._input_container;
 
 	},
 
+	/**
+	 * Fire {@link Lava.widget.input.Abstract#event:focused}
+	 */
 	_onInputFocused: function() {
 
 		this._fire('focused');
 
 	},
 
+	/**
+	 * Fire {@link Lava.widget.input.Abstract#event:blurred}
+	 */
 	_onInputBlurred: function() {
 
 		this._fire('blurred');
@@ -85,11 +120,27 @@ Lava.define(
 		this.Standard$destroy();
 	},
 
+	/**
+	 * Encode as part of GET request
+	 * @returns {string}
+	 */
 	toQueryString: function() {
 
 		return (this._properties.name && !this._properties.is_disabled && this._properties.value != null)
 			? encodeURIComponent(this._properties.name) + '=' + encodeURIComponent(this._properties.value)
 			: '';
+
+	},
+
+	/**
+	 * Protected setter for readonly <i>is_valid</i> property
+	 * @param {boolean} value New value for <i>is_valid</i> property
+	 */
+	_setValidity: function(value) {
+
+		if (this._properties.is_valid != value) {
+			this._set('is_valid', value);
+		}
 
 	}
 

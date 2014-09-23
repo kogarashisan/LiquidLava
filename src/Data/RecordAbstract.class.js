@@ -2,6 +2,7 @@
 Lava.define(
 'Lava.data.RecordAbstract',
 /**
+ * Base class for module records
  * @lends Lava.data.RecordAbstract#
  * @extends Lava.mixin.Properties
  */
@@ -9,21 +10,44 @@ Lava.define(
 
 	Implements: 'Lava.mixin.Properties',
 
+	/**
+	 * To tell other classes that this is instance of RecordAbstract
+	 * @type {boolean}
+	 * @const
+	 */
 	isRecord: true,
 
-	// replace the default value to save some processor time on garbage collection (it's assigned in constructor)
+	/**
+	 * Record's `_properties` are assigned in constructor, so here we replace the default value (empty object)
+	 * to save some time on garbage collection
+	 * @type {Object}
+	 */
 	_properties: null,
 
+	/**
+	 * Record's module
+	 * @type {Lava.data.ModuleAbstract}
+	 */
 	_module: null,
 
+	/**
+	 * Reference to module's fields
+	 * @type {Object.<string, Lava.data.field.Abstract>}
+	 */
 	_fields: null,
 
 	/**
-	 * Every record must have it's own GUID. otherwise collections and ForEach loops will not be able to distinguish
-	 * between records from different modules with equal ID fields.
+	 * Global unique identifier
+	 * @type {_tGUID}
 	 */
 	guid: null,
 
+	/**
+	 * Create record instance
+	 * @param {Lava.data.ModuleAbstract} module Records module
+	 * @param {Object.<string, Lava.data.field.Abstract>} fields Object with module's fields
+	 * @param {Object} properties_storage_ref Reference to an object with record's properties
+	 */
 	init: function(module, fields, properties_storage_ref) {
 
 		this.guid = Lava.guid++;
@@ -47,12 +71,20 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_module`
+	 * @returns {Lava.data.ModuleAbstract}
+	 */
 	getModule: function() {
 
 		return this._module;
 
 	},
 
+	/**
+	 * Export record back into plain JavaScript object for sending to server
+	 * @returns {Object}
+	 */
 	'export': function() {
 
 		var export_record = {};

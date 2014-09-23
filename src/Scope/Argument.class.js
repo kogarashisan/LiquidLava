@@ -1,7 +1,16 @@
 
+/**
+ * Argument's value has changed
+ * @event Lava.scope.Argument#changed
+ * @type {Object}
+ * @property {*} old_value Optional: old value of the argument
+ */
+
 Lava.define(
 'Lava.scope.Argument',
 /**
+ * Evaluates expression in context of it's view
+ *
  * @lends Lava.scope.Argument#
  * @extends Lava.mixin.Refreshable
  * @implements _iValueContainer
@@ -9,37 +18,71 @@ Lava.define(
 {
 
 	Extends: 'Lava.mixin.Refreshable',
+	/**
+	 * Sign that this instance implements {@link _iValueContainer}
+	 * @type {boolean}
+	 * @const
+	 */
 	isValueContainer: true,
 
 	/**
+	 * Owner view
 	 * @type {Lava.view.Abstract}
 	 */
 	_view: null,
 	/**
+	 * Nearest widget in hierarchy
 	 * @type {Lava.widget.Standard}
 	 */
 	_widget: null,
 	/**
+	 * Generated method that is called in context of Argument instance and produces the argument's result
 	 * @type {function}
 	 */
 	_evaluator: null,
+	/**
+	 * The result of `_evaluator` call
+	 * @type {*}
+	 */
 	_value: null,
+	/**
+	 * Global unique identifier
+	 * @type {_tGUID}
+	 */
 	guid: null,
 
 	/**
+	 * Scopes that provide operands for the `_evaluator`
 	 * @type {Array.<_iValueContainer>}
 	 */
 	_binds: [],
+	/**
+	 * Length of `_binds` array
+	 * @type {number}
+	 */
 	_binds_count: 0,
+	/**
+	 * objects with listeners for {@link Lava.mixin.Refreshable#event:waits_refresh}, {@link Lava.mixin.Refreshable#event:refreshed}
+	 * and <kw>"changed"</kw> events
+	 * @type {Array.<Object>}
+	 */
 	_bind_listeners: [],
 
+	/**
+	 * Objects with a reference to modifier's widget (it's cached to speed up calling) and modifier name
+	 * @type {Array.<Object>}
+	 */
 	_modifiers: [],
+	/**
+	 * Alpha version. Not used
+	 */
 	_active_modifiers: [],
 
 	/**
+	 * Create an Argument instance. Acquire binds, find modifier sources, apply correct state
 	 * @param {_cArgument} config
-	 * @param {Lava.view.Abstract} view
-	 * @param {Lava.widget.Standard} widget
+	 * @param {Lava.view.Abstract} view Argument's view
+	 * @param {Lava.widget.Standard} widget Nearest widget in hierarchy
 	 */
 	init: function(config, view, widget) {
 
@@ -135,7 +178,8 @@ Lava.define(
 	},
 
 	/**
-	 * @param {_cKnownViewLocator} path_config
+	 * Get widget, that will be used to call a modifier
+	 * @param {_cKnownViewLocator} path_config Route to the widget
 	 * @returns {Lava.widget.Standard}
 	 */
 	getWidgetByModifierConfig: function(path_config) {
@@ -148,6 +192,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * One of evaluator's operands has changed. Instance is now dirty
+	 */
 	onBindingChanged: function() {
 
 		// Classes that can serve as a binding: PropertyBinding, DataBinding and Segment. They all will fire 'changed'
@@ -158,6 +205,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Execute `_evaluator` and return
+	 * @returns {*} The Argument's result
+	 */
 	_evaluate: function() {
 
 		var result = null;
@@ -185,12 +236,20 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_value`
+	 * @returns {*}
+	 */
 	getValue: function() {
 
 		return this._value;
 
 	},
 
+	/**
+	 * Refresh `_value` and fire {@link Lava.scope.Argument#event:changed}
+	 * @private
+	 */
 	_doRefresh: function() {
 
 		var newValue = this._evaluate(),
@@ -206,18 +265,36 @@ Lava.define(
 
 	},
 
+	/**
+	 * Call a modifier from widget
+	 * @param {number} index
+	 * @param {?Array.<*>} arguments_array
+	 * @returns {*}
+	 */
 	_callModifier: function(index, arguments_array) {
 
 		return this._modifiers[index].widget.callModifier(this._modifiers[index].callback_name, arguments_array);
 
 	},
 
+	/**
+	 * Alpha. Not used
+	 * @param index
+	 * @param arguments_array
+	 * @returns {*}
+	 */
 	_callActiveModifier: function(index, arguments_array) {
 
 		return this._modifiers[index].widget.callActiveModifier(this._modifiers[index].callback_name, arguments_array);
 
 	},
 
+	/**
+	 * Calls a global function from {@link Lava.modifiers}
+	 * @param {string} name The function's name
+	 * @param {?Array.<*>} arguments_array Evaluator's arguments
+	 * @returns {*}
+	 */
 	_callGlobalModifier: function(name, arguments_array) {
 
 		if (Lava.schema.DEBUG && !(name in Lava.modifiers)) Lava.t("Unknown global modifier: " + name);
@@ -225,6 +302,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Suspend argument's listeners
+	 */
 	sleep: function() {
 
 		for (var i = 0, count = this._bind_listeners.length; i < count; i++) {
@@ -239,6 +319,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Resume argument's listeners and refresh state
+	 * @param {boolean} fire_changed Whether to fire the <kw>"changed"</kw> event
+	 */
 	wakeup: function(fire_changed) {
 
 		for (var i = 0, count = this._bind_listeners.length; i < count; i++) {
@@ -282,6 +366,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Free resources and make this instance unusable
+	 */
 	destroy: function() {
 
 		for (var i = 0, count = this._bind_listeners.length; i < count; i++) {

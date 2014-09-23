@@ -2,7 +2,9 @@
 Lava.define(
 'Lava.data.field.Id',
 /**
- * Holds a positive integer, does NOT generate id's automatically
+ * Holds server-side IDs from database table, does NOT generate id's automatically.
+ * Currently supports only positive integers as IDs
+ *
  * @lends Lava.data.field.Id#
  * @extends Lava.data.field.Abstract
  */
@@ -16,6 +18,9 @@ Lava.define(
 		valid_value_regex: /^[1-9]\d*$/
 	},
 
+	/**
+	 * ID may be null for new records, which are not saved into database yet
+	 */
 	_is_nullable: true,
 
 	init: function(module, name, config, module_storages) {
@@ -87,7 +92,10 @@ Lava.define(
 
 	},
 
-	setValue: function(record, storage, value) {
+	/**
+	 * Throws an error
+	 */
+	setValue: function() {
 
 		Lava.t("Standard id field must not be set");
 

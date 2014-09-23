@@ -68,7 +68,7 @@ exports.publish = function(taffyData, opts, tutorials) {
 		support_links.push({
 			hash: 'object=Support;member=' + longname,
 			page: 'api',
-			title: longname,
+			title: longname.replace('.', '#'),
 			type: 'support'
 		});
 
@@ -101,7 +101,7 @@ exports.publish = function(taffyData, opts, tutorials) {
 					name: jsdoc_descriptor.name,
 					value: jsdoc_descriptor.defaultvalue // yes, lowercase
 				};
-				if (export_descriptor.description) property_descriptor.description = export_descriptor.description;
+				if (jsdoc_descriptor.description) property_descriptor.description = jsdoc_descriptor.description;
 				export_descriptor.properties.push(property_descriptor);
 			});
 			enums.push(export_descriptor);

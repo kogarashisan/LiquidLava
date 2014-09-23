@@ -2,6 +2,8 @@
 Lava.define(
 'Lava.system.Template',
 /**
+ * Renderable collection of views and strings
+ *
  * @lends Lava.system.Template#
  * @implements _iViewHierarchyMember
  */
@@ -9,17 +11,56 @@ Lava.define(
 
 	Shared: ['_block_handlers_map'],
 
+	/**
+	 * This class is instance of Lava.system.Template
+	 */
 	isTemplate: true,
 
+	/**
+	 * The nearest widget in hierarchy
+	 * @type {Lava.widget.Standard}
+	 */
 	_widget: null,
+	/**
+	 * The owner (parent) view
+	 * @type {Lava.view.Abstract}
+	 */
 	_parent_view: null,
+	/**
+	 * Instance config
+	 * @type {_tTemplate}
+	 */
 	_config: null,
+	/**
+	 * Count of renderable elements in template instance
+	 * @type {number}
+	 */
 	_count: 0,
+	/**
+	 * The renderable items, constructed from `_config`
+	 * @type {Array.<_tRenderable>}
+	 */
 	_contents: [],
+	/**
+	 * Is the template currently in DOM
+	 * @type {boolean}
+	 */
 	_is_inDOM: false,
+	/**
+	 * Is template currently sleeping
+	 * @type {boolean}
+	 */
 	_is_sleeping: false,
+	/**
+	 * Global unique ID of the instance
+	 * @type {_tGUID}
+	 */
 	guid: null,
 
+	/**
+	 * When creating content: handlers for every item type in `_config`
+	 * @type {Object.<string, string>}
+	 */
 	_block_handlers_map: {
 		'string': '_createDirect',
 		view: '_createView',
@@ -31,10 +72,12 @@ Lava.define(
 	},
 
 	/**
-	 * @param {_tTemplate} template_config
-	 * @param {Lava.widget.Standard} widget
-	 * @param {Lava.view.Abstract} parent_view
-	 * @param {Object} child_properties
+	 * Create an instance of Template. Create content from config
+	 *
+	 * @param {_tTemplate} template_config Config for content
+	 * @param {Lava.widget.Standard} widget Nearest widget in hierarchy
+	 * @param {Lava.view.Abstract} parent_view Owner (parent) view
+	 * @param {Object} [child_properties] The properties to set to child views
 	 */
 	init: function(template_config, widget, parent_view, child_properties) {
 
@@ -49,10 +92,11 @@ Lava.define(
 	},
 
 	/**
-	 * @param {Array.<_tRenderable>} result
-	 * @param {_tTemplate} children_config
-	 * @param {Array.<string>} include_name_stack
-	 * @param {Object} properties
+	 * Create items from config and put them in `result`
+	 * @param {Array.<_tRenderable>} result Where to put created items
+	 * @param {_tTemplate} children_config Config for the Template
+	 * @param {Array.<string>} include_name_stack Used to protect from recursive includes
+	 * @param {Object} properties The properties for child views
 	 */
 	_createChildren: function(result, children_config, include_name_stack, properties) {
 
@@ -74,12 +118,24 @@ Lava.define(
 
 	},
 
+	/**
+	 * Handler for strings: push it into result
+	 * @param {Array.<_tRenderable>} result Created items
+	 * @param {string} childConfig String from Template config
+	 */
 	_createDirect: function(result, childConfig) {
 
 		result.push(childConfig);
 
 	},
 
+	/**
+	 * Handler for views. Create a view and push it into result
+	 * @param {Array.<_tRenderable>} result
+	 * @param {(_cView|_cWidget)} childConfig Config vor the view
+	 * @param {Array.<string>} include_name_stack Used to protect from recursive includes
+	 * @param {Object} properties Properties for that view
+	 */
 	_createView: function(result, childConfig, include_name_stack, properties) {
 
 		var constructor = Lava.ClassManager.getConstructor(childConfig['class'], 'Lava.view'),
@@ -95,6 +151,13 @@ Lava.define(
 
 	},
 
+	/**
+	 * Handler for includes. Get include from widget, then create and append all items from include
+	 * @param {Array.<_tRenderable>} result
+	 * @param {_cInclude} child_config
+	 * @param {Array.<string>} include_name_stack
+	 * @param {Object} properties
+	 */
 	_createInclude: function(result, child_config, include_name_stack, properties) {
 
 		if (include_name_stack.indexOf(child_config.name) != -1) Lava.t("Infinite include recursion");
@@ -108,12 +171,11 @@ Lava.define(
 	},
 
 	/**
-	 * @param result
+	 * Handler for static_value: get the value from widget resources and push it into result
+	 * @param {Array.<_tRenderable>} result
 	 * @param {_cStaticValue} childConfig
-	 * @param include_name_stack
-	 * @param properties
 	 */
-	_createStaticValue: function(result, childConfig, include_name_stack, properties) {
+	_createStaticValue: function(result, childConfig) {
 
 		var resource_id = childConfig.resource_id,
 			resource_owner = Lava.view_manager.locateTarget(this._widget, resource_id.locator_type, resource_id.locator),
@@ -132,15 +194,14 @@ Lava.define(
 	},
 
 	/**
-	 * @param result
+	 * Handler for static_eval: evaluate the given Argument config and append evaluation result
+	 * @param {Array.<_tRenderable>} result
 	 * @param {_cStaticEval} childConfig
-	 * @param include_name_stack
-	 * @param properties
 	 */
-	_createStaticEval: function(result, childConfig, include_name_stack, properties) {
+	_createStaticEval: function(result, childConfig) {
 
 		var argument = new Lava.scope.Argument(childConfig.argument, this._view, this._widget);
-		// if this happens - than you are probably doing something wrong
+		// if this happens - then you are probably doing something wrong
 		if (argument.isWaitingRefresh()) {
 			if (Lava.schema.DEBUG) Lava.t("static_eval wrong usage: created argument is dirty");
 			Lava.logError("static_eval wrong usage: created argument is dirty");
@@ -151,10 +212,12 @@ Lava.define(
 	},
 
 	/**
-	 * @param result
+	 * Handler for static tags: resolve it's resources, serialize it into string and push parts into result.
+	 * The content of the tag is processed recursively
+	 * @param {Array.<_tRenderable>} result
 	 * @param {_cStaticTag} child_config
-	 * @param include_name_stack
-	 * @param properties
+	 * @param {Array.<string>} include_name_stack
+	 * @param {Object} properties
 	 */
 	_createStaticTag: function(result, child_config, include_name_stack, properties) {
 
@@ -222,6 +285,7 @@ Lava.define(
 	},
 
 	/**
+	 * Perform broadcast
 	 * @param {string} function_name
 	 */
 	_broadcast: function(function_name) {
@@ -239,7 +303,8 @@ Lava.define(
 	},
 
 	/**
-	 * @returns {string}
+	 * Render template
+	 * @returns {string} Rendered HTML
 	 */
 	render: function() {
 
@@ -271,6 +336,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Broadcast <kw>"broadcastRemove"</kw> to instance content
+	 */
 	broadcastRemove: function() {
 
 		if (this._is_inDOM) {
@@ -283,6 +351,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Broadcast <kw>"broadcastInDOM"</kw> to instance content
+	 */
 	broadcastInDOM: function() {
 
 		this._is_inDOM = true;
@@ -290,6 +361,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Broadcast <kw>"broadcastSleep"</kw> to instance content
+	 */
 	broadcastSleep: function() {
 
 		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.t();
@@ -299,6 +373,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Broadcast <kw>"broadcastWakeup"</kw> to instance content
+	 */
 	broadcastWakeup: function() {
 
 		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.t();
@@ -308,6 +385,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Set this property to all views inside `_contents`
+	 * @param {string} name Property name
+	 * @param {*} value Property value
+	 */
 	batchSetProperty: function(name, value) {
 
 		for (var i = 0; i < this._count; i++) {
@@ -322,6 +404,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Set properties to all views inside `_contents`
+	 * @param {Object} properties_object
+	 */
 	batchSetProperties: function(properties_object) {
 
 		for (var i = 0; i < this._count; i++) {
@@ -336,24 +422,42 @@ Lava.define(
 
 	},
 
+	/**
+	 * Find first view in `_contents` and return it
+	 * @returns {Lava.view.Abstract} First view
+	 */
 	getFirstView: function() {
 
 		return this._seekForwards(0);
 
 	},
 
+	/**
+	 * Find last view in `_contents` and return it
+	 * @returns {Lava.view.Abstract} Last view
+	 */
 	getLastView: function() {
 
 		return this._seekBackwards(this._count - 1);
 
 	},
 
+	/**
+	 * Find a view, preceding the given one
+	 * @param {Lava.view.Abstract} view Current view
+	 * @returns {Lava.view.Abstract} Previous view
+	 */
 	getPreviousView: function(view) {
 
 		return this._seekBackwards(view.template_index - 1);
 
 	},
 
+	/**
+	 * Find next view
+	 * @param {Lava.view.Abstract} view Current view
+	 * @returns {Lava.view.Abstract} Next view
+	 */
 	getNextView: function(view) {
 
 		return this._seekForwards(view.template_index + 1);
@@ -361,39 +465,50 @@ Lava.define(
 	},
 
 	/**
-	 * Warning: codestyle violation
-	 * @returns {Lava.view.Abstract}
+	 * Algorithm to find next view
+	 * @returns {Lava.view.Abstract} Next view from index `i`
 	 */
 	_seekForwards: function(i) {
 
+		var result = null;
+
 		while (i < this._count) {
 			if (this._contents[i].isView) {
-				return this._contents[i];
+				result = this._contents[i];
+				break;
 			}
 			i++;
 		}
 
-		return null;
+		return result;
 
 	},
 
 	/**
-	 * Warning: codestyle violation
-	 * @returns {Lava.view.Abstract}
+	 * Algorithm to find previous view
+	 * @returns {Lava.view.Abstract} Previous view to index `i`
 	 */
 	_seekBackwards: function(i) {
 
+		var result = null;
+
 		while (i >= 0) {
 			if (this._contents[i].isView) {
-				return this._contents[i];
+				result = this._contents[i];
+				break;
 			}
 			i--;
 		}
 
-		return null;
+		return result;
 
 	},
 
+	/**
+	 * Search `_contents` and find all views with given label
+	 * @param {string} label Label to search for
+	 * @returns {Array.<Lava.view.Abstract>} Views with given label
+	 */
 	getViewsByLabel: function(label) {
 
 		var result = [],
@@ -413,6 +528,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Find all widgets with given name inside `_contents`
+	 * @param {string} name Name to search for
+	 * @returns {Array.<Lava.widget.Standard>} Found widgets
+	 */
 	getWidgetsByName: function(name) {
 
 		var result = [],
@@ -432,30 +552,50 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_count`
+	 * @returns {number} `_count`
+	 */
 	getCount: function() {
 
 		return this._count;
 
 	},
 
+	/**
+	 * Return an item from `_content` at given index
+	 * @param {number} index Index in `_content`
+	 * @returns {_tRenderable} Requested item
+	 */
 	getAt: function(index) {
 
 		return this._contents[index];
 
 	},
 
+	/**
+	 * Get `_is_inDOM`
+	 * @returns {boolean}
+	 */
 	isInDOM: function() {
 
 		return this._is_inDOM;
 
 	},
 
+	/**
+	 * Get `_is_sleeping`
+	 * @returns {boolean}
+	 */
 	isSleeping: function() {
 
 		return this._is_sleeping;
 
 	},
 
+	/**
+	 * Free resources and make this instance unusable
+	 */
 	destroy: function() {
 
 		this._broadcast('destroy');

@@ -1,7 +1,13 @@
 
+/**
+ * Animation has ended
+ * @event Lava.animation.Abstract#complete
+ */
+
 Lava.define(
 'Lava.animation.Abstract',
 /**
+ * Animation changes properties of HTML Elements over time
  * @lends Lava.animation.Abstract#
  * @extends Lava.mixin.Observable
  */
@@ -10,46 +16,57 @@ Lava.define(
 	Extends: 'Lava.mixin.Observable',
 
 	/**
+	 * The time when animation was started, in milliseconds
 	 * @type {number}
 	 */
 	_started_time: 0,
 	/**
+	 * The time animation ends (or has ended), in milliseconds
 	 * @type {number}
 	 */
 	_end_time: 0,
 	/**
+	 * Animation duration, in milliseconds
 	 * @type {number}
 	 */
 	_duration: 0,
 	/**
+	 * Usually, a HTML Element, properties of which this animation changes
 	 * @type {*}
 	 */
 	_target: null,
 	/**
+	 * Is it currently running
 	 * @type {boolean}
 	 */
 	_is_running: false,
 	/**
+	 * Does it run in reversed direction
 	 * @type {boolean}
 	 */
 	_is_reversed: false,
 	/**
+	 * The settings for this instance
+	 * @readonly
 	 * @type {_cAnimation}
 	 */
 	_config: null,
 
 	/**
+	 * Transition is a function, which takes current elapsed time (in percent, from 0 to 1) and returns current animation position (also in percent)
 	 * @type {_tTransitionCallback}
 	 */
 	_transition: null,
 	/**
+	 * Instance global unique identifier
 	 * @type {_tGUID}
 	 */
 	guid: null,
 
 	/**
-	 * @param {_cAnimation} config
-	 * @param {*} target
+	 * Constructs the class instance
+	 * @param {_cAnimation} config Settings, `this._config`
+	 * @param {*} target `this._target`
 	 */
 	init: function(config, target) {
 
@@ -64,7 +81,7 @@ Lava.define(
 	},
 
 	/**
-	 * Called by Cron. Assigned in constructor.
+	 * Called by Cron. Assigned in constructor
 	 * @param {number} now The current time (=new Date().getTime())
 	 */
 	onTimer: function(now) {
@@ -73,10 +90,9 @@ Lava.define(
 
 	},
 
-	_start: function(now) {
-
-	},
-
+	/**
+	 * Set the animation state to 'not running' and fire the {@link Lava.animation.Abstract#event:complete} event
+	 */
 	_finish: function() {
 
 		this._is_running = false;
@@ -86,7 +102,8 @@ Lava.define(
 
 	/**
 	 * Start only if it's not already running
-	 * @param [started_time]
+	 * @param [started_time] Optionally, you can pass the time when animation has actually started.
+	 *      Otherwise, the current system time will be taken
 	 */
 	safeStart: function(started_time) {
 
@@ -125,7 +142,7 @@ Lava.define(
 	},
 
 	/**
-	 * The actual reversing algorithm
+	 * Reverse animation direction
 	 */
 	_mirror: function() {
 

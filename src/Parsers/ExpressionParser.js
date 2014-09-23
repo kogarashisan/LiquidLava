@@ -1,20 +1,19 @@
 
-/**
- * Expression parser
- * @name Lava.ExpressionParser
- */
-
 Lava.ExpressionParser._parse = Lava.ExpressionParser.parse;
 
-/** @enum {number} */
+/**
+ * Allowed separators between expressions
+ * @enum {number}
+ */
 Lava.ExpressionParser.SEPARATORS = {
 	COMMA: 1,
 	SEMICOLON: 2
 };
 
 /**
- * @param {string} input
- * @param {Lava.ExpressionParser.SEPARATORS} [separator]
+ * Parse expressions, but do not create evaluator functions from their source code
+ * @param {string} input Expression source
+ * @param {Lava.ExpressionParser.SEPARATORS} [separator] Allowed separator, when parsing multiple expressions
  * @returns {Array.<_cRawArgument>}
  */
 Lava.ExpressionParser.parseRaw = function(input, separator) {
@@ -43,8 +42,9 @@ Lava.ExpressionParser.parseRaw = function(input, separator) {
 };
 
 /**
- * @param {string} input
- * @param {Lava.ExpressionParser.SEPARATORS} [separator]
+ * Parse expressions
+ * @param {string} input Source code
+ * @param {Lava.ExpressionParser.SEPARATORS} [separator] Allowed separator, when parsing multiple expressions
  * @returns {Array.<_cArgument>}
  */
 Lava.ExpressionParser.parse = function(input, separator) {
@@ -52,17 +52,7 @@ Lava.ExpressionParser.parse = function(input, separator) {
 };
 
 /**
- * @param {string} input
- * @returns {_cScopeLocator}
- */
-Lava.ExpressionParser.parsePath = function(input) {
-	var configs = this.yy.convertArguments(this.parseRaw(input));
-	if (configs.length != 1) Lava.t("ExpressionParser: single scope expected, got either many expressions or nothing");
-	if (!configs[0].flags || !configs[0].flags.isScopeEval) Lava.t("ExpressionParser: expected scope path, got expression");
-	return configs[0].binds[0];
-};
-
-/**
+ * Same as {@link Lava.ExpressionParser#parseWithTail}, but does not create evaluator functions from source
  * @param {{input: string, tail_length: number}} config_ref
  * @param {Lava.ExpressionParser.SEPARATORS} separator
  * @returns {Array.<_cRawArgument>}
@@ -94,6 +84,8 @@ Lava.ExpressionParser.parseWithTailRaw = function(config_ref, separator) {
 };
 
 /**
+ * Parse expressions, which are followed by a closing brace (and anything after it).
+ * Stores the length of unparsed content in `config_ref.tail_length`
  * @param {{input: string, tail_length: number}} config_ref
  * @param {Lava.ExpressionParser.SEPARATORS} separator
  * @returns {Array.<_cArgument>}
@@ -102,12 +94,17 @@ Lava.ExpressionParser.parseWithTail = function(config_ref, separator) {
 	return this.yy.convertArguments(this.parseWithTailRaw(config_ref, separator));
 };
 
+/**
+ * Parse expression which represents a single path
+ * @param {string} input Expression source
+ * @returns {_cScopeLocator}
+ */
 Lava.ExpressionParser.parseScopeEval = function(input) {
 
 	var raw_arguments = this.parseRaw(input);
-	if (Lava.schema.DEBUG && (raw_arguments.length != 1 || !raw_arguments[0].flags.isScopeEval)) Lava.t('parseScopeEval: malformed scope path');
-
+	if (Lava.schema.DEBUG && (raw_arguments.length != 1 || !raw_arguments[0].flags || !raw_arguments[0].flags.isScopeEval)) Lava.t('parseScopeEval: malformed scope path');
 	return raw_arguments[0].binds[0];
+
 };
 
 Lava.ExpressionParser.yy = {

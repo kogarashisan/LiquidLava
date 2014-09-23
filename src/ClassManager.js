@@ -1,26 +1,39 @@
-
+/**
+ * Create and manage classes
+ */
 Lava.ClassManager = {
 
 	/**
 	 * Whether to serialize them and inline as a value, or slice() from original array in original object
+	 * @type {boolean}
+	 * @const
 	 */
 	INLINE_SIMPLE_ARRAYS: true,
 	/**
-	 * If an array consists of these types - it can be inlined.
+	 * If an array consists of these types - it can be inlined
+	 * @type {Array.<string>}
 	 */
 	SIMPLE_TYPES: ['string', 'boolean', 'number', 'null', 'undefined'],
 
 	/**
+	 * All data that belongs to each class: everything that's needed for inheritance and building of a constructor
 	 * @type {Object.<string, _cClassData>}
 	 */
 	_sources: {},
 	/**
-	 * [Class path] => constructor - a function that returns a new class instance
+	 * Constructors for each class
 	 * @type {Object.<string, function>}
 	 */
 	constructors: {},
+	/**
+	 * Special directives, understandable by ClassManager
+	 */
 	_reserved_members: ['Extends', 'Implements', 'Class', 'Shared'],
 
+	/**
+	 * Namespaces, which can hold class constructors
+	 * @type {Object.<string, Object>}
+	 */
 	_root: {},
 
 	ClassData: {
@@ -33,6 +46,11 @@ Lava.ClassManager = {
 
 	},
 
+	/**
+	 * Add a namespace, that can contain class constructors
+	 * @param {string} name The name of the namespace
+	 * @param {Object} object The namespace object
+	 */
 	registerRootNamespace: function(name, object) {
 
 		this._root[name] = object;
@@ -40,6 +58,7 @@ Lava.ClassManager = {
 	},
 
 	/**
+	 * Get {@link _cClassData} structure for each class
 	 * @param {string} class_path
 	 * @returns {_cClassData}
 	 */
@@ -49,6 +68,11 @@ Lava.ClassManager = {
 
 	},
 
+	/**
+	 * Create a class
+	 * @param {string} class_path Full name of the class
+	 * @param {Object} source_object Class body
+	 */
 	define: function(class_path, source_object) {
 
 		var name,
@@ -169,6 +193,7 @@ Lava.ClassManager = {
 	},
 
 	/**
+	 * Implement members from another class into current class data
 	 * @param {_cClassData} class_data
 	 * @param {string} path
 	 */
@@ -201,12 +226,13 @@ Lava.ClassManager = {
 	},
 
 	/**
+	 * Perform extend/implement operation
 	 * @param {_cClassData} child_data
-	 * @param child_skeleton
+	 * @param {Object} child_skeleton The skeleton of a child object
 	 * @param {_cClassData} parent_data
-	 * @param parent_skeleton
-	 * @param {boolean} is_root
-	 * @param {number=} references_offset Also acts as a sign of 'implements' mode
+	 * @param {Object} parent_skeleton The skeleton of a parent object
+	 * @param {boolean} is_root <kw>true</kw>, when extending skeletons class bodies, and false in all other cases
+	 * @param {number} [references_offset] Also acts as a sign of 'implements' mode
 	 */
 	_extend: function (child_data, child_skeleton, parent_data, parent_skeleton, is_root, references_offset) {
 
@@ -257,6 +283,14 @@ Lava.ClassManager = {
 
 	},
 
+	/**
+	 * Recursively create skeletons for all objects inside class body
+	 * @param {_cClassData} class_data
+	 * @param {Object} source_object
+	 * @param {number} hierarchy_index
+	 * @param {boolean} is_root
+	 * @returns {Object}
+	 */
 	_disassemble: function(class_data, source_object, hierarchy_index, is_root) {
 
 		var name,
@@ -328,6 +362,11 @@ Lava.ClassManager = {
 
 	},
 
+	/**
+	 * Build class constructor that can be used with the "new" keyword
+	 * @param {_cClassData} class_data
+	 * @returns {function} The class constructor
+	 */
 	_buildRealConstructor: function(class_data) {
 
 		var prototype = {},
@@ -422,6 +461,13 @@ Lava.ClassManager = {
 
 	},
 
+	/**
+	 * Perform special class serialization, that takes functions and resources from class data and can be used in constructors
+	 * @param {Object} skeleton
+	 * @param {_cClassData} class_data
+	 * @param {string} padding
+	 * @returns {Array}
+	 */
 	_serializeSkeleton: function(skeleton, class_data, padding) {
 
 		var serialized_properties = [],
@@ -483,6 +529,11 @@ Lava.ClassManager = {
 
 	},
 
+	/**
+	 * Get namespace for a class constructor
+	 * @param {Array.<string>} path_segments Path to the namespace of a class. Must start with one of registered roots
+	 * @returns {Object}
+	 */
 	_getNamespace: function(path_segments) {
 
 		var namespace,
@@ -513,9 +564,10 @@ Lava.ClassManager = {
 	},
 
 	/**
-	 * @param {string} class_path
-	 * @param {string=} default_namespace
-	 * @returns {*}
+	 * Get class constructor
+	 * @param {string} class_path Full name of a class, or a short name (if namespace is provided)
+	 * @param {string} [default_namespace] The default prefix where to search for the class, like <kw>"Lava.widget"</kw>
+	 * @returns {function}
 	 */
 	getConstructor: function(class_path, default_namespace) {
 
@@ -529,6 +581,11 @@ Lava.ClassManager = {
 
 	},
 
+	/**
+	 * Whether to inline or slice() an array in constructor
+	 * @param {Array} items
+	 * @returns {boolean}
+	 */
 	isInlineArray: function(items) {
 
 		var result = true,
@@ -549,9 +606,9 @@ Lava.ClassManager = {
 	},
 
 	/**
-	 * Register an existing function as a class constructor for usage with create().
-	 * @param {string} class_path
-	 * @param {function} constructor
+	 * Register an existing function as a class constructor for usage with {@link Lava.ClassManager#getConstructor}()
+	 * @param {string} class_path Full class path
+	 * @param {function} constructor Constructor instance
 	 */
 	registerExistingConstructor: function(class_path, constructor) {
 
@@ -560,18 +617,33 @@ Lava.ClassManager = {
 
 	},
 
+	/**
+	 * Does a constructor exists
+	 * @param {string} class_path Full class path
+	 * @returns {boolean}
+	 */
 	hasConstructor: function(class_path) {
 
 		return class_path in this.constructors;
 
 	},
 
+	/**
+	 * Does a class exists
+	 * @param {string} class_path
+	 * @returns {boolean}
+	 */
 	hasClass: function(class_path) {
 
 		return class_path in this._sources;
 
 	},
 
+	/**
+	 * Build a function that creates class constructor's prototype. Used in export
+	 * @param {_cClassData} class_data
+	 * @returns {function}
+	 */
 	_getPrototypeGenerator: function(class_data) {
 
 		var skeleton = class_data.skeleton,
@@ -627,6 +699,12 @@ Lava.ClassManager = {
 
 	},
 
+	/**
+	 * Server-side export function: create an exported version of a class, which can be loaded by
+	 * {@link Lava.ClassManager#loadClass} to save time on client
+	 * @param {string} class_path
+	 * @returns {Object}
+	 */
 	exportClass: function(class_path) {
 
 		var class_data = this._sources[class_path],
@@ -683,6 +761,10 @@ Lava.ClassManager = {
 
 	},
 
+	/**
+	 * Load an object, exported by {@link Lava.ClassManager#exportClass}
+	 * @param {Object} class_data
+	 */
 	loadClass: function(class_data) {
 
 		var parent_data,
@@ -732,6 +814,10 @@ Lava.ClassManager = {
 
 	},
 
+	/**
+	 * Put a newly built class constructor into it's namespace
+	 * @param {_cClassData} class_data
+	 */
 	_registerClass: function(class_data) {
 
 		var class_path = class_data.path,
@@ -749,6 +835,12 @@ Lava.ClassManager = {
 
 	},
 
+	/**
+	 * Find a class that begins with `base_path` or names of it's parents, and ends with `suffix`
+	 * @param {string} base_path
+	 * @param {string} suffix
+	 * @returns {function}
+	 */
 	getPackageConstructor: function(base_path, suffix) {
 
 		if (Lava.schema.DEBUG && !(base_path in this._sources)) Lava.t("[getPackageConstructor] Class not found: " + base_path);
@@ -775,6 +867,10 @@ Lava.ClassManager = {
 
 	},
 
+	/**
+	 * Get all names (full paths) of registered classes
+	 * @returns {Array.<string>}
+	 */
 	getClassNames: function() {
 
 		return Object.keys(this._sources);

@@ -2,6 +2,7 @@
 Lava.define(
 'Lava.widget.input.Text',
 /**
+ * Text input field
  * @lends Lava.widget.input.Text#
  * @extends Lava.widget.input.TextAbstract#
  */
@@ -10,7 +11,6 @@ Lava.define(
 	Extends: 'Lava.widget.input.TextAbstract',
 
 	name: 'text_input',
-
 	_type: "text",
 
 	_handleInputView: function(view, template_arguments) {

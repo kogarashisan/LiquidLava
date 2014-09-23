@@ -2,6 +2,7 @@
 Lava.define(
 'Lava.data.field.Boolean',
 /**
+ * Field that holds boolean values (<kw>true</kw> or <kw>false</kw>)
  * @lends Lava.data.field.Boolean#
  * @extends Lava.data.field.Basic
  */
@@ -9,6 +10,9 @@ Lava.define(
 
 	Extends: 'Lava.data.field.Basic',
 
+	/**
+	 * @type {boolean}
+	 */
 	_default: false,
 
 	isValidValue: function(value) {

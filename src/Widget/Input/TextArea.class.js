@@ -2,6 +2,7 @@
 Lava.define(
 'Lava.widget.input.TextArea',
 /**
+ * Multiline text input field
  * @lends Lava.widget.input.TextArea#
  * @extends Lava.widget.input.TextAbstract#
  */

@@ -2,6 +2,7 @@
 Lava.define(
 'Lava.widget.input.Numeric',
 /**
+ * Numeric input
  * @lends Lava.widget.input.Numeric#
  * @extends Lava.widget.input.Text#
  */
@@ -16,12 +17,28 @@ Lava.define(
 
 	_properties: {
 		value: 0,
+		/** Text, that is currently entered into the DOM element */
 		input_value: ''
 	},
 
 	_type: "number",
+	/**
+	 * A type from {@link Lava.types}
+	 * @type {string}
+	 */
 	_data_type: 'Number',
 
+	/**
+	 * @param config
+	 * @param {string} config.options.type The only possible value is "text" - to change default &lt;input&gt; element
+	 *  type from "number" to "text"
+	 * @param {string} config.options.data_type Widget's value type from {@link Lava.types}.
+	 *  Must produce valid JavaScript number. Defaults to "Number"
+	 * @param widget
+	 * @param parent_view
+	 * @param template
+	 * @param properties
+	 */
 	init: function(config, widget, parent_view, template, properties) {
 
 		this.Text$init(config, widget, parent_view, template, properties);
@@ -45,7 +62,7 @@ Lava.define(
 
 	},
 
-	_valueToAttributeString: function(value) {
+	_valueToElementProperty: function(value) {
 
 		return value + '';
 
@@ -83,14 +100,6 @@ Lava.define(
 
 		this.Text$_setValue(value, name);
 		this._setValidity(true);
-
-	},
-
-	_setValidity: function(value) {
-
-		if (this._properties.is_valid != value) {
-			this._set('is_valid', value);
-		}
 
 	}
 

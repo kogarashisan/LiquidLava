@@ -1,6 +1,12 @@
-
+/**
+ * Methods for parsing {@link _cWidget#storage}
+ */
 Lava.parsers.Storage = {
 
+	/**
+	 * Kinds of tag with storage items
+	 * @type {Object.<string, string>}
+	 */
 	_root_handlers: {
 		template_collection: '_parseTemplateCollection',
 		object_collection: '_parseObjectCollection',
@@ -9,16 +15,25 @@ Lava.parsers.Storage = {
 		object: '_parseObject'
 	},
 
+	/**
+	 * Kinds of tags that describe object properties
+	 * @type {Object.<string, string>}
+	 */
 	_object_property_handlers: {
 		template: '_parsePropertyAsTemplate',
 		lava_type: '_parsePropertyAsLavaType'
 	},
 
+	/**
+	 * Kinds of attributes on tags that describe objects
+	 * @type {Object.<string, string>}
+	 */
 	_object_attributes_handlers: {
 		lava_type: '_parseAttributeAsLavaType'
 	},
 
 	/**
+	 * Parse raw tags as widget's storage
 	 * @param {_cWidget} widget_config
 	 * @param {_tRawTemplate} raw_template
 	 */
@@ -41,6 +56,7 @@ Lava.parsers.Storage = {
 	},
 
 	/**
+	 * Template represents an array of storage items (templates or objects)
 	 * @param {_cStorageItemSchema} schema
 	 * @param {_tRawTemplate} raw_template
 	 * @param {string} callback_name
@@ -67,6 +83,7 @@ Lava.parsers.Storage = {
 	},
 
 	/**
+	 * Template represents a hash of items (templates or objects) with 'name' attribute on each item
 	 * @param {_cStorageItemSchema} schema
 	 * @param {_tRawTemplate} raw_template
 	 * @param {string} callback_name
@@ -96,6 +113,7 @@ Lava.parsers.Storage = {
 	},
 
 	/**
+	 * Convert `raw_tag` into template
 	 * @param {_cStorageItemSchema} schema
 	 * @param {_cRawTag} raw_tag
 	 * @returns {_tTemplate}
@@ -107,10 +125,11 @@ Lava.parsers.Storage = {
 	},
 
 	/**
+	 * Convert `raw_rag` into object with given `schema`
 	 * @param {_cStorageItemSchema} schema
 	 * @param {_cRawTag} raw_tag
 	 * @param {bool} exclude_name
-	 * @returns {{}}
+	 * @returns {Object}
 	 */
 	_asObject: function(schema, raw_tag, exclude_name) {
 
@@ -145,6 +164,8 @@ Lava.parsers.Storage = {
 	},
 
 	/**
+	 * In case of server-side parsing widget configs may be unextended. Manually merge only {@link _cWidget#storage_schema}
+	 * from hierarchy of widget configs
 	 * @param {_cWidget} widget_config
 	 * @returns {Object.<name, _cStorageItemSchema>}
 	 */
@@ -175,6 +196,7 @@ Lava.parsers.Storage = {
 	// root handlers
 
 	/**
+	 * Parse root storage tag's content as an array of templates
 	 * @param {_cStorageItemSchema} item_schema
 	 * @param {_cRawTag} raw_tag
 	 */
@@ -185,6 +207,7 @@ Lava.parsers.Storage = {
 	},
 
 	/**
+	 * Parse root storage tag's content as array of objects with known structure
 	 * @param {_cStorageItemSchema} item_schema
 	 * @param {_cRawTag} raw_tag
 	 */
@@ -195,6 +218,7 @@ Lava.parsers.Storage = {
 	},
 
 	/**
+	 * Parse root tag's content as hash of templates
 	 * @param {_cStorageItemSchema} item_schema
 	 * @param {_cRawTag} raw_tag
 	 */
@@ -205,6 +229,7 @@ Lava.parsers.Storage = {
 	},
 
 	/**
+	 * Parse root tag's content as hash of objects
 	 * @param {_cStorageItemSchema} item_schema
 	 * @param {_cRawTag} raw_tag
 	 */
@@ -215,6 +240,7 @@ Lava.parsers.Storage = {
 	},
 
 	/**
+	 * Parse tag's content as object with known structure
 	 * @param {_cStorageItemSchema} item_schema
 	 * @param {_cRawTag} raw_tag
 	 */
@@ -228,6 +254,7 @@ Lava.parsers.Storage = {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
+	 * Parse a tag inside object, that represents a template
 	 * @param {_cStorageObjectPropertySchema} schema
 	 * @param {_cRawTag} raw_tag
 	 */
@@ -238,6 +265,7 @@ Lava.parsers.Storage = {
 	},
 
 	/**
+	 * Parse tag inside object, that represents a type from {@link Lava.types}
 	 * @param {_cStorageObjectPropertySchema} schema
 	 * @param {_cRawTag} raw_tag
 	 */
@@ -249,6 +277,7 @@ Lava.parsers.Storage = {
 	},
 
 	/**
+	 * Parse object attribute as a type from {@link Lava.types}
 	 * @param {_cStorageObjectPropertySchema} descriptor
 	 * @param {string} value
 	 * @returns {*}

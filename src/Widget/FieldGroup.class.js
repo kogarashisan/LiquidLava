@@ -2,6 +2,7 @@
 Lava.define(
 'Lava.widget.FieldGroup',
 /**
+ * Manages a collection of form input fields
  * @lends Lava.widget.FieldGroup#
  * @extends Lava.widget.Standard#
  */
@@ -21,25 +22,36 @@ Lava.define(
 	},
 
 	/**
+	 * Input widgets, registered with the FieldGroup
 	 * @type {Array.<Lava.widget.input.Abstract>}
 	 */
 	_fields: [],
 	/**
+	 * Other FieldGroup instances registered with this widget
 	 * @type {Array.<Lava.widget.FieldGroup>}
 	 */
 	_groups: [],
 	/**
+	 * Submit button fields
 	 * @type {Array.<Lava.widget.input.Submit>}
 	 */
 	_submit_fields: [],
 
-	_handleGroupRole: function(formgroup_widget, template_arguments) {
+	/**
+	 * Register another FieldGroup widget with this one
+	 * @param field_group_widget
+	 */
+	_handleGroupRole: function(field_group_widget) {
 
-		this._groups.push(formgroup_widget);
+		this._groups.push(field_group_widget);
 
 	},
 
-	_handleFieldRole: function(field_widget, template_arguments) {
+	/**
+	 * Register an input widget
+	 * @param field_widget
+	 */
+	_handleFieldRole: function(field_widget) {
 
 		if (field_widget.name == 'submit') {
 
@@ -58,24 +70,39 @@ Lava.define(
 
 	},
 
+	/**
+	 * Submit input was clicked
+	 */
 	_onSubmit: function() {
 
 
 
 	},
 
+	/**
+	 * Get `_fields`
+	 * @returns {Array.<Lava.widget.input.Abstract>}
+	 */
 	getFields: function() {
 
 		return this._fields.slice();
 
 	},
 
+	/**
+	 * Get `_submit_fields`
+	 * @returns {Array.<Lava.widget.input.Abstract>}
+	 */
 	getSubmitFields: function() {
 
-		return this._fields.slice();
+		return this._submit_fields.slice();
 
 	},
 
+	/**
+	 * Convert value of all registered inputs to query string, as in GET request
+	 * @returns {string}
+	 */
 	toQueryString: function() {
 
 		var i = 0,
@@ -96,6 +123,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Cleanup destroyed fields from local members
+	 * @param {Lava.widget.input.Abstract} field_widget
+	 * @param event_args
+	 * @param native_args Reference to local array with input widgets
+	 */
 	_onFieldDestroyed: function(field_widget, event_args, native_args) {
 
 		Firestorm.Array.exclude(native_args, field_widget);

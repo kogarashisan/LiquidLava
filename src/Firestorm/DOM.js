@@ -1,21 +1,35 @@
-
+/**
+ * DOM manipulation methods
+ */
 Firestorm.DOM = {
 
+	/**
+	 * When turning HTML into nodes - it must be inserted into appropriate tags to stay valid
+	 */
 	_wrap_map: {
-		select: [ 1, "<select multiple='multiple'>", "</select>" ],
-		fieldset: [ 1, "<fieldset>", "</fieldset>" ],
-		table: [ 1, "<table>", "</table>" ],
-		tbody: [ 2, "<table><tbody>", "</tbody></table>" ],
-		thead: [ 2, "<table><tbody>", "</tbody></table>" ],
-		tfoot: [ 2, "<table><tbody>", "</tbody></table>" ],
-		tr: [ 3, "<table><tbody><tr>", "</tr></tbody></table>" ],
-		colgroup: [ 2, "<table><tbody></tbody><colgroup>", "</colgroup></table>" ],
-		map: [ 1, "<map>", "</map>" ]
+		select: [1, "<select multiple='multiple'>", "</select>"],
+		fieldset: [1, "<fieldset>", "</fieldset>"],
+		table: [1, "<table>", "</table>"],
+		tbody: [2, "<table><tbody>", "</tbody></table>"],
+		thead: [2, "<table><tbody>", "</tbody></table>"],
+		tfoot: [2, "<table><tbody>", "</tbody></table>"],
+		tr: [3, "<table><tbody><tr>", "</tr></tbody></table>"],
+		colgroup: [2, "<table><tbody></tbody><colgroup>", "</colgroup></table>"],
+		map: [1, "<map>", "</map>"]
 	},
 
+	/**
+	 * Workaround for browser bugs in IE. Copied from {@link Firestorm.Environment#STRIPS_INNER_HTML_SCRIPT_AND_STYLE_TAGS}
+	 */
 	_needs_shy: false,
+	/**
+	 * Workaround for browser bugs in IE. Copied from {@link Firestorm.Environment#MOVES_WHITESPACE_BEFORE_SCRIPT}
+	 */
 	_moves_whitespace: false,
 
+	/**
+	 * Init the object: choose appropriate methods for DOM manipulation, depending on browser capabilities
+	 */
 	init: function() {
 
 		var e = Firestorm.Environment;
@@ -47,15 +61,57 @@ Firestorm.DOM = {
 
 	},
 
+	/**
+	 * Turn given HTML into DOM nodes and insert them before the given element
+	 * @param {HTMLElement} element
+	 * @param {string} html
+	 */
 	insertHTMLBefore: function(element, html) { Firestorm.t(1); },
+	/**
+	 * Turn given HTML into DOM nodes and insert them after the given element
+	 * @param {HTMLElement} element
+	 * @param {string} html
+	 */
 	insertHTMLAfter: function(element, html) { Firestorm.t(1); },
+	/**
+	 * Turn given HTML into DOM nodes and insert them inside the given element, at the top of it
+	 * @param {HTMLElement} element
+	 * @param {string} html
+	 */
 	insertHTMLTop: function(element, html) { Firestorm.t(1); },
+	/**
+	 * Turn given HTML into DOM nodes and insert them inside the given element, at the bottom
+	 * @param {HTMLElement} element
+	 * @param {string} html
+	 */
 	insertHTMLBottom: function(element, html) { Firestorm.t(1); },
 
+	/**
+	 * Remove all HTML nodes between the given elements and elements themselves
+	 * @param {HTMLElement} start_element
+	 * @param {HTMLElement} end_element
+	 */
 	clearOuterRange: function(start_element, end_element) { Firestorm.t(1); },
+	/**
+	 * Remove all HTML nodes between the given elements
+	 * @param {HTMLElement} start_element
+	 * @param {HTMLElement} end_element
+	 */
 	clearInnerRange: function(start_element, end_element) { Firestorm.t(1); },
+	/**
+	 * Remove all HTML nodes between the elements and insert the given html there
+	 * @param {HTMLElement} start_element
+	 * @param {HTMLElement} end_element
+	 * @param {string} html
+	 */
 	replaceInnerRange: function(start_element, end_element, html) { Firestorm.t(1); },
 
+	/**
+	 * Turn HTML into nodes and insert them relatively to the given element
+	 * @param {HTMLElement} element
+	 * @param {string} html
+	 * @param {_eInsertPosition} [position='Bottom']
+	 */
 	insertHTML: function(element, html, position) {
 
 		this['insertHTML' + (position || 'Bottom')](element, html);
@@ -65,6 +121,11 @@ Firestorm.DOM = {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// nodes api
 
+	/**
+	 * Set the elements innerHTML, taking into account various browser bugs
+	 * @param {HTMLElement} element
+	 * @param {string} html
+	 */
 	_setInnerHTML: function(element, html) {
 
 		var matches,
@@ -103,7 +164,10 @@ Firestorm.DOM = {
 	 * node, which will allow us to traverse the rest using nextSibling.
 	 *
 	 * In cases of certain elements like tables and lists we cannot just assign innerHTML and get the nodes,
-	 * cause innerHTML is either readonly on them in IE, or it would destroy some of the content.
+	 * cause innerHTML is either readonly on them in IE, or it would destroy some of the content
+	 *
+	 * @param {HTMLElement} parentNode
+	 * @param {string} html
 	 **/
 	_firstNodeFor: function(parentNode, html) {
 
@@ -153,8 +217,8 @@ Firestorm.DOM = {
 
 	/**
 	 * Remove everything between two tags
-	 * @param start_element
-	 * @param end_element
+	 * @param {HTMLElement} start_element
+	 * @param {HTMLElement} end_element
 	 */
 	clearInnerRange_Nodes: function(start_element, end_element) {
 
@@ -173,6 +237,11 @@ Firestorm.DOM = {
 
 	},
 
+	/**
+	 * Version of clearOuterRange, which manipulates HTML nodes
+	 * @param {HTMLElement} start_element
+	 * @param {HTMLElement} end_element
+	 */
 	clearOuterRange_Nodes: function(start_element, end_element) {
 
 		this.clearInnerRange_Nodes(start_element, end_element);
@@ -181,6 +250,12 @@ Firestorm.DOM = {
 
 	},
 
+	/**
+	 * Version of replaceInnerRange, which manipulates HTML nodes
+	 * @param {HTMLElement} start_element
+	 * @param {HTMLElement} end_element
+	 * @param {string} html
+	 */
 	replaceInnerRange_Nodes: function(start_element, end_element, html) {
 
 		this.clearInnerRange_Nodes(start_element, end_element);
@@ -188,6 +263,12 @@ Firestorm.DOM = {
 
 	},
 
+	/**
+	 * Turn HTML into nodes with respect to the parent node and sequentially insert them before `insert_before` element
+	 * @param {HTMLElement} parent_node
+	 * @param {string} html
+	 * @param {HTMLElement} insert_before
+	 */
 	_insertHTMLBefore: function(parent_node, html, insert_before) {
 
 		var node,
@@ -203,24 +284,44 @@ Firestorm.DOM = {
 
 	},
 
+	/**
+	 * Version of insertHTMLAfter which works with nodes
+	 * @param {HTMLElement} element
+	 * @param {string} html
+	 */
 	insertHTMLAfter_Nodes: function(element, html) {
 
 		this._insertHTMLBefore(element.parentNode, html, element.nextSibling);
 
 	},
 
+	/**
+	 * Version of insertHTMLBefore which works with nodes
+	 * @param {HTMLElement} element
+	 * @param {string} html
+	 */
 	insertHTMLBefore_Nodes: function(element, html) {
 
 		this._insertHTMLBefore(element.parentNode, html, element);
 
 	},
 
+	/**
+	 * Version of insertHTMLTop which works with nodes
+	 * @param {HTMLElement} element
+	 * @param {string} html
+	 */
 	insertHTMLTop_Nodes: function(element, html) {
 
 		this._insertHTMLBefore(element, html, element.firstChild);
 
 	},
 
+	/**
+	 * Version of insertHTMLBottom which works with nodes
+	 * @param {HTMLElement} element
+	 * @param {string} html
+	 */
 	insertHTMLBottom_Nodes: function(element, html) {
 
 		this._insertHTMLBefore(element, html, null);
@@ -233,6 +334,12 @@ Firestorm.DOM = {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// range api
 
+	/**
+	 * Create a Range object, with limits between the given elements
+	 * @param {HTMLElement} start_element
+	 * @param {HTMLElement} end_element
+	 * @returns {Range|TextRange}
+	 */
 	_createInnerRange: function(start_element, end_element) {
 
 		var range = document.createRange();
@@ -242,6 +349,12 @@ Firestorm.DOM = {
 
 	},
 
+	/**
+	 * Create a Range object, which includes the given elements
+	 * @param {HTMLElement} start_element
+	 * @param {HTMLElement} end_element
+	 * @returns {Range|TextRange}
+	 */
 	_createOuterRange: function(start_element, end_element) {
 
 		var range = document.createRange();
@@ -251,6 +364,12 @@ Firestorm.DOM = {
 
 	},
 
+	/**
+	 * Version of replaceInnerRange, which works with Range API
+	 * @param {HTMLElement} start_element
+	 * @param {HTMLElement} end_element
+	 * @param {string} html
+	 */
 	replaceInnerRange_Range: function(start_element, end_element, html) {
 
 		var range = this._createInnerRange(start_element, end_element);
@@ -259,6 +378,11 @@ Firestorm.DOM = {
 		range.insertNode(range.createContextualFragment(html));
 	},
 
+	/**
+	 * Version of clearOuterRange, which works with Range API
+	 * @param {HTMLElement} start_element
+	 * @param {HTMLElement} end_element
+	 */
 	clearOuterRange_Range: function(start_element, end_element) {
 
 		var range = this._createOuterRange(start_element, end_element);
@@ -266,6 +390,11 @@ Firestorm.DOM = {
 
 	},
 
+	/**
+	 * Version of clearInnerRange, which works with Range API
+	 * @param {HTMLElement} start_element
+	 * @param {HTMLElement} end_element
+	 */
 	clearInnerRange_Range: function(start_element, end_element) {
 
 		var range = this._createInnerRange(start_element, end_element);
@@ -273,6 +402,11 @@ Firestorm.DOM = {
 
 	},
 
+	/**
+	 * Version of insertHTMLAfter, which works with Range API
+	 * @param {HTMLElement} element
+	 * @param {string} html
+	 */
 	insertHTMLAfter_Range: function(element, html) {
 
 		var range = document.createRange();
@@ -283,6 +417,11 @@ Firestorm.DOM = {
 
 	},
 
+	/**
+	 * Version of insertHTMLBefore, which works with Range API
+	 * @param {HTMLElement} element
+	 * @param {string} html
+	 */
 	insertHTMLBefore_Range: function(element, html) {
 
 		var range = document.createRange();
@@ -293,6 +432,11 @@ Firestorm.DOM = {
 
 	},
 
+	/**
+	 * Version of insertHTMLTop, which works with Range API
+	 * @param {HTMLElement} element
+	 * @param {string} html
+	 */
 	insertHTMLTop_Range: function(element, html) {
 
 		var range = document.createRange();
@@ -302,6 +446,11 @@ Firestorm.DOM = {
 
 	},
 
+	/**
+	 * Version of insertHTMLBottom, which works with Range API
+	 * @param {HTMLElement} element
+	 * @param {string} html
+	 */
 	insertHTMLBottom_Range: function(element, html) {
 
 		var last_child = element.lastChild,

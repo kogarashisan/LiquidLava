@@ -32,6 +32,7 @@ For function:
 		is_nullable = <bool>
 		is_non_nullable = <bool>
 		type_names = [<string>]
+	param_renames = Object.<from, to>
 
 event:
 	description
@@ -95,12 +96,7 @@ exports.publish = function(taffyData, opts, tutorials) {
 
 		// get rid of doclets for "this.varname = something" inside functions
 		var allowed = (doclet.name && doclet.meta.code.name && doclet.meta.code.name.indexOf('this.') != 0);
-		// for the three virtual comments with @name in Parsers/ParserName.js
-		if (doclet.name && ['ExpressionParser', 'ObjectParser', 'TemplateParser'].indexOf(doclet.name) != -1) {
-			allowed = true;
-		}
 		if (doclet.kind == 'event') allowed = true;
-
 		if (!allowed) continue;
 
 		if (doclet.description) export_descriptor.description = doclet.description;
@@ -108,18 +104,38 @@ exports.publish = function(taffyData, opts, tutorials) {
 		if (doclet.kind == 'function') {
 
 			ApiHelper.exportMethod(doclet, export_descriptor);
+			if (doclet.tags) {
+				doclet.tags.forEach(function(tag){
+					if (tag.title != 'lava-param-renamed') throw new Error ();
+					var renames_match = /^\s*([a-zA-Z\_]+)\s*\-\>\s*([a-zA-Z\_]+)\s*$/.exec(tag.value); // example: 'name -> guid'
+					if (!renames_match) throw new Error();
+					if (!export_descriptor.param_renames) export_descriptor.param_renames = {};
+					export_descriptor.param_renames[renames_match[1]] = renames_match[2];
+				});
+			}
 
 		} else if (doclet.kind == 'event') {
 
 			if (/@type\s+\{[^\}]\}\s+[^\n]+/.test(doclet.comment)) throw new Error('jsdoc does not support description for @type in @event. Use lava-type-description tag.');
 
-			// type_names are commented in template
-			if (!doclet.type || !doclet.type.names || doclet.type.names.length != 1 || doclet.type.names[0] != 'Object') throw new Error('todo');
+			ApiHelper.export_type_data(doclet, export_descriptor, true);
+			if (export_descriptor.default_value || export_descriptor.is_variable) throw new Error();
+
+			if (doclet.type && doclet.type.names && (doclet.type.names.length != 1 || doclet.type.names[0] != 'Object')) {
+
+				if (!doclet.tags || doclet.tags[0].title != 'lava-type-description') throw new Error();
+				// event's argument is not an object, but some other type (maybe simple)
+				export_descriptor.argument_description = doclet.tags[0].value;
+
+			} else {
+
+				delete export_descriptor.type_names;
+
+			}
 
 			if (!(doclet.memberof in events_export)) events_export[doclet.memberof] = [];
 			events_export[doclet.memberof].push(export_descriptor);
-			export_descriptor.name = doclet.name;
-			if (doclet.type && doclet.type.names) export_descriptor.type_names = doclet.type.names;
+
 			if (doclet.properties) {
 				export_descriptor.params = [];
 				doclet.properties.forEach(function(property_descriptor){
@@ -127,13 +143,6 @@ exports.publish = function(taffyData, opts, tutorials) {
 					ApiHelper.export_type_data(property_descriptor, param, true);
 					export_descriptor.params.push(param);
 				})
-			}
-
-			if (doclet.tags && doclet.tags[0].title == 'lava-type-description') {
-				if (doclet.properties) throw new Error();
-				// event's argument is not an object, but some other type (maybe simple)
-				throw new Error('todo');
-				//export_descriptor.argument_description = doclet.tags[0].value;
 			}
 
 		} else {

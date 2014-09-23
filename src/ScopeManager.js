@@ -1,29 +1,64 @@
-
+/**
+ * Performs scope refresh
+ */
 Lava.ScopeManager = {
 
+	/**
+	 * There is a separate queue for each scope level
+	 * @type {Array.<Array.<Lava.mixin.Refreshable>>}
+	 */
 	_scope_refresh_queues: [],
+	/**
+	 * Minimal index in `_scope_refresh_queues`
+	 * @type {number}
+	 */
 	_min_scope_refresh_level: 0,
 	/**
 	 * Scopes are updated from lower to higher level, from first index in array to last.
 	 * Update cycle may jump to lower level, if a scope is added there during the update cycle.
-	 * For each scope level this array stores the number of already updated scopes on that level.
+	 * For each scope level this array stores the number of already updated scopes on that level
 	 * @type {Array.<number>}
 	 */
 	_scope_refresh_current_indices: [],
 
+	/**
+	 * User-accessible statistics with critical data
+	 * @type {Object}
+	 */
 	statistics: {
+		/**
+		 * Each refresh loop has smaller cycles
+		 * @type {number}
+		 */
 		max_refresh_cycles: 0,
+		/**
+		 * Number of times, when circular dependencies in scope tree has been encountered
+		 * @type {number}
+		 */
 		count_dead_loop_exceptions: 0
 	},
 
+	/**
+	 * Each refresh loop generates a new id
+	 * @type {number}
+	 */
 	_refresh_id: 0,
+	/**
+	 * Sign of circular dependency for current loop
+	 * @type {boolean}
+	 */
 	_has_exceptions: false,
+	/**
+	 * Sign of circular dependency for previous loop
+	 * @type {boolean}
+	 */
 	_has_infinite_loop: false,
 
 	/**
+	 * Queue a scope for update
 	 * @param {Lava.mixin.Refreshable} target
 	 * @param {number} level
-	 * @returns {{index: number}}
+	 * @returns {{index: number}} Refresh ticket
 	 */
 	scheduleScopeRefresh: function(target, level) {
 
@@ -47,6 +82,7 @@ Lava.ScopeManager = {
 	},
 
 	/**
+	 * Remove a scope from update queue
 	 * @param {{index: number}} refresh_ticket
 	 * @param {number} level
 	 */
@@ -58,12 +94,19 @@ Lava.ScopeManager = {
 
 	},
 
+	/**
+	 * Get `_has_infinite_loop`
+	 * @returns {boolean}
+	 */
 	hasInfiniteLoop: function() {
 
 		return this._has_infinite_loop;
 
 	},
 
+	/**
+	 * The main refresh loop
+	 */
 	refreshScopes: function() {
 
 		var count_refresh_cycles = 0,
@@ -128,6 +171,7 @@ Lava.ScopeManager = {
 	},
 
 	/**
+	 * One refresh cycle in the refresh loop.
 	 * Warning: violates codestyle with multiple return statements
 	 * @returns {boolean} true if another cycle is needed, false when done and queue is clean
 	 */
@@ -203,6 +247,10 @@ Lava.ScopeManager = {
 
 	},
 
+	/**
+	 * A refresh cycle that is launched in case of circular scope dependency
+	 * It will refresh all dirty scopes one time
+	 */
 	_scopeMalfunctionCycle: function() {
 
 		var current_level = this._min_scope_refresh_level,
@@ -249,7 +297,7 @@ Lava.ScopeManager = {
 	},
 
 	/**
-	 * In case of infinite loop exception:
+	 * Launched in case of infinite loop exception:
 	 * all existing tickets must be preserved for the next refresh cycle, otherwise the system will be broken
 	 * @returns {Array}
 	 */
@@ -297,14 +345,26 @@ Lava.ScopeManager = {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Debug-mode validations
 
+	/**
+	 * An array of all scopes in the framework, for debug purpose only
+	 * @type {Array.<Lava.mixin.Refreshable>}
+	 */
 	_debug_all_scopes: [],
 
+	/**
+	 * Add a scope to `_debug_all_scopes`
+	 * @param {Lava.mixin.Refreshable} scope
+	 */
 	debugTrackScope: function(scope) {
 
 		this._debug_all_scopes.push(scope);
 
 	},
 
+	/**
+	 * Remove a scope from `_debug_all_scopes`
+	 * @param {Lava.mixin.Refreshable} scope
+	 */
 	debugStopTracking: function(scope) {
 
 		var index = this._debug_all_scopes.indexOf(scope);
@@ -313,6 +373,9 @@ Lava.ScopeManager = {
 
 	},
 
+	/**
+	 * LiquidLava alpha: debug verification that scope refresh cycle works as expected
+	 */
 	debugVerify: function() {
 
 		try {

@@ -1,9 +1,12 @@
-/**
- * Credits:
- * Some code is taken from Metamorph (https://github.com/tomhuda/metamorph.js/)
- * and MooTools (http://mootools.net/)
- */
+/*
+Credits:
+Some code is taken from Metamorph (https://github.com/tomhuda/metamorph.js/)
+and MooTools (http://mootools.net/)
+*/
 
+/**
+ * Low-level DOM manipulation and utility library
+ */
 var Firestorm = {
 
 	/** @ignore */
@@ -23,8 +26,16 @@ var Firestorm = {
 	/** @ignore */
 	Date: null,
 
+	/**
+	 * The map of numbered exception messages. May be excluded from production build
+	 * @type {Object.<number, string>}
+	 */
 	KNOWN_EXCEPTIONS: null,
 
+	/**
+	 * Used by {@link Firestorm#getType}
+	 * @type {Object.<string, string>}
+	 */
 	_descriptor_to_type: {
 		"[object Boolean]": 'boolean',
 		"[object Number]": 'number',
@@ -39,7 +50,10 @@ var Firestorm = {
 		"[object Undefined]": 'undefined'
 	},
 
-	/** @enum {number} */
+	/**
+	 * Browser key codes from keyboard events
+	 * @enum {number}
+	 */
 	KEY_CODES: {
 		ESCAPE: 27,
 		LEFT_ARROW: 37,
@@ -48,6 +62,9 @@ var Firestorm = {
 		DOWN_ARROW: 40
 	},
 
+	/**
+	 * Framework must be initialized before it can be used
+	 */
 	init: function() {
 
 		if (typeof(window) != 'undefined') {
@@ -64,17 +81,22 @@ var Firestorm = {
 
 	},
 
-	getType: function(target) {
+	/**
+	 * Get actual type of any JavaScript value
+	 * @param {*} value Any value
+	 * @returns {string} The type name, like "null", "object" or "regex"
+	 */
+	getType: function(value) {
 
 		var result = 'null';
 
 		// note: Regexp type may be both an object and a function in different browsers
-		if (target !== null) {
+		if (value !== null) {
 
-			result = typeof(target);
+			result = typeof(value);
 			if (result == "object" || result == "function") {
 				// this.toString refers to plain object's toString
-				result = this._descriptor_to_type[this.toString.call(target)] || "object";
+				result = this._descriptor_to_type[this.toString.call(value)] || "object";
 			}
 
 		}
@@ -83,12 +105,22 @@ var Firestorm = {
 
 	},
 
+	/**
+	 * Get HTML element by it's id attribute
+	 * @param {string} id
+	 * @returns {HTMLElement}
+	 */
 	getElementById: function(id) {
 
 		return document.id(id);
 
 	},
 
+	/**
+	 * Copy all properties from `partial` to `base`
+	 * @param {Object} base
+	 * @param {Object} partial
+	 */
 	extend: function(base, partial) {
 
 		for (var name in partial) {
@@ -99,6 +131,11 @@ var Firestorm = {
 
 	},
 
+	/**
+	 * Copy all properties from `partial` to `base`, but do not overwrite existing properties
+	 * @param {Object} base
+	 * @param {Object} partial
+	 */
 	implement: function(base, partial) {
 
 		for (var name in partial) {
@@ -113,12 +150,22 @@ var Firestorm = {
 
 	},
 
+	/**
+	 * Return all elements which match the given selector
+	 * @param {string} selector CSS selector
+	 * @returns {Array.<HTMLElement>}
+	 */
 	selectElements: function(selector) {
 
 		return Slick.search(window.document, selector, new Elements);
 
 	},
 
+	/**
+	 * Deep clone of given value
+	 * @param {*} value
+	 * @returns {*}
+	 */
 	clone: function(value) {
 
 		switch (this.getType(value)) {
@@ -132,6 +179,10 @@ var Firestorm = {
 
 	},
 
+	/**
+	 * Throw an exception
+	 * @param [message] Exception message
+	 */
 	t: function(message) {
 
 		if (typeof(message) == 'number' && this.KNOWN_EXCEPTIONS && (message in this.KNOWN_EXCEPTIONS)) {
@@ -142,17 +193,34 @@ var Firestorm = {
 
 	},
 
+	/**
+	 * Return <kw>true</kw>
+	 * @returns {boolean} <kw>true</kw>
+	 */
 	'true': function() {return true},
+	/**
+	 * Return <kw>false</kw>
+	 * @returns {boolean} <kw>false</kw>
+	 */
 	'false': function() {return false}
 
 };
-
+/**
+ * Settings for the Firestorm library
+ */
 Firestorm.schema = {
 	dom: {
-		/** @const */
+		/**
+		 * Allow using of Range API, if browser is capable of it
+		 * @const
+		 */
 		PREFER_RANGE_API: true
 	},
-	/** @define */
+	/**
+	 * Perform DEBUG checks. Should be <kw>false</kw> in production,
+	 * but it's strictly recommended to keep it <kw>true</kw> during development and testing
+	 * @define
+	 */
 	DEBUG: true
 };
 
@@ -160,17 +228,35 @@ Firestorm.schema = {
 Firestorm.KNOWN_EXCEPTIONS = {
 	'1': "Firestorm: framework requires initialization"
 };
-
-
+/**
+ * Checks for browser bugs and capabilities, provides common interfaces for browser-specific extensions
+ */
 Firestorm.Environment = {
 
 	//SUPPORTS_FUNCTION_SERIALIZATION: false,
+	/**
+	 * Supports HTML Range API
+	 */
 	SUPPORTS_RANGE: false,
+	/**
+	 * Internet Explorer < 9 strips SCRIPT and STYLE tags from beginning of innerHTML
+	 */
 	STRIPS_INNER_HTML_SCRIPT_AND_STYLE_TAGS: false,
+	/**
+	 * IE 8 (and likely earlier) likes to move whitespace preceding a script tag to appear after it.
+	 * This means that we can accidentally remove whitespace when updating a morph
+	 */
 	MOVES_WHITESPACE_BEFORE_SCRIPT: false,
+	/**
+	 * Calls requestAnimationFrame, if browser supports it. Actual method name may have a vendor prefix in different browsers.
+	 * If browser does not support requestAnimationFrame - this method will be <kw>null</kw>
+	 * @param {function} callback
+	 */
+	requestAnimationFrame: function(callback) { Firestorm.t(1); },
 
-	requestAnimationFrame: null,
-
+	/**
+	 * Perform the object initialization
+	 */
 	init: function() {
 
 		var document = window.document,
@@ -183,15 +269,11 @@ Firestorm.Environment = {
 		// last check is for IE9 which only partially supports ranges
 		this.SUPPORTS_RANGE = ('createRange' in document) && (typeof Range !== 'undefined') && Range.prototype.createContextualFragment;
 
-		// Internet Explorer < 9 strips SCRIPT and STYLE tags from beginning of innerHTML
 		testEl = document.createElement('div');
 		testEl.innerHTML = "<div></div>";
 		testEl.firstChild.innerHTML = "<script></script>";
 		this.STRIPS_INNER_HTML_SCRIPT_AND_STYLE_TAGS = testEl.firstChild.innerHTML === '';
 
-		// IE 8 (and likely earlier) likes to move whitespace preceeding
-		// a script tag to appear after it. This means that we can
-		// accidentally remove whitespace when updating a morph.
 		testEl.innerHTML = "Test: <script type='text/x-placeholder'></script>Value";
 		this.MOVES_WHITESPACE_BEFORE_SCRIPT = testEl.childNodes[0].nodeValue === 'Test:' && testEl.childNodes[2].nodeValue === ' Value';
 
@@ -208,33 +290,67 @@ Firestorm.Environment = {
 	}
 
 };
-
+/**
+ * Methods for working with DOM elements
+ */
 Firestorm.Element = {
 
+	/**
+	 * Attach DOM listener to an element
+	 * @param {HTMLElement} element The DOM element for attaching the event
+	 * @param {string} event_name Name of DOM event
+	 * @param {function} callback Callback for the listener
+	 * @param {boolean} capture Use capturing phase
+	 */
 	addListener: function(element, event_name, callback, capture) {
 
 		document.id(element).addEvent(event_name, callback, capture);
 
 	},
 
+	/**
+	 * Detach DOM listener
+	 * @param {HTMLElement} element
+	 * @param {string} event_name
+	 * @param {function} callback
+	 */
 	removeListener: function(element, event_name, callback) {
 
 		document.id(element).removeEvent(event_name, callback);
 
 	},
 
+	/**
+	 * Route events from elements inside `element` that match the `selector`
+	 * @param {HTMLElement} element
+	 * @param {string} event_name
+	 * @param {string} selector CSS selector
+	 * @param {function} callback
+	 */
 	addDelegation: function(element, event_name, selector, callback) {
 
 		document.id(element).addEvent(event_name + ':relay(' + selector + ')', callback);
 
 	},
 
+	/**
+	 * Stop delegating events
+	 * @param {HTMLElement} element
+	 * @param {string} event_name
+	 * @param {string} selector CSS selector
+	 * @param {function} callback
+	 */
 	removeDelegation: function(element, event_name, selector, callback) {
 
 		document.id(element).removeEvent(event_name + ':relay(' + selector + ')', callback);
 
 	},
 
+	/**
+	 * Remove an element from DOM and clean all framework dependencies on that element.
+	 * Destroyed elements cannot be reused
+	 * @param {HTMLElement} element
+	 */
 	destroy: function(element) {
 
 		document.id(element).destroy();
@@ -242,8 +358,8 @@ Firestorm.Element = {
 	},
 
 	/**
-	 * Remove the element from DOM tree. After removal it may be inserted back.
-	 * @param element
+	 * Remove the element from DOM tree. After removal it may be inserted back
+	 * @param {HTMLElement} element
 	 */
 	remove: function(element) {
 
@@ -255,12 +371,12 @@ Firestorm.Element = {
 
 	},
 
-	getChildren: function(element, expression) {
-
-		return document.id(element).getChildren(expression);
-
-	},
-
+	/**
+	 * Perform search by id for {@link Firestorm.Element#findChildById}
+	 * @param {HTMLElement} element
+	 * @param {string} id
+	 * @returns {HTMLElement}
+	 */
 	_findChildById: function(element, id) {
 
 		var count,
@@ -295,24 +411,46 @@ Firestorm.Element = {
 
 	},
 
+	/**
+	 * Traverse element's children and find a child with given `id`
+	 * @param {HTMLElement} element
+	 * @param {string} id
+	 * @returns {HTMLElement}
+	 */
 	findChildById: function(element, id) {
 
 		return (element.getAttribute('id') === id) ? element : this._findChildById(element, id);
 
 	},
 
+	/**
+	 * Insert an element relatively to `parent` element
+	 * @param {HTMLElement} parent
+	 * @param {HTMLElement} element
+	 * @param {_eInsertPosition} where
+	 */
 	insertElement: function(parent, element, where) {
 
 		this['insertElement' + where](parent, element);
 
 	},
 
+	/**
+	 * Insert an element inside `parent`, at the top of it
+	 * @param {HTMLElement} parent
+	 * @param {HTMLElement} element
+	 */
 	insertElementTop: function(parent, element) {
 
 		parent.insertBefore(element, parent.firstChild);
 
 	},
 
+	/**
+	 * Insert an element inside `parent`, at the bottom of it
+	 * @param {HTMLElement} parent
+	 * @param {HTMLElement} element
+	 */
 	insertElementBottom: function(parent, element) {
 
 		parent.appendChild(element);
@@ -320,9 +458,9 @@ Firestorm.Element = {
 	},
 
 	/**
-	 * Insert target_element just before context
-	 * @param {Node} context
-	 * @param {Node} target_element
+	 * Insert `target_element` just before `context`
+	 * @param {HTMLElement} context
+	 * @param {HTMLElement} target_element Element that is being inserted
 	 */
 	insertElementBefore: function(context, target_element) {
 
@@ -331,9 +469,9 @@ Firestorm.Element = {
 	},
 
 	/**
-	 * Insert target_element after context
-	 * @param {Node} context
-	 * @param {Node} target_element
+	 * Insert `target_element` after `context`
+	 * @param {HTMLElement} context
+	 * @param {HTMLElement} target_element Element that is being inserted
 	 */
 	insertElementAfter: function(context, target_element) {
 
@@ -341,6 +479,12 @@ Firestorm.Element = {
 
 	},
 
+	/**
+	 * Get elements, that are children of `element` and match the given `selector`
+	 * @param {HTMLElement} element Root element
+	 * @param {string} selector CSS selector
+	 * @returns {Array.<HTMLElement>}
+	 */
 	selectElements: function(element, selector) {
 
 		return Slick.search(element, selector, new Elements);
@@ -356,30 +500,59 @@ Firestorm.Element,
  */
 {
 
+	/**
+	 * Set a property on an element
+	 * @param {HTMLElement} element Target element
+	 * @param {string} name Property name
+	 * @param {*} value Property value
+	 */
 	setProperty: function(element, name, value) {
 
 		document.id(element).set(name, value);
 
 	},
 
+	/**
+	 * Get element's property
+	 * @param {HTMLElement} element
+	 * @param {string} name
+	 * @returns {*}
+	 */
 	getProperty: function(element, name) {
 
 		return document.id(element).get(name);
 
 	},
 
+	/**
+	 * Remove property from the element
+	 * @param {HTMLElement} element
+	 * @param {string} name
+	 */
 	removeProperty: function(element, name) {
 
 		document.id(element).setProperty(name, null);
 
 	},
 
+	/**
+	 * Does an element have an attribute
+	 * @param {HTMLElement} element
+	 * @param {string} name Attribute name
+	 * @returns {boolean} True, if attribute exists
+	 */
 	hasAttribute: function(element, name) {
 
 		return Slick.hasAttribute(element, name);
 
 	},
 
+	/**
+	 * Get attribute value from the element
+	 * @param {HTMLElement} element
+	 * @param {string} name Attribute name
+	 * @returns {string} The attribute value
+	 */
 	getAttribute: function(element, name) {
 
 		return Slick.getAttribute(element, name);
@@ -396,8 +569,9 @@ Firestorm.Element,
 {
 
 	/**
+	 * Get element's dimensions
 	 * @param element
-	 * @returns {{x: number, y: number}}
+	 * @returns {{x: number, y: number}} An object with element's dimensions
 	 */
 	getSize: function(element) {
 
@@ -418,7 +592,8 @@ Firestorm.Element,
 {
 
 	/**
-	 * @param element
+	 * Set one CSS property in element's "style" attribute
+	 * @param {HTMLElement} element
 	 * @param {string} name
 	 * @param {string} value
 	 */
@@ -429,9 +604,10 @@ Firestorm.Element,
 	},
 
 	/**
-	 * Rounds numbers and adds 'px' before setting them to element.
+	 * Set CSS property, which accepts a list of pixel values (like <kw>"border: 1px 2px 3px 4px"</kw>)
+	 * Rounds numbers and adds 'px' before setting them to element
 	 *
-	 * @param element
+	 * @param {HTMLElement} element
 	 * @param {string} name
 	 * @param {(Array.<(number)>)} value
 	 */
@@ -450,36 +626,67 @@ Firestorm.Element,
 
 	},
 
+	/**
+	 * Get value of CSS style property
+	 * @param {HTMLElement} element
+	 * @param {string} name Name of the property, like <kw>"height"</kw>
+	 * @returns {*}
+	 */
 	getStyle: function(element, name) {
 
-		return document.id(element).getStyle(name, value);
+		return document.id(element).getStyle(name);
 
 	},
 
+	/**
+	 * Set element's opacity
+	 * @param {HTMLElement} element
+	 * @param {(string|number)} value 0 <= value <= 1
+	 */
 	setOpacity: function(element, value) {
 
 		document.id(element).set('opacity', value);
 
 	},
 
+	/**
+	 * Get element's opacity
+	 * @param {HTMLElement} element
+	 * @returns {*}
+	 */
 	getOpacity: function(element) {
 
 		return document.id(element).get('opacity');
 
 	},
 
+	/**
+	 * Add another class to collection of element's classes. Will not do anything, if class already exists
+	 * @param {HTMLElement} element
+	 * @param {string} class_name The class name to add
+	 */
 	addClass: function(element, class_name) {
 
 		document.id(element).addClass(class_name);
 
 	},
 
+	/**
+	 * Remove a class from the list of element's classes. Will do nothing, if class does not exist
+	 * @param {HTMLElement} element
+	 * @param {string} class_name
+	 */
 	removeClass: function(element, class_name) {
 
 		document.id(element).removeClass(class_name);
 
 	},
 
+	/**
+	 * Add a list of classes to element
+	 * @param {HTMLElement} element
+	 * @param {Array.<string>} class_list
+	 */
 	addClasses: function(element, class_list) {
 
 		if (Firestorm.schema.DEBUG && typeof(class_list) == 'string') Firestorm.t();
@@ -492,6 +699,11 @@ Firestorm.Element,
 
 	},
 
+	/**
+	 * Remove a list of classes from an element
+	 * @param {HTMLElement} element
+	 * @param {Array.<string>} class_list
+	 */
 	removeClasses: function(element, class_list) {
 
 		if (Firestorm.schema.DEBUG && typeof(class_list) == 'string') Firestorm.t();
@@ -505,24 +717,38 @@ Firestorm.Element,
 	}
 
 });
-
+/**
+ * DOM manipulation methods
+ */
 Firestorm.DOM = {
 
+	/**
+	 * When turning HTML into nodes - it must be inserted into appropriate tags to stay valid
+	 */
 	_wrap_map: {
-		select: [ 1, "<select multiple='multiple'>", "</select>" ],
-		fieldset: [ 1, "<fieldset>", "</fieldset>" ],
-		table: [ 1, "<table>", "</table>" ],
-		tbody: [ 2, "<table><tbody>", "</tbody></table>" ],
-		thead: [ 2, "<table><tbody>", "</tbody></table>" ],
-		tfoot: [ 2, "<table><tbody>", "</tbody></table>" ],
-		tr: [ 3, "<table><tbody><tr>", "</tr></tbody></table>" ],
-		colgroup: [ 2, "<table><tbody></tbody><colgroup>", "</colgroup></table>" ],
-		map: [ 1, "<map>", "</map>" ]
+		select: [1, "<select multiple='multiple'>", "</select>"],
+		fieldset: [1, "<fieldset>", "</fieldset>"],
+		table: [1, "<table>", "</table>"],
+		tbody: [2, "<table><tbody>", "</tbody></table>"],
+		thead: [2, "<table><tbody>", "</tbody></table>"],
+		tfoot: [2, "<table><tbody>", "</tbody></table>"],
+		tr: [3, "<table><tbody><tr>", "</tr></tbody></table>"],
+		colgroup: [2, "<table><tbody></tbody><colgroup>", "</colgroup></table>"],
+		map: [1, "<map>", "</map>"]
 	},
 
+	/**
+	 * Workaround for browser bugs in IE. Copied from {@link Firestorm.Environment#STRIPS_INNER_HTML_SCRIPT_AND_STYLE_TAGS}
+	 */
 	_needs_shy: false,
+	/**
+	 * Workaround for browser bugs in IE. Copied from {@link Firestorm.Environment#MOVES_WHITESPACE_BEFORE_SCRIPT}
+	 */
 	_moves_whitespace: false,
 
+	/**
+	 * Init the object: choose appropriate methods for DOM manipulation, depending on browser capabilities
+	 */
 	init: function() {
 
 		var e = Firestorm.Environment;
@@ -554,15 +780,57 @@ Firestorm.DOM = {
 
 	},
 
+	/**
+	 * Turn given HTML into DOM nodes and insert them before the given element
+	 * @param {HTMLElement} element
+	 * @param {string} html
+	 */
 	insertHTMLBefore: function(element, html) { Firestorm.t(1); },
+	/**
+	 * Turn given HTML into DOM nodes and insert them after the given element
+	 * @param {HTMLElement} element
+	 * @param {string} html
+	 */
 	insertHTMLAfter: function(element, html) { Firestorm.t(1); },
+	/**
+	 * Turn given HTML into DOM nodes and insert them inside the given element, at the top of it
+	 * @param {HTMLElement} element
+	 * @param {string} html
+	 */
 	insertHTMLTop: function(element, html) { Firestorm.t(1); },
+	/**
+	 * Turn given HTML into DOM nodes and insert them inside the given element, at the bottom
+	 * @param {HTMLElement} element
+	 * @param {string} html
+	 */
 	insertHTMLBottom: function(element, html) { Firestorm.t(1); },
 
+	/**
+	 * Remove all HTML nodes between the given elements and elements themselves
+	 * @param {HTMLElement} start_element
+	 * @param {HTMLElement} end_element
+	 */
 	clearOuterRange: function(start_element, end_element) { Firestorm.t(1); },
+	/**
+	 * Remove all HTML nodes between the given elements
+	 * @param {HTMLElement} start_element
+	 * @param {HTMLElement} end_element
+	 */
 	clearInnerRange: function(start_element, end_element) { Firestorm.t(1); },
+	/**
+	 * Remove all HTML nodes between the elements and insert the given html there
+	 * @param {HTMLElement} start_element
+	 * @param {HTMLElement} end_element
+	 * @param {string} html
+	 */
 	replaceInnerRange: function(start_element, end_element, html) { Firestorm.t(1); },
 
+	/**
+	 * Turn HTML into nodes and insert them relatively to the given element
+	 * @param {HTMLElement} element
+	 * @param {string} html
+	 * @param {_eInsertPosition} [position='Bottom']
+	 */
 	insertHTML: function(element, html, position) {
 
 		this['insertHTML' + (position || 'Bottom')](element, html);
@@ -572,6 +840,11 @@ Firestorm.DOM = {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// nodes api
 
+	/**
+	 * Set the elements innerHTML, taking into account various browser bugs
+	 * @param {HTMLElement} element
+	 * @param {string} html
+	 */
 	_setInnerHTML: function(element, html) {
 
 		var matches,
@@ -610,7 +883,10 @@ Firestorm.DOM = {
 	 * node, which will allow us to traverse the rest using nextSibling.
 	 *
 	 * In cases of certain elements like tables and lists we cannot just assign innerHTML and get the nodes,
-	 * cause innerHTML is either readonly on them in IE, or it would destroy some of the content.
+	 * cause innerHTML is either readonly on them in IE, or it would destroy some of the content
+	 *
+	 * @param {HTMLElement} parentNode
+	 * @param {string} html
 	 **/
 	_firstNodeFor: function(parentNode, html) {
 
@@ -660,8 +936,8 @@ Firestorm.DOM = {
 
 	/**
 	 * Remove everything between two tags
-	 * @param start_element
-	 * @param end_element
+	 * @param {HTMLElement} start_element
+	 * @param {HTMLElement} end_element
 	 */
 	clearInnerRange_Nodes: function(start_element, end_element) {
 
@@ -680,6 +956,11 @@ Firestorm.DOM = {
 
 	},
 
+	/**
+	 * Version of clearOuterRange, which manipulates HTML nodes
+	 * @param {HTMLElement} start_element
+	 * @param {HTMLElement} end_element
+	 */
 	clearOuterRange_Nodes: function(start_element, end_element) {
 
 		this.clearInnerRange_Nodes(start_element, end_element);
@@ -688,6 +969,12 @@ Firestorm.DOM = {
 
 	},
 
+	/**
+	 * Version of replaceInnerRange, which manipulates HTML nodes
+	 * @param {HTMLElement} start_element
+	 * @param {HTMLElement} end_element
+	 * @param {string} html
+	 */
 	replaceInnerRange_Nodes: function(start_element, end_element, html) {
 
 		this.clearInnerRange_Nodes(start_element, end_element);
@@ -695,6 +982,12 @@ Firestorm.DOM = {
 
 	},
 
+	/**
+	 * Turn HTML into nodes with respect to the parent node and sequentially insert them before `insert_before` element
+	 * @param {HTMLElement} parent_node
+	 * @param {string} html
+	 * @param {HTMLElement} insert_before
+	 */
 	_insertHTMLBefore: function(parent_node, html, insert_before) {
 
 		var node,
@@ -710,24 +1003,44 @@ Firestorm.DOM = {
 
 	},
 
+	/**
+	 * Version of insertHTMLAfter which works with nodes
+	 * @param {HTMLElement} element
+	 * @param {string} html
+	 */
 	insertHTMLAfter_Nodes: function(element, html) {
 
 		this._insertHTMLBefore(element.parentNode, html, element.nextSibling);
 
 	},
 
+	/**
+	 * Version of insertHTMLBefore which works with nodes
+	 * @param {HTMLElement} element
+	 * @param {string} html
+	 */
 	insertHTMLBefore_Nodes: function(element, html) {
 
 		this._insertHTMLBefore(element.parentNode, html, element);
 
 	},
 
+	/**
+	 * Version of insertHTMLTop which works with nodes
+	 * @param {HTMLElement} element
+	 * @param {string} html
+	 */
 	insertHTMLTop_Nodes: function(element, html) {
 
 		this._insertHTMLBefore(element, html, element.firstChild);
 
 	},
 
+	/**
+	 * Version of insertHTMLBottom which works with nodes
+	 * @param {HTMLElement} element
+	 * @param {string} html
+	 */
 	insertHTMLBottom_Nodes: function(element, html) {
 
 		this._insertHTMLBefore(element, html, null);
@@ -740,6 +1053,12 @@ Firestorm.DOM = {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// range api
 
+	/**
+	 * Create a Range object, with limits between the given elements
+	 * @param {HTMLElement} start_element
+	 * @param {HTMLElement} end_element
+	 * @returns {Range|TextRange}
+	 */
 	_createInnerRange: function(start_element, end_element) {
 
 		var range = document.createRange();
@@ -749,6 +1068,12 @@ Firestorm.DOM = {
 
 	},
 
+	/**
+	 * Create a Range object, which includes the given elements
+	 * @param {HTMLElement} start_element
+	 * @param {HTMLElement} end_element
+	 * @returns {Range|TextRange}
+	 */
 	_createOuterRange: function(start_element, end_element) {
 
 		var range = document.createRange();
@@ -758,6 +1083,12 @@ Firestorm.DOM = {
 
 	},
 
+	/**
+	 * Version of replaceInnerRange, which works with Range API
+	 * @param {HTMLElement} start_element
+	 * @param {HTMLElement} end_element
+	 * @param {string} html
+	 */
 	replaceInnerRange_Range: function(start_element, end_element, html) {
 
 		var range = this._createInnerRange(start_element, end_element);
@@ -766,6 +1097,11 @@ Firestorm.DOM = {
 		range.insertNode(range.createContextualFragment(html));
 	},
 
+	/**
+	 * Version of clearOuterRange, which works with Range API
+	 * @param {HTMLElement} start_element
+	 * @param {HTMLElement} end_element
+	 */
 	clearOuterRange_Range: function(start_element, end_element) {
 
 		var range = this._createOuterRange(start_element, end_element);
@@ -773,6 +1109,11 @@ Firestorm.DOM = {
 
 	},
 
+	/**
+	 * Version of clearInnerRange, which works with Range API
+	 * @param {HTMLElement} start_element
+	 * @param {HTMLElement} end_element
+	 */
 	clearInnerRange_Range: function(start_element, end_element) {
 
 		var range = this._createInnerRange(start_element, end_element);
@@ -780,6 +1121,11 @@ Firestorm.DOM = {
 
 	},
 
+	/**
+	 * Version of insertHTMLAfter, which works with Range API
+	 * @param {HTMLElement} element
+	 * @param {string} html
+	 */
 	insertHTMLAfter_Range: function(element, html) {
 
 		var range = document.createRange();
@@ -790,6 +1136,11 @@ Firestorm.DOM = {
 
 	},
 
+	/**
+	 * Version of insertHTMLBefore, which works with Range API
+	 * @param {HTMLElement} element
+	 * @param {string} html
+	 */
 	insertHTMLBefore_Range: function(element, html) {
 
 		var range = document.createRange();
@@ -800,6 +1151,11 @@ Firestorm.DOM = {
 
 	},
 
+	/**
+	 * Version of insertHTMLTop, which works with Range API
+	 * @param {HTMLElement} element
+	 * @param {string} html
+	 */
 	insertHTMLTop_Range: function(element, html) {
 
 		var range = document.createRange();
@@ -809,6 +1165,11 @@ Firestorm.DOM = {
 
 	},
 
+	/**
+	 * Version of insertHTMLBottom, which works with Range API
+	 * @param {HTMLElement} element
+	 * @param {string} html
+	 */
 	insertHTMLBottom_Range: function(element, html) {
 
 		var last_child = element.lastChild,
@@ -833,10 +1194,17 @@ Firestorm.DOM = {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 };
-
-
+/**
+ * Collection of methods to manipulate arrays
+ */
 Firestorm.Array = {
 
+	/**
+	 * Swap two elements in given array
+	 * @param array
+	 * @param index_a
+	 * @param index_b
+	 */
 	swap: function(array, index_a, index_b) {
 		var temp = array[index_a];
 		array[index_a] = array[index_b];
@@ -844,9 +1212,10 @@ Firestorm.Array = {
 	},
 
 	/**
+	 * If array does not contain the given `value` - then push the value into array
 	 * @param {Array} array
 	 * @param {*} value
-	 * @returns {boolean} True, if element was not in array, false if it was already there
+	 * @returns {boolean} <kw>true</kw>, if array did not contain the element, <kw>false</kw> if it was already there
 	 */
 	include: function(array, value) {
 		if (array.indexOf(value) == -1) {
@@ -857,7 +1226,7 @@ Firestorm.Array = {
 	},
 
 	/**
-	 * Include all unique values from source_array into dest_array.
+	 * Include all unique values from `source_array` into `dest_array`
 	 * @param {Array} dest_array
 	 * @param {Array} source_array
 	 */
@@ -875,9 +1244,10 @@ Firestorm.Array = {
 	},
 
 	/**
+	 * Remove the first occurence of `value` from `array`
 	 * @param {Array} array
 	 * @param {*} value
-	 * @returns {boolean} True, if element was present in array
+	 * @returns {boolean} <kw>true</kw>, if element was present in array
 	 */
 	exclude: function(array, value) {
 		var index = array.indexOf(value);
@@ -886,6 +1256,11 @@ Firestorm.Array = {
 		return true;
 	},
 
+	/**
+	 * Remove the first occurrence of each value from array. Does not exclude duplicate occurrences
+	 * @param array
+	 * @param values
+	 */
 	excludeAll: function(array, values) {
 		var index;
 		for (var i = 0, count = values.length; i < count; i++) {
@@ -896,6 +1271,11 @@ Firestorm.Array = {
 		}
 	},
 
+	/**
+	 * Deep clone of array
+	 * @param array
+	 * @returns {Array}
+	 */
 	clone: function(array) {
 
 		var count = array.length,
@@ -912,6 +1292,12 @@ Firestorm.Array = {
 
 	},
 
+	/**
+	 * Find the first occurrence `old_value` and replace it with `new_value`
+	 * @param array
+	 * @param old_value
+	 * @param new_value
+	 */
 	replace: function(array, old_value, new_value) {
 
 		var index = array.indexOf(old_value);
@@ -922,10 +1308,20 @@ Firestorm.Array = {
 
 };
 
+/**
+ * Methods and regular expressions to manipulate strings
+ */
 Firestorm.String = {
 
 	// taken from json2
+	/**
+	 * Special characters, which must be escaped when serializing (quoting) a string
+	 */
 	QUOTE_ESCAPE_REGEX: /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
+	/**
+	 * Map for escaping special characters
+	 * @type {Object.<string, string>}
+	 */
 	quote_escape_map: {
 		// without these comments JSDoc throws errors
 		// https://github.com/jsdoc3/jsdoc/issues/549
@@ -946,6 +1342,10 @@ Firestorm.String = {
 		'\\': '\\\\'
 	},
 
+	/**
+	 * HTML special entities that must be escaped in attributes and similar cases
+	 * @type {Object.<string, string>}
+	 */
 	escape_chars: {
 		"&": "&amp;",
 		"<": "&lt;",
@@ -955,6 +1355,9 @@ Firestorm.String = {
 		"`": "&#x60;"
 	},
 
+	/**
+	 * Reverse map of HTML entities to perform unescaping
+	 */
 	unescape_chars: {
 		"&amp;": "&",
 		"&lt;": "<",
@@ -964,13 +1367,25 @@ Firestorm.String = {
 		"&#x60;": "`"
 	},
 
+	/**
+	 * Characters which must be escaped in a string, which is part of HTML document
+	 */
 	HTML_ESCAPE_REGEX: /[<>\&]/g,
+	/**
+	 * Characters that nust be escaped in HTML attributes
+	 */
 	ATTRIBUTE_ESCAPE_REGEX: /[&<>\"\'\`]/g,
+	/**
+	 * Characters that must be escaped when creating a &lt;textarea&gt; tag with initial content
+	 */
 	TEXTAREA_ESCAPE_REGEX: /[<>&\'\"]/g,
+	/**
+	 * Characters, which are escaped by the browser, when getting innerHTML of elements
+	 */
 	UNESCAPE_REGEX: /(&amp;|&lt;|&gt;)/g,
 
 	/**
-	 * Turn "dashed-string" into camelCased string
+	 * Turn "dashed-string" into "camelCased" string
 	 * @param {string} string
 	 * @returns {string}
 	 */
@@ -1006,6 +1421,12 @@ Firestorm.String = {
 		});
 	},
 
+	/**
+	 * Escape HTML entities found by `regex` argument
+	 * @param {string} string
+	 * @param {RegExp} regex A regular expression object, such as {@link Firestorm.String#HTML_ESCAPE_REGEX}
+	 * @returns {string}
+	 */
 	escape: function(string, regex) {
 		var escape_chars = this.escape_chars;
 		return string.replace(
@@ -1014,6 +1435,11 @@ Firestorm.String = {
 		);
 	},
 
+	/**
+	 * Unescape html entities which are escaped by browser (see {@link Firestorm.String#UNESCAPE_REGEX})
+	 * @param {string} string
+	 * @returns {string}
+	 */
 	unescape: function(string) {
 		var unescape_chars = this.unescape_chars;
 		return string.replace(
@@ -1022,6 +1448,11 @@ Firestorm.String = {
 		);
 	},
 
+	/**
+	 * Serialize a string into it's JavaScript representation. If you eval() the result - you will get the original value
+	 * @param string
+	 * @returns {*}
+	 */
 	quote: function(string) {
 
 		var result,
@@ -1042,8 +1473,16 @@ Firestorm.String = {
 
 };
 
+/**
+ * Collection of methods to manipulate objects
+ */
 Firestorm.Object = {
 
+	/**
+	 * Return true for object with no properties, and false otherwise
+	 * @param {Object} object_instance
+	 * @returns {boolean} <kw>true</kw>, if object is empty
+	 */
 	isEmpty: function(object_instance) {
 		// it's much faster than using Object.keys
 		//noinspection LoopStatementThatDoesntLoopJS
@@ -1053,6 +1492,11 @@ Firestorm.Object = {
 		return true;
 	},
 
+	/**
+	 * Deep clone of given object
+	 * @param {Object} object
+	 * @returns {Object}
+	 */
 	clone: function(object) {
 		var result = {},
 			key;
@@ -1066,6 +1510,11 @@ Firestorm.Object = {
 		return result;
 	},
 
+	/**
+	 * Shallow copy of an object (not a clone)
+	 * @param {Object} object
+	 * @returns {Object}
+	 */
 	copy: function(object) {
 
 		var result = {};
@@ -1075,11 +1524,22 @@ Firestorm.Object = {
 	}
 
 };
-
+/**
+ * Methods to manipulate Dates
+ */
 Firestorm.Date = {
 
+	/**
+	 * Numbers of days in months for non-leap year
+	 */
 	DAYS_IN_MONTH: [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31],
 
+	/**
+	 * Get number of days in month, with respect to leap years
+	 * @param {number} year
+	 * @param {number} month
+	 * @returns {number}
+	 */
 	getDaysInMonth: function(year, month) {
 		return (month == 1 && ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0))
 			? 29 // february in leap year
@@ -1089,8 +1549,13 @@ Firestorm.Date = {
 };
 
 Firestorm.init();
-
+/**
+ * Root object of the Lava framework
+ */
 var Lava = {
+	/**
+	 * Version numbers, split by comma to allow easier comparison of versions
+	 */
 	version: [],
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1161,27 +1626,46 @@ var Lava = {
 	widget: {},
 	/** @ignore */
 	scope: {},
-	user: {
-		// place for any other user defined classes and variables
-	},
+	/**
+	 * place for any other user defined classes and variables
+	 */
+	user: {},
 
-	/** @type {Lava.system.App} */
+	/**
+	 * Globak App class instance
+	 * @type {Lava.system.App}
+	 */
 	app: null,
-	/** @type {Lava.system.ViewManager} */
+	/**
+	 * Global ViewManager instance
+	 * @type {Lava.system.ViewManager}
+	 */
 	view_manager: null,
-	/** @type {Lava.system.PopoverManager} */
+	/**
+	 * Global PopoverManager instance
+	 * @type {Lava.system.PopoverManager}
+	 */
 	popover_manager: null,
 
+	/**
+	 * Container for locale-specific data (strings, date formats, etc)
+	 * @type {Object.<string, Object>}
+	 */
 	locales: {},
 
 	/**
+	 * Global named widget configs
 	 * @type {Object.<string, _cWidget>}
 	 */
 	widgets: {},
 	/**
+	 * Tag names that are parsed by Sugar class
 	 * @type {Object.<string, _cSugarSchema>}
 	 */
 	sugar_map: {},
+	/**
+	 * All class definitions are stored here until framework initialization to allow monkey-patching
+	 */
 	classes: {},
 
 	// end: default namespaces reservation
@@ -1190,7 +1674,10 @@ var Lava = {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// constants and predefined data
 
-	/** @enum {number} */
+	/**
+	 * Directions for {@link Lava.scope.Binding}
+	 * @enum {number}
+	 */
 	BINDING_DIRECTIONS: {
 		/** @const */
 		TO_WIDGET: 1,
@@ -1198,32 +1685,71 @@ var Lava = {
 		FROM_WIDGET: 2
 	},
 
-	/** @enum {number} */
+	/**
+	 * Types of template arguments, allowed in view events and roles
+	 * @enum {number}
+	 */
 	TARGET_ARGUMENT_TYPES: {
 		VALUE: 1,
 		BIND: 2
 	},
 
 	/**
+	 * Enumerable can refresh itself from these kinds of sources
+	 * @enum {number}
+	 */
+	ENUMERABLE_SOURCE_OBJECT_TYPES: {
+		OBJECT: 0,
+		ARRAY: 1,
+		ENUMERABLE: 2,
+		PROPERTIES: 3
+	},
+
+	/**
+	 * <kw>"id"</kw> attribute of framework's DOM elements start with this prefix.
 	 * When changing this, you must also change SYSTEM_ID_REGEX
 	 * @const
 	 * */
 	ELEMENT_ID_PREFIX: 'e',
+	/**
+	 * Does a string represent a valid element's id, used by the framework
+	 */
 	SYSTEM_ID_REGEX: /^e?\\d+$/,
+	/**
+	 * May a string be used as property/include name
+	 */
 	VALID_PROPERTY_NAME_REGEX: /^[a-zA-Z\_\$][a-zA-Z0-9\_\$]*$/,
+	/**
+	 * Match empty string or string with spaces
+	 */
 	EMPTY_REGEX: /^\s*$/,
+	/**
+	 * May a string be used as view's label
+	 */
 	VALID_LABEL_REGEX: /^[A-Za-z\_][A-Za-z\_0-9]*$/,
 
-	/** @returns {boolean} */
+	/**
+	 * Default comparison function
+	 * @returns {boolean}
+	 */
 	DEFAULT_LESS: function(a, b) { return a < b; },
 	// not sure if these obsolete tags should also be included: basefont, bgsound, frame, isindex
+	/**
+	 * HTML tags that do not require a closing tag
+	 */
 	VOID_TAGS: ['area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'],
+	/**
+	 * List of all JavaScript keywords, used when serializing objects
+	 */
 	JS_KEYWORDS: ['break','case','catch','class','const','continue','debugger','default','delete','do','else','export','extends','false','finally',
 		'for','function','if','import','in','instanceof','new','null','protected','return','super','switch','this','throw','true','try','typeof',
 		'var','while','with','abstract','boolean','byte','char','decimal','double','enum','final','float','get','implements','int','interface',
 		'internal','long','package','private','protected','public','sbyte','set','short','static','uint','ulong','ushort','void','assert','ensure',
 		'event','goto','invariant','namespace','native','require','synchronized','throws','transient','use','volatile'],
 
+	/**
+	 * List of common framework exceptions to make the framework smaller in size. May be excluded in production
+	 */
 	KNOWN_EXCEPTIONS: null,
 
 	// end: constants and predefined data
@@ -1232,16 +1758,36 @@ var Lava = {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// class members
 
+	/**
+	 * Cache for sugar API
+	 * @type {Object.<string, Lava.system.Sugar>}
+	 */
 	_widget_title_to_sugar_instance: {},
+	/**
+	 * Global instances of Sugar class by class name
+	 * @type {Object.<string, Lava.system.Sugar>}
+	 */
 	_sugar_instances: {},
 
-	/** @type {_tGUID} */
+	/**
+	 * Global UID counter
+	 * @type {_tGUID}
+	 */
 	guid: 1,
+	/**
+	 * Was init() called
+	 * @type {boolean}
+	 * @readonly
+	 */
 	is_init_done: false,
+	/**
+	 * Used to delay refresh loop after the current JavaScript thread exits. See {@link Lava#scheduleRefresh}
+	 */
 	_refresh_timer: null,
 
 	/**
-	 * Must be called before bootstrap() or creating any widgets.
+	 * Create all classes and global class instances.
+	 * Must be called before bootstrap() or creating any widgets
 	 */
 	init: function() {
 
@@ -1278,6 +1824,9 @@ var Lava = {
 
 	},
 
+	/**
+	 * Create global class instances
+	 */
 	_initGlobals: function() {
 
 		var constructor;
@@ -1296,7 +1845,7 @@ var Lava = {
 	/**
 	 * Validate and then eval the passed string.
 	 * String does not necessarily need to be in strict JSON format, just any valid plain JS object (without logic!).
-	 * Obviously, you must use this function only with the code you trust.
+	 * Obviously, you must use this function only with the code you trust
 	 * @param {string} serialized_object
 	 */
 	parseOptions: function(serialized_object) {
@@ -1305,6 +1854,7 @@ var Lava = {
 	},
 
 	/**
+	 * Does the string represent a valid identifier, that can be referenced from expressions
 	 * @param {string} id
 	 * @returns {boolean}
 	 */
@@ -1315,6 +1865,7 @@ var Lava = {
 	},
 
 	/**
+	 * Log a recoverable error
 	 * @param {string} msg
 	 */
 	logError: function(msg) {
@@ -1327,6 +1878,10 @@ var Lava = {
 
 	},
 
+	/**
+	 * Log a caught exception
+	 * @param {(Error|string|number)} e
+	 */
 	logException: function(e) {
 
 		this.logError((typeof(e) == 'string' || typeof(e) == 'number') ? e : e.message);
@@ -1334,7 +1889,8 @@ var Lava = {
 	},
 
 	/**
-	 * @param widget_title
+	 * Get extended config of global named widget
+	 * @param {string} widget_title
 	 * @returns {_cWidget}
 	 */
 	getWidgetConfig: function(widget_title) {
@@ -1354,21 +1910,22 @@ var Lava = {
 	},
 
 	/**
-	 * @param {string} title
-	 * @param [config]
-	 * @param [properties]
-	 * @returns {Lava.widget.Standard}
+	 * Create a root widget instance
+	 * @param {string} extends_title Name of global parent widget
+	 * @param {_cWidget} [config] Partial config for new widget, will be extended with parent's config
+	 * @param {Object} [properties] Properties for created widget
+	 * @returns {Lava.widget.Standard} Created widget instance
 	 */
-	createWidget: function(title, config, properties) {
+	createWidget: function(extends_title, config, properties) {
 
-		var widget_config = this.getWidgetConfig(title),
+		var widget_config = this.getWidgetConfig(extends_title),
 			constructor;
 
 		if (config) {
 
-			if (Lava.schema.DEBUG && config.extends && config.extends != title) Lava.t("Malformed widget config");
+			if (Lava.schema.DEBUG && config.extends && config.extends != extends_title) Lava.t("Malformed widget config");
 
-			config.extends = title;
+			config.extends = extends_title;
 			Lava.extenders[config.extender_type || widget_config.extender_type](config);
 
 		} else {
@@ -1383,6 +1940,11 @@ var Lava = {
 
 	},
 
+	/**
+	 * Is there a global widget with such `widget_title` registered
+	 * @param {string} widget_title
+	 * @returns {boolean}
+	 */
 	hasWidgetConfig: function(widget_title) {
 
 		return widget_title in this.widgets;
@@ -1390,9 +1952,9 @@ var Lava = {
 	},
 
 	/**
-	 * Take an array of event names and leave those, which are not in DEFAULT_EVENTS schema setting,
+	 * Take an array of event names and remove default from {@link Lava.schema#system.DEFAULT_EVENTS}
 	 * @param {Array.<string>} event_names
-	 * @returns {Array.<string>}
+	 * @returns {Array.<string>} Filtered array of event names
 	 */
 	excludeDefaultEvents: function(event_names) {
 
@@ -1416,7 +1978,7 @@ var Lava = {
 
 	/**
 	 * Throw an error
-	 * @param {string} [message]
+	 * @param {string} [message] Defaults to <kw>"Debug assertion failed"</kw>
 	 */
 	t: function(message) {
 
@@ -1428,6 +1990,10 @@ var Lava = {
 
 	},
 
+	/**
+	 * Create an instance of `class_name` and register it as sugar processor {@link Lava.system.Sugar}
+	 * @param class_name
+	 */
 	registerSugar: function(class_name) {
 
 		if (Lava.schema.DEBUG && (class_name in this._sugar_instances)) Lava.t('Class is already registered as sugar');
@@ -1436,6 +2002,11 @@ var Lava = {
 
 	},
 
+	/**
+	 * Get a Sugar class instance by it's name
+	 * @param {string} class_name
+	 * @returns {Lava.system.Sugar}
+	 */
 	getSugarInstance: function(class_name) {
 
 		return this._sugar_instances[class_name];
@@ -1443,6 +2014,7 @@ var Lava = {
 	},
 
 	/**
+	 * Get a Sugar class instance by the title of the widget (each widget has a class that processes sugar for it)
 	 * @param {string} widget_title
 	 * @returns {_iSugarParser}
 	 */
@@ -1465,7 +2037,8 @@ var Lava = {
 	},
 
 	/**
-	 * @param {string} widget_title
+	 * Register a global widget config
+	 * @param {string} widget_title Title for new global widget
 	 * @param {_cWidget} widget_config
 	 */
 	storeWidgetSchema: function(widget_title, widget_config) {
@@ -1483,6 +2056,9 @@ var Lava = {
 
 	},
 
+	/**
+	 * Parse the page &lt;body&gt; or special "lava-app" regions in the page and replace them with widgets
+	 */
 	bootstrap: function() {
 
 		var body = document.body,
@@ -1510,7 +2086,7 @@ var Lava = {
 					element = bootstrap_targets[i];
 					result = this._elementToWidget(element, {class: 'Morph'});
 					result.inject(element, 'After');
-					element.destroy();
+					Firestorm.Element.destroy(element);
 
 				//} catch (e) {
 
@@ -1528,6 +2104,12 @@ var Lava = {
 
 	},
 
+	/**
+	 * Parse the DOM element instance as a widget template and create a widget
+	 * @param {HTMLElement} element
+	 * @param {Object} container_config
+	 * @returns {Lava.widget.Standard}
+	 */
 	_elementToWidget: function(element, container_config) {
 
 		var config,
@@ -1557,7 +2139,8 @@ var Lava = {
 
 	/**
 	 * Behaves like a widget constructor, but accepts raw (unextended) widget config.
-	 * Extends the config and creates the widget instance with the right class.
+	 * Extends the config and creates the widget instance with the right class. Extension process stores the right
+	 * class in widget config, so next time a widget is constructed - this method is not called.
 	 *
 	 * @param {_cWidget} config
 	 * @param {Lava.widget.Standard} widget
@@ -1585,6 +2168,16 @@ var Lava = {
 
 	},
 
+	/**
+	 * Behaves like view/widget constructor, but resolves the correct class name from widget hierarchy
+	 *
+	 * @param {(_cView|_cWidget)} config
+	 * @param {Lava.widget.Standard} widget
+	 * @param {Lava.view.Abstract} parent_view
+	 * @param {Lava.system.Template} template
+	 * @param {Object} properties
+	 * @returns {(Lava.widget.Standard|Lava.view.Abstract)}
+	 */
 	ClassLocatorGateway: function(config, widget, parent_view, template, properties) {
 
 		var name_source = Lava.view_manager.locateTarget(widget, config.class_locator.locator_type, config.class_locator.name);
@@ -1596,8 +2189,9 @@ var Lava = {
 	},
 
 	/**
-	 * @param {string} class_name
-	 * @param {Object} class_object
+	 * Store class body in `this.classes` (before `init()`), or call {@link Lava.ClassManager#define} directly (after `init()`)
+	 * @param {string} class_name Name of the class
+	 * @param {Object} class_object Class body
 	 */
 	define: function(class_name, class_object) {
 
@@ -1613,6 +2207,10 @@ var Lava = {
 
 	},
 
+	/**
+	 * Recursively define a class, stored in `this.classes`
+	 * @param {string} path
+	 */
 	_loadClass: function(path) {
 
 		var class_body = this.classes[path],
@@ -1648,7 +2246,7 @@ var Lava = {
 	/**
 	 * Create a function, which returns a clone of given template or config.
 	 * Note: widget configs must not be extended!
-	 * @param {*} config
+	 * @param {*} config Any clonable JavaScript object without circular references
 	 * @returns {function}
 	 */
 	createCloner: function(config) {
@@ -1660,7 +2258,8 @@ var Lava = {
 	/**
 	 * Feature of the current binding system:
 	 * sometimes, a view may be rendered with dirty bindings. They will be refreshed in the next refresh loop.
-	 * This may happen during widget inject() outside of normal App lifecycle, and developer may forget to call Lava.refreshViews().
+	 * This may happen during widget {@link Lava.widget.Standard#inject|inject()} outside of normal App lifecycle,
+	 * and developer may forget to call Lava.refreshViews()
 	 */
 	scheduleRefresh: function() {
 
@@ -1680,6 +2279,10 @@ var Lava = {
 
 	},
 
+	/**
+	 * Perform view refresh outside of normal application lifecycle (in the end of AJAX call, or from browser console).
+	 * Note: call to this function does not guarantee, that views will be refreshed immediately
+	 */
 	refreshViews: function() {
 
 		if (!Lava.Core.isProcessingEvent()) {
@@ -1695,12 +2298,22 @@ var Lava = {
 
 	},
 
+	/**
+	 * Returns true, if tag name is void (does nor require closing tag), like "img" or "input"
+	 * @param {string} name
+	 * @returns {boolean}
+	 */
 	isVoidTag: function(name) {
 
 		return this.VOID_TAGS.indexOf(name) != -1;
 
 	},
 
+	/**
+	 * Used in process of config extension to merge {@link _cWidget#storage_schema}
+	 * @param {Object} dest Child schema
+	 * @param {Object} source Parent schema
+	 */
 	mergeStorageSchema: function(dest, source) {
 
 		var name;
@@ -1760,40 +2373,74 @@ var Lava = {
 
 	},
 
+	/**
+	 * Suspend a listener, returned by {@link Lava.mixin.Observable#on}
+	 * @param {_tListener} listener
+	 */
 	suspendListener: function(listener) {
 		listener.fn = this.noop;
 	},
 
+	/**
+	 * Resume listener, suspended by {@link Lava#suspendListener}
+	 * @param {_tListener} listener
+	 */
 	resumeListener: function(listener) {
 		listener.fn = listener.fn_original;
 	},
 
+	/**
+	 * Do nothing
+	 */
 	noop: function() {}
 
 };
-
+/**
+ * Settings for the entire framework
+ */
 Lava.schema = {
 	/** @const */
 	//ELEMENT_EVENT_PREFIX: 'data-e-',
 	/**
 	 * This option should be turned off in production, but keep in mind: options, defined in template, are part of
 	 * view configuration, and they must be valid JSON objects. Putting there anything else will most likely break
-	 * existing and future functionality. Options must be serializable.
+	 * existing and future functionality. Options must be serializable!
 	 * @const
 	 */
 	VALIDATE_OPTIONS: true,
-	/** @const */
+	/**
+	 * Whether to check paths to objects in evaluated options
+	 * @const
+	 */
 	VALIDATE_OBJECT_PATHS: true,
-	/** @const */
+	/**
+	 * Sort algorithm is called stable, if it preserves order of items that are already sorted. Suitable for ordering
+	 * table data by several columns
+	 * @const
+	 */
 	DEFAULT_STABLE_SORT_ALGORITHM: 'mergeSort',
+	/**
+	 * Unstable algorithms are faster, but subsequent sorts mess the previous results
+	 * @const
+	 */
 	DEFAULT_UNSTABLE_SORT_ALGORITHM: 'mergeSort',
+	/**
+	 * Core settings
+	 */
 	system: {
-		/** @const */
+		/**
+		 * Class for {@link Lava#app}
+		 * @const
+		 */
 		APP_CLASS: 'Lava.system.App',
-		/** @const */
+		/**
+		 * Class for {@link Lava#view_manager}
+		 * @const
+		 */
 		VIEW_MANAGER_CLASS: 'Lava.system.ViewManager',
 		/**
-		 * ViewManager events (routed via templates), which are enabled by default, so does not require a call to lendEvent().
+		 * ViewManager events (routed via templates), which are enabled by default, so does not require a call to lendEvent()
+		 * @const
 		 */
 		DEFAULT_EVENTS: [
 			'click', 'dblclick', 'mouseup', 'mousedown', 'contextmenu',
@@ -1802,77 +2449,186 @@ Lava.schema = {
 		],
 
 		/**
-		 * Lava.Cron uses it for animation
+		 * {@link Lava.Cron} uses requestAnimationFrame, if browser supports it
+		 * @const
 		 */
 		ALLOW_REQUEST_ANIMATION_FRAME: true
 	},
+	/**
+	 * Settings for {@link Lava#popover_manager}
+	 */
 	popover_manager: {
+		/**
+		 * Is PopoverManager enabled
+		 * @const
+		 */
 		IS_ENABLED: true,
+		/**
+		 * Class for {@link Lava#popover_manager}
+		 * @const
+		 */
 		CLASS: 'Lava.system.PopoverManager',
+		/**
+		 * Whether it will ignore tooltips with no text
+		 * @const
+		 */
 		HIDE_EMPTY_TOOLTIPS: true
 	},
+	/**
+	 * Settings for Data layer: modules, records and fields
+	 */
 	data: {
-		/** @const */
+		/**
+		 * Default class for modules
+		 * @const
+		 */
 		DEFAULT_MODULE_CLASS: 'Module',
-		/** @const */
+		/**
+		 * Default class for module records
+		 * @const
+		 */
 		DEFAULT_RECORD_CLASS: 'Record',
-		/** @const */
+		/**
+		 * Default class for record fields
+		 * @const
+		 */
 		DEFAULT_FIELD_TYPE: 'Basic',
 		/**
+		 * Whether to validate the data, which is loaded into modules.
 		 * Generally, it's NOT recommended to turn this off in production
+		 * @const
 		 */
 		VALIDATE_IMPORT_DATA: true
 	},
+	/**
+	 * User-defined module settings
+	 */
 	modules: {},
+	/**
+	 * Settings for views
+	 */
 	view: {
-		/** @const */
+		/**
+		 * Whether to validate content of the 'class' attribute on Element containers
+		 * @const
+		 */
 		VALIDATE_CLASS_NAMES: true,
-		/** @const */
+		/**
+		 * Whether to validate content of the 'style' attribute on Element containers
+		 * @const
+		 */
 		VALIDATE_STYLES: true,
-		/** @const */
+		/**
+		 * How much times a scope may be refreshed during one refresh loop, before it's considered
+		 * an infinite refresh loop
+		 * @const
+		 */
 		REFRESH_INFINITE_LOOP_THRESHOLD: 3,
+		/**
+		 * Gateway, which constructs the views with dynamic class names
+		 * @const
+		 */
 		DEFAULT_CLASS_LOCATOR_GATEWAY: 'Lava.ClassLocatorGateway'
 	},
+	/**
+	 * Settings for parsers
+	 */
 	parsers: {
+		/**
+		 * Class that corresponds to each view
+		 * @const
+		 */
 		view_name_to_class_map: {
 			'expression': 'Expression',
 			'foreach': 'Foreach',
 			'if': 'If',
 			'view': 'View'
 		},
+		/**
+		 * Whether to keep original view names in compiled templates, or leave just classes
+		 * @const
+		 */
 		PRESERVE_VIEW_NAME: false,
+		/**
+		 * When parsing resources: whether to call {@link Lava.resources#exportTranslatableString}
+		 * @const
+		 */
 		EXPORT_STRINGS: false
 	},
+	/**
+	 * Widget settings
+	 */
 	widget: {
 		/**
+		 * Whether to validate the values, that are `set()` to widget instances.
 		 * May be treated same as DEBUG switch (most likely, you will want to turn this off in production)
 		 * @const
 		 */
 		VALIDATE_PROPERTY_TYPES: true,
-		/** @const */
+		/**
+		 * Default class that parses widget's sugar
+		 * @const
+		 */
 		DEFAULT_SUGAR_CLASS: 'Lava.system.Sugar',
+		/**
+		 * Whether a global widget config may be overwritten
+		 */
 		ALLOW_REDEFINITION: false,
+		/**
+		 * Constructor, that extends configs
+		 * @const
+		 */
 		DEFAULT_EXTENSION_GATEWAY: 'Lava.WidgetConfigExtensionGateway',
+		/**
+		 * Constructor, that resolves class names
+		 * @const
+		 */
 		DEFAULT_CLASS_LOCATOR_GATEWAY: 'Lava.ClassLocatorGateway',
+		/**
+		 * Default config extension algorithm
+		 */
 		DEFAULT_EXTENDER: 'Default'
 	},
+	/**
+	 * Classes, that parse sugar. An instance of each class will be created at the time of initialization
+	 * @const
+	 */
 	SUGAR_CLASSES: ['Lava.system.Sugar'],
 
 	/**
-	 * Current locale. Must not be null or 'default'
+	 * Current locale. Must not be <kw>null</kw> or <kw>"default"</kw>
+	 * @const
 	 */
 	LOCALE: 'en',
+	/**
+	 * May be used to turn off resources globally and cut away all resource-related code
+	 * @define
+	 */
 	RESOURCES_ENABLED: true,
 
-	/** @define */
+	/**
+	 * Framework contains hundreds of debug checks. It's strictly not recommended to turn this off
+	 * at the time of development and testing
+	 * @define
+	 */
 	DEBUG: true
 };
-
+/**
+ * Pretty-print any JavaScript object into string, which can be eval()'ed to reconstruct original object
+ */
 Lava.Serializer = {
 
-	/** @define {boolean} */
+	/**
+	 * If you know that you serialize objects with only valid property names (all characters are alphanumeric),
+	 * you may turn this off
+	 * @define {boolean}
+	 */
 	CHECK_PROPERTY_NAMES: true,
 
+	/**
+	 * Concrete serializers for each value type
+	 * @type {Object.<string, string>}
+	 */
 	_callback_map: {
 		string: '_serializeString',
 		array: '_serializeArray',
@@ -1885,6 +2641,10 @@ Lava.Serializer = {
 		'undefined': '_serializeUndefined'
 	},
 
+	/**
+	 * Used to pretty-print values in objects
+	 * @type {Object.<string, true>}
+	 */
 	_complex_types: {
 		array: true,
 		'object': true,
@@ -1893,6 +2653,7 @@ Lava.Serializer = {
 	},
 
 	/**
+	 * Serialize any value
 	 * @param {*} value
 	 * @returns {string}
 	 */
@@ -1902,6 +2663,12 @@ Lava.Serializer = {
 
 	},
 
+	/**
+	 * Perform value serialization
+	 * @param {*} value
+	 * @param {string} padding The initial padding for JavaScript code
+	 * @returns {string}
+	 */
 	_serializeValue: function(value, padding) {
 
 		var type = Firestorm.getType(value),
@@ -1915,6 +2682,12 @@ Lava.Serializer = {
 
 	},
 
+	/**
+	 * Perform serialization of an array
+	 * @param {Array} data
+	 * @param {string} padding
+	 * @returns {string}
+	 */
 	_serializeArray: function(data, padding) {
 
 		var tempResult = [],
@@ -1947,12 +2720,23 @@ Lava.Serializer = {
 
 	},
 
+	/**
+	 * Turn a string into it's JavaScript representation
+	 * @param {string} data
+	 * @returns {string}
+	 */
 	_serializeString: function(data) {
 
 		return Firestorm.String.quote(data);
 
 	},
 
+	/**
+	 * Serialize an object
+	 * @param {Object} data
+	 * @param {string} padding
+	 * @returns {string}
+	 */
 	_serializeObject: function(data, padding) {
 
 		var tempResult = [],
@@ -1966,8 +2750,8 @@ Lava.Serializer = {
 
 		// this may be faster than using Object.keys(data), but I haven't done speed comparison yet.
 		// Purpose of the following code:
-		// 1) if object has something in it than 'is_empty' will be set to false
-		// 2) if there is only one property in it, than 'only_key' will contain it's name
+		// 1) if object has something in it then 'is_empty' will be set to false
+		// 2) if there is only one property in it, then 'only_key' will contain it's name
 		for (name in data) {
 			if (only_key !== null) { // strict comparison - in case the key is valid, but evaluates to false
 				only_key = null;
@@ -2014,11 +2798,18 @@ Lava.Serializer = {
 
 	},
 
+	/**
+	 * Serialize one key-value pair in an object
+	 * @param {string} name
+	 * @param {*} value
+	 * @param {string} padding
+	 * @returns {string}
+	 */
 	_serializeObjectProperty: function(name, value, padding) {
 
 		var type = Firestorm.getType(value);
 
-		// if you serialize only Lava configs, than most likely you do not need this check,
+		// if you serialize only Lava configs, then most likely you do not need this check,
 		// cause the property names in configs are always valid.
 		if (this.CHECK_PROPERTY_NAMES && (!Lava.VALID_PROPERTY_NAME_REGEX.test(name) || Lava.JS_KEYWORDS.indexOf(name) != -1)) {
 
@@ -2031,6 +2822,7 @@ Lava.Serializer = {
 	},
 
 	/**
+	 * Serialize a function
 	 * @param {function} data
 	 * @returns {string}
 	 */
@@ -2047,30 +2839,53 @@ Lava.Serializer = {
 
 	},
 
+	/**
+	 * Turn a boolean into string
+	 * @param {boolean} data
+	 * @returns {string}
+	 */
 	_serializeBoolean: function(data) {
 
 		return data.toString();
 
 	},
 
+	/**
+	 * Turn a number into string
+	 * @param {number} data
+	 * @returns {string}
+	 */
 	_serializeNumber: function(data) {
 
 		return data.toString();
 
 	},
 
+	/**
+	 * Turn a regexp into string
+	 * @param {RegExp} data
+	 * @returns {string}
+	 */
 	_serializeRegexp: function(data) {
 
 		return data.toString();
 
 	},
 
+	/**
+	 * Return <kw>"null"</kw>
+	 * @returns {string}
+	 */
 	_serializeNull: function() {
 
 		return 'null';
 
 	},
 
+	/**
+	 * Return <kw>"undefined"</kw>
+	 * @returns {string}
+	 */
 	_serializeUndefined: function() {
 
 		return 'undefined';
@@ -2078,10 +2893,13 @@ Lava.Serializer = {
 	}
 
 };
-
+/**
+ * Global functions that are callable from templates
+ */
 Lava.modifiers = {
 
 	/**
+	 * Transform a string to lower case
 	 * @param value
 	 * @returns {string}
 	 */
@@ -2121,6 +2939,11 @@ Lava.modifiers = {
 
 	},
 
+	/**
+	 * Translate a boolean type into user language
+	 * @param value
+	 * @returns {string}
+	 */
 	translateBoolean: function(value) {
 
 		if (Lava.schema.DEBUG && typeof(value) != 'boolean') Lava.t("translateBoolean: argument is not boolean type");
@@ -2128,6 +2951,12 @@ Lava.modifiers = {
 
 	},
 
+	/**
+	 * Join an array of values
+	 * @param {Array} array
+	 * @param {string} glue
+	 * @returns {string}
+	 */
 	joinArray: function(array, glue) {
 
 		return array ? array.join(glue) : '';
@@ -2135,7 +2964,9 @@ Lava.modifiers = {
 	}
 
 };
-
+/**
+ * Easings for animation
+ */
 Lava.transitions = {
 
 	linear: function(x) {
@@ -2181,12 +3012,15 @@ Lava.transitions = {
 };
 
 
-Lava.resources =
 /**
- * API for working with resources, gathered into separate namespace for convenience.
+ * API for working with resources, gathered into separate namespace for convenience
  */
-{
+Lava.resources = {
 
+	/**
+	 * Helper operations for merging container resources
+	 * @type {Object.<string, string>}
+	 */
 	_container_resources_operations_map: {
 		static_properties: '_containerSet',
 		static_styles: '_containerSet',
@@ -2199,6 +3033,10 @@ Lava.resources =
 		remove_classes: '_containerRemoveArray'
 	},
 
+	/**
+	 * Another map for container resources operations
+	 * @type {Object.<string, string>}
+	 */
 	_container_resources_operands_map: {
 		add_properties: 'static_properties',
 		remove_properties: 'static_properties',
@@ -2209,8 +3047,8 @@ Lava.resources =
 	},
 
 	/**
-	 * May be overwritten by user to handle string definitions in widget resources.
-	 * Example usage: create an export file for translation.
+	 * Does nothing by default, but may be overwritten by user to handle string definitions in widget resources.
+	 * Example usage: create an export file for translation
 	 *
 	 * @param {(_cTranslatableString|_cTranslatablePlural)} data
 	 * @param {string} widget_title May be used as Domain for strings
@@ -2222,9 +3060,10 @@ Lava.resources =
 	},
 
 	/**
-	 * @param {string} widget_title
-	 * @param {string} locale
-	 * @param {Object} locale_resources
+	 * Attach resources object to global widget definition
+	 * @param {string} widget_title The name in {@link Lava#widgets}
+	 * @param {string} locale Locale of the resource object
+	 * @param {Object} locale_resources The object with resources for given locale
 	 */
 	addWidgetResource: function(widget_title, locale, locale_resources) {
 
@@ -2244,69 +3083,13 @@ Lava.resources =
 
 	},
 
-	_mergeResourceContainerObject: function(name, target, result) {
-
-		var i,
-			count,
-			static_property_name = 'static_' + name,
-			add_property_name = 'add_' + name,
-			remove_property_name = 'remove_' + name;
-
-		if (static_property_name in target) {
-
-			result[static_property_name] = target[static_property_name];
-
-		} else if ((add_property_name in target) || (remove_property_name in target)) {
-
-			if (Lava.schema.DEBUG && !(static_property_name in result)) Lava.t("Merging resources container: add/remove operation present, but value is not defined");
-			result[static_property_name] = Firestorm.Object.copy(result[static_property_name]);
-			if (add_property_name in target) {
-				Firestorm.extend(result[static_property_name], target[add_property_name]);
-			}
-			if (remove_property_name in target) {
-				for (i = 0, count = target[remove_property_name].length; i < count; i++) {
-					delete result[static_property_name][target[remove_property_name][i]];
-				}
-			}
-
-		}
-
-	},
-
-	_mergeContainerResource: function(top_object, bottom_object) {
-
-		var result = Firestorm.Object.copy(bottom_object);
-
-		this._mergeResourceContainerObject('styles', top_object, result);
-		this._mergeResourceContainerObject('properties', top_object, result);
-
-		if ('static_classes' in top_object) {
-
-			result['static_classes'] = top_object['static_classes'];
-
-		} else if (('add_classes' in top_object) || ('remove_classes' in top_object)) {
-
-			if (Lava.schema.DEBUG && !('static_classes' in result)) Lava.t("Merging resources container: add/remove operation present, but value is not defined");
-			result['static_classes'] = result['static_classes'].slice();
-			if ('add_classes' in top_object) {
-				result['static_classes'] = result['static_classes'].concat(top_object['add_classes']);
-			}
-			if ('remove_classes' in top_object) {
-				Firestorm.Array.excludeAll(result['static_classes'], top_object['remove_classes']);
-			}
-
-		}
-
-		return result;
-
-	},
-
 	/**
-	 * top_resources is expected to be a copy or a new empty object.
-	 * Properties in top_resources have priority over bottom_resources.
+	 * Merge resource objects.
+	 * `top_resources` is expected to be a copy or a new empty object.
+	 * Properties in `top_resources` have priority over `bottom_resources`
 	 *
-	 * @param top_resources
-	 * @param bottom_resources
+	 * @param {Object} top_resources Child resources
+	 * @param {Object} bottom_resources Parent resources
 	 */
 	mergeResources: function(top_resources, bottom_resources) {
 
@@ -2349,6 +3132,10 @@ Lava.resources =
 
 	},
 
+	/**
+	 * Container operations are stacked until first usage to guarantee correct inheritance
+	 * @param {Object} resource_object
+	 */
 	mergeRootContainerStacks: function(resource_object) {
 
 		for (var name in resource_object) {
@@ -2364,6 +3151,11 @@ Lava.resources =
 
 	},
 
+	/**
+	 * Perform merging of "container_stack" resource into "container" resource
+	 * @param {Array} stack
+	 * @returns {Object}
+	 */
 	_mergeRootContainerStack: function(stack) {
 
 		var i = 0,
@@ -2382,10 +3174,12 @@ Lava.resources =
 
 	},
 
+	/** Container resources merging API */
 	_containerSet: function(result, name, value) {
 		result[name] = value;
 	},
 
+	/** Container resources merging API */
 	_containerAddObject: function(result, name, value) {
 		var operand_name = this._container_resources_operands_map[name];
 		if (operand_name in result) {
@@ -2395,6 +3189,7 @@ Lava.resources =
 		}
 	},
 
+	/** Container resources merging API */
 	_containerAddArray: function(result, name, value) {
 		var operand_name = this._container_resources_operands_map[name];
 		if (operand_name in result) {
@@ -2404,6 +3199,7 @@ Lava.resources =
 		}
 	},
 
+	/** Container resources merging API */
 	_containerRemoveObject: function(result, name, value) {
 
 		var target,
@@ -2416,6 +3212,7 @@ Lava.resources =
 		}
 	},
 
+	/** Container resources merging API */
 	_containerRemoveArray: function(result, name, value) {
 		var operand_name = this._container_resources_operands_map[name];
 		if (operand_name in result) {
@@ -2425,8 +3222,9 @@ Lava.resources =
 
 	/**
 	 * Helper function which puts the value inside the resources object under given path string.
+	 * Used while parsing templates
 	 *
-	 * @param {Object} target_object the resources object which is being parsed
+	 * @param {Object} target_object The resources object which is being parsed
 	 * @param {string} path Path inside the resources object
 	 * @param {*} value
 	 */
@@ -2469,7 +3267,7 @@ Lava.resources =
 
 };
 /**
- * Note: types require initialization (Lava.initCore())
+ * Predefined objects which can parse and check strings and values for compliance to certain types
  */
 Lava.types = {
 
@@ -2492,6 +3290,9 @@ Lava.types = {
 
 	},
 
+	/**
+	 * A common boolean type (<kw>true</kw> or <kw>false</kw>)
+	 */
 	Boolean: {
 
 		extends: 'AbstractType',
@@ -2527,6 +3328,9 @@ Lava.types = {
 
 	},
 
+	/**
+	 * Any string
+	 */
 	String: {
 
 		extends: 'AbstractType',
@@ -2541,7 +3345,7 @@ Lava.types = {
 
 		},
 
-		isValidString: function(value) {
+		isValidString: function() {
 
 			return true;
 
@@ -2555,6 +3359,9 @@ Lava.types = {
 
 	},
 
+	/**
+	 * Any decimal number
+	 */
 	Number: {
 
 		extends: 'AbstractType',
@@ -2585,6 +3392,9 @@ Lava.types = {
 
 	},
 
+	/**
+	 * Numbers without fractional part
+	 */
 	Integer: {
 
 		extends: 'Number',
@@ -2593,6 +3403,9 @@ Lava.types = {
 
 	},
 
+	/**
+	 * Integers strictly greater than zero
+	 */
 	PositiveInteger: {
 
 		extends: 'Number',
@@ -2601,6 +3414,9 @@ Lava.types = {
 
 	},
 
+	/**
+	 * Integers greater than zero, or zero
+	 */
 	NonNegativeInteger: {
 
 		extends: 'Number',
@@ -2609,6 +3425,9 @@ Lava.types = {
 
 	},
 
+	/**
+	 * A number between 0 and 1, inclusive
+	 */
 	Percent: {
 
 		extends: 'Number',
@@ -2627,6 +3446,9 @@ Lava.types = {
 
 	},
 
+	/**
+	 * A string with an array of allowed values
+	 */
 	Set: {
 
 		extends: 'AbstractType',
@@ -2658,7 +3480,7 @@ Lava.types = {
 	},
 
 	/**
-	 * An HTML attribute which can take it's name as a value.
+	 * An HTML attribute which can take it's name as a value. Converts to <kw>true</kw>
 	 * Example:
 	 * checked="checked"
 	 * checked=""
@@ -2692,6 +3514,9 @@ Lava.types = {
 
 	},
 
+	/**
+	 * A string which is converted to any other value from a map object
+	 */
 	Map: {
 
 		extends: 'AbstractType',
@@ -2722,6 +3547,9 @@ Lava.types = {
 
 	},
 
+	/**
+	 * Any array
+	 */
 	Array: {
 
 		extends: 'AbstractType',
@@ -2746,6 +3574,9 @@ Lava.types = {
 
 	},
 
+	/**
+	 * Any date
+	 */
 	Date: {
 
 		extends: 'AbstractType',
@@ -2762,7 +3593,7 @@ Lava.types = {
 
 		},
 
-		fromSafeString: function(value) {
+		fromSafeString: function() {
 
 			Lava.t();
 
@@ -2799,7 +3630,10 @@ Lava.types = {
  */
 Lava.extenders = {
 
-	// properties that must be merged with parent configs
+	/**
+	 * Properties that must be merged with parent configs
+	 * @type {Object.<string, string>}
+	 */
 	_widget_config_merged_properties: {
 		includes: '_mergeIncludes',
 		bindings: '_mergeConfigProperty',
@@ -2811,7 +3645,10 @@ Lava.extenders = {
 		storage_schema: '_mergeStorageSchema'
 	},
 
-	// property_name => needs_implement || property_merge_map
+	/**
+	 * property_name => needs_implement || property_merge_map
+	 * @type {Object}
+	 */
 	_sugar_merge_map: {
 		attribute_mappings: true,
 		content_schema: {
@@ -2819,8 +3656,18 @@ Lava.extenders = {
 		}
 	},
 
+	/**
+	 * Properties that are merged separately
+	 * @type {Array.<string>}
+	 */
 	_exceptions: ['resources', 'resources_cache', 'storage'],
 
+	/**
+	 * Common property merging algorithm, suitable for most cases
+	 * @param {_cWidget} dest_container The child config
+	 * @param {_cWidget} source_container The parent config
+	 * @param {string} property_name The name of the property to merge
+	 */
 	_mergeConfigProperty: function(dest_container, source_container, property_name) {
 
 		var name,
@@ -2839,6 +3686,12 @@ Lava.extenders = {
 
 	},
 
+	/**
+	 * Advanced merging algorithm
+	 * @param {Object} dest
+	 * @param {Object} source
+	 * @param {Object} map
+	 */
 	_mergeWithMap: function(dest, source, map) {
 
 		var name;
@@ -2867,12 +3720,25 @@ Lava.extenders = {
 
 	},
 
+	/**
+	 * Merge algorithm for {@link _cWidget#sugar}
+	 * @param {_cWidget} dest_container Child config
+	 * @param {_cWidget} source_container Parent config
+	 * @param {string} property_name
+	 */
 	_mergeSugar: function(dest_container, source_container, property_name) {
 
 		this._mergeWithMap(dest_container[property_name], source_container[property_name], this._sugar_merge_map);
 
 	},
 
+	/**
+	 * Merge algorithm for {@link _cWidget#includes}
+	 * @param {_cWidget} dest_container Child config
+	 * @param {_cWidget} source_container Parent config
+	 * @param {string} property_name
+	 * @param {string} parent_widget_name Name of the parent widget
+	 */
 	_mergeIncludes: function(dest_container, source_container, property_name, parent_widget_name) {
 
 		var name,
@@ -2898,6 +3764,12 @@ Lava.extenders = {
 
 	},
 
+	/**
+	 * Merging algorithm for {@link _cWidget#storage}
+	 * @param {_cWidget} dest_container Child config
+	 * @param {_cWidget} source_container Parent config
+	 * @param {string} property_name
+	 */
 	_mergeStorage: function(dest_container, source_container, property_name) {
 
 		var name,
@@ -2925,6 +3797,11 @@ Lava.extenders = {
 
 	},
 
+	/**
+	 * Merge algorithm for resources
+	 * @param {_cWidget} config
+	 * @param {_cWidget} parent_config
+	 */
 	_extendResources: function(config, parent_config) {
 
 		var locale_cache = {};
@@ -2955,6 +3832,12 @@ Lava.extenders = {
 
 	},
 
+	/**
+	 * Merge algorithm for {@link _cWidget#storage_schema}
+	 * @param {_cWidget} dest_container
+	 * @param {_cWidget} source_container
+	 * @param {string} property_name
+	 */
 	_mergeStorageSchema: function(dest_container, source_container, property_name) {
 
 		Lava.mergeStorageSchema(dest_container[property_name], source_container[property_name]);
@@ -2962,6 +3845,7 @@ Lava.extenders = {
 	},
 
 	/**
+	 * Extend raw widget config
 	 * @param {_cWidget} config
 	 */
 	Default: function(config) {
@@ -3022,33 +3906,55 @@ Lava.extenders = {
 
 		config.is_extended = true;
 
-	},
-
-	_noop: function() {
-
 	}
 
 };
-
+/**
+ * Controls animations
+ */
 Lava.Cron = {
 
+	/**
+	 * Minimum delay between animation frames
+	 * @type {number}
+	 * @const
+	 */
 	DEFAULT_TIMER_DELAY: 20, // up to 50 fps
 
-	timer: null,
+	/**
+	 * window.setInterval reference
+	 * @readonly
+	 */
+	_timer: null,
+	/**
+	 * Is animation currently running
+	 * @type {boolean}
+	 * @readonly
+	 */
 	is_running: false,
+	/**
+	 * Active animations
+	 * @type {Array.<Lava.animation.Abstract>}
+	 */
 	_active_tasks: [],
 
+	/**
+	 * Callback for window.setInterval()
+	 */
 	timeout_callback: function() {
 
 		var self = Lava.Cron;
 		self.onTimer();
 		if (!self.is_running) {
-			clearInterval(self.timer);
-			self.timer = null;
+			clearInterval(self._timer);
+			self._timer = null;
 		}
 
 	},
 
+	/**
+	 * Callback for requestAnimationFrame()
+	 */
 	animation_frame_callback: function() {
 		var self = Lava.Cron;
 		self.onTimer();
@@ -3056,6 +3962,10 @@ Lava.Cron = {
 
 	},
 
+	/**
+	 * Start animating
+	 * @param {Lava.animation.Abstract} task
+	 */
 	acceptTask: function(task) {
 
 		if (this._active_tasks.indexOf(task) == -1) {
@@ -3073,16 +3983,23 @@ Lava.Cron = {
 
 	},
 
+	/**
+	 * Create a timer, which executes a callback at nearly equal intervals
+	 */
 	_enable: function() {
 
+		// one-time gateway
 		this._enable = (Firestorm.Environment.requestAnimationFrame && Lava.schema.system.ALLOW_REQUEST_ANIMATION_FRAME)
 			? function() { Firestorm.Environment.requestAnimationFrame(this.animation_frame_callback); }
-			: function() { this.timer = window.setInterval(this.timeout_callback, this.DEFAULT_TIMER_DELAY); };
+			: function() { this._timer = window.setInterval(this.timeout_callback, this.DEFAULT_TIMER_DELAY); };
 
 		this._enable();
 
 	},
 
+	/**
+	 * Call {@link Lava.animation.Abstract#onTimer} of all animations
+	 */
 	onTimer: function() {
 
 		var time = new Date().getTime(),
@@ -3114,12 +4031,17 @@ Lava.Cron = {
 	}
 
 };
-
+/**
+ * Listens to DOM events and provides them to framework
+ */
 Lava.Core = {
 
-	// note: IE8 and below are not fully supported
+	/**
+	 * Map of events that require special support from Core
+	 * Note: IE8 and below are not fully supported
+	 * @type {Object.<string, Object>}
+	 */
 	_dom_event_support: {
-
 		focus: {delegation: true},
 		blur: {delegation: true},
 		change: {delegation: true},
@@ -3128,30 +4050,44 @@ Lava.Core = {
 		submit: {delegation: true},
 		paste: {delegation: true},
 		input: {delegation: true}
-
 	},
 
 	/**
 	 * Core's own handlers, which then call attached listeners
+	 * @type {Object.<string, function>}
 	 */
 	_event_listeners: {},
+	/**
+	 * Event listeners are attached only once to the window, and released when they are not needed anymore
+	 * @type {Object.<string, number>}
+	 */
 	_event_usage_counters: {},
 
 	/**
-	 * External listeners
-	 * @type {Object.<string, Array.<_iListener>>}
+	 * Framework listeners
+	 * @type {Object.<string, Array.<_tListener>>}
 	 */
 	_event_handlers: {},
 
+	/**
+	 * Is set at the beginning of Core's DOM event listener and removed at the end. Used to delay refresh of views
+	 * until the end of event processing
+	 * @type {boolean}
+	 */
 	_is_processing_event: false,
 
+	/**
+	 * In case of infinite loops in scope layer, there may be lags, when processing mousemove and other frequent events
+	 * @type {Array.<string>}
+	 */
 	_freeze_protected_events: ['mouseover', 'mouseout', 'mousemove'],
 
 	/**
-	 * @param {string} event_name
-	 * @param {function} fn
-	 * @param {Object} context
-	 * @returns {_iListener}
+	 * Add a listener for DOM event. Similar to {@link Lava.mixin.Observable#on}
+	 * @param {string} event_name Name of DOM event
+	 * @param {function} fn Callback
+	 * @param {Object} context Callback owner
+	 * @returns {_tListener} The listener structure, similar to {@link Lava.mixin.Observable#on} result
 	 */
 	addGlobalHandler: function(event_name, fn, context) {
 
@@ -3179,6 +4115,10 @@ Lava.Core = {
 
 	},
 
+	/**
+	 * Release the listener, acquired via call to {@link Lava.Core#addGlobalHandler}
+	 * @param {_tListener} listener Listener structure
+	 */
 	removeGlobalHandler: function(listener) {
 
 		var event_name = listener.event_name,
@@ -3196,6 +4136,11 @@ Lava.Core = {
 
 	},
 
+	/**
+	 * Used to bind `_onDomEvent` to Core instance
+	 * @param {string} event_name DOM event name
+	 * @returns {Function}
+	 */
 	_createEventWrapper: function(event_name) {
 
 		var self = this,
@@ -3210,6 +4155,10 @@ Lava.Core = {
 
 	},
 
+	/**
+	 * Attach a listener to window object, start listening to the event
+	 * @param {string} event_name DOM event name
+	 */
 	_initEvent: function(event_name) {
 
 		this._event_listeners[event_name] = this._createEventWrapper(event_name);
@@ -3226,6 +4175,10 @@ Lava.Core = {
 
 	},
 
+	/**
+	 * Stop listening to DOM event
+	 * @param {string} event_name DOM event name
+	 */
 	_shutdownEvent: function(event_name) {
 
 		if ((event_name in this._dom_event_support) && this._dom_event_support[event_name].delegation) {
@@ -3240,6 +4193,12 @@ Lava.Core = {
 
 	},
 
+	/**
+	 * Actual listener for DOM events. Calls framework listeners, attached via {@link Lava.Core#addGlobalHandler}
+	 * @param {string} event_name DOM event name
+	 * @param {Object} event_object Event object, returned by low-level framework
+	 * @param {boolean} freeze_protection Is this a frequent event, which may cause lags
+	 */
 	_onDomEvent: function(event_name, event_object, freeze_protection) {
 
 		var handlers = this._event_handlers[event_name].slice(),
@@ -3264,6 +4223,10 @@ Lava.Core = {
 
 	},
 
+	/**
+	 * Get `_is_processing_event`
+	 * @returns {boolean} True, if Core is in the process of calling framework listeners
+	 */
 	isProcessingEvent: function() {
 
 		return this._is_processing_event;
@@ -3271,32 +4234,67 @@ Lava.Core = {
 	}
 
 };
-
+/**
+ * Performs scope refresh
+ */
 Lava.ScopeManager = {
 
+	/**
+	 * There is a separate queue for each scope level
+	 * @type {Array.<Array.<Lava.mixin.Refreshable>>}
+	 */
 	_scope_refresh_queues: [],
+	/**
+	 * Minimal index in `_scope_refresh_queues`
+	 * @type {number}
+	 */
 	_min_scope_refresh_level: 0,
 	/**
 	 * Scopes are updated from lower to higher level, from first index in array to last.
 	 * Update cycle may jump to lower level, if a scope is added there during the update cycle.
-	 * For each scope level this array stores the number of already updated scopes on that level.
+	 * For each scope level this array stores the number of already updated scopes on that level
 	 * @type {Array.<number>}
 	 */
 	_scope_refresh_current_indices: [],
 
+	/**
+	 * User-accessible statistics with critical data
+	 * @type {Object}
+	 */
 	statistics: {
+		/**
+		 * Each refresh loop has smaller cycles
+		 * @type {number}
+		 */
 		max_refresh_cycles: 0,
+		/**
+		 * Number of times, when circular dependencies in scope tree has been encountered
+		 * @type {number}
+		 */
 		count_dead_loop_exceptions: 0
 	},
 
+	/**
+	 * Each refresh loop generates a new id
+	 * @type {number}
+	 */
 	_refresh_id: 0,
+	/**
+	 * Sign of circular dependency for current loop
+	 * @type {boolean}
+	 */
 	_has_exceptions: false,
+	/**
+	 * Sign of circular dependency for previous loop
+	 * @type {boolean}
+	 */
 	_has_infinite_loop: false,
 
 	/**
+	 * Queue a scope for update
 	 * @param {Lava.mixin.Refreshable} target
 	 * @param {number} level
-	 * @returns {{index: number}}
+	 * @returns {{index: number}} Refresh ticket
 	 */
 	scheduleScopeRefresh: function(target, level) {
 
@@ -3320,6 +4318,7 @@ Lava.ScopeManager = {
 	},
 
 	/**
+	 * Remove a scope from update queue
 	 * @param {{index: number}} refresh_ticket
 	 * @param {number} level
 	 */
@@ -3331,12 +4330,19 @@ Lava.ScopeManager = {
 
 	},
 
+	/**
+	 * Get `_has_infinite_loop`
+	 * @returns {boolean}
+	 */
 	hasInfiniteLoop: function() {
 
 		return this._has_infinite_loop;
 
 	},
 
+	/**
+	 * The main refresh loop
+	 */
 	refreshScopes: function() {
 
 		var count_refresh_cycles = 0,
@@ -3401,6 +4407,7 @@ Lava.ScopeManager = {
 	},
 
 	/**
+	 * One refresh cycle in the refresh loop.
 	 * Warning: violates codestyle with multiple return statements
 	 * @returns {boolean} true if another cycle is needed, false when done and queue is clean
 	 */
@@ -3476,6 +4483,10 @@ Lava.ScopeManager = {
 
 	},
 
+	/**
+	 * A refresh cycle that is launched in case of circular scope dependency
+	 * It will refresh all dirty scopes one time
+	 */
 	_scopeMalfunctionCycle: function() {
 
 		var current_level = this._min_scope_refresh_level,
@@ -3522,7 +4533,7 @@ Lava.ScopeManager = {
 	},
 
 	/**
-	 * In case of infinite loop exception:
+	 * Launched in case of infinite loop exception:
 	 * all existing tickets must be preserved for the next refresh cycle, otherwise the system will be broken
 	 * @returns {Array}
 	 */
@@ -3570,14 +4581,26 @@ Lava.ScopeManager = {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Debug-mode validations
 
+	/**
+	 * An array of all scopes in the framework, for debug purpose only
+	 * @type {Array.<Lava.mixin.Refreshable>}
+	 */
 	_debug_all_scopes: [],
 
+	/**
+	 * Add a scope to `_debug_all_scopes`
+	 * @param {Lava.mixin.Refreshable} scope
+	 */
 	debugTrackScope: function(scope) {
 
 		this._debug_all_scopes.push(scope);
 
 	},
 
+	/**
+	 * Remove a scope from `_debug_all_scopes`
+	 * @param {Lava.mixin.Refreshable} scope
+	 */
 	debugStopTracking: function(scope) {
 
 		var index = this._debug_all_scopes.indexOf(scope);
@@ -3586,6 +4609,9 @@ Lava.ScopeManager = {
 
 	},
 
+	/**
+	 * LiquidLava alpha: debug verification that scope refresh cycle works as expected
+	 */
 	debugVerify: function() {
 
 		try {
@@ -3605,7 +4631,7 @@ Lava.ScopeManager = {
 };
 
 /**
- * Stable (by definition)
+ * Stable sort algorithm (by definition)
  */
 Lava.algorithms.sorting.mergeSort = (function(){
 	"use strict";
@@ -3707,9 +4733,15 @@ Lava.algorithms.sorting.mergeSort = (function(){
 	};
 
 })();
-
+/**
+ * Traverse templates with provided "visitor" object
+ */
 Lava.TemplateWalker = {
 
+	/**
+	 * Callbacks for different types of items in template
+	 * @type {Object.<string, string>}
+	 */
 	_handlers_map: {
 		'string': '_handleString',
 		view: '_handleView',
@@ -3721,26 +4753,61 @@ Lava.TemplateWalker = {
 	},
 
 	/**
+	 * The visitor object, which has callbacks for different traversal events
 	 * @type {_iVisitor}
 	 */
 	_visitor: null,
+	/**
+	 * Stack of nested templates
+	 * @type {Array.<_tTemplate>}
+	 */
 	_template_stack: [],
+	/**
+	 * Stack of indices in `_template_stack`
+	 * @type {Array.<number>}
+	 */
 	_index_stack: [],
+	/**
+	 * Stack of nested view configs
+	 * @type {Array.<(_cView|_cWidget)>}
+	 */
 	_view_config_stack: [],
 
 	// local vars for advanced compression
+	/**
+	 * Does current visitor have `enter()`
+	 * @type {boolean}
+	 */
 	_has_enter: false,
+	/**
+	 * Does current visitor have `leave()`
+	 * @type {boolean}
+	 */
 	_has_leave: false,
+	/**
+	 * Does current visitor have `enter)region()`
+	 * @type {boolean}
+	 */
 	_has_enter_region: false,
+	/**
+	 * Does current visitor have `leave_region()`
+	 * @type {boolean}
+	 */
 	_has_leave_region: false,
 
 	/**
-	 * @param template
+	 * Traverse a template, executing visitor's callbacks
+	 * @param {_tTemplate} template
 	 * @param {_iVisitor} visitor
 	 */
 	walkTemplate: function(template, visitor) {
 
 		if (Lava.schema.DEBUG && this._visitor) Lava.t();
+
+		// in case of WALKER_STOP exception, they might be filled with old garbage
+		this._template_stack = [];
+		this._index_stack = [];
+		this._view_config_stack = [];
 
 		this._visitor = visitor;
 		this._has_enter = !!this._visitor.enter;
@@ -3760,34 +4827,66 @@ Lava.TemplateWalker = {
 
 	},
 
+	/**
+	 * Throw an exception, which will be caught in `walkTemplate`
+	 * @throws TemplateWalker internal exception that will be caught in `walkTemplate`
+	 */
 	interrupt: function() {
 		throw "WALKER_STOP";
 	},
 
+	/**
+	 * Get a copy of `_template_stack`
+	 * @returns {Array.<_tTemplate>}
+	 */
 	getTemplateStack: function() {
-		return this._template_stack;
+		return this._template_stack.slice();
 	},
 
+	/**
+	 * Get a copy of `_index_stack`
+	 * @returns {Array.<number>}
+	 */
 	getIndexStack: function() {
-		return this._index_stack;
+		return this._index_stack.slice();
 	},
 
+	/**
+	 * Get the template on top of `_template_stack`
+	 * @returns {_tTemplate}
+	 */
 	getCurrentTemplate: function() {
 		return this._template_stack[this._template_stack.length - 1];
 	},
 
+	/**
+	 * Get the template index on top of `_index_stack`
+	 * @returns {number}
+	 */
 	getCurrentIndex: function() {
 		return this._index_stack[this._index_stack.length - 1];
 	},
 
+	/**
+	 * Get a copy of `_view_config_stack`
+	 * @returns {Array.<_cView|_cWidget>}
+	 */
 	getViewConfigStack: function() {
-		return this._view_config_stack;
+		return this._view_config_stack.slice();
 	},
 
+	/**
+	 * Get view config on top of `_view_config_stack`
+	 * @returns {_cView|_cWidget}
+	 */
 	getCurrentViewConfig: function() {
 		return this._view_config_stack[this._view_config_stack.length];
 	},
 
+	/**
+	 * Walk a single template
+	 * @param {_tTemplate} template
+	 */
 	_walkTemplate: function(template) {
 
 		if (Lava.schema.DEBUG && !Array.isArray(template)) Lava.t();
@@ -3817,6 +4916,10 @@ Lava.TemplateWalker = {
 
 	},
 
+	/**
+	 * Walk the common part of {@link _cView} and {@link _cWidget}
+	 * @param {_cView} node
+	 */
 	_handleViewCommon: function(node) {
 
 		var i = 0,
@@ -3844,6 +4947,10 @@ Lava.TemplateWalker = {
 
 	},
 
+	/**
+	 * Walk {@link _cView}
+	 * @param {_cView} node
+	 */
 	_handleView: function(node) {
 
 		this._view_config_stack.push(node);
@@ -3853,6 +4960,11 @@ Lava.TemplateWalker = {
 
 	},
 
+	/**
+	 * Walk an object in {@link _cWidget#storage}
+	 * @param {Object} object
+	 * @param {Object} properties_schema
+	 */
 	_walkStorageObject: function(object, properties_schema) {
 
 		var name;
@@ -3867,6 +4979,10 @@ Lava.TemplateWalker = {
 
 	},
 
+	/**
+	 * Walk a widget config
+	 * @param {_cWidget} node
+	 */
 	_handleWidget: function(node) {
 
 		var name,
@@ -3945,30 +5061,50 @@ Lava.TemplateWalker = {
 
 	},
 
+	/**
+	 * Walk a string in template
+	 * @param {string} node
+	 */
 	_handleString: function(node) {
 
 		this._visitor.visitString && this._visitor.visitString(this, node);
 
 	},
 
+	/**
+	 * Walk an include config
+	 * @param {_cInclude} node
+	 */
 	_handleInclude: function(node) {
 
 		this._visitor.visitInclude && this._visitor.visitInclude(this, node);
 
 	},
 
+	/**
+	 * Walk {@link _cStaticValue}
+	 * @param {_cStaticValue} node
+	 */
 	_handleStaticValue: function(node) {
 
 		this._visitor.visitStaticValue && this._visitor.visitStaticValue(this, node);
 
 	},
 
+	/**
+	 * Walk {@link _cStaticEval}
+	 * @param {_cStaticEval} node
+	 */
 	_handleStaticEval: function(node) {
 
 		this._visitor.visitStaticEval && this._visitor.visitStaticEval(this, node);
 
 	},
 
+	/**
+	 * Walk {@link _cStaticTag}
+	 * @param {_cStaticTag} node
+	 */
 	_handleStaticTag: function(node) {
 
 		this._visitor.visitStaticTag && this._visitor.visitStaticTag(this, node);
@@ -3976,29 +5112,42 @@ Lava.TemplateWalker = {
 	}
 
 };
-
+/**
+ * Create and manage classes
+ */
 Lava.ClassManager = {
 
 	/**
 	 * Whether to serialize them and inline as a value, or slice() from original array in original object
+	 * @type {boolean}
+	 * @const
 	 */
 	INLINE_SIMPLE_ARRAYS: true,
 	/**
-	 * If an array consists of these types - it can be inlined.
+	 * If an array consists of these types - it can be inlined
+	 * @type {Array.<string>}
 	 */
 	SIMPLE_TYPES: ['string', 'boolean', 'number', 'null', 'undefined'],
 
 	/**
+	 * All data that belongs to each class: everything that's needed for inheritance and building of a constructor
 	 * @type {Object.<string, _cClassData>}
 	 */
 	_sources: {},
 	/**
-	 * [Class path] => constructor - a function that returns a new class instance
+	 * Constructors for each class
 	 * @type {Object.<string, function>}
 	 */
 	constructors: {},
+	/**
+	 * Special directives, understandable by ClassManager
+	 */
 	_reserved_members: ['Extends', 'Implements', 'Class', 'Shared'],
 
+	/**
+	 * Namespaces, which can hold class constructors
+	 * @type {Object.<string, Object>}
+	 */
 	_root: {},
 
 	ClassData: {
@@ -4011,6 +5160,11 @@ Lava.ClassManager = {
 
 	},
 
+	/**
+	 * Add a namespace, that can contain class constructors
+	 * @param {string} name The name of the namespace
+	 * @param {Object} object The namespace object
+	 */
 	registerRootNamespace: function(name, object) {
 
 		this._root[name] = object;
@@ -4018,6 +5172,7 @@ Lava.ClassManager = {
 	},
 
 	/**
+	 * Get {@link _cClassData} structure for each class
 	 * @param {string} class_path
 	 * @returns {_cClassData}
 	 */
@@ -4027,6 +5182,11 @@ Lava.ClassManager = {
 
 	},
 
+	/**
+	 * Create a class
+	 * @param {string} class_path Full name of the class
+	 * @param {Object} source_object Class body
+	 */
 	define: function(class_path, source_object) {
 
 		var name,
@@ -4147,6 +5307,7 @@ Lava.ClassManager = {
 	},
 
 	/**
+	 * Implement members from another class into current class data
 	 * @param {_cClassData} class_data
 	 * @param {string} path
 	 */
@@ -4179,12 +5340,13 @@ Lava.ClassManager = {
 	},
 
 	/**
+	 * Perform extend/implement operation
 	 * @param {_cClassData} child_data
-	 * @param child_skeleton
+	 * @param {Object} child_skeleton The skeleton of a child object
 	 * @param {_cClassData} parent_data
-	 * @param parent_skeleton
-	 * @param {boolean} is_root
-	 * @param {number=} references_offset Also acts as a sign of 'implements' mode
+	 * @param {Object} parent_skeleton The skeleton of a parent object
+	 * @param {boolean} is_root <kw>true</kw>, when extending skeletons class bodies, and false in all other cases
+	 * @param {number} [references_offset] Also acts as a sign of 'implements' mode
 	 */
 	_extend: function (child_data, child_skeleton, parent_data, parent_skeleton, is_root, references_offset) {
 
@@ -4235,6 +5397,14 @@ Lava.ClassManager = {
 
 	},
 
+	/**
+	 * Recursively create skeletons for all objects inside class body
+	 * @param {_cClassData} class_data
+	 * @param {Object} source_object
+	 * @param {number} hierarchy_index
+	 * @param {boolean} is_root
+	 * @returns {Object}
+	 */
 	_disassemble: function(class_data, source_object, hierarchy_index, is_root) {
 
 		var name,
@@ -4306,6 +5476,11 @@ Lava.ClassManager = {
 
 	},
 
+	/**
+	 * Build class constructor that can be used with the "new" keyword
+	 * @param {_cClassData} class_data
+	 * @returns {function} The class constructor
+	 */
 	_buildRealConstructor: function(class_data) {
 
 		var prototype = {},
@@ -4400,6 +5575,13 @@ Lava.ClassManager = {
 
 	},
 
+	/**
+	 * Perform special class serialization, that takes functions and resources from class data and can be used in constructors
+	 * @param {Object} skeleton
+	 * @param {_cClassData} class_data
+	 * @param {string} padding
+	 * @returns {Array}
+	 */
 	_serializeSkeleton: function(skeleton, class_data, padding) {
 
 		var serialized_properties = [],
@@ -4461,6 +5643,11 @@ Lava.ClassManager = {
 
 	},
 
+	/**
+	 * Get namespace for a class constructor
+	 * @param {Array.<string>} path_segments Path to the namespace of a class. Must start with one of registered roots
+	 * @returns {Object}
+	 */
 	_getNamespace: function(path_segments) {
 
 		var namespace,
@@ -4491,9 +5678,10 @@ Lava.ClassManager = {
 	},
 
 	/**
-	 * @param {string} class_path
-	 * @param {string=} default_namespace
-	 * @returns {*}
+	 * Get class constructor
+	 * @param {string} class_path Full name of a class, or a short name (if namespace is provided)
+	 * @param {string} [default_namespace] The default prefix where to search for the class, like <kw>"Lava.widget"</kw>
+	 * @returns {function}
 	 */
 	getConstructor: function(class_path, default_namespace) {
 
@@ -4507,6 +5695,11 @@ Lava.ClassManager = {
 
 	},
 
+	/**
+	 * Whether to inline or slice() an array in constructor
+	 * @param {Array} items
+	 * @returns {boolean}
+	 */
 	isInlineArray: function(items) {
 
 		var result = true,
@@ -4527,9 +5720,9 @@ Lava.ClassManager = {
 	},
 
 	/**
-	 * Register an existing function as a class constructor for usage with create().
-	 * @param {string} class_path
-	 * @param {function} constructor
+	 * Register an existing function as a class constructor for usage with {@link Lava.ClassManager#getConstructor}()
+	 * @param {string} class_path Full class path
+	 * @param {function} constructor Constructor instance
 	 */
 	registerExistingConstructor: function(class_path, constructor) {
 
@@ -4538,18 +5731,33 @@ Lava.ClassManager = {
 
 	},
 
+	/**
+	 * Does a constructor exists
+	 * @param {string} class_path Full class path
+	 * @returns {boolean}
+	 */
 	hasConstructor: function(class_path) {
 
 		return class_path in this.constructors;
 
 	},
 
+	/**
+	 * Does a class exists
+	 * @param {string} class_path
+	 * @returns {boolean}
+	 */
 	hasClass: function(class_path) {
 
 		return class_path in this._sources;
 
 	},
 
+	/**
+	 * Build a function that creates class constructor's prototype. Used in export
+	 * @param {_cClassData} class_data
+	 * @returns {function}
+	 */
 	_getPrototypeGenerator: function(class_data) {
 
 		var skeleton = class_data.skeleton,
@@ -4605,6 +5813,12 @@ Lava.ClassManager = {
 
 	},
 
+	/**
+	 * Server-side export function: create an exported version of a class, which can be loaded by
+	 * {@link Lava.ClassManager#loadClass} to save time on client
+	 * @param {string} class_path
+	 * @returns {Object}
+	 */
 	exportClass: function(class_path) {
 
 		var class_data = this._sources[class_path],
@@ -4661,6 +5875,10 @@ Lava.ClassManager = {
 
 	},
 
+	/**
+	 * Load an object, exported by {@link Lava.ClassManager#exportClass}
+	 * @param {Object} class_data
+	 */
 	loadClass: function(class_data) {
 
 		var parent_data,
@@ -4710,6 +5928,10 @@ Lava.ClassManager = {
 
 	},
 
+	/**
+	 * Put a newly built class constructor into it's namespace
+	 * @param {_cClassData} class_data
+	 */
 	_registerClass: function(class_data) {
 
 		var class_path = class_data.path,
@@ -4727,6 +5949,12 @@ Lava.ClassManager = {
 
 	},
 
+	/**
+	 * Find a class that begins with `base_path` or names of it's parents, and ends with `suffix`
+	 * @param {string} base_path
+	 * @param {string} suffix
+	 * @returns {function}
+	 */
 	getPackageConstructor: function(base_path, suffix) {
 
 		if (Lava.schema.DEBUG && !(base_path in this._sources)) Lava.t("[getPackageConstructor] Class not found: " + base_path);
@@ -4753,6 +5981,10 @@ Lava.ClassManager = {
 
 	},
 
+	/**
+	 * Get all names (full paths) of registered classes
+	 * @returns {Array.<string>}
+	 */
 	getClassNames: function() {
 
 		return Object.keys(this._sources);
@@ -4761,36 +5993,82 @@ Lava.ClassManager = {
 
 };
 
+/**
+ * Common methods and properties for working with widget templates
+ */
 Lava.parsers.Common = {
 
-	// same as in Firestorm.String, but without quotes and backslash.
+	/**
+	 * Same as regex in {@link Firestorm.String}, but without quotes and backslash
+	 */
 	UNQUOTE_ESCAPE_REGEX: /[\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
 
+	/**
+	 * The only allowed options on view's hash
+	 * @type {Array.<string>}
+	 */
 	_allowed_hash_options: ['id', 'label', 'as', 'escape_off'],
+	/**
+	 * Allowed "x:" attributes on elements
+	 * @type {Array.<string>}
+	 */
 	_allowed_control_attributes: ['event', 'bind', 'style', 'classes', 'container_class', 'type', 'options', 'label', 'roles', 'resource_id', 'widget'],
+	/**
+	 * Words, that cannot be used as a label
+	 * @type {Array.<string>}
+	 */
 	_reserved_labels: ['parent', 'widget', 'this', 'root'],
+	/**
+	 * The only control attributes ("x:") that can be placed on widget's sugar tag
+	 * @type {Array.<string>}
+	 */
 	_allowed_sugar_control_attributes: ['label', 'roles', 'resource_id'],
 
+	/**
+	 * When widgets are referenced in expressions - they are prefixed with these special characters, which define the kind of reference
+	 * @type {Object.<string, string>}
+	 */
 	locator_types: {
 		'#': 'Id',
 		'@': 'Label',
 		'$': 'Name'
 	},
 
-	// example: @accordion.accordion_panel
+	/**
+	 * A widget with a name after dot. Example: <kw>"@accordion.accordion_panel"</kw>
+	 * @type {RegExp}
+	 */
 	_locator_regex: /^[\$\#\@]([a-zA-Z\_][a-zA-Z0-9\_]*)\.([a-zA-Z\_][a-zA-Z0-9\_]*)/,
+	/**
+	 * Valid name of a variable
+	 * @type {RegExp}
+	 */
 	_identifier_regex: /^[a-zA-Z\_][a-zA-Z0-9\_]*/,
 
-	// overridden includes have '$' in their name.
-	// Example: $tree.Tree$node
+	/**
+	 * Same as `_locator_regex`, but allows the <kw>"$"</kw> symbol in include name
+	 * (overridden includes have '$' in their name). Example: <kw>"$tree.Tree$node"</kw>
+	 */
 	_include_locator_regex: /^[\$\#\@]([a-zA-Z\_][a-zA-Z0-9\_]*)\.([a-zA-Z\_][\$a-zA-Z0-9\_]*)/,
+	/**
+	 * Same as `_identifier_regex`, but <kw>"$"</kw> symbol is also allowed
+	 * @type {RegExp}
+	 */
 	_include_identifier_regex: /^[a-zA-Z\_][\$a-zA-Z0-9\_]*/,
 
+	/**
+	 * Special setters for some properties in view config
+	 * @type {Object.<string, string>}
+	 */
 	_view_config_property_setters: {
 		id: 'setViewConfigId',
 		label: 'setViewConfigLabel'
 	},
 
+	/**
+	 * For each type of item in raw templates: callbacks that return it's "compiled" version
+	 * @type {Object.<string, string>}
+	 */
 	_compile_handlers: {
 		string: '_compileString',
 		include: '_compileInclude',
@@ -4807,6 +6085,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
+	 * Does given string represent a JavaScript literal ('true', 'false', 'null', 'undefined')
 	 * @param {string} string
 	 * @returns {boolean}
 	 */
@@ -4816,12 +6095,22 @@ Lava.parsers.Common = {
 
 	},
 
+	/**
+	 * Translate name of the view to name of it's class
+	 * @param {string} name
+	 * @returns {string}
+	 */
 	_viewNameToClass: function(name) {
 
 		return Lava.schema.parsers.view_name_to_class_map[name] || name;
 
 	},
 
+	/**
+	 * Store values from view's hash as config properties
+	 * @param {_cView} view_config
+	 * @param {Object} raw_hash
+	 */
 	_parseViewHash: function(view_config, raw_hash) {
 
 		for (var name in raw_hash) {
@@ -4841,6 +6130,7 @@ Lava.parsers.Common = {
 	// Start: config property setters
 
 	/**
+	 * Check {@link _cView#id} for validity before assignment
 	 * @param {_cView} view_config
 	 * @param {string} id
 	 */
@@ -4852,6 +6142,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
+	 * Check {@link _cView#label} for validity before assignment
 	 * @param {_cView} view_config
 	 * @param {string} label
 	 */
@@ -4870,6 +6161,7 @@ Lava.parsers.Common = {
 	// Start: block handlers
 
 	/**
+	 * Compile a raw directive. Directives either produce widget configs, or modify the config of their parent view
 	 * @param {_tTemplate} result
 	 * @param {_cRawDirective} directive
 	 * @param {_cView} view_config
@@ -4900,6 +6192,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
+	 * Compile raw include (push as is)
 	 * @param {_tTemplate} result
 	 * @param {_cInclude} include_config
 	 */
@@ -4910,6 +6203,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
+	 * Compile raw string (push or append to the last string in result)
 	 * @param {_tTemplate} result
 	 * @param {string} string
 	 */
@@ -4932,6 +6226,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
+	 * Compile raw block (represents a view)
 	 * @param {_tTemplate} result
 	 * @param {_cRawBlock} raw_block
 	 */
@@ -4995,6 +6290,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
+	 * Compile raw expression view. Will produce a view config with class="Expression"
 	 * @param {_tTemplate} result
 	 * @param {_cRawExpression} raw_expression
 	 */
@@ -5019,7 +6315,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * Serialize the tag back into text.
+	 * Serialize the tag back into text
 	 * @param {_tTemplate} result
 	 * @param {_cRawTag} tag
 	 */
@@ -5065,7 +6361,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * Tag with x:type='view'
+	 * Compile raw tag with x:type="view". Will produce a {@link Lava.view.View} with an Element container
 	 * @param {_tTemplate} result
 	 * @param {_cRawTag} raw_tag
 	 */
@@ -5092,7 +6388,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * Tag with x:type='container'
+	 * Compile raw tag with x:type="container". Extract the wrapped view and set this tag as it's container
 	 * @param {_tTemplate} result
 	 * @param {_cRawTag} raw_tag
 	 */
@@ -5188,7 +6484,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * Tag with x:type='static'
+	 * Compile tag with x:type="static"
 	 * @param {_tTemplate} result
 	 * @param {_cRawTag} raw_tag
 	 */
@@ -5223,6 +6519,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
+	 * Compile a tag which belongs to widget's sugar. Parse it into tag config using {@link Lava.system.Sugar} class instance
 	 * @param {_tTemplate} result
 	 * @param {_cRawTag} raw_tag
 	 */
@@ -5268,7 +6565,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * Tag with x:widget='WidgetName'. Represents a widget with explicitly defined Element container.
+	 * Compile tag with x:widget="WidgetName". Represents a widget with explicitly defined Element container
 	 *
 	 * @param {_tTemplate} result
 	 * @param {_cRawTag} raw_tag
@@ -5294,6 +6591,7 @@ Lava.parsers.Common = {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
+	 * Assign some attributes of an element to `view_config`
 	 * @param {_cView} view_config
 	 * @param {_cRawTag} raw_tag
 	 */
@@ -5319,6 +6617,10 @@ Lava.parsers.Common = {
 
 	},
 
+	/**
+	 * Check validity of control attributes and throw exception, in case they are invalid
+	 * @param {_cRawX} x
+	 */
 	_assertControlAttributesValid: function(x) {
 
 		for (var name in x) {
@@ -5327,6 +6629,11 @@ Lava.parsers.Common = {
 
 	},
 
+	/**
+	 * Convert raw tag to an Element container config
+	 * @param {_cRawTag} raw_tag
+	 * @returns {_cElementContainer}
+	 */
 	_toContainer: function(raw_tag) {
 
 		var container_config = {
@@ -5337,11 +6644,12 @@ Lava.parsers.Common = {
 		if ('attributes' in raw_tag) this._parseContainerStaticAttributes(container_config, raw_tag.attributes);
 		if ('x' in raw_tag) this._parseContainerControlAttributes(container_config, raw_tag.x);
 
-		return container_config;
+		return /** @type {_cElementContainer} */ container_config;
 
 	},
 
 	/**
+	 * Take raw control attributes, parse them, and store in `container_config`
 	 * @param {_cElementContainer} container_config
 	 * @param {_cRawX} x
 	 */
@@ -5406,11 +6714,10 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * Parse object as (name => expression) pairs
+	 * Parse object as [name] => &lt;expression&gt; pairs
 	 *
 	 * @param {Object.<string, string>} hash
 	 * @returns {Object.<string, _cArgument>}
-	 * @private
 	 */
 	_parseBindingsHash: function(hash) {
 
@@ -5435,7 +6742,7 @@ Lava.parsers.Common = {
 
 	/**
 	 * Parse style attribute contents (plain string) into object with keys being individual style names,
-	 * and values being actual style values.
+	 * and values being actual style values
 	 *
 	 * @param {string} styles_string
 	 * @returns {Object.<string, string>}
@@ -5485,10 +6792,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * Fills the following properties of the container:
-	 *      static_styles
-	 *      static_classes
-	 *      static_properties
+	 * Fills the following properties of the container: static_styles, static_classes and static_properties
 	 *
 	 * @param {_cElementContainer} container_config
 	 * @param {Object.<string, string>} raw_attributes
@@ -5532,6 +6836,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
+	 * Compile raw template config
 	 * @param {_tRawTemplate} blocks
 	 * @param {_cView} [view_config]
 	 * @returns {_tTemplate}
@@ -5593,7 +6898,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * Compile template as usual and assert that it contains single view inside. Return that view.
+	 * Compile template as usual and assert that it contains single view inside. Return that view
 	 *
 	 * @param {_tRawTemplate} raw_blocks
 	 * @returns {_cView}
@@ -5608,6 +6913,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
+	 * Remove strings from template and assert they are empty
 	 * @param {(_tRawTemplate|_tTemplate)} template
 	 * @returns {Array}
 	 */
@@ -5636,7 +6942,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 *
+	 * Extract blocks/tags from template and assert they all have specific type
 	 * @param {Array} blocks
 	 * @param {string} type
 	 * @returns {Array}
@@ -5658,9 +6964,9 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * Convert an object as <name,value> pairs back into plain string.
+	 * Convert an object with element's attributes ([name] => &lt;value&gt; pairs) back into plain string
 	 *
-	 * @param {Object.<string,string>} attributes_object
+	 * @param {Object.<string, string>} attributes_object
 	 * @returns {string}
 	 */
 	renderTagAttributes: function(attributes_object) {
@@ -5679,6 +6985,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
+	 * Parse a string with semicolon-delimited list of widget targets (optionally, with arguments)
 	 * @param {string} targets_string
 	 * @returns {Array.<_cTarget>}
 	 */
@@ -5792,6 +7099,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
+	 * Parse value of x:resource_id attribute
 	 * @param {string} id_string
 	 * @returns {_cResourceId}
 	 */
@@ -5814,6 +7122,10 @@ Lava.parsers.Common = {
 
 	},
 
+	/**
+	 * Create an empty widget config with default class and extender from schema
+	 * @returns {_cWidget}
+	 */
 	createDefaultWidgetConfig: function() {
 
 		return {
@@ -5825,9 +7137,12 @@ Lava.parsers.Common = {
 	},
 
 	/**
+	 * Turn a serialized and quoted string back into it's JavaScript representation.
+	 *
 	 * Assume that everything that follows a backslash is a valid escape sequence
 	 * (all backslashes are prefixed with another backslash).
-	 * Quotes inside string: lexer's regex will match all escaped quotes.
+	 *
+	 * Quotes inside string: lexer's regex will match all escaped quotes
 	 *
 	 * @param {string} raw_string
 	 * @returns {string}
@@ -5851,9 +7166,15 @@ Lava.parsers.Common = {
 	}
 
 };
-
+/**
+ * All TemplateParser directives
+ */
 Lava.parsers.Directives = {
 
+	/**
+	 * Settings for each directive
+	 * @type {Object.<string, Object>}
+	 */
 	_directives_schema: {
 		define: {view_config_presence: false},
 		widget: {},
@@ -5877,6 +7198,10 @@ Lava.parsers.Directives = {
 		default_events: {view_config_presence: true, is_top_directive: true}
 	},
 
+	/**
+	 * Handlers for tags in widget definition
+	 * @type {Object.<string, string>}
+	 */
 	_widget_tag_actions: {
 		bind: '_widgetTagBind',
 		assign: '_widgetTagAssign',
@@ -5895,6 +7220,10 @@ Lava.parsers.Directives = {
 		include: '_widgetTagInclude'
 	},
 
+	/**
+	 * Handlers for tags inside x:resources
+	 * @type {Object.<string, string>}
+	 */
 	_resource_tag_actions: {
 		string: '_resourceTagString',
 		number: '_resourceTagNumber',
@@ -5905,25 +7234,43 @@ Lava.parsers.Directives = {
 		ntranslate: '_resourceTagTranslatePlural'
 	},
 
+	/**
+	 * Predefined edit_template tasks
+	 * @type {Object.<string, string>}
+	 */
 	_known_edit_tasks: {
 		replace_config_option: '_editTaskSetConfigOptions',
 		add_class: '_editTaskAddClass'
 	},
 
+	/**
+	 * Allowed item types in <kw>"array"</kw> resource
+	 * @type {Array.<string>}
+	 */
 	RESOURCE_ARRAY_ALLOWED_TYPES: ['string', 'boolean', 'null', 'number'],
 
 	/**
 	 * To prevent nested defines
+	 * @type {boolean}
 	 */
 	_is_processing_define: false,
-	_current_widget_title: null, // the title of the widget in x:define directive, which is currently being processed
+	/**
+	 * The title of the widget in x:define directive, which is currently being processed
+	 * @type {string}
+	 */
+	_current_widget_title: null,
+	/**
+	 * Stack of widget configs, which are currently being processed by x:widget/x:define directives
+	 * @type {Array.<_cWidget>}
+	 */
 	_widget_directives_stack: [],
 
 	/**
-	 * @param {_cRawDirective} raw_directive
-	 * @param {(_cView|_cWidget)} view_config
-	 * @param {boolean} is_top_directive
-	 * @returns {*}
+	 * Handle directive tag
+	 * @param {_cRawDirective} raw_directive Raw directive tag
+	 * @param {(_cView|_cWidget)} view_config Config of the directive's parent view
+	 * @param {boolean} is_top_directive Code style validation switch. Some directives must be at the top of templates
+	 * @returns {*} Compiled template item or nothing
 	 */
 	processDirective: function(raw_directive, view_config, is_top_directive) {
 
@@ -5943,6 +7290,12 @@ Lava.parsers.Directives = {
 
 	},
 
+	/**
+	 * Helper method to copy properties from `source` to `destination`, if they exist
+	 * @param {Object} destination
+	 * @param {Object} source
+	 * @param {Array.<string>} name_list List of properties to copy from `source` to `destination`
+	 */
 	_importVars: function(destination, source, name_list) {
 		for (var i = 0, count = name_list.length; i < count; i++) {
 			var name = name_list[i];
@@ -5954,6 +7307,7 @@ Lava.parsers.Directives = {
 	// start: actions for widget tags
 
 	/**
+	 * Parse {@link _cWidget#bindings}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -5964,6 +7318,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cView#assigns}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -5974,6 +7329,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse one option for {@link _cView#options}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -5984,6 +7340,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse one property for {@link _cWidget#properties}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -5994,6 +7351,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cView#options}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -6004,6 +7362,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cWidget#storage_schema}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -6014,6 +7373,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cWidget#properties}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -6024,6 +7384,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cView#roles}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -6034,6 +7395,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cWidget#sugar}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -6046,6 +7408,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cWidget#broadcast}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -6056,6 +7419,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cWidget#storage}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -6066,6 +7430,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cWidget#default_events}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -6076,6 +7441,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cWidget#resources}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -6086,6 +7452,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse &lt;arguments&gt; tag for edit_template
 	 * @param {_tRawTemplate} raw_template
 	 * @returns {Array.<*>}
 	 */
@@ -6124,6 +7491,11 @@ Lava.parsers.Directives = {
 
 	},
 
+	/**
+	 * Helper method for edit_template to evaluate and extract editing method from task definition
+	 * @param {string} src
+	 * @returns {*}
+	 */
 	_evalTaskHandler: function(src) {
 		var handler = null;
 		eval(src);
@@ -6132,6 +7504,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Copy template and apply editing operations to it
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -6236,6 +7609,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse one include for {_cWidget#includes}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -6252,6 +7626,12 @@ Lava.parsers.Directives = {
 	////////////////////////////////////////////////////////////////////
 	// Start: resource tags
 
+	/**
+	 * Parse x:resources definition
+	 * @param {_cRawTag} raw_tag
+	 * @param {string} widget_title
+	 * @returns {Object}
+	 */
 	_parseResources: function(raw_tag, widget_title) {
 
 		var tags = Lava.parsers.Common.asBlockType(raw_tag.content, 'tag'),
@@ -6281,6 +7661,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse a string resource
 	 * @param {_cRawTag} raw_tag
 	 */
 	_resourceTagString: function(raw_tag) {
@@ -6302,6 +7683,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse number resource
 	 * @param {_cRawTag} raw_tag
 	 */
 	_resourceTagNumber: function(raw_tag) {
@@ -6316,6 +7698,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse boolean resource
 	 * @param {_cRawTag} raw_tag
 	 */
 	_resourceTagBoolean: function(raw_tag) {
@@ -6330,6 +7713,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse array resource
 	 * @param {_cRawTag} raw_tag
 	 */
 	_resourceTagArray: function(raw_tag) {
@@ -6355,6 +7739,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse a translatable string
 	 * @param {_cRawTag} raw_tag
 	 */
 	_resourceTagTranslate: function(raw_tag) {
@@ -6374,6 +7759,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse translatable plural string
 	 * @param {_cRawTag} raw_tag
 	 */
 	_resourceTagTranslatePlural: function(raw_tag) {
@@ -6408,6 +7794,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse inheritable actions for classes, styles and container properties
 	 * @param {_cRawTag} raw_tag
 	 */
 	_resourceTagContainer: function(raw_tag) {
@@ -6497,6 +7884,7 @@ Lava.parsers.Directives = {
 	////////////////////////////////////////////////////////////////////
 
 	/**
+	 * Parse main_view widget tag: compile, extract and validate a single view inside it
 	 * @param {_cRawTag} raw_tag
 	 */
 	_asMainWidget: function(raw_tag) {
@@ -6523,6 +7911,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse x:view and x:widget directives
 	 * @param {_cRawDirective} raw_directive
 	 * @returns {_cWidget}
 	 */
@@ -6607,6 +7996,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Wrapper for `_parseWidgetDefinition` in x:define to guarantee that there are no nested defines
 	 * @param {_cRawDirective} raw_directive
 	 * @returns {_cWidget}
 	 */
@@ -6633,6 +8023,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Define a widget
 	 * @param {_cRawDirective} raw_directive
 	 */
 	_xdefine: function(raw_directive) {
@@ -6653,6 +8044,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Inline widget definition
 	 * @param {_cRawDirective} raw_directive
 	 */
 	_xwidget: function(raw_directive) {
@@ -6668,6 +8060,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse an assign config for {@link _cView#assigns}
 	 * @param {_cRawDirective} raw_directive
 	 * @param {_cView} view_config
 	 */
@@ -6678,16 +8071,17 @@ Lava.parsers.Directives = {
 	},
 
 	/**
-	 * @param {Object} storage
+	 * Perform parsing an assign from {@link _cView#assigns}
+	 * @param {(_cView|_cWidget)} config
 	 * @param {(_cRawDirective|_cRawTag)} raw_tag
 	 */
-	_parseAssign: function(storage, raw_tag) {
+	_parseAssign: function(config, raw_tag) {
 
-		if (!('assigns' in storage)) storage.assigns = {};
+		if (!('assigns' in config)) config.assigns = {};
 
 		if (Lava.schema.DEBUG && !('attributes' in raw_tag)) Lava.t("assign: missing attributes");
 		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.t("Malformed assign");
-		if (raw_tag.attributes.name in storage.assigns) Lava.t("Duplicate assign: " + raw_tag.attributes.name);
+		if (raw_tag.attributes.name in config.assigns) Lava.t("Duplicate assign: " + raw_tag.attributes.name);
 
 		var arguments = Lava.ExpressionParser.parse(raw_tag.content[0]);
 		if (Lava.schema.DEBUG && arguments.length != 1) Lava.t("Expression block requires exactly one argument");
@@ -6698,11 +8092,12 @@ Lava.parsers.Directives = {
 
 		}
 
-		storage.assigns[raw_tag.attributes.name] = arguments[0];
+		config.assigns[raw_tag.attributes.name] = arguments[0];
 
 	},
 
 	/**
+	 * Parse an option for {@link _cView#options}
 	 * @param {_cRawDirective} raw_directive
 	 * @param {_cView} view_config
 	 */
@@ -6713,11 +8108,12 @@ Lava.parsers.Directives = {
 	},
 
 	/**
-	 * @param {Object} storage
+	 * Perform parsing of a tag with serialized JavaScript object inside it
+	 * @param {(_cView|_cWidget)} config
 	 * @param {(_cRawDirective|_cRawTag)} raw_tag
-	 * @param {string} storage_property_name
+	 * @param {string} config_property_name Name of the config member, which holds target JavaScript object
 	 */
-	_parseOption: function(storage, raw_tag, storage_property_name) {
+	_parseOption: function(config, raw_tag, config_property_name) {
 
 		if (Lava.schema.DEBUG && !('attributes' in raw_tag)) Lava.t("option: missing attributes");
 		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.t("Malformed option: " + raw_tag.attributes.name);
@@ -6747,24 +8143,26 @@ Lava.parsers.Directives = {
 
 		}
 
-		Lava.store(storage, storage_property_name, raw_tag.attributes.name, result);
+		Lava.store(config, config_property_name, raw_tag.attributes.name, result);
 
 	},
 
 	/**
-	 * @param {_cWidget} storage
+	 * Perform parsing a property from {@link _cWidget#properties}
+	 * @param {_cWidget} config
 	 * @param {(_cRawDirective|_cRawTag)} raw_tag
-	 * @param {string} storage_property_name
+	 * @param {string} config_property_name Name of the config member, which holds target JavaScript object
 	 */
-	_parseProperty: function(storage, raw_tag, storage_property_name) {
+	_parseProperty: function(config, raw_tag, config_property_name) {
 
 		if (Lava.schema.DEBUG && !('attributes' in raw_tag)) Lava.t("option: missing attributes");
 		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.t("Malformed option: " + raw_tag.attributes.name);
-		Lava.store(storage, storage_property_name, raw_tag.attributes.name, Lava.parseOptions(raw_tag.content[0]));
+		Lava.store(config, config_property_name, raw_tag.attributes.name, Lava.parseOptions(raw_tag.content[0]));
 
 	},
 
 	/**
+	 * Parse {@link _cView#roles}
 	 * @param {_cRawDirective} raw_directive
 	 * @param {_cView} view_config
 	 */
@@ -6774,15 +8172,21 @@ Lava.parsers.Directives = {
 
 	},
 
-	_parseRoles: function(storage, raw_tag) {
+	/**
+	 * Perform parsing a role from {@link _cView#roles}
+	 * @param {(_cView|_cWidget)} config
+	 * @param {_cRawTag} raw_tag
+	 */
+	_parseRoles: function(config, raw_tag) {
 
-		if ('roles' in storage) Lava.t("Roles are already defined");
+		if ('roles' in config) Lava.t("Roles are already defined");
 		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.t("Malformed roles tag/directive");
-		storage.roles = Lava.parsers.Common.parseTargets(raw_tag.content[0]);
+		config.roles = Lava.parsers.Common.parseTargets(raw_tag.content[0]);
 
 	},
 
 	/**
+	 * Parse {@link _cView#container}
 	 * @param {_cRawDirective} raw_directive
 	 * @param {_cView} view_config
 	 */
@@ -6810,6 +8214,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cView#refresher}
 	 * @param {_cRawDirective} raw_directive
 	 * @param {_cView} view_config
 	 */
@@ -6823,6 +8228,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Perform parsing {@link _cWidget#broadcast}
 	 * @param {_cWidget} widget_config
 	 * @param {(_cRawDirective|_cRawTag)} raw_element
 	 */
@@ -6844,6 +8250,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cWidget#broadcast}
 	 * @param {_cRawDirective} raw_directive
 	 * @param {_cWidget} widget_config
 	 */
@@ -6856,6 +8263,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Perform parsing {@link _cWidget#bindings}
 	 * @param {_cWidget} widget_config
 	 * @param {(_cRawDirective|_cRawTag)} raw_element
 	 */
@@ -6865,7 +8273,7 @@ Lava.parsers.Directives = {
 
 		var binding = {
 			property_name: raw_element.attributes.name,
-			path_config: Lava.ExpressionParser.parsePath(raw_element.content[0])
+			path_config: Lava.ExpressionParser.parseScopeEval(raw_element.content[0])
 		};
 		if ('direction' in raw_element.attributes) {
 			if (!(raw_element.attributes.direction in Lava.BINDING_DIRECTIONS))
@@ -6877,6 +8285,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cWidget#bindings}
 	 * @param {_cRawDirective} raw_directive
 	 * @param {_cWidget} widget_config
 	 */
@@ -6888,6 +8297,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse a tag with JavaScript object inside
 	 * @param {(_cView|_cWidget)} config
 	 * @param {string} name
 	 * @param {(_cRawDirective|_cRawTag)} raw_tag
@@ -6901,6 +8311,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cView#options}
 	 * @param {_cRawDirective} raw_directive
 	 * @param {(_cView|_cWidget)} config
 	 */
@@ -6911,6 +8322,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse a property for {@link _cWidget#properties}
 	 * @param {_cRawDirective} raw_directive
 	 * @param {_cWidget} widget_config
 	 */
@@ -6923,6 +8335,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cWidget#properties}
 	 * @param {_cRawDirective} raw_directive
 	 * @param {_cWidget} widget_config
 	 */
@@ -6934,15 +8347,22 @@ Lava.parsers.Directives = {
 
 	},
 
-	_storeDirectiveContent: function(widget_config, raw_directive, storage_name) {
+	/**
+	 * Helper method for widget directives
+	 * @param {_cWidget} widget_config
+	 * @param {_cRawDirective} raw_directive
+	 * @param {string} config_property_name
+	 */
+	_storeDirectiveContent: function(widget_config, raw_directive, config_property_name) {
 
 		if (Lava.schema.DEBUG && !('attributes' in raw_directive)) Lava.t("option: missing attributes");
 		if (Lava.schema.DEBUG && (!raw_directive.content || raw_directive.content.length != 1)) Lava.t("Malformed property: " + raw_directive.attributes.name);
-		Lava.store(widget_config, storage_name, raw_directive.attributes.name, raw_directive.content[0]);
+		Lava.store(widget_config, config_property_name, raw_directive.attributes.name, raw_directive.content[0]);
 
 	},
 
 	/**
+	 * Parse a property for {@link _cWidget#properties} as a string
 	 * @param {_cRawDirective} raw_directive
 	 * @param {_cWidget} widget_config
 	 */
@@ -6955,6 +8375,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Store a string as an option value
 	 * @param {_cRawDirective} raw_directive
 	 * @param {_cWidget} widget_config
 	 */
@@ -6965,6 +8386,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Standalone resources definition for global widget
 	 * @param {_cRawDirective} raw_directive
 	 */
 	_xdefine_resources: function(raw_directive) {
@@ -6981,6 +8403,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cWidget#resources}
 	 * @param {(_cRawDirective|_cRawTag)} raw_directive
 	 * @param {_cWidget} widget_config
 	 */
@@ -7000,6 +8423,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cStaticValue}
 	 * @param {_cRawDirective} raw_directive
 	 */
 	_xstatic_value: function(raw_directive) {
@@ -7015,8 +8439,9 @@ Lava.parsers.Directives = {
 	},
 
 	/**
-	 * Caution! Inner argument should depend only on static data.
-	 * Bindings are allowed, but not recommended, cause at the moment when template is rendered - they may be dirty.
+	 * Parse {@link _cStaticEval}.
+	 * Warning! Inner argument should depend only on static data.
+	 * Bindings are allowed, but not recommended, cause at the moment when template is rendered - they may be dirty
 	 *
 	 * @param {_cRawDirective} raw_directive
 	 */
@@ -7037,10 +8462,10 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Wrapper, used to apply directives to a void tag
 	 * @param {_cRawDirective} raw_directive
-	 * @param {_cWidget} widget_config
 	 */
-	_xattach_directives: function(raw_directive, widget_config) {
+	_xattach_directives: function(raw_directive) {
 
 		if (Lava.schema.DEBUG && !raw_directive.content) Lava.t("empty attach_directives");
 
@@ -7062,6 +8487,11 @@ Lava.parsers.Directives = {
 
 	},
 
+	/**
+	 * Perform parsing of {@link _cWidget#default_events}
+	 * @param {_cRawTag} raw_tag
+	 * @param {_cWidget} widget_config
+	 */
 	_parseDefaultEvents: function(raw_tag, widget_config) {
 
 		if (Lava.schema.DEBUG && (!raw_tag.content || !raw_tag.content.length)) Lava.t('default_events: tag content is required');
@@ -7086,6 +8516,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cWidget#default_events}
 	 * @param {_cRawDirective} raw_directive
 	 * @param {_cWidget} widget_config
 	 */
@@ -7095,6 +8526,13 @@ Lava.parsers.Directives = {
 
 	},
 
+	/**
+	 * Search for an item inside template, for edit_template
+	 * @param {_tTemplate} template
+	 * @param {string} node_type Type of template item to search for
+	 * @param {string} condition JavaScript expression which returns <kw>true</kw> for valid items
+	 * @returns {_tTemplateItem}
+	 */
 	_selectFirst: function(template, node_type, condition) {
 
 		var filter,
@@ -7119,6 +8557,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Predefined template editing task for edit_template: set any JavaScript object at some path inside template item
 	 * @param {_tTemplate} template
 	 * @param {_cRawTag} task_tag
 	 * @param {Object.<string,_cRawTag>} content_blocks_hash
@@ -7162,6 +8601,13 @@ Lava.parsers.Directives = {
 
 	},
 
+	/**
+	 * Predefined task for edit_template: add a class to view's container
+	 * @param {_tTemplate} template
+	 * @param {_cRawTag} task_tag
+	 * @param {Object.<string,_cRawTag>} content_blocks_hash
+	 * @param {Array.<*>} task_arguments
+	 */
 	_editTaskAddClass: function(template, task_tag, content_blocks_hash, task_arguments) {
 
 		if (Lava.schema.DEBUG && !task_tag.attributes.node_type) Lava.t('_editTaskAddClass: malformed attributes');
@@ -7187,9 +8633,15 @@ Lava.parsers.Directives = {
 	}
 
 };
-
+/**
+ * Methods for parsing {@link _cWidget#storage}
+ */
 Lava.parsers.Storage = {
 
+	/**
+	 * Kinds of tag with storage items
+	 * @type {Object.<string, string>}
+	 */
 	_root_handlers: {
 		template_collection: '_parseTemplateCollection',
 		object_collection: '_parseObjectCollection',
@@ -7198,16 +8650,25 @@ Lava.parsers.Storage = {
 		object: '_parseObject'
 	},
 
+	/**
+	 * Kinds of tags that describe object properties
+	 * @type {Object.<string, string>}
+	 */
 	_object_property_handlers: {
 		template: '_parsePropertyAsTemplate',
 		lava_type: '_parsePropertyAsLavaType'
 	},
 
+	/**
+	 * Kinds of attributes on tags that describe objects
+	 * @type {Object.<string, string>}
+	 */
 	_object_attributes_handlers: {
 		lava_type: '_parseAttributeAsLavaType'
 	},
 
 	/**
+	 * Parse raw tags as widget's storage
 	 * @param {_cWidget} widget_config
 	 * @param {_tRawTemplate} raw_template
 	 */
@@ -7230,6 +8691,7 @@ Lava.parsers.Storage = {
 	},
 
 	/**
+	 * Template represents an array of storage items (templates or objects)
 	 * @param {_cStorageItemSchema} schema
 	 * @param {_tRawTemplate} raw_template
 	 * @param {string} callback_name
@@ -7256,6 +8718,7 @@ Lava.parsers.Storage = {
 	},
 
 	/**
+	 * Template represents a hash of items (templates or objects) with 'name' attribute on each item
 	 * @param {_cStorageItemSchema} schema
 	 * @param {_tRawTemplate} raw_template
 	 * @param {string} callback_name
@@ -7285,6 +8748,7 @@ Lava.parsers.Storage = {
 	},
 
 	/**
+	 * Convert `raw_tag` into template
 	 * @param {_cStorageItemSchema} schema
 	 * @param {_cRawTag} raw_tag
 	 * @returns {_tTemplate}
@@ -7296,10 +8760,11 @@ Lava.parsers.Storage = {
 	},
 
 	/**
+	 * Convert `raw_rag` into object with given `schema`
 	 * @param {_cStorageItemSchema} schema
 	 * @param {_cRawTag} raw_tag
 	 * @param {bool} exclude_name
-	 * @returns {{}}
+	 * @returns {Object}
 	 */
 	_asObject: function(schema, raw_tag, exclude_name) {
 
@@ -7334,6 +8799,8 @@ Lava.parsers.Storage = {
 	},
 
 	/**
+	 * In case of server-side parsing widget configs may be unextended. Manually merge only {@link _cWidget#storage_schema}
+	 * from hierarchy of widget configs
 	 * @param {_cWidget} widget_config
 	 * @returns {Object.<name, _cStorageItemSchema>}
 	 */
@@ -7364,6 +8831,7 @@ Lava.parsers.Storage = {
 	// root handlers
 
 	/**
+	 * Parse root storage tag's content as an array of templates
 	 * @param {_cStorageItemSchema} item_schema
 	 * @param {_cRawTag} raw_tag
 	 */
@@ -7374,6 +8842,7 @@ Lava.parsers.Storage = {
 	},
 
 	/**
+	 * Parse root storage tag's content as array of objects with known structure
 	 * @param {_cStorageItemSchema} item_schema
 	 * @param {_cRawTag} raw_tag
 	 */
@@ -7384,6 +8853,7 @@ Lava.parsers.Storage = {
 	},
 
 	/**
+	 * Parse root tag's content as hash of templates
 	 * @param {_cStorageItemSchema} item_schema
 	 * @param {_cRawTag} raw_tag
 	 */
@@ -7394,6 +8864,7 @@ Lava.parsers.Storage = {
 	},
 
 	/**
+	 * Parse root tag's content as hash of objects
 	 * @param {_cStorageItemSchema} item_schema
 	 * @param {_cRawTag} raw_tag
 	 */
@@ -7404,6 +8875,7 @@ Lava.parsers.Storage = {
 	},
 
 	/**
+	 * Parse tag's content as object with known structure
 	 * @param {_cStorageItemSchema} item_schema
 	 * @param {_cRawTag} raw_tag
 	 */
@@ -7417,6 +8889,7 @@ Lava.parsers.Storage = {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
+	 * Parse a tag inside object, that represents a template
 	 * @param {_cStorageObjectPropertySchema} schema
 	 * @param {_cRawTag} raw_tag
 	 */
@@ -7427,6 +8900,7 @@ Lava.parsers.Storage = {
 	},
 
 	/**
+	 * Parse tag inside object, that represents a type from {@link Lava.types}
 	 * @param {_cStorageObjectPropertySchema} schema
 	 * @param {_cRawTag} raw_tag
 	 */
@@ -7438,6 +8912,7 @@ Lava.parsers.Storage = {
 	},
 
 	/**
+	 * Parse object attribute as a type from {@link Lava.types}
 	 * @param {_cStorageObjectPropertySchema} descriptor
 	 * @param {string} value
 	 * @returns {*}
@@ -7780,11 +9255,6 @@ return new Parser;
 
 
 
-/**
- * Object parser
- * @name Lava.ObjectParser
- */
-
 Lava.ObjectParser.yy = {
 
 	/**
@@ -7793,7 +9263,7 @@ Lava.ObjectParser.yy = {
 	valid_globals: ['Lava'],
 
 	/**
-	 * Keep in mind: configs must be serializable.
+	 * Keep in mind: configs must be serializable
 	 * @param {Array} path_segments
 	 */
 	assertPathValid: function(path_segments) {
@@ -8417,22 +9887,21 @@ return new Parser;
 
 
 
-/**
- * Expression parser
- * @name Lava.ExpressionParser
- */
-
 Lava.ExpressionParser._parse = Lava.ExpressionParser.parse;
 
-/** @enum {number} */
+/**
+ * Allowed separators between expressions
+ * @enum {number}
+ */
 Lava.ExpressionParser.SEPARATORS = {
 	COMMA: 1,
 	SEMICOLON: 2
 };
 
 /**
- * @param {string} input
- * @param {Lava.ExpressionParser.SEPARATORS} [separator]
+ * Parse expressions, but do not create evaluator functions from their source code
+ * @param {string} input Expression source
+ * @param {Lava.ExpressionParser.SEPARATORS} [separator] Allowed separator, when parsing multiple expressions
  * @returns {Array.<_cRawArgument>}
  */
 Lava.ExpressionParser.parseRaw = function(input, separator) {
@@ -8461,8 +9930,9 @@ Lava.ExpressionParser.parseRaw = function(input, separator) {
 };
 
 /**
- * @param {string} input
- * @param {Lava.ExpressionParser.SEPARATORS} [separator]
+ * Parse expressions
+ * @param {string} input Source code
+ * @param {Lava.ExpressionParser.SEPARATORS} [separator] Allowed separator, when parsing multiple expressions
  * @returns {Array.<_cArgument>}
  */
 Lava.ExpressionParser.parse = function(input, separator) {
@@ -8470,17 +9940,7 @@ Lava.ExpressionParser.parse = function(input, separator) {
 };
 
 /**
- * @param {string} input
- * @returns {_cScopeLocator}
- */
-Lava.ExpressionParser.parsePath = function(input) {
-	var configs = this.yy.convertArguments(this.parseRaw(input));
-	if (configs.length != 1) Lava.t("ExpressionParser: single scope expected, got either many expressions or nothing");
-	if (!configs[0].flags || !configs[0].flags.isScopeEval) Lava.t("ExpressionParser: expected scope path, got expression");
-	return configs[0].binds[0];
-};
-
-/**
+ * Same as {@link Lava.ExpressionParser#parseWithTail}, but does not create evaluator functions from source
  * @param {{input: string, tail_length: number}} config_ref
  * @param {Lava.ExpressionParser.SEPARATORS} separator
  * @returns {Array.<_cRawArgument>}
@@ -8512,6 +9972,8 @@ Lava.ExpressionParser.parseWithTailRaw = function(config_ref, separator) {
 };
 
 /**
+ * Parse expressions, which are followed by a closing brace (and anything after it).
+ * Stores the length of unparsed content in `config_ref.tail_length`
  * @param {{input: string, tail_length: number}} config_ref
  * @param {Lava.ExpressionParser.SEPARATORS} separator
  * @returns {Array.<_cArgument>}
@@ -8520,12 +9982,17 @@ Lava.ExpressionParser.parseWithTail = function(config_ref, separator) {
 	return this.yy.convertArguments(this.parseWithTailRaw(config_ref, separator));
 };
 
+/**
+ * Parse expression which represents a single path
+ * @param {string} input Expression source
+ * @returns {_cScopeLocator}
+ */
 Lava.ExpressionParser.parseScopeEval = function(input) {
 
 	var raw_arguments = this.parseRaw(input);
-	if (Lava.schema.DEBUG && (raw_arguments.length != 1 || !raw_arguments[0].flags.isScopeEval)) Lava.t('parseScopeEval: malformed scope path');
-
+	if (Lava.schema.DEBUG && (raw_arguments.length != 1 || !raw_arguments[0].flags || !raw_arguments[0].flags.isScopeEval)) Lava.t('parseScopeEval: malformed scope path');
 	return raw_arguments[0].binds[0];
+
 };
 
 Lava.ExpressionParser.yy = {
@@ -9430,16 +10897,12 @@ return new Parser;
 
 
 
-/**
- * Template parser
- * @name Lava.TemplateParser
- */
-
 Lava.TemplateParser._parse = Lava.TemplateParser.parse;
 
 /**
+ * Parse and compile a template
  * @param {string} input
- * @param {_cView=} view_config
+ * @param {_cView=} view_config View config for applying directives
  * @returns {_tTemplate}
  */
 Lava.TemplateParser.parse = function(input, view_config) {
@@ -9449,6 +10912,7 @@ Lava.TemplateParser.parse = function(input, view_config) {
 };
 
 /**
+ * Parse template, but do not compile
  * @param {string} input
  * @returns {_tRawTemplate}
  */
@@ -9490,7 +10954,7 @@ Lava.TemplateParser.yy = {
 	/**
 	 * Filters out attributes starting with 'x:' prefix, and puts them into separate property named 'x'.
 	 * Control attributes are split by colon, resulting array is then used as path inside the 'x' object
-	 * (similar to class paths).
+	 * (similar to class paths)
 	 *
 	 * @param {{
 		 *      attributes: Object.<string, string>,
@@ -9658,18 +11122,18 @@ Lava.define(
 
 	/**
 	 * The hash of listeners for each event
-	 * @type {Object.<string, Array.<_iListener>>}
+	 * @type {Object.<string, Array.<_tListener>>}
 	 */
 	_listeners: {},
 
 	/**
 	 * Add listener for event `event_name`
 	 *
-	 * @param {string} event_name
-	 * @param {function} fn
-	 * @param {Object} context
-	 * @param {*} [listener_args]
-	 * @returns {_iListener}
+	 * @param {string} event_name Name of the event to listen to
+	 * @param {function} fn The callback
+	 * @param {Object} context The context for callback execution (an object, to which the callback belongs)
+	 * @param {*} [listener_args] Static listener arguments. May be usable when one callback responds to different events
+	 * @returns {_tListener} Listener structure, which later may be suspended, or removed via call to {@link Lava.mixin.Observable#removeListener}
 	 */
 	on: function(event_name, fn, context, listener_args) {
 
@@ -9678,14 +11142,14 @@ Lava.define(
 	},
 
 	/**
-	 * Create the listener construct and push into the listeners array for given event name
+	 * Create the listener construct and push it into the listeners array for given event name
 	 *
-	 * @param {string} event_name
-	 * @param {function} fn
-	 * @param {Object} context
-	 * @param {*} listener_args
-	 * @param {Object} listeners_by_event
-	 * @returns {_iListener}
+	 * @param {string} event_name The name of event
+	 * @param {function} fn The callback
+	 * @param {Object} context The owner of the callback
+	 * @param {*} listener_args Static listener arguments
+	 * @param {Object.<string, Array.<_tListener>>} listeners_by_event {@link Lava.mixin.Observable#_listeners} or {@link Lava.mixin.Properties#_property_listeners}
+	 * @returns {_tListener} Listener structure
 	 */
 	_addListener: function(event_name, fn, context, listener_args, listeners_by_event) {
 
@@ -9712,8 +11176,8 @@ Lava.define(
 	},
 
 	/**
-	 * Remove the given listener object from event listeners array.
-	 * @param {_iListener} listener
+	 * Remove the given listener object from event listeners array
+	 * @param {_tListener} listener Structure, which was returned by {@link Lava.mixin.Observable#on} method
 	 */
 	removeListener: function(listener) {
 
@@ -9722,9 +11186,9 @@ Lava.define(
 	},
 
 	/**
-	 * Perform removal of the listener construct
-	 * @param {_iListener} listener
-	 * @param {Object} listeners_by_event
+	 * Perform removal of the listener structure
+	 * @param {_tListener} listener Structure, which was returned by {@link Lava.mixin.Observable#on} method
+	 * @param {Object.<string, Array.<_tListener>>} listeners_by_event {@link Lava.mixin.Observable#_listeners} or {@link Lava.mixin.Properties#_property_listeners}
 	 */
 	_removeListener: function(listener, listeners_by_event) {
 
@@ -9745,8 +11209,8 @@ Lava.define(
 
 	/**
 	 * Fire an event
-	 * @param {string} event_name
-	 * @param {*} [event_args]
+	 * @param {string} event_name The name of event
+	 * @param {*} [event_args] Dynamic event arguments. Anything, that may be needed by listener
 	 */
 	_fire: function(event_name, event_args) {
 
@@ -9761,9 +11225,9 @@ Lava.define(
 	},
 
 	/**
-	 * Perform fire
-	 * @param {Array} listeners
-	 * @param {*} event_args
+	 * Perform fire - call listeners of an event
+	 * @param {Array.<_tListener>} listeners An array with listener structures
+	 * @param {*} event_args Dynamic event arguments
 	 */
 	_callListeners: function(listeners, event_args) {
 
@@ -9782,9 +11246,9 @@ Lava.define(
 	},
 
 	/**
-	 * Does this object have any listeners for given event, including suspended instances.
-	 * @param {string} event_name
-	 * @returns {boolean}
+	 * Does this object have any listeners for given event, including suspended instances
+	 * @param {string} event_name The name of event
+	 * @returns {boolean} True, if there are listeners
 	 */
 	_hasListeners: function(event_name) {
 
@@ -9794,10 +11258,17 @@ Lava.define(
 
 });
 
+/**
+ * Property has changed
+ * @event Lava.mixin.Properties#property_changed
+ * @type {Object}
+ * @property {string} name The name of the changed property
+ */
+
 Lava.define(
 'Lava.mixin.Properties',
 /**
- * Provides the `get()` and `set()` methods, and fires changed events
+ * Provides the `get()` and `set()` methods, and fires property changed events
  * @lends Lava.mixin.Properties#
  * @extends Lava.mixin.Observable
  */
@@ -9812,18 +11283,18 @@ Lava.define(
 	isProperties: true,
 
 	/**
-	 * Hash with properties
+	 * Hash with property values
 	 * @type {Object.<name, *>}
 	 */
 	_properties: {},
 	/**
 	 * Separate listeners hash for property changed events, same as {@link Lava.mixin.Observable#_listeners}
-	 * @type {Object.<string, Array.<_iListener>>}
+	 * @type {Object.<string, Array.<_tListener>>}
 	 */
 	_property_listeners: {},
 
 	/**
-	 * Constructor
+	 * Allows the mixin to be used as full-featured class
 	 * @param {Object.<string, *>} properties Initial properties
 	 */
 	init: function(properties) {
@@ -9838,8 +11309,8 @@ Lava.define(
 
 	/**
 	 * Get property
-	 * @param {string} name
-	 * @returns {*}
+	 * @param {string} name Property name
+	 * @returns {*} Property value
 	 */
 	get: function(name) {
 
@@ -9849,8 +11320,8 @@ Lava.define(
 
 	/**
 	 * Returns true if property exists, even if it's null/undefined
-	 * @param {string} name
-	 * @returns {boolean}
+	 * @param {string} name Property name
+	 * @returns {boolean} True, if property exists
 	 */
 	isset: function(name) {
 
@@ -9860,8 +11331,8 @@ Lava.define(
 
 	/**
 	 * Set property
-	 * @param {string} name The property name
-	 * @param {*} value Property value
+	 * @param {string} name Property name
+	 * @param {*} value New property value
 	 */
 	set: function(name, value) {
 
@@ -9874,7 +11345,7 @@ Lava.define(
 	/**
 	 * Perform the set operation
 	 * @param {string} name Property name
-	 * @param {*} value Property value
+	 * @param {*} value New property value
 	 */
 	_set: function(name, value) {
 		this._properties[name] = value;
@@ -9883,7 +11354,7 @@ Lava.define(
 
 	/**
 	 * Set multiple properties at once
-	 * @param {Object.<string, *>} properties_object
+	 * @param {Object.<string, *>} properties_object A hash with new property values
 	 */
 	setProperties: function(properties_object) {
 
@@ -9899,7 +11370,7 @@ Lava.define(
 
 	/**
 	 * Return a copy of the properties hash
-	 * @returns {Object.<name, *>}
+	 * @returns {Object.<name, *>} Copy of `_properties` object
 	 */
 	getProperties: function() {
 
@@ -9910,7 +11381,8 @@ Lava.define(
 	},
 
 	/**
-	 * @param property_name
+	 * Fire the 'property_changed' event for Observable interface, and Properties' native {@link Lava.mixin.Properties#onPropertyChanged} event
+	 * @param {string} property_name The name of the changed property
 	 */
 	firePropertyChangedEvents: function(property_name) {
 
@@ -9922,11 +11394,11 @@ Lava.define(
 	/**
 	 * The same, as {@link Lava.mixin.Observable#on}, but returns listener to `property_name` instead of `event_name`
 	 *
-	 * @param {string} property_name
-	 * @param {function} fn
-	 * @param {Object} context
-	 * @param {*} [listener_args]
-	 * @returns {_iListener}
+	 * @param {string} property_name Name of the property to listen for changes
+	 * @param {function} fn The callback
+	 * @param {Object} context The context for callback execution (an object, to which the callback belongs)
+	 * @param {*} [listener_args] May be usable when one callback responds to changes of different properties
+	 * @returns {_tListener} Listener construct, which may be removed or suspended later
 	 */
 	onPropertyChanged: function(property_name, fn, context, listener_args) {
 
@@ -9935,8 +11407,8 @@ Lava.define(
 	},
 
 	/**
-	 * Removes listeners added with `onPropertyChanged`
-	 * @param {_iListener} listener
+	 * Removes listeners added with {@link Lava.mixin.Properties#onPropertyChanged}
+	 * @param {_tListener} listener The listener structure, returned from {@link Lava.mixin.Properties#onPropertyChanged}
 	 */
 	removePropertyListener: function(listener) {
 
@@ -9946,16 +11418,15 @@ Lava.define(
 
 	/**
 	 * Same as {@link Lava.mixin.Observable#_fire}, but for property listeners
-	 * @param {string} property_name
-	 * @param {*} [event_args]
+	 * @param {string} property_name Name of the changed property
 	 */
-	_firePropertyChanged: function(property_name, event_args) {
+	_firePropertyChanged: function(property_name) {
 
 		if (Lava.schema.DEBUG && property_name == null) Lava.t("firePropertyChanged: property_name is null");
 
 		if (this._property_listeners[property_name] != null) {
 
-			this._callListeners(this._property_listeners[property_name], event_args);
+			this._callListeners(this._property_listeners[property_name]);
 
 		}
 
@@ -9963,10 +11434,20 @@ Lava.define(
 
 });
 
+/**
+ * This instance may become dirty and will fire the 'refreshed' event
+ * @event Lava.mixin.Refreshable#waits_refresh
+ */
+
+/**
+ * Instance is now clean, and scopes that depend on it can update themselves now
+ * @event Lava.mixin.Refreshable#refreshed
+ */
+
 Lava.define(
 'Lava.mixin.Refreshable',
 /**
- * Auxiliary class for the scope refresh system
+ * Auxiliary class for the scope refresh system. Allows to build hierarchy of dependent scopes
  * @lends Lava.mixin.Refreshable#
  * @extends Lava.mixin.Observable
  */
@@ -9979,7 +11460,8 @@ Lava.define(
 	 */
 	level: 0,
 	/**
-	 * Force delay of refresh after the last dependency has been updated
+	 * Force delay of refresh after the last dependency has been updated.
+	 * This flag is set depending on scope configuration
 	 * @type {boolean}
 	 */
 	_requeue: false,
@@ -9995,7 +11477,7 @@ Lava.define(
 	 */
 	_waits_refresh: false,
 	/**
-	 * The object, which is given by ScopeManager when the scope is placed into the refresh queue
+	 * The object, which is given by {@link Lava.ScopeManager} when the scope is added into the refresh queue
 	 * @type {Object}
 	 */
 	_refresh_ticket: null,
@@ -10018,11 +11500,11 @@ Lava.define(
 	_is_dirty: false,
 
 	/**
-	 * Called by ScopeManager during refresh loop.
+	 * Called by {@link Lava.ScopeManager} during refresh loop
 	 *
-	 * @param {number} refresh_id
-	 * @param {boolean} [is_safe]
-	 * @returns {boolean} true in case of infinite loop
+	 * @param {number} refresh_id The id of current refresh loop
+	 * @param {boolean} [is_safe] Internal switch used to control infinite refresh loop exceptions
+	 * @returns {boolean} <kw>true</kw> in case of infinite loop, and <kw>false</kw> in case of normal refresh
 	 */
 	doRefresh: function(refresh_id, is_safe) {
 
@@ -10070,7 +11552,7 @@ Lava.define(
 	},
 
 	/**
-	 * Listens to the waits_refresh event
+	 * Listens to the {@link Lava.mixin.Refreshable#event:waits_refresh} event of it's dependencies (other Refreshable instances)
 	 */
 	_onDependencyWaitsRefresh: function() {
 
@@ -10079,6 +11561,8 @@ Lava.define(
 		if (this._waits_refresh) {
 
 			if (this._refresh_ticket) {
+				// If a scope, that was queued for refresh, has dirty dependencies - it will refresh itself automatically
+				// after it's last dependency is refreshed. So in that case it must cancel it's refresh ticket.
 				Lava.ScopeManager.cancelScopeRefresh(this._refresh_ticket, this.level);
 				this._refresh_ticket = null;
 			}
@@ -10095,7 +11579,7 @@ Lava.define(
 	},
 
 	/**
-	 * Listens to the refreshed event
+	 * Listens to the {@link Lava.mixin.Refreshable#event:refreshed} event of it's dependencies
 	 */
 	_onDependencyRefreshed: function() {
 
@@ -10178,7 +11662,7 @@ Lava.define(
 	},
 
 	/**
-	 * Cancel the current refresh ticket and ignore next refresh cycle. Does not destroy the Refreshable instance.
+	 * Cancel the current refresh ticket and ignore next refresh cycle. Does not destroy the Refreshable instance
 	 */
 	suspendRefreshable: function() {
 
@@ -10197,34 +11681,57 @@ Lava.define(
 Lava.define(
 'Lava.animator.Integer',
 /**
+ * Animate integer units, like pixels
  * @lends Lava.animator.Integer#
+ * @implements _iAnimator
  */
 {
 
-	_property_name: null,
+	/**
+	 * Property to animate, like 'width' or 'height'
+	 * @type {string}
+	 */
+	property_name: null,
+	/**
+	 * Starting property value
+	 * @type {number}
+	 */
 	from: 0,
+	/**
+	 * End property value
+	 * @type {number}
+	 */
 	delta: 0,
+	/**
+	 * CSS unit for animated property, like 'px'
+	 */
 	unit: null,
 
 	/**
+	 * Create the animator instance
 	 * @param {_cAnimator_Integer} config
 	 */
 	init: function(config) {
 
-		this._property_name = config.property;
+		this.property_name = config.property;
 		this.from = config.from || 0;
 		this.delta = config.delta;
 		this.unit = config.unit || 'px';
 
 	},
 
+	/**
+	 * Perform animation
+	 * @param {HTMLElement} element
+	 * @param {number} transition_value Value of animation. Usually between 0 and 1, but sometimes it may cross the bounds
+	 */
 	animate: function(element, transition_value) {
 
 		var raw_result = this.from + this.delta * transition_value;
 
 		Firestorm.Element.setStyle(
 			element,
-			this._property_name,
+			this.property_name,
 			Math.floor(raw_result) + this.unit
 		);
 
@@ -10234,27 +11741,51 @@ Lava.define(
 Lava.define(
 'Lava.animator.Color',
 /**
+ * Animate colors
  * @lends Lava.animator.Color#
+ * @implements _iAnimator
  */
 {
 
-	_property_name: null,
+	/**
+	 * Property to animate, like 'background-color'
+	 * @type {string}
+	 */
+	property_name: null,
+	/**
+	 * Starting color
+	 * @type {Array.<number>}
+	 */
 	from: null,
+	/**
+	 * End color
+	 * @type {Array.<number>}
+	 */
 	to: null,
+	/**
+	 * Computed difference between starting and the end color
+	 * @type {Array.<number>}
+	 */
 	delta: null,
 
 	/**
-	 * @param {_cAnimator} config
+	 * Create the animator instance
+	 * @param {_cAnimator_Color} config
 	 */
 	init: function(config) {
 
-		this._property_name = config.property;
+		this.property_name = config.property;
 		this.from = config.from || [0,0,0];
 		this.to = config.to || [0,0,0];
 		this.delta = [this.to[0] - this.from[0], this.to[1] - this.from[1], this.to[2] - this.from[2]];
 
 	},
 
+	/**
+	 * Perform animation
+	 * @param {HTMLElement} element
+	 * @param {number} transition_value Value of animation. Usually between 0 and 1, but sometimes it may cross the bounds
+	 */
 	animate: function(element, transition_value) {
 
 		var current_value = [
@@ -10265,7 +11796,7 @@ Lava.define(
 
 		Firestorm.Element.setStyle(
 			element,
-			this._property_name,
+			this.property_name,
 			'rgb(' + current_value.join(',') + ')'
 		);
 
@@ -10273,9 +11804,15 @@ Lava.define(
 
 });
 
+/**
+ * Animation has ended
+ * @event Lava.animation.Abstract#complete
+ */
+
 Lava.define(
 'Lava.animation.Abstract',
 /**
+ * Animation changes properties of HTML Elements over time
  * @lends Lava.animation.Abstract#
  * @extends Lava.mixin.Observable
  */
@@ -10284,46 +11821,57 @@ Lava.define(
 	Extends: 'Lava.mixin.Observable',
 
 	/**
+	 * The time when animation was started, in milliseconds
 	 * @type {number}
 	 */
 	_started_time: 0,
 	/**
+	 * The time animation ends (or has ended), in milliseconds
 	 * @type {number}
 	 */
 	_end_time: 0,
 	/**
+	 * Animation duration, in milliseconds
 	 * @type {number}
 	 */
 	_duration: 0,
 	/**
+	 * Usually, a HTML Element, properties of which this animation changes
 	 * @type {*}
 	 */
 	_target: null,
 	/**
+	 * Is it currently running
 	 * @type {boolean}
 	 */
 	_is_running: false,
 	/**
+	 * Does it run in reversed direction
 	 * @type {boolean}
 	 */
 	_is_reversed: false,
 	/**
+	 * The settings for this instance
+	 * @readonly
 	 * @type {_cAnimation}
 	 */
 	_config: null,
 
 	/**
+	 * Transition is a function, which takes current elapsed time (in percent, from 0 to 1) and returns current animation position (also in percent)
 	 * @type {_tTransitionCallback}
 	 */
 	_transition: null,
 	/**
+	 * Instance global unique identifier
 	 * @type {_tGUID}
 	 */
 	guid: null,
 
 	/**
-	 * @param {_cAnimation} config
-	 * @param {*} target
+	 * Constructs the class instance
+	 * @param {_cAnimation} config Settings, `this._config`
+	 * @param {*} target `this._target`
 	 */
 	init: function(config, target) {
 
@@ -10338,7 +11886,7 @@ Lava.define(
 	},
 
 	/**
-	 * Called by Cron. Assigned in constructor.
+	 * Called by Cron. Assigned in constructor
 	 * @param {number} now The current time (=new Date().getTime())
 	 */
 	onTimer: function(now) {
@@ -10347,10 +11895,9 @@ Lava.define(
 
 	},
 
-	_start: function(now) {
-
-	},
-
+	/**
+	 * Set the animation state to 'not running' and fire the {@link Lava.animation.Abstract#event:complete} event
+	 */
 	_finish: function() {
 
 		this._is_running = false;
@@ -10360,7 +11907,8 @@ Lava.define(
 
 	/**
 	 * Start only if it's not already running
-	 * @param [started_time]
+	 * @param [started_time] Optionally, you can pass the time when animation has actually started.
+	 *      Otherwise, the current system time will be taken
 	 */
 	safeStart: function(started_time) {
 
@@ -10399,7 +11947,7 @@ Lava.define(
 	},
 
 	/**
-	 * The actual reversing algorithm
+	 * Reverse animation direction
 	 */
 	_mirror: function() {
 
@@ -10512,6 +12060,7 @@ Lava.define(
 Lava.define(
 'Lava.animation.Standard',
 /**
+ * Common JavaScript-driven animation with keyframes
  * @lends Lava.animation.Standard#
  * @extends Lava.animation.Abstract
  */
@@ -10521,6 +12070,9 @@ Lava.define(
 
 	Shared: '_shared',
 
+	/**
+	 * Shared data
+	 */
 	_shared: {
 		// pre-generated variants of this._callAnimators function
 		call_animators: [
@@ -10546,14 +12098,22 @@ Lava.define(
 		]
 	},
 
+	/**
+	 * Current animation percent, between 0 and 1
+	 * @type {number}
+	 */
 	_percent: 0,
-	_now: 0, // current animation time
 
+	/**
+	 * Animator instances
+	 * @type {Array.<_iAnimator>}
+	 */
 	_animators: [],
 
 	/**
+	 * Create the animation instance
 	 * @param {_cAnimation} config
-	 * @param target
+	 * @param {*} target
 	 */
 	init: function(config, target) {
 
@@ -10587,9 +12147,10 @@ Lava.define(
 	},
 
 	/**
-	 * This function may be substituted with pre-generated function from _shared
+	 * Calls all animator instances.
+	 * This function may be substituted with pre-generated version from `_shared`
 	 *
-	 * @param transition_value
+	 * @param {number} transition_value The current percent of animation
 	 */
 	_callAnimators: function(transition_value) {
 
@@ -10602,7 +12163,8 @@ Lava.define(
 	},
 
 	/**
-	 * @param now
+	 * Perform animation in normal direction
+	 * @param {number} now The current global time in milliseconds
 	 */
 	_animateDirect: function(now) {
 
@@ -10620,7 +12182,8 @@ Lava.define(
 	},
 
 	/**
-	 * @param now
+	 * Perform animation in reversed direction
+	 * @param {number} now The current global time in milliseconds
 	 */
 	_animateReverse: function(now) {
 
@@ -10638,7 +12201,9 @@ Lava.define(
 	},
 
 	/**
-	 * @param [started_time]
+	 * Start animating
+	 * @param {number} [started_time] The global system time in milliseconds when animation has started.
+	 *  May be used to synchronize multiple animations
 	 */
 	start: function(started_time) {
 
@@ -10661,7 +12226,7 @@ Lava.define(
 	},
 
 	/**
-	 * Just stop, do not fire 'complete'
+	 * Stop animation immediately where it is. Do not fire {@link Lava.animation.Abstract#event:complete}
 	 */
 	stop: function() {
 
@@ -10678,7 +12243,7 @@ Lava.define(
 
 	/**
 	 * Act like the animation has ended naturally:
-	 * apply the end state to the element and fire 'complete'
+	 * apply the end state to the target and fire {@link Lava.animation.Abstract#event:complete}
 	 */
 	finish: function() {
 
@@ -10690,6 +12255,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Set animation duration
+	 * @param {number} duration New duration, in milliseconds
+	 */
 	setDuration: function(duration) {
 
 		this._duration = duration;
@@ -10702,6 +12271,9 @@ Lava.define(
 Lava.define(
 'Lava.animation.Collapse',
 /**
+ * Expand (forwards) and collapse (backwards) an element. May operate with either height (default) or width property.
+ * Adjusts animation duration dynamically, depending on distance
+ *
  * @lends Lava.animation.Collapse#
  * @extends Lava.animation.Standard
  */
@@ -10710,6 +12282,9 @@ Lava.define(
 	Extends: 'Lava.animation.Standard',
 	Shared: ['_shared'],
 
+	/**
+	 * Animation config
+	 */
 	_shared: {
 		default_config: {
 			// duration is set dynamically
@@ -10722,7 +12297,18 @@ Lava.define(
 		}
 	},
 
+	/**
+	 * Property to animate
+	 * @type {string}
+	 */
 	_property: 'height',
+
+	/**
+	 * Minimal animation duration, milliseconds
+	 * @type {number}
+	 * @const
+	 */
+	DURATION_BIAS: 200,
 
 	init: function(config, target) {
 
@@ -10745,7 +12331,7 @@ Lava.define(
 		// assuming that target is element
 		var property_value = Firestorm.Element.getSize(this._target)[(this._property == 'width') ? 'x' : 'y'];
 		this._animators[0].delta = property_value;
-		this.setDuration(200 + Math.floor(property_value)); // time depends on distance, to make it smoother
+		this.setDuration(this.DURATION_BIAS + Math.floor(property_value)); // time depends on distance, to make it smoother
 
 		this.Standard$start(started_time);
 
@@ -10770,7 +12356,9 @@ Lava.define(
 Lava.define(
 'Lava.animation.Toggle',
 /**
- * Primary purpose of this class: emulate animation support in cases when it's not enabled.
+ * Primary purpose of this class: emulate animation support in cases when it's not enabled
+ * (and leave the same code, that works with animations)
+ *
  * @lends Lava.animation.Toggle#
  * @extends Lava.animation.Standard
  */
@@ -10781,7 +12369,6 @@ Lava.define(
 	_finish: function() {
 
 		Firestorm.Element.setStyle(this._target, 'display', this._is_reversed ? 'none' : 'block');
-
 		this.Standard$_finish();
 
 	}
@@ -10791,6 +12378,7 @@ Lava.define(
 Lava.define(
 'Lava.animation.Emulated',
 /**
+ * Used to animate with CSS transitions. Does not have keyframes, just a single timeout event
  * @lends Lava.animation.Emulated#
  * @extends Lava.animation.Abstract
  */
@@ -10798,10 +12386,22 @@ Lava.define(
 
 	Extends: 'Lava.animation.Abstract',
 
+	/**
+	 * Tell other classes that this is instance of Lava.animation.Emulated
+	 */
 	isEmulatedAnimation: true,
 
-	_timeout: 0,
+	/**
+	 * Window timeout id
+	 * @type {?number}
+	 */
+	_timeout: null,
 
+	/**
+	 * Create an animation
+	 * @param {_cAnimation} config
+	 * @param {*} target
+	 */
 	init: function(config, target) {
 
 		this.Abstract$init(config, target);
@@ -10813,6 +12413,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Callback for window timeout event
+	 */
 	_onTimeout: function() {
 
 		this._timeout = null;
@@ -10821,10 +12424,16 @@ Lava.define(
 
 	},
 
+	/**
+	 * Apply the ended state to the target
+	 */
 	_end: function() {
 
 	},
 
+	/**
+	 * Clear old timeout, if it exists
+	 */
 	_cancelTimeout: function() {
 		if (this._timeout) {
 			window.clearTimeout(this._timeout);
@@ -10832,6 +12441,9 @@ Lava.define(
 		}
 	},
 
+	/**
+	 * Start animation
+	 */
 	start: function() {
 
 		if (this._is_running) {
@@ -10844,10 +12456,16 @@ Lava.define(
 
 	},
 
+	/**
+	 * Apply the started state to the target
+	 */
 	_start: function() {
 
 	},
 
+	/**
+	 * Stop animation immediately where it is. Do not fire {@link Lava.animation.Abstract#event:complete}
+	 */
 	stop: function() {
 
 		if (this._is_running) {
@@ -10872,35 +12490,20 @@ Lava.define(
 	},
 
 	/**
-	 * Reverse the animation while it's still running
+	 * Actions to reverse Emulated animation while it's still running
 	 */
 	_reverse: function() {
 
 	},
 
+	/**
+	 * End the animation and Apply the end state to target
+	 */
 	finish: function() {
 
 		if (this._is_running) {
 			this._cancelTimeout();
 			this._onTimeout();
-		}
-
-	},
-
-	_assertStopped: function() {
-
-		if (this._is_running) {
-
-			if (Lava.schema.DEBUG) {
-
-				Lava.t("Emulated animation: call to state changing function while the animation is running");
-
-			} else {
-
-				Lava.logError("Emulated animation: call to state changing function while the animation is running");
-
-			}
-
 		}
 
 	}
@@ -10910,6 +12513,8 @@ Lava.define(
 Lava.define(
 'Lava.animation.BootstrapCollapse',
 /**
+ * Expand and collapse an element using browser transitions from Bootstrap CSS framework
+ *
  * @lends Lava.animation.BootstrapCollapse#
  * @extends Lava.animation.Emulated
  */
@@ -10917,13 +12522,19 @@ Lava.define(
 
 	Extends: 'Lava.animation.Emulated',
 
+	/**
+	 * Fixed duration from CSS rules
+	 * @type {number}
+	 */
 	_duration: 350,
 	/**
 	 * 'width' or 'height'
+	 * @type {string}
 	 */
 	_property: 'height',
 	/**
-	 * The value of width (or height) the animation has started with. Updated every time the animation starts.
+	 * The value of width (or height) of the element. Updated every time the animation starts
+	 * @type {number}
 	 */
 	_property_value: 0,
 
@@ -10941,7 +12552,7 @@ Lava.define(
 
 		var Element = Firestorm.Element;
 
-		if (this._is_reversed) { // collapse an element that is currently open
+		if (this._is_reversed) { // collapse an element that is currently expanded
 
 			// explicitly set the height/width on the element to make transition happen
 			this._property_value = Element.getSize(this._target)[(this._property == 'width') ? 'x' : 'y'];
@@ -11000,42 +12611,91 @@ Lava.define(
 
 });
 
+/**
+ * Values were removed from collection
+ * @event Lava.system.Enumerable#items_removed
+ * @type {Object}
+ * @property {Array.<number>} uids Unique IDs of values, internal to this instance
+ * @property {array.<*>} values Values, that were removed
+ * @property {Array.<string>} names Names (keys) of values that were removed
+ */
+
+/**
+ * Values were added to collection
+ * @event Lava.system.Enumerable#items_added
+ * @type {Object}
+ * @property {Array.<number>} uids Internal unique IDs that were generated for added values
+ * @property {array.<*>} values Values, that were added
+ * @property {Array.<string>} names Names (keys) of values that were added
+ */
+
+/**
+ * Fires when either content or order of items in collection changes
+ * @event Lava.system.Enumerable#collection_changed
+ */
+
 Lava.define(
 'Lava.system.Enumerable',
 /**
+ * Array-like collection of elements, suitable for scope binding
+ *
  * @lends Lava.system.Enumerable#
  * @extends Lava.mixin.Properties
  */
 {
 
 	Extends: 'Lava.mixin.Properties',
-	Shared: ['SOURCE_OBJECT_TYPES'],
 
+	/**
+	 * To tell other classes that this is instance of Enumerable
+	 * @const
+	 */
 	isEnumerable: true,
-
+	/**
+	 * Global unique identifier of this instance
+	 * @type {_tGUID}
+	 */
 	guid: null,
-
-	_data_uids: [], // [index] => uid
-	_data_values: [], // [index] => value
-	// will hold keys, when Enumerable was constructed from object
-	_data_names: [], // [index] => name
+	/**
+	 * Unique identifiers for values, internal to this instance of enumerable. Note: they are not globally unique, just to this instance
+	 * @type {Array.<number>}
+	 */
+	_data_uids: [],
+	/**
+	 * Values, stored in this Enumerable
+	 * @type {Array.<*>}
+	 */
+	_data_values: [],
+	/**
+	 * Holds object keys, when Enumerable was constructed from object. Each name corresponds to it's value
+	 * @type {Array.<string>}
+	 */
+	_data_names: [],
+	/**
+	 * Object, from which this collection was constructed or refreshed
+	 * @type {(Array|Object|Lava.mixin.Properties|Lava.system.Enumerable)}
+	 */
 	_source_object: null,
+	/**
+	 * The type of `_source_object`
+	 * @type {Lava.ENUMERABLE_SOURCE_OBJECT_TYPES}
+	 */
 	_source_object_type: null,
+	/**
+	 * Count of items in Enumerable instance
+	 * @type {number}
+	 */
 	_count: 0,
-
+	/**
+	 * Counter for next internal UID
+	 * @type {number}
+	 */
 	_uid: 1,
 
 	/**
-	 * @enum {number}
-	 * @const
+	 * Creates Enumerable instance, sets `_source_object`
+	 * @param {(Array|Object|Lava.mixin.Properties|Lava.system.Enumerable)} data_source What will become `_source_object`
 	 */
-	SOURCE_OBJECT_TYPES: {
-		OBJECT: 0,
-		ARRAY: 1,
-		ENUMERABLE: 2,
-		PROPERTIES: 3
-	},
-
 	init: function(data_source) {
 
 		this.guid = Lava.guid++;
@@ -11047,7 +12707,7 @@ Lava.define(
 
 			this.setSourceObject(data_source);
 
-			if (this._source_object_type == this.SOURCE_OBJECT_TYPES.ARRAY) {
+			if (this._source_object_type == Lava.ENUMERABLE_SOURCE_OBJECT_TYPES.ARRAY) {
 
 				for (count = data_source.length; i < count; i++) {
 
@@ -11055,13 +12715,13 @@ Lava.define(
 
 				}
 
-			} else if (this._source_object_type == this.SOURCE_OBJECT_TYPES.ENUMERABLE) {
+			} else if (this._source_object_type == Lava.ENUMERABLE_SOURCE_OBJECT_TYPES.ENUMERABLE) {
 
 				this._data_names = data_source.getNames();
 				this._data_values = data_source.getValues();
 				this._data_uids = data_source.getUIDs();
 
-			} else if (this._source_object_type == this.SOURCE_OBJECT_TYPES.PROPERTIES) {
+			} else if (this._source_object_type == Lava.ENUMERABLE_SOURCE_OBJECT_TYPES.PROPERTIES) {
 
 				this._initFromObject(data_source.getProperties());
 
@@ -11077,6 +12737,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * If `_source_object` is an Object
+	 * @param {Object} data_source
+	 */
 	_initFromObject: function(data_source) {
 
 		for (var name in data_source) {
@@ -11087,6 +12751,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Append the given uid, value and name to corresponding instance arrays: `_data_uids`, `_data_values` and `_data_names`
+	 * @param {number} uid
+	 * @param {*} value
+	 * @param {string} name
+	 */
 	_push: function(uid, value, name) {
 
 		this._data_uids.push(uid);
@@ -11095,6 +12765,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Take the temporary helper object, returned from {@link Lava.system.Enumerable#_createHelperStorage}
+	 * and assign it's corresponding arrays to local arrays
+	 * @param {_cEnumerableHelperStorage} storage Temporary helper object
+	 */
 	_assignStorage: function(storage) {
 
 		this._data_uids = storage.uids;
@@ -11103,30 +12778,51 @@ Lava.define(
 
 	},
 
+	/**
+	 * Does it have `_source_object`
+	 * @returns {boolean} True, if `_source_object` is not null
+	 */
 	hasSourceObject: function() {
 
 		return this._source_object !== null;
 
 	},
 
+	/**
+	 * Does it have any items
+	 * @returns {boolean} True if there are no items in collection
+	 */
 	isEmpty: function() {
 
 		return this._count == 0;
 
 	},
 
+	/**
+	 * Get current item count
+	 * @returns {number} Get `_count`
+	 */
 	getCount: function() {
 
 		return this._count;
 
 	},
 
+	/**
+	 * The only supported property is <kw>"length"</kw>
+	 * @param {string} name
+	 * @returns {number} Returns `_count` for <kw>"length"</kw> property
+	 */
 	get: function(name) {
 
 		return (name == 'length') ? this._count : null;
 
 	},
 
+	/**
+	 * Get a copy of local UIDs array
+	 * @returns {Array.<number>} `_data_uids`
+	 */
 	getUIDs: function() {
 
 		// we need to copy the local array, to protect it from being altered outside of the class
@@ -11134,12 +12830,20 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get a copy of local values array
+	 * @returns {Array.<*>} `_data_values`
+	 */
 	getValues: function() {
 
 		return this._data_values.slice();
 
 	},
 
+	/**
+	 * Get a copy of local names array
+	 * @returns {Array.<string>} `_data_names`
+	 */
 	getNames: function() {
 
 		return this._data_names.slice();
@@ -11148,7 +12852,7 @@ Lava.define(
 
 	/**
 	 * Create an object with [uid] => value structure
-	 * @returns {{}}
+	 * @returns {Object.<number, *>} Object with local UIDs as keys and corresponding values
 	 */
 	getValuesHash: function() {
 
@@ -11166,8 +12870,9 @@ Lava.define(
 	},
 
 	/**
-	 * Warning: this map may change with any operation
-	 * @returns {{}} An object with keys being collection's internal UIDs and array indexes as values.
+	 * Get an object with local UIDs as keys and their indices in local array as values.
+	 * The result map is valid until any modification to Enumerable
+	 * @returns {Object.<number, number>} An object with keys being collection's internal UIDs and their indices as values
 	 */
 	getUIDToIndexMap: function() {
 
@@ -11184,6 +12889,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get the value, that corresponds to given UID
+	 * @param {number} uid
+	 * @returns {*}
+	 */
 	getValueByLocalUID: function(uid) {
 
 		var index = this._data_uids.indexOf(uid);
@@ -11192,66 +12902,96 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get UID at given `index`
+	 * @param {number} index
+	 * @returns {number} Requested UID
+	 */
 	getUIDAt: function(index) {
 
 		return this._data_uids[index];
 
 	},
 
+	/**
+	 * Get value at given `index`
+	 * @param {number} index
+	 * @returns {*} Requested value
+	 */
 	getValueAt: function(index) {
 
 		return this._data_values[index];
 
 	},
 
+	/**
+	 * Get name at given `index`
+	 * @param {number} index
+	 * @returns {string}
+	 */
 	getNameAt: function(index) {
 
 		return this._data_names[index];
 
 	},
 
+	/**
+	 * Does collection contain the `value`
+	 * @param {*} value Value to search for
+	 * @returns {boolean} <kw>true</kw>, if collection has given value
+	 */
 	containsValue: function(value) {
 
-		var i = 0,
-			result = false;
-
-		for (; i < this._count; i++) {
-
-			if (this._data_values[i] === value) {
-				result = true;
-				break;
-			}
-
-		}
-
-		return result;
+		return this._data_values.indexOf(value) != -1;
 
 	},
 
+	/**
+	 * Does collection contain the given `uid`
+	 * @param {number} uid
+	 * @returns {boolean} <kw>true</kw>, if collection has given UID
+	 */
 	containsLocalUID: function(uid) {
 
 		return this._data_uids.indexOf(uid) != -1;
 
 	},
 
+	/**
+	 * Get index of given `value` in collection
+	 * @param {*} value Value to search for
+	 * @returns {number} Zero-based index of value in Enumerable, or -1, if value is not in array
+	 */
 	indexOfValue: function(value) {
 
 		return this._data_values.indexOf(value);
 
 	},
 
+	/**
+	 * Get index of given `uid` in the collection
+	 * @param {number} uid Local UID to search for
+	 * @returns {number} Zero-based index of uid in Enumerable, or -1, if uid is not in array
+	 */
 	indexOfUID: function(uid) {
 
 		return this._data_uids.indexOf(uid);
 
 	},
 
+	/**
+	 * Will throw exception. You can not set any properties to Enumerable instance
+	 */
 	set: function() {
 
 		Lava.t('set on Enumerable is not permitted');
 
 	},
 
+	/**
+	 * Used in editing operations to set `_count` and fire changed events for <kw>"length"</kw> property
+	 * @param {number} new_length
+	 */
 	_setLength: function(new_length) {
 
 		this._count = new_length;
@@ -11259,6 +12999,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Replace the corresponding `value` and `name` at specified `index`, generating a new UID
+	 * @param {number} index Index of value in Enumerable
+	 * @param {*} value New value for given index
+	 * @param {number} [name] New name for the value
+	 */
 	replaceAt: function(index, value, name) {
 
 		if (index > this._count) Lava.t("Index is out of range");
@@ -11290,6 +13036,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Swap values, names and UIDs at given index. Does not generate {@link Lava.system.Enumerable#event:items_removed}
+	 * and {@link Lava.system.Enumerable#event:items_added} events, just {@link Lava.system.Enumerable#event:collection_changed}
+	 * @param {number} index_a First index to swap
+	 * @param {number} index_b Second index to swap
+	 */
 	swap: function(index_a, index_b) {
 
 		if (index_a > this._count || index_b > this._count) Lava.t("Index is out of range (2)");
@@ -11304,6 +13056,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Add the name/value pair to the end of the collection, generating a new UID
+	 * @param {*} value New value to add
+	 * @param {string} [name] New name
+	 * @returns {number} New collection `_count`
+	 */
 	push: function(value, name) {
 
 		var count = this._count,
@@ -11325,6 +13083,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Remove a value from the end of the collection
+	 * @returns {*} Removed value
+	 */
 	pop: function() {
 
 		var old_uid = this._data_uids.pop(),
@@ -11345,6 +13107,10 @@ Lava.define(
 		return old_value;
 	},
 
+	/**
+	 * Execute the `callback` for each item in collection
+	 * @param {_tEnumerableEachCallback} callback
+	 */
 	each: function(callback) {
 
 		// everything is copied in case the collection is modified during the cycle
@@ -11356,7 +13122,7 @@ Lava.define(
 
 		for (; i < count; i++) {
 
-			if (callback(values[i], uids[i], names[i], i) === false) {
+			if (callback(values[i], names[i], uids[i], i) === false) {
 				break;
 			}
 
@@ -11365,10 +13131,10 @@ Lava.define(
 	},
 
 	/**
-	 * Removes the first occurrence of value within collection.
+	 * Removes the first occurrence of value within collection
 	 *
 	 * @param {*} value
-	 * @returns {boolean} Whether the value existed.
+	 * @returns {boolean} <kw>true</kw>, if the value existed
 	 */
 	removeValue: function(value) {
 
@@ -11384,13 +13150,19 @@ Lava.define(
 
 	},
 
-	includeValue: function(value) {
+	/**
+	 * If value does not exist - push it into collection
+	 * @param {*} value New value
+	 * @param {string} [name] New name
+	 * @returns {boolean} <kw>true</kw>, if value did not exist and was included
+	 */
+	includeValue: function(value, name) {
 
 		var result = false,
 			index = this._data_values.indexOf(value);
 
 		if (index == -1) {
-			this.push(value);
+			this.push(value, name);
 			result = true;
 		}
 
@@ -11398,35 +13170,42 @@ Lava.define(
 
 	},
 
+	/**
+	 * Set `_source_object`
+	 * @param {(Array|Object|Lava.mixin.Properties|Lava.system.Enumerable)} data_source
+	 */
 	setSourceObject: function(data_source) {
 
 		if (Lava.schema.DEBUG && typeof(data_source) != 'object') Lava.t("Wrong argument supplied for Enumerable constructor");
 		this._source_object = data_source;
 		this._source_object_type = Array.isArray(data_source)
-			? this.SOURCE_OBJECT_TYPES.ARRAY
+			? Lava.ENUMERABLE_SOURCE_OBJECT_TYPES.ARRAY
 			: (data_source.isEnumerable
-				? this.SOURCE_OBJECT_TYPES.ENUMERABLE
+				? Lava.ENUMERABLE_SOURCE_OBJECT_TYPES.ENUMERABLE
 				: (data_source.isProperties
-					? this.SOURCE_OBJECT_TYPES.PROPERTIES
-					: this.SOURCE_OBJECT_TYPES.OBJECT));
+					? Lava.ENUMERABLE_SOURCE_OBJECT_TYPES.PROPERTIES
+					: Lava.ENUMERABLE_SOURCE_OBJECT_TYPES.OBJECT));
 
 	},
 
+	/**
+	 * Update the collection from `_source_object`: remove values, that are not in source object, and add new values
+	 */
 	updateFromSourceObject: function() {
 
 		if (Lava.schema.DEBUG && !this._source_object) Lava.t("Enumerable was not created from object");
 
 		switch (this._source_object_type) {
-			case this.SOURCE_OBJECT_TYPES.PROPERTIES:
+			case Lava.ENUMERABLE_SOURCE_OBJECT_TYPES.PROPERTIES:
 				this._updateFromObject(this._source_object.getProperties());
 				break;
-			case this.SOURCE_OBJECT_TYPES.OBJECT:
+			case Lava.ENUMERABLE_SOURCE_OBJECT_TYPES.OBJECT:
 				this._updateFromObject(this._source_object);
 				break;
-			case this.SOURCE_OBJECT_TYPES.ARRAY:
+			case Lava.ENUMERABLE_SOURCE_OBJECT_TYPES.ARRAY:
 				this._updateFromArray(this._source_object);
 				break;
-			case this.SOURCE_OBJECT_TYPES.ENUMERABLE:
+			case Lava.ENUMERABLE_SOURCE_OBJECT_TYPES.ENUMERABLE:
 				this._updateFromEnumerable(this._source_object);
 				break;
 			default:
@@ -11435,6 +13214,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Update from `_source_object` version for arrays
+	 * @param {Array} source_array
+	 */
 	_updateFromArray: function(source_array) {
 
 		var new_count = source_array.length,
@@ -11487,6 +13270,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Update from `_source_object` version for Enumerable
+	 * @param {Lava.system.Enumerable} data_source
+	 */
 	_updateFromEnumerable: function(data_source) {
 
 		var new_names = data_source.getNames(),
@@ -11530,6 +13317,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Update from `_source_object` - version for objects
+	 * @param {Object} source_object
+	 */
 	_updateFromObject: function(source_object) {
 
 		var i = 0,
@@ -11588,11 +13379,10 @@ Lava.define(
 	},
 
 	/**
-	 * Accepts a function with the following parameters:
-	 * function(value, name, uid)
-	 * Callback must return TRUE if element needs to stay in the collection, otherwise it will be removed.
+	 * Pass each value to callback and leave only those, for which it has returned <kw>true</kw>.
+	 * Remove the others
 	 *
-	 * @param {function(*, string, number)} callback
+	 * @param {_tEnumerableFilterCallback} callback
 	 */
 	filter: function(callback) {
 
@@ -11603,7 +13393,7 @@ Lava.define(
 
 		for (; i < count; i++) {
 
-			if (callback(this._data_values[i], this._data_names[i], this._data_uids[i])) {
+			if (callback(this._data_values[i], this._data_names[i], this._data_uids[i], i)) {
 
 				result.push(this._data_uids[i], this._data_values[i], this._data_names[i]);
 
@@ -11625,27 +13415,34 @@ Lava.define(
 	},
 
 	/**
-	 * @param {function(*, *):boolean} less A callback to compare items
+	 * Sort items in collection
+	 * @param {_tLessCallback} less A callback to compare items
 	 * @param {string} [algorithm_name] The name of the sorting method from Lava.algorithms.sorting
 	 */
 	sort: function(less, algorithm_name) {
 
-		this._sort(less, algorithm_name, this._data_values);
+		this._sort(less, this._data_values, algorithm_name);
 
 	},
 
 	/**
-	 * Sort by the array of names.
-	 * @param {function(*, *):boolean} less A callback to compare items
-	 * @param {string} [algorithm_name] The name of the sorting method from Lava.algorithms.sorting
+	 * Sort items by the array of names
+	 * @param {_tLessCallback} less A callback to compare items
+	 * @param {string} [algorithm_name] The name of the sorting method from {@link Lava.algorithms.sorting}
 	 */
 	sortByNames: function(less, algorithm_name) {
 
-		this._sort(less, algorithm_name, this._data_names);
+		this._sort(less, this._data_names, algorithm_name);
 
 	},
 
-	_sort: function(less, algorithm_name, values) {
+	/**
+	 * Perform sorting
+	 * @param {_tLessCallback} less A callback to compare items
+	 * @param {Array} values
+	 * @param {string} [algorithm_name]
+	 */
+	_sort: function(less, values, algorithm_name) {
 
 		var indices = [],
 			i = 0,
@@ -11670,6 +13467,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Sort items by premade array of new item indices
+	 * @param {Array.<number>} new_indices
+	 */
 	reorder: function(new_indices) {
 
 		var i = 0,
@@ -11697,6 +13498,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Remove range of indices from collection and return removed values
+	 * @param {number} start_index
+	 * @param {number} count
+	 * @returns {Array} Removed values
+	 */
 	removeRange: function(start_index, count) {
 
 		if (count <= 0) Lava.t("Invalid item count supplied for removeRange");
@@ -11720,6 +13527,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Insert a sequence of values into collection
+	 * @param {number} start_index Index of the beginning of new values. Must be less or equal to collection's `_count`
+	 * @param {Array.<*>} values New values
+	 * @param [names] Names that correspond to each value
+	 */
 	insertRange: function(start_index, values, names) {
 
 		if (start_index >= this._count) Lava.t("Index is out of range");
@@ -11784,6 +13597,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Append new values to the end of the collection
+	 * @param {Array.<*>} values New values
+	 * @param {Array.<string>} [names] Corresponding names
+	 */
 	append: function(values, names) {
 
 		this.insertRange(this._count, values, names);
@@ -11791,7 +13609,8 @@ Lava.define(
 	},
 
 	/**
-	 * Remove all records
+	 * Remove all values and return them
+	 * @returns {Array} Values that were in collection
 	 */
 	removeAll: function() {
 
@@ -11799,24 +13618,44 @@ Lava.define(
 
 	},
 
+	/**
+	 * Insert a value at index
+	 * @param {number} index Index to insert at
+	 * @param {*} value New value
+	 * @param {string} [name] New name
+	 */
 	insertAt: function(index, value, name) {
 
 		this.insertRange(index, [value], [name]);
 
 	},
 
+	/**
+	 * Put the value at the beginning of collection
+	 * @param {*} value New value
+	 * @param {string} [name] New name
+	 */
 	unshift: function(value, name) {
 
 		this.insertRange(0, [value], [name]);
 
 	},
 
+	/**
+	 * Remove value at `index`
+	 * @param {number} index Index to remove
+	 * @returns {*} The removed value
+	 */
 	removeAt: function(index) {
 
 		return this.removeRange(index, 1)[0];
 
 	},
 
+	/**
+	 * Remove value from the beginning of collection
+	 * @returns {*} The removed value
+	 */
 	shift: function() {
 
 		return this.removeRange(0, 1)[0];
@@ -11824,8 +13663,8 @@ Lava.define(
 	},
 
 	/**
-	 * Create an internal helper object. The purpose is to write less code.
-	 * @returns {{uids: Array, values: Array, names: Array, push: push, getObject: getObject}}
+	 * Create an internal helper object, which allows to write less code
+	 * @returns {_cEnumerableHelperStorage} Helper object
 	 */
 	_createHelperStorage: function() {
 
@@ -11849,6 +13688,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Free resources and make this instance unusable
+	 */
 	destroy: function() {
 
 		this._fire('destroy');
@@ -11860,6 +13702,8 @@ Lava.define(
 Lava.define(
 'Lava.system.Template',
 /**
+ * Renderable collection of views and strings
+ *
  * @lends Lava.system.Template#
  * @implements _iViewHierarchyMember
  */
@@ -11867,17 +13711,56 @@ Lava.define(
 
 	Shared: ['_block_handlers_map'],
 
+	/**
+	 * This class is instance of Lava.system.Template
+	 */
 	isTemplate: true,
 
+	/**
+	 * The nearest widget in hierarchy
+	 * @type {Lava.widget.Standard}
+	 */
 	_widget: null,
+	/**
+	 * The owner (parent) view
+	 * @type {Lava.view.Abstract}
+	 */
 	_parent_view: null,
+	/**
+	 * Instance config
+	 * @type {_tTemplate}
+	 */
 	_config: null,
+	/**
+	 * Count of renderable elements in template instance
+	 * @type {number}
+	 */
 	_count: 0,
+	/**
+	 * The renderable items, constructed from `_config`
+	 * @type {Array.<_tRenderable>}
+	 */
 	_contents: [],
+	/**
+	 * Is the template currently in DOM
+	 * @type {boolean}
+	 */
 	_is_inDOM: false,
+	/**
+	 * Is template currently sleeping
+	 * @type {boolean}
+	 */
 	_is_sleeping: false,
+	/**
+	 * Global unique ID of the instance
+	 * @type {_tGUID}
+	 */
 	guid: null,
 
+	/**
+	 * When creating content: handlers for every item type in `_config`
+	 * @type {Object.<string, string>}
+	 */
 	_block_handlers_map: {
 		'string': '_createDirect',
 		view: '_createView',
@@ -11889,10 +13772,12 @@ Lava.define(
 	},
 
 	/**
-	 * @param {_tTemplate} template_config
-	 * @param {Lava.widget.Standard} widget
-	 * @param {Lava.view.Abstract} parent_view
-	 * @param {Object} child_properties
+	 * Create an instance of Template. Create content from config
+	 *
+	 * @param {_tTemplate} template_config Config for content
+	 * @param {Lava.widget.Standard} widget Nearest widget in hierarchy
+	 * @param {Lava.view.Abstract} parent_view Owner (parent) view
+	 * @param {Object} [child_properties] The properties to set to child views
 	 */
 	init: function(template_config, widget, parent_view, child_properties) {
 
@@ -11907,10 +13792,11 @@ Lava.define(
 	},
 
 	/**
-	 * @param {Array.<_tRenderable>} result
-	 * @param {_tTemplate} children_config
-	 * @param {Array.<string>} include_name_stack
-	 * @param {Object} properties
+	 * Create items from config and put them in `result`
+	 * @param {Array.<_tRenderable>} result Where to put created items
+	 * @param {_tTemplate} children_config Config for the Template
+	 * @param {Array.<string>} include_name_stack Used to protect from recursive includes
+	 * @param {Object} properties The properties for child views
 	 */
 	_createChildren: function(result, children_config, include_name_stack, properties) {
 
@@ -11932,12 +13818,24 @@ Lava.define(
 
 	},
 
+	/**
+	 * Handler for strings: push it into result
+	 * @param {Array.<_tRenderable>} result Created items
+	 * @param {string} childConfig String from Template config
+	 */
 	_createDirect: function(result, childConfig) {
 
 		result.push(childConfig);
 
 	},
 
+	/**
+	 * Handler for views. Create a view and push it into result
+	 * @param {Array.<_tRenderable>} result
+	 * @param {(_cView|_cWidget)} childConfig Config vor the view
+	 * @param {Array.<string>} include_name_stack Used to protect from recursive includes
+	 * @param {Object} properties Properties for that view
+	 */
 	_createView: function(result, childConfig, include_name_stack, properties) {
 
 		var constructor = Lava.ClassManager.getConstructor(childConfig['class'], 'Lava.view'),
@@ -11953,6 +13851,13 @@ Lava.define(
 
 	},
 
+	/**
+	 * Handler for includes. Get include from widget, then create and append all items from include
+	 * @param {Array.<_tRenderable>} result
+	 * @param {_cInclude} child_config
+	 * @param {Array.<string>} include_name_stack
+	 * @param {Object} properties
+	 */
 	_createInclude: function(result, child_config, include_name_stack, properties) {
 
 		if (include_name_stack.indexOf(child_config.name) != -1) Lava.t("Infinite include recursion");
@@ -11966,12 +13871,11 @@ Lava.define(
 	},
 
 	/**
-	 * @param result
+	 * Handler for static_value: get the value from widget resources and push it into result
+	 * @param {Array.<_tRenderable>} result
 	 * @param {_cStaticValue} childConfig
-	 * @param include_name_stack
-	 * @param properties
 	 */
-	_createStaticValue: function(result, childConfig, include_name_stack, properties) {
+	_createStaticValue: function(result, childConfig) {
 
 		var resource_id = childConfig.resource_id,
 			resource_owner = Lava.view_manager.locateTarget(this._widget, resource_id.locator_type, resource_id.locator),
@@ -11990,15 +13894,14 @@ Lava.define(
 	},
 
 	/**
-	 * @param result
+	 * Handler for static_eval: evaluate the given Argument config and append evaluation result
+	 * @param {Array.<_tRenderable>} result
 	 * @param {_cStaticEval} childConfig
-	 * @param include_name_stack
-	 * @param properties
 	 */
-	_createStaticEval: function(result, childConfig, include_name_stack, properties) {
+	_createStaticEval: function(result, childConfig) {
 
 		var argument = new Lava.scope.Argument(childConfig.argument, this._view, this._widget);
-		// if this happens - than you are probably doing something wrong
+		// if this happens - then you are probably doing something wrong
 		if (argument.isWaitingRefresh()) {
 			if (Lava.schema.DEBUG) Lava.t("static_eval wrong usage: created argument is dirty");
 			Lava.logError("static_eval wrong usage: created argument is dirty");
@@ -12009,10 +13912,12 @@ Lava.define(
 	},
 
 	/**
-	 * @param result
+	 * Handler for static tags: resolve it's resources, serialize it into string and push parts into result.
+	 * The content of the tag is processed recursively
+	 * @param {Array.<_tRenderable>} result
 	 * @param {_cStaticTag} child_config
-	 * @param include_name_stack
-	 * @param properties
+	 * @param {Array.<string>} include_name_stack
+	 * @param {Object} properties
 	 */
 	_createStaticTag: function(result, child_config, include_name_stack, properties) {
 
@@ -12080,6 +13985,7 @@ Lava.define(
 	},
 
 	/**
+	 * Perform broadcast
 	 * @param {string} function_name
 	 */
 	_broadcast: function(function_name) {
@@ -12097,7 +14003,8 @@ Lava.define(
 	},
 
 	/**
-	 * @returns {string}
+	 * Render template
+	 * @returns {string} Rendered HTML
 	 */
 	render: function() {
 
@@ -12129,6 +14036,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Broadcast <kw>"broadcastRemove"</kw> to instance content
+	 */
 	broadcastRemove: function() {
 
 		if (this._is_inDOM) {
@@ -12141,6 +14051,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Broadcast <kw>"broadcastInDOM"</kw> to instance content
+	 */
 	broadcastInDOM: function() {
 
 		this._is_inDOM = true;
@@ -12148,6 +14061,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Broadcast <kw>"broadcastSleep"</kw> to instance content
+	 */
 	broadcastSleep: function() {
 
 		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.t();
@@ -12157,6 +14073,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Broadcast <kw>"broadcastWakeup"</kw> to instance content
+	 */
 	broadcastWakeup: function() {
 
 		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.t();
@@ -12166,6 +14085,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Set this property to all views inside `_contents`
+	 * @param {string} name Property name
+	 * @param {*} value Property value
+	 */
 	batchSetProperty: function(name, value) {
 
 		for (var i = 0; i < this._count; i++) {
@@ -12180,6 +14104,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Set properties to all views inside `_contents`
+	 * @param {Object} properties_object
+	 */
 	batchSetProperties: function(properties_object) {
 
 		for (var i = 0; i < this._count; i++) {
@@ -12194,24 +14122,42 @@ Lava.define(
 
 	},
 
+	/**
+	 * Find first view in `_contents` and return it
+	 * @returns {Lava.view.Abstract} First view
+	 */
 	getFirstView: function() {
 
 		return this._seekForwards(0);
 
 	},
 
+	/**
+	 * Find last view in `_contents` and return it
+	 * @returns {Lava.view.Abstract} Last view
+	 */
 	getLastView: function() {
 
 		return this._seekBackwards(this._count - 1);
 
 	},
 
+	/**
+	 * Find a view, preceding the given one
+	 * @param {Lava.view.Abstract} view Current view
+	 * @returns {Lava.view.Abstract} Previous view
+	 */
 	getPreviousView: function(view) {
 
 		return this._seekBackwards(view.template_index - 1);
 
 	},
 
+	/**
+	 * Find next view
+	 * @param {Lava.view.Abstract} view Current view
+	 * @returns {Lava.view.Abstract} Next view
+	 */
 	getNextView: function(view) {
 
 		return this._seekForwards(view.template_index + 1);
@@ -12219,39 +14165,50 @@ Lava.define(
 	},
 
 	/**
-	 * Warning: codestyle violation
-	 * @returns {Lava.view.Abstract}
+	 * Algorithm to find next view
+	 * @returns {Lava.view.Abstract} Next view from index `i`
 	 */
 	_seekForwards: function(i) {
 
+		var result = null;
+
 		while (i < this._count) {
 			if (this._contents[i].isView) {
-				return this._contents[i];
+				result = this._contents[i];
+				break;
 			}
 			i++;
 		}
 
-		return null;
+		return result;
 
 	},
 
 	/**
-	 * Warning: codestyle violation
-	 * @returns {Lava.view.Abstract}
+	 * Algorithm to find previous view
+	 * @returns {Lava.view.Abstract} Previous view to index `i`
 	 */
 	_seekBackwards: function(i) {
 
+		var result = null;
+
 		while (i >= 0) {
 			if (this._contents[i].isView) {
-				return this._contents[i];
+				result = this._contents[i];
+				break;
 			}
 			i--;
 		}
 
-		return null;
+		return result;
 
 	},
 
+	/**
+	 * Search `_contents` and find all views with given label
+	 * @param {string} label Label to search for
+	 * @returns {Array.<Lava.view.Abstract>} Views with given label
+	 */
 	getViewsByLabel: function(label) {
 
 		var result = [],
@@ -12271,6 +14228,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Find all widgets with given name inside `_contents`
+	 * @param {string} name Name to search for
+	 * @returns {Array.<Lava.widget.Standard>} Found widgets
+	 */
 	getWidgetsByName: function(name) {
 
 		var result = [],
@@ -12290,30 +14252,50 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_count`
+	 * @returns {number} `_count`
+	 */
 	getCount: function() {
 
 		return this._count;
 
 	},
 
+	/**
+	 * Return an item from `_content` at given index
+	 * @param {number} index Index in `_content`
+	 * @returns {_tRenderable} Requested item
+	 */
 	getAt: function(index) {
 
 		return this._contents[index];
 
 	},
 
+	/**
+	 * Get `_is_inDOM`
+	 * @returns {boolean}
+	 */
 	isInDOM: function() {
 
 		return this._is_inDOM;
 
 	},
 
+	/**
+	 * Get `_is_sleeping`
+	 * @returns {boolean}
+	 */
 	isSleeping: function() {
 
 		return this._is_sleeping;
 
 	},
 
+	/**
+	 * Free resources and make this instance unusable
+	 */
 	destroy: function() {
 
 		this._broadcast('destroy');
@@ -12322,10 +14304,19 @@ Lava.define(
 	}
 
 });
+/**
+ * Mouse pointer has crossed an element boundary
+ * @event Lava.system.ViewManager#mouseover_stack_changed
+ * @type {Array.<HTMLElement>}
+ * @lava-type-description List of elements under mouse cursor, with topmost element being the first item in array,
+ *  and all it's parents
+ */
 
 Lava.define(
 'Lava.system.ViewManager',
 /**
+ * Refreshes views and routes view events and roles
+ *
  * @lends Lava.system.ViewManager#
  * @extends Lava.mixin.Observable
  */
@@ -12333,42 +14324,88 @@ Lava.define(
 
 	Extends: 'Lava.mixin.Observable',
 
-	// views and widgets, sorted by depth level. [level][views_array]
+	/**
+	 * Views and widgets, sorted by depth level
+	 * @type {Array.<Array.<Lava.view.Abstract>>}
+	 */
 	_dirty_views: [],
+	/**
+	 * View refresh loop is in progress
+	 * @type {boolean}
+	 */
 	_views_refreshing: false,
 
 	/**
+	 * Hash of all views with user-defined ID
 	 * @type {Object.<string, Lava.view.Abstract>}
 	 */
 	_views_by_id: {},
 	/**
+	 * Hash of all views by their GUID
 	 * @type {Object.<*, Lava.view.Abstract>}
 	 */
 	_views_by_guid: {},
 
 	/**
+	 * Global user-assigned handlers for unhandled roles. <role_name> => [widgets_that_will_handle_it]
 	 * @type {Object.<string, Array.<Lava.widget.Standard>>}
 	 */
 	_global_role_targets: {},
 	/**
+	 * Global user-assigned handlers for unhandled events
 	 * @type {Object.<string, Array.<Lava.widget.Standard>>}
 	 */
 	_global_event_targets: {},
 
+	/**
+	 * Used in mouse events processing algorithm
+	 * @type {HTMLElement}
+	 */
 	_old_mouseover_target: null,
+	/**
+	 * Parents of `_old_mouseover_target` (and `_old_mouseover_target` itself)
+	 * @type {Array.<HTMLElement>}
+	 */
 	_old_mouseover_view_stack: [],
+	/**
+	 * Used in mouse events processing algorithm
+	 * @type {HTMLElement}
+	 */
 	_new_mouseover_target: null,
+	/**
+	 * Parents of `_new_mouseover_target` (and `_new_mouseover_target` itself)
+	 * @type {Array.<HTMLElement>}
+	 */
 	_new_mouseover_view_stack: [],
 
+	/**
+	 * Counters for event consumers
+	 * @type {Object.<string, number>}
+	 */
 	_event_usage_counters: {},
+	/**
+	 * Listeners from {@link Lava.Core} for each DOM event
+	 * @type {Object.<string, _tListener>}
+	 */
 	_events_listeners: {
 		mouseover: null,
 		mouseout: null
 	},
 
+	/**
+	 * Whether to cancel bubbling of current event or role
+	 * @type {boolean}
+	 */
 	_cancel_bubble: false,
+	/**
+	 * True, if bubbling of current event or role may be cancelled
+	 * @type {boolean}
+	 */
 	_is_bubble_cancellable: false,
 
+	/**
+	 * Create an instance of the class, acquire event listeners
+	 */
 	init: function() {
 
 		var default_events = Lava.schema.system.DEFAULT_EVENTS,
@@ -12385,6 +14422,7 @@ Lava.define(
 	},
 
 	/**
+	 * Place a view into queue for refresh
 	 * @param {Lava.view.Abstract} view
 	 */
 	scheduleViewRefresh: function(view) {
@@ -12403,6 +14441,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * View refresh cycle. Call {@link Lava.view.Abstract#refresh} of all views in the queue, starting from the root views
+	 */
 	refresh: function() {
 
 		var level = 0,
@@ -12449,6 +14490,7 @@ Lava.define(
 	},
 
 	/**
+	 * Add a newly created view to local collections: `_views_by_guid` and `_views_by_id`
 	 * @param {Lava.view.Abstract} instance
 	 */
 	registerView: function(instance) {
@@ -12457,8 +14499,7 @@ Lava.define(
 
 		if (instance.id) {
 
-			if (instance.id in this._views_by_id) Lava.t("Duplicate view id: " + instance.id);
-
+			if (Lava.schema.DEBUG && (instance.id in this._views_by_id)) Lava.t("Duplicate view id: " + instance.id);
 			if (Lava.schema.DEBUG && !Lava.isValidId(instance.id)) Lava.t(); // Element ID is either malformed or conflicts with framework id patterns
 
 			this._views_by_id[instance.id] = instance;
@@ -12467,6 +14508,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Remove a destroyed view from local collections
+	 * @param {Lava.view.Abstract} instance
+	 */
 	unregisterView: function(instance) {
 
 		delete this._views_by_guid[instance.guid];
@@ -12480,6 +14525,7 @@ Lava.define(
 	},
 
 	/**
+	 * Get a view with given user-defined ID
 	 * @param {string} id
 	 * @returns {Lava.view.Abstract}
 	 */
@@ -12490,6 +14536,7 @@ Lava.define(
 	},
 
 	/**
+	 * Get view by global unique identifier
 	 * @param {_tGUID} guid
 	 * @returns {Lava.view.Abstract}
 	 */
@@ -12499,6 +14546,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get widget by id. Does not take hierarchy into account
+	 * @param {Lava.widget.Standard} starting_widget
+	 * @param {string} id
+	 * @returns {Lava.view.Abstract}
+	 */
 	_locateWidgetById: function(starting_widget, id) {
 
 		if (Lava.schema.DEBUG && !id) Lava.t();
@@ -12507,6 +14560,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get widget by GUID. Does not consider hierarchy
+	 * @param {Lava.widget.Standard} starting_widget
+	 * @param {_tGUID} guid
+	 * @returns {Lava.view.Abstract}
+	 */
 	_locateWidgetByGuid: function(starting_widget, guid) {
 
 		if (Lava.schema.DEBUG && !guid) Lava.t();
@@ -12515,6 +14574,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Find first widget with given name among parents of the given widget (including widget itself)
+	 * @param {Lava.widget.Standard} widget Starting widget
+	 * @param {string} name Name to search for
+	 * @returns {?Lava.widget.Standard}
+	 */
 	_locateWidgetByName: function(widget, name) {
 
 		if (Lava.schema.DEBUG && !name) Lava.t();
@@ -12529,12 +14594,19 @@ Lava.define(
 
 	},
 
+	/**
+	 * Find first widget with given label among parents of the given widget (including widget itself)
+	 *
+	 * @param {Lava.widget.Standard} widget Starting widget
+	 * @param {string} label
+	 * @returns {?Lava.widget.Standard}
+	 */
 	_locateWidgetByLabel: function(widget, label) {
 
 		if (Lava.schema.DEBUG && !label) Lava.t();
 
 		// Targets are different from view locators, there must be no hardcoded '@widget' label, like in views
-		// (it may be very harmful. Use widget names instead!)
+		// ('@widget' label may be very harmful in this case. Use widget names instead!)
 
 		if (label == 'root') {
 
@@ -12559,10 +14631,11 @@ Lava.define(
 	},
 
 	/**
-	 * @param {Lava.widget.Standard} starting_widget
-	 * @param {string} locator_type
-	 * @param {string} locator
-	 * @returns {Lava.widget.Standard}
+	 * Get a widget from hierarchy by given route
+	 * @param {Lava.widget.Standard} starting_widget The child widget to start search
+	 * @param {_eViewLocatorType} locator_type
+	 * @param {string} locator Locator argument
+	 * @returns {?Lava.widget.Standard}
 	 */
 	locateTarget: function(starting_widget, locator_type, locator) {
 
@@ -12571,13 +14644,15 @@ Lava.define(
 	},
 
 	/**
-	 * Warning! Violates codestyle with multiple return statements.
+	 * Dispatch events and roles to their targets.
+	 * Warning! Violates codestyle with multiple return statements
 	 *
-	 * @param {Lava.view.Abstract} view
-	 * @param {Array.<_cTarget>} targets
-	 * @param {function} callback
-	 * @param {*} callback_arguments
-	 * @param {Object.<string, Array>} global_targets_object
+	 * @param {Lava.view.Abstract} view The source of events or roles
+	 * @param {Array.<_cTarget>} targets The target routes
+	 * @param {function} callback The ViewManager callback that will perform dispatching
+	 * @param {*} callback_arguments Will be passed to `callback`
+	 * @param {Object.<string, Array>} global_targets_object Either {@link Lava.system.ViewManager#_global_role_targets}
+	 *  or {@link Lava.system.ViewManager#_global_event_targets}
 	 */
 	_dispatchCallback: function(view, targets, callback, callback_arguments, global_targets_object) {
 
@@ -12663,6 +14738,15 @@ Lava.define(
 
 	},
 
+	/**
+	 * Callback for dispatching roles: call widget's role handler
+	 *
+	 * @param {Lava.widget.Standard} widget
+	 * @param {string} target_name
+	 * @param {Lava.view.Abstract} view
+	 * @param {Array.<*>} template_arguments
+	 * @returns {boolean}
+	 */
 	_callRegisterViewInRole: function(widget, target_name, view, template_arguments) {
 
 		return widget.handleRole(target_name, view, template_arguments);
@@ -12670,6 +14754,7 @@ Lava.define(
 	},
 
 	/**
+	 * Dispatch roles
 	 * @param {Lava.view.Abstract} view
 	 * @param {Array.<_cTarget>} targets
 	 */
@@ -12682,6 +14767,15 @@ Lava.define(
 
 	},
 
+	/**
+	 * Callback for dispatching events: call the widget's event handler
+	 * @param {Lava.widget.Standard} widget
+	 * @param {string} target_name
+	 * @param {Lava.view.Abstract} view
+	 * @param {Array.<*>} template_arguments
+	 * @param {Object} callback_arguments
+	 * @returns {boolean}
+	 */
 	_callHandleEvent: function(widget, target_name, view, template_arguments, callback_arguments) {
 
 		return widget.handleEvent(
@@ -12695,9 +14789,10 @@ Lava.define(
 	},
 
 	/**
+	 * Perform dispatching of view DOM events
 	 * @param {Lava.view.Abstract} view
 	 * @param {string} event_name
-	 * @param dom_event
+	 * @param {Object} dom_event
 	 */
 	_dispatchViewEvents: function(view, event_name, dom_event) {
 
@@ -12723,6 +14818,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Evaluate template arguments
+	 * @param {Lava.view.Abstract} view
+	 * @param {_cTarget} target
+	 * @returns {Array.<*>}
+	 */
 	_evalTargetArguments: function(view, target) {
 
 		var result = [];
@@ -12748,6 +14849,7 @@ Lava.define(
 	},
 
 	/**
+	 * Get include from widget
 	 * @param {Lava.view.Abstract} starting_view
 	 * @param {_cInclude} config
 	 * @returns {_tTemplate}
@@ -12769,30 +14871,56 @@ Lava.define(
 
 	},
 
+	/**
+	 * Add global user-defined handler for unhandled template events
+	 * @param {string} callback_name
+	 * @param {Lava.widget.Standard} widget
+	 */
 	addGlobalEventTarget: function(callback_name, widget) {
 
 		this._addTarget(this._global_event_targets, callback_name, widget);
 
 	},
 
+	/**
+	 * Remove a widget, added with {@link Lava.system.ViewManager#addGlobalEventTarget}
+	 * @param {string} callback_name
+	 * @param {Lava.widget.Standard} widget
+	 */
 	removeGlobalEventTarget: function(callback_name, widget) {
 
 		this._removeTarget(this._global_event_targets, callback_name, widget);
 
 	},
 
+	/**
+	 * Add a global user-defined handler for unhandled roles
+	 * @param {string} callback_name
+	 * @param {Lava.widget.Standard} widget
+	 */
 	addGlobalRoleTarget: function(callback_name, widget) {
 
 		this._addTarget(this._global_role_targets, callback_name, widget);
 
 	},
 
+	/**
+	 * Remove widget added with {@link Lava.system.ViewManager#addGlobalRoleTarget}
+	 * @param {string} callback_name
+	 * @param {Lava.widget.Standard} widget
+	 */
 	removeGlobalRoleTarget: function(callback_name, widget) {
 
 		this._removeTarget(this._global_role_targets, callback_name, widget);
 
 	},
 
+	/**
+	 * Perform {@link Lava.system.ViewManager#addGlobalEventTarget} or {@link Lava.system.ViewManager#addGlobalRoleTarget}
+	 * @param {Object} storage
+	 * @param {string} name
+	 * @param {Lava.widget.Standard} widget
+	 */
 	_addTarget: function(storage, name, widget) {
 
 		if (name in storage) {
@@ -12815,6 +14943,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Remove widget, added with {@link Lava.system.ViewManager#_addTarget}
+	 * @param {Object} storage
+	 * @param {string} name
+	 * @param {Lava.widget.Standard} widget
+	 */
 	_removeTarget: function(storage, name, widget) {
 
 		if (!(name in storage)) Lava.t("Trying to remove a global event target for nonexistent event");
@@ -12830,7 +14964,8 @@ Lava.define(
 	},
 
 	/**
-	 * @param element
+	 * Get the view, the container of which owns the given element
+	 * @param {HTMLElement} element
 	 * @returns {Lava.view.Abstract}
 	 */
 	getViewByElement: function(element) {
@@ -12852,6 +14987,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get all views by their label. Slow
+	 * @param {string} label
+	 * @returns {Array.<Lava.view.Abstract>}
+	 */
 	getViewsByLabel: function(label) {
 
 		var result = [];
@@ -12870,6 +15010,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Algorithm for dispatching of mouseenter, mouseleave, mouseover and mouseout events to views.
+	 * Maintains stack of elements under cursor, dispatches {@link Lava.system.ViewManager#event:mouseover_stack_changed}
+	 * @param {string} event_name
+	 * @param {Object} event_object
+	 */
 	handleMouseMovement:  function(event_name, event_object) {
 
 		var new_mouseover_target = (event_name == 'mouseover') ? event_object.target : event_object.relatedTarget,
@@ -12952,6 +15098,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Create an array from element and all it's parents
+	 * @param {HTMLElement} element
+	 * @returns {Array.<HTMLElement>}
+	 */
 	_buildElementStack: function(element) {
 
 		var document_ref = window.document,
@@ -12964,6 +15115,7 @@ Lava.define(
 
 		}
 
+		// you must not modify the returned array, but you can slice() it
 		if (Object.freeze) {
 			Object.freeze(result);
 		}
@@ -12972,6 +15124,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get the first view with an Element container, which wraps the given `element`
+	 * (including element's owner view, if `element` belongs to a view)
+	 * @param {HTMLElement} element
+	 * @returns {Lava.view.Abstract}
+	 */
 	_findNearestView: function(element) {
 
 		var view,
@@ -12989,6 +15147,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Dispatch DOM events to views
+	 * @param {string} event_name
+	 * @param {Object} event_object
+	 */
 	onDOMEvent: function(event_name, event_object) {
 
 		var target = event_object.target,
@@ -13034,6 +15197,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Register an event consumer and start routing that event
+	 * @param {string} event_name
+	 */
 	lendEvent: function(event_name) {
 
 		if (Lava.schema.DEBUG && ['mouseenter', 'mouseleave', 'mouseover', 'mouseout'].indexOf(event_name) != -1)
@@ -13052,6 +15219,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Start listening to an event
+	 * @param {string} event_name
+	 */
 	_initEvent: function(event_name) {
 
 		if (event_name == 'mouse_events') {
@@ -13070,6 +15241,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Inform that event consumer does not need that event anymore
+	 * @param {string} event_name
+	 */
 	releaseEvent: function(event_name) {
 
 		if (this._event_usage_counters[event_name] == 0) {
@@ -13087,6 +15262,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Stop listening to an event
+	 * @param {string} event_name
+	 */
 	_shutdownEvent: function(event_name) {
 
 		if (event_name == 'mouse_events') {
@@ -13106,6 +15285,7 @@ Lava.define(
 	},
 
 	/**
+	 * Dispatch a broadcast
 	 * @param {Lava.widget.Standard} widget
 	 * @param {Object.<string, Array.<_cTarget>>} targets
 	 */
@@ -13137,6 +15317,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Stop bubbling current event or role
+	 */
 	cancelBubble: function() {
 
 		if (Lava.schema.DEBUG && !this._is_bubble_cancellable) Lava.t("This event is not cancellable");
@@ -13147,6 +15330,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Free resources and make this instance unusable
+	 */
 	destroy: function() {
 
 		for (var name in this._events_listeners) {
@@ -13168,6 +15354,8 @@ Lava.define(
 Lava.define(
 'Lava.system.App',
 /**
+ * Place for user-defined business-logic
+ *
  * @lends Lava.system.App#
  * @extends Lava.mixin.Observable
  */
@@ -13175,10 +15363,23 @@ Lava.define(
 
 	Extends: 'Lava.mixin.Observable',
 
+	/**
+	 * Global named modules
+	 * @type {Object.<string, Lava.data.Module>}
+	 */
 	_modules: {},
 
+	/**
+	 * Debug mode variable to print a user-friendly message in case of circular dependencies in modules
+	 * @type {Array.<string>}
+	 */
 	_getmodule_recursion_protection: [],
 
+	/**
+	 * Get a global named module instance
+	 * @param {string} name Module name
+	 * @returns {Lava.data.Module}
+	 */
 	getModule: function(name) {
 
 		if (!(name in this._modules)) {
@@ -13208,6 +15409,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Allow user to fire an event from application's instance
+	 * @param {string} event_name
+	 * @param {*} event_args
+	 */
 	fireGlobalEvent: function(event_name, event_args) {
 
 		this._fire(event_name, event_args);
@@ -13219,10 +15425,16 @@ Lava.define(
 Lava.define(
 'Lava.system.Sugar',
 /**
+ * Parser syntax extension for widgets
+ *
  * @lends Lava.system.Sugar#
  */
 {
 
+	/**
+	 * Handlers for root types, {@link _eSugarRootContentType}
+	 * @type {Object.<string, string>}
+	 */
 	_root_map: {
 		include: '_parseInclude',
 		storage: '_parseStorage',
@@ -13230,12 +15442,18 @@ Lava.define(
 		storage_object: '_parseStorageObject'
 	},
 
+	/**
+	 * Tag types, allowed to be inside {@link _eSugarRootContentType|_eSugarRootContentType.union}
+	 * (except storage tags, which are processed separately)
+	 * @type {Object.<string, string>}
+	 */
 	_union_handlers: {
 		include: '_parseInclude'
 	},
 
 	/**
 	 * The types of attributes that can be on root object, type => handler_name
+	 * @type {Object.<string, string>}
 	 */
 	_root_attributes_handlers: {
 		expression_option: '_parseRootExpressionOptionAttribute',
@@ -13247,6 +15465,7 @@ Lava.define(
 	},
 
 	/**
+	 * Parse raw tag as a widget
 	 * @param {_cSugar} schema
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
@@ -13282,9 +15501,10 @@ Lava.define(
 	},
 
 	/**
-	 * @param {_tRawTemplate} raw_blocks
-	 * @param {_cWidget} widget_config
-	 * @returns {_tRawTemplate}
+	 * Inside sugar tag there may be directives at the top. Apply them to widget config and cut away
+	 * @param {_tRawTemplate} raw_blocks The content inside widget's sugar tag
+	 * @param {_cWidget} widget_config The config of the widget being parsed
+	 * @returns {_tRawTemplate} New content without directives
 	 */
 	_applyTopDirectives: function(raw_blocks, widget_config) {
 
@@ -13311,10 +15531,11 @@ Lava.define(
 	// root parsers
 
 	/**
+	 * Parse widget's tag content as include
 	 * @param {_cSugarContent} content_schema
-	 * @param {_cRawTag} raw_tag
+	 * @param {_cRawTag} raw_tag Widget's tag
 	 * @param {_cWidget} widget_config
-	 * @param {string} name
+	 * @param {string} name Include name
 	 */
 	_parseInclude: function(content_schema, raw_tag, widget_config, name) {
 
@@ -13329,9 +15550,10 @@ Lava.define(
 	},
 
 	/**
-	 * @param content_schema
-	 * @param raw_tag
-	 * @param widget_config
+	 * Parse widget's tag content as {@link _cWidget#storage}
+	 * @param {_cSugarContent} content_schema
+	 * @param {_cRawTag} raw_tag
+	 * @param {_cWidget} widget_config
 	 */
 	_parseStorage: function(content_schema, raw_tag, widget_config) {
 
@@ -13344,6 +15566,7 @@ Lava.define(
 	},
 
 	/**
+	 * The content of `raw_tag` is storage tags, mixed with includes
 	 * @param {_cSugarContent} content_schema
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
@@ -13384,6 +15607,7 @@ Lava.define(
 	},
 
 	/**
+	 * Tags inside `raw_tag` represent properties in an object in storage
 	 * @param {_cSugarContent} content_schema
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
@@ -13404,6 +15628,7 @@ Lava.define(
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
+	 * Parse attributes of the widget's `raw_tag` into `widget_config`
 	 * @param {_cSugar} schema
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
@@ -13438,6 +15663,7 @@ Lava.define(
 	},
 
 	/**
+	 * Store root attributes that are not described in Sugar config as 'container_stack' resource
 	 * @param {_cWidget} widget_config
 	 * @param {Object} unknown_attributes
 	 * @param {string} resource_name
@@ -13499,6 +15725,7 @@ Lava.define(
 	// root attribute actions
 
 	/**
+	 * Store 'id' attribute on root tag into {@link _cView#id}
 	 * @param {_cWidget} widget_config
 	 * @param {string} attribute_value
 	 */
@@ -13510,6 +15737,7 @@ Lava.define(
 	},
 
 	/**
+	 * Evaluate attribute value and store it in {@link _cView#options}
 	 * @param {_cWidget} widget_config
 	 * @param {string} attribute_value
 	 * @param {_cSugarRootAttribute} descriptor
@@ -13522,7 +15750,7 @@ Lava.define(
 	},
 
 	/**
-	 * Same as 'option', but empty value is treated as boolean TRUE, to allow value-less attributes.
+	 * Same as 'option', but empty value is treated as boolean TRUE, to allow value-less (void) attributes
 	 * @param {_cWidget} widget_config
 	 * @param {string} attribute_value
 	 * @param {_cSugarRootAttribute} descriptor
@@ -13535,6 +15763,7 @@ Lava.define(
 	},
 
 	/**
+	 * Store attribute as property into {@link _cWidget#properties}
 	 * @param {_cWidget} widget_config
 	 * @param {string} attribute_value
 	 * @param {_cSugarRootAttribute} descriptor
@@ -13546,9 +15775,8 @@ Lava.define(
 
 	},
 
-
-
 	/**
+	 * Parse attribute value via {@link Lava.parsers.Common#parseTargets} and store it as an option
 	 * @param {_cWidget} widget_config
 	 * @param {string} attribute_value
 	 * @param {_cSugarRootAttribute} descriptor
@@ -13561,6 +15789,7 @@ Lava.define(
 	},
 
 	/**
+	 * Parse attribute value as expression and store it as an option
 	 * @param {_cWidget} widget_config
 	 * @param {string} attribute_value
 	 * @param {_cSugarRootAttribute} descriptor
@@ -13586,34 +15815,63 @@ Lava.define(
 Lava.define(
 'Lava.system.PopoverManager',
 /**
+ * Shows and positions popups and tooltips
  * @lends Lava.system.PopoverManager#
  */
 {
 
+	/**
+	 * Listener for {@link Lava.system.ViewManager#event:mouseover_stack_changed}
+	 * @type {_tListener}
+	 */
 	_mouseover_stack_changed_listener: null,
 
+	/**
+	 * The mouseover element with tooltip
+	 * @type {HTMLElement}
+	 */
 	_tooltip_target: null,
 
+	/**
+	 * The attribute with tooltip text
+	 * @type {string}
+	 */
 	_attribute_name: 'data-tooltip',
 
+	/**
+	 * Listener for the mousemove DOM event
+	 * @type {_tListener}
+	 */
 	_mousemove_listener: null,
 
+	/**
+	 * Instance of the Tooltip widget
+	 * @type {Lava.widget.Standard}
+	 */
 	_tooltip: null,
 
-	_default_tooltip_widget: 'Tooltip',
+	/**
+	 * Name of the widget that will show up as a tooltip
+	 * @type {string}
+	 */
+	DEFAULT_TOOLTIP_WIDGET: 'Tooltip',
 
+	/**
+	 * Create tooltip widget instance and start listening to mouse events
+	 */
 	enable: function() {
 
 		if (Lava.schema.DEBUG && this._mouseover_stack_changed_listener) Lava.t("PopoverManager is already enabled");
 		Lava.view_manager.lendEvent('mouse_events');
 		this._mouseover_stack_changed_listener = Lava.view_manager.on('mouseover_stack_changed', this._onMouseoverStackChanged, this);
-		if (!this._tooltip) {
-			this._tooltip = Lava.createWidget(this._default_tooltip_widget);
-			this._tooltip.inject(document.body, 'Bottom');
-		}
+		if (!this._tooltip) this._tooltip = Lava.createWidget(this.DEFAULT_TOOLTIP_WIDGET);
+		this._tooltip.inject(document.body, 'Bottom');
 
 	},
 
+	/**
+	 * Remove tooltip widget from DOM and stop responding to events
+	 */
 	disable: function() {
 
 		Lava.view_manager.releaseEvent('mouse_events');
@@ -13623,10 +15881,16 @@ Lava.define(
 			Lava.Core.removeGlobalHandler(this._mousemove_listener);
 			this._mousemove_listener = null;
 		}
+		this._tooltip.set('is_visible', false);
 		this._tooltip.remove();
 
 	},
 
+	/**
+	 * Mouse has crossed an element boundary. Find new element with tooltip and show new content
+	 * @param {Lava.system.ViewManager} view_manager
+	 * @param {Array.<HTMLElement>} stack
+	 */
 	_onMouseoverStackChanged: function(view_manager, stack) {
 
 		var new_tooltip_target = null,
@@ -13673,6 +15937,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Mouse has changed position. Move tooltip accordingly
+	 * @param {string} event_name
+	 * @param {Object} event_object
+	 */
 	_onMouseMove: function(event_name, event_object) {
 
 		this._tooltip.set('x', event_object.page.x); // left
@@ -13682,9 +15951,18 @@ Lava.define(
 
 });
 
+/**
+ * Field's value has changed in a record instance
+ * @event Lava.data.field.Abstract#changed
+ * @type {Object}
+ * @property {Lava.data.RecordAbstract} record The record with changed field
+ */
+
 Lava.define(
 'Lava.data.field.Abstract',
 /**
+ * Base class for all record fields
+ *
  * @lends Lava.data.field.Abstract#
  * @extends Lava.mixin.Observable
  */
@@ -13693,25 +15971,37 @@ Lava.define(
 	Extends: 'Lava.mixin.Observable',
 
 	/**
+	 * Field's name
 	 * @type {string}
 	 */
 	_name: null,
+	/**
+	 * Field's module
+	 * @type {Lava.data.ModuleAbstract}
+	 */
 	_module: null,
+	/**
+	 * Field's config
+	 * @type {_cField}
+	 */
 	_config: null,
 	/**
+	 * Reference to object from module with properties of all records
 	 * @type {Object.<_tGUID, Object>}
 	 */
 	_storages_by_guid: null,
 	/**
+	 * May this field be assigned a <kw>null</kw> value
 	 * @type {boolean}
 	 */
 	_is_nullable: false,
 
 	/**
+	 * Create the instance of a field
 	 * @param {Lava.data.Module} module
-	 * @param {string} name
+	 * @param {string} name Field name
 	 * @param {_cField} config
-	 * @param {object} module_storages
+	 * @param {object} module_storages Reference to object from module with properties of all records
 	 */
 	init: function(module, name, config, module_storages) {
 
@@ -13724,15 +16014,16 @@ Lava.define(
 	},
 
 	/**
-	 * Module calls it, when all field objects are already created,
+	 * Module calls this method when all field objects are already created,
 	 * and passes the object which will become default property storage for all records.
-	 * It's common purpose is to set this field's default value and attach listeners to other fields.
+	 * Common purpose of this method is to set this field's default value and attach listeners to other fields
 	 */
 	onModuleFieldsCreated: function(default_storage) {},
 
 	/**
+	 * Is the given `value` valid for assignment to this field
 	 * @param {*} value
-	 * @returns {boolean}
+	 * @returns {boolean} True, if value is valid
 	 */
 	isValidValue: function(value) {
 
@@ -13741,7 +16032,8 @@ Lava.define(
 	},
 
 	/**
-	 * Unlike isValidValue(), this is slow version of this check, which returns a message in case the value is invalid
+	 * Unlike {@link Lava.data.field.Abstract#isValidValue}, this is slow version of validity check,
+	 * which returns a message in case the value is invalid
 	 * @param {*} value
 	 * @returns {?string}
 	 */
@@ -13763,6 +16055,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_is_nullable`
+	 * @returns {boolean}
+	 */
 	isNullable: function() {
 
 		return this._is_nullable;
@@ -13770,27 +16066,51 @@ Lava.define(
 	},
 
 	/**
-	 * Records are either loaded from existing data, or created with default storage.
-	 * Here a field may perform initialization of new records, for example: generate an id.
+	 * Records are either loaded from existing data, or created with default properties.
+	 * Here a field may perform initialization of new records, for example: generate an id
 	 */
 	initNewRecord: function(record, storage) {},
 
-	'import': function(record, storage, raw_properties) {
+	/**
+	 * Initialize a field from server-side data
+	 * @param {Lava.data.RecordAbstract} record
+	 * @param {Object} storage
+	 * @param {Object} raw_properties
+	 */
+	'import': function(record, storage, raw_properties) {},
 
-	},
-
+	/**
+	 * Export the field's value back to server-side data
+	 * @param {Lava.data.RecordAbstract} record
+	 * @param {Object} destination_object Object with exported data
+	 */
 	'export': function(record, destination_object) {
 		Lava.t("Abstract function call: export");
 	},
 
+	/**
+	 * Get this field's value from a record's properties
+	 * @param {Lava.data.RecordAbstract} record
+	 * @param {Object} storage
+	 */
 	getValue: function(record, storage) {
 		Lava.t("Abstract function call: getValue");
 	},
 
+	/**
+	 * Set this field's value to record's properties
+	 * @param {Lava.data.RecordAbstract} record
+	 * @param {Object} storage
+	 * @param {*} value
+	 */
 	setValue: function(record, storage, value) {
 		Lava.t("Abstract function call: setValue");
 	},
 
+	/**
+	 * Emit {@link Lava.data.field.Abstract#event:changed} and fire the changed events from record instance
+	 * @param {Lava.data.RecordAbstract} record
+	 */
 	_fireFieldChangedEvents: function(record) {
 
 		this._fire('changed', {record: record});
@@ -13798,6 +16118,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Helper method for importing values from server-side data. Performs validation
+	 * @param {Object} storage
+	 * @param {Object} raw_properties
+	 * @returns {*}
+	 */
 	_getImportValue: function(storage, raw_properties) {
 
 		if (Lava.schema.data.VALIDATE_IMPORT_DATA && !this.isValidValue(raw_properties[this._name]))
@@ -13807,18 +16133,33 @@ Lava.define(
 
 	},
 
+	/**
+	 * Compare values of this field in two records
+	 * @param {Lava.data.RecordAbstract} record_a
+	 * @param {Lava.data.RecordAbstract} record_b
+	 * @returns {boolean} True, in case the value of this field in `record_a` is less than value in `record_b`
+	 */
 	isLess: function(record_a, record_b) {
 
 		return this._storages_by_guid[record_a.guid][this._name] < this._storages_by_guid[record_b.guid][this._name];
 
 	},
 
+	/**
+	 * Compare values of this field in two records
+	 * @param record_a
+	 * @param record_b
+	 * @returns {boolean} True, in case values are equal
+	 */
 	isEqual: function(record_a, record_b) {
 
 		return this._storages_by_guid[record_a.guid][this._name] == this._storages_by_guid[record_b.guid][this._name];
 
 	},
 
+	/**
+	 * Free resources and make this instance unusable
+	 */
 	destroy: function() {
 
 		this._storages_by_guid = this._module = null;
@@ -13830,6 +16171,8 @@ Lava.define(
 Lava.define(
 'Lava.data.field.Basic',
 /**
+ * Field that holds any value
+ *
  * @lends Lava.data.field.Basic#
  * @extends Lava.data.field.Abstract
  */
@@ -13837,6 +16180,10 @@ Lava.define(
 
 	Extends: 'Lava.data.field.Abstract',
 
+	/**
+	 * Field's default value from config
+	 * @type {*}
+	 */
 	_default: null,
 
 	init: function(module, name, config, module_storages) {
@@ -13908,6 +16255,7 @@ Lava.define(
 Lava.define(
 'Lava.data.field.Collection',
 /**
+ * Field, that holds collection of records (usually, from another module)
  * @lends Lava.data.field.Collection#
  * @extends Lava.data.field.Abstract
  */
@@ -13915,41 +16263,62 @@ Lava.define(
 
 	Extends: 'Lava.data.field.Abstract',
 
+	/**
+	 * Instance belongs to Collection field
+	 * @type {boolean}
+	 * @const
+	 */
 	isCollectionField: true,
 
 	/**
-	 * Collection field holds an array of records from this module
+	 * Collection field holds array of records from this module instance
+	 * @type {Lava.data.Module}
 	 */
 	_target_module: null,
 
 	/**
+	 * The mirror {@link Lava.data.field.Record} field name
 	 * @type {string}
 	 */
 	_target_record_field_name: null,
 	/**
-	 * Each Collection field has corresponding Record field, they always come in pairs, like 'parent' and 'children'
+	 * Each Collection field has corresponding Record field, they always come in pairs, like 'parent' (Record) and 'children' (Collection)
 	 * @type {Lava.data.field.Record}
 	 */
 	_target_record_field: null,
 
+	/**
+	 * Listener for {@link Lava.data.field.Record#event:removed_child}
+	 * @type {_tListener}
+	 */
 	_record_removed_listener: null,
+	/**
+	 * Listener for {@link Lava.data.field.Record#event:added_child}
+	 * @type {_tListener}
+	 */
 	_record_added_listener: null,
 
 	/**
+	 * Collections of foreign records that belong to local record
 	 * @type {Object.<string, Lava.system.Enumerable>}
 	 */
 	_collections_by_record_guid: {},
+	/**
+	 * Listeners for each Enumerable from `_collections_by_record_guid`
+	 * @type {Object}
+	 */
 	_collection_listeners_by_guid: {},
 	/**
+	 * Hash of global unique identifiers of Enumerables from `_collections_by_record_guid` to their owner record (local)
 	 * @type {Object.<_tGUID, Lava.data.RecordAbstract>}
 	 */
 	_collection_guid_to_record: {},
 
 	/**
-	 * @param {Lava.data.Module} module
-	 * @param {string} name
+	 * @param module
+	 * @param name
 	 * @param {_cCollectionField} config
-	 * @param {object} module_storages
+	 * @param module_storages
 	 */
 	init: function(module, name, config, module_storages) {
 
@@ -13976,6 +16345,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Record was removed from collection by setting it's related Record field. Update local collection
+	 * @param {Lava.data.field.Record} field
+	 * @param {Lava.data.field.Record#event:removed_child} event_args
+	 */
 	_onRecordRemoved: function(field, event_args) {
 
 		var local_record = event_args.collection_owner;
@@ -13985,6 +16359,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Record was added to collection by setting it's related Record field. Update local collection
+	 * @param {Lava.data.field.Record} field
+	 * @param {Lava.data.field.Record#event:removed_child} event_args
+	 */
 	_onRecordAdded: function(field, event_args) {
 
 		var local_record = event_args.collection_owner;
@@ -13994,13 +16373,13 @@ Lava.define(
 
 	},
 
-	isValidValue: function(value) {
+	isValidValue: function() {
 
 		return false;
 
 	},
 
-	getInvalidReason: function(value) {
+	getInvalidReason: function() {
 
 		return  'Collection field does not support setValue';
 
@@ -14052,18 +16431,33 @@ Lava.define(
 
 	},
 
+	/**
+	 * When directly adding records to collection - their related Record field must be set to correct collection owner
+	 * @param {Lava.system.Enumerable} collection Collection of records that belong to local record ("children")
+	 * @param {Lava.system.Enumerable#event:items_added} event_args
+	 */
 	_onCollectionRecordsAdded: function(collection, event_args) {
 
 		this._setCollectionOwner(event_args.values, this._collection_guid_to_record[collection.guid]);
 
 	},
 
+	/**
+	 * When directly removing records from collection - their related Record field must be set to null
+	 * @param {Lava.system.Enumerable} collection Collection of records that belong to local record ("children")
+	 * @param {Lava.system.Enumerable#event:items_removed} event_args
+	 */
 	_onCollectionRecordsRemoved: function(collection, event_args) {
 
 		this._setCollectionOwner(event_args.values, null);
 
 	},
 
+	/**
+	 * Set the related {@link Lava.data.field.Record} field of the `records` array to `new_value`
+	 * @param {Array.<Lava.data.RecordAbstract>} records
+	 * @param {?Lava.data.RecordAbstract} new_value
+	 */
 	_setCollectionOwner: function(records, new_value) {
 
 		var i = 0,
@@ -14081,13 +16475,19 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get count of items in record's collection of this field
+	 * @param {Lava.data.RecordAbstract} record
+	 * @param {Object} storage
+	 * @returns {Number}
+	 */
 	getCount: function(record, storage) {
 
 		return this._target_record_field.getCollectionCount(record);
 
 	},
 
-	setValue: function(record, storage, new_records) {
+	setValue: function() {
 
 		Lava.t('Trying to set Collection field value');
 
@@ -14133,6 +16533,7 @@ Lava.define(
 Lava.define(
 'Lava.data.field.Integer',
 /**
+ * Holds integer values
  * @lends Lava.data.field.Integer#
  * @extends Lava.data.field.Basic
  */
@@ -14179,7 +16580,9 @@ Lava.define(
 Lava.define(
 'Lava.data.field.Id',
 /**
- * Holds a positive integer, does NOT generate id's automatically
+ * Holds server-side IDs from database table, does NOT generate id's automatically.
+ * Currently supports only positive integers as IDs
+ *
  * @lends Lava.data.field.Id#
  * @extends Lava.data.field.Abstract
  */
@@ -14193,6 +16596,9 @@ Lava.define(
 		valid_value_regex: /^[1-9]\d*$/
 	},
 
+	/**
+	 * ID may be null for new records, which are not saved into database yet
+	 */
 	_is_nullable: true,
 
 	init: function(module, name, config, module_storages) {
@@ -14264,7 +16670,10 @@ Lava.define(
 
 	},
 
-	setValue: function(record, storage, value) {
+	/**
+	 * Throws an error
+	 */
+	setValue: function() {
 
 		Lava.t("Standard id field must not be set");
 
@@ -14275,6 +16684,8 @@ Lava.define(
 Lava.define(
 'Lava.data.field.ForeignKey',
 /**
+ * Represents a field that references ID field of another record (often from another modules). Maintains collections
+ * of local records, grouped by their referenced "parent"
  * @lends Lava.data.field.ForeignKey#
  * @extends Lava.data.field.Basic
  */
@@ -14282,10 +16693,23 @@ Lava.define(
 
 	Extends: 'Lava.data.field.Basic',
 
+	/**
+	 * Instance belongs to ForeignKey field
+	 * @type {boolean}
+	 * @const
+	 */
 	isForeignKey: true,
 
+	/**
+	 * Local records, grouped by foreign field
+	 * @type {Object.<string, Array.<Lava.data.RecordAbstract>>}
+	 */
 	_collections_by_foreign_id: {},
 
+	/**
+	 * Default foreign id (0 means that no record is referenced)
+	 * @type {number}
+	 */
 	_default: 0,
 
 	initNewRecord: function(record, storage) {
@@ -14302,6 +16726,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Add record to local collection of records, grouped by this field
+	 * @param {Lava.data.RecordAbstract} record
+	 * @param {string} foreign_key
+	 */
 	_registerByForeignKey: function(record, foreign_key) {
 
 		if (foreign_key in this._collections_by_foreign_id) {
@@ -14325,9 +16754,14 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get local records with given `foreign_key` value
+	 * @param {string} foreign_key
+	 * @returns {Array.<Lava.data.RecordAbstract>}
+	 */
 	getCollection: function(foreign_key) {
 
-		return this._collections_by_foreign_id[foreign_key] || [];
+		return (foreign_key in this._collections_by_foreign_id) ? this._collections_by_foreign_id[foreign_key].slice() : [];
 
 	},
 
@@ -14339,11 +16773,29 @@ Lava.define(
 	}
 
 });
+/**
+ * Fired, when the field's value changes: local record (`child`) now references the `collection_owner`
+ * @event Lava.data.field.Record#added_child
+ * @type {Object}
+ * @property {Lava.data.RecordAbstract} collection_owner New referenced record
+ * @property {Lava.data.RecordAbstract} child Referencing record from local module
+ */
+
+/**
+ * Fired, when the field's value changes: local record (`child`) no longer references the `collection_owner`
+ * @event Lava.data.field.Record#removed_child
+ * @type {Object}
+ * @property {Lava.data.RecordAbstract} collection_owner Old referenced record
+ * @property {Lava.data.RecordAbstract} child Referencing record from local module
+ */
 
 Lava.define(
 'Lava.data.field.Record',
 /**
- * Maintains collections of records, grouped by this field. Also used by mirror Collection field.
+ * References a record (usually from another module).
+ * Also maintains collections of records, grouped by this field (used by mirror Collection field)
+ * and synchronizes it's state with accompanying ForeignKey field
+ *
  * @lends Lava.data.field.Record#
  * @extends Lava.data.field.Abstract
  */
@@ -14351,42 +16803,69 @@ Lava.define(
 
 	Extends: 'Lava.data.field.Abstract',
 
+	/**
+	 * This class is instance of a Record field
+	 * @type {boolean}
+	 * @const
+	 */
 	isRecordField: true,
 
+	/**
+	 * Owner module for the records of this field
+	 * @type {Lava.data.Module}
+	 */
 	_referenced_module: null,
 
 	/**
 	 * Records, grouped by this field. Serves as a helper for mirror Collection field.
-	 * Key is GUID of the foreign record, value is collection of records from local module.
-	 * @type {Object.<string, Array>}
+	 * Key is GUID of the foreign record, value is collection of records from local module
+	 * @type {Object.<string, Array.<Lava.data.Record>>}
 	 */
 	_collections_by_foreign_guid: {},
 
 	/**
-	 * Example: 'parent_id'
+	 * Name of accompanying {@link Lava.data.field.ForeignKey} field from local module. Example: 'parent_id'
 	 * @type {string}
 	 */
 	_foreign_key_field_name: null,
 	/**
-	 * Local field with ID of the record in external module.
+	 * Local field with ID of the record in external module
+	 * @type {Lava.data.field.ForeignKey}
 	 */
 	_foreign_key_field: null,
+	/**
+	 * Listener for {@link Lava.data.field.Abstract#event:changed} in `_foreign_key_field`
+	 * @type {_tListener}
+	 */
 	_foreign_key_changed_listener: null,
 
 	/**
+	 * The {@link Lava.data.field.Id} field in external module
 	 * @type {Lava.data.field.Abstract}
 	 */
 	_external_id_field: null,
+	/**
+	 * The listener for external ID creation event ({@link Lava.data.field.Abstract#event:changed} in `_external_id_field` field)
+	 * @type {_tListener}
+	 */
 	_external_id_changed_listener: null,
+	/**
+	 * Listener for {@link Lava.data.Module#event:records_loaded} in external module
+	 * @type {_tListener}
+	 */
 	_external_records_loaded_listener: null,
 
+	/**
+	 * The foreign ID value, when there is no referenced record
+	 * @const
+	 */
 	EMPTY_FOREIGN_ID: 0,
 
 	/**
-	 * @param {Lava.data.Module} module
-	 * @param {string} name
+	 * @param module
+	 * @param name
 	 * @param {_cRecordField} config
-	 * @param {object} module_storages
+	 * @param module_storages
 	 */
 	init: function(module, name, config, module_storages) {
 
@@ -14416,6 +16895,13 @@ Lava.define(
 
 	},
 
+	/**
+	 * There may be local records that reference external records, which are not yet loaded (by ForeignKey).
+	 * This field is <kw>null</kw> for them.
+	 * When referenced records are loaded - local records must update this field with the newly loaded instances
+	 * @param {Lava.data.Module} module
+	 * @param {Lava.data.Module#event:records_loaded} event_args
+	 */
 	_onReferencedModuleRecordsLoaded: function(module, event_args) {
 
 		var records = event_args.records,
@@ -14443,9 +16929,9 @@ Lava.define(
 	},
 
 	/**
-	 * A record was saved to the database and assigned an id. Need to assign foreign keys for loaded records.
-	 * @param foreign_module_id_field
-	 * @param event_args
+	 * A record was saved to the database and assigned an id. Need to assign foreign keys for local records
+	 * @param {Lava.data.field.Id} foreign_module_id_field
+	 * @param {Lava.data.field.Abstract#event:changed} event_args
 	 */
 	_onExternalIdCreated: function(foreign_module_id_field, event_args) {
 
@@ -14486,8 +16972,8 @@ Lava.define(
 	 * ```javascript
 	 * record.set('category_id', 123); // 'record' is from local module, 123 - id of foreign record
 	 * ```
-	 * @param foreign_key_field
-	 * @param event_args
+	 * @param {Lava.data.field.ForeignKey} foreign_key_field
+	 * @param {Lava.data.field.Abstract#event:changed} event_args
 	 */
 	_onForeignKeyChanged: function(foreign_key_field, event_args) {
 
@@ -14564,7 +17050,7 @@ Lava.define(
 
 		if (this._foreign_key_field) {
 
-			// if foreign id is in import - than it will replace the default value (if foreign kay has default)
+			// if foreign id is in import - then it will replace the default value (if foreign kay has default)
 			foreign_id = raw_properties[this._foreign_key_field_name] || storage[this._foreign_key_field_name];
 			if (foreign_id) {
 				this._registerByReferencedId(record, storage, foreign_id);
@@ -14575,9 +17061,10 @@ Lava.define(
 	},
 
 	/**
+	 * Update value of this field in local `record` and add the record to field's internal collections
 	 * @param {Lava.data.RecordAbstract} record The local record
-	 * @param {Object} storage The storage of local record
-	 * @param referenced_record_id The id of foreign record, which it belongs to
+	 * @param {Object} storage The properties of local record
+	 * @param {string} referenced_record_id The id of foreign record, which it belongs to
 	 */
 	_registerByReferencedId: function(record, storage, referenced_record_id) {
 
@@ -14626,7 +17113,7 @@ Lava.define(
 
 			if (new_ref_record != null) {
 
-				// if this module has foreign_key_field than foreign module must have an ID column
+				// if this module has foreign_key_field then foreign module must have an ID column
 				record.set(this._foreign_key_field_name, new_ref_record.get('id'));
 
 			} else {
@@ -14644,9 +17131,9 @@ Lava.define(
 	},
 
 	/**
-	 * Remove local_record from the collection referenced by referenced_record
-	 * @param local_record
-	 * @param referenced_record
+	 * Remove `local_record` from field's internal collection referenced by `referenced_record`
+	 * @param {Lava.data.RecordAbstract} local_record
+	 * @param {Lava.data.RecordAbstract} referenced_record
 	 */
 	_unregisterRecord: function(local_record, referenced_record) {
 
@@ -14659,9 +17146,9 @@ Lava.define(
 	},
 
 	/**
-	 * Add local_record to collection of records from local module, referenced by referenced_record
-	 * @param local_record
-	 * @param referenced_record The collection owner
+	 * Add `local_record` to field's internal collection of records from local module, referenced by `referenced_record`
+	 * @param {Lava.data.RecordAbstract} local_record
+	 * @param {Lava.data.RecordAbstract} referenced_record The collection owner
 	 */
 	_registerRecord: function(local_record, referenced_record) {
 
@@ -14687,8 +17174,9 @@ Lava.define(
 	},
 
 	/**
+	 * API for {@link Lava.data.field.Collection} field. Get all local records, which reference `referenced_record`
 	 * @param {Lava.data.RecordAbstract} referenced_record The collection's owner record from referenced module
-	 * @returns {Array}
+	 * @returns {Array} All records
 	 */
 	getCollection: function(referenced_record) {
 
@@ -14698,6 +17186,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * API for {@link Lava.data.field.Collection} field. Get count of local records, which reference the `referenced_record`
+	 * @param {Lava.data.RecordAbstract} referenced_record The collection's owner record from referenced module
+	 * @returns {Number}
+	 */
 	getCollectionCount: function(referenced_record) {
 
 		var collection = this._collections_by_foreign_guid[referenced_record.guid];
@@ -14705,12 +17198,21 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_referenced_module`
+	 * @returns {Lava.data.Module}
+	 */
 	getReferencedModule: function() {
 
 		return this._referenced_module;
 
 	},
 
+	/**
+	 * Get field's value equivalent for comparison
+	 * @param {Lava.data.RecordAbstract} record
+	 * @returns {string}
+	 */
 	_getComparisonValue: function(record) {
 
 		if (Lava.schema.DEBUG && !(record.guid in this._storages_by_guid)) Lava.t("isLess: record does not belong to this module");
@@ -14758,6 +17260,7 @@ Lava.define(
 Lava.define(
 'Lava.data.field.Boolean',
 /**
+ * Field that holds boolean values (<kw>true</kw> or <kw>false</kw>)
  * @lends Lava.data.field.Boolean#
  * @extends Lava.data.field.Basic
  */
@@ -14765,6 +17268,9 @@ Lava.define(
 
 	Extends: 'Lava.data.field.Basic',
 
+	/**
+	 * @type {boolean}
+	 */
 	_default: false,
 
 	isValidValue: function(value) {
@@ -14792,6 +17298,7 @@ Lava.define(
 Lava.define(
 'Lava.data.field.Guid',
 /**
+ * Returns record's `guid` property
  * @lends Lava.data.field.Guid#
  * @extends Lava.data.field.Abstract
  */
@@ -14805,12 +17312,21 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get record's `guid` property
+	 * @param record
+	 * @param storage
+	 * @returns {_tGUID}
+	 */
 	getValue: function(record, storage) {
 
 		return record.guid;
 
 	},
 
+	/**
+	 * Throws an error
+	 */
 	setValue: function(record, storage, value) {
 
 		Lava.t('Guid field is read only');
@@ -14822,6 +17338,8 @@ Lava.define(
 Lava.define(
 'Lava.data.ModuleAbstract',
 /**
+ * Base class for modules
+ *
  * @lends Lava.data.ModuleAbstract#
  * @extends Lava.mixin.Observable
  */
@@ -14829,12 +17347,37 @@ Lava.define(
 
 	Extends: 'Lava.mixin.Observable',
 
+	/**
+	 * Module's config
+	 * @type {(_cModule|_cMetaStorage)}
+	 */
 	_config: null,
+	/**
+	 * Module's field instances
+	 * @type {Object.<string, Lava.data.field.Abstract>}
+	 */
 	_fields: {},
+	/**
+	 * All records in this module
+	 * @type {Array.<Lava.data.RecordAbstract>}
+	 */
 	_records: [],
+	/**
+	 * Records by their global unique identifiers
+	 * @type {Object.<string, Lava.data.RecordAbstract>}
+	 */
 	_records_by_guid: {},
+	/**
+	 * Record's properties by their global unique identifiers
+	 * @type {Object.<string, Lava.data.RecordAbstract>}
+	 */
 	_storages_by_guid: {},
 
+	/**
+	 * Create field instances and return the default record storage object
+	 * @param {(_cModule|_cMetaStorage)} config
+	 * @returns {Object} Default record storage object with initial values for each field
+	 */
 	_initFields: function(config) {
 
 		var field_name,
@@ -14866,8 +17409,7 @@ Lava.define(
 	},
 
 	/**
-	 * This function is autogenerated in constructor
-	 *
+	 * Returns an object with record's initial properties. This function is autogenerated in constructor
 	 * @returns {Object}
 	 */
 	_createEmptyRecordStorage: function() {
@@ -14876,6 +17418,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Free resources and make this instance unusable
+	 */
 	destroy: function() {
 
 		var name;
@@ -14900,9 +17445,25 @@ Lava.define(
 
 });
 
+/**
+ * Records have been loaded from server
+ * @event Lava.data.Module#records_loaded
+ * @type {Object}
+ * @property {Array.<Lava.data.Record>} records The loaded record instances
+ */
+
+/**
+ * New records have been created
+ * @event Lava.data.Module#records_created
+ * @type {Object}
+ * @property {Array.<Lava.data.Record>} records The new record instances
+ */
+
 Lava.define(
 'Lava.data.Module',
 /**
+ * Module represents a server-side database table
+ *
  * @lends Lava.data.Module#
  * @extends Lava.data.ModuleAbstract
  */
@@ -14910,19 +17471,40 @@ Lava.define(
 
 	Extends: 'Lava.data.ModuleAbstract',
 
+	/**
+	 * Application instance reference
+	 * @type {Lava.system.App}
+	 */
 	_app: null,
+	/**
+	 * Module name
+	 * @type {string}
+	 */
 	_name: null,
 
-	_record_class: Lava.schema.data.DEFAULT_RECORD_CLASS,
+	/**
+	 * Cached record class constructor
+	 * @type {string}
+	 */
+	_record_constructor: null,
 
+	/**
+	 * All records by their unique ID key (if module has an ID field)
+	 * @type {Object.<string, Lava.data.Record>}
+	 */
 	_records_by_id: {},
 
+	/**
+	 * Does this module have an ID field
+	 * @type {boolean}
+	 */
 	_has_id: false,
 
 	/**
-	 * @param lava_app
+	 * Create a Module instance, init fields, generate the method that returns initial record storage
+	 * @param {Lava.system.App} lava_app Application instance
 	 * @param {_cModule} config
-	 * @param {string} name
+	 * @param {string} name Module's name
 	 */
 	init: function(lava_app, config, name) {
 
@@ -14930,13 +17512,12 @@ Lava.define(
 		this._config = config;
 		this._name = name;
 
-		if ('record_class' in config) {
-
-			this._record_class = config.record_class;
-
-		}
-
 		var default_storage = this._initFields(config);
+
+		this._record_constructor = Lava.ClassManager.getConstructor(
+			config.record_class || Lava.schema.data.DEFAULT_RECORD_CLASS,
+			'Lava.data'
+		);
 
 		this._createEmptyRecordStorage = new Function(
 			"return " + Lava.Serializer.serialize(default_storage)
@@ -14951,6 +17532,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Record's ID has been created (ID fields never change). Need to update local `_records_by_id` hash
+	 * @param {Lava.data.field.Abstract} id_field
+	 * @param {Lava.data.field.Abstract#event:changed} event_args
+	 */
 	_onRecordIdChanged: function(id_field, event_args) {
 
 		var id = event_args.record.get('id');
@@ -14959,42 +17545,72 @@ Lava.define(
 
 	},
 
+	/**
+	 * Does this module have an ID field with given name
+	 * @param {string} name
+	 * @returns {boolean}
+	 */
 	hasField: function(name) {
 
 		return name in this._fields;
 
 	},
 
-
+	/**
+	 * Get field instance
+	 * @param {string} name
+	 * @returns {Lava.data.field.Abstract}
+	 */
 	getField: function(name) {
 
 		return this._fields[name];
 
 	},
 
+	/**
+	 * Get a record by it's ID field
+	 * @param {string} id
+	 * @returns {Lava.data.Record}
+	 */
 	getRecordById: function(id) {
 
 		return this._records_by_id[id];
 
 	},
 
+	/**
+	 * Get a record by it's global unique identifier
+	 * @param {_tGUID} guid
+	 * @returns {Lava.data.Record}
+	 */
 	getRecordByGuid: function(guid) {
 
 		return this._records_by_guid[guid];
 
 	},
 
+	/**
+	 * Get `_app`
+	 * @returns {Lava.system.App}
+	 */
 	getApp: function() {
 
 		return this._app;
 
 	},
 
+	/**
+	 * Load record only if it has not been already loaded. `raw_properties` must have an ID
+	 * @param {Object} raw_properties Serialized record fields from server
+	 * @returns {Lava.data.Record} Newly loaded record instance, or the old one
+	 */
 	safeLoadRecord: function(raw_properties) {
 
 		var result;
 
-		if (raw_properties.id && (raw_properties.id in this._records_by_id)) {
+		if (Lava.schema.DEBUG && !raw_properties.id) Lava.t('safeLoadRecord: import data must have an id');
+
+		if (raw_properties.id in this._records_by_id) {
 
 			result = this._records_by_id[raw_properties.id];
 
@@ -15008,6 +17624,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Initialize a module record from server-side data
+	 * @param {Object} raw_properties Serialized record fields from server
+	 * @returns {Lava.data.Record} Loaded record instance
+	 */
 	loadRecord: function(raw_properties) {
 
 		var record = this._createRecordInstance(raw_properties);
@@ -15016,6 +17637,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Create a new record instance
+	 * @returns {Lava.data.Record}
+	 */
 	createRecord: function() {
 
 		var record = this._createRecordInstance();
@@ -15024,11 +17649,15 @@ Lava.define(
 
 	},
 
+	/**
+	 * Perform creation of a new record instance (either with server-side data, or without it)
+	 * @param {Object} raw_properties
+	 * @returns {Lava.data.Record}
+	 */
 	_createRecordInstance: function(raw_properties) {
 
 		var storage = this._createEmptyRecordStorage(),
-			constructor = Lava.ClassManager.getConstructor(this._record_class, 'Lava.data'),
-			record = new constructor(this, this._fields, storage, raw_properties);
+			record = new this._record_constructor(this, this._fields, storage, raw_properties);
 
 		if (storage.id) {
 
@@ -15045,8 +17674,9 @@ Lava.define(
 	},
 
 	/**
-	 * @param {Array.<Object>} raw_records_array
-	 * @returns {Array}
+	 * Initialize module records from server-side data
+	 * @param {Array.<Object>} raw_records_array Server-side data for the records
+	 * @returns {Array.<Lava.data.Record>} Loaded record instances
 	 */
 	loadRecords: function(raw_records_array) {
 
@@ -15066,12 +17696,20 @@ Lava.define(
 
 	},
 
+	/**
+	 * Return a copy of local `_records` array
+	 * @returns {Array.<Lava.data.Record>}
+	 */
 	getAllRecords: function() {
 
 		return this._records.slice();
 
 	},
 
+	/**
+	 * Get number of records in the module
+	 * @returns {number}
+	 */
 	getCount: function() {
 
 		return this._records.length;
@@ -15090,6 +17728,7 @@ Lava.define(
 Lava.define(
 'Lava.data.RecordAbstract',
 /**
+ * Base class for module records
  * @lends Lava.data.RecordAbstract#
  * @extends Lava.mixin.Properties
  */
@@ -15097,21 +17736,44 @@ Lava.define(
 
 	Implements: 'Lava.mixin.Properties',
 
+	/**
+	 * To tell other classes that this is instance of RecordAbstract
+	 * @type {boolean}
+	 * @const
+	 */
 	isRecord: true,
 
-	// replace the default value to save some processor time on garbage collection (it's assigned in constructor)
+	/**
+	 * Record's `_properties` are assigned in constructor, so here we replace the default value (empty object)
+	 * to save some time on garbage collection
+	 * @type {Object}
+	 */
 	_properties: null,
 
+	/**
+	 * Record's module
+	 * @type {Lava.data.ModuleAbstract}
+	 */
 	_module: null,
 
+	/**
+	 * Reference to module's fields
+	 * @type {Object.<string, Lava.data.field.Abstract>}
+	 */
 	_fields: null,
 
 	/**
-	 * Every record must have it's own GUID. otherwise collections and ForEach loops will not be able to distinguish
-	 * between records from different modules with equal ID fields.
+	 * Global unique identifier
+	 * @type {_tGUID}
 	 */
 	guid: null,
 
+	/**
+	 * Create record instance
+	 * @param {Lava.data.ModuleAbstract} module Records module
+	 * @param {Object.<string, Lava.data.field.Abstract>} fields Object with module's fields
+	 * @param {Object} properties_storage_ref Reference to an object with record's properties
+	 */
 	init: function(module, fields, properties_storage_ref) {
 
 		this.guid = Lava.guid++;
@@ -15135,12 +17797,20 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_module`
+	 * @returns {Lava.data.ModuleAbstract}
+	 */
 	getModule: function() {
 
 		return this._module;
 
 	},
 
+	/**
+	 * Export record back into plain JavaScript object for sending to server
+	 * @returns {Object}
+	 */
 	'export': function() {
 
 		var export_record = {};
@@ -15160,6 +17830,8 @@ Lava.define(
 Lava.define(
 'Lava.data.Record',
 /**
+ * Standard module's record
+ *
  * @lends Lava.data.Record#
  * @extends Lava.data.RecordAbstract
  */
@@ -15167,6 +17839,12 @@ Lava.define(
 
 	Extends: 'Lava.data.RecordAbstract',
 
+	/**
+	 * @param module
+	 * @param fields
+	 * @param properties_storage_ref
+	 * @param {Object} raw_properties Object with record field values from server
+	 */
 	init: function(module, fields, properties_storage_ref, raw_properties) {
 
 		this.RecordAbstract$init(module, fields, properties_storage_ref);
@@ -15198,6 +17876,7 @@ Lava.define(
 Lava.define(
 'Lava.data.MetaRecord',
 /**
+ * Record for {@link Lava.data.MetaStorage} module
  * @lends Lava.data.MetaRecord#
  * @extends Lava.data.RecordAbstract
  */
@@ -15205,6 +17884,11 @@ Lava.define(
 
 	Extends: 'Lava.data.RecordAbstract',
 
+	/**
+	 * Instance belongs to MetaRecord class
+	 * @type {boolean}
+	 * @const
+	 */
 	isMetaRecord: true,
 
 	init: function(meta_storage, fields, properties_storage_ref) {
@@ -15224,6 +17908,7 @@ Lava.define(
 Lava.define(
 'Lava.data.MetaStorage',
 /**
+ * Module that is designed to extend normal modules with additional fields. Cannot have an ID field
  * @lends Lava.data.MetaStorage#
  * @extends Lava.data.ModuleAbstract
  * @extends Lava.mixin.Properties
@@ -15233,9 +17918,8 @@ Lava.define(
 	Extends: 'Lava.data.ModuleAbstract',
 	Implements: 'Lava.mixin.Properties',
 
-	//_attached_module: null,
-
 	/**
+	 * Create an instance of MetaStorage
 	 * @param {_cMetaStorage} config
 	 */
 	init: function(config) {
@@ -15243,7 +17927,6 @@ Lava.define(
 		if ('id' in config.fields) Lava.t("Id field in MetaStorage is not permitted");
 
 		this._config = config;
-		//this._attached_module = attached_module;
 
 		var default_storage = this._initFields(config),
 			field;
@@ -15261,6 +17944,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get or create an extension record by GUID of record in a normal module
+	 * @param {_tGUID} guid
+	 * @returns {Lava.data.MetaRecord}
+	 * @lava-param-renamed name -> guid
+	 */
 	get: function(guid) {
 
 		if (!(guid in this._properties)) {
@@ -15273,18 +17962,19 @@ Lava.define(
 
 	},
 
-	set: function(name, value) {
+	/**
+	 * Throws an error
+	 */
+	set: function() {
 
 		Lava.t("MetaStorage: set operation is not permitted");
 
 	},
 
-//	getAttachedModule: function() {
-//
-//		return this._attached_module;
-//
-//	},
-
+	/**
+	 * Create an instance of {@link Lava.data.MetaRecord}
+	 * @returns {Lava.data.MetaRecord}
+	 */
 	_createRecordInstance: function() {
 
 		var storage = this._createEmptyRecordStorage(),
@@ -15298,6 +17988,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get all records in this module
+	 * @returns {Array.<Lava.data.MetaRecord>}
+	 */
 	getAllRecords: function() {
 
 		var result = [],
@@ -15315,6 +18009,7 @@ Lava.define(
 Lava.define(
 'Lava.scope.Abstract',
 /**
+ * Abstract class for data binding
  * @lends Lava.scope.Abstract#
  * @extends Lava.mixin.Refreshable
  */
@@ -15322,20 +18017,28 @@ Lava.define(
 
 	Extends: 'Lava.mixin.Refreshable',
 
+	/**
+	 * Instance belongs to scope/Abstract
+	 * @type {boolean}
+	 * @const
+	 */
 	isValueContainer: true,
 
 	/**
+	 * Scopes, bound to properties of the value of this container
 	 * @type {Object.<string, Lava.scope.DataBinding>}
 	 */
 	_data_bindings_by_property: {},
 
 	/**
+	 * Segments, bound to properties of the value of this container.
 	 * [name_source_guid} => Segment
 	 * @type {Object.<_tGUID, Lava.scope.Segment>}
 	 */
 	_data_segments: {},
 
 	/**
+	 * Get a scope, which is bound to property of the value of this container
 	 * @param {string} property_name
 	 * @returns {Lava.scope.DataBinding}
 	 */
@@ -15352,6 +18055,7 @@ Lava.define(
 	},
 
 	/**
+	 * Get a {@link Lava.scope.Segment}, which is bound to property of the value of this container
 	 * @param {(Lava.scope.PropertyBinding|Lava.scope.DataBinding)} name_source_scope
 	 * @returns {Lava.scope.Segment}
 	 */
@@ -15369,6 +18073,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Free resources and make this instance unusable
+	 */
 	destroy: function() {
 
 		var name;
@@ -15391,9 +18098,18 @@ Lava.define(
 
 });
 
+/**
+ * Argument's value has changed
+ * @event Lava.scope.Argument#changed
+ * @type {Object}
+ * @property {*} old_value Optional: old value of the argument
+ */
+
 Lava.define(
 'Lava.scope.Argument',
 /**
+ * Evaluates expression in context of it's view
+ *
  * @lends Lava.scope.Argument#
  * @extends Lava.mixin.Refreshable
  * @implements _iValueContainer
@@ -15401,37 +18117,71 @@ Lava.define(
 {
 
 	Extends: 'Lava.mixin.Refreshable',
+	/**
+	 * Sign that this instance implements {@link _iValueContainer}
+	 * @type {boolean}
+	 * @const
+	 */
 	isValueContainer: true,
 
 	/**
+	 * Owner view
 	 * @type {Lava.view.Abstract}
 	 */
 	_view: null,
 	/**
+	 * Nearest widget in hierarchy
 	 * @type {Lava.widget.Standard}
 	 */
 	_widget: null,
 	/**
+	 * Generated method that is called in context of Argument instance and produces the argument's result
 	 * @type {function}
 	 */
 	_evaluator: null,
+	/**
+	 * The result of `_evaluator` call
+	 * @type {*}
+	 */
 	_value: null,
+	/**
+	 * Global unique identifier
+	 * @type {_tGUID}
+	 */
 	guid: null,
 
 	/**
+	 * Scopes that provide operands for the `_evaluator`
 	 * @type {Array.<_iValueContainer>}
 	 */
 	_binds: [],
+	/**
+	 * Length of `_binds` array
+	 * @type {number}
+	 */
 	_binds_count: 0,
+	/**
+	 * objects with listeners for {@link Lava.mixin.Refreshable#event:waits_refresh}, {@link Lava.mixin.Refreshable#event:refreshed}
+	 * and <kw>"changed"</kw> events
+	 * @type {Array.<Object>}
+	 */
 	_bind_listeners: [],
 
+	/**
+	 * Objects with a reference to modifier's widget (it's cached to speed up calling) and modifier name
+	 * @type {Array.<Object>}
+	 */
 	_modifiers: [],
+	/**
+	 * Alpha version. Not used
+	 */
 	_active_modifiers: [],
 
 	/**
+	 * Create an Argument instance. Acquire binds, find modifier sources, apply correct state
 	 * @param {_cArgument} config
-	 * @param {Lava.view.Abstract} view
-	 * @param {Lava.widget.Standard} widget
+	 * @param {Lava.view.Abstract} view Argument's view
+	 * @param {Lava.widget.Standard} widget Nearest widget in hierarchy
 	 */
 	init: function(config, view, widget) {
 
@@ -15527,7 +18277,8 @@ Lava.define(
 	},
 
 	/**
-	 * @param {_cKnownViewLocator} path_config
+	 * Get widget, that will be used to call a modifier
+	 * @param {_cKnownViewLocator} path_config Route to the widget
 	 * @returns {Lava.widget.Standard}
 	 */
 	getWidgetByModifierConfig: function(path_config) {
@@ -15540,6 +18291,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * One of evaluator's operands has changed. Instance is now dirty
+	 */
 	onBindingChanged: function() {
 
 		// Classes that can serve as a binding: PropertyBinding, DataBinding and Segment. They all will fire 'changed'
@@ -15550,6 +18304,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Execute `_evaluator` and return
+	 * @returns {*} The Argument's result
+	 */
 	_evaluate: function() {
 
 		var result = null;
@@ -15577,12 +18335,20 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_value`
+	 * @returns {*}
+	 */
 	getValue: function() {
 
 		return this._value;
 
 	},
 
+	/**
+	 * Refresh `_value` and fire {@link Lava.scope.Argument#event:changed}
+	 * @private
+	 */
 	_doRefresh: function() {
 
 		var newValue = this._evaluate(),
@@ -15598,18 +18364,36 @@ Lava.define(
 
 	},
 
+	/**
+	 * Call a modifier from widget
+	 * @param {number} index
+	 * @param {?Array.<*>} arguments_array
+	 * @returns {*}
+	 */
 	_callModifier: function(index, arguments_array) {
 
 		return this._modifiers[index].widget.callModifier(this._modifiers[index].callback_name, arguments_array);
 
 	},
 
+	/**
+	 * Alpha. Not used
+	 * @param index
+	 * @param arguments_array
+	 * @returns {*}
+	 */
 	_callActiveModifier: function(index, arguments_array) {
 
 		return this._modifiers[index].widget.callActiveModifier(this._modifiers[index].callback_name, arguments_array);
 
 	},
 
+	/**
+	 * Calls a global function from {@link Lava.modifiers}
+	 * @param {string} name The function's name
+	 * @param {?Array.<*>} arguments_array Evaluator's arguments
+	 * @returns {*}
+	 */
 	_callGlobalModifier: function(name, arguments_array) {
 
 		if (Lava.schema.DEBUG && !(name in Lava.modifiers)) Lava.t("Unknown global modifier: " + name);
@@ -15617,6 +18401,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Suspend argument's listeners
+	 */
 	sleep: function() {
 
 		for (var i = 0, count = this._bind_listeners.length; i < count; i++) {
@@ -15631,6 +18418,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Resume argument's listeners and refresh state
+	 * @param {boolean} fire_changed Whether to fire the <kw>"changed"</kw> event
+	 */
 	wakeup: function(fire_changed) {
 
 		for (var i = 0, count = this._bind_listeners.length; i < count; i++) {
@@ -15674,6 +18465,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Free resources and make this instance unusable
+	 */
 	destroy: function() {
 
 		for (var i = 0, count = this._bind_listeners.length; i < count; i++) {
@@ -15693,31 +18487,40 @@ Lava.define(
 Lava.define(
 'Lava.scope.Binding',
 /**
+ * Two-way binding between a widget property and a scope path
  * @lends Lava.scope.Binding#
  */
 {
 
 	/**
+	 * The scope, which is bound to property of the widget
 	 * @type {_iValueContainer}
 	 */
 	_scope: null,
 	/**
+	 * Widget with bound property
 	 * @type {Lava.widget.Standard}
 	 */
 	_widget: null,
 	/**
+	 * Bound property name in widget
 	 * @type {string}
 	 */
 	_property_name: null,
 
+	/**
+	 * Listener for "changed" event
+	 * @type {_tListener}
+	 */
 	_scope_changed_listener: null,
-	_scope_refreshed_listener: null,
+	/**
+	 * Listener for onPropertyChanged in `_widget`
+	 * @type {_tListener}
+	 */
 	_widget_property_changed_listener: null,
 
-	_scope_refresh_lock: false,
-	_scope_refresh_count: 0,
-
 	/**
+	 * Create Binding instance. Refresh widget's property value
 	 * @param {_cBinding} config
 	 * @param {Lava.widget.Standard} widget
 	 */
@@ -15763,6 +18566,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Scope, which is bound to widget property, has changed. Refresh widget property value
+	 */
 	onScopeChanged: function() {
 
 		// avoid setting nulls to non-nullable fields.
@@ -15780,6 +18586,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Widget property has changed. Refresh bound scope value
+	 */
 	onWidgetPropertyChanged: function() {
 
 		Lava.suspendListener(this._widget_property_changed_listener);
@@ -15798,9 +18607,18 @@ Lava.define(
 	}
 
 });
+
+/**
+ * Value of this DataBinding instance has changed
+ * @event Lava.scope.DataBinding#changed
+ */
+
 Lava.define(
 'Lava.scope.DataBinding',
 /**
+ * Binding to a property of a JavaScript object with special support for {@link Lava.mixin.Properties}
+ * and {@link Lava.system.Enumerable} instances
+ *
  * @lends Lava.scope.DataBinding#
  * @extends Lava.scope.Abstract
  * @implements _iValueContainer
@@ -15808,31 +18626,76 @@ Lava.define(
 {
 
 	Extends: 'Lava.scope.Abstract',
+	/**
+	 * This instance supports two-way data binding
+	 * @type {boolean}
+	 * @const
+	 */
 	isSetValue: true,
+	/**
+	 * Global unique identifier of this instance
+	 * @type {_tGUID}
+	 */
 	guid: null,
 
 	/**
+	 * The name of property to which this scope is bound
 	 * @type {string}
 	 */
 	_property_name: null,
+	/**
+	 * Current value of this instance (equals to property value in data source)
+	 * @type {*}
+	 */
 	_value: null,
 
 	/**
+	 * Scope, that provides data source for this instance
 	 * @type {_iValueContainer}
 	 */
 	_value_container: null,
+	/**
+	 * Listener for {Lava.mixin.Refreshable#event:waits_refresh} in `_value_container`
+	 * @type {_tListener}
+	 */
 	_container_waits_refresh_listener: null,
+	/**
+	 * Listener for "changed" event in `_value_container`
+	 * @type {_tListener}
+	 */
 	_container_changed_listener: null,
+	/**
+	 * Listener for {Lava.mixin.Refreshable#event:refreshed} in `_value_container`
+	 * @type {_tListener}
+	 */
 	_container_refreshed_listener: null,
 
+	/**
+	 * Listener for onPropertyChanged in data source of this scope (if data source is instance of {@link Lava.mixin.Properties})
+	 * @type {_tListener}
+	 */
 	_property_changed_listener: null,
+	/**
+	 * Listener for {@link Lava.system.Enumerable#event:collection_changed} in data source of this scope
+	 * (if data source is instance of {@link Lava.system.Enumerable})
+	 * @type {_tListener}
+	 */
 	_enumerable_changed_listener: null,
+	/**
+	 * Data source for this scope, from which this scope gets it's value. Also, value of the `_value_container`
+	 * @type {*}
+	 */
 	_property_container: null,
 
+	/**
+	 * Is `_property_container` an existing object, or this scope is not bound to an existing value
+	 * @type {boolean}
+	 */
 	_is_connected: false,
 
 	/**
-	 * @param {_iValueContainer} value_container
+	 * Create DataBinding instance
+	 * @param {_iValueContainer} value_container The scope, which provides the data source for this instance
 	 * @param {string} property_name
 	 * @param {number} level
 	 */
@@ -15857,6 +18720,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_property_container` from `_value_container`, and get `_property_name` from `_property_container`
+	 */
 	_refreshValue: function() {
 
 		var property_container = this._value_container.getValue(),
@@ -15908,12 +18774,19 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_is_connected`
+	 * @returns {boolean}
+	 */
 	isConnected: function() {
 
 		return this._is_connected;
 
 	},
 
+	/**
+	 * Data source for this instance has changed. Remove listeners to old data source and schedule refresh
+	 */
 	onParentDataSourceChanged: function() {
 
 		if (this._property_changed_listener && (this._value_container.getValue() != this._property_container)) {
@@ -15939,6 +18812,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Data source remains the same, but it's property has changed (property we are currently bound to)
+	 */
 	onValueChanged: function() {
 
 		this._queueForRefresh();
@@ -15947,6 +18823,7 @@ Lava.define(
 	},
 
 	/**
+	 * If this instance is bound to existing object - set object's property value
 	 * @param {*} value
 	 */
 	setValue: function(value) {
@@ -16006,9 +18883,22 @@ Lava.define(
 	}
 
 });
+
+/**
+ * Content of scope's enumerable has changed
+ * @event Lava.scope.Foreach#changed
+ */
+
+/**
+ * Scope has created a new Enumerable instance. All old UIDs are now invalid
+ * @event Lava.scope.Foreach#new_enumerable
+ */
+
 Lava.define(
 'Lava.scope.Foreach',
 /**
+ * Designed to serve data to Foreach view. Transforms value of Argument into Enumerable
+ *
  * @lends Lava.scope.Foreach#
  * @extends Lava.mixin.Refreshable
  * @implements _iValueContainer
@@ -16016,32 +18906,87 @@ Lava.define(
 {
 
 	Extends: 'Lava.mixin.Refreshable',
+	/**
+	 * Sign that this instance implements {@link _iValueContainer}
+	 * @type {boolean}
+	 * @const
+	 */
 	isValueContainer: true,
 
 	/**
+	 * Scope's argument
 	 * @type {Lava.scope.Argument}
 	 */
 	_argument: null,
+	/**
+	 * Listener for {@link Lava.mixin.Refreshable#event:waits_refresh}
+	 * @type {_tListener}
+	 */
 	_argument_waits_refresh_listener: null,
+	/**
+	 * Listener for {@link Lava.scope.Argument#event:changed}
+	 * @type {_tListener}
+	 */
 	_argument_changed_listener: null,
+	/**
+	 * Listener for {@link Lava.mixin.Refreshable#event:refreshed}
+	 * @type {_tListener}
+	 */
 	_argument_refreshed_listener: null,
 
+	/**
+	 * The owner Foreach view
+	 * @type {Lava.view.Foreach}
+	 */
 	_view: null,
+	/**
+	 * The nearest widget in hierarchy
+	 * @type {Lava.widget.Standard}
+	 */
 	_widget: null,
+	/**
+	 * Global unique identifier
+	 * @type {_tGUID}
+	 */
 	guid: null,
 
 	/**
+	 * Scope's value
 	 * @type {Lava.system.Enumerable}
 	 */
 	_value: null,
+	/**
+	 * Listens to changes in `_observable`. Event name varies
+	 * @type {_tListener}
+	 */
 	_observable_listener: null,
+	/**
+	 * Holds argument value, when it's instance of Observable. Used to remove listener
+	 * @type {Lava.mixin.Observable}
+	 */
 	_observable: null,
+	/**
+	 * Has this instance created a new Enumerable instance to serve data, or is it using the instance
+	 * which was returned from `_argument`
+	 * @type {boolean}
+	 */
 	_own_enumerable: false,
 
+	/**
+	 * Should this scope create it's own instance of Enumerable, when argument's value is also Enumerable
+	 * (or it will use argument's value). May be used to apply sorting and filtering
+	 * @type {boolean}
+	 */
 	_create_own_enumerable: false,
+	/**
+	 * When local Enumerable is refreshed from argument, scope instance may call it's widget to apply sorting and filtering
+	 * @type {string}
+	 */
 	_after_refresh_callback: null,
 
 	/**
+	 * Create an instance of the Foreach scope. Refresh value
+	 *
 	 * @param {Lava.scope.Argument} argument
 	 * @param {Lava.view.Foreach} view
 	 * @param {Lava.widget.Standard} widget
@@ -16073,6 +19018,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get new value from the `_argument`, and create a new instance of local Enumerable, or update the content of the old one
+	 */
 	_refreshDataSource: function() {
 
 		var argument_value = this._argument.getValue();
@@ -16140,6 +19088,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Depending on current value, create new Enumerable instance or update the old one
+	 * @param {*} argument_value
+	 */
 	_createOrUpdateCollection: function(argument_value) {
 
 		if (this._own_enumerable) {
@@ -16155,6 +19107,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Create the local instance of Enumerable
+	 * @param {*} argument_value
+	 */
 	_createCollection: function(argument_value) {
 
 		this._value = new Lava.system.Enumerable(argument_value);
@@ -16163,6 +19119,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get rid of old Observable and it's listener (argument result has changed)
+	 */
 	_flushObservable: function() {
 
 		this._observable.removeListener(this._observable_listener);
@@ -16171,6 +19130,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Argument has changed
+	 */
 	onDataSourceChanged: function() {
 
 		if (this._observable_listener) this._flushObservable();
@@ -16179,6 +19141,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Argument's result has not changed (the same object), but that object itself has changed
+	 */
 	_onObservableChanged: function() {
 
 		this._is_dirty = true;
@@ -16186,6 +19151,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Update value from argument
+	 */
 	_doRefresh: function() {
 
 		this._refreshDataSource();
@@ -16193,12 +19161,19 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get scope's value
+	 * @returns {Lava.system.Enumerable}
+	 */
 	getValue: function() {
 
 		return this._value;
 
 	},
 
+	/**
+	 * Stop listening to events
+	 */
 	sleep: function() {
 
 		Lava.suspendListener(this._argument_changed_listener);
@@ -16207,6 +19182,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Resume event listeners and refresh state
+	 */
 	wakeup: function() {
 
 		if (this._observable_listener) {
@@ -16229,6 +19207,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Free resources and make this instance unusable
+	 */
 	destroy: function() {
 
 		this._argument.removeListener(this._argument_waits_refresh_listener);
@@ -16248,9 +19229,15 @@ Lava.define(
 
 });
 
+/**
+ * Value of this PropertyBinding instance has changed
+ * @event Lava.scope.PropertyBinding#changed
+ */
+
 Lava.define(
 'Lava.scope.PropertyBinding',
 /**
+ * Scope, that is designed to bind to a property of a view
  * @lends Lava.scope.PropertyBinding#
  * @extends Lava.scope.Abstract
  * @implements _iValueContainer
@@ -16258,28 +19245,52 @@ Lava.define(
 {
 
 	Extends: 'Lava.scope.Abstract',
+	/**
+	 * This instance supports two-way data binding
+	 * @type {boolean}
+	 * @const
+	 */
 	isSetValue: true,
+	/**
+	 * Global unique identifier of this instance
+	 * @type {_tGUID}
+	 */
 	guid: null,
 
 	/**
+	 * View's property name, to which this instance is bound
 	 * @type {string}
 	 */
 	_property_name: null,
+	/**
+	 * The value of this scope (equals to property value in bound view)
+	 * @type {*}
+	 */
 	_value: null,
 
 	/**
+	 * Scope's bound view (also the scope's owner view, which created the instance)
 	 * @type {Lava.view.Abstract}
 	 */
 	_view: null,
+	/**
+	 * Listener for onPropertyChanged in bound view
+	 * @type {_tListener}
+	 */
 	_property_changed_listener: null,
 
+	/**
+	 * PropertyBinding supports "assigns" - one-way binding of widget's property to any {@link Lava.scope.Argument} value
+	 * @type {Lava.scope.Argument}
+	 */
 	_assign_argument: null,
 
 	/**
-	 * @param {Lava.view.Abstract} view
+	 * Create the PropertyBinding instance. Refresh value from view's property or set value from assign
+	 * @param {Lava.view.Abstract} view Scope's owner view, to which it's bound
 	 * @param {string} property_name
 	 * @param {number} level
-	 * @param {_cAssign} assign_config
+	 * @param {_cAssign} assign_config Config for the Argument, in case this scope is created in "assign" mode
 	 */
 	init: function(view, property_name, level, assign_config) {
 
@@ -16314,12 +19325,19 @@ Lava.define(
 
 	},
 
+	/**
+	 * PropertyBinding is always bound to it's view
+	 * @returns {boolean} Always returns <kw>true</kw>
+	 */
 	isConnected: function() {
 
-		return true; // property binding is always connected to it's widget
+		return true;
 
 	},
 
+	/**
+	 * Value of "assign" argument has changed. Set view's property and schedule refresh
+	 */
 	onAssignChanged: function() {
 
 		this._view.set(this._property_name, this._assign_argument.getValue());
@@ -16328,6 +19346,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * View's property has changed. Schedule refresh
+	 */
 	onContainerPropertyChanged: function() {
 
 		this._queueForRefresh();
@@ -16335,6 +19356,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_value`
+	 * @returns {*}
+	 */
 	getValue: function() {
 
 		return this._value;
@@ -16342,6 +19367,7 @@ Lava.define(
 	},
 
 	/**
+	 * Set property value to the bound view
 	 * @param {*} value
 	 */
 	setValue: function(value) {
@@ -16388,9 +19414,16 @@ Lava.define(
 	}
 
 });
+
+/**
+ * Value of this Segment instance has changed
+ * @event Lava.scope.Segment#changed
+ */
+
 Lava.define(
 'Lava.scope.Segment',
 /**
+ * Scope, that can change name of it's bound property dynamically
  * @lends Lava.scope.Segment#
  * @extends Lava.scope.Abstract
  * @implements _iValueContainer
@@ -16398,25 +19431,64 @@ Lava.define(
 {
 
 	Extends: 'Lava.scope.Abstract',
+	/**
+	 * This instance supports two-way data binding
+	 * @type {boolean}
+	 * @const
+	 */
 	isSetValue: true,
 
+	/**
+	 * Either view or a scope with `getDataBinding()` - will be used to construct `_data_binding`
+	 * @type {(Lava.view.Abstract|Lava.scope.Abstract)}
+	 */
 	_container: null,
 
 	/**
-	 * @type {_iValueContainer}
+	 * The scope, which provides the name of the property for the Segment
+	 * @type {(Lava.scope.PropertyBinding|Lava.scope.DataBinding)}
 	 */
 	_name_source_container: null,
+	/**
+	 * Listener for {Lava.mixin.Refreshable#event:waits_refresh} in `_name_source_container`
+	 * @type {_tListener}
+	 */
 	_name_source_waits_refresh_listener: null,
+	/**
+	 * Listener for "changed" event in `_name_source_container`
+	 * @type {_tListener}
+	 */
 	_name_source_changed_listener: null,
+	/**
+	 * Listener for {Lava.mixin.Refreshable#event:refreshed} in `_name_source_container`
+	 * @type {_tListener}
+	 */
 	_name_source_refreshed_listener: null,
 
+	/**
+	 * The name of the property, which this Segment is bound to
+	 * @type {string}
+	 */
 	_property_name: null,
+	/**
+	 * Scope, which is bound to the `_property_name`. Serves as source of value for the Segment
+	 * @type {(Lava.scope.DataBinding|Lava.scope.PropertyBinding)}
+	 */
 	_data_binding: null,
+	/**
+	 * Listener for "changed" event in `_data_binding`
+	 * @type {_tListener}
+	 */
 	_data_binding_changed_listener: null,
 
+	/**
+	 * Segment's current value
+	 * @type {*}
+	 */
 	_value: null,
 
 	/**
+	 * Create Segment instance. Refresh `_property_name`, `_data_binding` and get value
 	 * @param {(Lava.view.Abstract|Lava.scope.Abstract)} container
 	 * @param {(Lava.scope.PropertyBinding|Lava.scope.DataBinding)} name_source_container
 	 * @param {number} level
@@ -16448,6 +19520,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Return true, if the Segment is bound to existing object
+	 * @returns {boolean}
+	 */
 	isConnected: function() {
 
 		if (!this._data_binding) Lava.t();
@@ -16455,6 +19531,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Create `_data_binding` and it's "changed" listener
+	 */
 	_refreshDataBinding: function() {
 
 		this._data_binding = this._container.getDataBinding(this._property_name);
@@ -16462,6 +19541,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Destroy `_data_binding` and it's "changed" listener
+	 */
 	_destroyDataBinding: function() {
 
 		this._data_binding.removeListener(this._data_binding_changed_listener);
@@ -16470,6 +19552,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * The value of bound scope has changed. Schedule refresh
+	 */
 	onDataBindingChanged: function() {
 
 		this._queueForRefresh();
@@ -16497,6 +19582,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Segment must bind to new property name. Destroy old `_data_binding` and schedule refresh
+	 */
 	onPropertyNameChanged: function() {
 
 		this._property_name = this._name_source_container.getValue();
@@ -16507,6 +19595,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_value`
+	 * @returns {*}
+	 */
 	getValue: function() {
 
 		return this._value;
@@ -16514,6 +19606,7 @@ Lava.define(
 	},
 
 	/**
+	 * Set `_property_name` of the bound object
 	 * @param {*} value
 	 */
 	setValue: function(value) {
@@ -16541,62 +19634,113 @@ Lava.define(
 Lava.define(
 'Lava.view.container.Element',
 /**
+ * Container, that represents a DOM element
  * @lends Lava.view.container.Element#
  * @implements _iContainer
  */
 {
 
+	/**
+	 * This instance belongs to Element container
+	 * @type {boolean}
+	 * @const
+	 */
 	isElementContainer: true,
 
+	/**
+	 * ID of DOM element that belongs to this container
+	 * @type {string}
+	 */
 	_id: null,
 	/**
+	 * iew that owns the container
 	 * @type {Lava.view.Abstract}
 	 */
 	_view: null,
 	/**
+	 * Settings for this instance
 	 * @type {_cElementContainer}
 	 */
 	_config: null,
 	/**
+	 * Nearest widget in hierarchy
 	 * @type {Lava.widget.Standard}
 	 */
 	_widget: null,
+	/**
+	 * Tag name of the DOM element
+	 * @type {string}
+	 */
 	_tag_name: null,
 
+	/**
+	 * List of static CSS classes, that are not bound to expressions
+	 * @type {Array.<string>}
+	 */
 	_static_classes: [],
 	/**
+	 * Arguments, that produce dynamic class names. Keys are sequential numbers
 	 * @type {!Object.<string, Lava.scope.Argument>}
 	 */
 	_class_bindings: null,
-
+	/**
+	 * Value of each argument from `_class_bindings`, split into array of class names
+	 * @type {Object.<string, Array.<string>>}
+	 */
 	_class_bindings_values: {},
 
+	/**
+	 * Styles, that are not bound to expressions
+	 * @type {Object.<string, string>}
+	 */
 	_static_styles: {},
 	/**
+	 * Arguments, that produce style values dynamically. Keys are names of CSS styles
 	 * @type {!Object.<string, Lava.scope.Argument>}
 	 */
 	_style_bindings: null,
 
+	/**
+	 * Properties, that are not bound to an argument
+	 * @type {Object.<string, string>}
+	 */
 	_static_properties: {}, // name => value
 	/**
+	 * Arguments, that produce property values. Keys are names of properties
 	 * @type {!Object.<string, Lava.scope.Argument>}
 	 */
 	_property_bindings: null,
 
 	/**
+	 * Targets for DOM events, routed by {@link Lava.system.ViewManager}
 	 * @type {Object.<string, Array.<_cTarget>>}
 	 */
 	_events: {},
 
+	/**
+	 * Is container's html element in DOM
+	 * @type {boolean}
+	 */
 	_is_inDOM: false,
-
+	/**
+	 * Reference to the real DOM element, that belongs to this container
+	 * @type {HTMLElement}
+	 */
 	_element: null,
-
+	/**
+	 * Is container's element void? (does not require closing tag)
+	 * @type {boolean}
+	 */
 	_is_void: false,
-
+	/**
+	 * Element container can control an existing element on page. <kw>true</kw>, if container was rendered and inserted
+	 * as new element, and <kw>false</kw>, if this instance was ordered to capture an existing DOM element on page
+	 * @type {boolean}
+	 */
 	_is_element_owner: true,
 
 	/**
+	 * Create Element container instance. Create bindings
 	 * @param {Lava.view.Abstract} view
 	 * @param {_cElementContainer} config
 	 * @param {Lava.widget.Standard} widget
@@ -16671,6 +19815,7 @@ Lava.define(
 	},
 
 	/**
+	 * Get target routes for dom event
 	 * @param {string} event_name
 	 * @returns {Array.<_cTarget>}
 	 */
@@ -16702,6 +19847,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Add a route for DOM event
+	 * @param {string} event_name
+	 * @param {_cTarget} target
+	 */
 	addEventTarget: function(event_name, target) {
 
 		this._fixIOS();
@@ -16709,6 +19859,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Add a route for DOM event - IOS bugfix version
+	 * @param {string} event_name
+	 * @param {_cTarget} target
+	 */
 	addEventTarget_IOS: function(event_name, target) {
 
 		if (this._is_inDOM && event_name == 'click' && !(event_name in this._events)) {
@@ -16718,6 +19873,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Add a route for DOM event - normal version
+	 * @param {string} event_name
+	 * @param {_cTarget} target
+	 */
 	addEventTarget_Original: function(event_name, target) {
 
 		if (!(event_name in this._events)) {
@@ -16733,11 +19893,9 @@ Lava.define(
 	},
 
 	/**
-	 * Store property value in the javascript class, and optionally - set it on the DOM element.
-	 * View can be rendered at any time, so property values must always be actual.
-	 *
+	 * Add a property to `_static_properties` and synchronize it with DOM element
 	 * @param {string} name
-	 * @param value
+	 * @param {string} value
 	 */
 	setProperty: function(name, value) {
 
@@ -16746,6 +19904,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Set static property to the container, but do not synchronize it with DOM element
+	 * @param {string} name
+	 * @param {string} value
+	 */
 	storeProperty: function(name, value) {
 
 		if (Lava.schema.DEBUG && name == 'id') Lava.t();
@@ -16755,6 +19918,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get static property
+	 * @param {string} name Property name
+	 * @returns {string}
+	 */
 	getProperty: function(name) {
 
 		return this._static_properties[name];
@@ -16762,8 +19930,8 @@ Lava.define(
 	},
 
 	/**
-	 * Push locally stored property value into element.
-	 * @param name
+	 * Set locally stored property value into element
+	 * @param {string} name
 	 */
 	syncProperty: function(name) {
 
@@ -16771,6 +19939,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Add static CSS class
+	 * @param {string} class_name
+	 * @param {boolean} cancel_sync If <kw>true</kw> - do not add that class to DOM element, just to local `_static_classes` array
+	 */
 	addClass: function(class_name, cancel_sync) {
 
 		if (Lava.schema.DEBUG && (!class_name || class_name.indexOf(' ') != -1)) Lava.t("addClass: expected one class name, got: " + class_name);
@@ -16783,6 +19956,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Remove a static CSS class
+	 * @param {string} class_name
+	 * @param {boolean} cancel_sync If <kw>true</kw> - do not remove the class from DOM element, just from local `_static_classes` array
+	 */
 	removeClass: function(class_name, cancel_sync) {
 
 		if (Firestorm.Array.exclude(this._static_classes, class_name)) {
@@ -16793,30 +19971,49 @@ Lava.define(
 
 	},
 
+	/**
+	 * Add a list of static classes to the instance
+	 * @param {Array.<string>} class_names
+	 * @param {boolean} cancel_sync If <kw>true</kw> - do not add that classes to DOM element, just to local `_static_classes` array
+	 */
 	addClasses: function(class_names, cancel_sync) {
 
 		if (Lava.schema.DEBUG && typeof(class_names) == 'string') Lava.t();
 
 		for (var i = 0, count = class_names.length; i < count; i++) {
 
-			this.addClass(class_names[i])
+			this.addClass(class_names[i], cancel_sync);
 
 		}
 
 	},
 
+	/**
+	 * Does this instance have the given static class
+	 * @param class_name Name of CSS class to search for
+	 * @returns {boolean} <kw>true</kw>, if class exists in `_static_classes`
+	 */
 	hasStaticClass: function(class_name) {
 
 		return this._static_classes.indexOf(class_name) != -1;
 
 	},
 
+	/**
+	 * Refresh CSS classes on DOM element, including bound classes
+	 */
 	syncClasses: function() {
 
 		Firestorm.Element.setProperty(this.getDOMElement(), 'class', this._renderClasses());
 
 	},
 
+	/**
+	 * Set static style value
+	 * @param {string} name CSS property name
+	 * @param {string} value CSS property value
+	 * @param cancel_sync If <kw>true</kw> - do not add that style to DOM element, just to local `_static_styles` object
+	 */
 	setStyle: function(name, value, cancel_sync) {
 
 		if (value == null) {
@@ -16832,6 +20029,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Remove static CSS style
+	 * @param {string} name CSS style name
+	 * @param {boolean} cancel_sync If <kw>true</kw> - do not remove that style from DOM element, just from local `_static_styles` object
+	 */
 	removeStyle: function(name, cancel_sync) {
 
 		if (name in this._static_styles) {
@@ -16841,12 +20043,20 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get CSS style value
+	 * @param {string} name
+	 * @returns {string}
+	 */
 	getStyle: function(name) {
 
 		return this._static_styles[name];
 
 	},
 
+	/**
+	 * Refresh the "style" attribute on DOM element
+	 */
 	syncStyles: function() {
 
 		Firestorm.Element.setProperty(this.getDOMElement(), 'style', this._renderStyles());
@@ -16854,6 +20064,7 @@ Lava.define(
 	},
 
 	/**
+	 * Helper method to create style, class and property bindings
 	 * @param {?Object.<string, _cArgument>} configs
 	 * @param {Lava.view.Abstract} view
 	 * @param {!function} fn
@@ -16876,6 +20087,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Argument value for property binding has changed. If container's element is in DOM - update it's property value
+	 * @param {Lava.scope.Argument} argument
+	 * @param event_args
+	 * @param listener_args
+	 */
 	_onPropertyBindingChanged: function(argument, event_args, listener_args) {
 
 		if (this._is_inDOM) {
@@ -16901,6 +20118,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Argument value for style binding has changed. If container's element is in DOM - update it's style
+	 * @param {Lava.scope.Argument} argument
+	 * @param event_args
+	 * @param listener_args
+	 */
 	_onStyleBindingChanged: function(argument, event_args, listener_args) {
 
 		var value = this._style_bindings[listener_args.name].getValue() || '';
@@ -16908,6 +20131,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Split a string into array of class names
+	 * @param {string} classes_string
+	 * @returns {Array}
+	 */
 	_toClassNames: function(classes_string) {
 
 		var classes = [];
@@ -16926,6 +20154,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Class binding argument has changed it's value. Refresh internal class values and element's classes
+	 * @param {Lava.scope.Argument} argument
+	 * @param event_args
+	 * @param listener_args
+	 */
 	_onClassBindingChanged: function(argument, event_args, listener_args) {
 
 		var new_classes = this._toClassNames(argument.getValue().toString().trim());
@@ -16941,17 +20175,29 @@ Lava.define(
 
 	},
 
+	/**
+	 * Assert, that style string does not contain any special characters, that can break HTML markup
+	 * @param value
+	 */
 	assertStyleValid: function(value) {
 		if (/\"\<\>/.test(value))
 			Lava.t("Invalid symbols in style value: " + value + ". Please, use single quotes for string values and manually escape special characters.");
 	},
 
+	/**
+	 * Assert, that class string does not contain any special characters
+	 * @param value
+	 */
 	assertClassStringValid: function(value) {
 
 		if (/\'\"\<\>\&\./.test(value)) Lava.t("Invalid class names: " + value);
 
 	},
 
+	/**
+	 * Render value of the "class" attribute, including bound classes
+	 * @returns {string}
+	 */
 	_renderClasses: function() {
 
 		var resultClasses = this._static_classes.clone(),
@@ -16977,6 +20223,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Render content of the "style" attribute, including bound styles
+	 * @returns {string}
+	 */
 	_renderStyles: function() {
 
 		var result_styles = [],
@@ -17008,7 +20258,13 @@ Lava.define(
 
 	},
 
-	_serializeAttribute: function(name, value) {
+	/**
+	 * Render one attribute
+	 * @param {string} name
+	 * @param {boolean|null|string} value
+	 * @returns {string}
+	 */
+	_renderAttribute: function(name, value) {
 
 		var result = '';
 
@@ -17026,7 +20282,11 @@ Lava.define(
 
 	},
 
-	_renderOpenTag: function() {
+	/**
+	 * Render the opening HTML tag, including all attributes
+	 * @returns {string}
+	 */
+	_renderOpeningTag: function() {
 
 		var classes = this._renderClasses(),
 			style = this._renderStyles(),
@@ -17040,13 +20300,13 @@ Lava.define(
 
 		for (name in this._static_properties) {
 
-			properties_string += this._serializeAttribute(name, this._static_properties[name]);
+			properties_string += this._renderAttribute(name, this._static_properties[name]);
 
 		}
 
 		for (name in this._property_bindings) {
 
-			properties_string += this._serializeAttribute(name, this._property_bindings[name].getValue());
+			properties_string += this._renderAttribute(name, this._property_bindings[name].getValue());
 
 		}
 
@@ -17068,22 +20328,35 @@ Lava.define(
 
 	},
 
+	/**
+	 * Render tag and wrap given HTML code inside it
+	 * @param {string} html
+	 * @returns {string}
+	 */
 	wrap: function(html) {
 
 		if (Lava.schema.DEBUG && this._is_void) Lava.t('Trying to wrap content in void tag');
 
-		return this._renderOpenTag() + ">" + html + "</" + this._tag_name + ">";
+		return this._renderOpeningTag() + ">" + html + "</" + this._tag_name + ">";
 
 	},
 
+	/**
+	 * Render the tag as void tag
+	 * @returns {string}
+	 */
 	renderVoid: function() {
 
 		if (Lava.schema.DEBUG && !this._is_void) Lava.t('Trying to render non-void container as void');
 
-		return this._renderOpenTag() + "/>";
+		return this._renderOpeningTag() + "/>";
 
 	},
 
+	/**
+	 * Set innerHTML of container's element. Container must be in DOM
+	 * @param {string} html
+	 */
 	setHTML: function(html) {
 
 		if (!this._is_inDOM) Lava.t("setHTML: element is not in DOM");
@@ -17093,24 +20366,40 @@ Lava.define(
 
 	},
 
+	/**
+	 * Insert given HTML markup at the bottom of container's DOM element
+	 * @param {string} html
+	 */
 	appendHTML: function(html) {
 
 		Firestorm.DOM.insertHTMLBottom(this.getDOMElement(), html);
 
 	},
 
+	/**
+	 * Insert given HTML markup at the top of container's DOM element
+	 * @param {string} html
+	 */
 	prependHTML: function(html) {
 
 		Firestorm.DOM.insertHTMLTop(this.getDOMElement(), html);
 
 	},
 
+	/**
+	 * Insert HTML markup after container's DOM element
+	 * @param {string} html
+	 */
 	insertHTMLAfter: function(html) {
 
 		Firestorm.DOM.insertHTMLAfter(this.getDOMElement(), html);
 
 	},
 
+	/**
+	 * Insert HTML markup before container's DOM element
+	 * @param {string} html
+	 */
 	insertHTMLBefore: function(html) {
 
 		Firestorm.DOM.insertHTMLBefore(this.getDOMElement(), html);
@@ -17118,7 +20407,8 @@ Lava.define(
 	},
 
 	/**
-	 * Note: does not need to be called after capture.
+	 * Call this method, when container has been rendered and inserted into DOM
+	 * Note: does not need to be called after capture
 	 */
 	informInDOM: function() {
 
@@ -17127,6 +20417,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Version of informInDOM with IOS bugfixes
+	 */
 	informInDOM_IOS: function() {
 
 		this.informInDOM_Original();
@@ -17134,6 +20427,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Normal version of informInDOM
+	 */
 	informInDOM_Original: function() {
 
 		this._is_inDOM = true;
@@ -17141,6 +20437,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Call this method before removing container's element from DOM
+	 */
 	informRemove: function() {
 
 		this._is_inDOM = false;
@@ -17148,6 +20447,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get current container's element from DOM
+	 * @returns {HTMLElement}
+	 */
 	getDOMElement: function() {
 
 		if (!this._element && this._is_inDOM) {
@@ -17160,30 +20463,56 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_id`
+	 * @returns {string}
+	 */
 	getId: function() { return this._id; },
 
+	/**
+	 * Get `_is_inDOM`
+	 * @returns {boolean}
+	 */
 	isInDOM: function() { return this._is_inDOM; },
 
+	/**
+	 * Get `_is_void`
+	 * @returns {boolean}
+	 */
 	isVoid: function() { return this._is_void; },
 
+	/**
+	 * Clear internal reference to container's DOM element
+	 */
 	release: function() {
 
 		this._element = null;
 
 	},
 
+	/**
+	 * Turn off bindings
+	 */
 	sleep: function() {
 
 		this._withArguments('sleep');
 
 	},
 
+	/**
+	 * Resume bindings
+	 */
 	wakeup: function() {
 
 		this._withArguments('wakeup', true);
 
 	},
 
+	/**
+	 * Call a method of all binding arguments
+	 * @param {string} callback_name Method to call
+	 * @param {*} callback_argument Argument for the method
+	 */
 	_withArguments: function(callback_name, callback_argument) {
 
 		var name;
@@ -17196,6 +20525,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Set new tag name for container
+	 * @param {string} tag_name
+	 */
 	setSignature: function(tag_name) {
 
 		if (Lava.schema.DEBUG && tag_name != tag_name.toLowerCase()) Lava.t("Tag names must be lower case");
@@ -17205,12 +20538,17 @@ Lava.define(
 
 	},
 
+	/**
+	 * Bind container to existing DOM element. Apply new styles, classes and properties
+	 * @param {HTMLElement} element
+	 */
 	captureExistingElement: function(element) {
 
 		var Element = Firestorm.Element,
 			name;
 
 		if (this._is_inDOM) Lava.t("Can not set duplicate id attribute on elements");
+		// there must not be ID attribute
 		if (Element.getProperty(element, 'id')) Lava.t("Target element already has an ID, and could be owned by another container");
 		if (Element.getProperty(element, 'tag').toLowerCase() != this._tag_name) Lava.t("Captured tag name differs from the container's tag name");
 
@@ -17240,6 +20578,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Release an element after call to `captureExistingElement`. Does not clear any attributes, except ID
+	 */
 	releaseElement: function() {
 
 		// keep original container in DOM
@@ -17250,18 +20591,30 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_is_element_owner`
+	 * @returns {boolean}
+	 */
 	isElementOwner: function() {
 
 		return this._is_element_owner;
 
 	},
 
+	/**
+	 * Perform escaping of an attribute value while rendering
+	 * @param {string} string
+	 * @returns {string}
+	 */
 	escapeAttributeValue: function(string) {
 
 		return Firestorm.String.escape(string, Firestorm.String.ATTRIBUTE_ESCAPE_REGEX);
 
 	},
 
+	/**
+	 * Remove container's element from DOM
+	 */
 	remove: function() {
 
 		if (!this._is_inDOM) Lava.t("remove: container is not in DOM");
@@ -17269,6 +20622,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Free resources and make this instance unusable
+	 */
 	destroy: function() {
 
 		var name;
@@ -17298,6 +20654,7 @@ Lava.define(
 Lava.define(
 'Lava.view.container.Morph',
 /**
+ * Container, that represents two &lt;script&gt; tags with content between them
  * @lends Lava.view.container.Morph#
  * @implements _iContainer
  *
@@ -17306,34 +20663,67 @@ Lava.define(
  */
 {
 
+	/**
+	 * Instance belongs to Morph container
+	 * @type {boolean}
+	 * @const
+	 */
 	isMorphContainer: true,
 
 	/**
+	 * View, that owns this instance of container
 	 * @type {Lava.view.Abstract}
 	 */
 	_view: null,
-	_config: null,
 	/**
+	 * Settings for the Morph container
+	 * @type {Object}
+	 */
+	//_config: null,
+
+	/**
+	 * Nearest widget in hierarchy
 	 * @type {Lava.widget.Standard}
 	 */
 	_widget: null,
 
+	/**
+	 * Is this instance currently in DOM
+	 * @type {boolean}
+	 */
 	_is_inDOM: false,
+	/**
+	 * ID of the first &lt;script&gt; tag
+	 * @type {string}
+	 */
 	_start_script_id: null,
+	/**
+	 * ID of the second &lt;script&gt; tag
+	 * @type {string}
+	 */
 	_end_script_id: null,
 
+	/**
+	 * Reference to the first &lt;script&gt; tag as DOM element
+	 * @type {HTMLElement}
+	 */
 	_start_element: null,
+	/**
+	 * Reference to the second &lt;script&gt; tag as DOM element
+	 * @type {HTMLElement}
+	 */
 	_end_element: null,
 
 	/**
+	 * Create Morph container instance
 	 * @param {Lava.view.Abstract} view
-	 * @param {_cEmulatedContainer} config
+	 * @param {Object} config
 	 * @param {Lava.widget.Standard} widget
 	 */
 	init: function(view, config, widget) {
 
 		this._view = view;
-		this._config = config;
+		//this._config = config;
 		this._widget = widget;
 
 		this._start_script_id = 'c' + view.guid + 's';
@@ -17341,6 +20731,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Retrieve both &lt;script&gt; tags from DOM into local references,
+	 * at the same time applying fixes for old browsers
+	 */
 	_getElements: function() {
 
 		var start_element = document.getElementById(this._start_script_id),
@@ -17402,6 +20796,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_start_element`
+	 * @returns {HTMLElement}
+	 */
 	getStartElement: function() {
 
 		if (this._start_element == null) {
@@ -17412,6 +20810,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_end_element`
+	 * @returns {HTMLElement}
+	 */
 	getEndElement: function() {
 
 		if (this._end_element == null) {
@@ -17422,6 +20824,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Render the container with `html` inside
+	 * @param {string} html
+	 * @returns {string}
+	 */
 	wrap: function(html) {
 
 		this._start_element = this._end_element = null;
@@ -17437,6 +20844,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Replace the content between container's tags. Requires container to be in DOM
+	 * @param {string} html
+	 */
 	setHTML: function(html) {
 
 		if (!this._is_inDOM) Lava.t("setHTML: container is not in DOM");
@@ -17446,6 +20857,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Remove container's content and it's tags from DOM
+	 */
 	remove: function() {
 
 		if (!this._is_inDOM) Lava.t("remove: container is not in DOM");
@@ -17453,32 +20867,54 @@ Lava.define(
 
 	},
 
+	/**
+	 * Insert html before the second &lt;script&gt; tag
+	 * @param {string} html
+	 */
 	appendHTML: function(html) {
 
 		Firestorm.DOM.insertHTMLBefore(this.getEndElement(), html);
 
 	},
 
+	/**
+	 * Insert html after the first &lt;script&gt; tag
+	 * @param {string} html
+	 */
 	prependHTML: function(html) {
 
 		Firestorm.DOM.insertHTMLAfter(this.getStartElement(), html);
 
 	},
 
+	/**
+	 * Insert html after the second &lt;script&gt; tag
+	 * @param {string} html
+	 */
 	insertHTMLAfter: function(html) {
 
 		Firestorm.DOM.insertHTMLAfter(this.getEndElement(), html);
 
 	},
 
+	/**
+	 * Insert html before the first &lt;script&gt; tag
+	 * @param {string} html
+	 */
 	insertHTMLBefore: function(html) {
 
 		Firestorm.DOM.insertHTMLBefore(this.getStartElement(), html);
 
 	},
 
+	/**
+	 * Call this method after inserting rendered container into DOM
+	 */
 	informInDOM: function() { this._is_inDOM = true; },
 
+	/**
+	 * Call this method before removing container from DOM
+	 */
 	informRemove: function() {
 
 		this._start_element = this._end_element = null;
@@ -17486,24 +20922,39 @@ Lava.define(
 
 	},
 
+	/**
+	 * Forget references to both DOM &lt;script&gt; elements
+	 */
 	release: function() {
 
 		this._start_element = this._end_element = null;
 
 	},
 
+	/** Does nothing */
 	refresh: function() {},
-
+	/** Does nothing */
 	sleep: function() {},
-
+	/** Does nothing */
 	wakeup: function() {},
 
+	/**
+	 * Get `_is_inDOM`
+	 * @returns {boolean}
+	 */
 	isInDOM: function() { return this._is_inDOM; },
-
+	/**
+	 * Get `_widget`
+	 * @returns {Lava.widget.Standard}
+	 */
 	getWidget: function() { return this._widget; },
-
+	/**
+	 * Get `_view`
+	 * @returns {Lava.view.Abstract}
+	 */
 	getView: function() { return this._view; },
 
+	/** Free resources and make this instance unusable */
 	destroy: function() {}
 
 });
@@ -17511,36 +20962,52 @@ Lava.define(
 Lava.define(
 'Lava.view.container.Emulated',
 /**
+ * Virtual container that can simulate behaviour of Element and Morph containers
  * @lends Lava.view.container.Emulated#
  * @implements _iContainer
  */
 {
 
+	/**
+	 * Instance belongs to Emulated container
+	 * @type {boolean}
+	 * @const
+	 */
 	isEmulatedContainer: true,
 
 	/**
+	 * View that owns this instance
 	 * @type {Lava.view.Abstract}
 	 */
 	_view: null,
-	_config: null,
-	guid: null,
 	/**
+	 * Container's settings
+	 * @type {Object}
+	 */
+	//_config: null,
+
+	/**
+	 * Nearest widget in hierarchy
 	 * @type {Lava.widget.Standard}
 	 */
 	_widget: null,
 
+	/**
+	 * Is instance in DOM
+	 * @type {boolean}
+	 */
 	_is_inDOM: false,
 
 	/**
+	 * Create Emulated container instance
 	 * @param {Lava.view.Abstract} view
 	 * @param {_cEmulatedContainer} config
 	 * @param {Lava.widget.Standard} widget
 	 */
 	init: function(view, config, widget) {
 
-		this.guid = Lava.guid++;
 		this._view = view;
-		this._config = config;
+		//this._config = config;
 		this._widget = widget;
 
 		if (('options' in config)) {
@@ -17559,8 +21026,17 @@ Lava.define(
 
 	},
 
+	/**
+	 * Return `html` without modifications
+	 * @param {string} html
+	 * @returns {string} Returns argument as-is
+	 */
 	wrap: function(html) { return html; },
 
+	/**
+	 * Throws exception. May be overridden by user to provide exact method of inserting content
+	 * @param {string} html
+	 */
 	setHTML: function(html) {
 
 		if (!this._is_inDOM) Lava.t("setHTML: container is not in DOM");
@@ -17569,6 +21045,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Throws exception. May be overridden by user to provide exact way of removing content
+	 */
 	remove: function() {
 
 		if (!this._is_inDOM) Lava.t("remove: container is not in DOM");
@@ -17577,24 +21056,40 @@ Lava.define(
 
 	},
 
+	/**
+	 * Append `html` to the bottom of parent container
+	 * @param {string} html
+	 */
 	_appendBottom: function(html) {
 
 		this._view.getParentView().getContainer().appendHTML(html);
 
 	},
 
+	/**
+	 * Prepend `html` to the top of parent container
+	 * @param {string} html
+	 */
 	_appendTop: function(html) {
 
 		this._view.getParentView().getContainer().prependHTML(html);
 
 	},
 
+	/**
+	 * Append `html` after previous view in template
+	 * @param {string} html
+	 */
 	_appendAfterPrevious: function(html) {
 
 		this._view.getTemplate().getPreviousView(this._view).getContainer().insertHTMLAfter(html);
 
 	},
 
+	/**
+	 * Append `html` before next view in template
+	 * @param {string} html
+	 */
 	_appendBeforeNext: function(html) {
 
 		this._view.getTemplate().getNextView(this._view).getContainer().insertHTMLBefore(html);
@@ -17602,7 +21097,8 @@ Lava.define(
 	},
 
 	/**
-	 * Note: this function is replaced in constructor
+	 * Inserts `html` to where the bottom of container should be.
+	 * Note: this method is replaced in constructor with exact algorithm
 	 * @param {string} html
 	 */
 	appendHTML: function(html) {
@@ -17611,42 +21107,76 @@ Lava.define(
 
 	},
 
+	/**
+	 * Inserts `html` to where the top of container should be.
+	 * Note: this method is replaced in constructor with exact algorithm
+	 * @param {string} html
+	 */
 	prependHTML: function(html) {
 
 		Lava.t("prependHTML is not supported or not configured");
 
 	},
 
+	/**
+	 * Same as `prependHTML`
+	 * @param {string} html
+	 */
 	insertHTMLBefore: function(html) {
 
 		this.prependHTML(html);
 
 	},
 
+	/**
+	 * Same as `appendHTML`
+	 * @param {string} html
+	 */
 	insertHTMLAfter: function(html) {
 
 		this.appendHTML(html);
 
 	},
 
+	/**
+	 * Call this method immediately after content of the container has been inserted into DOM
+	 */
 	informInDOM: function() { this._is_inDOM = true; },
 
+	/**
+	 * Call this method before removing container's content from DOM
+	 */
 	informRemove: function() { this._is_inDOM = false; },
 
+	/** Does nothing */
 	refresh: function() {},
-
+	/** Does nothing */
 	sleep: function() {},
-
+	/** Does nothing */
 	wakeup: function() {},
 
+	/**
+	 * Get `_is_inDOM`
+	 * @returns {boolean}
+	 */
 	isInDOM: function() { return this._is_inDOM; },
-
+	/**
+	 * Get `_widget`
+	 * @returns {Lava.widget.Standard}
+	 */
 	getWidget: function() { return this._widget; },
-
+	/**
+	 * Get `_view`
+	 * @returns {Lava.view.Abstract}
+	 */
 	getView: function() { return this._view; },
 
+	/** Does nothing */
 	release: function() {},
 
+	/**
+	 * Free resources and make this instance unusable
+	 */
 	destroy: function() {}
 
 });
@@ -17654,26 +21184,37 @@ Lava.define(
 Lava.define(
 'Lava.view.refresher.Default',
 /**
- * Base class for animation support. Does not animate templates, but inserts and removes them separately.
+ * Base class for animation support in views. Default refresher does not animate templates, but inserts and removes them separately
  * @lends Lava.view.refresher.Default#
  * @extends Lava.mixin.Observable
  */
 {
 
 	Extends: 'Lava.mixin.Observable',
-
 	Shared: '_insertion_strategies',
 
-	// all functions are called in context of THIS class, not the shared object
+	/**
+	 * Map of callbacks for dynamic insertion of templates
+	 * @type {Object.<string, string>}
+	 */
 	_insertion_strategies: {
 		sequential_elements: '_insertSequentialElements'
 	},
 
+	/**
+	 * Settings for this instance
+	 * @type {_cRefresher}
+	 */
 	_config: null,
 	/**
+	 * View, that owns this refresher instance
 	 * @type {Lava.view.Abstract}
 	 */
 	_view: null,
+	/**
+	 * View's container
+	 * @type {_iContainer}
+	 */
 	_container: null,
 
 	/**
@@ -17683,22 +21224,29 @@ Lava.define(
 	_removed_templates: {},
 
 	/**
+	 * Templates, that are currently in DOM
 	 * @type {Object.<_tGUID, Lava.system.Template>}
 	 */
 	_current_templates: [],
 
 	/**
+	 * Animation instances for each template
 	 * @type {Object.<_tGUID, Lava.animation.Standard>}
 	 */
 	_animations_by_template_guid: {},
 	/**
+	 * Template of each animation
 	 * @type {Object.<_tGUID, Lava.system.Template>}
 	 */
 	_templates_by_animation_guid: {},
-
+	/**
+	 * Whether to perform template insertion and removal animations
+	 * @type {boolean}
+	 */
 	_is_animation_enabled: false,
 
 	/**
+	 * Create refresher instance
 	 * @param {_cRefresher} config
 	 * @param {Lava.view.Abstract} view
 	 * @param {_iContainer} container
@@ -17717,6 +21265,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Queue templates for removal
+	 * @param {Array.<Lava.system.Template>} templates
+	 */
 	removeTemplates: function(templates) {
 
 		for (var i = 0, count = templates.length; i < count; i++) {
@@ -17729,8 +21281,9 @@ Lava.define(
 	},
 
 	/**
-	 * @param current_templates Templates, that refresher must render and insert in DOM. Some of them are already there,
-	 * some are in DOM but sleeping, and others are not in DOM.
+	 * Insert new templates into DOM and remove those, which are queued for removal
+	 * @param {Array.<Lava.system.Template>} current_templates Templates, that refresher must render and insert into DOM.
+	 *  Some of them are already there, some are in DOM but sleeping, and others are not yet in DOM
 	 */
 	refresh: function(current_templates) {
 
@@ -17771,6 +21324,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * View's render callback
+	 * @param {Array.<Lava.system.Template>} current_templates Templates that must be in DOM
+	 */
 	onRender: function(current_templates) {
 
 		var i = 0,
@@ -17800,6 +21357,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Insert the template into DOM and apply corresponding animation
+	 * @param {Lava.system.Template} template
+	 * @param {number} index Index of this template in list of all active templates
+	 */
 	_animateInsertion: function(template, index) {
 
 		var animation = this._animations_by_template_guid[template.guid];
@@ -17828,6 +21390,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Apply template removal animation and remove element from DOM in the end of it
+	 * @param {Lava.system.Template} template
+	 */
 	_animateRemoval: function(template) {
 
 		var animation = this._animations_by_template_guid[template.guid];
@@ -17847,6 +21413,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Insert template into DOM
+	 * @param {Lava.system.Template} template
+	 * @param {number} index Index of this template in list of all active templates
+	 */
 	_insertTemplate: function(template, index) {
 
 		this._view.getContainer().appendHTML(template.render());
@@ -17854,6 +21425,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Remove template from DOM
+	 * @param {Lava.system.Template} template
+	 */
 	_removeTemplate: function(template) {
 
 		// save, cause element container will throw an error if we try to do it after broadcastRemove
@@ -17865,6 +21440,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get the element of the template, that will be animated
+	 * @param {Lava.system.Template} template
+	 * @returns {HTMLElement}
+	 */
 	_getAnimationTarget: function(template) {
 
 		// get the only element inside the template
@@ -17872,6 +21452,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Cleanup animation instance and update state of it's template
+	 * @param {Lava.animation.Abstract} animation
+	 */
 	_onAnimationComplete: function(animation) {
 
 		var template = this._templates_by_animation_guid[animation.guid];
@@ -17893,12 +21477,22 @@ Lava.define(
 
 	},
 
+	/**
+	 * Removal animation has ended. Remove template from DOM
+	 * @param {Lava.animation.Abstract} animation
+	 * @param {Lava.system.Template} template
+	 */
 	_onRemovalComplete: function(animation, template) {
 
 		this._removeTemplate(template);
 
 	},
 
+	/**
+	 * Insertion animation has ended. Update state of the template
+	 * @param {Lava.animation.Abstract} animation
+	 * @param {Lava.system.Template} template
+	 */
 	_onInsertionComplete: function(animation, template) {
 
 		// if animation was reversed, then template must be sleeping now
@@ -17908,6 +21502,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Are there any active animations
+	 * @returns {boolean}
+	 */
 	hasAnimations: function() {
 
 		return false;
@@ -17915,8 +21513,9 @@ Lava.define(
 	},
 
 	/**
+	 * Create animation instance
 	 * @param {Lava.system.Template} template
-	 * @param index
+	 * @param {number} index Index of the template in the list of all active templates
 	 */
 	_createAnimation: function(template, index) {
 
@@ -17924,12 +21523,19 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_is_animation_enabled`
+	 * @returns {boolean}
+	 */
 	isAnimationEnabled: function() {
 
 		return this._is_animation_enabled;
 
 	},
 
+	/**
+	 * Stop all active animations
+	 */
 	stopAnimations: function() {
 
 	},
@@ -17937,9 +21543,9 @@ Lava.define(
 	/**
 	 * (insertion strategy)
 	 * With this callback you can insert Foreach elements at the right place.
-	 * All templates inside Foreach are treated as single view with Element container.
-	 * @param template
-	 * @param index
+	 * All templates inside Foreach are treated as single view with Element container
+	 * @param {Lava.system.Template} template
+	 * @param {number} index Index of the template in the list of all active templates
 	 */
 	_insertSequentialElements: function(template, index) {
 
@@ -17957,6 +21563,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Free resources and make this instance unusable
+	 */
 	destroy: function() {
 
 		this.stopAnimations();
@@ -17968,7 +21577,7 @@ Lava.define(
 Lava.define(
 'Lava.view.refresher.Animated',
 /**
- * Base class for animation support.
+ * Base class for refreshers, which support animation
  * @lends Lava.view.refresher.Animated#
  * @extends Lava.view.refresher.Default
  */
@@ -17992,6 +21601,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Version of `refresh()`, which animates insertion and removal of templates
+	 * @param {Array.<Lava.system.Template>} current_templates
+	 */
 	_refreshAnimated: function(current_templates) {
 
 		var i = 0,
@@ -18018,6 +21631,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * View's render callback
+	 * @param {Array.<Lava.system.Template>} current_templates
+	 */
 	onRender: function(current_templates) {
 
 		this.stopAnimations();
@@ -18026,16 +21643,18 @@ Lava.define(
 
 	},
 
-	_onRenderAnimated: function(current_templates) {
-
-	},
-
+	/**
+	 * Set `_is_animation_enabled` to <kw>true</kw>
+	 */
 	enableAnimation: function() {
 
 		this._is_animation_enabled = true;
 
 	},
 
+	/**
+	 * Set `_is_animation_enabled` to <kw>false</kw> and stop all animations
+	 */
 	disableAnimation: function() {
 
 		this._is_animation_enabled = false;
@@ -18067,6 +21686,7 @@ Lava.define(
 Lava.define(
 'Lava.view.refresher.Collapse',
 /**
+ * Animation that expands and collapses elements in one direction
  * @lends Lava.view.refresher.Collapse#
  * @extends Lava.view.refresher.Animated
  */
@@ -18074,6 +21694,11 @@ Lava.define(
 
 	Extends: 'Lava.view.refresher.Animated',
 
+	/**
+	 * Animation class to use when expanding and collapsing templates
+	 * @type {string}
+	 * @readonly
+	 */
 	ANIMATION_NAME: 'Lava.animation.Collapse',
 
 	_createAnimation: function(template, index) {
@@ -18095,85 +21720,135 @@ Lava.define(
 
 });
 
+/**
+ * View has been destroyed and became unusable. You must not call any methods of a destroyed instance
+ * @event Lava.view.Abstract#destroy
+ */
+
 Lava.define(
 'Lava.view.Abstract',
 /**
+ * Base class for all views and widgets
+ *
  * @lends Lava.view.Abstract#
- * @implements _iViewHierarchyMember
  * @extends Lava.mixin.Properties#
+ * @implements _iViewHierarchyMember
  */
 {
 
 	Extends: 'Lava.mixin.Properties',
-	/** @const */
+	/**
+	 * Indicate that this class is instance of Lava.view.Abstract
+	 * @type {boolean}
+	 * @const
+	 */
 	isView: true,
-	/** @readonly */
+	/**
+	 * Global unique identifier
+	 * @type {_tGUID}
+	 * @readonly
+	 */
 	guid: null,
 	/**
-	 * Do not set ID directly, use appropriate setter.
+	 * Global unique user-assigned view's ID. Views can be retrieved by their ID from {@link Lava.system.ViewManager};
+	 * and referenced in expressions. Note: this is not the same as "id" attribute of DOM element of view's container.
+	 *
+	 * Do not set this property directly! Use appropriate setter.
+	 * @type {?string}
 	 * @readonly
 	 */
 	id: null,
 	/**
-	 * Label is part of template config, so must be considered readonly.
+	 * Labels are used to find views when routing events and roles, or manually.
+	 * Label is part of template config, so must be considered readonly
+	 * @type {?string}
 	 * @readonly
 	 */
 	label: null,
 	/**
-	 * How many parents does it have
+	 * How many parents does it have (until the root widget, which does not have a parent)
+	 * @type {number}
 	 * @readonly
 	 */
 	depth: 0,
 
 	/**
+	 * View's index in {@link Lava.system.Template#_contents|_contents} array of parent template
+	 * @type {number}
 	 * @readonly
 	 */
 	template_index: 0,
 
 	/**
+	 * Nearest widget in hierarchy of view's parents
 	 * @type {Lava.widget.Standard}
 	 */
 	_widget: null,
 
 	/**
+	 * The owner (parent) view of this instance
 	 * @type {Lava.view.Abstract}
 	 */
 	_parent_view: null,
 
 	/**
-	 * Nearest parent view with it's own container.
+	 * Nearest parent view with it's own container
 	 * @type {Lava.view.Abstract}
 	 */
 	_parent_with_container: null,
 
 	/**
+	 * View's container
 	 * @type {_iContainer}
 	 */
 	_container: null,
 
 	/**
+	 * Settings for this instance
 	 * @type {_cView}
 	 */
 	_config: null,
 
+	/**
+	 * The {@link Lava.system.Template} that owns the view
+	 */
 	_template: null,
 
+	/**
+	 * Is this view currently in DOM
+	 * @type {boolean}
+	 */
 	_is_inDOM: false,
+	/**
+	 * Is this view currently sleeping? (arguments are turned off)
+	 * @type {boolean}
+	 */
 	_is_sleeping: false,
+	/**
+	 * Does this view need refresh
+	 * @type {boolean}
+	 */
 	_is_dirty: false,
+	/**
+	 * Will it be refreshed by ViewManager
+	 * @type {boolean}
+	 */
 	_is_queued_for_refresh: false,
 
 	/**
+	 * Bindings to properties of this view
 	 * @type {Object.<string, Lava.scope.PropertyBinding>}
 	 */
 	_property_bindings_by_property: {},
 
 	/**
+	 * Segments, built over bindings to properties of this view (see {@link Lava.scope.Segment})
 	 * @type {Object.<_tGUID, Lava.scope.Segment>}
 	 */
 	_data_segments: {},
 
 	/**
+	 * Create an instance of the view, including container and assigns; dispatch roles
 	 * @param {_cView} config
 	 * @param {Lava.widget.Standard} widget
 	 * @param {Lava.view.Abstract} parent_view
@@ -18237,23 +21912,52 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_container`
+	 * @returns {_iContainer}
+	 */
 	getContainer: function() { return this._container; },
 
+	/**
+	 * Get `_parent_with_container`
+	 * @returns {Lava.view.Abstract}
+	 */
 	getParentWithContainer: function() { return this._parent_with_container; },
 
+	/**
+	 * Get `_parent_view`
+	 * @returns {Lava.view.Abstract}
+	 */
 	getParentView: function() { return this._parent_view; },
 
+	/**
+	 * Get `_widget`
+	 * @returns {Lava.widget.Standard}
+	 */
 	getWidget: function() { return this._widget; },
 
+	/**
+	 * Get `_is_inDOM`
+	 * @returns {boolean}
+	 */
 	isInDOM: function() { return this._is_inDOM; },
 
+	/**
+	 * Get `_is_sleeping`
+	 * @returns {boolean}
+	 */
 	isSleeping: function() { return this._is_sleeping; },
 
 	/**
+	 * Get `_template`
 	 * @returns {Lava.system.Template}
 	 */
 	getTemplate: function() { return this._template; },
 
+	/**
+	 * Setter for the {@link Lava.view.Abstract#id} property
+	 * @param {string} new_id
+	 */
 	setId: function(new_id) {
 
 		Lava.view_manager.unregisterView(this);
@@ -18262,6 +21966,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Set properties, that were passed to constructor
+	 * @param {Object} properties
+	 */
 	_initMembers: function(properties) {
 
 		for (var name in properties) {
@@ -18273,14 +21981,15 @@ Lava.define(
 	},
 
 	/**
-	 * Called before registering roles.
+	 * Called before registering roles
 	 */
 	_postInit: function() {
 
 	},
 
 	/**
-	 * @param {number} depth
+	 * Get N'th parent of the view
+	 * @param {number} depth The number of view's parent you want to get
 	 * @returns {Lava.view.Abstract}
 	 */
 	getViewByDepth: function(depth) {
@@ -18301,6 +22010,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * This view needs to be refreshed. If it has a container - then it can refresh itself independently,
+	 * but views without container must ask their parents to refresh them
+	 */
 	trySetDirty: function() {
 
 		if (this._is_inDOM) {
@@ -18327,14 +22040,15 @@ Lava.define(
 	},
 
 	/**
+	 * Execute some state changing function on each child of the view
+	 * Must be overridden in child classes (in those, that have children)
 	 * @param {string} function_name
 	 */
-	_broadcastToChildren: function(function_name) {
+	_broadcastToChildren: function(function_name) {},
 
-		// must be overridden in child classes (in those, that have children)
-
-	},
-
+	/**
+	 * Inform that this view is already in DOM. Now it can access it's container's elements
+	 */
 	broadcastInDOM: function() {
 
 		this._is_inDOM = true;
@@ -18345,6 +22059,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Inform that this view is now going to be removed from DOM. It must suspend it's bindings,
+	 * detach element listeners and stop animations, etc.
+	 */
 	broadcastRemove: function() {
 
 		if (this._is_inDOM) {
@@ -18361,6 +22079,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Put the view and it's children into 'sleeping' mode: view is still in DOM, but does not access
+	 * or refresh it's DOM content, and does not react to argument or binding changes
+	 */
 	broadcastSleep: function() {
 
 		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.t();
@@ -18374,6 +22096,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Perform the 'sleep' operation
+	 */
 	_sleep: function() {
 
 		this._is_sleeping = true;
@@ -18381,6 +22106,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * View starts listening to it's bindings and refreshes it's DOM content, if needed
+	 */
 	broadcastWakeup: function() {
 
 		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.t();
@@ -18394,6 +22122,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Perform 'wakeup'
+	 */
 	_wakeup: function() {
 
 		this._is_sleeping = false;
@@ -18408,12 +22139,19 @@ Lava.define(
 
 	},
 
+	/**
+	 * Render the inner hierarchy
+	 */
 	_renderContents: function() {
 
 		Lava.t("_renderContents must be overridden in inherited classes");
 
 	},
 
+	/**
+	 * Render the view, including container and all it's inner content
+	 * @returns {string} The HTML representation of the view
+	 */
 	render: function() {
 
 		if (this._is_sleeping) this._wakeup();
@@ -18436,7 +22174,7 @@ Lava.define(
 	},
 
 	/**
-	 * 'soft' refresh - only if needed
+	 * Refresh the view, if it's dirty (render the view's content and replace old content with the fresh version)
 	 */
 	refresh: function() {
 
@@ -18457,6 +22195,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Perform refresh
+	 */
 	_refresh: function() {
 
 		this._container.setHTML(this._renderContents());
@@ -18465,8 +22206,13 @@ Lava.define(
 	},
 
 	/**
-	 * @param {string} label
-	 * @returns {Lava.view.Abstract}
+	 * Find a view with given label in hierarchy of view's parents. Recognizes some predefined labels, like:
+	 * - "root" - the root widget (topmost widget with no parents)
+	 * - "parent" - this view's parent view
+	 * - "widget" - parent widget of this view
+	 * - "this" - this view
+	 * @param {string} label Label to search for
+	 * @returns {Lava.view.Abstract} View with given label
 	 */
 	locateViewByLabel: function(label) {
 
@@ -18507,9 +22253,9 @@ Lava.define(
 	},
 
 	/**
-	 * Actually, returns a widget.
+	 * Find a <b>widget</b> with given name in hierarchy of this view's parents
 	 *
-	 * @param {string} name
+	 * @param {string} name Name of the widget
 	 * @returns {Lava.widget.Standard}
 	 */
 	locateViewByName: function(name) {
@@ -18529,7 +22275,8 @@ Lava.define(
 	},
 
 	/**
-	 * @param id
+	 * Get a view with given user-defined id
+	 * @param {string} id
 	 * @returns {Lava.view.Abstract}
 	 */
 	locateViewById: function(id) {
@@ -18541,7 +22288,8 @@ Lava.define(
 	},
 
 	/**
-	 * @param guid
+	 * Get a view by GUID
+	 * @param {_tGUID} guid
 	 * @returns {Lava.view.Abstract}
 	 */
 	locateViewByGuid: function(guid) {
@@ -18553,6 +22301,7 @@ Lava.define(
 	},
 
 	/**
+	 * Find a view in hierarchy of parents by the given route
 	 * @param {_cScopeLocator|_cKnownViewLocator} path_config
 	 * @returns {Lava.view.Abstract}
 	 */
@@ -18572,6 +22321,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get a parent with property `name` defined
+	 * @param {string} name
+	 * @returns {Lava.view.Abstract}
+	 */
 	locateViewWithProperty: function(name) {
 
 		var view = this;
@@ -18587,6 +22341,7 @@ Lava.define(
 	},
 
 	/**
+	 * Get a scope or property binding by the given route
 	 * @param {_cScopeLocator} path_config
 	 * @returns {_iValueContainer}
 	 */
@@ -18637,6 +22392,7 @@ Lava.define(
 	},
 
 	/**
+	 * Get value of the route without creating scopes
 	 * @param {_cScopeLocator} path_config
 	 * @returns {*}
 	 */
@@ -18704,6 +22460,7 @@ Lava.define(
 	},
 
 	/**
+	 * Get a binding to this view's property
 	 * @param {string} property_name
 	 * @returns {Lava.scope.PropertyBinding}
 	 */
@@ -18720,6 +22477,7 @@ Lava.define(
 	},
 
 	/**
+	 * Get a {@link Lava.scope.Segment}, bound to view's property
 	 * @param {(Lava.scope.PropertyBinding|Lava.scope.DataBinding)} name_source_scope
 	 * @returns {Lava.scope.Segment}
 	 */
@@ -18737,6 +22495,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Free resources and make this instance unusable
+	 */
 	destroy: function() {
 
 		var name;
@@ -18768,6 +22529,8 @@ Lava.define(
 Lava.define(
 'Lava.view.View',
 /**
+ * A view, which can have a container and inner template. The only kind of view, which can have a void tag as container
+ *
  * @lends Lava.view.View#
  * @extends Lava.view.Abstract#
  * @implements _iViewHierarchyMember
@@ -18777,6 +22540,7 @@ Lava.define(
 	Extends: 'Lava.view.Abstract',
 
 	/**
+	 * The content of the view
 	 * @type {Lava.system.Template}
 	 */
 	_contents: null,
@@ -18844,6 +22608,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_contents`. Create, if needed
+	 * @returns {Lava.system.Template}
+	 */
 	_getContents: function() {
 
 		if (this._contents == null) {
@@ -18872,6 +22640,8 @@ Lava.define(
 Lava.define(
 'Lava.view.Expression',
 /**
+ * View that displays result of an Argument
+ *
  * @lends Lava.view.Expression#
  * @extends Lava.view.Abstract
  * @implements _iViewHierarchyMember
@@ -18880,11 +22650,20 @@ Lava.define(
 
 	Extends: 'Lava.view.Abstract',
 	/**
+	 * Argument that returns a string
 	 * @type {Lava.scope.Argument}
 	 */
 	_argument: null,
+	/**
+	 * Listener to {@link Lava.scope.Argument#event:changed}
+	 * @type {_tListener}
+	 */
 	_argument_changed_listener: null,
 
+	/**
+	 * Should the view escape HTML entities in argument's value. May be turned off via config switch
+	 * @type {boolean}
+	 */
 	_escape: true,
 
 	_postInit: function() {
@@ -18896,6 +22675,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Argument's value has changed, schedule refresh
+	 */
 	_onValueChanged: function() {
 
 		this.trySetDirty();
@@ -18939,6 +22721,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Perform escaping of HTML entities in argument's value
+	 * @param {string} string Argument's value
+	 * @returns {string} Escaped value
+	 */
 	escapeArgumentValue: function(string) {
 
 		return Firestorm.String.escape(string, Firestorm.String.HTML_ESCAPE_REGEX);
@@ -18959,6 +22746,8 @@ Lava.define(
 Lava.define(
 'Lava.view.Foreach',
 /**
+ * Iterate over a sequence of items and render a template for each item
+ *
  * @lends Lava.view.Foreach#
  * @extends Lava.view.Abstract
  * @implements _iViewHierarchyMember
@@ -18968,22 +22757,41 @@ Lava.define(
 	Extends: 'Lava.view.Abstract',
 
 	/**
+	 * Argument, that returns an array or Enumerable
 	 * @type {Lava.scope.Argument}
 	 */
 	_argument: null,
+	/**
+	 * Scope, that is preparing results from argument
+	 * @type {Lava.scope.Foreach}
+	 */
 	_foreach_scope: null,
+	/**
+	 * Listener for {@link Lava.scope.Foreach#event:changed} event
+	 * @type {_tListener}
+	 */
 	_foreach_scope_changed_listener: null,
 
-	// = _current_uids.length
+	/**
+	 * Equals to `_current_uids.length`
+	 * @type {number}
+	 */
 	_current_count: 0,
-	// [index] => uid
+	/**
+	 * Unique IDs, received from Enumerable, that was returned from Foreach scope
+	 * @type {Array.<number>}
+	 */
 	_current_uids: [],
 	/**
-	 * [guid] => template
-	 * @type {Object.<string, _tRenderable>}
+	 * Enumerable UID => Template
+	 * @type {Object.<string, Lava.system.Template>}
 	 */
 	_current_hash: {},
 
+	/**
+	 * Templates that correspond to each item in Enumerable
+	 * @type {Array.<Lava.system.Template>}
+	 */
 	_current_templates: [],
 
 	/**
@@ -18993,11 +22801,15 @@ Lava.define(
 	_as: null,
 
 	/**
-	 * @type {(Lava.view.refresher.Default)}
+	 * Refreshers perform insertion, removal and animation of items
+	 * @type {Lava.view.refresher.Default}
 	 */
 	_refresher: null,
 
 	_properties: {
+		/**
+		 * Number of items in Foreach
+		 */
 		count: 0
 	},
 
@@ -19021,6 +22833,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_refresher`
+	 * @returns {Lava.view.refresher.Default}
+	 */
 	getRefresher: function() {
 
 		return this._refresher;
@@ -19047,8 +22863,8 @@ Lava.define(
 	},
 
 	/**
-	 * Scope hac created a new instance of Enumerable.
-	 * Now all UIDs belong to the old enumerable, so must get rid of all templates.
+	 * Scope has created a new instance of Enumerable.
+	 * Now all UIDs belong to the old enumerable, so must get rid of all templates
 	 */
 	_onEnumerableChanged: function() {
 
@@ -19070,6 +22886,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Callback that removes templates for removed Enumerable items
+	 * @param {Array.<Lava.system.Template>} removed_templates
+	 */
 	_removeTemplates: function(removed_templates) {
 
 		var i = 0,
@@ -19091,6 +22911,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Remove old templates, create new
+	 */
 	_refreshChildren: function() {
 
 		var data_source = this._foreach_scope.getValue(),
@@ -19153,6 +22976,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Callback for {@link Lava.scope.Foreach#event:changed} event
+	 */
 	_onDataSourceChanged: function() {
 
 		this._refreshChildren();
@@ -19160,6 +22986,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Animation has ended and refresher has removed the `template` from DOM
+	 * @param template
+	 */
 	_onRemovalComplete: function(template) {
 
 		template.destroy();
@@ -19200,9 +23030,6 @@ Lava.define(
 
 	},
 
-	/**
-	 * @param {string} function_name
-	 */
 	_broadcastToChildren: function(function_name) {
 
 		for (var name in this._current_hash) {
@@ -19262,6 +23089,8 @@ Lava.define(
 Lava.define(
 'Lava.view.If',
 /**
+ * Display content depending on condition
+ *
  * @lends Lava.view.If#
  * @extends Lava.view.Abstract
  * @implements _iViewHierarchyMember
@@ -19271,25 +23100,45 @@ Lava.define(
 	Extends: 'Lava.view.Abstract',
 
 	/**
+	 * One argument for each if/elseif section
 	 * @type {Array.<Lava.scope.Argument>}
 	 */
 	_arguments: [],
+	/**
+	 * For each argument: it's {@link Lava.scope.Argument#event:changed} listener
+	 * @type {Array.<_tListener>}
+	 */
 	_argument_changed_listeners: [],
+	/**
+	 * Total number of if/elseif sections
+	 * @type {number}
+	 */
 	_count_arguments: 0,
+	/**
+	 * Currently active if/elseif section id
+	 * @type {number}
+	 */
 	_active_argument_index: null,
 	/**
-	 * @type {Array.<_tRenderable>}
+	 * Content of each if/elseif section
+	 * @type {Array.<Lava.system.Template>}
 	 */
 	_contents: [],
 	/**
-	 * @type {_tRenderable}
+	 * Template to display when all if/elseif conditions are <kw>false</kw>
+	 * @type {Lava.system.Template}
 	 */
 	_else_contents: null,
 
 	/**
+	 * Refreshers animates insertion and removal of templates
 	 * @type {(Lava.view.refresher.Default)}
 	 */
 	_refresher: null,
+	/**
+	 * Currently active Template instance, including the 'else' template
+	 * @type {Lava.system.Template}
+	 */
 	_active_template: null,
 
 	_postInit: function() {
@@ -19335,12 +23184,20 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_refresher`
+	 * @returns {Lava.view.refresher.Default}
+	 */
 	getRefresher: function() {
 
 		return this._refresher;
 
 	},
 
+	/**
+	 * Get index of the first argument which evaluates to <kw>true</kw>
+	 * @returns {?number} Zero-based argument index, or <kw>null</kw>, if all arguments evaluate to <kw>false</kw>
+	 */
 	_getActiveArgumentIndex: function() {
 
 		var i = 0,
@@ -19359,6 +23216,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get template that corresponds to argument that evaluates to <kw>true</kw>
+	 * (or 'else' template, if there are no active arguments)
+	 * @returns {?Lava.system.Template}
+	 */
 	_getActiveTemplate: function() {
 
 		var result = null;
@@ -19381,6 +23243,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Listener for argument's {@link Lava.scope.Argument#event:changed} event
+	 */
 	_onArgumentChanged: function() {
 
 		var active_argument_index = this._getActiveArgumentIndex();
@@ -19411,6 +23276,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Render the currently active if/elseif section
+	 * @returns {string}
+	 */
 	_renderContents: function() {
 
 		if (Lava.schema.DEBUG && this._active_argument_index != null && this._arguments[this._active_argument_index].isWaitingRefresh()) Lava.t();
@@ -19421,6 +23290,7 @@ Lava.define(
 	},
 
 	/**
+	 * Broadcast to currently active if/elseif template
 	 * @param {string} function_name
 	 */
 	_broadcastToChildren: function(function_name) {
@@ -19474,6 +23344,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Create the template that corresponds to a if/elseif section
+	 * @param {number} index
+	 */
 	_createContents: function(index) {
 
 		if (typeof(this._contents[index]) == 'undefined') {
@@ -19488,6 +23362,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Create the 'else' template
+	 */
 	_createElseContents: function() {
 
 		if (this._else_contents == null) {
@@ -19541,6 +23418,7 @@ Lava.define(
 Lava.define(
 'Lava.widget.Standard',
 /**
+ * Base class for all widgets
  * @lends Lava.widget.Standard#
  * @extends Lava.view.View#
  * @implements _iViewHierarchyMember
@@ -19550,29 +23428,69 @@ Lava.define(
 	Extends: 'Lava.view.View',
 	Shared: ['_property_descriptors', '_event_handlers', '_role_handlers', '_include_handlers', '_broadcast_handlers', '_modifiers'],
 
+	/**
+	 * Instance is widget
+	 * @type {boolean}
+	 * @const
+	 */
 	isWidget: true,
-	/** @readonly */
+	/**
+	 * Widget's name for referencing from templates. Each kind of widget should have it's own unique name
+	 * @readonly
+	 */
 	name: 'widget',
 
-	/** @type {Object.<string, _cPropertyDescriptor>} */
+	/**
+	 * Rules for accessing widget's properties
+	 * @type {Object.<string, _cPropertyDescriptor>}
+	 */
 	_property_descriptors: {},
 
+	/**
+	 * List of non-default template events, to which this widget responds
+	 * @type {Array.<string>}
+	 */
 	_acquired_events: [],
+	/**
+	 * Map of template event handlers
+	 * @type {Object.<string, string>}
+	 */
 	_event_handlers: {},
-
+	/**
+	 * Map of template role handlers
+	 * @type {Object.<string, string>}
+	 */
 	_role_handlers: {},
+	/**
+	 * Map of template include handlers
+	 * @type {Object.<string, string>}
+	 */
 	_include_handlers: {},
-
+	/**
+	 * Map of broadcast handlers
+	 * @type {Object.<string, string>}
+	 */
 	_broadcast_handlers: {},
 
+	/**
+	 * Two-way bindings to properties of this widget
+	 * @type {Object.<string, Lava.scope.Binding>}
+	 */
 	_bindings: {},
+	/**
+	 * Resources from widget config
+	 * @type {Object}
+	 */
 	_resources: {},
-
+	/**
+	 * Nearest parent widget in hierarchy
+	 * @type {?Lava.widget.Standard}
+	 */
 	_parent_widget: null,
 
 	/**
-	 * Called in context of the widget.
-	 * modifier_name => class_method_name
+	 * Map of template callbacks. Called in context of the widget
+	 * @type {Object.<string, string>}
 	 */
 	_modifiers: {
 		translate: 'translate',
@@ -19580,6 +23498,7 @@ Lava.define(
 	},
 
 	/**
+	 * Create widget instance
 	 * @param {_cWidget} config
 	 * @param {Lava.widget.Standard} widget
 	 * @param {Lava.view.Abstract} parent_view
@@ -19635,6 +23554,7 @@ Lava.define(
 	},
 
 	/**
+	 * Get, merge and prepare resources for this widget
 	 * @param {_cWidget} config
 	 */
 	_initResources: function(config) {
@@ -19677,9 +23597,10 @@ Lava.define(
 	},
 
 	/**
-	 * @param {string} name
-	 * @param {Array} template_arguments
-	 * @returns {_tTemplate}
+	 * Get view's include
+	 * @param {string} name Include name
+	 * @param {Array} template_arguments Evaluated argument values from view's template
+	 * @returns {?_tTemplate}
 	 */
 	getInclude: function(name, template_arguments) {
 
@@ -19700,12 +23621,13 @@ Lava.define(
 	},
 
 	/**
+	 * Respond to DOM event, routed by {@link Lava.system.ViewManager}
 	 * @param {string} dom_event_name
-	 * @param dom_event
-	 * @param {string} target_name
-	 * @param {Lava.view.Abstract} view
-	 * @param {Array.<*>} template_arguments
-	 * @returns {boolean}
+	 * @param dom_event Browser event object, wrapped by the framework
+	 * @param {string} target_name Template event name
+	 * @param {Lava.view.Abstract} view View, that is the source for this event
+	 * @param {Array.<*>} template_arguments Evaluated argument values from view's template
+	 * @returns {boolean} <kw>true</kw>, if event was handled, and <kw>false</kw> otherwise
 	 */
 	handleEvent: function(dom_event_name, dom_event, target_name, view, template_arguments) {
 
@@ -19745,6 +23667,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Render and insert the widget instance into DOM
+	 * @param {HTMLElement} element
+	 * @param {_eInsertPosition} position
+	 */
 	inject: function(element, position) {
 
 		if (this._is_inDOM) Lava.t("inject: widget is already in DOM");
@@ -19762,7 +23689,7 @@ Lava.define(
 
 	/**
 	 * The target element becomes container for this widget.
-	 * Primary usage: inject a widget into the BODY element.
+	 * Primary usage: inject a widget into the &lt;body&gt; element
 	 * @param element
 	 */
 	injectIntoExistingElement: function(element) {
@@ -19783,6 +23710,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Register this widget in {@link Lava.system.ViewManager} as a consumer for each of `default_events` from config
+	 */
 	_acquireDefaultEvents: function() {
 
 		var i = 0,
@@ -19799,6 +23729,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * "lend" an event name from {@link Lava.system.ViewManager} and save it's name in local `_acquired_events` list
+	 * @param {string} event_name
+	 */
 	_lendEvent: function(event_name) {
 
 		if (Firestorm.Array.include(this._acquired_events, event_name)) {
@@ -19809,6 +23743,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Inform {@link Lava.system.ViewManager} that this instance does not need to route that event anymore
+	 * @param {string} event_name
+	 */
 	_releaseEvent: function(event_name) {
 
 		if (Firestorm.Array.exclude(this._acquired_events, event_name)) {
@@ -19819,6 +23757,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * "release" all `_acquired_events`
+	 */
 	_releaseAllEvents: function() {
 
 		var i = 0,
@@ -19834,6 +23775,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Remove widget from DOM. Only `inject()`'ed (root) widgets may be removed this way
+	 */
 	remove: function() {
 
 		if (!this._is_inDOM) Lava.t("remove: widget is not in DOM");
@@ -19858,8 +23802,9 @@ Lava.define(
 	},
 
 	/**
-	 * @param {string} name
-	 * @param {Array} arguments_array
+	 * Call a template method
+	 * @param {string} name Modifier name
+	 * @param {Array} arguments_array Evaluated template arguments
 	 * @returns {*}
 	 */
 	callModifier: function(name, arguments_array) {
@@ -19871,6 +23816,7 @@ Lava.define(
 	},
 
 	/**
+	 * Alpha: not implemented
 	 * @param {string} name
 	 * @param {Array} arguments_array
 	 * @returns {*}
@@ -19882,6 +23828,7 @@ Lava.define(
 	},
 
 	/**
+	 * Get `_parent_widget`
 	 * @returns {Lava.widget.Standard}
 	 */
 	getParentWidget: function() {
@@ -19891,10 +23838,11 @@ Lava.define(
 	},
 
 	/**
-	 * @param {string} role
+	 * Handle a view with a role in this widget
+	 * @param {string} role Role name
 	 * @param {Lava.view.Abstract} view
 	 * @param {Array.<*>} template_arguments
-	 * @returns {boolean}
+	 * @returns {boolean} <kw>true</kw>, if the role was handled, and <kw>false</kw> otherwise
 	 */
 	handleRole: function(role, view, template_arguments) {
 
@@ -19971,6 +23919,7 @@ Lava.define(
 	},
 
 	/**
+	 * Register handlers for events, emitted by widget inside this one
 	 * @param {Lava.widget.Standard} widget
 	 * @param {string} event_name
 	 * @param {string} handler_name
@@ -19993,24 +23942,36 @@ Lava.define(
 	},
 
 	/**
-	 * Fire the received event. For usage with broadcast events from inner widgets.
+	 * (broadcast handler) Fire broadcast event from this widget.
+	 * May be used to broadcast events from children to other widgets
 	 *
-	 * @param widget
+	 * @param {Lava.widget.Standard} widget Event emitter
 	 * @param event_args
 	 * @param listener_args
 	 */
 	_broadcastEvent: function(widget, event_args, listener_args) {
 
-		this._fire(listener_args.event_name);
+		this._fire(listener_args.event_name, event_args);
 
 	},
 
+	/**
+	 * Get constructor of a class, which is part of this widget
+	 * @param {string} path Path suffix
+	 * @returns {Function} Class constructor
+	 */
 	getPackageConstructor: function(path) {
 
 		return Lava.ClassManager.getPackageConstructor(this.Class.path, path);
 
 	},
 
+	/**
+	 * Get a resource object by it's name
+	 * @param {string} resource_name
+	 * @param {string} locale
+	 * @returns {*}
+	 */
 	getResource: function(resource_name, locale) {
 
 		locale = locale || Lava.schema.LOCALE;
@@ -20021,6 +23982,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get a scope instance
+	 * @param {Lava.view.Abstract} view
+	 * @param {_cDynamicScope} config
+	 */
 	getDynamicScope: function(view, config) {
 
 		Lava.t('Not implemented: getDynamicScope');
@@ -20028,7 +23994,7 @@ Lava.define(
 	},
 
 	/**
-	 * (modifier)
+	 * (modifier) Translate a string from resources
 	 * @param {string} resource_name
 	 * @param {Array} arguments_list
 	 * @param {string} locale
@@ -20067,7 +24033,7 @@ Lava.define(
 	},
 
 	/**
-	 * (modifier)
+	 * (modifier) Translate a plural string from resources
 	 * @param {string} string_name
 	 * @param {number} n
 	 * @param {Array} arguments_list
@@ -20129,10 +24095,20 @@ Lava.define(
 	}
 
 });
+/**
+ * Input's element got focus
+ * @event Lava.widget.input.Abstract#focused
+ */
+
+/**
+ * Input's element lost it's focus
+ * @event Lava.widget.input.Abstract#blurred
+ */
 
 Lava.define(
 'Lava.widget.input.Abstract',
 /**
+ * Base class for support of html &lt;input&gt; fields
  * @lends Lava.widget.input.Abstract#
  * @extends Lava.widget.Standard#
  */
@@ -20140,9 +24116,6 @@ Lava.define(
 
 	Extends: 'Lava.widget.Standard',
 
-	/**
-	 * @type {Object.<string, _cPropertyDescriptor>}
-	 */
 	_property_descriptors: {
 		name: {type: 'String', is_nullable: true},
 		value: {type: 'String', is_nullable: true},
@@ -20153,11 +24126,17 @@ Lava.define(
 	},
 
 	_properties: {
+		/** Input's "name" attribute */
 		name: null,
+		/** Input's "value" attribute */
 		value: null,
+		/** "disabled" attribute of the input */
 		is_disabled: false,
+		/** "required" attribute of the input */
 		is_required: false,
+		/** "readonly" attribute of the input */
 		is_readonly: false,
+		/** Is current input of HTML element valid for this kind of field */
 		is_valid: true
 	},
 
@@ -20170,7 +24149,15 @@ Lava.define(
 		_input_view: '_handleInputView'
 	},
 
+	/**
+	 * The input's "type" attribute
+	 * @type {string}
+	 */
 	_type: null,
+	/**
+	 * DOM input element
+	 * @type {Lava.view.container.Element}
+	 */
 	_input_container: null,
 
 	init: function(config, widget, parent_view, template, properties) {
@@ -20180,7 +24167,11 @@ Lava.define(
 
 	},
 
-	_handleInputView: function(view, template_arguments) {
+	/**
+	 * Save container of the DOM input element and set it's type
+	 * @param {Lava.view.Abstract} view
+	 */
+	_handleInputView: function(view) {
 
 		this._input_container = view.getContainer();
 
@@ -20193,18 +24184,28 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_input_container`
+	 * @returns {Lava.view.container.Element}
+	 */
 	getMainContainer: function() {
 
 		return this._input_container;
 
 	},
 
+	/**
+	 * Fire {@link Lava.widget.input.Abstract#event:focused}
+	 */
 	_onInputFocused: function() {
 
 		this._fire('focused');
 
 	},
 
+	/**
+	 * Fire {@link Lava.widget.input.Abstract#event:blurred}
+	 */
 	_onInputBlurred: function() {
 
 		this._fire('blurred');
@@ -20216,11 +24217,27 @@ Lava.define(
 		this.Standard$destroy();
 	},
 
+	/**
+	 * Encode as part of GET request
+	 * @returns {string}
+	 */
 	toQueryString: function() {
 
 		return (this._properties.name && !this._properties.is_disabled && this._properties.value != null)
 			? encodeURIComponent(this._properties.name) + '=' + encodeURIComponent(this._properties.value)
 			: '';
+
+	},
+
+	/**
+	 * Protected setter for readonly <i>is_valid</i> property
+	 * @param {boolean} value New value for <i>is_valid</i> property
+	 */
+	_setValidity: function(value) {
+
+		if (this._properties.is_valid != value) {
+			this._set('is_valid', value);
+		}
 
 	}
 
@@ -20229,6 +24246,7 @@ Lava.define(
 Lava.define(
 'Lava.widget.input.TextAbstract',
 /**
+ * Base class for text inputs
  * @lends Lava.widget.input.TextAbstract#
  * @extends Lava.widget.input.Abstract#
  */
@@ -20241,6 +24259,7 @@ Lava.define(
 	},
 
 	_properties: {
+		/** Current text inside the input element */
 		value: ''
 	},
 
@@ -20249,8 +24268,21 @@ Lava.define(
 		input: '_onTextInput'
 	},
 
+	/**
+	 * Whether to update widget's {@link Lava.widget.input.Abstract#property:value} property
+	 * on any change in DOM input element. Otherwise, value will be refreshed on input's "blur" event
+	 */
 	_refresh_on_input: true,
 
+	/**
+	 * @param config
+	 * @param {boolean} config.options.cancel_refresh_on_input Update widget's <i>value</i> when input element loses focus.
+	 *  By default, value is updated on each user input
+	 * @param widget
+	 * @param parent_view
+	 * @param template
+	 * @param properties
+	 */
 	init: function(config, widget, parent_view, template, properties) {
 
 		this.Abstract$init(config, widget, parent_view, template, properties);
@@ -20261,25 +24293,37 @@ Lava.define(
 
 	},
 
-	_setValue: function(value, name) {
+	/**
+	 * Set input's value
+	 * @param {string} value
+	 */
+	_setValue: function(value) {
 
 		if (this._properties.value != value) {
 
 			this._set('value', value);
 			if (this._input_container) {
-				this._input_container.setProperty('value', this._valueToAttributeString(value));
+				this._input_container.setProperty('value', this._valueToElementProperty(value));
 			}
 
 		}
 
 	},
 
-	_valueToAttributeString: function(value) {
+	/**
+	 * Convert value before setting it to Element
+	 * @param {*} value
+	 * @returns {string}
+	 */
+	_valueToElementProperty: function(value) {
 
 		return value;
 
 	},
 
+	/**
+	 * Get value from DOM input element and set local {@link Lava.widget.input.Abstract#property:value} property
+	 */
 	_refreshValue: function() {
 
 		var value = this._input_container.getDOMElement().value;
@@ -20293,6 +24337,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * DOM element's value changed: refresh local {@link Lava.widget.input.Abstract#property:value} property
+	 */
 	_onTextInput: function() {
 
 		if (this._refresh_on_input) {
@@ -20306,6 +24353,7 @@ Lava.define(
 Lava.define(
 'Lava.widget.input.TextArea',
 /**
+ * Multiline text input field
  * @lends Lava.widget.input.TextArea#
  * @extends Lava.widget.input.TextAbstract#
  */
@@ -20326,6 +24374,7 @@ Lava.define(
 Lava.define(
 'Lava.widget.input.Text',
 /**
+ * Text input field
  * @lends Lava.widget.input.Text#
  * @extends Lava.widget.input.TextAbstract#
  */
@@ -20334,7 +24383,6 @@ Lava.define(
 	Extends: 'Lava.widget.input.TextAbstract',
 
 	name: 'text_input',
-
 	_type: "text",
 
 	_handleInputView: function(view, template_arguments) {
@@ -20346,9 +24394,15 @@ Lava.define(
 
 });
 
+/**
+ * Radio or checkbox has changed it's "checked" state
+ * @event Lava.widget.input.RadioAbstract#checked_changed
+ */
+
 Lava.define(
 'Lava.widget.input.RadioAbstract',
 /**
+ * Base class for Radio and CheckBox classes
  * @lends Lava.widget.input.RadioAbstract#
  * @extends Lava.widget.input.Abstract#
  */
@@ -20361,6 +24415,7 @@ Lava.define(
 	},
 
 	_properties: {
+		/** Is this checkbox or radio currently selected (checked)? */
 		is_checked: false
 	},
 
@@ -20375,7 +24430,11 @@ Lava.define(
 
 	},
 
-	_setIsChecked: function(value, name) {
+	/**
+	 * Set the "checked" property on checkbox or radio input element
+	 * @param {boolean} value
+	 */
+	_setIsChecked: function(value) {
 
 		if (this._properties.is_checked != value) {
 
@@ -20388,6 +24447,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Element's checked state has changed. Update local <i>is_checked</i> property
+	 */
 	_onCheckedChanged: function() {
 
 		this.set('is_checked', this._input_container.getDOMElement().checked);
@@ -20406,6 +24468,7 @@ Lava.define(
 Lava.define(
 'Lava.widget.input.CheckBox',
 /**
+ * CheckBox input
  * @lends Lava.widget.input.CheckBox#
  * @extends Lava.widget.input.RadioAbstract#
  */
@@ -20414,17 +24477,20 @@ Lava.define(
 	Extends: 'Lava.widget.input.RadioAbstract',
 
 	name: 'checkbox',
+	_type: "checkbox",
 
 	_property_descriptors: {
 		is_indeterminate: {type: 'Boolean', setter: '_setIsIndeterminate'}
 	},
 
 	_properties: {
+		/** Is checkbox in indeterminate state */
 		is_indeterminate: false
 	},
 
-	_type: "checkbox",
-
+	/**
+	 * Set "indeterminate" property on checkbox input element
+	 */
 	_refreshIndeterminate: function() {
 
 		if (this._input_container && this._input_container.getDOMElement()) {
@@ -20454,6 +24520,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Setter for <i>is_indeterminate</i> property
+	 * @param {boolean} value
+	 */
 	_setIsIndeterminate: function(value) {
 
 		if (this._properties.is_indeterminate != value) {
@@ -20475,6 +24545,7 @@ Lava.define(
 Lava.define(
 'Lava.widget.input.Radio',
 /**
+ * Radio input
  * @lends Lava.widget.input.Radio#
  * @extends Lava.widget.input.RadioAbstract#
  */
@@ -20483,19 +24554,6 @@ Lava.define(
 	Extends: 'Lava.widget.input.RadioAbstract',
 
 	name: 'radio',
-
-	_property_descriptors: {
-		is_checked: {type: 'Boolean', setter: '_setIsChecked'}
-	},
-
-	_properties: {
-		is_checked: false
-	},
-
-	_event_handlers: {
-		checked_changed: '_onCheckedChanged'
-	},
-
 	_type: "radio",
 
 	broadcastInDOM: function() {
@@ -20512,9 +24570,15 @@ Lava.define(
 
 });
 
+/**
+ * Submit button was clicked
+ * @event Lava.widget.input.Submit#clicked
+ */
+
 Lava.define(
 'Lava.widget.input.Submit',
 /**
+ * Submit button input
  * @lends Lava.widget.input.Submit#
  * @extends Lava.widget.input.Abstract#
  */
@@ -20523,14 +24587,18 @@ Lava.define(
 	Extends: 'Lava.widget.input.Abstract',
 
 	name: 'submit',
+	_type: "submit",
 
 	_event_handlers: {
 		clicked: '_onClicked'
 	},
 
-	_type: "submit",
-
-	_onClicked: function(dom_event_name, dom_event, view, template_arguments) {
+	/**
+	 * Submit button was clicked. Fire "clicked" event
+	 * @param dom_event_name
+	 * @param dom_event
+	 */
+	_onClicked: function(dom_event_name, dom_event) {
 
 		this._fire('clicked');
 		dom_event.preventDefault();
@@ -20542,6 +24610,7 @@ Lava.define(
 Lava.define(
 'Lava.widget.input.SelectAbstract',
 /**
+ * Base class for select inputs
  * @lends Lava.widget.input.SelectAbstract#
  * @extends Lava.widget.input.Abstract#
  */
@@ -20552,7 +24621,10 @@ Lava.define(
 	name: 'select',
 
 	_properties: {
-		// optgroup tag is created only for those groups that have a title
+		/**
+		 * Option groups in this select input.
+		 * &lt;optgroup&gt; tag is created only for those groups that have a title
+		 */
 		optgroups: null
 	},
 
@@ -20571,7 +24643,10 @@ Lava.define(
 
 	},
 
-	_onValueChanged: function(dom_event_name, dom_event, view, template_arguments) {
+	/**
+	 * DOM element's value has changed: refresh local <i>value</i> property
+	 */
+	_onValueChanged: function() {
 
 		this._refreshValue();
 
@@ -20585,6 +24660,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Refresh local <i>value</i> property from DOM input element
+	 */
 	_refreshValue: function() {
 
 		Lava.t('Abstract function call: _refreshValue');
@@ -20596,6 +24674,7 @@ Lava.define(
 Lava.define(
 'Lava.widget.input.Select',
 /**
+ * Dropdown select
  * @lends Lava.widget.input.Select#
  * @extends Lava.widget.input.SelectAbstract#
  */
@@ -20617,7 +24696,11 @@ Lava.define(
 
 	},
 
-	_setValue: function(value, name) {
+	/**
+	 * Setter for the <i>value</i> property
+	 * @param {string} value
+	 */
+	_setValue: function(value) {
 
 		var element;
 		if (this._properties.value != value) {
@@ -20638,8 +24721,8 @@ Lava.define(
 	},
 
 	/**
-	 * as control does not need live bindings of 'selected' property, this modifier is used to speed up rendering.
-	 * @param value
+	 * {modifier} This widget does not need live bindings of <i>selected</i> property, so this modifier is used to speed up rendering
+	 * @param {string} value
 	 * @returns {boolean}
 	 */
 	isValueSelected: function(value) {
@@ -20651,6 +24734,7 @@ Lava.define(
 Lava.define(
 'Lava.widget.input.MultipleSelect',
 /**
+ * Select input with multiple choices
  * @lends Lava.widget.input.MultipleSelect#
  * @extends Lava.widget.input.SelectAbstract#
  */
@@ -20703,7 +24787,11 @@ Lava.define(
 
 	},
 
-	_setValue: function(value, name) {
+	/**
+	 * Setter for the <i>value</i> property
+	 * @param {Array.<string>} value
+	 */
+	_setValue: function(value) {
 
 		var element,
 			options,
@@ -20728,8 +24816,8 @@ Lava.define(
 	},
 
 	/**
-	 * as control does not need live bindings of 'selected' property, this modifier is used to speed up rendering.
-	 * @param value
+	 * {modifier} This widget does not need live bindings of <i>selected</i> property, so this modifier is used to speed up rendering
+	 * @param {string} value
 	 * @returns {boolean}
 	 */
 	isValueSelected: function(value) {
@@ -20763,6 +24851,7 @@ Lava.define(
 Lava.define(
 'Lava.widget.input.Numeric',
 /**
+ * Numeric input
  * @lends Lava.widget.input.Numeric#
  * @extends Lava.widget.input.Text#
  */
@@ -20777,12 +24866,28 @@ Lava.define(
 
 	_properties: {
 		value: 0,
+		/** Text, that is currently entered into the DOM element */
 		input_value: ''
 	},
 
 	_type: "number",
+	/**
+	 * A type from {@link Lava.types}
+	 * @type {string}
+	 */
 	_data_type: 'Number',
 
+	/**
+	 * @param config
+	 * @param {string} config.options.type The only possible value is "text" - to change default &lt;input&gt; element
+	 *  type from "number" to "text"
+	 * @param {string} config.options.data_type Widget's value type from {@link Lava.types}.
+	 *  Must produce valid JavaScript number. Defaults to "Number"
+	 * @param widget
+	 * @param parent_view
+	 * @param template
+	 * @param properties
+	 */
 	init: function(config, widget, parent_view, template, properties) {
 
 		this.Text$init(config, widget, parent_view, template, properties);
@@ -20806,7 +24911,7 @@ Lava.define(
 
 	},
 
-	_valueToAttributeString: function(value) {
+	_valueToElementProperty: function(value) {
 
 		return value + '';
 
@@ -20845,14 +24950,6 @@ Lava.define(
 		this.Text$_setValue(value, name);
 		this._setValidity(true);
 
-	},
-
-	_setValidity: function(value) {
-
-		if (this._properties.is_valid != value) {
-			this._set('is_valid', value);
-		}
-
 	}
 
 });
@@ -20860,6 +24957,7 @@ Lava.define(
 Lava.define(
 'Lava.widget.FieldGroup',
 /**
+ * Manages a collection of form input fields
  * @lends Lava.widget.FieldGroup#
  * @extends Lava.widget.Standard#
  */
@@ -20879,25 +24977,36 @@ Lava.define(
 	},
 
 	/**
+	 * Input widgets, registered with the FieldGroup
 	 * @type {Array.<Lava.widget.input.Abstract>}
 	 */
 	_fields: [],
 	/**
+	 * Other FieldGroup instances registered with this widget
 	 * @type {Array.<Lava.widget.FieldGroup>}
 	 */
 	_groups: [],
 	/**
+	 * Submit button fields
 	 * @type {Array.<Lava.widget.input.Submit>}
 	 */
 	_submit_fields: [],
 
-	_handleGroupRole: function(formgroup_widget, template_arguments) {
+	/**
+	 * Register another FieldGroup widget with this one
+	 * @param field_group_widget
+	 */
+	_handleGroupRole: function(field_group_widget) {
 
-		this._groups.push(formgroup_widget);
+		this._groups.push(field_group_widget);
 
 	},
 
-	_handleFieldRole: function(field_widget, template_arguments) {
+	/**
+	 * Register an input widget
+	 * @param field_widget
+	 */
+	_handleFieldRole: function(field_widget) {
 
 		if (field_widget.name == 'submit') {
 
@@ -20916,24 +25025,39 @@ Lava.define(
 
 	},
 
+	/**
+	 * Submit input was clicked
+	 */
 	_onSubmit: function() {
 
 
 
 	},
 
+	/**
+	 * Get `_fields`
+	 * @returns {Array.<Lava.widget.input.Abstract>}
+	 */
 	getFields: function() {
 
 		return this._fields.slice();
 
 	},
 
+	/**
+	 * Get `_submit_fields`
+	 * @returns {Array.<Lava.widget.input.Abstract>}
+	 */
 	getSubmitFields: function() {
 
-		return this._fields.slice();
+		return this._submit_fields.slice();
 
 	},
 
+	/**
+	 * Convert value of all registered inputs to query string, as in GET request
+	 * @returns {string}
+	 */
 	toQueryString: function() {
 
 		var i = 0,
@@ -20954,6 +25078,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Cleanup destroyed fields from local members
+	 * @param {Lava.widget.input.Abstract} field_widget
+	 * @param event_args
+	 * @param native_args Reference to local array with input widgets
+	 */
 	_onFieldDestroyed: function(field_widget, event_args, native_args) {
 
 		Firestorm.Array.exclude(native_args, field_widget);
@@ -20965,19 +25095,20 @@ Lava.define(
  * Panel is expanding
  * @event Lava.widget.Accordion#panel_expanding
  * @type {Object}
- * @property {Lava.widget.Standard} panel The panel, which triggered the event
+ * @property {Lava.widget.Standard} panel Panel, which triggered the event
  */
 
 /**
  * Panel is collapsing
  * @event Lava.widget.Accordion#panel_collapsing
  * @type {Object}
- * @property {Lava.widget.Standard} panel The panel, which triggered the event
+ * @property {Lava.widget.Standard} panel Panel, which triggered the event
  */
 
 Lava.define(
 'Lava.widget.Accordion',
 /**
+ * Collection of expandable panels
  * @lends Lava.widget.Accordion#
  * @extends Lava.widget.Standard#
  */
@@ -20992,8 +25123,12 @@ Lava.define(
 	},
 
 	_properties: {
-		/** @type {Lava.system.Enumerable} */
+		/**
+		 * Collection of "panel" <b>objects</b> (objects with properties for panel <b>widgets</b>)
+		 * @type {Lava.system.Enumerable}
+		 */
 		_panels: null,
+		/** If accordion is enabled - then it closes all other open panels when any panel is opened */
 		is_enabled: true
 	},
 
@@ -21005,15 +25140,31 @@ Lava.define(
 		panel_include: '_getPanelInclude'
 	},
 
+	/**
+	 * Reference to the <i>_panels</i> property
+	 * @type {Lava.system.Enumerable}
+	 */
 	_panels: null,
+	/**
+	 * Accordion's panels
+	 * @type {Array.<Lava.widget.Standard>}
+	 */
 	_panel_widgets: [],
+	/**
+	 * Panels, that are currently expanded
+	 * @type {Array.<Lava.widget.Standard>}
+	 */
 	_active_panels: [],
+	/**
+	 * Objects with listeners for accordion's panels
+	 * @type {Object.<string, Object.<string, _tListener>>}
+	 */
 	_listeners_by_panel_guid: {},
 
 	/**
 	 * @param config
-	 * @param config.options.keep_expanded_on_add If you add another expanded panel to accordion - it's collapsed by default.
-	 * You may set this option to keep it expanded - in this case all expanded panels will be collapsed as soon as any panel is expanded by user.
+	 * @param {boolean} config.options.keep_expanded_on_add If you add another expanded panel to accordion - it's collapsed by default.
+	 *  You may set this option to keep it expanded - in this case all expanded panels will be collapsed as soon as any panel is expanded by user
 	 * @param widget
 	 * @param parent_view
 	 * @param template
@@ -21052,6 +25203,14 @@ Lava.define(
 
 	},
 
+	/**
+	 * Create a panel inside accordion
+	 * @param {Object} properties Plain object with panel's data
+	 * @param {boolean} properties.is_expanded Initial "expanded" state
+	 * @param {_tTemplate} properties.title
+	 * @param {_tTemplate} properties.content
+	 * @returns {Lava.mixin.Properties} The {@link Lava.mixin.Properties} instance with panel's data
+	 */
 	addPanel: function(properties) {
 
 		if (Lava.schema.DEBUG && (properties.title && !Array.isArray(properties.title)) || (properties.content && !Array.isArray(properties.content))) Lava.t('Accordion: title and content must be templates');
@@ -21067,30 +25226,53 @@ Lava.define(
 
 	},
 
-	getPanels: function() {
+	/**
+	 * Get panel objects
+	 * @returns {Array.<Lava.widget.Standard>}
+	 */
+	getPanelObjects: function() {
 
 		return this._panels.getValues();
 
 	},
 
+	/**
+	 * Get a copy of `_panel_widgets`
+	 * @returns {Array}
+	 */
 	getPanelWidgets: function() {
 
 		return this._panel_widgets.slice();
 
 	},
 
+	/**
+	 * Get an include from panel data
+	 * @param template_arguments
+	 * @returns {_tTemplate}
+	 */
 	_getPanelInclude: function(template_arguments) {
 
+		// template_arguments[0] - panel object (Properties)
+		// template_arguments[1] - name of variable (ex: "content")
 		return template_arguments[0].get(template_arguments[1]);
 
 	},
 
-	_handlePanelRole: function(view, template_arguments) {
+	/**
+	 * Handle a panel inside accordion instance
+	 * @param {Lava.widget.Standard} view
+	 */
+	_handlePanelRole: function(view) {
 
 		this.registerPanel(view);
 
 	},
 
+	/**
+	 * Add panel widget instance to Accordion. Panel does not need to be inside accordion
+	 * @param {Lava.widget.Standard} panel_widget
+	 */
 	registerPanel: function(panel_widget) {
 
 		var collapse_on_add = !this._config.options || !this._config.options['keep_expanded_on_add'];
@@ -21120,6 +25302,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Remove all references to panel widget from local members
+	 * @param {Lava.widget.Standard} panel_widget
+	 */
 	_removePanel: function(panel_widget) {
 
 		Firestorm.Array.exclude(this._panel_widgets, panel_widget);
@@ -21128,6 +25314,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Stop controlling this panel widget
+	 * @param {Lava.widget.Standard} panel_widget
+	 */
 	unregisterPanel: function(panel_widget) {
 
 		var listeners = this._listeners_by_panel_guid[panel_widget.guid];
@@ -21140,6 +25330,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Panel is expanding. Close all other panels
+	 * @param {Lava.widget.Standard} panel
+	 */
 	_onPanelExpanding: function(panel) {
 
 		var turnoff_panels,
@@ -21169,6 +25363,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Handler of panel's "collapsing" event
+	 * @param {Lava.widget.Standard} panel
+	 */
 	_onPanelCollapsing: function(panel) {
 
 		Firestorm.Array.exclude(this._active_panels, panel);
@@ -21178,6 +25376,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Turn accordion on and off
+	 * @param {boolean} value
+	 * @param {string} name
+	 */
 	_setIsEnabled: function(value, name) {
 
 		var turnoff_panels = [],
@@ -21209,21 +25412,31 @@ Lava.define(
 
 	},
 
+	/**
+	 * Remove references to destroyed panel
+	 * @param panel
+	 */
 	_onPanelDestroy: function(panel) {
 
 		this._removePanel(panel);
 
 	},
 
+	/**
+	 * Remove all panels, added by `addPanel`
+	 */
 	removeNativePanels: function() {
 
 		this._panels.removeAll();
 
 	},
 
+	/**
+	 * Stop controlling all panels and remove panels which were added by `addPanel`
+	 */
 	removeAllPanels: function() {
 
-		var panel_widgets = this._panel_widgets.clone(); // cause array will be modified during unregisterPanel()
+		var panel_widgets = this._panel_widgets.slice(); // cause array will be modified during unregisterPanel()
 
 		for (var i = 0, count = panel_widgets.length; i < count; i++) {
 
@@ -21235,6 +25448,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Remove a panel, added by `addPanel`
+	 * @param {Lava.mixin.Properties} panel The panel object, returned by `addPanel`
+	 */
 	removePanel: function(panel) {
 
 		this._panels.removeValue(panel); // everything else will be done by destroy listener
@@ -21257,6 +25474,7 @@ Lava.define(
 Lava.define(
 'Lava.widget.Tabs',
 /**
+ * Tabs widget
  * @lends Lava.widget.Tabs#
  * @extends Lava.widget.Standard#
  */
@@ -21267,8 +25485,15 @@ Lava.define(
 	name: 'tabs',
 
 	_properties: {
-		/** @type {Lava.system.Enumerable} */
+		/**
+		 * Collection of objects with tab data
+		 * @type {Lava.system.Enumerable}
+		 */
 		_tabs: null,
+		/**
+		 * Active tab object
+		 * @type {Lava.mixin.Properties}
+		 */
 		active_tab: null
 	},
 
@@ -21285,14 +25510,15 @@ Lava.define(
 	},
 
 	/**
+	 * Reference to <i>_tabs</i> property
 	 * @type {Lava.system.Enumerable}
 	 */
-	_tabs: null,
+	_tab_objects: null,
 
 	init: function(config, widget, parent_view, template, properties) {
 
-		this._tabs = new Lava.system.Enumerable();
-		this._properties._tabs = this._tabs;
+		this._tab_objects = new Lava.system.Enumerable();
+		this._properties._tabs = this._tab_objects;
 
 		this.Standard$init(config, widget, parent_view, template, properties);
 
@@ -21322,9 +25548,16 @@ Lava.define(
 
 	},
 
+	/**
+	 * Tab header was clicked. Switch active tab
+	 * @param dom_event_name
+	 * @param dom_event
+	 * @param view
+	 * @param template_arguments
+	 */
 	_onTabHeaderClicked: function(dom_event_name, dom_event, view, template_arguments) {
 
-		var tab = template_arguments[0];
+		var tab = template_arguments[0]; // tab object
 		if (tab.get('is_enabled')) {
 			this._setActiveTab(tab);
 		}
@@ -21335,12 +25568,14 @@ Lava.define(
 	},
 
 	/**
-	 * @param {Object} properties
+	 * Create a new tab
+	 * @param {Object} properties The properties of the new tab
 	 * @param {string} properties.name
 	 * @param {boolean} properties.is_enabled
 	 * @param {boolean} properties.is_hidden
 	 * @param {_tTemplate} properties.content Read only
 	 * @param {_tTemplate} properties.title Read only
+	 * @returns {Lava.mixin.Properties} Created object with tab data
 	 */
 	addTab: function(properties) {
 
@@ -21372,7 +25607,7 @@ Lava.define(
 			this._set('active_tab', tab);
 		}
 
-		this._tabs.push(tab);
+		this._tab_objects.push(tab);
 
 		tab.onPropertyChanged('is_enabled', this._onTabStateChanged, this);
 		tab.onPropertyChanged('is_hidden', this._onTabStateChanged, this);
@@ -21382,6 +25617,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * "is_active" property of tab object has changed. Update active tab
+	 * @param {Lava.mixin.Properties} tab
+	 */
 	_onTabIsActiveChanged: function(tab) {
 
 		if (tab.get('is_active')) {
@@ -21396,6 +25635,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Change currently active tab
+	 * @param {Lava.mixin.Properties} new_tab
+	 */
 	_setActiveTab: function(new_tab) {
 
 		var old_active_tab = this._properties.active_tab;
@@ -21410,6 +25653,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * If currently active tab was disabled or hidden - choose new active tab
+	 * @param {Lava.mixin.Properties} tab
+	 */
 	_onTabStateChanged: function(tab) {
 
 		if (tab.get('is_active') && (!tab.get('is_enabled') || tab.get('is_hidden'))) {
@@ -21420,17 +25667,25 @@ Lava.define(
 
 	},
 
-	getTabs: function() {
+	/**
+	 * Get all objects with tab data
+	 * @returns {Array.<Lava.mixin.Properties>}
+	 */
+	getTabObjects: function() {
 
-		return this._tabs.getValues();
+		return this._tab_objects.getValues();
 
 	},
 
-	removeTab: function(tab) {
+	/**
+	 * Remove a tab object, returned by `addTab`
+	 * @param {Lava.mixin.Properties} tab_object
+	 */
+	removeTab: function(tab_object) {
 
-		this._tabs.removeValue(tab);
+		this._tab_objects.removeValue(tab_object);
 
-		if (this._properties.active_tab == tab) {
+		if (this._properties.active_tab == tab_object) {
 
 			this._fixActiveTab();
 
@@ -21445,7 +25700,7 @@ Lava.define(
 
 		var active_tab = null;
 
-		this._tabs.each(function(tab) {
+		this._tab_objects.each(function(tab) {
 			var result = null;
 			if (tab.get('is_enabled') && !tab.get('is_hidden')) {
 				active_tab = tab;
@@ -21458,15 +25713,25 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get include from tab data
+	 * @param template_arguments
+	 * @returns {_tTemplate}
+	 */
 	_getTabInclude: function(template_arguments) {
 
+		// template_arguments[0] - tab object
+		// template_arguments[1] - property name
 		return template_arguments[0].get(template_arguments[1]);
 
 	},
 
+	/**
+	 * Remove all tabs
+	 */
 	removeAllTabs: function() {
 
-		var tabs = this._tabs.getValues(),
+		var tabs = this._tab_objects.getValues(),
 			i = 0,
 			count = tabs.length;
 
@@ -21478,33 +25743,61 @@ Lava.define(
 
 	},
 
+	/**
+	 * Reorder tabs
+	 * @param {Array.<number>} indices
+	 */
 	reorderTabs: function(indices) {
 
-		this._tabs.reorder(indices);
+		this._tab_objects.reorder(indices);
 
 	},
 
+	/**
+	 * Sort tabs
+	 * @param {_tLessCallback} callback
+	 */
 	sortTabs: function(callback) {
 
-		this._tabs.sort(callback);
+		this._tab_objects.sort(callback);
 
 	},
 
 	destroy: function() {
 
 		this.removeAllTabs();
-		this._tabs.destroy();
-		this._tabs = this._properties._tabs = null;
+		this._tab_objects.destroy();
+		this._tab_objects = this._properties._tab_objects = null;
 
 		this.Standard$destroy();
 
 	}
 
 });
+/**
+ * Panel started to expand
+ * @event Lava.widget.Collapsible#expanding
+ */
+
+/**
+ * Panel started to collapse
+ * @event Lava.widget.Collapsible#collapsing
+ */
+
+/**
+ * Panel has fully expanded
+ * @event Lava.widget.Collapsible#expanded
+ */
+
+/**
+ * Panel is collapsed
+ * @event Lava.widget.Collapsible#collapsed
+ */
 
 Lava.define(
 'Lava.widget.Collapsible',
 /**
+ * Animated HTML element, which can be shown and hidden
  * @lends Lava.widget.Collapsible#
  * @extends Lava.widget.Standard#
  */
@@ -21520,8 +25813,11 @@ Lava.define(
 	},
 
 	_properties: {
+		/** Is the element expanded */
 		is_expanded: true,
+		/** Use animation, while expanding and collapsing the element */
 		is_animation_enabled: true,
+		/** Content for default widget's template */
 		content: ''
 	},
 
@@ -21529,12 +25825,33 @@ Lava.define(
 		_container_view: '_handleContainerView'
 	},
 
+	/**
+	 * Main container of the expandable DOM element
+	 * @type {Lava.view.container.Element}
+	 */
 	_panel_container: null,
+	/**
+	 * DOM element's animation
+	 * @type {Lava.animation.Abstract}
+	 */
 	_animation: null,
+	/**
+	 * The "display" CSS rule from container's element
+	 * @type {string}
+	 */
 	_default_display: null,
 
+	/**
+	 * When animation is disabled, Toggle animation is used to show and hide the DOM element
+	 * @type {string}
+	 * @const
+	 */
 	TOGGLE_ANIMATION_CLASS: 'Toggle',
 
+	/**
+	 * Create animation, set it's direction and run it
+	 * @param {boolean} is_forwards Is widget's element expanding
+	 */
 	_refreshAnimation: function(is_forwards) {
 
 		var element = this._panel_container.getDOMElement(),
@@ -21565,6 +25882,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Fire widget's events and fix element's "display" CSS rule
+	 */
 	_onAnimationComplete: function() {
 
 		if (this._animation.isReversed()) {
@@ -21580,6 +25900,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Setter for <i>is_expanded</i> property
+	 * @param {boolean} value
+	 * @param {string} name
+	 */
 	_setExpanded: function(value, name) {
 
 		var new_display = 'none';
@@ -21594,7 +25919,7 @@ Lava.define(
 
 			}
 
-			// if this property is set in constructor - than container does not yet exist
+			// if this property is set in constructor - then container does not yet exist
 			if (this._panel_container) {
 
 				this._panel_container.setStyle('display', new_display);
@@ -21621,7 +25946,11 @@ Lava.define(
 
 	},
 
-	_handleContainerView: function(view, template_arguments) {
+	/**
+	 * Handle view with main container
+	 * @param {Lava.view.Abstract} view
+	 */
+	_handleContainerView: function(view) {
 
 		this._panel_container = view.getContainer();
 
@@ -21635,6 +25964,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_panel_container`
+	 * @returns {Lava.view.container.Element}
+	 */
 	getMainContainer: function() {
 
 		return this._panel_container;
@@ -21646,6 +25979,7 @@ Lava.define(
 Lava.define(
 'Lava.widget.CollapsiblePanel',
 /**
+ * An expandable panel with header and body
  * @lends Lava.widget.CollapsiblePanel#
  * @extends Lava.widget.Collapsible#
  */
@@ -21660,7 +25994,9 @@ Lava.define(
 	},
 
 	_properties: {
+		/** When panel is locked - it does not respond to header clicks */
 		is_locked: false,
+		/** Panel's title */
 		title: ''
 	},
 
@@ -21668,6 +26004,9 @@ Lava.define(
 		header_click: '_onHeaderClick'
 	},
 
+	/**
+	 * Toggle <i>is_expanded</i> property, when not locked
+	 */
 	_onHeaderClick: function() {
 
 		if (!this._properties.is_locked) {
@@ -21680,10 +26019,30 @@ Lava.define(
 
 });
 
+/**
+ * Panel started to expand it's body
+ * @event Lava.widget.CollapsiblePanelExt#expanding
+ */
+
+/**
+ * Panel started to collapse it's body
+ * @event Lava.widget.CollapsiblePanelExt#collapsing
+ */
+
+/**
+ * Panel's body has fully expanded
+ * @event Lava.widget.CollapsiblePanelExt#expanded
+ */
+
+/**
+ * Panel's body is collapsed
+ * @event Lava.widget.CollapsiblePanelExt#collapsed
+ */
+
 Lava.define(
 'Lava.widget.CollapsiblePanelExt',
 /**
- * A panel that removes it's content from DOM in collapsed state.
+ * An expandable panel that removes it's content from DOM in collapsed state
  * @lends Lava.widget.CollapsiblePanelExt#
  * @extends Lava.widget.Standard#
  */
@@ -21700,10 +26059,15 @@ Lava.define(
 	},
 
 	_properties: {
+		/** Is panel expanded */
 		is_expanded: true,
+		/** When panel is locked - it does not respond to header clicks */
 		is_locked: false,
+		/** Does panel use animation to expand and collapse it's body */
 		is_animation_enabled: true,
+		/** Panel's title */
 		title: '',
+		/** Content for the default panel's template */
 		content: ''
 	},
 
@@ -21715,9 +26079,17 @@ Lava.define(
 		_content_if: '_handleContentIf'
 	},
 
+	/**
+	 * Refresher of the panel's body
+	 * @type {Lava.view.refresher.Default}
+	 */
 	_content_refresher: null,
 
-	_handleContentIf: function(view, template_arguments) {
+	/**
+	 * Handle view with the panel's body
+	 * @param {Lava.view.Abstract} view
+	 */
+	_handleContentIf: function(view) {
 
 		var refresher = view.getRefresher();
 
@@ -21732,18 +26104,27 @@ Lava.define(
 
 	},
 
+	/**
+	 * Refresher has expanded the body, fire "expanded" event
+	 */
 	_onInsertionComplete: function() {
 
 		this._fire('expanded');
 
 	},
 
+	/**
+	 * Refresher has collapsed and removed the body, fire "collapsed" event
+	 */
 	_onRemovalComplete: function() {
 
 		this._fire('collapsed');
 
 	},
 
+	/**
+	 * Toggle <i>is_expanded</i> property, if not locked
+	 */
 	_onHeaderClick: function() {
 
 		if (!this._properties.is_locked) {
@@ -21757,6 +26138,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Setter for `is_animation_enabled`
+	 * @param {boolean} value
+	 * @param {string} name
+	 */
 	_setAnimationEnabled: function(value, name) {
 
 		if (this._properties.is_animation_enabled != value) {
@@ -21787,6 +26173,7 @@ Lava.define(
 Lava.define(
 'Lava.widget.DropDown',
 /**
+ * Widget with content, that is shown on click
  * @lends Lava.widget.DropDown#
  * @extends Lava.widget.Standard#
  */
@@ -21801,6 +26188,7 @@ Lava.define(
 	},
 
 	_properties: {
+		/** Is the widget expanded */
 		is_open: false
 	},
 
@@ -21813,13 +26201,31 @@ Lava.define(
 		target: '_registerTarget' // the target to which the class 'open' is applied
 	},
 
-	_is_focused: false,
-
+	/**
+	 * A view that responds to the "click" event
+	 * @type {Lava.view.Abstract}
+	 */
 	_trigger: null,
+	/**
+	 * A view, that is displayed when `_trigger` is clicked
+	 * @type {Lava.view.Abstract}
+	 */
 	_target: null,
 
+	/**
+	 * Listener for global "click" anywhere on page
+	 * @type {_tListener}
+	 */
 	_click_listener: null,
 
+	/**
+	 * @param config
+	 * @param {string} config.options.target_class Class name to add to `_target` when `_trigger` is clicked
+	 * @param widget
+	 * @param parent_view
+	 * @param template
+	 * @param properties
+	 */
 	init: function(config, widget, parent_view, template, properties) {
 
 		this.Standard$init(config, widget, parent_view, template, properties);
@@ -21827,15 +26233,23 @@ Lava.define(
 
 	},
 
+	/**
+	 * Handler for global {@link Lava.system.App} event "close_popups"
+	 */
 	_onClosePopups: function() {
 
 		this.set('is_open', false);
 
 	},
 
-	_onTriggerClick: function(dom_event_name, dom_event, view, template_arguments) {
+	/**
+	 * Change <i>is_open</i> state
+	 * @param dom_event_name
+	 * @param dom_event
+	 */
+	_onTriggerClick: function(dom_event_name, dom_event) {
 
-		if (this._properties._is_open) {
+		if (this._properties.is_open) {
 
 			this.set('is_open', false);
 
@@ -21854,6 +26268,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Click anywhere on page
+	 */
 	_onGlobalClick: function() {
 
 		Lava.Core.removeGlobalHandler(this._click_listener);
@@ -21862,25 +26279,42 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get container of the element, which is shown, when widget is expanded
+	 * @returns {_iContainer}
+	 */
 	_getTargetContainer: function() {
 
 		return this._target && this._target.getContainer() || this._container;
 
 	},
 
-	_registerTrigger: function(view, template_arguments) {
+	/**
+	 * Register `_trigger` view
+	 * @param {Lava.view.Abstract} view
+	 */
+	_registerTrigger: function(view) {
 
 		this._trigger = view;
 		view.getContainer().addEventTarget('click', {locator_type: "Guid", locator: this.guid, name: "trigger_click"});
 
 	},
 
-	_registerTarget: function(view, template_arguments) {
+	/**
+	 * Register `_target` view
+	 * @param {Lava.view.Abstract} view
+	 */
+	_registerTarget: function(view) {
 
 		this._target = view;
 
 	},
 
+	/**
+	 * Setter for <i>is_open</i> property
+	 * @param {boolean} value
+	 * @param {string} name
+	 */
 	_setIsOpen: function(value, name) {
 
 		var open_target_container = this._getTargetContainer();
@@ -21922,6 +26356,7 @@ Lava.define(
 Lava.define(
 'Lava.widget.Tree',
 /**
+ * Tree with expandable nodes
  * @lends Lava.widget.Tree#
  * @extends Lava.widget.Standard#
  */
@@ -21932,6 +26367,9 @@ Lava.define(
 
 	name: 'tree',
 
+	/**
+	 * Shared configs
+	 */
 	_shared: {
 		meta_storage_config: {
 			fields: {
@@ -21943,6 +26381,7 @@ Lava.define(
 	},
 
 	_properties: {
+		/** User-assigned records in the root of the tree */
 		records: null
 	},
 
@@ -21950,9 +26389,26 @@ Lava.define(
 		node_click: '_onNodeClick'
 	},
 
+	/**
+	 * MetaStorage instance for storage of "is_expanded" state of tree records
+	 * @type {Lava.data.MetaStorage}
+	 */
 	_meta_storage: null,
+	/**
+	 * Route to record's "is_expanded" property for templates
+	 * @type {_cScopeLocator}
+	 */
 	_is_expanded_bind_config: null,
 
+	/**
+	 * @param config
+	 * @param {boolean} config.options.use_meta_storage Store "is_expanded" property of tree nodes in separate MetaStorage instance.
+	 *  By default, "is_expanded" property is taken directly from nodes
+	 * @param widget
+	 * @param parent_view
+	 * @param template
+	 * @param properties
+	 */
 	init: function(config, widget, parent_view, template, properties) {
 
 		this.Standard$init(config, widget, parent_view, template, properties);
@@ -21966,14 +26422,34 @@ Lava.define(
 
 	},
 
+	/**
+	 * Expand or collapse the node
+	 * @param dom_event_name
+	 * @param dom_event
+	 * @param view
+	 * @param template_arguments
+	 */
 	_onNodeClick: function(dom_event_name, dom_event, view, template_arguments) {
 
+		// template_arguments[0] - node record
+		if (Lava.schema.DEBUG) {
+			if (this._meta_storage) {
+				if (!template_arguments[0].guid) Lava.t("Tree: record without GUID");
+			} else if (!template_arguments[0].isProperties) {
+				Lava.t("Tree: record is not instance of Properties");
+			}
+		}
 		var property_source = this._meta_storage ? this._meta_storage.get(template_arguments[0].guid) : template_arguments[0];
 		property_source.set('is_expanded', !property_source.get('is_expanded'));
 		dom_event.preventDefault(); // to prevent text selection
 
 	},
 
+	/**
+	 * Switch expandable tree records to new state
+	 * @param node
+	 * @param {boolean} expanded_state
+	 */
 	_toggleTree: function(node, expanded_state) {
 
 		var children = node.get('children'),
@@ -21998,6 +26474,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Switch expandable root records to new state
+	 * @param {boolean} expanded_state
+	 */
 	_toggleRecords: function(expanded_state) {
 
 		var records = this._properties.records,
@@ -22015,12 +26495,18 @@ Lava.define(
 
 	},
 
+	/**
+	 * Expand all records in the tree
+	 */
 	expandAll: function() {
 
 		this._toggleRecords(true);
 
 	},
 
+	/**
+	 * Collapse all records in the tree
+	 */
 	collapseAll: function() {
 
 		this._toggleRecords(false);
@@ -22028,6 +26514,7 @@ Lava.define(
 	},
 
 	/**
+	 * Locate record's "is_expanded" property for templates
 	 * @param {Lava.view.Abstract} view
 	 * @param {_cDynamicScope} config
 	 */
@@ -22053,6 +26540,7 @@ Lava.define(
 Lava.define(
 'Lava.widget.Table',
 /**
+ * Sortable table
  * @lends Lava.widget.Table#
  * @extends Lava.widget.Standard#
  */
@@ -22062,9 +26550,22 @@ Lava.define(
 	name: 'table',
 
 	_properties: {
+		/**
+		 * User-assigned records collection for this table
+		 * @type {Lava.system.Enumerable}
+		 */
 		records: null,
+		/** Columns from table's options */
 		_columns: null,
+		/**
+		 * The column, by which the records are sorted
+		 * @type {string}
+		 */
 		_sort_column_name: null,
+		/**
+		 * Sort order
+		 * @type {boolean}
+		 */
 		_sort_descending: false
 	},
 
@@ -22076,6 +26577,15 @@ Lava.define(
 		cell: '_getCellInclude'
 	},
 
+	/**
+	 * @param config
+	 * @param {Array.<{name, title}>} config.options.columns Column descriptors. "title" is displayed in table head,
+	 *  while "name" is name of the property in records
+	 * @param widget
+	 * @param parent_view
+	 * @param template
+	 * @param properties
+	 */
 	init: function(config, widget, parent_view, template, properties) {
 
 		if (Lava.schema.DEBUG && (!config.options || !config.options.columns)) Lava.t("Table: config.options.columns is required");
@@ -22084,6 +26594,13 @@ Lava.define(
 
 	},
 
+	/**
+	 * Column header has been clicked. Apply sorting
+	 * @param dom_event_name
+	 * @param dom_event
+	 * @param view
+	 * @param template_arguments
+	 */
 	_onColumnHeaderClick: function(dom_event_name, dom_event, view, template_arguments) {
 
 		var column_name = template_arguments[0].name,
@@ -22110,9 +26627,14 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get include that renders content of a cell
+	 * @param template_arguments
+	 * @returns {_tTemplate}
+	 */
 	_getCellInclude: function(template_arguments) {
 
-		// var column = template_arguments[0];
+		// var column = template_arguments[0]; - column descriptor from options
 		return this._config.storage.cells[template_arguments[0].type];
 
 	}
@@ -22122,6 +26644,7 @@ Lava.define(
 Lava.define(
 'Lava.widget.CalendarAbstract',
 /**
+ * Base class for calendar widgets
  * @lends Lava.widget.CalendarAbstract#
  * @extends Lava.widget.Standard#
  */
@@ -22131,16 +26654,24 @@ Lava.define(
 	name: 'calendar',
 
 	_properties: {
+		/** Currently selected year */
 		_current_year: 0,
+		/** Currently selected month */
 		_current_month: 0,
+		/** Currently selected day */
 		_current_day: 0
 	},
 
-	_getMonthDescriptors: function(locale) {
+	/**
+	 * Get data, which is used to build the month selection view
+	 * @param {string} locale_name
+	 * @returns {Array}
+	 */
+	_getMonthDescriptors: function(locale_name) {
 
 		var i,
 			result = [],
-			month_names = Lava.locales[locale].short_month_names;
+			month_names = Lava.locales[locale_name].short_month_names;
 
 		for (i = 0; i < 12; i++) {
 
@@ -22155,6 +26686,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Split array of month descriptors into rows
+	 * @param {Array} descriptors
+	 * @returns {Array}
+	 */
 	_getMonthDescriptorRows: function(descriptors) {
 
 		var result = [];
@@ -22165,6 +26701,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get descriptors for rendering the day names, with respect to cultural offset
+	 * @param {string} locale
+	 * @returns {Array}
+	 */
 	_getWeekDays: function(locale) {
 
 		var culture_offset = Lava.locales[locale].first_day_offset,
@@ -22186,9 +26727,16 @@ Lava.define(
 
 	},
 
-	_renderMonth: function(year, month, locale) {
+	/**
+	 * Get data, which is needed to display a month in template
+	 * @param {number} year
+	 * @param {number} month
+	 * @param {string} locale_name
+	 * @returns {{year: number, index: number, weeks: Array}}
+	 */
+	_renderMonth: function(year, month, locale_name) {
 
-		var culture_offset = Lava.locales[locale].first_day_offset,
+		var culture_offset = Lava.locales[locale_name].first_day_offset,
 			first_day_in_sequence = new Date(Date.UTC(year, month)),
 			first_day_of_week = (first_day_in_sequence.getDay() - culture_offset + 7) % 7;
 
@@ -22208,10 +26756,8 @@ Lava.define(
 	},
 
 	/**
-	 * Render the 6 rows of 7 days. Receives the date of the first day in the first row.
-	 * (day of week always starts from zero)
-	 *
-	 * @param {Date} start_date
+	 * Render 6 rows of 7 days
+	 * @param {Date} start_date Date of the first day in the first row (day of week always starts from zero)
 	 */
 	_renderMonthWeeks: function(start_date) {
 
@@ -22257,6 +26803,15 @@ Lava.define(
 
 	},
 
+	/**
+	 * Create a structure, which is used to display a day number in calendar template
+	 * @param {number} year
+	 * @param {number} month
+	 * @param {number} day Day index in month, 0..30
+	 * @param {number} day_of_week Weekday index, 0..6
+	 * @param milliseconds Absolute time of the day
+	 * @returns {{year: number, month: number, day: number, day_of_week: number, milliseconds: number, is_today: boolean}}
+	 */
 	_renderDay: function(year, month, day, day_of_week, milliseconds) {
 		return {
 			year: year,
@@ -22275,6 +26830,7 @@ Lava.define(
 Lava.define(
 'Lava.widget.Calendar',
 /**
+ * Calendar widget
  * @lends Lava.widget.Calendar#
  * @extends Lava.widget.CalendarAbstract#
  */
@@ -22287,17 +26843,32 @@ Lava.define(
 	},
 
 	_properties: {
-		value: null, // the current Date object
+		/**
+		 * The current Date object
+		 * @type {Date}
+		 */
+		value: null,
+		/** Currently selected view: 'days' or 'months' */
 		_selected_view: 'days',
-		_weekdays: null, // culture-dependent list of week days
-		_months: null, // template data
-		_month_year_string: null, // Example: "May 2014" - displayed above the days_table
-		_today_string: null, // Example: "24 May 2014" - displayed on the "today" button
-		_selection_start: 0, // in milliseconds
+		/** Culture-dependent list of week day descriptors */
+		_weekdays: null,
+		/** Displayed months for template */
+		_months: null,
+		/** Example: "May 2014" - displayed above the days_table */
+		_month_year_string: null,
+		/** Example: "24 May 2014" - displayed on the "today" link */
+		_today_string: null,
+		/** Start of selection, in milliseconds */
+		_selection_start: 0,
+		/** End of selection, in milliseconds (by default, always equals to <i>_selection_start</i>) */
 		_selection_end: 0,
+		/** Current year, displayed in calendar */
 		_displayed_year: null,
+		/** Current month of the displayed year */
 		_displayed_month: null,
+		/** Collection of template data, used to render month names */
 		_month_descriptors: null,
+		/** Month descriptors, split into rows - for the "months" selection view */
 		_month_descriptor_rows: null
 	},
 
@@ -22317,9 +26888,25 @@ Lava.define(
 		_year_input: '_handleYearInput'
 	},
 
+	/**
+	 * Year input widget
+	 * @type {Lava.widget.input.Abstract}
+	 */
 	_year_input: null,
+	/**
+	 * Cache of data for months rendering
+	 * @type {Object}
+	 */
 	_months_cache: {},
 
+	/**
+	 * @param config
+	 * @param {string} config.options.invalid_input_class Name of CSS class to apply to invalid year input field
+	 * @param widget
+	 * @param parent_view
+	 * @param template
+	 * @param properties
+	 */
 	init: function(config, widget, parent_view, template, properties) {
 
 		var current_date = new Date(),
@@ -22353,6 +26940,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Refresh data for templates
+	 */
 	_refreshData: function() {
 
 		var locale_object = Lava.locales[Lava.schema.LOCALE],
@@ -22368,6 +26958,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get cached template data for month rendering
+	 * @param {number} year
+	 * @param {number} month
+	 * @returns {Object}
+	 */
 	_getMonthData: function(year, month) {
 
 		var month_key = year + '' + month;
@@ -22380,7 +26976,12 @@ Lava.define(
 
 	},
 
-	_onPreviousMonthClick: function(dom_event_name, dom_event, view, template_arguments) {
+	/**
+	 * Show previous month
+	 * @param dom_event_name
+	 * @param dom_event
+	 */
+	_onPreviousMonthClick: function(dom_event_name, dom_event) {
 
 		var month = this._properties._displayed_month;
 		if (month == 0) {
@@ -22395,7 +26996,12 @@ Lava.define(
 
 	},
 
-	_onNextMonthClick: function(dom_event_name, dom_event, view, template_arguments) {
+	/**
+	 * Show next month
+	 * @param dom_event_name
+	 * @param dom_event
+	 */
+	_onNextMonthClick: function(dom_event_name, dom_event) {
 
 		var month = this._properties._displayed_month;
 		if (month == 11) {
@@ -22410,7 +27016,12 @@ Lava.define(
 
 	},
 
-	_onTodayClick: function(dom_event_name, dom_event, view, template_arguments) {
+	/**
+	 * Select current day
+	 * @param dom_event_name
+	 * @param dom_event
+	 */
+	_onTodayClick: function(dom_event_name, dom_event) {
 
 		var time = Date.UTC(this._properties._current_year, this._properties._current_month, this._properties._current_day);
 		this._select(this._properties._current_year, this._properties._current_month, time);
@@ -22418,14 +27029,27 @@ Lava.define(
 
 	},
 
+	/**
+	 * Select the clicked day
+	 * @param dom_event_name
+	 * @param dom_event
+	 * @param view
+	 * @param template_arguments
+	 */
 	_onDayClick: function(dom_event_name, dom_event, view, template_arguments) {
 
-		var day = template_arguments[0];
+		var day = template_arguments[0]; // the rendered "day" structure
 		this._select(day.year, day.month, day.milliseconds);
 		dom_event.preventDefault(); // cancel selection
 
 	},
 
+	/**
+	 * Perform date selection
+	 * @param {number} year
+	 * @param {number} month
+	 * @param {number} milliseconds
+	 */
 	_select: function(year, month, milliseconds) {
 
 		this.set('_selection_start', milliseconds);
@@ -22440,7 +27064,12 @@ Lava.define(
 
 	},
 
-	_onSwitchToMonthViewClick: function(dom_event_name, dom_event, view, template_arguments) {
+	/**
+	 * Switch current view to "months" selection
+	 * @param dom_event_name
+	 * @param dom_event
+	 */
+	_onSwitchToMonthViewClick: function(dom_event_name, dom_event) {
 
 		this.set('_selected_view', 'months');
 		if (this._year_input) {
@@ -22457,7 +27086,12 @@ Lava.define(
 
 	},*/
 
-	_onPreviousYearClick: function(dom_event_name, dom_event, view, template_arguments) {
+	/**
+	 * Display previous year
+	 * @param dom_event_name
+	 * @param dom_event
+	 */
+	_onPreviousYearClick: function(dom_event_name, dom_event) {
 
 		this.set('_displayed_year', this.get('_displayed_year') - 1);
 		this._clearInvalidInputState();
@@ -22465,7 +27099,12 @@ Lava.define(
 
 	},
 
-	_onNextYearClick: function(dom_event_name, dom_event, view, template_arguments) {
+	/**
+	 * Display next year
+	 * @param dom_event_name
+	 * @param dom_event
+	 */
+	_onNextYearClick: function(dom_event_name, dom_event) {
 
 		this.set('_displayed_year', this.get('_displayed_year') + 1);
 		this._clearInvalidInputState();
@@ -22473,6 +27112,13 @@ Lava.define(
 
 	},
 
+	/**
+	 * Display calendar for chosen month
+	 * @param dom_event_name
+	 * @param dom_event
+	 * @param view
+	 * @param template_arguments
+	 */
 	_onMonthClick: function(dom_event_name, dom_event, view, template_arguments) {
 
 		var month_descriptor = template_arguments[0];
@@ -22482,13 +27128,20 @@ Lava.define(
 
 	},
 
-	_handleYearInput: function(view, template_arguments) {
+	/**
+	 * Register input for the year on months view
+	 * @param {Lava.widget.input.Abstract} view
+	 */
+	_handleYearInput: function(view) {
 
 		this._year_input = view;
 		view.onPropertyChanged('value', this._onYearInputValueChanged, this);
 
 	},
 
+	/**
+	 * Add predefined CSS class to the year input to mark it as invalid
+	 */
 	_markInputAsInvalid: function() {
 
 		// do not add the class to the container itself, just to the element
@@ -22500,6 +27153,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Remove "invalid_input_class" from input field
+	 */
 	_clearInvalidInputState: function() {
 
 		var element = this._year_input.getMainContainer().getDOMElement();
@@ -22509,6 +27165,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Refresh <i>_displayed_year</i> property from year input
+	 * @param {Lava.widget.input.Abstract} widget
+	 */
 	_onYearInputValueChanged: function(widget) {
 
 		var value = widget.get('value');
@@ -22523,7 +27183,11 @@ Lava.define(
 
 	},
 
-	_setValue: function(value, name) {
+	/**
+	 * Set selected date. Setter for <i>value</i> property
+	 * @param {Date} value
+	 */
+	_setValue: function(value) {
 
 		var year = value.getFullYear(),
 			month = value.getMonth(),
@@ -22547,6 +27211,7 @@ Lava.define(
 Lava.define(
 'Lava.widget.Tooltip',
 /**
+ * Tooltip instance
  * @lends Lava.widget.Tooltip#
  * @extends Lava.widget.Standard#
  */
@@ -22566,11 +27231,17 @@ Lava.define(
 	},
 
 	_properties: {
+		/** Vertical position of the tooltip */
 		y: 0,
+		/** Vertical position of the tooltip */
 		x: 0,
+		/** Vertical offset of the tooltip instance from cursor pointer */
 		y_offset: -25,
+		/** Horizontal tooltip offset */
 		x_offset: 5,
+		/** Tooltip's content */
 		html: '',
+		/** Is this tooltip instance visible */
 		is_visible: false
 	}
 

@@ -1,9 +1,19 @@
-
+/**
+ * Pretty-print any JavaScript object into string, which can be eval()'ed to reconstruct original object
+ */
 Lava.Serializer = {
 
-	/** @define {boolean} */
+	/**
+	 * If you know that you serialize objects with only valid property names (all characters are alphanumeric),
+	 * you may turn this off
+	 * @define {boolean}
+	 */
 	CHECK_PROPERTY_NAMES: true,
 
+	/**
+	 * Concrete serializers for each value type
+	 * @type {Object.<string, string>}
+	 */
 	_callback_map: {
 		string: '_serializeString',
 		array: '_serializeArray',
@@ -16,6 +26,10 @@ Lava.Serializer = {
 		'undefined': '_serializeUndefined'
 	},
 
+	/**
+	 * Used to pretty-print values in objects
+	 * @type {Object.<string, true>}
+	 */
 	_complex_types: {
 		array: true,
 		'object': true,
@@ -24,6 +38,7 @@ Lava.Serializer = {
 	},
 
 	/**
+	 * Serialize any value
 	 * @param {*} value
 	 * @returns {string}
 	 */
@@ -33,6 +48,12 @@ Lava.Serializer = {
 
 	},
 
+	/**
+	 * Perform value serialization
+	 * @param {*} value
+	 * @param {string} padding The initial padding for JavaScript code
+	 * @returns {string}
+	 */
 	_serializeValue: function(value, padding) {
 
 		var type = Firestorm.getType(value),
@@ -46,6 +67,12 @@ Lava.Serializer = {
 
 	},
 
+	/**
+	 * Perform serialization of an array
+	 * @param {Array} data
+	 * @param {string} padding
+	 * @returns {string}
+	 */
 	_serializeArray: function(data, padding) {
 
 		var tempResult = [],
@@ -78,12 +105,23 @@ Lava.Serializer = {
 
 	},
 
+	/**
+	 * Turn a string into it's JavaScript representation
+	 * @param {string} data
+	 * @returns {string}
+	 */
 	_serializeString: function(data) {
 
 		return Firestorm.String.quote(data);
 
 	},
 
+	/**
+	 * Serialize an object
+	 * @param {Object} data
+	 * @param {string} padding
+	 * @returns {string}
+	 */
 	_serializeObject: function(data, padding) {
 
 		var tempResult = [],
@@ -97,8 +135,8 @@ Lava.Serializer = {
 
 		// this may be faster than using Object.keys(data), but I haven't done speed comparison yet.
 		// Purpose of the following code:
-		// 1) if object has something in it than 'is_empty' will be set to false
-		// 2) if there is only one property in it, than 'only_key' will contain it's name
+		// 1) if object has something in it then 'is_empty' will be set to false
+		// 2) if there is only one property in it, then 'only_key' will contain it's name
 		for (name in data) {
 			if (only_key !== null) { // strict comparison - in case the key is valid, but evaluates to false
 				only_key = null;
@@ -145,11 +183,18 @@ Lava.Serializer = {
 
 	},
 
+	/**
+	 * Serialize one key-value pair in an object
+	 * @param {string} name
+	 * @param {*} value
+	 * @param {string} padding
+	 * @returns {string}
+	 */
 	_serializeObjectProperty: function(name, value, padding) {
 
 		var type = Firestorm.getType(value);
 
-		// if you serialize only Lava configs, than most likely you do not need this check,
+		// if you serialize only Lava configs, then most likely you do not need this check,
 		// cause the property names in configs are always valid.
 		if (this.CHECK_PROPERTY_NAMES && (!Lava.VALID_PROPERTY_NAME_REGEX.test(name) || Lava.JS_KEYWORDS.indexOf(name) != -1)) {
 
@@ -162,6 +207,7 @@ Lava.Serializer = {
 	},
 
 	/**
+	 * Serialize a function
 	 * @param {function} data
 	 * @returns {string}
 	 */
@@ -178,30 +224,53 @@ Lava.Serializer = {
 
 	},
 
+	/**
+	 * Turn a boolean into string
+	 * @param {boolean} data
+	 * @returns {string}
+	 */
 	_serializeBoolean: function(data) {
 
 		return data.toString();
 
 	},
 
+	/**
+	 * Turn a number into string
+	 * @param {number} data
+	 * @returns {string}
+	 */
 	_serializeNumber: function(data) {
 
 		return data.toString();
 
 	},
 
+	/**
+	 * Turn a regexp into string
+	 * @param {RegExp} data
+	 * @returns {string}
+	 */
 	_serializeRegexp: function(data) {
 
 		return data.toString();
 
 	},
 
+	/**
+	 * Return <kw>"null"</kw>
+	 * @returns {string}
+	 */
 	_serializeNull: function() {
 
 		return 'null';
 
 	},
 
+	/**
+	 * Return <kw>"undefined"</kw>
+	 * @returns {string}
+	 */
 	_serializeUndefined: function() {
 
 		return 'undefined';

@@ -2,6 +2,7 @@
 Lava.define(
 'Lava.widget.Calendar',
 /**
+ * Calendar widget
  * @lends Lava.widget.Calendar#
  * @extends Lava.widget.CalendarAbstract#
  */
@@ -14,17 +15,32 @@ Lava.define(
 	},
 
 	_properties: {
-		value: null, // the current Date object
+		/**
+		 * The current Date object
+		 * @type {Date}
+		 */
+		value: null,
+		/** Currently selected view: 'days' or 'months' */
 		_selected_view: 'days',
-		_weekdays: null, // culture-dependent list of week days
-		_months: null, // template data
-		_month_year_string: null, // Example: "May 2014" - displayed above the days_table
-		_today_string: null, // Example: "24 May 2014" - displayed on the "today" button
-		_selection_start: 0, // in milliseconds
+		/** Culture-dependent list of week day descriptors */
+		_weekdays: null,
+		/** Displayed months for template */
+		_months: null,
+		/** Example: "May 2014" - displayed above the days_table */
+		_month_year_string: null,
+		/** Example: "24 May 2014" - displayed on the "today" link */
+		_today_string: null,
+		/** Start of selection, in milliseconds */
+		_selection_start: 0,
+		/** End of selection, in milliseconds (by default, always equals to <i>_selection_start</i>) */
 		_selection_end: 0,
+		/** Current year, displayed in calendar */
 		_displayed_year: null,
+		/** Current month of the displayed year */
 		_displayed_month: null,
+		/** Collection of template data, used to render month names */
 		_month_descriptors: null,
+		/** Month descriptors, split into rows - for the "months" selection view */
 		_month_descriptor_rows: null
 	},
 
@@ -44,9 +60,25 @@ Lava.define(
 		_year_input: '_handleYearInput'
 	},
 
+	/**
+	 * Year input widget
+	 * @type {Lava.widget.input.Abstract}
+	 */
 	_year_input: null,
+	/**
+	 * Cache of data for months rendering
+	 * @type {Object}
+	 */
 	_months_cache: {},
 
+	/**
+	 * @param config
+	 * @param {string} config.options.invalid_input_class Name of CSS class to apply to invalid year input field
+	 * @param widget
+	 * @param parent_view
+	 * @param template
+	 * @param properties
+	 */
 	init: function(config, widget, parent_view, template, properties) {
 
 		var current_date = new Date(),
@@ -80,6 +112,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Refresh data for templates
+	 */
 	_refreshData: function() {
 
 		var locale_object = Lava.locales[Lava.schema.LOCALE],
@@ -95,6 +130,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get cached template data for month rendering
+	 * @param {number} year
+	 * @param {number} month
+	 * @returns {Object}
+	 */
 	_getMonthData: function(year, month) {
 
 		var month_key = year + '' + month;
@@ -107,7 +148,12 @@ Lava.define(
 
 	},
 
-	_onPreviousMonthClick: function(dom_event_name, dom_event, view, template_arguments) {
+	/**
+	 * Show previous month
+	 * @param dom_event_name
+	 * @param dom_event
+	 */
+	_onPreviousMonthClick: function(dom_event_name, dom_event) {
 
 		var month = this._properties._displayed_month;
 		if (month == 0) {
@@ -122,7 +168,12 @@ Lava.define(
 
 	},
 
-	_onNextMonthClick: function(dom_event_name, dom_event, view, template_arguments) {
+	/**
+	 * Show next month
+	 * @param dom_event_name
+	 * @param dom_event
+	 */
+	_onNextMonthClick: function(dom_event_name, dom_event) {
 
 		var month = this._properties._displayed_month;
 		if (month == 11) {
@@ -137,7 +188,12 @@ Lava.define(
 
 	},
 
-	_onTodayClick: function(dom_event_name, dom_event, view, template_arguments) {
+	/**
+	 * Select current day
+	 * @param dom_event_name
+	 * @param dom_event
+	 */
+	_onTodayClick: function(dom_event_name, dom_event) {
 
 		var time = Date.UTC(this._properties._current_year, this._properties._current_month, this._properties._current_day);
 		this._select(this._properties._current_year, this._properties._current_month, time);
@@ -145,14 +201,27 @@ Lava.define(
 
 	},
 
+	/**
+	 * Select the clicked day
+	 * @param dom_event_name
+	 * @param dom_event
+	 * @param view
+	 * @param template_arguments
+	 */
 	_onDayClick: function(dom_event_name, dom_event, view, template_arguments) {
 
-		var day = template_arguments[0];
+		var day = template_arguments[0]; // the rendered "day" structure
 		this._select(day.year, day.month, day.milliseconds);
 		dom_event.preventDefault(); // cancel selection
 
 	},
 
+	/**
+	 * Perform date selection
+	 * @param {number} year
+	 * @param {number} month
+	 * @param {number} milliseconds
+	 */
 	_select: function(year, month, milliseconds) {
 
 		this.set('_selection_start', milliseconds);
@@ -167,7 +236,12 @@ Lava.define(
 
 	},
 
-	_onSwitchToMonthViewClick: function(dom_event_name, dom_event, view, template_arguments) {
+	/**
+	 * Switch current view to "months" selection
+	 * @param dom_event_name
+	 * @param dom_event
+	 */
+	_onSwitchToMonthViewClick: function(dom_event_name, dom_event) {
 
 		this.set('_selected_view', 'months');
 		if (this._year_input) {
@@ -184,7 +258,12 @@ Lava.define(
 
 	},*/
 
-	_onPreviousYearClick: function(dom_event_name, dom_event, view, template_arguments) {
+	/**
+	 * Display previous year
+	 * @param dom_event_name
+	 * @param dom_event
+	 */
+	_onPreviousYearClick: function(dom_event_name, dom_event) {
 
 		this.set('_displayed_year', this.get('_displayed_year') - 1);
 		this._clearInvalidInputState();
@@ -192,7 +271,12 @@ Lava.define(
 
 	},
 
-	_onNextYearClick: function(dom_event_name, dom_event, view, template_arguments) {
+	/**
+	 * Display next year
+	 * @param dom_event_name
+	 * @param dom_event
+	 */
+	_onNextYearClick: function(dom_event_name, dom_event) {
 
 		this.set('_displayed_year', this.get('_displayed_year') + 1);
 		this._clearInvalidInputState();
@@ -200,6 +284,13 @@ Lava.define(
 
 	},
 
+	/**
+	 * Display calendar for chosen month
+	 * @param dom_event_name
+	 * @param dom_event
+	 * @param view
+	 * @param template_arguments
+	 */
 	_onMonthClick: function(dom_event_name, dom_event, view, template_arguments) {
 
 		var month_descriptor = template_arguments[0];
@@ -209,13 +300,20 @@ Lava.define(
 
 	},
 
-	_handleYearInput: function(view, template_arguments) {
+	/**
+	 * Register input for the year on months view
+	 * @param {Lava.widget.input.Abstract} view
+	 */
+	_handleYearInput: function(view) {
 
 		this._year_input = view;
 		view.onPropertyChanged('value', this._onYearInputValueChanged, this);
 
 	},
 
+	/**
+	 * Add predefined CSS class to the year input to mark it as invalid
+	 */
 	_markInputAsInvalid: function() {
 
 		// do not add the class to the container itself, just to the element
@@ -227,6 +325,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Remove "invalid_input_class" from input field
+	 */
 	_clearInvalidInputState: function() {
 
 		var element = this._year_input.getMainContainer().getDOMElement();
@@ -236,6 +337,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Refresh <i>_displayed_year</i> property from year input
+	 * @param {Lava.widget.input.Abstract} widget
+	 */
 	_onYearInputValueChanged: function(widget) {
 
 		var value = widget.get('value');
@@ -250,7 +355,11 @@ Lava.define(
 
 	},
 
-	_setValue: function(value, name) {
+	/**
+	 * Set selected date. Setter for <i>value</i> property
+	 * @param {Date} value
+	 */
+	_setValue: function(value) {
 
 		var year = value.getFullYear(),
 			month = value.getMonth(),

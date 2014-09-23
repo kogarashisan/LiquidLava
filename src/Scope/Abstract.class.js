@@ -1,6 +1,7 @@
 Lava.define(
 'Lava.scope.Abstract',
 /**
+ * Abstract class for data binding
  * @lends Lava.scope.Abstract#
  * @extends Lava.mixin.Refreshable
  */
@@ -8,20 +9,28 @@ Lava.define(
 
 	Extends: 'Lava.mixin.Refreshable',
 
+	/**
+	 * Instance belongs to scope/Abstract
+	 * @type {boolean}
+	 * @const
+	 */
 	isValueContainer: true,
 
 	/**
+	 * Scopes, bound to properties of the value of this container
 	 * @type {Object.<string, Lava.scope.DataBinding>}
 	 */
 	_data_bindings_by_property: {},
 
 	/**
+	 * Segments, bound to properties of the value of this container.
 	 * [name_source_guid} => Segment
 	 * @type {Object.<_tGUID, Lava.scope.Segment>}
 	 */
 	_data_segments: {},
 
 	/**
+	 * Get a scope, which is bound to property of the value of this container
 	 * @param {string} property_name
 	 * @returns {Lava.scope.DataBinding}
 	 */
@@ -38,6 +47,7 @@ Lava.define(
 	},
 
 	/**
+	 * Get a {@link Lava.scope.Segment}, which is bound to property of the value of this container
 	 * @param {(Lava.scope.PropertyBinding|Lava.scope.DataBinding)} name_source_scope
 	 * @returns {Lava.scope.Segment}
 	 */
@@ -55,6 +65,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Free resources and make this instance unusable
+	 */
 	destroy: function() {
 
 		var name;

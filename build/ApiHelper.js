@@ -10,19 +10,18 @@ var ApiHelper = {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// static methods for JSDoc themes
 
-	export_type_data: function(doclet_param, export_param, is_name_required) {
+	export_type_data: function(doclet, export_descriptor, is_name_required) {
 
-		if (!doclet_param.name && is_name_required) throw new Error();
+		if (!doclet.name && is_name_required) throw new Error();
 
-		if (doclet_param.name) export_param.name = doclet_param.name;
-		if (doclet_param.description) export_param.description = doclet_param.description;
-		if (doclet_param.defaultValue) export_param.default_value = doclet_param.defaultValue;
+		this.importVars(export_descriptor, doclet, ['name', 'description']);
+		if (doclet.defaultValue) export_descriptor.default_value = doclet.defaultValue;
 
 		['optional', 'nullable', 'variable', 'readonly'].forEach(function(name) {
-			if (doclet_param[name]) export_param['is_' + name] = true;
+			if (doclet[name]) export_descriptor['is_' + name] = true;
 		});
-		if (doclet_param['nullable'] === false) export_param['is_non_nullable'] = true;
-		if (doclet_param.type && doclet_param.type.names && doclet_param.type.names.length) export_param.type_names = doclet_param.type.names;
+		if (doclet['nullable'] === false) export_descriptor['is_non_nullable'] = true;
+		if (doclet.type && doclet.type.names && doclet.type.names.length) export_descriptor.type_names = doclet.type.names;
 
 	},
 

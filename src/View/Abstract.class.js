@@ -1,83 +1,133 @@
 
+/**
+ * View has been destroyed and became unusable. You must not call any methods of a destroyed instance
+ * @event Lava.view.Abstract#destroy
+ */
+
 Lava.define(
 'Lava.view.Abstract',
 /**
+ * Base class for all views and widgets
+ *
  * @lends Lava.view.Abstract#
- * @implements _iViewHierarchyMember
  * @extends Lava.mixin.Properties#
+ * @implements _iViewHierarchyMember
  */
 {
 
 	Extends: 'Lava.mixin.Properties',
-	/** @const */
+	/**
+	 * Indicate that this class is instance of Lava.view.Abstract
+	 * @type {boolean}
+	 * @const
+	 */
 	isView: true,
-	/** @readonly */
+	/**
+	 * Global unique identifier
+	 * @type {_tGUID}
+	 * @readonly
+	 */
 	guid: null,
 	/**
-	 * Do not set ID directly, use appropriate setter.
+	 * Global unique user-assigned view's ID. Views can be retrieved by their ID from {@link Lava.system.ViewManager};
+	 * and referenced in expressions. Note: this is not the same as "id" attribute of DOM element of view's container.
+	 *
+	 * Do not set this property directly! Use appropriate setter.
+	 * @type {?string}
 	 * @readonly
 	 */
 	id: null,
 	/**
-	 * Label is part of template config, so must be considered readonly.
+	 * Labels are used to find views when routing events and roles, or manually.
+	 * Label is part of template config, so must be considered readonly
+	 * @type {?string}
 	 * @readonly
 	 */
 	label: null,
 	/**
-	 * How many parents does it have
+	 * How many parents does it have (until the root widget, which does not have a parent)
+	 * @type {number}
 	 * @readonly
 	 */
 	depth: 0,
 
 	/**
+	 * View's index in {@link Lava.system.Template#_contents|_contents} array of parent template
+	 * @type {number}
 	 * @readonly
 	 */
 	template_index: 0,
 
 	/**
+	 * Nearest widget in hierarchy of view's parents
 	 * @type {Lava.widget.Standard}
 	 */
 	_widget: null,
 
 	/**
+	 * The owner (parent) view of this instance
 	 * @type {Lava.view.Abstract}
 	 */
 	_parent_view: null,
 
 	/**
-	 * Nearest parent view with it's own container.
+	 * Nearest parent view with it's own container
 	 * @type {Lava.view.Abstract}
 	 */
 	_parent_with_container: null,
 
 	/**
+	 * View's container
 	 * @type {_iContainer}
 	 */
 	_container: null,
 
 	/**
+	 * Settings for this instance
 	 * @type {_cView}
 	 */
 	_config: null,
 
+	/**
+	 * The {@link Lava.system.Template} that owns the view
+	 */
 	_template: null,
 
+	/**
+	 * Is this view currently in DOM
+	 * @type {boolean}
+	 */
 	_is_inDOM: false,
+	/**
+	 * Is this view currently sleeping? (arguments are turned off)
+	 * @type {boolean}
+	 */
 	_is_sleeping: false,
+	/**
+	 * Does this view need refresh
+	 * @type {boolean}
+	 */
 	_is_dirty: false,
+	/**
+	 * Will it be refreshed by ViewManager
+	 * @type {boolean}
+	 */
 	_is_queued_for_refresh: false,
 
 	/**
+	 * Bindings to properties of this view
 	 * @type {Object.<string, Lava.scope.PropertyBinding>}
 	 */
 	_property_bindings_by_property: {},
 
 	/**
+	 * Segments, built over bindings to properties of this view (see {@link Lava.scope.Segment})
 	 * @type {Object.<_tGUID, Lava.scope.Segment>}
 	 */
 	_data_segments: {},
 
 	/**
+	 * Create an instance of the view, including container and assigns; dispatch roles
 	 * @param {_cView} config
 	 * @param {Lava.widget.Standard} widget
 	 * @param {Lava.view.Abstract} parent_view
@@ -141,23 +191,52 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_container`
+	 * @returns {_iContainer}
+	 */
 	getContainer: function() { return this._container; },
 
+	/**
+	 * Get `_parent_with_container`
+	 * @returns {Lava.view.Abstract}
+	 */
 	getParentWithContainer: function() { return this._parent_with_container; },
 
+	/**
+	 * Get `_parent_view`
+	 * @returns {Lava.view.Abstract}
+	 */
 	getParentView: function() { return this._parent_view; },
 
+	/**
+	 * Get `_widget`
+	 * @returns {Lava.widget.Standard}
+	 */
 	getWidget: function() { return this._widget; },
 
+	/**
+	 * Get `_is_inDOM`
+	 * @returns {boolean}
+	 */
 	isInDOM: function() { return this._is_inDOM; },
 
+	/**
+	 * Get `_is_sleeping`
+	 * @returns {boolean}
+	 */
 	isSleeping: function() { return this._is_sleeping; },
 
 	/**
+	 * Get `_template`
 	 * @returns {Lava.system.Template}
 	 */
 	getTemplate: function() { return this._template; },
 
+	/**
+	 * Setter for the {@link Lava.view.Abstract#id} property
+	 * @param {string} new_id
+	 */
 	setId: function(new_id) {
 
 		Lava.view_manager.unregisterView(this);
@@ -166,6 +245,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Set properties, that were passed to constructor
+	 * @param {Object} properties
+	 */
 	_initMembers: function(properties) {
 
 		for (var name in properties) {
@@ -177,14 +260,15 @@ Lava.define(
 	},
 
 	/**
-	 * Called before registering roles.
+	 * Called before registering roles
 	 */
 	_postInit: function() {
 
 	},
 
 	/**
-	 * @param {number} depth
+	 * Get N'th parent of the view
+	 * @param {number} depth The number of view's parent you want to get
 	 * @returns {Lava.view.Abstract}
 	 */
 	getViewByDepth: function(depth) {
@@ -205,6 +289,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * This view needs to be refreshed. If it has a container - then it can refresh itself independently,
+	 * but views without container must ask their parents to refresh them
+	 */
 	trySetDirty: function() {
 
 		if (this._is_inDOM) {
@@ -231,14 +319,15 @@ Lava.define(
 	},
 
 	/**
+	 * Execute some state changing function on each child of the view
+	 * Must be overridden in child classes (in those, that have children)
 	 * @param {string} function_name
 	 */
-	_broadcastToChildren: function(function_name) {
+	_broadcastToChildren: function(function_name) {},
 
-		// must be overridden in child classes (in those, that have children)
-
-	},
-
+	/**
+	 * Inform that this view is already in DOM. Now it can access it's container's elements
+	 */
 	broadcastInDOM: function() {
 
 		this._is_inDOM = true;
@@ -249,6 +338,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Inform that this view is now going to be removed from DOM. It must suspend it's bindings,
+	 * detach element listeners and stop animations, etc.
+	 */
 	broadcastRemove: function() {
 
 		if (this._is_inDOM) {
@@ -265,6 +358,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Put the view and it's children into 'sleeping' mode: view is still in DOM, but does not access
+	 * or refresh it's DOM content, and does not react to argument or binding changes
+	 */
 	broadcastSleep: function() {
 
 		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.t();
@@ -278,6 +375,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Perform the 'sleep' operation
+	 */
 	_sleep: function() {
 
 		this._is_sleeping = true;
@@ -285,6 +385,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * View starts listening to it's bindings and refreshes it's DOM content, if needed
+	 */
 	broadcastWakeup: function() {
 
 		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.t();
@@ -298,6 +401,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Perform 'wakeup'
+	 */
 	_wakeup: function() {
 
 		this._is_sleeping = false;
@@ -312,12 +418,19 @@ Lava.define(
 
 	},
 
+	/**
+	 * Render the inner hierarchy
+	 */
 	_renderContents: function() {
 
 		Lava.t("_renderContents must be overridden in inherited classes");
 
 	},
 
+	/**
+	 * Render the view, including container and all it's inner content
+	 * @returns {string} The HTML representation of the view
+	 */
 	render: function() {
 
 		if (this._is_sleeping) this._wakeup();
@@ -340,7 +453,7 @@ Lava.define(
 	},
 
 	/**
-	 * 'soft' refresh - only if needed
+	 * Refresh the view, if it's dirty (render the view's content and replace old content with the fresh version)
 	 */
 	refresh: function() {
 
@@ -361,6 +474,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Perform refresh
+	 */
 	_refresh: function() {
 
 		this._container.setHTML(this._renderContents());
@@ -369,8 +485,13 @@ Lava.define(
 	},
 
 	/**
-	 * @param {string} label
-	 * @returns {Lava.view.Abstract}
+	 * Find a view with given label in hierarchy of view's parents. Recognizes some predefined labels, like:
+	 * - "root" - the root widget (topmost widget with no parents)
+	 * - "parent" - this view's parent view
+	 * - "widget" - parent widget of this view
+	 * - "this" - this view
+	 * @param {string} label Label to search for
+	 * @returns {Lava.view.Abstract} View with given label
 	 */
 	locateViewByLabel: function(label) {
 
@@ -411,9 +532,9 @@ Lava.define(
 	},
 
 	/**
-	 * Actually, returns a widget.
+	 * Find a <b>widget</b> with given name in hierarchy of this view's parents
 	 *
-	 * @param {string} name
+	 * @param {string} name Name of the widget
 	 * @returns {Lava.widget.Standard}
 	 */
 	locateViewByName: function(name) {
@@ -433,7 +554,8 @@ Lava.define(
 	},
 
 	/**
-	 * @param id
+	 * Get a view with given user-defined id
+	 * @param {string} id
 	 * @returns {Lava.view.Abstract}
 	 */
 	locateViewById: function(id) {
@@ -445,7 +567,8 @@ Lava.define(
 	},
 
 	/**
-	 * @param guid
+	 * Get a view by GUID
+	 * @param {_tGUID} guid
 	 * @returns {Lava.view.Abstract}
 	 */
 	locateViewByGuid: function(guid) {
@@ -457,6 +580,7 @@ Lava.define(
 	},
 
 	/**
+	 * Find a view in hierarchy of parents by the given route
 	 * @param {_cScopeLocator|_cKnownViewLocator} path_config
 	 * @returns {Lava.view.Abstract}
 	 */
@@ -476,6 +600,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get a parent with property `name` defined
+	 * @param {string} name
+	 * @returns {Lava.view.Abstract}
+	 */
 	locateViewWithProperty: function(name) {
 
 		var view = this;
@@ -491,6 +620,7 @@ Lava.define(
 	},
 
 	/**
+	 * Get a scope or property binding by the given route
 	 * @param {_cScopeLocator} path_config
 	 * @returns {_iValueContainer}
 	 */
@@ -541,6 +671,7 @@ Lava.define(
 	},
 
 	/**
+	 * Get value of the route without creating scopes
 	 * @param {_cScopeLocator} path_config
 	 * @returns {*}
 	 */
@@ -608,6 +739,7 @@ Lava.define(
 	},
 
 	/**
+	 * Get a binding to this view's property
 	 * @param {string} property_name
 	 * @returns {Lava.scope.PropertyBinding}
 	 */
@@ -624,6 +756,7 @@ Lava.define(
 	},
 
 	/**
+	 * Get a {@link Lava.scope.Segment}, bound to view's property
 	 * @param {(Lava.scope.PropertyBinding|Lava.scope.DataBinding)} name_source_scope
 	 * @returns {Lava.scope.Segment}
 	 */
@@ -641,6 +774,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Free resources and make this instance unusable
+	 */
 	destroy: function() {
 
 		var name;

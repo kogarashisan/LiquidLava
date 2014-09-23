@@ -1,14 +1,10 @@
 
-/**
- * Template parser
- * @name Lava.TemplateParser
- */
-
 Lava.TemplateParser._parse = Lava.TemplateParser.parse;
 
 /**
+ * Parse and compile a template
  * @param {string} input
- * @param {_cView=} view_config
+ * @param {_cView=} view_config View config for applying directives
  * @returns {_tTemplate}
  */
 Lava.TemplateParser.parse = function(input, view_config) {
@@ -18,6 +14,7 @@ Lava.TemplateParser.parse = function(input, view_config) {
 };
 
 /**
+ * Parse template, but do not compile
  * @param {string} input
  * @returns {_tRawTemplate}
  */
@@ -59,7 +56,7 @@ Lava.TemplateParser.yy = {
 	/**
 	 * Filters out attributes starting with 'x:' prefix, and puts them into separate property named 'x'.
 	 * Control attributes are split by colon, resulting array is then used as path inside the 'x' object
-	 * (similar to class paths).
+	 * (similar to class paths)
 	 *
 	 * @param {{
 		 *      attributes: Object.<string, string>,

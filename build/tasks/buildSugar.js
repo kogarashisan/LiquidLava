@@ -271,6 +271,8 @@ module.exports = function(grunt) {
 
 			LavaBuild.recursiveRemoveDirectory('www/api/');
 			fs.mkdirSync('www/api/');
+			LavaBuild.recursiveRemoveDirectory('www/reference/');
+			fs.mkdirSync('www/reference/');
 
 			var temp = JSON.stringify({
 				description: result

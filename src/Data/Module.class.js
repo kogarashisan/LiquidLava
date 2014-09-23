@@ -1,7 +1,23 @@
 
+/**
+ * Records have been loaded from server
+ * @event Lava.data.Module#records_loaded
+ * @type {Object}
+ * @property {Array.<Lava.data.Record>} records The loaded record instances
+ */
+
+/**
+ * New records have been created
+ * @event Lava.data.Module#records_created
+ * @type {Object}
+ * @property {Array.<Lava.data.Record>} records The new record instances
+ */
+
 Lava.define(
 'Lava.data.Module',
 /**
+ * Module represents a server-side database table
+ *
  * @lends Lava.data.Module#
  * @extends Lava.data.ModuleAbstract
  */
@@ -9,19 +25,40 @@ Lava.define(
 
 	Extends: 'Lava.data.ModuleAbstract',
 
+	/**
+	 * Application instance reference
+	 * @type {Lava.system.App}
+	 */
 	_app: null,
+	/**
+	 * Module name
+	 * @type {string}
+	 */
 	_name: null,
 
-	_record_class: Lava.schema.data.DEFAULT_RECORD_CLASS,
+	/**
+	 * Cached record class constructor
+	 * @type {string}
+	 */
+	_record_constructor: null,
 
+	/**
+	 * All records by their unique ID key (if module has an ID field)
+	 * @type {Object.<string, Lava.data.Record>}
+	 */
 	_records_by_id: {},
 
+	/**
+	 * Does this module have an ID field
+	 * @type {boolean}
+	 */
 	_has_id: false,
 
 	/**
-	 * @param lava_app
+	 * Create a Module instance, init fields, generate the method that returns initial record storage
+	 * @param {Lava.system.App} lava_app Application instance
 	 * @param {_cModule} config
-	 * @param {string} name
+	 * @param {string} name Module's name
 	 */
 	init: function(lava_app, config, name) {
 
@@ -29,13 +66,12 @@ Lava.define(
 		this._config = config;
 		this._name = name;
 
-		if ('record_class' in config) {
-
-			this._record_class = config.record_class;
-
-		}
-
 		var default_storage = this._initFields(config);
+
+		this._record_constructor = Lava.ClassManager.getConstructor(
+			config.record_class || Lava.schema.data.DEFAULT_RECORD_CLASS,
+			'Lava.data'
+		);
 
 		this._createEmptyRecordStorage = new Function(
 			"return " + Lava.Serializer.serialize(default_storage)
@@ -50,6 +86,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Record's ID has been created (ID fields never change). Need to update local `_records_by_id` hash
+	 * @param {Lava.data.field.Abstract} id_field
+	 * @param {Lava.data.field.Abstract#event:changed} event_args
+	 */
 	_onRecordIdChanged: function(id_field, event_args) {
 
 		var id = event_args.record.get('id');
@@ -58,42 +99,72 @@ Lava.define(
 
 	},
 
+	/**
+	 * Does this module have an ID field with given name
+	 * @param {string} name
+	 * @returns {boolean}
+	 */
 	hasField: function(name) {
 
 		return name in this._fields;
 
 	},
 
-
+	/**
+	 * Get field instance
+	 * @param {string} name
+	 * @returns {Lava.data.field.Abstract}
+	 */
 	getField: function(name) {
 
 		return this._fields[name];
 
 	},
 
+	/**
+	 * Get a record by it's ID field
+	 * @param {string} id
+	 * @returns {Lava.data.Record}
+	 */
 	getRecordById: function(id) {
 
 		return this._records_by_id[id];
 
 	},
 
+	/**
+	 * Get a record by it's global unique identifier
+	 * @param {_tGUID} guid
+	 * @returns {Lava.data.Record}
+	 */
 	getRecordByGuid: function(guid) {
 
 		return this._records_by_guid[guid];
 
 	},
 
+	/**
+	 * Get `_app`
+	 * @returns {Lava.system.App}
+	 */
 	getApp: function() {
 
 		return this._app;
 
 	},
 
+	/**
+	 * Load record only if it has not been already loaded. `raw_properties` must have an ID
+	 * @param {Object} raw_properties Serialized record fields from server
+	 * @returns {Lava.data.Record} Newly loaded record instance, or the old one
+	 */
 	safeLoadRecord: function(raw_properties) {
 
 		var result;
 
-		if (raw_properties.id && (raw_properties.id in this._records_by_id)) {
+		if (Lava.schema.DEBUG && !raw_properties.id) Lava.t('safeLoadRecord: import data must have an id');
+
+		if (raw_properties.id in this._records_by_id) {
 
 			result = this._records_by_id[raw_properties.id];
 
@@ -107,6 +178,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Initialize a module record from server-side data
+	 * @param {Object} raw_properties Serialized record fields from server
+	 * @returns {Lava.data.Record} Loaded record instance
+	 */
 	loadRecord: function(raw_properties) {
 
 		var record = this._createRecordInstance(raw_properties);
@@ -115,6 +191,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Create a new record instance
+	 * @returns {Lava.data.Record}
+	 */
 	createRecord: function() {
 
 		var record = this._createRecordInstance();
@@ -123,11 +203,15 @@ Lava.define(
 
 	},
 
+	/**
+	 * Perform creation of a new record instance (either with server-side data, or without it)
+	 * @param {Object} raw_properties
+	 * @returns {Lava.data.Record}
+	 */
 	_createRecordInstance: function(raw_properties) {
 
 		var storage = this._createEmptyRecordStorage(),
-			constructor = Lava.ClassManager.getConstructor(this._record_class, 'Lava.data'),
-			record = new constructor(this, this._fields, storage, raw_properties);
+			record = new this._record_constructor(this, this._fields, storage, raw_properties);
 
 		if (storage.id) {
 
@@ -144,8 +228,9 @@ Lava.define(
 	},
 
 	/**
-	 * @param {Array.<Object>} raw_records_array
-	 * @returns {Array}
+	 * Initialize module records from server-side data
+	 * @param {Array.<Object>} raw_records_array Server-side data for the records
+	 * @returns {Array.<Lava.data.Record>} Loaded record instances
 	 */
 	loadRecords: function(raw_records_array) {
 
@@ -165,12 +250,20 @@ Lava.define(
 
 	},
 
+	/**
+	 * Return a copy of local `_records` array
+	 * @returns {Array.<Lava.data.Record>}
+	 */
 	getAllRecords: function() {
 
 		return this._records.slice();
 
 	},
 
+	/**
+	 * Get number of records in the module
+	 * @returns {number}
+	 */
 	getCount: function() {
 
 		return this._records.length;

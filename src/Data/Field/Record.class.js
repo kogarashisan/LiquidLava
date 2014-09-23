@@ -1,8 +1,26 @@
+/**
+ * Fired, when the field's value changes: local record (`child`) now references the `collection_owner`
+ * @event Lava.data.field.Record#added_child
+ * @type {Object}
+ * @property {Lava.data.RecordAbstract} collection_owner New referenced record
+ * @property {Lava.data.RecordAbstract} child Referencing record from local module
+ */
+
+/**
+ * Fired, when the field's value changes: local record (`child`) no longer references the `collection_owner`
+ * @event Lava.data.field.Record#removed_child
+ * @type {Object}
+ * @property {Lava.data.RecordAbstract} collection_owner Old referenced record
+ * @property {Lava.data.RecordAbstract} child Referencing record from local module
+ */
 
 Lava.define(
 'Lava.data.field.Record',
 /**
- * Maintains collections of records, grouped by this field. Also used by mirror Collection field.
+ * References a record (usually from another module).
+ * Also maintains collections of records, grouped by this field (used by mirror Collection field)
+ * and synchronizes it's state with accompanying ForeignKey field
+ *
  * @lends Lava.data.field.Record#
  * @extends Lava.data.field.Abstract
  */
@@ -10,42 +28,69 @@ Lava.define(
 
 	Extends: 'Lava.data.field.Abstract',
 
+	/**
+	 * This class is instance of a Record field
+	 * @type {boolean}
+	 * @const
+	 */
 	isRecordField: true,
 
+	/**
+	 * Owner module for the records of this field
+	 * @type {Lava.data.Module}
+	 */
 	_referenced_module: null,
 
 	/**
 	 * Records, grouped by this field. Serves as a helper for mirror Collection field.
-	 * Key is GUID of the foreign record, value is collection of records from local module.
-	 * @type {Object.<string, Array>}
+	 * Key is GUID of the foreign record, value is collection of records from local module
+	 * @type {Object.<string, Array.<Lava.data.Record>>}
 	 */
 	_collections_by_foreign_guid: {},
 
 	/**
-	 * Example: 'parent_id'
+	 * Name of accompanying {@link Lava.data.field.ForeignKey} field from local module. Example: 'parent_id'
 	 * @type {string}
 	 */
 	_foreign_key_field_name: null,
 	/**
-	 * Local field with ID of the record in external module.
+	 * Local field with ID of the record in external module
+	 * @type {Lava.data.field.ForeignKey}
 	 */
 	_foreign_key_field: null,
+	/**
+	 * Listener for {@link Lava.data.field.Abstract#event:changed} in `_foreign_key_field`
+	 * @type {_tListener}
+	 */
 	_foreign_key_changed_listener: null,
 
 	/**
+	 * The {@link Lava.data.field.Id} field in external module
 	 * @type {Lava.data.field.Abstract}
 	 */
 	_external_id_field: null,
+	/**
+	 * The listener for external ID creation event ({@link Lava.data.field.Abstract#event:changed} in `_external_id_field` field)
+	 * @type {_tListener}
+	 */
 	_external_id_changed_listener: null,
+	/**
+	 * Listener for {@link Lava.data.Module#event:records_loaded} in external module
+	 * @type {_tListener}
+	 */
 	_external_records_loaded_listener: null,
 
+	/**
+	 * The foreign ID value, when there is no referenced record
+	 * @const
+	 */
 	EMPTY_FOREIGN_ID: 0,
 
 	/**
-	 * @param {Lava.data.Module} module
-	 * @param {string} name
+	 * @param module
+	 * @param name
 	 * @param {_cRecordField} config
-	 * @param {object} module_storages
+	 * @param module_storages
 	 */
 	init: function(module, name, config, module_storages) {
 
@@ -75,6 +120,13 @@ Lava.define(
 
 	},
 
+	/**
+	 * There may be local records that reference external records, which are not yet loaded (by ForeignKey).
+	 * This field is <kw>null</kw> for them.
+	 * When referenced records are loaded - local records must update this field with the newly loaded instances
+	 * @param {Lava.data.Module} module
+	 * @param {Lava.data.Module#event:records_loaded} event_args
+	 */
 	_onReferencedModuleRecordsLoaded: function(module, event_args) {
 
 		var records = event_args.records,
@@ -102,9 +154,9 @@ Lava.define(
 	},
 
 	/**
-	 * A record was saved to the database and assigned an id. Need to assign foreign keys for loaded records.
-	 * @param foreign_module_id_field
-	 * @param event_args
+	 * A record was saved to the database and assigned an id. Need to assign foreign keys for local records
+	 * @param {Lava.data.field.Id} foreign_module_id_field
+	 * @param {Lava.data.field.Abstract#event:changed} event_args
 	 */
 	_onExternalIdCreated: function(foreign_module_id_field, event_args) {
 
@@ -145,8 +197,8 @@ Lava.define(
 	 * ```javascript
 	 * record.set('category_id', 123); // 'record' is from local module, 123 - id of foreign record
 	 * ```
-	 * @param foreign_key_field
-	 * @param event_args
+	 * @param {Lava.data.field.ForeignKey} foreign_key_field
+	 * @param {Lava.data.field.Abstract#event:changed} event_args
 	 */
 	_onForeignKeyChanged: function(foreign_key_field, event_args) {
 
@@ -223,7 +275,7 @@ Lava.define(
 
 		if (this._foreign_key_field) {
 
-			// if foreign id is in import - than it will replace the default value (if foreign kay has default)
+			// if foreign id is in import - then it will replace the default value (if foreign kay has default)
 			foreign_id = raw_properties[this._foreign_key_field_name] || storage[this._foreign_key_field_name];
 			if (foreign_id) {
 				this._registerByReferencedId(record, storage, foreign_id);
@@ -234,9 +286,10 @@ Lava.define(
 	},
 
 	/**
+	 * Update value of this field in local `record` and add the record to field's internal collections
 	 * @param {Lava.data.RecordAbstract} record The local record
-	 * @param {Object} storage The storage of local record
-	 * @param referenced_record_id The id of foreign record, which it belongs to
+	 * @param {Object} storage The properties of local record
+	 * @param {string} referenced_record_id The id of foreign record, which it belongs to
 	 */
 	_registerByReferencedId: function(record, storage, referenced_record_id) {
 
@@ -285,7 +338,7 @@ Lava.define(
 
 			if (new_ref_record != null) {
 
-				// if this module has foreign_key_field than foreign module must have an ID column
+				// if this module has foreign_key_field then foreign module must have an ID column
 				record.set(this._foreign_key_field_name, new_ref_record.get('id'));
 
 			} else {
@@ -303,9 +356,9 @@ Lava.define(
 	},
 
 	/**
-	 * Remove local_record from the collection referenced by referenced_record
-	 * @param local_record
-	 * @param referenced_record
+	 * Remove `local_record` from field's internal collection referenced by `referenced_record`
+	 * @param {Lava.data.RecordAbstract} local_record
+	 * @param {Lava.data.RecordAbstract} referenced_record
 	 */
 	_unregisterRecord: function(local_record, referenced_record) {
 
@@ -318,9 +371,9 @@ Lava.define(
 	},
 
 	/**
-	 * Add local_record to collection of records from local module, referenced by referenced_record
-	 * @param local_record
-	 * @param referenced_record The collection owner
+	 * Add `local_record` to field's internal collection of records from local module, referenced by `referenced_record`
+	 * @param {Lava.data.RecordAbstract} local_record
+	 * @param {Lava.data.RecordAbstract} referenced_record The collection owner
 	 */
 	_registerRecord: function(local_record, referenced_record) {
 
@@ -346,8 +399,9 @@ Lava.define(
 	},
 
 	/**
+	 * API for {@link Lava.data.field.Collection} field. Get all local records, which reference `referenced_record`
 	 * @param {Lava.data.RecordAbstract} referenced_record The collection's owner record from referenced module
-	 * @returns {Array}
+	 * @returns {Array} All records
 	 */
 	getCollection: function(referenced_record) {
 
@@ -357,6 +411,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * API for {@link Lava.data.field.Collection} field. Get count of local records, which reference the `referenced_record`
+	 * @param {Lava.data.RecordAbstract} referenced_record The collection's owner record from referenced module
+	 * @returns {Number}
+	 */
 	getCollectionCount: function(referenced_record) {
 
 		var collection = this._collections_by_foreign_guid[referenced_record.guid];
@@ -364,12 +423,21 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_referenced_module`
+	 * @returns {Lava.data.Module}
+	 */
 	getReferencedModule: function() {
 
 		return this._referenced_module;
 
 	},
 
+	/**
+	 * Get field's value equivalent for comparison
+	 * @param {Lava.data.RecordAbstract} record
+	 * @returns {string}
+	 */
 	_getComparisonValue: function(record) {
 
 		if (Lava.schema.DEBUG && !(record.guid in this._storages_by_guid)) Lava.t("isLess: record does not belong to this module");

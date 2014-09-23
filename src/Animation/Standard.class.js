@@ -2,6 +2,7 @@
 Lava.define(
 'Lava.animation.Standard',
 /**
+ * Common JavaScript-driven animation with keyframes
  * @lends Lava.animation.Standard#
  * @extends Lava.animation.Abstract
  */
@@ -11,6 +12,9 @@ Lava.define(
 
 	Shared: '_shared',
 
+	/**
+	 * Shared data
+	 */
 	_shared: {
 		// pre-generated variants of this._callAnimators function
 		call_animators: [
@@ -36,14 +40,22 @@ Lava.define(
 		]
 	},
 
+	/**
+	 * Current animation percent, between 0 and 1
+	 * @type {number}
+	 */
 	_percent: 0,
-	_now: 0, // current animation time
 
+	/**
+	 * Animator instances
+	 * @type {Array.<_iAnimator>}
+	 */
 	_animators: [],
 
 	/**
+	 * Create the animation instance
 	 * @param {_cAnimation} config
-	 * @param target
+	 * @param {*} target
 	 */
 	init: function(config, target) {
 
@@ -77,9 +89,10 @@ Lava.define(
 	},
 
 	/**
-	 * This function may be substituted with pre-generated function from _shared
+	 * Calls all animator instances.
+	 * This function may be substituted with pre-generated version from `_shared`
 	 *
-	 * @param transition_value
+	 * @param {number} transition_value The current percent of animation
 	 */
 	_callAnimators: function(transition_value) {
 
@@ -92,7 +105,8 @@ Lava.define(
 	},
 
 	/**
-	 * @param now
+	 * Perform animation in normal direction
+	 * @param {number} now The current global time in milliseconds
 	 */
 	_animateDirect: function(now) {
 
@@ -110,7 +124,8 @@ Lava.define(
 	},
 
 	/**
-	 * @param now
+	 * Perform animation in reversed direction
+	 * @param {number} now The current global time in milliseconds
 	 */
 	_animateReverse: function(now) {
 
@@ -128,7 +143,9 @@ Lava.define(
 	},
 
 	/**
-	 * @param [started_time]
+	 * Start animating
+	 * @param {number} [started_time] The global system time in milliseconds when animation has started.
+	 *  May be used to synchronize multiple animations
 	 */
 	start: function(started_time) {
 
@@ -151,7 +168,7 @@ Lava.define(
 	},
 
 	/**
-	 * Just stop, do not fire 'complete'
+	 * Stop animation immediately where it is. Do not fire {@link Lava.animation.Abstract#event:complete}
 	 */
 	stop: function() {
 
@@ -168,7 +185,7 @@ Lava.define(
 
 	/**
 	 * Act like the animation has ended naturally:
-	 * apply the end state to the element and fire 'complete'
+	 * apply the end state to the target and fire {@link Lava.animation.Abstract#event:complete}
 	 */
 	finish: function() {
 
@@ -180,6 +197,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Set animation duration
+	 * @param {number} duration New duration, in milliseconds
+	 */
 	setDuration: function(duration) {
 
 		this._duration = duration;

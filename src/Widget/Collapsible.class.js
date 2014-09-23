@@ -1,7 +1,27 @@
+/**
+ * Panel started to expand
+ * @event Lava.widget.Collapsible#expanding
+ */
+
+/**
+ * Panel started to collapse
+ * @event Lava.widget.Collapsible#collapsing
+ */
+
+/**
+ * Panel has fully expanded
+ * @event Lava.widget.Collapsible#expanded
+ */
+
+/**
+ * Panel is collapsed
+ * @event Lava.widget.Collapsible#collapsed
+ */
 
 Lava.define(
 'Lava.widget.Collapsible',
 /**
+ * Animated HTML element, which can be shown and hidden
  * @lends Lava.widget.Collapsible#
  * @extends Lava.widget.Standard#
  */
@@ -17,8 +37,11 @@ Lava.define(
 	},
 
 	_properties: {
+		/** Is the element expanded */
 		is_expanded: true,
+		/** Use animation, while expanding and collapsing the element */
 		is_animation_enabled: true,
+		/** Content for default widget's template */
 		content: ''
 	},
 
@@ -26,12 +49,33 @@ Lava.define(
 		_container_view: '_handleContainerView'
 	},
 
+	/**
+	 * Main container of the expandable DOM element
+	 * @type {Lava.view.container.Element}
+	 */
 	_panel_container: null,
+	/**
+	 * DOM element's animation
+	 * @type {Lava.animation.Abstract}
+	 */
 	_animation: null,
+	/**
+	 * The "display" CSS rule from container's element
+	 * @type {string}
+	 */
 	_default_display: null,
 
+	/**
+	 * When animation is disabled, Toggle animation is used to show and hide the DOM element
+	 * @type {string}
+	 * @const
+	 */
 	TOGGLE_ANIMATION_CLASS: 'Toggle',
 
+	/**
+	 * Create animation, set it's direction and run it
+	 * @param {boolean} is_forwards Is widget's element expanding
+	 */
 	_refreshAnimation: function(is_forwards) {
 
 		var element = this._panel_container.getDOMElement(),
@@ -62,6 +106,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Fire widget's events and fix element's "display" CSS rule
+	 */
 	_onAnimationComplete: function() {
 
 		if (this._animation.isReversed()) {
@@ -77,6 +124,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Setter for <i>is_expanded</i> property
+	 * @param {boolean} value
+	 * @param {string} name
+	 */
 	_setExpanded: function(value, name) {
 
 		var new_display = 'none';
@@ -91,7 +143,7 @@ Lava.define(
 
 			}
 
-			// if this property is set in constructor - than container does not yet exist
+			// if this property is set in constructor - then container does not yet exist
 			if (this._panel_container) {
 
 				this._panel_container.setStyle('display', new_display);
@@ -118,7 +170,11 @@ Lava.define(
 
 	},
 
-	_handleContainerView: function(view, template_arguments) {
+	/**
+	 * Handle view with main container
+	 * @param {Lava.view.Abstract} view
+	 */
+	_handleContainerView: function(view) {
 
 		this._panel_container = view.getContainer();
 
@@ -132,6 +188,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_panel_container`
+	 * @returns {Lava.view.container.Element}
+	 */
 	getMainContainer: function() {
 
 		return this._panel_container;

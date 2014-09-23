@@ -1,31 +1,40 @@
 Lava.define(
 'Lava.scope.Binding',
 /**
+ * Two-way binding between a widget property and a scope path
  * @lends Lava.scope.Binding#
  */
 {
 
 	/**
+	 * The scope, which is bound to property of the widget
 	 * @type {_iValueContainer}
 	 */
 	_scope: null,
 	/**
+	 * Widget with bound property
 	 * @type {Lava.widget.Standard}
 	 */
 	_widget: null,
 	/**
+	 * Bound property name in widget
 	 * @type {string}
 	 */
 	_property_name: null,
 
+	/**
+	 * Listener for "changed" event
+	 * @type {_tListener}
+	 */
 	_scope_changed_listener: null,
-	_scope_refreshed_listener: null,
+	/**
+	 * Listener for onPropertyChanged in `_widget`
+	 * @type {_tListener}
+	 */
 	_widget_property_changed_listener: null,
 
-	_scope_refresh_lock: false,
-	_scope_refresh_count: 0,
-
 	/**
+	 * Create Binding instance. Refresh widget's property value
 	 * @param {_cBinding} config
 	 * @param {Lava.widget.Standard} widget
 	 */
@@ -71,6 +80,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Scope, which is bound to widget property, has changed. Refresh widget property value
+	 */
 	onScopeChanged: function() {
 
 		// avoid setting nulls to non-nullable fields.
@@ -88,6 +100,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Widget property has changed. Refresh bound scope value
+	 */
 	onWidgetPropertyChanged: function() {
 
 		Lava.suspendListener(this._widget_property_changed_listener);

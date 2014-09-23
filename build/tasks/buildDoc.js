@@ -155,7 +155,8 @@ module.exports = function(grunt) {
 			if (last_parent_index != -1) {
 				destination.splice(last_parent_index + 1, 0, parameter);
 			} else {
-				destination.push(parameter);
+				throw new Error();
+				//destination.push(parameter);
 			}
 		}
 
@@ -190,8 +191,13 @@ module.exports = function(grunt) {
 						var parent_hash = groupByName(parent_descriptor.params);
 						for (var name in parent_hash) {
 							if (!(name in child_hash)) {
-								if (child_hash[name].name.indexOf('.') == -1) throw new Error('Child member must have all parameters from parent: ' + child_hash[name]);
-								insertMissingParameter(child_descriptor.params, child_hash[name]);
+								var child_method_jsdoc_descriptor = getJSDocDescriptor(child_descriptor.belongs + '#' + child_descriptor.name, true);
+								if (child_method_jsdoc_descriptor.param_renames && child_method_jsdoc_descriptor.param_renames[name]) {
+									if (!(child_method_jsdoc_descriptor.param_renames[name] in child_hash)) throw new Error('Wrong lava-param-renamed tag');
+								} else {
+									if (parent_hash[name].name.indexOf('.') == -1) throw new Error('Child member must have all parameters from parent: ' + child_descriptor.belongs + '#' + child_descriptor.name);
+									insertMissingParameter(child_descriptor.params, parent_hash[name]);
+								}
 							} else {
 								inheritDescription(child_hash[name], parent_hash[name], parent_descriptor.belongs);
 								ApiHelper.importVars(child_hash[name], parent_hash[name], ['default_value','type_names','is_nullable','is_non_nullable','is_optional','is_variable']);
@@ -802,7 +808,6 @@ module.exports = function(grunt) {
 					SEPARATORS: Lava.ExpressionParser.SEPARATORS,
 					parseRaw: Lava.ExpressionParser.parseRaw,
 					parse: Lava.ExpressionParser.parse,
-					parsePath: Lava.ExpressionParser.parsePath,
 					parseWithTailRaw: Lava.ExpressionParser.parseWithTailRaw,
 					parseWithTail: Lava.ExpressionParser.parseWithTail,
 					parseScopeEval: Lava.ExpressionParser.parseScopeEval

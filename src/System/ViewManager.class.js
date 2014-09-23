@@ -1,7 +1,16 @@
+/**
+ * Mouse pointer has crossed an element boundary
+ * @event Lava.system.ViewManager#mouseover_stack_changed
+ * @type {Array.<HTMLElement>}
+ * @lava-type-description List of elements under mouse cursor, with topmost element being the first item in array,
+ *  and all it's parents
+ */
 
 Lava.define(
 'Lava.system.ViewManager',
 /**
+ * Refreshes views and routes view events and roles
+ *
  * @lends Lava.system.ViewManager#
  * @extends Lava.mixin.Observable
  */
@@ -9,42 +18,88 @@ Lava.define(
 
 	Extends: 'Lava.mixin.Observable',
 
-	// views and widgets, sorted by depth level. [level][views_array]
+	/**
+	 * Views and widgets, sorted by depth level
+	 * @type {Array.<Array.<Lava.view.Abstract>>}
+	 */
 	_dirty_views: [],
+	/**
+	 * View refresh loop is in progress
+	 * @type {boolean}
+	 */
 	_views_refreshing: false,
 
 	/**
+	 * Hash of all views with user-defined ID
 	 * @type {Object.<string, Lava.view.Abstract>}
 	 */
 	_views_by_id: {},
 	/**
+	 * Hash of all views by their GUID
 	 * @type {Object.<*, Lava.view.Abstract>}
 	 */
 	_views_by_guid: {},
 
 	/**
+	 * Global user-assigned handlers for unhandled roles. <role_name> => [widgets_that_will_handle_it]
 	 * @type {Object.<string, Array.<Lava.widget.Standard>>}
 	 */
 	_global_role_targets: {},
 	/**
+	 * Global user-assigned handlers for unhandled events
 	 * @type {Object.<string, Array.<Lava.widget.Standard>>}
 	 */
 	_global_event_targets: {},
 
+	/**
+	 * Used in mouse events processing algorithm
+	 * @type {HTMLElement}
+	 */
 	_old_mouseover_target: null,
+	/**
+	 * Parents of `_old_mouseover_target` (and `_old_mouseover_target` itself)
+	 * @type {Array.<HTMLElement>}
+	 */
 	_old_mouseover_view_stack: [],
+	/**
+	 * Used in mouse events processing algorithm
+	 * @type {HTMLElement}
+	 */
 	_new_mouseover_target: null,
+	/**
+	 * Parents of `_new_mouseover_target` (and `_new_mouseover_target` itself)
+	 * @type {Array.<HTMLElement>}
+	 */
 	_new_mouseover_view_stack: [],
 
+	/**
+	 * Counters for event consumers
+	 * @type {Object.<string, number>}
+	 */
 	_event_usage_counters: {},
+	/**
+	 * Listeners from {@link Lava.Core} for each DOM event
+	 * @type {Object.<string, _tListener>}
+	 */
 	_events_listeners: {
 		mouseover: null,
 		mouseout: null
 	},
 
+	/**
+	 * Whether to cancel bubbling of current event or role
+	 * @type {boolean}
+	 */
 	_cancel_bubble: false,
+	/**
+	 * True, if bubbling of current event or role may be cancelled
+	 * @type {boolean}
+	 */
 	_is_bubble_cancellable: false,
 
+	/**
+	 * Create an instance of the class, acquire event listeners
+	 */
 	init: function() {
 
 		var default_events = Lava.schema.system.DEFAULT_EVENTS,
@@ -61,6 +116,7 @@ Lava.define(
 	},
 
 	/**
+	 * Place a view into queue for refresh
 	 * @param {Lava.view.Abstract} view
 	 */
 	scheduleViewRefresh: function(view) {
@@ -79,6 +135,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * View refresh cycle. Call {@link Lava.view.Abstract#refresh} of all views in the queue, starting from the root views
+	 */
 	refresh: function() {
 
 		var level = 0,
@@ -125,6 +184,7 @@ Lava.define(
 	},
 
 	/**
+	 * Add a newly created view to local collections: `_views_by_guid` and `_views_by_id`
 	 * @param {Lava.view.Abstract} instance
 	 */
 	registerView: function(instance) {
@@ -133,8 +193,7 @@ Lava.define(
 
 		if (instance.id) {
 
-			if (instance.id in this._views_by_id) Lava.t("Duplicate view id: " + instance.id);
-
+			if (Lava.schema.DEBUG && (instance.id in this._views_by_id)) Lava.t("Duplicate view id: " + instance.id);
 			if (Lava.schema.DEBUG && !Lava.isValidId(instance.id)) Lava.t(); // Element ID is either malformed or conflicts with framework id patterns
 
 			this._views_by_id[instance.id] = instance;
@@ -143,6 +202,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Remove a destroyed view from local collections
+	 * @param {Lava.view.Abstract} instance
+	 */
 	unregisterView: function(instance) {
 
 		delete this._views_by_guid[instance.guid];
@@ -156,6 +219,7 @@ Lava.define(
 	},
 
 	/**
+	 * Get a view with given user-defined ID
 	 * @param {string} id
 	 * @returns {Lava.view.Abstract}
 	 */
@@ -166,6 +230,7 @@ Lava.define(
 	},
 
 	/**
+	 * Get view by global unique identifier
 	 * @param {_tGUID} guid
 	 * @returns {Lava.view.Abstract}
 	 */
@@ -175,6 +240,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get widget by id. Does not take hierarchy into account
+	 * @param {Lava.widget.Standard} starting_widget
+	 * @param {string} id
+	 * @returns {Lava.view.Abstract}
+	 */
 	_locateWidgetById: function(starting_widget, id) {
 
 		if (Lava.schema.DEBUG && !id) Lava.t();
@@ -183,6 +254,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get widget by GUID. Does not consider hierarchy
+	 * @param {Lava.widget.Standard} starting_widget
+	 * @param {_tGUID} guid
+	 * @returns {Lava.view.Abstract}
+	 */
 	_locateWidgetByGuid: function(starting_widget, guid) {
 
 		if (Lava.schema.DEBUG && !guid) Lava.t();
@@ -191,6 +268,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Find first widget with given name among parents of the given widget (including widget itself)
+	 * @param {Lava.widget.Standard} widget Starting widget
+	 * @param {string} name Name to search for
+	 * @returns {?Lava.widget.Standard}
+	 */
 	_locateWidgetByName: function(widget, name) {
 
 		if (Lava.schema.DEBUG && !name) Lava.t();
@@ -205,12 +288,19 @@ Lava.define(
 
 	},
 
+	/**
+	 * Find first widget with given label among parents of the given widget (including widget itself)
+	 *
+	 * @param {Lava.widget.Standard} widget Starting widget
+	 * @param {string} label
+	 * @returns {?Lava.widget.Standard}
+	 */
 	_locateWidgetByLabel: function(widget, label) {
 
 		if (Lava.schema.DEBUG && !label) Lava.t();
 
 		// Targets are different from view locators, there must be no hardcoded '@widget' label, like in views
-		// (it may be very harmful. Use widget names instead!)
+		// ('@widget' label may be very harmful in this case. Use widget names instead!)
 
 		if (label == 'root') {
 
@@ -235,10 +325,11 @@ Lava.define(
 	},
 
 	/**
-	 * @param {Lava.widget.Standard} starting_widget
-	 * @param {string} locator_type
-	 * @param {string} locator
-	 * @returns {Lava.widget.Standard}
+	 * Get a widget from hierarchy by given route
+	 * @param {Lava.widget.Standard} starting_widget The child widget to start search
+	 * @param {_eViewLocatorType} locator_type
+	 * @param {string} locator Locator argument
+	 * @returns {?Lava.widget.Standard}
 	 */
 	locateTarget: function(starting_widget, locator_type, locator) {
 
@@ -247,13 +338,15 @@ Lava.define(
 	},
 
 	/**
-	 * Warning! Violates codestyle with multiple return statements.
+	 * Dispatch events and roles to their targets.
+	 * Warning! Violates codestyle with multiple return statements
 	 *
-	 * @param {Lava.view.Abstract} view
-	 * @param {Array.<_cTarget>} targets
-	 * @param {function} callback
-	 * @param {*} callback_arguments
-	 * @param {Object.<string, Array>} global_targets_object
+	 * @param {Lava.view.Abstract} view The source of events or roles
+	 * @param {Array.<_cTarget>} targets The target routes
+	 * @param {function} callback The ViewManager callback that will perform dispatching
+	 * @param {*} callback_arguments Will be passed to `callback`
+	 * @param {Object.<string, Array>} global_targets_object Either {@link Lava.system.ViewManager#_global_role_targets}
+	 *  or {@link Lava.system.ViewManager#_global_event_targets}
 	 */
 	_dispatchCallback: function(view, targets, callback, callback_arguments, global_targets_object) {
 
@@ -339,6 +432,15 @@ Lava.define(
 
 	},
 
+	/**
+	 * Callback for dispatching roles: call widget's role handler
+	 *
+	 * @param {Lava.widget.Standard} widget
+	 * @param {string} target_name
+	 * @param {Lava.view.Abstract} view
+	 * @param {Array.<*>} template_arguments
+	 * @returns {boolean}
+	 */
 	_callRegisterViewInRole: function(widget, target_name, view, template_arguments) {
 
 		return widget.handleRole(target_name, view, template_arguments);
@@ -346,6 +448,7 @@ Lava.define(
 	},
 
 	/**
+	 * Dispatch roles
 	 * @param {Lava.view.Abstract} view
 	 * @param {Array.<_cTarget>} targets
 	 */
@@ -358,6 +461,15 @@ Lava.define(
 
 	},
 
+	/**
+	 * Callback for dispatching events: call the widget's event handler
+	 * @param {Lava.widget.Standard} widget
+	 * @param {string} target_name
+	 * @param {Lava.view.Abstract} view
+	 * @param {Array.<*>} template_arguments
+	 * @param {Object} callback_arguments
+	 * @returns {boolean}
+	 */
 	_callHandleEvent: function(widget, target_name, view, template_arguments, callback_arguments) {
 
 		return widget.handleEvent(
@@ -371,9 +483,10 @@ Lava.define(
 	},
 
 	/**
+	 * Perform dispatching of view DOM events
 	 * @param {Lava.view.Abstract} view
 	 * @param {string} event_name
-	 * @param dom_event
+	 * @param {Object} dom_event
 	 */
 	_dispatchViewEvents: function(view, event_name, dom_event) {
 
@@ -399,6 +512,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Evaluate template arguments
+	 * @param {Lava.view.Abstract} view
+	 * @param {_cTarget} target
+	 * @returns {Array.<*>}
+	 */
 	_evalTargetArguments: function(view, target) {
 
 		var result = [];
@@ -424,6 +543,7 @@ Lava.define(
 	},
 
 	/**
+	 * Get include from widget
 	 * @param {Lava.view.Abstract} starting_view
 	 * @param {_cInclude} config
 	 * @returns {_tTemplate}
@@ -445,30 +565,56 @@ Lava.define(
 
 	},
 
+	/**
+	 * Add global user-defined handler for unhandled template events
+	 * @param {string} callback_name
+	 * @param {Lava.widget.Standard} widget
+	 */
 	addGlobalEventTarget: function(callback_name, widget) {
 
 		this._addTarget(this._global_event_targets, callback_name, widget);
 
 	},
 
+	/**
+	 * Remove a widget, added with {@link Lava.system.ViewManager#addGlobalEventTarget}
+	 * @param {string} callback_name
+	 * @param {Lava.widget.Standard} widget
+	 */
 	removeGlobalEventTarget: function(callback_name, widget) {
 
 		this._removeTarget(this._global_event_targets, callback_name, widget);
 
 	},
 
+	/**
+	 * Add a global user-defined handler for unhandled roles
+	 * @param {string} callback_name
+	 * @param {Lava.widget.Standard} widget
+	 */
 	addGlobalRoleTarget: function(callback_name, widget) {
 
 		this._addTarget(this._global_role_targets, callback_name, widget);
 
 	},
 
+	/**
+	 * Remove widget added with {@link Lava.system.ViewManager#addGlobalRoleTarget}
+	 * @param {string} callback_name
+	 * @param {Lava.widget.Standard} widget
+	 */
 	removeGlobalRoleTarget: function(callback_name, widget) {
 
 		this._removeTarget(this._global_role_targets, callback_name, widget);
 
 	},
 
+	/**
+	 * Perform {@link Lava.system.ViewManager#addGlobalEventTarget} or {@link Lava.system.ViewManager#addGlobalRoleTarget}
+	 * @param {Object} storage
+	 * @param {string} name
+	 * @param {Lava.widget.Standard} widget
+	 */
 	_addTarget: function(storage, name, widget) {
 
 		if (name in storage) {
@@ -491,6 +637,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Remove widget, added with {@link Lava.system.ViewManager#_addTarget}
+	 * @param {Object} storage
+	 * @param {string} name
+	 * @param {Lava.widget.Standard} widget
+	 */
 	_removeTarget: function(storage, name, widget) {
 
 		if (!(name in storage)) Lava.t("Trying to remove a global event target for nonexistent event");
@@ -506,7 +658,8 @@ Lava.define(
 	},
 
 	/**
-	 * @param element
+	 * Get the view, the container of which owns the given element
+	 * @param {HTMLElement} element
 	 * @returns {Lava.view.Abstract}
 	 */
 	getViewByElement: function(element) {
@@ -528,6 +681,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get all views by their label. Slow
+	 * @param {string} label
+	 * @returns {Array.<Lava.view.Abstract>}
+	 */
 	getViewsByLabel: function(label) {
 
 		var result = [];
@@ -546,6 +704,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Algorithm for dispatching of mouseenter, mouseleave, mouseover and mouseout events to views.
+	 * Maintains stack of elements under cursor, dispatches {@link Lava.system.ViewManager#event:mouseover_stack_changed}
+	 * @param {string} event_name
+	 * @param {Object} event_object
+	 */
 	handleMouseMovement:  function(event_name, event_object) {
 
 		var new_mouseover_target = (event_name == 'mouseover') ? event_object.target : event_object.relatedTarget,
@@ -628,6 +792,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Create an array from element and all it's parents
+	 * @param {HTMLElement} element
+	 * @returns {Array.<HTMLElement>}
+	 */
 	_buildElementStack: function(element) {
 
 		var document_ref = window.document,
@@ -640,6 +809,7 @@ Lava.define(
 
 		}
 
+		// you must not modify the returned array, but you can slice() it
 		if (Object.freeze) {
 			Object.freeze(result);
 		}
@@ -648,6 +818,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get the first view with an Element container, which wraps the given `element`
+	 * (including element's owner view, if `element` belongs to a view)
+	 * @param {HTMLElement} element
+	 * @returns {Lava.view.Abstract}
+	 */
 	_findNearestView: function(element) {
 
 		var view,
@@ -665,6 +841,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Dispatch DOM events to views
+	 * @param {string} event_name
+	 * @param {Object} event_object
+	 */
 	onDOMEvent: function(event_name, event_object) {
 
 		var target = event_object.target,
@@ -710,6 +891,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Register an event consumer and start routing that event
+	 * @param {string} event_name
+	 */
 	lendEvent: function(event_name) {
 
 		if (Lava.schema.DEBUG && ['mouseenter', 'mouseleave', 'mouseover', 'mouseout'].indexOf(event_name) != -1)
@@ -728,6 +913,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Start listening to an event
+	 * @param {string} event_name
+	 */
 	_initEvent: function(event_name) {
 
 		if (event_name == 'mouse_events') {
@@ -746,6 +935,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Inform that event consumer does not need that event anymore
+	 * @param {string} event_name
+	 */
 	releaseEvent: function(event_name) {
 
 		if (this._event_usage_counters[event_name] == 0) {
@@ -763,6 +956,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Stop listening to an event
+	 * @param {string} event_name
+	 */
 	_shutdownEvent: function(event_name) {
 
 		if (event_name == 'mouse_events') {
@@ -782,6 +979,7 @@ Lava.define(
 	},
 
 	/**
+	 * Dispatch a broadcast
 	 * @param {Lava.widget.Standard} widget
 	 * @param {Object.<string, Array.<_cTarget>>} targets
 	 */
@@ -813,6 +1011,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Stop bubbling current event or role
+	 */
 	cancelBubble: function() {
 
 		if (Lava.schema.DEBUG && !this._is_bubble_cancellable) Lava.t("This event is not cancellable");
@@ -823,6 +1024,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Free resources and make this instance unusable
+	 */
 	destroy: function() {
 
 		for (var name in this._events_listeners) {

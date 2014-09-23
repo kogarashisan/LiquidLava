@@ -2,6 +2,7 @@
 Lava.define(
 'Lava.widget.input.Radio',
 /**
+ * Radio input
  * @lends Lava.widget.input.Radio#
  * @extends Lava.widget.input.RadioAbstract#
  */
@@ -10,19 +11,6 @@ Lava.define(
 	Extends: 'Lava.widget.input.RadioAbstract',
 
 	name: 'radio',
-
-	_property_descriptors: {
-		is_checked: {type: 'Boolean', setter: '_setIsChecked'}
-	},
-
-	_properties: {
-		is_checked: false
-	},
-
-	_event_handlers: {
-		checked_changed: '_onCheckedChanged'
-	},
-
 	_type: "radio",
 
 	broadcastInDOM: function() {

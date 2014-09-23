@@ -1,7 +1,13 @@
 
+/**
+ * Radio or checkbox has changed it's "checked" state
+ * @event Lava.widget.input.RadioAbstract#checked_changed
+ */
+
 Lava.define(
 'Lava.widget.input.RadioAbstract',
 /**
+ * Base class for Radio and CheckBox classes
  * @lends Lava.widget.input.RadioAbstract#
  * @extends Lava.widget.input.Abstract#
  */
@@ -14,6 +20,7 @@ Lava.define(
 	},
 
 	_properties: {
+		/** Is this checkbox or radio currently selected (checked)? */
 		is_checked: false
 	},
 
@@ -28,7 +35,11 @@ Lava.define(
 
 	},
 
-	_setIsChecked: function(value, name) {
+	/**
+	 * Set the "checked" property on checkbox or radio input element
+	 * @param {boolean} value
+	 */
+	_setIsChecked: function(value) {
 
 		if (this._properties.is_checked != value) {
 
@@ -41,6 +52,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Element's checked state has changed. Update local <i>is_checked</i> property
+	 */
 	_onCheckedChanged: function() {
 
 		this.set('is_checked', this._input_container.getDOMElement().checked);

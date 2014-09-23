@@ -5,42 +5,66 @@
 
 _cRawTag = {
 
+	/**
+	 * Block type
+	 * @type {string}
+	 * @const
+	 */
 	type: 'tag',
 
+	/**
+	 * Tag name
+	 * @type {string}
+	 */
 	name: '',
 
 	/**
+	 * Name-value hash of tag's attributes, excluding control attributes
 	 * @type {Object.<string, string>}
 	 */
 	attributes: {},
 
 	/**
+	 * Attributes, that start with "x:"
 	 * @type {_cRawX}
 	 */
 	x: {},
 
 	/**
-	 * @type {_tRawTemplate}
+	 * Tag's content
+	 * @type {?_tRawTemplate}
 	 */
 	content: []
 
 };
 
+/**
+ * Directive is a tag with name starting with "x:"
+ */
 _cRawDirective = {
 
+	/**
+	 * Block type
+	 * @type {string}
+	 * @const
+	 */
 	type: 'directive',
 
+	/**
+	 * Directive name, without the control prefix ("x:")
+	 * @type {string}
+	 */
 	name: '',
 
 	/**
+	 * Directive's attributes, same as in {@link _cRawTag}
 	 * @type {Object.<string, string>}
 	 */
 	attributes: {
 		/**
-		 * For x:define: name of the JS class, inherited from Widget
+		 * For x:define: name of the JS class, inherited from Widget (default namespace is "Lava.widget")
 		 */
 		controller: '',
-
 		/**
 		 * For common tags and tags inside x:define. Meaning depends on context
 		 */
@@ -50,17 +74,40 @@ _cRawDirective = {
 	},
 
 	/**
+	 * Directive's content
 	 * @type {_tRawTemplate}
 	 */
 	content: []
 
 };
 
+/** @enum {string} */
+_iBlockPrefix = {
+	/**
+	 * View without container
+	 * @alias #
+	 */
+	'#': '#',
+	/** View with Metamorph container */
+	'$': '$'
+};
+
+/**
+ * Block, that represents a view
+ */
 _cRawBlock = {
 
+	/**
+	 * Block type
+	 * @type {string}
+	 * @const
+	 */
 	type: 'block',
 
-	// only for dynamic blocks
+	/**
+	 * For blocks with dynamic class name
+	 * @type {Object}
+	 */
 	class_locator: {
 		/**
 		 * @type {_eKnownViewLocatorType}
@@ -69,32 +116,50 @@ _cRawBlock = {
 		name: ''
 	},
 
+	/**
+	 * Real class name (default namespace is "Lava.widget")
+	 * @type {string}
+	 */
 	real_class: '',
 
+	/**
+	 * Block's name
+	 * @type {string}
+	 */
 	name: '',
 	/**
-	 * @type {_cArgument}
+	 * Array with single argument (the arguments from view's parentheses)
+	 * @type {Array.<_cArgument>}
 	 */
 	arguments: null,
 
-	prefix: '$' || '#',
 	/**
+	 * Block's prefix which defines it's container type
+	 * @type {_iBlockPrefix}
+	 */
+	prefix: null,
+	/**
+	 * Name-value hash of block's options
 	 * @type {Object.<string, string>}
 	 */
 	hash: {},
 	/**
+	 * Block's content
 	 * @type {_tRawTemplate}
 	 */
 	content: [],
 	/**
+	 * Content of the block's "else" section
 	 * @type {_tRawTemplate}
 	 */
 	else_content: [],
 	/**
+	 * Argument configs for the block's "elseif' sections
 	 * @type {Array.<_cArgument>}
 	 */
 	elseif_arguments: [],
 	/**
+	 * Content of the "elseif" sections
 	 * @type {Array.<_tRawTemplate>}
 	 */
 	elseif_contents: [] // array of arrays
@@ -102,12 +167,22 @@ _cRawBlock = {
 
 _cRawExpression = {
 
+	/**
+	 * Block type
+	 * @type {string}
+	 * @const
+	 */
 	type: 'expression',
 
-	prefix: '$' || '#',
+	/**
+	 * Prefix, which defines container for this expression
+	 * @type {_iBlockPrefix}
+	 */
+	prefix: null,
 
 	/**
-	 * @type {_cArgument}
+	 * Array with single expression's argument
+	 * @type {Array.<_cArgument>}
 	 */
 	arguments: null
 
@@ -119,41 +194,69 @@ _cRawExpression = {
  */
 _cRawArgument = {
 
-	evaluator_src: ''
+	/**
+	 * Source code for the Argument's evaluator function
+	 * @type {string}
+	 */
+	evaluator_src: null
 
 };
 
 /**
- * TemplateParser intermediate objects used when parsing tags
+ * TemplateParser's intermediate objects used when parsing tags
  */
 _cRawAttribute = {
 
+	/**
+	 * Attribute name
+	 * @type {string}
+	 */
 	name: '',
-
+	/**
+	 * Attribute value
+	 * @type {string}
+	 */
 	value: ''
 
 };
 
 /**
- * TemplateParser intermediate object with contents of all prefixed attributes
+ * TemplateParser's intermediate object with content of all control attributes
  */
 _cRawX = {
 
-	type: 'view' || 'container',
-
+	/**
+	 * 'view' || 'container'
+	 * @type {string}
+	 */
+	type: null,
+	/**
+	 * @type {Object}
+	 */
 	event: {},
-
+	/**
+	 * @type {Object}
+	 */
 	bind: {},
-
+	/**
+	 * @type {Object}
+	 */
 	style: {},
-
+	/**
+	 * @type {string}
+	 */
 	classes: '',
-
-	// comma-separated list of targets
+	/**
+	 * Comma-separated list of targets
+	 */
 	roles: '',
-
+	/**
+	 * @type {string}
+	 */
 	container_class: '',
-
+	/**
+	 * @type {string}
+	 */
 	resource_id: ''
 
 };

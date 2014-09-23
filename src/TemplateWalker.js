@@ -1,6 +1,12 @@
-
+/**
+ * Traverse templates with provided "visitor" object
+ */
 Lava.TemplateWalker = {
 
+	/**
+	 * Callbacks for different types of items in template
+	 * @type {Object.<string, string>}
+	 */
 	_handlers_map: {
 		'string': '_handleString',
 		view: '_handleView',
@@ -12,26 +18,61 @@ Lava.TemplateWalker = {
 	},
 
 	/**
+	 * The visitor object, which has callbacks for different traversal events
 	 * @type {_iVisitor}
 	 */
 	_visitor: null,
+	/**
+	 * Stack of nested templates
+	 * @type {Array.<_tTemplate>}
+	 */
 	_template_stack: [],
+	/**
+	 * Stack of indices in `_template_stack`
+	 * @type {Array.<number>}
+	 */
 	_index_stack: [],
+	/**
+	 * Stack of nested view configs
+	 * @type {Array.<(_cView|_cWidget)>}
+	 */
 	_view_config_stack: [],
 
 	// local vars for advanced compression
+	/**
+	 * Does current visitor have `enter()`
+	 * @type {boolean}
+	 */
 	_has_enter: false,
+	/**
+	 * Does current visitor have `leave()`
+	 * @type {boolean}
+	 */
 	_has_leave: false,
+	/**
+	 * Does current visitor have `enter)region()`
+	 * @type {boolean}
+	 */
 	_has_enter_region: false,
+	/**
+	 * Does current visitor have `leave_region()`
+	 * @type {boolean}
+	 */
 	_has_leave_region: false,
 
 	/**
-	 * @param template
+	 * Traverse a template, executing visitor's callbacks
+	 * @param {_tTemplate} template
 	 * @param {_iVisitor} visitor
 	 */
 	walkTemplate: function(template, visitor) {
 
 		if (Lava.schema.DEBUG && this._visitor) Lava.t();
+
+		// in case of WALKER_STOP exception, they might be filled with old garbage
+		this._template_stack = [];
+		this._index_stack = [];
+		this._view_config_stack = [];
 
 		this._visitor = visitor;
 		this._has_enter = !!this._visitor.enter;
@@ -51,34 +92,66 @@ Lava.TemplateWalker = {
 
 	},
 
+	/**
+	 * Throw an exception, which will be caught in `walkTemplate`
+	 * @throws TemplateWalker internal exception that will be caught in `walkTemplate`
+	 */
 	interrupt: function() {
 		throw "WALKER_STOP";
 	},
 
+	/**
+	 * Get a copy of `_template_stack`
+	 * @returns {Array.<_tTemplate>}
+	 */
 	getTemplateStack: function() {
-		return this._template_stack;
+		return this._template_stack.slice();
 	},
 
+	/**
+	 * Get a copy of `_index_stack`
+	 * @returns {Array.<number>}
+	 */
 	getIndexStack: function() {
-		return this._index_stack;
+		return this._index_stack.slice();
 	},
 
+	/**
+	 * Get the template on top of `_template_stack`
+	 * @returns {_tTemplate}
+	 */
 	getCurrentTemplate: function() {
 		return this._template_stack[this._template_stack.length - 1];
 	},
 
+	/**
+	 * Get the template index on top of `_index_stack`
+	 * @returns {number}
+	 */
 	getCurrentIndex: function() {
 		return this._index_stack[this._index_stack.length - 1];
 	},
 
+	/**
+	 * Get a copy of `_view_config_stack`
+	 * @returns {Array.<_cView|_cWidget>}
+	 */
 	getViewConfigStack: function() {
-		return this._view_config_stack;
+		return this._view_config_stack.slice();
 	},
 
+	/**
+	 * Get view config on top of `_view_config_stack`
+	 * @returns {_cView|_cWidget}
+	 */
 	getCurrentViewConfig: function() {
 		return this._view_config_stack[this._view_config_stack.length];
 	},
 
+	/**
+	 * Walk a single template
+	 * @param {_tTemplate} template
+	 */
 	_walkTemplate: function(template) {
 
 		if (Lava.schema.DEBUG && !Array.isArray(template)) Lava.t();
@@ -108,6 +181,10 @@ Lava.TemplateWalker = {
 
 	},
 
+	/**
+	 * Walk the common part of {@link _cView} and {@link _cWidget}
+	 * @param {_cView} node
+	 */
 	_handleViewCommon: function(node) {
 
 		var i = 0,
@@ -135,6 +212,10 @@ Lava.TemplateWalker = {
 
 	},
 
+	/**
+	 * Walk {@link _cView}
+	 * @param {_cView} node
+	 */
 	_handleView: function(node) {
 
 		this._view_config_stack.push(node);
@@ -144,6 +225,11 @@ Lava.TemplateWalker = {
 
 	},
 
+	/**
+	 * Walk an object in {@link _cWidget#storage}
+	 * @param {Object} object
+	 * @param {Object} properties_schema
+	 */
 	_walkStorageObject: function(object, properties_schema) {
 
 		var name;
@@ -158,6 +244,10 @@ Lava.TemplateWalker = {
 
 	},
 
+	/**
+	 * Walk a widget config
+	 * @param {_cWidget} node
+	 */
 	_handleWidget: function(node) {
 
 		var name,
@@ -236,30 +326,50 @@ Lava.TemplateWalker = {
 
 	},
 
+	/**
+	 * Walk a string in template
+	 * @param {string} node
+	 */
 	_handleString: function(node) {
 
 		this._visitor.visitString && this._visitor.visitString(this, node);
 
 	},
 
+	/**
+	 * Walk an include config
+	 * @param {_cInclude} node
+	 */
 	_handleInclude: function(node) {
 
 		this._visitor.visitInclude && this._visitor.visitInclude(this, node);
 
 	},
 
+	/**
+	 * Walk {@link _cStaticValue}
+	 * @param {_cStaticValue} node
+	 */
 	_handleStaticValue: function(node) {
 
 		this._visitor.visitStaticValue && this._visitor.visitStaticValue(this, node);
 
 	},
 
+	/**
+	 * Walk {@link _cStaticEval}
+	 * @param {_cStaticEval} node
+	 */
 	_handleStaticEval: function(node) {
 
 		this._visitor.visitStaticEval && this._visitor.visitStaticEval(this, node);
 
 	},
 
+	/**
+	 * Walk {@link _cStaticTag}
+	 * @param {_cStaticTag} node
+	 */
 	_handleStaticTag: function(node) {
 
 		this._visitor.visitStaticTag && this._visitor.visitStaticTag(this, node);

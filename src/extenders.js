@@ -3,7 +3,10 @@
  */
 Lava.extenders = {
 
-	// properties that must be merged with parent configs
+	/**
+	 * Properties that must be merged with parent configs
+	 * @type {Object.<string, string>}
+	 */
 	_widget_config_merged_properties: {
 		includes: '_mergeIncludes',
 		bindings: '_mergeConfigProperty',
@@ -15,7 +18,10 @@ Lava.extenders = {
 		storage_schema: '_mergeStorageSchema'
 	},
 
-	// property_name => needs_implement || property_merge_map
+	/**
+	 * property_name => needs_implement || property_merge_map
+	 * @type {Object}
+	 */
 	_sugar_merge_map: {
 		attribute_mappings: true,
 		content_schema: {
@@ -23,8 +29,18 @@ Lava.extenders = {
 		}
 	},
 
+	/**
+	 * Properties that are merged separately
+	 * @type {Array.<string>}
+	 */
 	_exceptions: ['resources', 'resources_cache', 'storage'],
 
+	/**
+	 * Common property merging algorithm, suitable for most cases
+	 * @param {_cWidget} dest_container The child config
+	 * @param {_cWidget} source_container The parent config
+	 * @param {string} property_name The name of the property to merge
+	 */
 	_mergeConfigProperty: function(dest_container, source_container, property_name) {
 
 		var name,
@@ -43,6 +59,12 @@ Lava.extenders = {
 
 	},
 
+	/**
+	 * Advanced merging algorithm
+	 * @param {Object} dest
+	 * @param {Object} source
+	 * @param {Object} map
+	 */
 	_mergeWithMap: function(dest, source, map) {
 
 		var name;
@@ -71,12 +93,25 @@ Lava.extenders = {
 
 	},
 
+	/**
+	 * Merge algorithm for {@link _cWidget#sugar}
+	 * @param {_cWidget} dest_container Child config
+	 * @param {_cWidget} source_container Parent config
+	 * @param {string} property_name
+	 */
 	_mergeSugar: function(dest_container, source_container, property_name) {
 
 		this._mergeWithMap(dest_container[property_name], source_container[property_name], this._sugar_merge_map);
 
 	},
 
+	/**
+	 * Merge algorithm for {@link _cWidget#includes}
+	 * @param {_cWidget} dest_container Child config
+	 * @param {_cWidget} source_container Parent config
+	 * @param {string} property_name
+	 * @param {string} parent_widget_name Name of the parent widget
+	 */
 	_mergeIncludes: function(dest_container, source_container, property_name, parent_widget_name) {
 
 		var name,
@@ -102,6 +137,12 @@ Lava.extenders = {
 
 	},
 
+	/**
+	 * Merging algorithm for {@link _cWidget#storage}
+	 * @param {_cWidget} dest_container Child config
+	 * @param {_cWidget} source_container Parent config
+	 * @param {string} property_name
+	 */
 	_mergeStorage: function(dest_container, source_container, property_name) {
 
 		var name,
@@ -129,6 +170,11 @@ Lava.extenders = {
 
 	},
 
+	/**
+	 * Merge algorithm for resources
+	 * @param {_cWidget} config
+	 * @param {_cWidget} parent_config
+	 */
 	_extendResources: function(config, parent_config) {
 
 		var locale_cache = {};
@@ -159,6 +205,12 @@ Lava.extenders = {
 
 	},
 
+	/**
+	 * Merge algorithm for {@link _cWidget#storage_schema}
+	 * @param {_cWidget} dest_container
+	 * @param {_cWidget} source_container
+	 * @param {string} property_name
+	 */
 	_mergeStorageSchema: function(dest_container, source_container, property_name) {
 
 		Lava.mergeStorageSchema(dest_container[property_name], source_container[property_name]);
@@ -166,6 +218,7 @@ Lava.extenders = {
 	},
 
 	/**
+	 * Extend raw widget config
 	 * @param {_cWidget} config
 	 */
 	Default: function(config) {
@@ -225,10 +278,6 @@ Lava.extenders = {
 		}
 
 		config.is_extended = true;
-
-	},
-
-	_noop: function() {
 
 	}
 

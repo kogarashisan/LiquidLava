@@ -228,8 +228,14 @@ module.exports = function(grunt) {
 			this.links[target] = descriptor;
 		},
 
+		has_errors: false,
+
 		generateLink: function(type, link_target, linktitle) {
-			if (!(link_target in this.links)) throw new Error('doc: link is not registered: ' + link_target);
+			if (!(link_target in this.links)) {
+				grunt.log.error('doc: link is not registered: ' + link_target);
+				this.has_errors = true;
+				return '[ERROR: INVALID LINK]';
+			}
 			var link_descriptor = this.links[link_target];
 			var href = this._page_links[link_descriptor.page] + '#' + link_descriptor.hash;
 			linktitle = linktitle || link_target;
@@ -245,6 +251,8 @@ module.exports = function(grunt) {
 				this.objects_with_processed_markdown.push(descriptor);
 
 				if (descriptor.description) descriptor.description = LavaBuild.processMarkdown(descriptor.description);
+				// for events
+				if (descriptor.argument_description) descriptor.argument_description = LavaBuild.processMarkdown(descriptor.argument_description);
 
 				if (descriptor.type_names) {
 					var new_type_names = [];

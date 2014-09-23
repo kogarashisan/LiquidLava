@@ -8,12 +8,45 @@
 /**
  * Animation transition function (easing)
  * @callback _tTransitionCallback
- * @param {number} x Current animation position, 0 <= x <= 1
+ * @param {number} x Current animation position, 0..1
  * @returns {number} The distance value
+ */
+
+/**
+ * // A comment for PHPStorm, cause it does not recognize @callback //
+ * @typedef {function(*, string, number):boolean} _tEnumerableFilterCallback
+ * @ignore
+ */
+
+/**
+ * Filter callback for {@link Lava.system.Enumerable}
+ * @callback _tEnumerableFilterCallback
+ * @param {*} value
+ * @param {string} name
+ * @param {number} uid
+ * @param {number} i Index in collection
+ * @returns {boolean} <kw>true</kw>, if entry needs to stay in collection, or <kw>false</kw> if it should be removed
+ */
+
+/**
+ * // A comment for PHPStorm, cause it does not recognize @callback //
+ * @typedef {function(*, *):boolean} _tLessCallback
+ * @ignore
+ */
+
+/**
+ * Callback to compare two values for usage in sorting algorithms
+ * @callback _tLessCallback
+ * @param {*} a
+ * @param {*} b
+ * @returns {boolean} <kw>true</kw>, if `a < b` and <kw>false</kw> otherwise
  */
 
 /** @typedef {number} _tGUID */
 
+/**
+ * Structure, used by {@link Lava.ClassManager}
+ */
 _cClassData = {
 
 	/**
@@ -29,7 +62,7 @@ _cClassData = {
 	path: '',
 
 	/**
-	 * The raw class object, from which it was constructed
+	 * Raw class body, from which it was constructed
 	 * @type {Object}
 	 */
 	source_object: {},
@@ -46,7 +79,10 @@ _cClassData = {
 	 */
 	extends: null,
 
-	/** @type {Array.<string>} */
+	/**
+	 * List of all classes, implemented by this class and it's parents
+	 * @type {Array.<string>}
+	 */
 	implements: [],
 
 	/**
@@ -56,13 +92,13 @@ _cClassData = {
 	parent_class_data: null,
 
 	/**
-	 * List of full paths to classes in the hierarchy, with this one being the last.
+	 * List of full paths to classes in the hierarchy, with this one being the last
 	 * @type {Array.<string>}
 	 */
 	hierarchy_paths: [],
 
 	/**
-	 * Used to build the class constructor.
+	 * Used to build the class constructor
 	 * @type {Object}
 	 */
 	skeleton: {},
@@ -89,14 +125,8 @@ _cClassData = {
 };
 
 /**
- * @interface
+ * Event argument for some events in Enumerable
  */
-_iEventTicket = {
-
-	remove: function() {}
-
-};
-
 _cEnumerableEventArgs = {
 
 	uids: [],
@@ -105,27 +135,65 @@ _cEnumerableEventArgs = {
 
 };
 
+/**
+ * Translatable string from widget's resources
+ */
 _cTranslatableString = {
 
+	/**
+	 * Resource type
+	 * @type {string}
+	 * @const
+	 */
 	type: 'translate',
+	/**
+	 * String content
+	 */
 	value: '',
+	/**
+	 * User-defined "description" attribute from resource tag
+	 */
 	description: '',
+	/**
+	 * User-defined "context" attribute from resource tag
+	 */
 	context: ''
 
 };
 
+/**
+ * Translatable plural string from widget's resources
+ */
 _cTranslatablePlural = {
 
+	/**
+	 * Resource type
+	 * @type {string}
+	 * @const
+	 */
 	type: 'ntranslate',
-	/** @type {Array.<string>} */
+	/**
+	 * @type {Array.<string>}
+	 */
 	value: [],
+	/**
+	 * User-defined "description" attribute from resource tag
+	 */
 	description: '',
+	/**
+	 * User-defined "context" attribute from resource tag
+	 */
 	context: ''
 
 };
 
 _cScopeForeach = {
 
+	/**
+	 * Whether to create another (own) instance of Enumerable, when argument result is also Enumerable.
+	 * May be used to apply sorting and filtering
+	 * @type {boolean}
+	 */
 	create_own_enumerable: false,
 	/**
 	 * @type {?string}
@@ -135,18 +203,47 @@ _cScopeForeach = {
 };
 
 /**
- * @interface
+ * Listener object
  */
-_iVisitor = {
-	enter: function(walker, block_type, block) {},
-	leave: function(walker, block_type, block) {},
-	enterRegion: function(walker, region_name) {},
-	leaveRegion: function(walker, region_name) {},
-	visitView: function(walker, node) {},
-	visitWidget: function(walker, node) {},
-	visitString: function(walker, node) {},
-	visitInclude: function(walker, node) {},
-	visitStaticValue: function(walker, node) {},
-	visitStaticEval: function(walker, node) {},
-	visitStaticTag: function(walker, node) {}
+_tListener = {
+	/** @readonly */
+	event_name: '',
+	/** @readonly */
+	fn: null,
+	/** @readonly */
+	fn_original: null,
+	/** @readonly */
+	context: null,
+	/** @readonly */
+	listener_args: null
 };
+
+/**
+ * Temporary object used internally by Enumerable
+ */
+_cEnumerableHelperStorage = {
+	uids: [],
+	values: [],
+	names: [],
+	push: function(uid, value, name) {},
+	/**
+	 * @returns {{uids: Array.<number>, values: Array.<*>, names: Array.<string>}}
+	 */
+	getObject: function() {}
+};
+
+/**
+ * // Comment for PHPStorm, cause it does not recognize @callback //
+ * @typedef {function(*, string, number):boolean} _tEnumerableEachCallback
+ * @ignore
+ */
+
+/**
+ * Callback for {@link Lava.system.Enumerable#each}
+ * @callback _tEnumerableEachCallback
+ * @param {*} value
+ * @param {string} name
+ * @param {number} uid
+ * @param {number} i Index in collection
+ * @returns {boolean} <kw>false</kw> to break loop
+ */

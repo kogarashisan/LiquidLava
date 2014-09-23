@@ -2,10 +2,16 @@
 Lava.define(
 'Lava.system.Sugar',
 /**
+ * Parser syntax extension for widgets
+ *
  * @lends Lava.system.Sugar#
  */
 {
 
+	/**
+	 * Handlers for root types, {@link _eSugarRootContentType}
+	 * @type {Object.<string, string>}
+	 */
 	_root_map: {
 		include: '_parseInclude',
 		storage: '_parseStorage',
@@ -13,12 +19,18 @@ Lava.define(
 		storage_object: '_parseStorageObject'
 	},
 
+	/**
+	 * Tag types, allowed to be inside {@link _eSugarRootContentType|_eSugarRootContentType.union}
+	 * (except storage tags, which are processed separately)
+	 * @type {Object.<string, string>}
+	 */
 	_union_handlers: {
 		include: '_parseInclude'
 	},
 
 	/**
 	 * The types of attributes that can be on root object, type => handler_name
+	 * @type {Object.<string, string>}
 	 */
 	_root_attributes_handlers: {
 		expression_option: '_parseRootExpressionOptionAttribute',
@@ -30,6 +42,7 @@ Lava.define(
 	},
 
 	/**
+	 * Parse raw tag as a widget
 	 * @param {_cSugar} schema
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
@@ -65,9 +78,10 @@ Lava.define(
 	},
 
 	/**
-	 * @param {_tRawTemplate} raw_blocks
-	 * @param {_cWidget} widget_config
-	 * @returns {_tRawTemplate}
+	 * Inside sugar tag there may be directives at the top. Apply them to widget config and cut away
+	 * @param {_tRawTemplate} raw_blocks The content inside widget's sugar tag
+	 * @param {_cWidget} widget_config The config of the widget being parsed
+	 * @returns {_tRawTemplate} New content without directives
 	 */
 	_applyTopDirectives: function(raw_blocks, widget_config) {
 
@@ -94,10 +108,11 @@ Lava.define(
 	// root parsers
 
 	/**
+	 * Parse widget's tag content as include
 	 * @param {_cSugarContent} content_schema
-	 * @param {_cRawTag} raw_tag
+	 * @param {_cRawTag} raw_tag Widget's tag
 	 * @param {_cWidget} widget_config
-	 * @param {string} name
+	 * @param {string} name Include name
 	 */
 	_parseInclude: function(content_schema, raw_tag, widget_config, name) {
 
@@ -112,9 +127,10 @@ Lava.define(
 	},
 
 	/**
-	 * @param content_schema
-	 * @param raw_tag
-	 * @param widget_config
+	 * Parse widget's tag content as {@link _cWidget#storage}
+	 * @param {_cSugarContent} content_schema
+	 * @param {_cRawTag} raw_tag
+	 * @param {_cWidget} widget_config
 	 */
 	_parseStorage: function(content_schema, raw_tag, widget_config) {
 
@@ -127,6 +143,7 @@ Lava.define(
 	},
 
 	/**
+	 * The content of `raw_tag` is storage tags, mixed with includes
 	 * @param {_cSugarContent} content_schema
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
@@ -167,6 +184,7 @@ Lava.define(
 	},
 
 	/**
+	 * Tags inside `raw_tag` represent properties in an object in storage
 	 * @param {_cSugarContent} content_schema
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
@@ -187,6 +205,7 @@ Lava.define(
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
+	 * Parse attributes of the widget's `raw_tag` into `widget_config`
 	 * @param {_cSugar} schema
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
@@ -221,6 +240,7 @@ Lava.define(
 	},
 
 	/**
+	 * Store root attributes that are not described in Sugar config as 'container_stack' resource
 	 * @param {_cWidget} widget_config
 	 * @param {Object} unknown_attributes
 	 * @param {string} resource_name
@@ -282,6 +302,7 @@ Lava.define(
 	// root attribute actions
 
 	/**
+	 * Store 'id' attribute on root tag into {@link _cView#id}
 	 * @param {_cWidget} widget_config
 	 * @param {string} attribute_value
 	 */
@@ -293,6 +314,7 @@ Lava.define(
 	},
 
 	/**
+	 * Evaluate attribute value and store it in {@link _cView#options}
 	 * @param {_cWidget} widget_config
 	 * @param {string} attribute_value
 	 * @param {_cSugarRootAttribute} descriptor
@@ -305,7 +327,7 @@ Lava.define(
 	},
 
 	/**
-	 * Same as 'option', but empty value is treated as boolean TRUE, to allow value-less attributes.
+	 * Same as 'option', but empty value is treated as boolean TRUE, to allow value-less (void) attributes
 	 * @param {_cWidget} widget_config
 	 * @param {string} attribute_value
 	 * @param {_cSugarRootAttribute} descriptor
@@ -318,6 +340,7 @@ Lava.define(
 	},
 
 	/**
+	 * Store attribute as property into {@link _cWidget#properties}
 	 * @param {_cWidget} widget_config
 	 * @param {string} attribute_value
 	 * @param {_cSugarRootAttribute} descriptor
@@ -329,9 +352,8 @@ Lava.define(
 
 	},
 
-
-
 	/**
+	 * Parse attribute value via {@link Lava.parsers.Common#parseTargets} and store it as an option
 	 * @param {_cWidget} widget_config
 	 * @param {string} attribute_value
 	 * @param {_cSugarRootAttribute} descriptor
@@ -344,6 +366,7 @@ Lava.define(
 	},
 
 	/**
+	 * Parse attribute value as expression and store it as an option
 	 * @param {_cWidget} widget_config
 	 * @param {string} attribute_value
 	 * @param {_cSugarRootAttribute} descriptor

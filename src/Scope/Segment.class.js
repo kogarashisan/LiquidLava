@@ -1,6 +1,13 @@
+
+/**
+ * Value of this Segment instance has changed
+ * @event Lava.scope.Segment#changed
+ */
+
 Lava.define(
 'Lava.scope.Segment',
 /**
+ * Scope, that can change name of it's bound property dynamically
  * @lends Lava.scope.Segment#
  * @extends Lava.scope.Abstract
  * @implements _iValueContainer
@@ -8,25 +15,64 @@ Lava.define(
 {
 
 	Extends: 'Lava.scope.Abstract',
+	/**
+	 * This instance supports two-way data binding
+	 * @type {boolean}
+	 * @const
+	 */
 	isSetValue: true,
 
+	/**
+	 * Either view or a scope with `getDataBinding()` - will be used to construct `_data_binding`
+	 * @type {(Lava.view.Abstract|Lava.scope.Abstract)}
+	 */
 	_container: null,
 
 	/**
-	 * @type {_iValueContainer}
+	 * The scope, which provides the name of the property for the Segment
+	 * @type {(Lava.scope.PropertyBinding|Lava.scope.DataBinding)}
 	 */
 	_name_source_container: null,
+	/**
+	 * Listener for {Lava.mixin.Refreshable#event:waits_refresh} in `_name_source_container`
+	 * @type {_tListener}
+	 */
 	_name_source_waits_refresh_listener: null,
+	/**
+	 * Listener for "changed" event in `_name_source_container`
+	 * @type {_tListener}
+	 */
 	_name_source_changed_listener: null,
+	/**
+	 * Listener for {Lava.mixin.Refreshable#event:refreshed} in `_name_source_container`
+	 * @type {_tListener}
+	 */
 	_name_source_refreshed_listener: null,
 
+	/**
+	 * The name of the property, which this Segment is bound to
+	 * @type {string}
+	 */
 	_property_name: null,
+	/**
+	 * Scope, which is bound to the `_property_name`. Serves as source of value for the Segment
+	 * @type {(Lava.scope.DataBinding|Lava.scope.PropertyBinding)}
+	 */
 	_data_binding: null,
+	/**
+	 * Listener for "changed" event in `_data_binding`
+	 * @type {_tListener}
+	 */
 	_data_binding_changed_listener: null,
 
+	/**
+	 * Segment's current value
+	 * @type {*}
+	 */
 	_value: null,
 
 	/**
+	 * Create Segment instance. Refresh `_property_name`, `_data_binding` and get value
 	 * @param {(Lava.view.Abstract|Lava.scope.Abstract)} container
 	 * @param {(Lava.scope.PropertyBinding|Lava.scope.DataBinding)} name_source_container
 	 * @param {number} level
@@ -58,6 +104,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Return true, if the Segment is bound to existing object
+	 * @returns {boolean}
+	 */
 	isConnected: function() {
 
 		if (!this._data_binding) Lava.t();
@@ -65,6 +115,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Create `_data_binding` and it's "changed" listener
+	 */
 	_refreshDataBinding: function() {
 
 		this._data_binding = this._container.getDataBinding(this._property_name);
@@ -72,6 +125,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Destroy `_data_binding` and it's "changed" listener
+	 */
 	_destroyDataBinding: function() {
 
 		this._data_binding.removeListener(this._data_binding_changed_listener);
@@ -80,6 +136,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * The value of bound scope has changed. Schedule refresh
+	 */
 	onDataBindingChanged: function() {
 
 		this._queueForRefresh();
@@ -107,6 +166,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Segment must bind to new property name. Destroy old `_data_binding` and schedule refresh
+	 */
 	onPropertyNameChanged: function() {
 
 		this._property_name = this._name_source_container.getValue();
@@ -117,6 +179,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_value`
+	 * @returns {*}
+	 */
 	getValue: function() {
 
 		return this._value;
@@ -124,6 +190,7 @@ Lava.define(
 	},
 
 	/**
+	 * Set `_property_name` of the bound object
 	 * @param {*} value
 	 */
 	setValue: function(value) {

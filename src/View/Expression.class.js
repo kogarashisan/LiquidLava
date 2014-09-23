@@ -2,6 +2,8 @@
 Lava.define(
 'Lava.view.Expression',
 /**
+ * View that displays result of an Argument
+ *
  * @lends Lava.view.Expression#
  * @extends Lava.view.Abstract
  * @implements _iViewHierarchyMember
@@ -10,11 +12,20 @@ Lava.define(
 
 	Extends: 'Lava.view.Abstract',
 	/**
+	 * Argument that returns a string
 	 * @type {Lava.scope.Argument}
 	 */
 	_argument: null,
+	/**
+	 * Listener to {@link Lava.scope.Argument#event:changed}
+	 * @type {_tListener}
+	 */
 	_argument_changed_listener: null,
 
+	/**
+	 * Should the view escape HTML entities in argument's value. May be turned off via config switch
+	 * @type {boolean}
+	 */
 	_escape: true,
 
 	_postInit: function() {
@@ -26,6 +37,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Argument's value has changed, schedule refresh
+	 */
 	_onValueChanged: function() {
 
 		this.trySetDirty();
@@ -69,6 +83,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Perform escaping of HTML entities in argument's value
+	 * @param {string} string Argument's value
+	 * @returns {string} Escaped value
+	 */
 	escapeArgumentValue: function(string) {
 
 		return Firestorm.String.escape(string, Firestorm.String.HTML_ESCAPE_REGEX);

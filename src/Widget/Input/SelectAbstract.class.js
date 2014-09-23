@@ -2,6 +2,7 @@
 Lava.define(
 'Lava.widget.input.SelectAbstract',
 /**
+ * Base class for select inputs
  * @lends Lava.widget.input.SelectAbstract#
  * @extends Lava.widget.input.Abstract#
  */
@@ -12,7 +13,10 @@ Lava.define(
 	name: 'select',
 
 	_properties: {
-		// optgroup tag is created only for those groups that have a title
+		/**
+		 * Option groups in this select input.
+		 * &lt;optgroup&gt; tag is created only for those groups that have a title
+		 */
 		optgroups: null
 	},
 
@@ -31,7 +35,10 @@ Lava.define(
 
 	},
 
-	_onValueChanged: function(dom_event_name, dom_event, view, template_arguments) {
+	/**
+	 * DOM element's value has changed: refresh local <i>value</i> property
+	 */
+	_onValueChanged: function() {
 
 		this._refreshValue();
 
@@ -45,6 +52,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Refresh local <i>value</i> property from DOM input element
+	 */
 	_refreshValue: function() {
 
 		Lava.t('Abstract function call: _refreshValue');

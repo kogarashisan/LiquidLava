@@ -1,9 +1,12 @@
-/**
- * Credits:
- * Some code is taken from Metamorph (https://github.com/tomhuda/metamorph.js/)
- * and MooTools (http://mootools.net/)
- */
+/*
+Credits:
+Some code is taken from Metamorph (https://github.com/tomhuda/metamorph.js/)
+and MooTools (http://mootools.net/)
+*/
 
+/**
+ * Low-level DOM manipulation and utility library
+ */
 var Firestorm = {
 
 	/** @ignore */
@@ -23,8 +26,16 @@ var Firestorm = {
 	/** @ignore */
 	Date: null,
 
+	/**
+	 * The map of numbered exception messages. May be excluded from production build
+	 * @type {Object.<number, string>}
+	 */
 	KNOWN_EXCEPTIONS: null,
 
+	/**
+	 * Used by {@link Firestorm#getType}
+	 * @type {Object.<string, string>}
+	 */
 	_descriptor_to_type: {
 		"[object Boolean]": 'boolean',
 		"[object Number]": 'number',
@@ -39,7 +50,10 @@ var Firestorm = {
 		"[object Undefined]": 'undefined'
 	},
 
-	/** @enum {number} */
+	/**
+	 * Browser key codes from keyboard events
+	 * @enum {number}
+	 */
 	KEY_CODES: {
 		ESCAPE: 27,
 		LEFT_ARROW: 37,
@@ -48,6 +62,9 @@ var Firestorm = {
 		DOWN_ARROW: 40
 	},
 
+	/**
+	 * Framework must be initialized before it can be used
+	 */
 	init: function() {
 
 		if (typeof(window) != 'undefined') {
@@ -64,17 +81,22 @@ var Firestorm = {
 
 	},
 
-	getType: function(target) {
+	/**
+	 * Get actual type of any JavaScript value
+	 * @param {*} value Any value
+	 * @returns {string} The type name, like "null", "object" or "regex"
+	 */
+	getType: function(value) {
 
 		var result = 'null';
 
 		// note: Regexp type may be both an object and a function in different browsers
-		if (target !== null) {
+		if (value !== null) {
 
-			result = typeof(target);
+			result = typeof(value);
 			if (result == "object" || result == "function") {
 				// this.toString refers to plain object's toString
-				result = this._descriptor_to_type[this.toString.call(target)] || "object";
+				result = this._descriptor_to_type[this.toString.call(value)] || "object";
 			}
 
 		}
@@ -83,12 +105,22 @@ var Firestorm = {
 
 	},
 
+	/**
+	 * Get HTML element by it's id attribute
+	 * @param {string} id
+	 * @returns {HTMLElement}
+	 */
 	getElementById: function(id) {
 
 		return document.id(id);
 
 	},
 
+	/**
+	 * Copy all properties from `partial` to `base`
+	 * @param {Object} base
+	 * @param {Object} partial
+	 */
 	extend: function(base, partial) {
 
 		for (var name in partial) {
@@ -99,6 +131,11 @@ var Firestorm = {
 
 	},
 
+	/**
+	 * Copy all properties from `partial` to `base`, but do not overwrite existing properties
+	 * @param {Object} base
+	 * @param {Object} partial
+	 */
 	implement: function(base, partial) {
 
 		for (var name in partial) {
@@ -113,12 +150,22 @@ var Firestorm = {
 
 	},
 
+	/**
+	 * Return all elements which match the given selector
+	 * @param {string} selector CSS selector
+	 * @returns {Array.<HTMLElement>}
+	 */
 	selectElements: function(selector) {
 
 		return Slick.search(window.document, selector, new Elements);
 
 	},
 
+	/**
+	 * Deep clone of given value
+	 * @param {*} value
+	 * @returns {*}
+	 */
 	clone: function(value) {
 
 		switch (this.getType(value)) {
@@ -132,6 +179,10 @@ var Firestorm = {
 
 	},
 
+	/**
+	 * Throw an exception
+	 * @param [message] Exception message
+	 */
 	t: function(message) {
 
 		if (typeof(message) == 'number' && this.KNOWN_EXCEPTIONS && (message in this.KNOWN_EXCEPTIONS)) {
@@ -142,7 +193,15 @@ var Firestorm = {
 
 	},
 
+	/**
+	 * Return <kw>true</kw>
+	 * @returns {boolean} <kw>true</kw>
+	 */
 	'true': function() {return true},
+	/**
+	 * Return <kw>false</kw>
+	 * @returns {boolean} <kw>false</kw>
+	 */
 	'false': function() {return false}
 
 };

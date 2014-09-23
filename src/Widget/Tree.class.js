@@ -2,6 +2,7 @@
 Lava.define(
 'Lava.widget.Tree',
 /**
+ * Tree with expandable nodes
  * @lends Lava.widget.Tree#
  * @extends Lava.widget.Standard#
  */
@@ -12,6 +13,9 @@ Lava.define(
 
 	name: 'tree',
 
+	/**
+	 * Shared configs
+	 */
 	_shared: {
 		meta_storage_config: {
 			fields: {
@@ -23,6 +27,7 @@ Lava.define(
 	},
 
 	_properties: {
+		/** User-assigned records in the root of the tree */
 		records: null
 	},
 
@@ -30,9 +35,26 @@ Lava.define(
 		node_click: '_onNodeClick'
 	},
 
+	/**
+	 * MetaStorage instance for storage of "is_expanded" state of tree records
+	 * @type {Lava.data.MetaStorage}
+	 */
 	_meta_storage: null,
+	/**
+	 * Route to record's "is_expanded" property for templates
+	 * @type {_cScopeLocator}
+	 */
 	_is_expanded_bind_config: null,
 
+	/**
+	 * @param config
+	 * @param {boolean} config.options.use_meta_storage Store "is_expanded" property of tree nodes in separate MetaStorage instance.
+	 *  By default, "is_expanded" property is taken directly from nodes
+	 * @param widget
+	 * @param parent_view
+	 * @param template
+	 * @param properties
+	 */
 	init: function(config, widget, parent_view, template, properties) {
 
 		this.Standard$init(config, widget, parent_view, template, properties);
@@ -46,14 +68,34 @@ Lava.define(
 
 	},
 
+	/**
+	 * Expand or collapse the node
+	 * @param dom_event_name
+	 * @param dom_event
+	 * @param view
+	 * @param template_arguments
+	 */
 	_onNodeClick: function(dom_event_name, dom_event, view, template_arguments) {
 
+		// template_arguments[0] - node record
+		if (Lava.schema.DEBUG) {
+			if (this._meta_storage) {
+				if (!template_arguments[0].guid) Lava.t("Tree: record without GUID");
+			} else if (!template_arguments[0].isProperties) {
+				Lava.t("Tree: record is not instance of Properties");
+			}
+		}
 		var property_source = this._meta_storage ? this._meta_storage.get(template_arguments[0].guid) : template_arguments[0];
 		property_source.set('is_expanded', !property_source.get('is_expanded'));
 		dom_event.preventDefault(); // to prevent text selection
 
 	},
 
+	/**
+	 * Switch expandable tree records to new state
+	 * @param node
+	 * @param {boolean} expanded_state
+	 */
 	_toggleTree: function(node, expanded_state) {
 
 		var children = node.get('children'),
@@ -78,6 +120,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Switch expandable root records to new state
+	 * @param {boolean} expanded_state
+	 */
 	_toggleRecords: function(expanded_state) {
 
 		var records = this._properties.records,
@@ -95,12 +141,18 @@ Lava.define(
 
 	},
 
+	/**
+	 * Expand all records in the tree
+	 */
 	expandAll: function() {
 
 		this._toggleRecords(true);
 
 	},
 
+	/**
+	 * Collapse all records in the tree
+	 */
 	collapseAll: function() {
 
 		this._toggleRecords(false);
@@ -108,6 +160,7 @@ Lava.define(
 	},
 
 	/**
+	 * Locate record's "is_expanded" property for templates
 	 * @param {Lava.view.Abstract} view
 	 * @param {_cDynamicScope} config
 	 */

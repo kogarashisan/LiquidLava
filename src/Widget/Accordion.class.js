@@ -2,19 +2,20 @@
  * Panel is expanding
  * @event Lava.widget.Accordion#panel_expanding
  * @type {Object}
- * @property {Lava.widget.Standard} panel The panel, which triggered the event
+ * @property {Lava.widget.Standard} panel Panel, which triggered the event
  */
 
 /**
  * Panel is collapsing
  * @event Lava.widget.Accordion#panel_collapsing
  * @type {Object}
- * @property {Lava.widget.Standard} panel The panel, which triggered the event
+ * @property {Lava.widget.Standard} panel Panel, which triggered the event
  */
 
 Lava.define(
 'Lava.widget.Accordion',
 /**
+ * Collection of expandable panels
  * @lends Lava.widget.Accordion#
  * @extends Lava.widget.Standard#
  */
@@ -29,8 +30,12 @@ Lava.define(
 	},
 
 	_properties: {
-		/** @type {Lava.system.Enumerable} */
+		/**
+		 * Collection of "panel" <b>objects</b> (objects with properties for panel <b>widgets</b>)
+		 * @type {Lava.system.Enumerable}
+		 */
 		_panels: null,
+		/** If accordion is enabled - then it closes all other open panels when any panel is opened */
 		is_enabled: true
 	},
 
@@ -42,15 +47,31 @@ Lava.define(
 		panel_include: '_getPanelInclude'
 	},
 
+	/**
+	 * Reference to the <i>_panels</i> property
+	 * @type {Lava.system.Enumerable}
+	 */
 	_panels: null,
+	/**
+	 * Accordion's panels
+	 * @type {Array.<Lava.widget.Standard>}
+	 */
 	_panel_widgets: [],
+	/**
+	 * Panels, that are currently expanded
+	 * @type {Array.<Lava.widget.Standard>}
+	 */
 	_active_panels: [],
+	/**
+	 * Objects with listeners for accordion's panels
+	 * @type {Object.<string, Object.<string, _tListener>>}
+	 */
 	_listeners_by_panel_guid: {},
 
 	/**
 	 * @param config
-	 * @param config.options.keep_expanded_on_add If you add another expanded panel to accordion - it's collapsed by default.
-	 * You may set this option to keep it expanded - in this case all expanded panels will be collapsed as soon as any panel is expanded by user.
+	 * @param {boolean} config.options.keep_expanded_on_add If you add another expanded panel to accordion - it's collapsed by default.
+	 *  You may set this option to keep it expanded - in this case all expanded panels will be collapsed as soon as any panel is expanded by user
 	 * @param widget
 	 * @param parent_view
 	 * @param template
@@ -89,6 +110,14 @@ Lava.define(
 
 	},
 
+	/**
+	 * Create a panel inside accordion
+	 * @param {Object} properties Plain object with panel's data
+	 * @param {boolean} properties.is_expanded Initial "expanded" state
+	 * @param {_tTemplate} properties.title
+	 * @param {_tTemplate} properties.content
+	 * @returns {Lava.mixin.Properties} The {@link Lava.mixin.Properties} instance with panel's data
+	 */
 	addPanel: function(properties) {
 
 		if (Lava.schema.DEBUG && (properties.title && !Array.isArray(properties.title)) || (properties.content && !Array.isArray(properties.content))) Lava.t('Accordion: title and content must be templates');
@@ -104,30 +133,53 @@ Lava.define(
 
 	},
 
-	getPanels: function() {
+	/**
+	 * Get panel objects
+	 * @returns {Array.<Lava.widget.Standard>}
+	 */
+	getPanelObjects: function() {
 
 		return this._panels.getValues();
 
 	},
 
+	/**
+	 * Get a copy of `_panel_widgets`
+	 * @returns {Array}
+	 */
 	getPanelWidgets: function() {
 
 		return this._panel_widgets.slice();
 
 	},
 
+	/**
+	 * Get an include from panel data
+	 * @param template_arguments
+	 * @returns {_tTemplate}
+	 */
 	_getPanelInclude: function(template_arguments) {
 
+		// template_arguments[0] - panel object (Properties)
+		// template_arguments[1] - name of variable (ex: "content")
 		return template_arguments[0].get(template_arguments[1]);
 
 	},
 
-	_handlePanelRole: function(view, template_arguments) {
+	/**
+	 * Handle a panel inside accordion instance
+	 * @param {Lava.widget.Standard} view
+	 */
+	_handlePanelRole: function(view) {
 
 		this.registerPanel(view);
 
 	},
 
+	/**
+	 * Add panel widget instance to Accordion. Panel does not need to be inside accordion
+	 * @param {Lava.widget.Standard} panel_widget
+	 */
 	registerPanel: function(panel_widget) {
 
 		var collapse_on_add = !this._config.options || !this._config.options['keep_expanded_on_add'];
@@ -157,6 +209,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Remove all references to panel widget from local members
+	 * @param {Lava.widget.Standard} panel_widget
+	 */
 	_removePanel: function(panel_widget) {
 
 		Firestorm.Array.exclude(this._panel_widgets, panel_widget);
@@ -165,6 +221,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Stop controlling this panel widget
+	 * @param {Lava.widget.Standard} panel_widget
+	 */
 	unregisterPanel: function(panel_widget) {
 
 		var listeners = this._listeners_by_panel_guid[panel_widget.guid];
@@ -177,6 +237,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Panel is expanding. Close all other panels
+	 * @param {Lava.widget.Standard} panel
+	 */
 	_onPanelExpanding: function(panel) {
 
 		var turnoff_panels,
@@ -206,6 +270,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Handler of panel's "collapsing" event
+	 * @param {Lava.widget.Standard} panel
+	 */
 	_onPanelCollapsing: function(panel) {
 
 		Firestorm.Array.exclude(this._active_panels, panel);
@@ -215,6 +283,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Turn accordion on and off
+	 * @param {boolean} value
+	 * @param {string} name
+	 */
 	_setIsEnabled: function(value, name) {
 
 		var turnoff_panels = [],
@@ -246,21 +319,31 @@ Lava.define(
 
 	},
 
+	/**
+	 * Remove references to destroyed panel
+	 * @param panel
+	 */
 	_onPanelDestroy: function(panel) {
 
 		this._removePanel(panel);
 
 	},
 
+	/**
+	 * Remove all panels, added by `addPanel`
+	 */
 	removeNativePanels: function() {
 
 		this._panels.removeAll();
 
 	},
 
+	/**
+	 * Stop controlling all panels and remove panels which were added by `addPanel`
+	 */
 	removeAllPanels: function() {
 
-		var panel_widgets = this._panel_widgets.clone(); // cause array will be modified during unregisterPanel()
+		var panel_widgets = this._panel_widgets.slice(); // cause array will be modified during unregisterPanel()
 
 		for (var i = 0, count = panel_widgets.length; i < count; i++) {
 
@@ -272,6 +355,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Remove a panel, added by `addPanel`
+	 * @param {Lava.mixin.Properties} panel The panel object, returned by `addPanel`
+	 */
 	removePanel: function(panel) {
 
 		this._panels.removeValue(panel); // everything else will be done by destroy listener

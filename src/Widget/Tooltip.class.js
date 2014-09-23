@@ -2,6 +2,7 @@
 Lava.define(
 'Lava.widget.Tooltip',
 /**
+ * Tooltip instance
  * @lends Lava.widget.Tooltip#
  * @extends Lava.widget.Standard#
  */
@@ -21,11 +22,17 @@ Lava.define(
 	},
 
 	_properties: {
+		/** Vertical position of the tooltip */
 		y: 0,
+		/** Vertical position of the tooltip */
 		x: 0,
+		/** Vertical offset of the tooltip instance from cursor pointer */
 		y_offset: -25,
+		/** Horizontal tooltip offset */
 		x_offset: 5,
+		/** Tooltip's content */
 		html: '',
+		/** Is this tooltip instance visible */
 		is_visible: false
 	}
 

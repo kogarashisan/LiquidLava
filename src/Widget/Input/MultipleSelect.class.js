@@ -2,6 +2,7 @@
 Lava.define(
 'Lava.widget.input.MultipleSelect',
 /**
+ * Select input with multiple choices
  * @lends Lava.widget.input.MultipleSelect#
  * @extends Lava.widget.input.SelectAbstract#
  */
@@ -54,7 +55,11 @@ Lava.define(
 
 	},
 
-	_setValue: function(value, name) {
+	/**
+	 * Setter for the <i>value</i> property
+	 * @param {Array.<string>} value
+	 */
+	_setValue: function(value) {
 
 		var element,
 			options,
@@ -79,8 +84,8 @@ Lava.define(
 	},
 
 	/**
-	 * as control does not need live bindings of 'selected' property, this modifier is used to speed up rendering.
-	 * @param value
+	 * {modifier} This widget does not need live bindings of <i>selected</i> property, so this modifier is used to speed up rendering
+	 * @param {string} value
 	 * @returns {boolean}
 	 */
 	isValueSelected: function(value) {

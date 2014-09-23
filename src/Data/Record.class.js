@@ -2,6 +2,8 @@
 Lava.define(
 'Lava.data.Record',
 /**
+ * Standard module's record
+ *
  * @lends Lava.data.Record#
  * @extends Lava.data.RecordAbstract
  */
@@ -9,6 +11,12 @@ Lava.define(
 
 	Extends: 'Lava.data.RecordAbstract',
 
+	/**
+	 * @param module
+	 * @param fields
+	 * @param properties_storage_ref
+	 * @param {Object} raw_properties Object with record field values from server
+	 */
 	init: function(module, fields, properties_storage_ref, raw_properties) {
 
 		this.RecordAbstract$init(module, fields, properties_storage_ref);

@@ -2,6 +2,7 @@
 Lava.define(
 'Lava.widget.DropDown',
 /**
+ * Widget with content, that is shown on click
  * @lends Lava.widget.DropDown#
  * @extends Lava.widget.Standard#
  */
@@ -16,6 +17,7 @@ Lava.define(
 	},
 
 	_properties: {
+		/** Is the widget expanded */
 		is_open: false
 	},
 
@@ -28,13 +30,31 @@ Lava.define(
 		target: '_registerTarget' // the target to which the class 'open' is applied
 	},
 
-	_is_focused: false,
-
+	/**
+	 * A view that responds to the "click" event
+	 * @type {Lava.view.Abstract}
+	 */
 	_trigger: null,
+	/**
+	 * A view, that is displayed when `_trigger` is clicked
+	 * @type {Lava.view.Abstract}
+	 */
 	_target: null,
 
+	/**
+	 * Listener for global "click" anywhere on page
+	 * @type {_tListener}
+	 */
 	_click_listener: null,
 
+	/**
+	 * @param config
+	 * @param {string} config.options.target_class Class name to add to `_target` when `_trigger` is clicked
+	 * @param widget
+	 * @param parent_view
+	 * @param template
+	 * @param properties
+	 */
 	init: function(config, widget, parent_view, template, properties) {
 
 		this.Standard$init(config, widget, parent_view, template, properties);
@@ -42,15 +62,23 @@ Lava.define(
 
 	},
 
+	/**
+	 * Handler for global {@link Lava.system.App} event "close_popups"
+	 */
 	_onClosePopups: function() {
 
 		this.set('is_open', false);
 
 	},
 
-	_onTriggerClick: function(dom_event_name, dom_event, view, template_arguments) {
+	/**
+	 * Change <i>is_open</i> state
+	 * @param dom_event_name
+	 * @param dom_event
+	 */
+	_onTriggerClick: function(dom_event_name, dom_event) {
 
-		if (this._properties._is_open) {
+		if (this._properties.is_open) {
 
 			this.set('is_open', false);
 
@@ -69,6 +97,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Click anywhere on page
+	 */
 	_onGlobalClick: function() {
 
 		Lava.Core.removeGlobalHandler(this._click_listener);
@@ -77,25 +108,42 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get container of the element, which is shown, when widget is expanded
+	 * @returns {_iContainer}
+	 */
 	_getTargetContainer: function() {
 
 		return this._target && this._target.getContainer() || this._container;
 
 	},
 
-	_registerTrigger: function(view, template_arguments) {
+	/**
+	 * Register `_trigger` view
+	 * @param {Lava.view.Abstract} view
+	 */
+	_registerTrigger: function(view) {
 
 		this._trigger = view;
 		view.getContainer().addEventTarget('click', {locator_type: "Guid", locator: this.guid, name: "trigger_click"});
 
 	},
 
-	_registerTarget: function(view, template_arguments) {
+	/**
+	 * Register `_target` view
+	 * @param {Lava.view.Abstract} view
+	 */
+	_registerTarget: function(view) {
 
 		this._target = view;
 
 	},
 
+	/**
+	 * Setter for <i>is_open</i> property
+	 * @param {boolean} value
+	 * @param {string} name
+	 */
 	_setIsOpen: function(value, name) {
 
 		var open_target_container = this._getTargetContainer();

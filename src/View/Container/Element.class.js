@@ -2,62 +2,113 @@
 Lava.define(
 'Lava.view.container.Element',
 /**
+ * Container, that represents a DOM element
  * @lends Lava.view.container.Element#
  * @implements _iContainer
  */
 {
 
+	/**
+	 * This instance belongs to Element container
+	 * @type {boolean}
+	 * @const
+	 */
 	isElementContainer: true,
 
+	/**
+	 * ID of DOM element that belongs to this container
+	 * @type {string}
+	 */
 	_id: null,
 	/**
+	 * iew that owns the container
 	 * @type {Lava.view.Abstract}
 	 */
 	_view: null,
 	/**
+	 * Settings for this instance
 	 * @type {_cElementContainer}
 	 */
 	_config: null,
 	/**
+	 * Nearest widget in hierarchy
 	 * @type {Lava.widget.Standard}
 	 */
 	_widget: null,
+	/**
+	 * Tag name of the DOM element
+	 * @type {string}
+	 */
 	_tag_name: null,
 
+	/**
+	 * List of static CSS classes, that are not bound to expressions
+	 * @type {Array.<string>}
+	 */
 	_static_classes: [],
 	/**
+	 * Arguments, that produce dynamic class names. Keys are sequential numbers
 	 * @type {!Object.<string, Lava.scope.Argument>}
 	 */
 	_class_bindings: null,
-
+	/**
+	 * Value of each argument from `_class_bindings`, split into array of class names
+	 * @type {Object.<string, Array.<string>>}
+	 */
 	_class_bindings_values: {},
 
+	/**
+	 * Styles, that are not bound to expressions
+	 * @type {Object.<string, string>}
+	 */
 	_static_styles: {},
 	/**
+	 * Arguments, that produce style values dynamically. Keys are names of CSS styles
 	 * @type {!Object.<string, Lava.scope.Argument>}
 	 */
 	_style_bindings: null,
 
+	/**
+	 * Properties, that are not bound to an argument
+	 * @type {Object.<string, string>}
+	 */
 	_static_properties: {}, // name => value
 	/**
+	 * Arguments, that produce property values. Keys are names of properties
 	 * @type {!Object.<string, Lava.scope.Argument>}
 	 */
 	_property_bindings: null,
 
 	/**
+	 * Targets for DOM events, routed by {@link Lava.system.ViewManager}
 	 * @type {Object.<string, Array.<_cTarget>>}
 	 */
 	_events: {},
 
+	/**
+	 * Is container's html element in DOM
+	 * @type {boolean}
+	 */
 	_is_inDOM: false,
-
+	/**
+	 * Reference to the real DOM element, that belongs to this container
+	 * @type {HTMLElement}
+	 */
 	_element: null,
-
+	/**
+	 * Is container's element void? (does not require closing tag)
+	 * @type {boolean}
+	 */
 	_is_void: false,
-
+	/**
+	 * Element container can control an existing element on page. <kw>true</kw>, if container was rendered and inserted
+	 * as new element, and <kw>false</kw>, if this instance was ordered to capture an existing DOM element on page
+	 * @type {boolean}
+	 */
 	_is_element_owner: true,
 
 	/**
+	 * Create Element container instance. Create bindings
 	 * @param {Lava.view.Abstract} view
 	 * @param {_cElementContainer} config
 	 * @param {Lava.widget.Standard} widget
@@ -132,6 +183,7 @@ Lava.define(
 	},
 
 	/**
+	 * Get target routes for dom event
 	 * @param {string} event_name
 	 * @returns {Array.<_cTarget>}
 	 */
@@ -163,6 +215,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Add a route for DOM event
+	 * @param {string} event_name
+	 * @param {_cTarget} target
+	 */
 	addEventTarget: function(event_name, target) {
 
 		this._fixIOS();
@@ -170,6 +227,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Add a route for DOM event - IOS bugfix version
+	 * @param {string} event_name
+	 * @param {_cTarget} target
+	 */
 	addEventTarget_IOS: function(event_name, target) {
 
 		if (this._is_inDOM && event_name == 'click' && !(event_name in this._events)) {
@@ -179,6 +241,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Add a route for DOM event - normal version
+	 * @param {string} event_name
+	 * @param {_cTarget} target
+	 */
 	addEventTarget_Original: function(event_name, target) {
 
 		if (!(event_name in this._events)) {
@@ -194,11 +261,9 @@ Lava.define(
 	},
 
 	/**
-	 * Store property value in the javascript class, and optionally - set it on the DOM element.
-	 * View can be rendered at any time, so property values must always be actual.
-	 *
+	 * Add a property to `_static_properties` and synchronize it with DOM element
 	 * @param {string} name
-	 * @param value
+	 * @param {string} value
 	 */
 	setProperty: function(name, value) {
 
@@ -207,6 +272,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Set static property to the container, but do not synchronize it with DOM element
+	 * @param {string} name
+	 * @param {string} value
+	 */
 	storeProperty: function(name, value) {
 
 		if (Lava.schema.DEBUG && name == 'id') Lava.t();
@@ -216,6 +286,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get static property
+	 * @param {string} name Property name
+	 * @returns {string}
+	 */
 	getProperty: function(name) {
 
 		return this._static_properties[name];
@@ -223,8 +298,8 @@ Lava.define(
 	},
 
 	/**
-	 * Push locally stored property value into element.
-	 * @param name
+	 * Set locally stored property value into element
+	 * @param {string} name
 	 */
 	syncProperty: function(name) {
 
@@ -232,6 +307,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Add static CSS class
+	 * @param {string} class_name
+	 * @param {boolean} cancel_sync If <kw>true</kw> - do not add that class to DOM element, just to local `_static_classes` array
+	 */
 	addClass: function(class_name, cancel_sync) {
 
 		if (Lava.schema.DEBUG && (!class_name || class_name.indexOf(' ') != -1)) Lava.t("addClass: expected one class name, got: " + class_name);
@@ -244,6 +324,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Remove a static CSS class
+	 * @param {string} class_name
+	 * @param {boolean} cancel_sync If <kw>true</kw> - do not remove the class from DOM element, just from local `_static_classes` array
+	 */
 	removeClass: function(class_name, cancel_sync) {
 
 		if (Firestorm.Array.exclude(this._static_classes, class_name)) {
@@ -254,30 +339,49 @@ Lava.define(
 
 	},
 
+	/**
+	 * Add a list of static classes to the instance
+	 * @param {Array.<string>} class_names
+	 * @param {boolean} cancel_sync If <kw>true</kw> - do not add that classes to DOM element, just to local `_static_classes` array
+	 */
 	addClasses: function(class_names, cancel_sync) {
 
 		if (Lava.schema.DEBUG && typeof(class_names) == 'string') Lava.t();
 
 		for (var i = 0, count = class_names.length; i < count; i++) {
 
-			this.addClass(class_names[i])
+			this.addClass(class_names[i], cancel_sync);
 
 		}
 
 	},
 
+	/**
+	 * Does this instance have the given static class
+	 * @param class_name Name of CSS class to search for
+	 * @returns {boolean} <kw>true</kw>, if class exists in `_static_classes`
+	 */
 	hasStaticClass: function(class_name) {
 
 		return this._static_classes.indexOf(class_name) != -1;
 
 	},
 
+	/**
+	 * Refresh CSS classes on DOM element, including bound classes
+	 */
 	syncClasses: function() {
 
 		Firestorm.Element.setProperty(this.getDOMElement(), 'class', this._renderClasses());
 
 	},
 
+	/**
+	 * Set static style value
+	 * @param {string} name CSS property name
+	 * @param {string} value CSS property value
+	 * @param cancel_sync If <kw>true</kw> - do not add that style to DOM element, just to local `_static_styles` object
+	 */
 	setStyle: function(name, value, cancel_sync) {
 
 		if (value == null) {
@@ -293,6 +397,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Remove static CSS style
+	 * @param {string} name CSS style name
+	 * @param {boolean} cancel_sync If <kw>true</kw> - do not remove that style from DOM element, just from local `_static_styles` object
+	 */
 	removeStyle: function(name, cancel_sync) {
 
 		if (name in this._static_styles) {
@@ -302,12 +411,20 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get CSS style value
+	 * @param {string} name
+	 * @returns {string}
+	 */
 	getStyle: function(name) {
 
 		return this._static_styles[name];
 
 	},
 
+	/**
+	 * Refresh the "style" attribute on DOM element
+	 */
 	syncStyles: function() {
 
 		Firestorm.Element.setProperty(this.getDOMElement(), 'style', this._renderStyles());
@@ -315,6 +432,7 @@ Lava.define(
 	},
 
 	/**
+	 * Helper method to create style, class and property bindings
 	 * @param {?Object.<string, _cArgument>} configs
 	 * @param {Lava.view.Abstract} view
 	 * @param {!function} fn
@@ -337,6 +455,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Argument value for property binding has changed. If container's element is in DOM - update it's property value
+	 * @param {Lava.scope.Argument} argument
+	 * @param event_args
+	 * @param listener_args
+	 */
 	_onPropertyBindingChanged: function(argument, event_args, listener_args) {
 
 		if (this._is_inDOM) {
@@ -362,6 +486,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Argument value for style binding has changed. If container's element is in DOM - update it's style
+	 * @param {Lava.scope.Argument} argument
+	 * @param event_args
+	 * @param listener_args
+	 */
 	_onStyleBindingChanged: function(argument, event_args, listener_args) {
 
 		var value = this._style_bindings[listener_args.name].getValue() || '';
@@ -369,6 +499,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Split a string into array of class names
+	 * @param {string} classes_string
+	 * @returns {Array}
+	 */
 	_toClassNames: function(classes_string) {
 
 		var classes = [];
@@ -387,6 +522,12 @@ Lava.define(
 
 	},
 
+	/**
+	 * Class binding argument has changed it's value. Refresh internal class values and element's classes
+	 * @param {Lava.scope.Argument} argument
+	 * @param event_args
+	 * @param listener_args
+	 */
 	_onClassBindingChanged: function(argument, event_args, listener_args) {
 
 		var new_classes = this._toClassNames(argument.getValue().toString().trim());
@@ -402,17 +543,29 @@ Lava.define(
 
 	},
 
+	/**
+	 * Assert, that style string does not contain any special characters, that can break HTML markup
+	 * @param value
+	 */
 	assertStyleValid: function(value) {
 		if (/\"\<\>/.test(value))
 			Lava.t("Invalid symbols in style value: " + value + ". Please, use single quotes for string values and manually escape special characters.");
 	},
 
+	/**
+	 * Assert, that class string does not contain any special characters
+	 * @param value
+	 */
 	assertClassStringValid: function(value) {
 
 		if (/\'\"\<\>\&\./.test(value)) Lava.t("Invalid class names: " + value);
 
 	},
 
+	/**
+	 * Render value of the "class" attribute, including bound classes
+	 * @returns {string}
+	 */
 	_renderClasses: function() {
 
 		var resultClasses = this._static_classes.clone(),
@@ -438,6 +591,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Render content of the "style" attribute, including bound styles
+	 * @returns {string}
+	 */
 	_renderStyles: function() {
 
 		var result_styles = [],
@@ -469,7 +626,13 @@ Lava.define(
 
 	},
 
-	_serializeAttribute: function(name, value) {
+	/**
+	 * Render one attribute
+	 * @param {string} name
+	 * @param {boolean|null|string} value
+	 * @returns {string}
+	 */
+	_renderAttribute: function(name, value) {
 
 		var result = '';
 
@@ -487,7 +650,11 @@ Lava.define(
 
 	},
 
-	_renderOpenTag: function() {
+	/**
+	 * Render the opening HTML tag, including all attributes
+	 * @returns {string}
+	 */
+	_renderOpeningTag: function() {
 
 		var classes = this._renderClasses(),
 			style = this._renderStyles(),
@@ -501,13 +668,13 @@ Lava.define(
 
 		for (name in this._static_properties) {
 
-			properties_string += this._serializeAttribute(name, this._static_properties[name]);
+			properties_string += this._renderAttribute(name, this._static_properties[name]);
 
 		}
 
 		for (name in this._property_bindings) {
 
-			properties_string += this._serializeAttribute(name, this._property_bindings[name].getValue());
+			properties_string += this._renderAttribute(name, this._property_bindings[name].getValue());
 
 		}
 
@@ -529,22 +696,35 @@ Lava.define(
 
 	},
 
+	/**
+	 * Render tag and wrap given HTML code inside it
+	 * @param {string} html
+	 * @returns {string}
+	 */
 	wrap: function(html) {
 
 		if (Lava.schema.DEBUG && this._is_void) Lava.t('Trying to wrap content in void tag');
 
-		return this._renderOpenTag() + ">" + html + "</" + this._tag_name + ">";
+		return this._renderOpeningTag() + ">" + html + "</" + this._tag_name + ">";
 
 	},
 
+	/**
+	 * Render the tag as void tag
+	 * @returns {string}
+	 */
 	renderVoid: function() {
 
 		if (Lava.schema.DEBUG && !this._is_void) Lava.t('Trying to render non-void container as void');
 
-		return this._renderOpenTag() + "/>";
+		return this._renderOpeningTag() + "/>";
 
 	},
 
+	/**
+	 * Set innerHTML of container's element. Container must be in DOM
+	 * @param {string} html
+	 */
 	setHTML: function(html) {
 
 		if (!this._is_inDOM) Lava.t("setHTML: element is not in DOM");
@@ -554,24 +734,40 @@ Lava.define(
 
 	},
 
+	/**
+	 * Insert given HTML markup at the bottom of container's DOM element
+	 * @param {string} html
+	 */
 	appendHTML: function(html) {
 
 		Firestorm.DOM.insertHTMLBottom(this.getDOMElement(), html);
 
 	},
 
+	/**
+	 * Insert given HTML markup at the top of container's DOM element
+	 * @param {string} html
+	 */
 	prependHTML: function(html) {
 
 		Firestorm.DOM.insertHTMLTop(this.getDOMElement(), html);
 
 	},
 
+	/**
+	 * Insert HTML markup after container's DOM element
+	 * @param {string} html
+	 */
 	insertHTMLAfter: function(html) {
 
 		Firestorm.DOM.insertHTMLAfter(this.getDOMElement(), html);
 
 	},
 
+	/**
+	 * Insert HTML markup before container's DOM element
+	 * @param {string} html
+	 */
 	insertHTMLBefore: function(html) {
 
 		Firestorm.DOM.insertHTMLBefore(this.getDOMElement(), html);
@@ -579,7 +775,8 @@ Lava.define(
 	},
 
 	/**
-	 * Note: does not need to be called after capture.
+	 * Call this method, when container has been rendered and inserted into DOM
+	 * Note: does not need to be called after capture
 	 */
 	informInDOM: function() {
 
@@ -588,6 +785,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Version of informInDOM with IOS bugfixes
+	 */
 	informInDOM_IOS: function() {
 
 		this.informInDOM_Original();
@@ -595,6 +795,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Normal version of informInDOM
+	 */
 	informInDOM_Original: function() {
 
 		this._is_inDOM = true;
@@ -602,6 +805,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Call this method before removing container's element from DOM
+	 */
 	informRemove: function() {
 
 		this._is_inDOM = false;
@@ -609,6 +815,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get current container's element from DOM
+	 * @returns {HTMLElement}
+	 */
 	getDOMElement: function() {
 
 		if (!this._element && this._is_inDOM) {
@@ -621,30 +831,56 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_id`
+	 * @returns {string}
+	 */
 	getId: function() { return this._id; },
 
+	/**
+	 * Get `_is_inDOM`
+	 * @returns {boolean}
+	 */
 	isInDOM: function() { return this._is_inDOM; },
 
+	/**
+	 * Get `_is_void`
+	 * @returns {boolean}
+	 */
 	isVoid: function() { return this._is_void; },
 
+	/**
+	 * Clear internal reference to container's DOM element
+	 */
 	release: function() {
 
 		this._element = null;
 
 	},
 
+	/**
+	 * Turn off bindings
+	 */
 	sleep: function() {
 
 		this._withArguments('sleep');
 
 	},
 
+	/**
+	 * Resume bindings
+	 */
 	wakeup: function() {
 
 		this._withArguments('wakeup', true);
 
 	},
 
+	/**
+	 * Call a method of all binding arguments
+	 * @param {string} callback_name Method to call
+	 * @param {*} callback_argument Argument for the method
+	 */
 	_withArguments: function(callback_name, callback_argument) {
 
 		var name;
@@ -657,6 +893,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Set new tag name for container
+	 * @param {string} tag_name
+	 */
 	setSignature: function(tag_name) {
 
 		if (Lava.schema.DEBUG && tag_name != tag_name.toLowerCase()) Lava.t("Tag names must be lower case");
@@ -666,12 +906,17 @@ Lava.define(
 
 	},
 
+	/**
+	 * Bind container to existing DOM element. Apply new styles, classes and properties
+	 * @param {HTMLElement} element
+	 */
 	captureExistingElement: function(element) {
 
 		var Element = Firestorm.Element,
 			name;
 
 		if (this._is_inDOM) Lava.t("Can not set duplicate id attribute on elements");
+		// there must not be ID attribute
 		if (Element.getProperty(element, 'id')) Lava.t("Target element already has an ID, and could be owned by another container");
 		if (Element.getProperty(element, 'tag').toLowerCase() != this._tag_name) Lava.t("Captured tag name differs from the container's tag name");
 
@@ -701,6 +946,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Release an element after call to `captureExistingElement`. Does not clear any attributes, except ID
+	 */
 	releaseElement: function() {
 
 		// keep original container in DOM
@@ -711,18 +959,30 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_is_element_owner`
+	 * @returns {boolean}
+	 */
 	isElementOwner: function() {
 
 		return this._is_element_owner;
 
 	},
 
+	/**
+	 * Perform escaping of an attribute value while rendering
+	 * @param {string} string
+	 * @returns {string}
+	 */
 	escapeAttributeValue: function(string) {
 
 		return Firestorm.String.escape(string, Firestorm.String.ATTRIBUTE_ESCAPE_REGEX);
 
 	},
 
+	/**
+	 * Remove container's element from DOM
+	 */
 	remove: function() {
 
 		if (!this._is_inDOM) Lava.t("remove: container is not in DOM");
@@ -730,6 +990,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Free resources and make this instance unusable
+	 */
 	destroy: function() {
 
 		var name;

@@ -3,21 +3,29 @@
 _cField = {
 
 	/**
-	 * Class name
+	 * Field class name (default namespace is Lava.data.field)
 	 * @type {string}
 	 */
-	type: '',
+	type: null,
 
 	/**
 	 * List of other fields which this field depends on.
-	 * Used to fire 'changed' events.
+	 * Used to fire 'changed' events
 	 *
 	 * @type {Array.<string>}
 	 */
 	//depends: [],
 
-	'default': '',
+	/**
+	 * Field's value for new records
+	 * @type {*}
+	 */
+	'default': null,
 
+	/**
+	 * May this field be assigned <kw>null</kw>
+	 * @type {boolean}
+	 */
 	is_nullable: false
 
 };
@@ -34,8 +42,7 @@ _cRecordField = {
 	module: '',
 
 	/**
-	 * Own record's field, which holds ID of the referenced record.
-	 * Used by Relation fields.
+	 * Local field, which holds ID of the referenced record
 	 * @type {string}
 	 */
 	foreign_key_field: ''
@@ -54,11 +61,15 @@ _cCollectionField = {
 	module: '',
 
 	/**
-	 * Name of the mirror Relation field
+	 * Name of the mirror Record field
 	 * @type {string}
 	 */
 	record_field: '',
 
+	/**
+	 * Should the collection be exported as array
+	 * @type {boolean}
+	 */
 	'export': false
 
 };
@@ -66,14 +77,19 @@ _cCollectionField = {
 _cModule = {
 
 	/**
-	 * Class name of the module itself
+	 * Class name of the module (default namespace is Lava.data)
 	 * @type {string}
 	 */
 	type: 'Module',
 
+	/**
+	 * Class for records in the module (default namespace is "Lava.data")
+	 * @type {string}
+	 */
 	record_class: 'Record',
 
 	/**
+	 * Field settings
 	 * @type {Object.<string, _cField>}
 	 */
 	fields: {}
@@ -83,6 +99,7 @@ _cModule = {
 _cMetaStorage = {
 
 	/**
+	 * Field settings
 	 * @type {Object.<string, _cField>}
 	 */
 	fields: {}

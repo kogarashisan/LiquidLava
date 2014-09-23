@@ -2,6 +2,8 @@
 Lava.define(
 'Lava.data.field.Basic',
 /**
+ * Field that holds any value
+ *
  * @lends Lava.data.field.Basic#
  * @extends Lava.data.field.Abstract
  */
@@ -9,6 +11,10 @@ Lava.define(
 
 	Extends: 'Lava.data.field.Abstract',
 
+	/**
+	 * Field's default value from config
+	 * @type {*}
+	 */
 	_default: null,
 
 	init: function(module, name, config, module_storages) {

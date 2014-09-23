@@ -2,6 +2,8 @@
 Lava.define(
 'Lava.system.App',
 /**
+ * Place for user-defined business-logic
+ *
  * @lends Lava.system.App#
  * @extends Lava.mixin.Observable
  */
@@ -9,10 +11,23 @@ Lava.define(
 
 	Extends: 'Lava.mixin.Observable',
 
+	/**
+	 * Global named modules
+	 * @type {Object.<string, Lava.data.Module>}
+	 */
 	_modules: {},
 
+	/**
+	 * Debug mode variable to print a user-friendly message in case of circular dependencies in modules
+	 * @type {Array.<string>}
+	 */
 	_getmodule_recursion_protection: [],
 
+	/**
+	 * Get a global named module instance
+	 * @param {string} name Module name
+	 * @returns {Lava.data.Module}
+	 */
 	getModule: function(name) {
 
 		if (!(name in this._modules)) {
@@ -42,6 +57,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Allow user to fire an event from application's instance
+	 * @param {string} event_name
+	 * @param {*} event_args
+	 */
 	fireGlobalEvent: function(event_name, event_args) {
 
 		this._fire(event_name, event_args);

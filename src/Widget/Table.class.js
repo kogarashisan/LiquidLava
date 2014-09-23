@@ -1,6 +1,7 @@
 Lava.define(
 'Lava.widget.Table',
 /**
+ * Sortable table
  * @lends Lava.widget.Table#
  * @extends Lava.widget.Standard#
  */
@@ -10,9 +11,22 @@ Lava.define(
 	name: 'table',
 
 	_properties: {
+		/**
+		 * User-assigned records collection for this table
+		 * @type {Lava.system.Enumerable}
+		 */
 		records: null,
+		/** Columns from table's options */
 		_columns: null,
+		/**
+		 * The column, by which the records are sorted
+		 * @type {string}
+		 */
 		_sort_column_name: null,
+		/**
+		 * Sort order
+		 * @type {boolean}
+		 */
 		_sort_descending: false
 	},
 
@@ -24,6 +38,15 @@ Lava.define(
 		cell: '_getCellInclude'
 	},
 
+	/**
+	 * @param config
+	 * @param {Array.<{name, title}>} config.options.columns Column descriptors. "title" is displayed in table head,
+	 *  while "name" is name of the property in records
+	 * @param widget
+	 * @param parent_view
+	 * @param template
+	 * @param properties
+	 */
 	init: function(config, widget, parent_view, template, properties) {
 
 		if (Lava.schema.DEBUG && (!config.options || !config.options.columns)) Lava.t("Table: config.options.columns is required");
@@ -32,6 +55,13 @@ Lava.define(
 
 	},
 
+	/**
+	 * Column header has been clicked. Apply sorting
+	 * @param dom_event_name
+	 * @param dom_event
+	 * @param view
+	 * @param template_arguments
+	 */
 	_onColumnHeaderClick: function(dom_event_name, dom_event, view, template_arguments) {
 
 		var column_name = template_arguments[0].name,
@@ -58,9 +88,14 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get include that renders content of a cell
+	 * @param template_arguments
+	 * @returns {_tTemplate}
+	 */
 	_getCellInclude: function(template_arguments) {
 
-		// var column = template_arguments[0];
+		// var column = template_arguments[0]; - column descriptor from options
 		return this._config.storage.cells[template_arguments[0].type];
 
 	}

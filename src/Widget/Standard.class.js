@@ -2,6 +2,7 @@
 Lava.define(
 'Lava.widget.Standard',
 /**
+ * Base class for all widgets
  * @lends Lava.widget.Standard#
  * @extends Lava.view.View#
  * @implements _iViewHierarchyMember
@@ -11,29 +12,69 @@ Lava.define(
 	Extends: 'Lava.view.View',
 	Shared: ['_property_descriptors', '_event_handlers', '_role_handlers', '_include_handlers', '_broadcast_handlers', '_modifiers'],
 
+	/**
+	 * Instance is widget
+	 * @type {boolean}
+	 * @const
+	 */
 	isWidget: true,
-	/** @readonly */
+	/**
+	 * Widget's name for referencing from templates. Each kind of widget should have it's own unique name
+	 * @readonly
+	 */
 	name: 'widget',
 
-	/** @type {Object.<string, _cPropertyDescriptor>} */
+	/**
+	 * Rules for accessing widget's properties
+	 * @type {Object.<string, _cPropertyDescriptor>}
+	 */
 	_property_descriptors: {},
 
+	/**
+	 * List of non-default template events, to which this widget responds
+	 * @type {Array.<string>}
+	 */
 	_acquired_events: [],
+	/**
+	 * Map of template event handlers
+	 * @type {Object.<string, string>}
+	 */
 	_event_handlers: {},
-
+	/**
+	 * Map of template role handlers
+	 * @type {Object.<string, string>}
+	 */
 	_role_handlers: {},
+	/**
+	 * Map of template include handlers
+	 * @type {Object.<string, string>}
+	 */
 	_include_handlers: {},
-
+	/**
+	 * Map of broadcast handlers
+	 * @type {Object.<string, string>}
+	 */
 	_broadcast_handlers: {},
 
+	/**
+	 * Two-way bindings to properties of this widget
+	 * @type {Object.<string, Lava.scope.Binding>}
+	 */
 	_bindings: {},
+	/**
+	 * Resources from widget config
+	 * @type {Object}
+	 */
 	_resources: {},
-
+	/**
+	 * Nearest parent widget in hierarchy
+	 * @type {?Lava.widget.Standard}
+	 */
 	_parent_widget: null,
 
 	/**
-	 * Called in context of the widget.
-	 * modifier_name => class_method_name
+	 * Map of template callbacks. Called in context of the widget
+	 * @type {Object.<string, string>}
 	 */
 	_modifiers: {
 		translate: 'translate',
@@ -41,6 +82,7 @@ Lava.define(
 	},
 
 	/**
+	 * Create widget instance
 	 * @param {_cWidget} config
 	 * @param {Lava.widget.Standard} widget
 	 * @param {Lava.view.Abstract} parent_view
@@ -96,6 +138,7 @@ Lava.define(
 	},
 
 	/**
+	 * Get, merge and prepare resources for this widget
 	 * @param {_cWidget} config
 	 */
 	_initResources: function(config) {
@@ -138,9 +181,10 @@ Lava.define(
 	},
 
 	/**
-	 * @param {string} name
-	 * @param {Array} template_arguments
-	 * @returns {_tTemplate}
+	 * Get view's include
+	 * @param {string} name Include name
+	 * @param {Array} template_arguments Evaluated argument values from view's template
+	 * @returns {?_tTemplate}
 	 */
 	getInclude: function(name, template_arguments) {
 
@@ -161,12 +205,13 @@ Lava.define(
 	},
 
 	/**
+	 * Respond to DOM event, routed by {@link Lava.system.ViewManager}
 	 * @param {string} dom_event_name
-	 * @param dom_event
-	 * @param {string} target_name
-	 * @param {Lava.view.Abstract} view
-	 * @param {Array.<*>} template_arguments
-	 * @returns {boolean}
+	 * @param dom_event Browser event object, wrapped by the framework
+	 * @param {string} target_name Template event name
+	 * @param {Lava.view.Abstract} view View, that is the source for this event
+	 * @param {Array.<*>} template_arguments Evaluated argument values from view's template
+	 * @returns {boolean} <kw>true</kw>, if event was handled, and <kw>false</kw> otherwise
 	 */
 	handleEvent: function(dom_event_name, dom_event, target_name, view, template_arguments) {
 
@@ -206,6 +251,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Render and insert the widget instance into DOM
+	 * @param {HTMLElement} element
+	 * @param {_eInsertPosition} position
+	 */
 	inject: function(element, position) {
 
 		if (this._is_inDOM) Lava.t("inject: widget is already in DOM");
@@ -223,7 +273,7 @@ Lava.define(
 
 	/**
 	 * The target element becomes container for this widget.
-	 * Primary usage: inject a widget into the BODY element.
+	 * Primary usage: inject a widget into the &lt;body&gt; element
 	 * @param element
 	 */
 	injectIntoExistingElement: function(element) {
@@ -244,6 +294,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Register this widget in {@link Lava.system.ViewManager} as a consumer for each of `default_events` from config
+	 */
 	_acquireDefaultEvents: function() {
 
 		var i = 0,
@@ -260,6 +313,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * "lend" an event name from {@link Lava.system.ViewManager} and save it's name in local `_acquired_events` list
+	 * @param {string} event_name
+	 */
 	_lendEvent: function(event_name) {
 
 		if (Firestorm.Array.include(this._acquired_events, event_name)) {
@@ -270,6 +327,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Inform {@link Lava.system.ViewManager} that this instance does not need to route that event anymore
+	 * @param {string} event_name
+	 */
 	_releaseEvent: function(event_name) {
 
 		if (Firestorm.Array.exclude(this._acquired_events, event_name)) {
@@ -280,6 +341,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * "release" all `_acquired_events`
+	 */
 	_releaseAllEvents: function() {
 
 		var i = 0,
@@ -295,6 +359,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Remove widget from DOM. Only `inject()`'ed (root) widgets may be removed this way
+	 */
 	remove: function() {
 
 		if (!this._is_inDOM) Lava.t("remove: widget is not in DOM");
@@ -319,8 +386,9 @@ Lava.define(
 	},
 
 	/**
-	 * @param {string} name
-	 * @param {Array} arguments_array
+	 * Call a template method
+	 * @param {string} name Modifier name
+	 * @param {Array} arguments_array Evaluated template arguments
 	 * @returns {*}
 	 */
 	callModifier: function(name, arguments_array) {
@@ -332,6 +400,7 @@ Lava.define(
 	},
 
 	/**
+	 * Alpha: not implemented
 	 * @param {string} name
 	 * @param {Array} arguments_array
 	 * @returns {*}
@@ -343,6 +412,7 @@ Lava.define(
 	},
 
 	/**
+	 * Get `_parent_widget`
 	 * @returns {Lava.widget.Standard}
 	 */
 	getParentWidget: function() {
@@ -352,10 +422,11 @@ Lava.define(
 	},
 
 	/**
-	 * @param {string} role
+	 * Handle a view with a role in this widget
+	 * @param {string} role Role name
 	 * @param {Lava.view.Abstract} view
 	 * @param {Array.<*>} template_arguments
-	 * @returns {boolean}
+	 * @returns {boolean} <kw>true</kw>, if the role was handled, and <kw>false</kw> otherwise
 	 */
 	handleRole: function(role, view, template_arguments) {
 
@@ -432,6 +503,7 @@ Lava.define(
 	},
 
 	/**
+	 * Register handlers for events, emitted by widget inside this one
 	 * @param {Lava.widget.Standard} widget
 	 * @param {string} event_name
 	 * @param {string} handler_name
@@ -454,24 +526,36 @@ Lava.define(
 	},
 
 	/**
-	 * Fire the received event. For usage with broadcast events from inner widgets.
+	 * (broadcast handler) Fire broadcast event from this widget.
+	 * May be used to broadcast events from children to other widgets
 	 *
-	 * @param widget
+	 * @param {Lava.widget.Standard} widget Event emitter
 	 * @param event_args
 	 * @param listener_args
 	 */
 	_broadcastEvent: function(widget, event_args, listener_args) {
 
-		this._fire(listener_args.event_name);
+		this._fire(listener_args.event_name, event_args);
 
 	},
 
+	/**
+	 * Get constructor of a class, which is part of this widget
+	 * @param {string} path Path suffix
+	 * @returns {Function} Class constructor
+	 */
 	getPackageConstructor: function(path) {
 
 		return Lava.ClassManager.getPackageConstructor(this.Class.path, path);
 
 	},
 
+	/**
+	 * Get a resource object by it's name
+	 * @param {string} resource_name
+	 * @param {string} locale
+	 * @returns {*}
+	 */
 	getResource: function(resource_name, locale) {
 
 		locale = locale || Lava.schema.LOCALE;
@@ -482,6 +566,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get a scope instance
+	 * @param {Lava.view.Abstract} view
+	 * @param {_cDynamicScope} config
+	 */
 	getDynamicScope: function(view, config) {
 
 		Lava.t('Not implemented: getDynamicScope');
@@ -489,7 +578,7 @@ Lava.define(
 	},
 
 	/**
-	 * (modifier)
+	 * (modifier) Translate a string from resources
 	 * @param {string} resource_name
 	 * @param {Array} arguments_list
 	 * @param {string} locale
@@ -528,7 +617,7 @@ Lava.define(
 	},
 
 	/**
-	 * (modifier)
+	 * (modifier) Translate a plural string from resources
 	 * @param {string} string_name
 	 * @param {number} n
 	 * @param {Array} arguments_list

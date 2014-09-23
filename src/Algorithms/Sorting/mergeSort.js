@@ -1,6 +1,6 @@
 
 /**
- * Stable (by definition)
+ * Stable sort algorithm (by definition)
  */
 Lava.algorithms.sorting.mergeSort = (function(){
 	"use strict";

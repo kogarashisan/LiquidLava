@@ -1,7 +1,14 @@
-
-
+/**
+ * Collection of methods to manipulate arrays
+ */
 Firestorm.Array = {
 
+	/**
+	 * Swap two elements in given array
+	 * @param array
+	 * @param index_a
+	 * @param index_b
+	 */
 	swap: function(array, index_a, index_b) {
 		var temp = array[index_a];
 		array[index_a] = array[index_b];
@@ -9,9 +16,10 @@ Firestorm.Array = {
 	},
 
 	/**
+	 * If array does not contain the given `value` - then push the value into array
 	 * @param {Array} array
 	 * @param {*} value
-	 * @returns {boolean} True, if element was not in array, false if it was already there
+	 * @returns {boolean} <kw>true</kw>, if array did not contain the element, <kw>false</kw> if it was already there
 	 */
 	include: function(array, value) {
 		if (array.indexOf(value) == -1) {
@@ -22,7 +30,7 @@ Firestorm.Array = {
 	},
 
 	/**
-	 * Include all unique values from source_array into dest_array.
+	 * Include all unique values from `source_array` into `dest_array`
 	 * @param {Array} dest_array
 	 * @param {Array} source_array
 	 */
@@ -40,9 +48,10 @@ Firestorm.Array = {
 	},
 
 	/**
+	 * Remove the first occurence of `value` from `array`
 	 * @param {Array} array
 	 * @param {*} value
-	 * @returns {boolean} True, if element was present in array
+	 * @returns {boolean} <kw>true</kw>, if element was present in array
 	 */
 	exclude: function(array, value) {
 		var index = array.indexOf(value);
@@ -51,6 +60,11 @@ Firestorm.Array = {
 		return true;
 	},
 
+	/**
+	 * Remove the first occurrence of each value from array. Does not exclude duplicate occurrences
+	 * @param array
+	 * @param values
+	 */
 	excludeAll: function(array, values) {
 		var index;
 		for (var i = 0, count = values.length; i < count; i++) {
@@ -61,6 +75,11 @@ Firestorm.Array = {
 		}
 	},
 
+	/**
+	 * Deep clone of array
+	 * @param array
+	 * @returns {Array}
+	 */
 	clone: function(array) {
 
 		var count = array.length,
@@ -77,6 +96,12 @@ Firestorm.Array = {
 
 	},
 
+	/**
+	 * Find the first occurrence `old_value` and replace it with `new_value`
+	 * @param array
+	 * @param old_value
+	 * @param new_value
+	 */
 	replace: function(array, old_value, new_value) {
 
 		var index = array.indexOf(old_value);

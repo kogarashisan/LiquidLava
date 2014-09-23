@@ -2,6 +2,7 @@
 Lava.define(
 'Lava.widget.Tabs',
 /**
+ * Tabs widget
  * @lends Lava.widget.Tabs#
  * @extends Lava.widget.Standard#
  */
@@ -12,8 +13,15 @@ Lava.define(
 	name: 'tabs',
 
 	_properties: {
-		/** @type {Lava.system.Enumerable} */
+		/**
+		 * Collection of objects with tab data
+		 * @type {Lava.system.Enumerable}
+		 */
 		_tabs: null,
+		/**
+		 * Active tab object
+		 * @type {Lava.mixin.Properties}
+		 */
 		active_tab: null
 	},
 
@@ -30,14 +38,15 @@ Lava.define(
 	},
 
 	/**
+	 * Reference to <i>_tabs</i> property
 	 * @type {Lava.system.Enumerable}
 	 */
-	_tabs: null,
+	_tab_objects: null,
 
 	init: function(config, widget, parent_view, template, properties) {
 
-		this._tabs = new Lava.system.Enumerable();
-		this._properties._tabs = this._tabs;
+		this._tab_objects = new Lava.system.Enumerable();
+		this._properties._tabs = this._tab_objects;
 
 		this.Standard$init(config, widget, parent_view, template, properties);
 
@@ -67,9 +76,16 @@ Lava.define(
 
 	},
 
+	/**
+	 * Tab header was clicked. Switch active tab
+	 * @param dom_event_name
+	 * @param dom_event
+	 * @param view
+	 * @param template_arguments
+	 */
 	_onTabHeaderClicked: function(dom_event_name, dom_event, view, template_arguments) {
 
-		var tab = template_arguments[0];
+		var tab = template_arguments[0]; // tab object
 		if (tab.get('is_enabled')) {
 			this._setActiveTab(tab);
 		}
@@ -80,12 +96,14 @@ Lava.define(
 	},
 
 	/**
-	 * @param {Object} properties
+	 * Create a new tab
+	 * @param {Object} properties The properties of the new tab
 	 * @param {string} properties.name
 	 * @param {boolean} properties.is_enabled
 	 * @param {boolean} properties.is_hidden
 	 * @param {_tTemplate} properties.content Read only
 	 * @param {_tTemplate} properties.title Read only
+	 * @returns {Lava.mixin.Properties} Created object with tab data
 	 */
 	addTab: function(properties) {
 
@@ -117,7 +135,7 @@ Lava.define(
 			this._set('active_tab', tab);
 		}
 
-		this._tabs.push(tab);
+		this._tab_objects.push(tab);
 
 		tab.onPropertyChanged('is_enabled', this._onTabStateChanged, this);
 		tab.onPropertyChanged('is_hidden', this._onTabStateChanged, this);
@@ -127,6 +145,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * "is_active" property of tab object has changed. Update active tab
+	 * @param {Lava.mixin.Properties} tab
+	 */
 	_onTabIsActiveChanged: function(tab) {
 
 		if (tab.get('is_active')) {
@@ -141,6 +163,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Change currently active tab
+	 * @param {Lava.mixin.Properties} new_tab
+	 */
 	_setActiveTab: function(new_tab) {
 
 		var old_active_tab = this._properties.active_tab;
@@ -155,6 +181,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * If currently active tab was disabled or hidden - choose new active tab
+	 * @param {Lava.mixin.Properties} tab
+	 */
 	_onTabStateChanged: function(tab) {
 
 		if (tab.get('is_active') && (!tab.get('is_enabled') || tab.get('is_hidden'))) {
@@ -165,17 +195,25 @@ Lava.define(
 
 	},
 
-	getTabs: function() {
+	/**
+	 * Get all objects with tab data
+	 * @returns {Array.<Lava.mixin.Properties>}
+	 */
+	getTabObjects: function() {
 
-		return this._tabs.getValues();
+		return this._tab_objects.getValues();
 
 	},
 
-	removeTab: function(tab) {
+	/**
+	 * Remove a tab object, returned by `addTab`
+	 * @param {Lava.mixin.Properties} tab_object
+	 */
+	removeTab: function(tab_object) {
 
-		this._tabs.removeValue(tab);
+		this._tab_objects.removeValue(tab_object);
 
-		if (this._properties.active_tab == tab) {
+		if (this._properties.active_tab == tab_object) {
 
 			this._fixActiveTab();
 
@@ -190,7 +228,7 @@ Lava.define(
 
 		var active_tab = null;
 
-		this._tabs.each(function(tab) {
+		this._tab_objects.each(function(tab) {
 			var result = null;
 			if (tab.get('is_enabled') && !tab.get('is_hidden')) {
 				active_tab = tab;
@@ -203,15 +241,25 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get include from tab data
+	 * @param template_arguments
+	 * @returns {_tTemplate}
+	 */
 	_getTabInclude: function(template_arguments) {
 
+		// template_arguments[0] - tab object
+		// template_arguments[1] - property name
 		return template_arguments[0].get(template_arguments[1]);
 
 	},
 
+	/**
+	 * Remove all tabs
+	 */
 	removeAllTabs: function() {
 
-		var tabs = this._tabs.getValues(),
+		var tabs = this._tab_objects.getValues(),
 			i = 0,
 			count = tabs.length;
 
@@ -223,23 +271,31 @@ Lava.define(
 
 	},
 
+	/**
+	 * Reorder tabs
+	 * @param {Array.<number>} indices
+	 */
 	reorderTabs: function(indices) {
 
-		this._tabs.reorder(indices);
+		this._tab_objects.reorder(indices);
 
 	},
 
+	/**
+	 * Sort tabs
+	 * @param {_tLessCallback} callback
+	 */
 	sortTabs: function(callback) {
 
-		this._tabs.sort(callback);
+		this._tab_objects.sort(callback);
 
 	},
 
 	destroy: function() {
 
 		this.removeAllTabs();
-		this._tabs.destroy();
-		this._tabs = this._properties._tabs = null;
+		this._tab_objects.destroy();
+		this._tab_objects = this._properties._tab_objects = null;
 
 		this.Standard$destroy();
 

@@ -1,7 +1,10 @@
-
+/**
+ * Global functions that are callable from templates
+ */
 Lava.modifiers = {
 
 	/**
+	 * Transform a string to lower case
 	 * @param value
 	 * @returns {string}
 	 */
@@ -41,6 +44,11 @@ Lava.modifiers = {
 
 	},
 
+	/**
+	 * Translate a boolean type into user language
+	 * @param value
+	 * @returns {string}
+	 */
 	translateBoolean: function(value) {
 
 		if (Lava.schema.DEBUG && typeof(value) != 'boolean') Lava.t("translateBoolean: argument is not boolean type");
@@ -48,6 +56,12 @@ Lava.modifiers = {
 
 	},
 
+	/**
+	 * Join an array of values
+	 * @param {Array} array
+	 * @param {string} glue
+	 * @returns {string}
+	 */
 	joinArray: function(array, glue) {
 
 		return array ? array.join(glue) : '';

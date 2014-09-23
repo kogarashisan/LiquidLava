@@ -2,6 +2,8 @@
 Lava.define(
 'Lava.view.View',
 /**
+ * A view, which can have a container and inner template. The only kind of view, which can have a void tag as container
+ *
  * @lends Lava.view.View#
  * @extends Lava.view.Abstract#
  * @implements _iViewHierarchyMember
@@ -11,6 +13,7 @@ Lava.define(
 	Extends: 'Lava.view.Abstract',
 
 	/**
+	 * The content of the view
 	 * @type {Lava.system.Template}
 	 */
 	_contents: null,
@@ -78,6 +81,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_contents`. Create, if needed
+	 * @returns {Lava.system.Template}
+	 */
 	_getContents: function() {
 
 		if (this._contents == null) {

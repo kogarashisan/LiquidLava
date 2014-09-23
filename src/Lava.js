@@ -1,5 +1,10 @@
-
+/**
+ * Root object of the Lava framework
+ */
 var Lava = {
+	/**
+	 * Version numbers, split by comma to allow easier comparison of versions
+	 */
 	version: [],
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -70,27 +75,46 @@ var Lava = {
 	widget: {},
 	/** @ignore */
 	scope: {},
-	user: {
-		// place for any other user defined classes and variables
-	},
+	/**
+	 * place for any other user defined classes and variables
+	 */
+	user: {},
 
-	/** @type {Lava.system.App} */
+	/**
+	 * Globak App class instance
+	 * @type {Lava.system.App}
+	 */
 	app: null,
-	/** @type {Lava.system.ViewManager} */
+	/**
+	 * Global ViewManager instance
+	 * @type {Lava.system.ViewManager}
+	 */
 	view_manager: null,
-	/** @type {Lava.system.PopoverManager} */
+	/**
+	 * Global PopoverManager instance
+	 * @type {Lava.system.PopoverManager}
+	 */
 	popover_manager: null,
 
+	/**
+	 * Container for locale-specific data (strings, date formats, etc)
+	 * @type {Object.<string, Object>}
+	 */
 	locales: {},
 
 	/**
+	 * Global named widget configs
 	 * @type {Object.<string, _cWidget>}
 	 */
 	widgets: {},
 	/**
+	 * Tag names that are parsed by Sugar class
 	 * @type {Object.<string, _cSugarSchema>}
 	 */
 	sugar_map: {},
+	/**
+	 * All class definitions are stored here until framework initialization to allow monkey-patching
+	 */
 	classes: {},
 
 	// end: default namespaces reservation
@@ -99,7 +123,10 @@ var Lava = {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// constants and predefined data
 
-	/** @enum {number} */
+	/**
+	 * Directions for {@link Lava.scope.Binding}
+	 * @enum {number}
+	 */
 	BINDING_DIRECTIONS: {
 		/** @const */
 		TO_WIDGET: 1,
@@ -107,32 +134,71 @@ var Lava = {
 		FROM_WIDGET: 2
 	},
 
-	/** @enum {number} */
+	/**
+	 * Types of template arguments, allowed in view events and roles
+	 * @enum {number}
+	 */
 	TARGET_ARGUMENT_TYPES: {
 		VALUE: 1,
 		BIND: 2
 	},
 
 	/**
+	 * Enumerable can refresh itself from these kinds of sources
+	 * @enum {number}
+	 */
+	ENUMERABLE_SOURCE_OBJECT_TYPES: {
+		OBJECT: 0,
+		ARRAY: 1,
+		ENUMERABLE: 2,
+		PROPERTIES: 3
+	},
+
+	/**
+	 * <kw>"id"</kw> attribute of framework's DOM elements start with this prefix.
 	 * When changing this, you must also change SYSTEM_ID_REGEX
 	 * @const
 	 * */
 	ELEMENT_ID_PREFIX: 'e',
+	/**
+	 * Does a string represent a valid element's id, used by the framework
+	 */
 	SYSTEM_ID_REGEX: /^e?\\d+$/,
+	/**
+	 * May a string be used as property/include name
+	 */
 	VALID_PROPERTY_NAME_REGEX: /^[a-zA-Z\_\$][a-zA-Z0-9\_\$]*$/,
+	/**
+	 * Match empty string or string with spaces
+	 */
 	EMPTY_REGEX: /^\s*$/,
+	/**
+	 * May a string be used as view's label
+	 */
 	VALID_LABEL_REGEX: /^[A-Za-z\_][A-Za-z\_0-9]*$/,
 
-	/** @returns {boolean} */
+	/**
+	 * Default comparison function
+	 * @returns {boolean}
+	 */
 	DEFAULT_LESS: function(a, b) { return a < b; },
 	// not sure if these obsolete tags should also be included: basefont, bgsound, frame, isindex
+	/**
+	 * HTML tags that do not require a closing tag
+	 */
 	VOID_TAGS: ['area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'],
+	/**
+	 * List of all JavaScript keywords, used when serializing objects
+	 */
 	JS_KEYWORDS: ['break','case','catch','class','const','continue','debugger','default','delete','do','else','export','extends','false','finally',
 		'for','function','if','import','in','instanceof','new','null','protected','return','super','switch','this','throw','true','try','typeof',
 		'var','while','with','abstract','boolean','byte','char','decimal','double','enum','final','float','get','implements','int','interface',
 		'internal','long','package','private','protected','public','sbyte','set','short','static','uint','ulong','ushort','void','assert','ensure',
 		'event','goto','invariant','namespace','native','require','synchronized','throws','transient','use','volatile'],
 
+	/**
+	 * List of common framework exceptions to make the framework smaller in size. May be excluded in production
+	 */
 	KNOWN_EXCEPTIONS: null,
 
 	// end: constants and predefined data
@@ -141,16 +207,36 @@ var Lava = {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// class members
 
+	/**
+	 * Cache for sugar API
+	 * @type {Object.<string, Lava.system.Sugar>}
+	 */
 	_widget_title_to_sugar_instance: {},
+	/**
+	 * Global instances of Sugar class by class name
+	 * @type {Object.<string, Lava.system.Sugar>}
+	 */
 	_sugar_instances: {},
 
-	/** @type {_tGUID} */
+	/**
+	 * Global UID counter
+	 * @type {_tGUID}
+	 */
 	guid: 1,
+	/**
+	 * Was init() called
+	 * @type {boolean}
+	 * @readonly
+	 */
 	is_init_done: false,
+	/**
+	 * Used to delay refresh loop after the current JavaScript thread exits. See {@link Lava#scheduleRefresh}
+	 */
 	_refresh_timer: null,
 
 	/**
-	 * Must be called before bootstrap() or creating any widgets.
+	 * Create all classes and global class instances.
+	 * Must be called before bootstrap() or creating any widgets
 	 */
 	init: function() {
 
@@ -187,6 +273,9 @@ var Lava = {
 
 	},
 
+	/**
+	 * Create global class instances
+	 */
 	_initGlobals: function() {
 
 		var constructor;
@@ -205,7 +294,7 @@ var Lava = {
 	/**
 	 * Validate and then eval the passed string.
 	 * String does not necessarily need to be in strict JSON format, just any valid plain JS object (without logic!).
-	 * Obviously, you must use this function only with the code you trust.
+	 * Obviously, you must use this function only with the code you trust
 	 * @param {string} serialized_object
 	 */
 	parseOptions: function(serialized_object) {
@@ -214,6 +303,7 @@ var Lava = {
 	},
 
 	/**
+	 * Does the string represent a valid identifier, that can be referenced from expressions
 	 * @param {string} id
 	 * @returns {boolean}
 	 */
@@ -224,6 +314,7 @@ var Lava = {
 	},
 
 	/**
+	 * Log a recoverable error
 	 * @param {string} msg
 	 */
 	logError: function(msg) {
@@ -236,6 +327,10 @@ var Lava = {
 
 	},
 
+	/**
+	 * Log a caught exception
+	 * @param {(Error|string|number)} e
+	 */
 	logException: function(e) {
 
 		this.logError((typeof(e) == 'string' || typeof(e) == 'number') ? e : e.message);
@@ -243,7 +338,8 @@ var Lava = {
 	},
 
 	/**
-	 * @param widget_title
+	 * Get extended config of global named widget
+	 * @param {string} widget_title
 	 * @returns {_cWidget}
 	 */
 	getWidgetConfig: function(widget_title) {
@@ -263,21 +359,22 @@ var Lava = {
 	},
 
 	/**
-	 * @param {string} title
-	 * @param [config]
-	 * @param [properties]
-	 * @returns {Lava.widget.Standard}
+	 * Create a root widget instance
+	 * @param {string} extends_title Name of global parent widget
+	 * @param {_cWidget} [config] Partial config for new widget, will be extended with parent's config
+	 * @param {Object} [properties] Properties for created widget
+	 * @returns {Lava.widget.Standard} Created widget instance
 	 */
-	createWidget: function(title, config, properties) {
+	createWidget: function(extends_title, config, properties) {
 
-		var widget_config = this.getWidgetConfig(title),
+		var widget_config = this.getWidgetConfig(extends_title),
 			constructor;
 
 		if (config) {
 
-			if (Lava.schema.DEBUG && config.extends && config.extends != title) Lava.t("Malformed widget config");
+			if (Lava.schema.DEBUG && config.extends && config.extends != extends_title) Lava.t("Malformed widget config");
 
-			config.extends = title;
+			config.extends = extends_title;
 			Lava.extenders[config.extender_type || widget_config.extender_type](config);
 
 		} else {
@@ -292,6 +389,11 @@ var Lava = {
 
 	},
 
+	/**
+	 * Is there a global widget with such `widget_title` registered
+	 * @param {string} widget_title
+	 * @returns {boolean}
+	 */
 	hasWidgetConfig: function(widget_title) {
 
 		return widget_title in this.widgets;
@@ -299,9 +401,9 @@ var Lava = {
 	},
 
 	/**
-	 * Take an array of event names and leave those, which are not in DEFAULT_EVENTS schema setting,
+	 * Take an array of event names and remove default from {@link Lava.schema#system.DEFAULT_EVENTS}
 	 * @param {Array.<string>} event_names
-	 * @returns {Array.<string>}
+	 * @returns {Array.<string>} Filtered array of event names
 	 */
 	excludeDefaultEvents: function(event_names) {
 
@@ -325,7 +427,7 @@ var Lava = {
 
 	/**
 	 * Throw an error
-	 * @param {string} [message]
+	 * @param {string} [message] Defaults to <kw>"Debug assertion failed"</kw>
 	 */
 	t: function(message) {
 
@@ -337,6 +439,10 @@ var Lava = {
 
 	},
 
+	/**
+	 * Create an instance of `class_name` and register it as sugar processor {@link Lava.system.Sugar}
+	 * @param class_name
+	 */
 	registerSugar: function(class_name) {
 
 		if (Lava.schema.DEBUG && (class_name in this._sugar_instances)) Lava.t('Class is already registered as sugar');
@@ -345,6 +451,11 @@ var Lava = {
 
 	},
 
+	/**
+	 * Get a Sugar class instance by it's name
+	 * @param {string} class_name
+	 * @returns {Lava.system.Sugar}
+	 */
 	getSugarInstance: function(class_name) {
 
 		return this._sugar_instances[class_name];
@@ -352,6 +463,7 @@ var Lava = {
 	},
 
 	/**
+	 * Get a Sugar class instance by the title of the widget (each widget has a class that processes sugar for it)
 	 * @param {string} widget_title
 	 * @returns {_iSugarParser}
 	 */
@@ -374,7 +486,8 @@ var Lava = {
 	},
 
 	/**
-	 * @param {string} widget_title
+	 * Register a global widget config
+	 * @param {string} widget_title Title for new global widget
 	 * @param {_cWidget} widget_config
 	 */
 	storeWidgetSchema: function(widget_title, widget_config) {
@@ -392,6 +505,9 @@ var Lava = {
 
 	},
 
+	/**
+	 * Parse the page &lt;body&gt; or special "lava-app" regions in the page and replace them with widgets
+	 */
 	bootstrap: function() {
 
 		var body = document.body,
@@ -419,7 +535,7 @@ var Lava = {
 					element = bootstrap_targets[i];
 					result = this._elementToWidget(element, {class: 'Morph'});
 					result.inject(element, 'After');
-					element.destroy();
+					Firestorm.Element.destroy(element);
 
 				//} catch (e) {
 
@@ -437,6 +553,12 @@ var Lava = {
 
 	},
 
+	/**
+	 * Parse the DOM element instance as a widget template and create a widget
+	 * @param {HTMLElement} element
+	 * @param {Object} container_config
+	 * @returns {Lava.widget.Standard}
+	 */
 	_elementToWidget: function(element, container_config) {
 
 		var config,
@@ -466,7 +588,8 @@ var Lava = {
 
 	/**
 	 * Behaves like a widget constructor, but accepts raw (unextended) widget config.
-	 * Extends the config and creates the widget instance with the right class.
+	 * Extends the config and creates the widget instance with the right class. Extension process stores the right
+	 * class in widget config, so next time a widget is constructed - this method is not called.
 	 *
 	 * @param {_cWidget} config
 	 * @param {Lava.widget.Standard} widget
@@ -494,6 +617,16 @@ var Lava = {
 
 	},
 
+	/**
+	 * Behaves like view/widget constructor, but resolves the correct class name from widget hierarchy
+	 *
+	 * @param {(_cView|_cWidget)} config
+	 * @param {Lava.widget.Standard} widget
+	 * @param {Lava.view.Abstract} parent_view
+	 * @param {Lava.system.Template} template
+	 * @param {Object} properties
+	 * @returns {(Lava.widget.Standard|Lava.view.Abstract)}
+	 */
 	ClassLocatorGateway: function(config, widget, parent_view, template, properties) {
 
 		var name_source = Lava.view_manager.locateTarget(widget, config.class_locator.locator_type, config.class_locator.name);
@@ -505,8 +638,9 @@ var Lava = {
 	},
 
 	/**
-	 * @param {string} class_name
-	 * @param {Object} class_object
+	 * Store class body in `this.classes` (before `init()`), or call {@link Lava.ClassManager#define} directly (after `init()`)
+	 * @param {string} class_name Name of the class
+	 * @param {Object} class_object Class body
 	 */
 	define: function(class_name, class_object) {
 
@@ -522,6 +656,10 @@ var Lava = {
 
 	},
 
+	/**
+	 * Recursively define a class, stored in `this.classes`
+	 * @param {string} path
+	 */
 	_loadClass: function(path) {
 
 		var class_body = this.classes[path],
@@ -557,7 +695,7 @@ var Lava = {
 	/**
 	 * Create a function, which returns a clone of given template or config.
 	 * Note: widget configs must not be extended!
-	 * @param {*} config
+	 * @param {*} config Any clonable JavaScript object without circular references
 	 * @returns {function}
 	 */
 	createCloner: function(config) {
@@ -569,7 +707,8 @@ var Lava = {
 	/**
 	 * Feature of the current binding system:
 	 * sometimes, a view may be rendered with dirty bindings. They will be refreshed in the next refresh loop.
-	 * This may happen during widget inject() outside of normal App lifecycle, and developer may forget to call Lava.refreshViews().
+	 * This may happen during widget {@link Lava.widget.Standard#inject|inject()} outside of normal App lifecycle,
+	 * and developer may forget to call Lava.refreshViews()
 	 */
 	scheduleRefresh: function() {
 
@@ -589,6 +728,10 @@ var Lava = {
 
 	},
 
+	/**
+	 * Perform view refresh outside of normal application lifecycle (in the end of AJAX call, or from browser console).
+	 * Note: call to this function does not guarantee, that views will be refreshed immediately
+	 */
 	refreshViews: function() {
 
 		if (!Lava.Core.isProcessingEvent()) {
@@ -604,12 +747,22 @@ var Lava = {
 
 	},
 
+	/**
+	 * Returns true, if tag name is void (does nor require closing tag), like "img" or "input"
+	 * @param {string} name
+	 * @returns {boolean}
+	 */
 	isVoidTag: function(name) {
 
 		return this.VOID_TAGS.indexOf(name) != -1;
 
 	},
 
+	/**
+	 * Used in process of config extension to merge {@link _cWidget#storage_schema}
+	 * @param {Object} dest Child schema
+	 * @param {Object} source Parent schema
+	 */
 	mergeStorageSchema: function(dest, source) {
 
 		var name;
@@ -669,14 +822,25 @@ var Lava = {
 
 	},
 
+	/**
+	 * Suspend a listener, returned by {@link Lava.mixin.Observable#on}
+	 * @param {_tListener} listener
+	 */
 	suspendListener: function(listener) {
 		listener.fn = this.noop;
 	},
 
+	/**
+	 * Resume listener, suspended by {@link Lava#suspendListener}
+	 * @param {_tListener} listener
+	 */
 	resumeListener: function(listener) {
 		listener.fn = listener.fn_original;
 	},
 
+	/**
+	 * Do nothing
+	 */
 	noop: function() {}
 
 };

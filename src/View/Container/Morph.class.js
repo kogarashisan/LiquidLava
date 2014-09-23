@@ -2,6 +2,7 @@
 Lava.define(
 'Lava.view.container.Morph',
 /**
+ * Container, that represents two &lt;script&gt; tags with content between them
  * @lends Lava.view.container.Morph#
  * @implements _iContainer
  *
@@ -10,34 +11,67 @@ Lava.define(
  */
 {
 
+	/**
+	 * Instance belongs to Morph container
+	 * @type {boolean}
+	 * @const
+	 */
 	isMorphContainer: true,
 
 	/**
+	 * View, that owns this instance of container
 	 * @type {Lava.view.Abstract}
 	 */
 	_view: null,
-	_config: null,
 	/**
+	 * Settings for the Morph container
+	 * @type {Object}
+	 */
+	//_config: null,
+
+	/**
+	 * Nearest widget in hierarchy
 	 * @type {Lava.widget.Standard}
 	 */
 	_widget: null,
 
+	/**
+	 * Is this instance currently in DOM
+	 * @type {boolean}
+	 */
 	_is_inDOM: false,
+	/**
+	 * ID of the first &lt;script&gt; tag
+	 * @type {string}
+	 */
 	_start_script_id: null,
+	/**
+	 * ID of the second &lt;script&gt; tag
+	 * @type {string}
+	 */
 	_end_script_id: null,
 
+	/**
+	 * Reference to the first &lt;script&gt; tag as DOM element
+	 * @type {HTMLElement}
+	 */
 	_start_element: null,
+	/**
+	 * Reference to the second &lt;script&gt; tag as DOM element
+	 * @type {HTMLElement}
+	 */
 	_end_element: null,
 
 	/**
+	 * Create Morph container instance
 	 * @param {Lava.view.Abstract} view
-	 * @param {_cEmulatedContainer} config
+	 * @param {Object} config
 	 * @param {Lava.widget.Standard} widget
 	 */
 	init: function(view, config, widget) {
 
 		this._view = view;
-		this._config = config;
+		//this._config = config;
 		this._widget = widget;
 
 		this._start_script_id = 'c' + view.guid + 's';
@@ -45,6 +79,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Retrieve both &lt;script&gt; tags from DOM into local references,
+	 * at the same time applying fixes for old browsers
+	 */
 	_getElements: function() {
 
 		var start_element = document.getElementById(this._start_script_id),
@@ -106,6 +144,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_start_element`
+	 * @returns {HTMLElement}
+	 */
 	getStartElement: function() {
 
 		if (this._start_element == null) {
@@ -116,6 +158,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_end_element`
+	 * @returns {HTMLElement}
+	 */
 	getEndElement: function() {
 
 		if (this._end_element == null) {
@@ -126,6 +172,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Render the container with `html` inside
+	 * @param {string} html
+	 * @returns {string}
+	 */
 	wrap: function(html) {
 
 		this._start_element = this._end_element = null;
@@ -141,6 +192,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Replace the content between container's tags. Requires container to be in DOM
+	 * @param {string} html
+	 */
 	setHTML: function(html) {
 
 		if (!this._is_inDOM) Lava.t("setHTML: container is not in DOM");
@@ -150,6 +205,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Remove container's content and it's tags from DOM
+	 */
 	remove: function() {
 
 		if (!this._is_inDOM) Lava.t("remove: container is not in DOM");
@@ -157,32 +215,54 @@ Lava.define(
 
 	},
 
+	/**
+	 * Insert html before the second &lt;script&gt; tag
+	 * @param {string} html
+	 */
 	appendHTML: function(html) {
 
 		Firestorm.DOM.insertHTMLBefore(this.getEndElement(), html);
 
 	},
 
+	/**
+	 * Insert html after the first &lt;script&gt; tag
+	 * @param {string} html
+	 */
 	prependHTML: function(html) {
 
 		Firestorm.DOM.insertHTMLAfter(this.getStartElement(), html);
 
 	},
 
+	/**
+	 * Insert html after the second &lt;script&gt; tag
+	 * @param {string} html
+	 */
 	insertHTMLAfter: function(html) {
 
 		Firestorm.DOM.insertHTMLAfter(this.getEndElement(), html);
 
 	},
 
+	/**
+	 * Insert html before the first &lt;script&gt; tag
+	 * @param {string} html
+	 */
 	insertHTMLBefore: function(html) {
 
 		Firestorm.DOM.insertHTMLBefore(this.getStartElement(), html);
 
 	},
 
+	/**
+	 * Call this method after inserting rendered container into DOM
+	 */
 	informInDOM: function() { this._is_inDOM = true; },
 
+	/**
+	 * Call this method before removing container from DOM
+	 */
 	informRemove: function() {
 
 		this._start_element = this._end_element = null;
@@ -190,24 +270,39 @@ Lava.define(
 
 	},
 
+	/**
+	 * Forget references to both DOM &lt;script&gt; elements
+	 */
 	release: function() {
 
 		this._start_element = this._end_element = null;
 
 	},
 
+	/** Does nothing */
 	refresh: function() {},
-
+	/** Does nothing */
 	sleep: function() {},
-
+	/** Does nothing */
 	wakeup: function() {},
 
+	/**
+	 * Get `_is_inDOM`
+	 * @returns {boolean}
+	 */
 	isInDOM: function() { return this._is_inDOM; },
-
+	/**
+	 * Get `_widget`
+	 * @returns {Lava.widget.Standard}
+	 */
 	getWidget: function() { return this._widget; },
-
+	/**
+	 * Get `_view`
+	 * @returns {Lava.view.Abstract}
+	 */
 	getView: function() { return this._view; },
 
+	/** Free resources and make this instance unusable */
 	destroy: function() {}
 
 });

@@ -1,6 +1,6 @@
 
 /**
- * Implemented by most classes inside the scope folder
+ * Implemented by most classes inside the Scope folder
  * @interface
  */
 _iValueContainer = {
@@ -11,6 +11,7 @@ _iValueContainer = {
 	//   refreshed
 
 	/**
+	 * Add a listener
 	 * @type {function}
 	 */
 	on: null,
@@ -26,29 +27,39 @@ _iValueContainer = {
 };
 
 /**
- * Implemented by classes inside the Views folder.
+ * Implemented by classes inside the Views folder
  * @interface
  */
 _iViewHierarchyMember = {
 
 	render: function() {},
-
 	broadcastRemove: function() {},
-
 	broadcastInDOM: function() {},
-
 	broadcastSleep: function() {},
-
 	broadcastWakeup: function() {}
 
 };
 
 /**
+ * Visitor for {@link Lava.TemplateWalker}
  * @interface
  */
-_iListener = {};
+_iVisitor = {
+	enter: function(walker, block_type, block) {},
+	leave: function(walker, block_type, block) {},
+	enterRegion: function(walker, region_name) {},
+	leaveRegion: function(walker, region_name) {},
+	visitView: function(walker, node) {},
+	visitWidget: function(walker, node) {},
+	visitString: function(walker, node) {},
+	visitInclude: function(walker, node) {},
+	visitStaticValue: function(walker, node) {},
+	visitStaticEval: function(walker, node) {},
+	visitStaticTag: function(walker, node) {}
+};
 
 /**
+ * Interface of Lava.view.container classes
  * @interface
  */
 _iContainer = {

@@ -1,7 +1,13 @@
 
+/**
+ * Value of this PropertyBinding instance has changed
+ * @event Lava.scope.PropertyBinding#changed
+ */
+
 Lava.define(
 'Lava.scope.PropertyBinding',
 /**
+ * Scope, that is designed to bind to a property of a view
  * @lends Lava.scope.PropertyBinding#
  * @extends Lava.scope.Abstract
  * @implements _iValueContainer
@@ -9,28 +15,52 @@ Lava.define(
 {
 
 	Extends: 'Lava.scope.Abstract',
+	/**
+	 * This instance supports two-way data binding
+	 * @type {boolean}
+	 * @const
+	 */
 	isSetValue: true,
+	/**
+	 * Global unique identifier of this instance
+	 * @type {_tGUID}
+	 */
 	guid: null,
 
 	/**
+	 * View's property name, to which this instance is bound
 	 * @type {string}
 	 */
 	_property_name: null,
+	/**
+	 * The value of this scope (equals to property value in bound view)
+	 * @type {*}
+	 */
 	_value: null,
 
 	/**
+	 * Scope's bound view (also the scope's owner view, which created the instance)
 	 * @type {Lava.view.Abstract}
 	 */
 	_view: null,
+	/**
+	 * Listener for onPropertyChanged in bound view
+	 * @type {_tListener}
+	 */
 	_property_changed_listener: null,
 
+	/**
+	 * PropertyBinding supports "assigns" - one-way binding of widget's property to any {@link Lava.scope.Argument} value
+	 * @type {Lava.scope.Argument}
+	 */
 	_assign_argument: null,
 
 	/**
-	 * @param {Lava.view.Abstract} view
+	 * Create the PropertyBinding instance. Refresh value from view's property or set value from assign
+	 * @param {Lava.view.Abstract} view Scope's owner view, to which it's bound
 	 * @param {string} property_name
 	 * @param {number} level
-	 * @param {_cAssign} assign_config
+	 * @param {_cAssign} assign_config Config for the Argument, in case this scope is created in "assign" mode
 	 */
 	init: function(view, property_name, level, assign_config) {
 
@@ -65,12 +95,19 @@ Lava.define(
 
 	},
 
+	/**
+	 * PropertyBinding is always bound to it's view
+	 * @returns {boolean} Always returns <kw>true</kw>
+	 */
 	isConnected: function() {
 
-		return true; // property binding is always connected to it's widget
+		return true;
 
 	},
 
+	/**
+	 * Value of "assign" argument has changed. Set view's property and schedule refresh
+	 */
 	onAssignChanged: function() {
 
 		this._view.set(this._property_name, this._assign_argument.getValue());
@@ -79,6 +116,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * View's property has changed. Schedule refresh
+	 */
 	onContainerPropertyChanged: function() {
 
 		this._queueForRefresh();
@@ -86,6 +126,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_value`
+	 * @returns {*}
+	 */
 	getValue: function() {
 
 		return this._value;
@@ -93,6 +137,7 @@ Lava.define(
 	},
 
 	/**
+	 * Set property value to the bound view
 	 * @param {*} value
 	 */
 	setValue: function(value) {

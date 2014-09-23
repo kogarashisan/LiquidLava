@@ -2,7 +2,7 @@
 Lava.define(
 'Lava.view.refresher.Animated',
 /**
- * Base class for animation support.
+ * Base class for refreshers, which support animation
  * @lends Lava.view.refresher.Animated#
  * @extends Lava.view.refresher.Default
  */
@@ -26,6 +26,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Version of `refresh()`, which animates insertion and removal of templates
+	 * @param {Array.<Lava.system.Template>} current_templates
+	 */
 	_refreshAnimated: function(current_templates) {
 
 		var i = 0,
@@ -52,6 +56,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * View's render callback
+	 * @param {Array.<Lava.system.Template>} current_templates
+	 */
 	onRender: function(current_templates) {
 
 		this.stopAnimations();
@@ -60,16 +68,18 @@ Lava.define(
 
 	},
 
-	_onRenderAnimated: function(current_templates) {
-
-	},
-
+	/**
+	 * Set `_is_animation_enabled` to <kw>true</kw>
+	 */
 	enableAnimation: function() {
 
 		this._is_animation_enabled = true;
 
 	},
 
+	/**
+	 * Set `_is_animation_enabled` to <kw>false</kw> and stop all animations
+	 */
 	disableAnimation: function() {
 
 		this._is_animation_enabled = false;

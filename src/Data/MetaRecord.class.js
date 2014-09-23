@@ -2,6 +2,7 @@
 Lava.define(
 'Lava.data.MetaRecord',
 /**
+ * Record for {@link Lava.data.MetaStorage} module
  * @lends Lava.data.MetaRecord#
  * @extends Lava.data.RecordAbstract
  */
@@ -9,6 +10,11 @@ Lava.define(
 
 	Extends: 'Lava.data.RecordAbstract',
 
+	/**
+	 * Instance belongs to MetaRecord class
+	 * @type {boolean}
+	 * @const
+	 */
 	isMetaRecord: true,
 
 	init: function(meta_storage, fields, properties_storage_ref) {

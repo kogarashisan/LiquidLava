@@ -1,10 +1,13 @@
 
-Lava.resources =
 /**
- * API for working with resources, gathered into separate namespace for convenience.
+ * API for working with resources, gathered into separate namespace for convenience
  */
-{
+Lava.resources = {
 
+	/**
+	 * Helper operations for merging container resources
+	 * @type {Object.<string, string>}
+	 */
 	_container_resources_operations_map: {
 		static_properties: '_containerSet',
 		static_styles: '_containerSet',
@@ -17,6 +20,10 @@ Lava.resources =
 		remove_classes: '_containerRemoveArray'
 	},
 
+	/**
+	 * Another map for container resources operations
+	 * @type {Object.<string, string>}
+	 */
 	_container_resources_operands_map: {
 		add_properties: 'static_properties',
 		remove_properties: 'static_properties',
@@ -27,8 +34,8 @@ Lava.resources =
 	},
 
 	/**
-	 * May be overwritten by user to handle string definitions in widget resources.
-	 * Example usage: create an export file for translation.
+	 * Does nothing by default, but may be overwritten by user to handle string definitions in widget resources.
+	 * Example usage: create an export file for translation
 	 *
 	 * @param {(_cTranslatableString|_cTranslatablePlural)} data
 	 * @param {string} widget_title May be used as Domain for strings
@@ -40,9 +47,10 @@ Lava.resources =
 	},
 
 	/**
-	 * @param {string} widget_title
-	 * @param {string} locale
-	 * @param {Object} locale_resources
+	 * Attach resources object to global widget definition
+	 * @param {string} widget_title The name in {@link Lava#widgets}
+	 * @param {string} locale Locale of the resource object
+	 * @param {Object} locale_resources The object with resources for given locale
 	 */
 	addWidgetResource: function(widget_title, locale, locale_resources) {
 
@@ -62,69 +70,13 @@ Lava.resources =
 
 	},
 
-	_mergeResourceContainerObject: function(name, target, result) {
-
-		var i,
-			count,
-			static_property_name = 'static_' + name,
-			add_property_name = 'add_' + name,
-			remove_property_name = 'remove_' + name;
-
-		if (static_property_name in target) {
-
-			result[static_property_name] = target[static_property_name];
-
-		} else if ((add_property_name in target) || (remove_property_name in target)) {
-
-			if (Lava.schema.DEBUG && !(static_property_name in result)) Lava.t("Merging resources container: add/remove operation present, but value is not defined");
-			result[static_property_name] = Firestorm.Object.copy(result[static_property_name]);
-			if (add_property_name in target) {
-				Firestorm.extend(result[static_property_name], target[add_property_name]);
-			}
-			if (remove_property_name in target) {
-				for (i = 0, count = target[remove_property_name].length; i < count; i++) {
-					delete result[static_property_name][target[remove_property_name][i]];
-				}
-			}
-
-		}
-
-	},
-
-	_mergeContainerResource: function(top_object, bottom_object) {
-
-		var result = Firestorm.Object.copy(bottom_object);
-
-		this._mergeResourceContainerObject('styles', top_object, result);
-		this._mergeResourceContainerObject('properties', top_object, result);
-
-		if ('static_classes' in top_object) {
-
-			result['static_classes'] = top_object['static_classes'];
-
-		} else if (('add_classes' in top_object) || ('remove_classes' in top_object)) {
-
-			if (Lava.schema.DEBUG && !('static_classes' in result)) Lava.t("Merging resources container: add/remove operation present, but value is not defined");
-			result['static_classes'] = result['static_classes'].slice();
-			if ('add_classes' in top_object) {
-				result['static_classes'] = result['static_classes'].concat(top_object['add_classes']);
-			}
-			if ('remove_classes' in top_object) {
-				Firestorm.Array.excludeAll(result['static_classes'], top_object['remove_classes']);
-			}
-
-		}
-
-		return result;
-
-	},
-
 	/**
-	 * top_resources is expected to be a copy or a new empty object.
-	 * Properties in top_resources have priority over bottom_resources.
+	 * Merge resource objects.
+	 * `top_resources` is expected to be a copy or a new empty object.
+	 * Properties in `top_resources` have priority over `bottom_resources`
 	 *
-	 * @param top_resources
-	 * @param bottom_resources
+	 * @param {Object} top_resources Child resources
+	 * @param {Object} bottom_resources Parent resources
 	 */
 	mergeResources: function(top_resources, bottom_resources) {
 
@@ -167,6 +119,10 @@ Lava.resources =
 
 	},
 
+	/**
+	 * Container operations are stacked until first usage to guarantee correct inheritance
+	 * @param {Object} resource_object
+	 */
 	mergeRootContainerStacks: function(resource_object) {
 
 		for (var name in resource_object) {
@@ -182,6 +138,11 @@ Lava.resources =
 
 	},
 
+	/**
+	 * Perform merging of "container_stack" resource into "container" resource
+	 * @param {Array} stack
+	 * @returns {Object}
+	 */
 	_mergeRootContainerStack: function(stack) {
 
 		var i = 0,
@@ -200,10 +161,12 @@ Lava.resources =
 
 	},
 
+	/** Container resources merging API */
 	_containerSet: function(result, name, value) {
 		result[name] = value;
 	},
 
+	/** Container resources merging API */
 	_containerAddObject: function(result, name, value) {
 		var operand_name = this._container_resources_operands_map[name];
 		if (operand_name in result) {
@@ -213,6 +176,7 @@ Lava.resources =
 		}
 	},
 
+	/** Container resources merging API */
 	_containerAddArray: function(result, name, value) {
 		var operand_name = this._container_resources_operands_map[name];
 		if (operand_name in result) {
@@ -222,6 +186,7 @@ Lava.resources =
 		}
 	},
 
+	/** Container resources merging API */
 	_containerRemoveObject: function(result, name, value) {
 
 		var target,
@@ -234,6 +199,7 @@ Lava.resources =
 		}
 	},
 
+	/** Container resources merging API */
 	_containerRemoveArray: function(result, name, value) {
 		var operand_name = this._container_resources_operands_map[name];
 		if (operand_name in result) {
@@ -243,8 +209,9 @@ Lava.resources =
 
 	/**
 	 * Helper function which puts the value inside the resources object under given path string.
+	 * Used while parsing templates
 	 *
-	 * @param {Object} target_object the resources object which is being parsed
+	 * @param {Object} target_object The resources object which is being parsed
 	 * @param {string} path Path inside the resources object
 	 * @param {*} value
 	 */

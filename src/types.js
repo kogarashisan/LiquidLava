@@ -1,5 +1,5 @@
 /**
- * Note: types require initialization (Lava.initCore())
+ * Predefined objects which can parse and check strings and values for compliance to certain types
  */
 Lava.types = {
 
@@ -22,6 +22,9 @@ Lava.types = {
 
 	},
 
+	/**
+	 * A common boolean type (<kw>true</kw> or <kw>false</kw>)
+	 */
 	Boolean: {
 
 		extends: 'AbstractType',
@@ -57,6 +60,9 @@ Lava.types = {
 
 	},
 
+	/**
+	 * Any string
+	 */
 	String: {
 
 		extends: 'AbstractType',
@@ -71,7 +77,7 @@ Lava.types = {
 
 		},
 
-		isValidString: function(value) {
+		isValidString: function() {
 
 			return true;
 
@@ -85,6 +91,9 @@ Lava.types = {
 
 	},
 
+	/**
+	 * Any decimal number
+	 */
 	Number: {
 
 		extends: 'AbstractType',
@@ -115,6 +124,9 @@ Lava.types = {
 
 	},
 
+	/**
+	 * Numbers without fractional part
+	 */
 	Integer: {
 
 		extends: 'Number',
@@ -123,6 +135,9 @@ Lava.types = {
 
 	},
 
+	/**
+	 * Integers strictly greater than zero
+	 */
 	PositiveInteger: {
 
 		extends: 'Number',
@@ -131,6 +146,9 @@ Lava.types = {
 
 	},
 
+	/**
+	 * Integers greater than zero, or zero
+	 */
 	NonNegativeInteger: {
 
 		extends: 'Number',
@@ -139,6 +157,9 @@ Lava.types = {
 
 	},
 
+	/**
+	 * A number between 0 and 1, inclusive
+	 */
 	Percent: {
 
 		extends: 'Number',
@@ -157,6 +178,9 @@ Lava.types = {
 
 	},
 
+	/**
+	 * A string with an array of allowed values
+	 */
 	Set: {
 
 		extends: 'AbstractType',
@@ -188,7 +212,7 @@ Lava.types = {
 	},
 
 	/**
-	 * An HTML attribute which can take it's name as a value.
+	 * An HTML attribute which can take it's name as a value. Converts to <kw>true</kw>
 	 * Example:
 	 * checked="checked"
 	 * checked=""
@@ -222,6 +246,9 @@ Lava.types = {
 
 	},
 
+	/**
+	 * A string which is converted to any other value from a map object
+	 */
 	Map: {
 
 		extends: 'AbstractType',
@@ -252,6 +279,9 @@ Lava.types = {
 
 	},
 
+	/**
+	 * Any array
+	 */
 	Array: {
 
 		extends: 'AbstractType',
@@ -276,6 +306,9 @@ Lava.types = {
 
 	},
 
+	/**
+	 * Any date
+	 */
 	Date: {
 
 		extends: 'AbstractType',
@@ -292,7 +325,7 @@ Lava.types = {
 
 		},
 
-		fromSafeString: function(value) {
+		fromSafeString: function() {
 
 			Lava.t();
 

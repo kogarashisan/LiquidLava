@@ -2,6 +2,8 @@
 Lava.define(
 'Lava.view.If',
 /**
+ * Display content depending on condition
+ *
  * @lends Lava.view.If#
  * @extends Lava.view.Abstract
  * @implements _iViewHierarchyMember
@@ -11,25 +13,45 @@ Lava.define(
 	Extends: 'Lava.view.Abstract',
 
 	/**
+	 * One argument for each if/elseif section
 	 * @type {Array.<Lava.scope.Argument>}
 	 */
 	_arguments: [],
+	/**
+	 * For each argument: it's {@link Lava.scope.Argument#event:changed} listener
+	 * @type {Array.<_tListener>}
+	 */
 	_argument_changed_listeners: [],
+	/**
+	 * Total number of if/elseif sections
+	 * @type {number}
+	 */
 	_count_arguments: 0,
+	/**
+	 * Currently active if/elseif section id
+	 * @type {number}
+	 */
 	_active_argument_index: null,
 	/**
-	 * @type {Array.<_tRenderable>}
+	 * Content of each if/elseif section
+	 * @type {Array.<Lava.system.Template>}
 	 */
 	_contents: [],
 	/**
-	 * @type {_tRenderable}
+	 * Template to display when all if/elseif conditions are <kw>false</kw>
+	 * @type {Lava.system.Template}
 	 */
 	_else_contents: null,
 
 	/**
+	 * Refreshers animates insertion and removal of templates
 	 * @type {(Lava.view.refresher.Default)}
 	 */
 	_refresher: null,
+	/**
+	 * Currently active Template instance, including the 'else' template
+	 * @type {Lava.system.Template}
+	 */
 	_active_template: null,
 
 	_postInit: function() {
@@ -75,12 +97,20 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_refresher`
+	 * @returns {Lava.view.refresher.Default}
+	 */
 	getRefresher: function() {
 
 		return this._refresher;
 
 	},
 
+	/**
+	 * Get index of the first argument which evaluates to <kw>true</kw>
+	 * @returns {?number} Zero-based argument index, or <kw>null</kw>, if all arguments evaluate to <kw>false</kw>
+	 */
 	_getActiveArgumentIndex: function() {
 
 		var i = 0,
@@ -99,6 +129,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get template that corresponds to argument that evaluates to <kw>true</kw>
+	 * (or 'else' template, if there are no active arguments)
+	 * @returns {?Lava.system.Template}
+	 */
 	_getActiveTemplate: function() {
 
 		var result = null;
@@ -121,6 +156,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Listener for argument's {@link Lava.scope.Argument#event:changed} event
+	 */
 	_onArgumentChanged: function() {
 
 		var active_argument_index = this._getActiveArgumentIndex();
@@ -151,6 +189,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Render the currently active if/elseif section
+	 * @returns {string}
+	 */
 	_renderContents: function() {
 
 		if (Lava.schema.DEBUG && this._active_argument_index != null && this._arguments[this._active_argument_index].isWaitingRefresh()) Lava.t();
@@ -161,6 +203,7 @@ Lava.define(
 	},
 
 	/**
+	 * Broadcast to currently active if/elseif template
 	 * @param {string} function_name
 	 */
 	_broadcastToChildren: function(function_name) {
@@ -214,6 +257,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Create the template that corresponds to a if/elseif section
+	 * @param {number} index
+	 */
 	_createContents: function(index) {
 
 		if (typeof(this._contents[index]) == 'undefined') {
@@ -228,6 +275,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Create the 'else' template
+	 */
 	_createElseContents: function() {
 
 		if (this._else_contents == null) {

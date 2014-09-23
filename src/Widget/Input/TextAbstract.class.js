@@ -2,6 +2,7 @@
 Lava.define(
 'Lava.widget.input.TextAbstract',
 /**
+ * Base class for text inputs
  * @lends Lava.widget.input.TextAbstract#
  * @extends Lava.widget.input.Abstract#
  */
@@ -14,6 +15,7 @@ Lava.define(
 	},
 
 	_properties: {
+		/** Current text inside the input element */
 		value: ''
 	},
 
@@ -22,8 +24,21 @@ Lava.define(
 		input: '_onTextInput'
 	},
 
+	/**
+	 * Whether to update widget's {@link Lava.widget.input.Abstract#property:value} property
+	 * on any change in DOM input element. Otherwise, value will be refreshed on input's "blur" event
+	 */
 	_refresh_on_input: true,
 
+	/**
+	 * @param config
+	 * @param {boolean} config.options.cancel_refresh_on_input Update widget's <i>value</i> when input element loses focus.
+	 *  By default, value is updated on each user input
+	 * @param widget
+	 * @param parent_view
+	 * @param template
+	 * @param properties
+	 */
 	init: function(config, widget, parent_view, template, properties) {
 
 		this.Abstract$init(config, widget, parent_view, template, properties);
@@ -34,25 +49,37 @@ Lava.define(
 
 	},
 
-	_setValue: function(value, name) {
+	/**
+	 * Set input's value
+	 * @param {string} value
+	 */
+	_setValue: function(value) {
 
 		if (this._properties.value != value) {
 
 			this._set('value', value);
 			if (this._input_container) {
-				this._input_container.setProperty('value', this._valueToAttributeString(value));
+				this._input_container.setProperty('value', this._valueToElementProperty(value));
 			}
 
 		}
 
 	},
 
-	_valueToAttributeString: function(value) {
+	/**
+	 * Convert value before setting it to Element
+	 * @param {*} value
+	 * @returns {string}
+	 */
+	_valueToElementProperty: function(value) {
 
 		return value;
 
 	},
 
+	/**
+	 * Get value from DOM input element and set local {@link Lava.widget.input.Abstract#property:value} property
+	 */
 	_refreshValue: function() {
 
 		var value = this._input_container.getDOMElement().value;
@@ -66,6 +93,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * DOM element's value changed: refresh local {@link Lava.widget.input.Abstract#property:value} property
+	 */
 	_onTextInput: function() {
 
 		if (this._refresh_on_input) {

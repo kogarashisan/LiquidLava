@@ -1,8 +1,18 @@
 
+/**
+ * Methods and regular expressions to manipulate strings
+ */
 Firestorm.String = {
 
 	// taken from json2
+	/**
+	 * Special characters, which must be escaped when serializing (quoting) a string
+	 */
 	QUOTE_ESCAPE_REGEX: /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
+	/**
+	 * Map for escaping special characters
+	 * @type {Object.<string, string>}
+	 */
 	quote_escape_map: {
 		// without these comments JSDoc throws errors
 		// https://github.com/jsdoc3/jsdoc/issues/549
@@ -23,6 +33,10 @@ Firestorm.String = {
 		'\\': '\\\\'
 	},
 
+	/**
+	 * HTML special entities that must be escaped in attributes and similar cases
+	 * @type {Object.<string, string>}
+	 */
 	escape_chars: {
 		"&": "&amp;",
 		"<": "&lt;",
@@ -32,6 +46,9 @@ Firestorm.String = {
 		"`": "&#x60;"
 	},
 
+	/**
+	 * Reverse map of HTML entities to perform unescaping
+	 */
 	unescape_chars: {
 		"&amp;": "&",
 		"&lt;": "<",
@@ -41,13 +58,25 @@ Firestorm.String = {
 		"&#x60;": "`"
 	},
 
+	/**
+	 * Characters which must be escaped in a string, which is part of HTML document
+	 */
 	HTML_ESCAPE_REGEX: /[<>\&]/g,
+	/**
+	 * Characters that nust be escaped in HTML attributes
+	 */
 	ATTRIBUTE_ESCAPE_REGEX: /[&<>\"\'\`]/g,
+	/**
+	 * Characters that must be escaped when creating a &lt;textarea&gt; tag with initial content
+	 */
 	TEXTAREA_ESCAPE_REGEX: /[<>&\'\"]/g,
+	/**
+	 * Characters, which are escaped by the browser, when getting innerHTML of elements
+	 */
 	UNESCAPE_REGEX: /(&amp;|&lt;|&gt;)/g,
 
 	/**
-	 * Turn "dashed-string" into camelCased string
+	 * Turn "dashed-string" into "camelCased" string
 	 * @param {string} string
 	 * @returns {string}
 	 */
@@ -83,6 +112,12 @@ Firestorm.String = {
 		});
 	},
 
+	/**
+	 * Escape HTML entities found by `regex` argument
+	 * @param {string} string
+	 * @param {RegExp} regex A regular expression object, such as {@link Firestorm.String#HTML_ESCAPE_REGEX}
+	 * @returns {string}
+	 */
 	escape: function(string, regex) {
 		var escape_chars = this.escape_chars;
 		return string.replace(
@@ -91,6 +126,11 @@ Firestorm.String = {
 		);
 	},
 
+	/**
+	 * Unescape html entities which are escaped by browser (see {@link Firestorm.String#UNESCAPE_REGEX})
+	 * @param {string} string
+	 * @returns {string}
+	 */
 	unescape: function(string) {
 		var unescape_chars = this.unescape_chars;
 		return string.replace(
@@ -99,6 +139,11 @@ Firestorm.String = {
 		);
 	},
 
+	/**
+	 * Serialize a string into it's JavaScript representation. If you eval() the result - you will get the original value
+	 * @param string
+	 * @returns {*}
+	 */
 	quote: function(string) {
 
 		var result,

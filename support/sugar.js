@@ -1,18 +1,27 @@
 
 /** @enum {string} */
 _eSugarRootContentType = {
+	/** Content of sugar tag is an object from {@link _cWidget#storage} */
 	storage_object: 'storage_object',
+	/** Entire content is widget's include */
 	include: 'include',
+	/** Entire content should be parsed as storage */
 	storage: 'storage',
-	tag_map: 'union'
+	/** Content of sugar tag may contain tags from storage and tags with includes */
+	union: 'union'
 	//main_template: 'main_template'
 };
 
 _cSugarTag = {
 
+	/**
+	 * @type {string}
+	 * @const
+	 */
 	type: 'include',
 	/**
 	 * Only for `type='include'` - the name of include
+	 * @type {string}
 	 */
 	name: null
 
@@ -24,11 +33,12 @@ _cSugarContent = {
 	type: null,
 	/**
 	 * For `type='include'` - name of the include,
-	 * For `type='storage_object'` - name of the object in storage
+	 * for `type='storage_object'` - name of the object in storage
+	 * @type {string}
 	 */
 	name: null,
 	/**
-	 * for `type='map'`:
+	 * For `type='map'`
 	 * @type {Object.<string, _cSugarTag>}
 	 */
 	tag_roles: {}
@@ -37,17 +47,31 @@ _cSugarContent = {
 
 _cSugar = {
 
+	/**
+	 * Full name of the class that will parse widget's sugar. See {@link Lava#getWidgetSugarInstance}
+	 * @type {string}
+	 */
 	'class': '',
-
+	/**
+	 * Custom tag name that will be used to define the widget
+	 * @type {string}
+	 */
 	tag_name: '',
-
-	/** @type {_cSugarContent} */
+	/**
+	 * What can be inside the sugar tag
+	 * @type {?_cSugarContent}
+	 */
 	content_schema: null,
-
-	/** @type {Object.<string, _cSugarRootAttribute>} */
+	/**
+	 * Actions for attributes on root tag
+	 * @type {Object.<string, _cSugarRootAttribute>}
+	 */
 	attribute_mappings: null,
-
-	root_resource_name: '' // for attributes without schema
+	/**
+	 * Resource name for root attributes, which are not described in `attribute_mappings`
+	 * @type {string}
+	 */
+	root_resource_name: ''
 
 };
 
@@ -56,14 +80,23 @@ _cSugar = {
  * @enum {string}
  */
 _eSugarRootAttributeType = {
+	/** Attribute value will be parsed by {@link Lava.ExpressionParser} and stored in {@link _cView#options} */
 	expression_option: 'expression_option',
+	/** Attribute value will be parsed by {@link Lava.parsers.Common#parseTargets} and stored in {@link _cView#options} */
 	targets_option: 'targets_option',
+	/** Content will be optionally converted and stored in {@link _cWidget#properties} */
 	property: 'property',
+	/** Boolean option. Empty value is converted to <kw>true</kw> */
 	'switch': 'switch',
+	/** Content of the attribute will be optionally converted and stored in {@link _cView#options} */
 	option: 'option',
+	/** This is {@link _cView#id} attribute */
 	id: 'id'
 };
 
+/**
+ * Attribute on tag that belongs to a sugar
+ */
 _cSugarRootAttribute = {
 
 	/**
@@ -71,9 +104,17 @@ _cSugarRootAttribute = {
 	 */
 	type: null,
 
+	/**
+	 * Name from {@link Lava.types}
+	 * @type {string}
+	 */
 	type_name: '',
 
-	name: '' // the name in widget config
+	/**
+	 * The name in widget config
+	 * @type {string}
+	 */
+	name: ''
 
 };
 
@@ -82,6 +123,10 @@ _cSugarRootAttribute = {
  */
 _cSugarSchema = {
 
+	/**
+	 * Name of global widget from {@link Lava#widgets}
+	 * @type {string}
+	 */
 	widget_title: '',
 
 	/** @param {_cRawTag} raw_tag */

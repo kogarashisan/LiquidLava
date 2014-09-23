@@ -2,6 +2,7 @@
 Lava.define(
 'Lava.animation.Emulated',
 /**
+ * Used to animate with CSS transitions. Does not have keyframes, just a single timeout event
  * @lends Lava.animation.Emulated#
  * @extends Lava.animation.Abstract
  */
@@ -9,10 +10,22 @@ Lava.define(
 
 	Extends: 'Lava.animation.Abstract',
 
+	/**
+	 * Tell other classes that this is instance of Lava.animation.Emulated
+	 */
 	isEmulatedAnimation: true,
 
-	_timeout: 0,
+	/**
+	 * Window timeout id
+	 * @type {?number}
+	 */
+	_timeout: null,
 
+	/**
+	 * Create an animation
+	 * @param {_cAnimation} config
+	 * @param {*} target
+	 */
 	init: function(config, target) {
 
 		this.Abstract$init(config, target);
@@ -24,6 +37,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Callback for window timeout event
+	 */
 	_onTimeout: function() {
 
 		this._timeout = null;
@@ -32,10 +48,16 @@ Lava.define(
 
 	},
 
+	/**
+	 * Apply the ended state to the target
+	 */
 	_end: function() {
 
 	},
 
+	/**
+	 * Clear old timeout, if it exists
+	 */
 	_cancelTimeout: function() {
 		if (this._timeout) {
 			window.clearTimeout(this._timeout);
@@ -43,6 +65,9 @@ Lava.define(
 		}
 	},
 
+	/**
+	 * Start animation
+	 */
 	start: function() {
 
 		if (this._is_running) {
@@ -55,10 +80,16 @@ Lava.define(
 
 	},
 
+	/**
+	 * Apply the started state to the target
+	 */
 	_start: function() {
 
 	},
 
+	/**
+	 * Stop animation immediately where it is. Do not fire {@link Lava.animation.Abstract#event:complete}
+	 */
 	stop: function() {
 
 		if (this._is_running) {
@@ -83,35 +114,20 @@ Lava.define(
 	},
 
 	/**
-	 * Reverse the animation while it's still running
+	 * Actions to reverse Emulated animation while it's still running
 	 */
 	_reverse: function() {
 
 	},
 
+	/**
+	 * End the animation and Apply the end state to target
+	 */
 	finish: function() {
 
 		if (this._is_running) {
 			this._cancelTimeout();
 			this._onTimeout();
-		}
-
-	},
-
-	_assertStopped: function() {
-
-		if (this._is_running) {
-
-			if (Lava.schema.DEBUG) {
-
-				Lava.t("Emulated animation: call to state changing function while the animation is running");
-
-			} else {
-
-				Lava.logError("Emulated animation: call to state changing function while the animation is running");
-
-			}
-
 		}
 
 	}

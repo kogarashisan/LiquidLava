@@ -1,8 +1,18 @@
 
+/**
+ * This instance may become dirty and will fire the 'refreshed' event
+ * @event Lava.mixin.Refreshable#waits_refresh
+ */
+
+/**
+ * Instance is now clean, and scopes that depend on it can update themselves now
+ * @event Lava.mixin.Refreshable#refreshed
+ */
+
 Lava.define(
 'Lava.mixin.Refreshable',
 /**
- * Auxiliary class for the scope refresh system
+ * Auxiliary class for the scope refresh system. Allows to build hierarchy of dependent scopes
  * @lends Lava.mixin.Refreshable#
  * @extends Lava.mixin.Observable
  */
@@ -15,7 +25,8 @@ Lava.define(
 	 */
 	level: 0,
 	/**
-	 * Force delay of refresh after the last dependency has been updated
+	 * Force delay of refresh after the last dependency has been updated.
+	 * This flag is set depending on scope configuration
 	 * @type {boolean}
 	 */
 	_requeue: false,
@@ -31,7 +42,7 @@ Lava.define(
 	 */
 	_waits_refresh: false,
 	/**
-	 * The object, which is given by ScopeManager when the scope is placed into the refresh queue
+	 * The object, which is given by {@link Lava.ScopeManager} when the scope is added into the refresh queue
 	 * @type {Object}
 	 */
 	_refresh_ticket: null,
@@ -54,11 +65,11 @@ Lava.define(
 	_is_dirty: false,
 
 	/**
-	 * Called by ScopeManager during refresh loop.
+	 * Called by {@link Lava.ScopeManager} during refresh loop
 	 *
-	 * @param {number} refresh_id
-	 * @param {boolean} [is_safe]
-	 * @returns {boolean} true in case of infinite loop
+	 * @param {number} refresh_id The id of current refresh loop
+	 * @param {boolean} [is_safe] Internal switch used to control infinite refresh loop exceptions
+	 * @returns {boolean} <kw>true</kw> in case of infinite loop, and <kw>false</kw> in case of normal refresh
 	 */
 	doRefresh: function(refresh_id, is_safe) {
 
@@ -106,7 +117,7 @@ Lava.define(
 	},
 
 	/**
-	 * Listens to the waits_refresh event
+	 * Listens to the {@link Lava.mixin.Refreshable#event:waits_refresh} event of it's dependencies (other Refreshable instances)
 	 */
 	_onDependencyWaitsRefresh: function() {
 
@@ -115,6 +126,8 @@ Lava.define(
 		if (this._waits_refresh) {
 
 			if (this._refresh_ticket) {
+				// If a scope, that was queued for refresh, has dirty dependencies - it will refresh itself automatically
+				// after it's last dependency is refreshed. So in that case it must cancel it's refresh ticket.
 				Lava.ScopeManager.cancelScopeRefresh(this._refresh_ticket, this.level);
 				this._refresh_ticket = null;
 			}
@@ -131,7 +144,7 @@ Lava.define(
 	},
 
 	/**
-	 * Listens to the refreshed event
+	 * Listens to the {@link Lava.mixin.Refreshable#event:refreshed} event of it's dependencies
 	 */
 	_onDependencyRefreshed: function() {
 
@@ -214,7 +227,7 @@ Lava.define(
 	},
 
 	/**
-	 * Cancel the current refresh ticket and ignore next refresh cycle. Does not destroy the Refreshable instance.
+	 * Cancel the current refresh ticket and ignore next refresh cycle. Does not destroy the Refreshable instance
 	 */
 	suspendRefreshable: function() {
 

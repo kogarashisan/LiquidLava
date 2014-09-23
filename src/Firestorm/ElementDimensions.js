@@ -7,8 +7,9 @@ Firestorm.Element,
 {
 
 	/**
+	 * Get element's dimensions
 	 * @param element
-	 * @returns {{x: number, y: number}}
+	 * @returns {{x: number, y: number}} An object with element's dimensions
 	 */
 	getSize: function(element) {
 

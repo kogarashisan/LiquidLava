@@ -1,6 +1,12 @@
-
+/**
+ * All TemplateParser directives
+ */
 Lava.parsers.Directives = {
 
+	/**
+	 * Settings for each directive
+	 * @type {Object.<string, Object>}
+	 */
 	_directives_schema: {
 		define: {view_config_presence: false},
 		widget: {},
@@ -24,6 +30,10 @@ Lava.parsers.Directives = {
 		default_events: {view_config_presence: true, is_top_directive: true}
 	},
 
+	/**
+	 * Handlers for tags in widget definition
+	 * @type {Object.<string, string>}
+	 */
 	_widget_tag_actions: {
 		bind: '_widgetTagBind',
 		assign: '_widgetTagAssign',
@@ -42,6 +52,10 @@ Lava.parsers.Directives = {
 		include: '_widgetTagInclude'
 	},
 
+	/**
+	 * Handlers for tags inside x:resources
+	 * @type {Object.<string, string>}
+	 */
 	_resource_tag_actions: {
 		string: '_resourceTagString',
 		number: '_resourceTagNumber',
@@ -52,25 +66,43 @@ Lava.parsers.Directives = {
 		ntranslate: '_resourceTagTranslatePlural'
 	},
 
+	/**
+	 * Predefined edit_template tasks
+	 * @type {Object.<string, string>}
+	 */
 	_known_edit_tasks: {
 		replace_config_option: '_editTaskSetConfigOptions',
 		add_class: '_editTaskAddClass'
 	},
 
+	/**
+	 * Allowed item types in <kw>"array"</kw> resource
+	 * @type {Array.<string>}
+	 */
 	RESOURCE_ARRAY_ALLOWED_TYPES: ['string', 'boolean', 'null', 'number'],
 
 	/**
 	 * To prevent nested defines
+	 * @type {boolean}
 	 */
 	_is_processing_define: false,
-	_current_widget_title: null, // the title of the widget in x:define directive, which is currently being processed
+	/**
+	 * The title of the widget in x:define directive, which is currently being processed
+	 * @type {string}
+	 */
+	_current_widget_title: null,
+	/**
+	 * Stack of widget configs, which are currently being processed by x:widget/x:define directives
+	 * @type {Array.<_cWidget>}
+	 */
 	_widget_directives_stack: [],
 
 	/**
-	 * @param {_cRawDirective} raw_directive
-	 * @param {(_cView|_cWidget)} view_config
-	 * @param {boolean} is_top_directive
-	 * @returns {*}
+	 * Handle directive tag
+	 * @param {_cRawDirective} raw_directive Raw directive tag
+	 * @param {(_cView|_cWidget)} view_config Config of the directive's parent view
+	 * @param {boolean} is_top_directive Code style validation switch. Some directives must be at the top of templates
+	 * @returns {*} Compiled template item or nothing
 	 */
 	processDirective: function(raw_directive, view_config, is_top_directive) {
 
@@ -90,6 +122,12 @@ Lava.parsers.Directives = {
 
 	},
 
+	/**
+	 * Helper method to copy properties from `source` to `destination`, if they exist
+	 * @param {Object} destination
+	 * @param {Object} source
+	 * @param {Array.<string>} name_list List of properties to copy from `source` to `destination`
+	 */
 	_importVars: function(destination, source, name_list) {
 		for (var i = 0, count = name_list.length; i < count; i++) {
 			var name = name_list[i];
@@ -101,6 +139,7 @@ Lava.parsers.Directives = {
 	// start: actions for widget tags
 
 	/**
+	 * Parse {@link _cWidget#bindings}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -111,6 +150,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cView#assigns}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -121,6 +161,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse one option for {@link _cView#options}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -131,6 +172,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse one property for {@link _cWidget#properties}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -141,6 +183,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cView#options}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -151,6 +194,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cWidget#storage_schema}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -161,6 +205,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cWidget#properties}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -171,6 +216,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cView#roles}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -181,6 +227,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cWidget#sugar}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -193,6 +240,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cWidget#broadcast}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -203,6 +251,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cWidget#storage}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -213,6 +262,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cWidget#default_events}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -223,6 +273,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cWidget#resources}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -233,6 +284,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse &lt;arguments&gt; tag for edit_template
 	 * @param {_tRawTemplate} raw_template
 	 * @returns {Array.<*>}
 	 */
@@ -271,6 +323,11 @@ Lava.parsers.Directives = {
 
 	},
 
+	/**
+	 * Helper method for edit_template to evaluate and extract editing method from task definition
+	 * @param {string} src
+	 * @returns {*}
+	 */
 	_evalTaskHandler: function(src) {
 		var handler = null;
 		eval(src);
@@ -279,6 +336,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Copy template and apply editing operations to it
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -383,6 +441,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse one include for {_cWidget#includes}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -399,6 +458,12 @@ Lava.parsers.Directives = {
 	////////////////////////////////////////////////////////////////////
 	// Start: resource tags
 
+	/**
+	 * Parse x:resources definition
+	 * @param {_cRawTag} raw_tag
+	 * @param {string} widget_title
+	 * @returns {Object}
+	 */
 	_parseResources: function(raw_tag, widget_title) {
 
 		var tags = Lava.parsers.Common.asBlockType(raw_tag.content, 'tag'),
@@ -428,6 +493,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse a string resource
 	 * @param {_cRawTag} raw_tag
 	 */
 	_resourceTagString: function(raw_tag) {
@@ -449,6 +515,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse number resource
 	 * @param {_cRawTag} raw_tag
 	 */
 	_resourceTagNumber: function(raw_tag) {
@@ -463,6 +530,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse boolean resource
 	 * @param {_cRawTag} raw_tag
 	 */
 	_resourceTagBoolean: function(raw_tag) {
@@ -477,6 +545,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse array resource
 	 * @param {_cRawTag} raw_tag
 	 */
 	_resourceTagArray: function(raw_tag) {
@@ -502,6 +571,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse a translatable string
 	 * @param {_cRawTag} raw_tag
 	 */
 	_resourceTagTranslate: function(raw_tag) {
@@ -521,6 +591,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse translatable plural string
 	 * @param {_cRawTag} raw_tag
 	 */
 	_resourceTagTranslatePlural: function(raw_tag) {
@@ -555,6 +626,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse inheritable actions for classes, styles and container properties
 	 * @param {_cRawTag} raw_tag
 	 */
 	_resourceTagContainer: function(raw_tag) {
@@ -644,6 +716,7 @@ Lava.parsers.Directives = {
 	////////////////////////////////////////////////////////////////////
 
 	/**
+	 * Parse main_view widget tag: compile, extract and validate a single view inside it
 	 * @param {_cRawTag} raw_tag
 	 */
 	_asMainWidget: function(raw_tag) {
@@ -670,6 +743,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse x:view and x:widget directives
 	 * @param {_cRawDirective} raw_directive
 	 * @returns {_cWidget}
 	 */
@@ -754,6 +828,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Wrapper for `_parseWidgetDefinition` in x:define to guarantee that there are no nested defines
 	 * @param {_cRawDirective} raw_directive
 	 * @returns {_cWidget}
 	 */
@@ -780,6 +855,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Define a widget
 	 * @param {_cRawDirective} raw_directive
 	 */
 	_xdefine: function(raw_directive) {
@@ -800,6 +876,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Inline widget definition
 	 * @param {_cRawDirective} raw_directive
 	 */
 	_xwidget: function(raw_directive) {
@@ -815,6 +892,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse an assign config for {@link _cView#assigns}
 	 * @param {_cRawDirective} raw_directive
 	 * @param {_cView} view_config
 	 */
@@ -825,16 +903,17 @@ Lava.parsers.Directives = {
 	},
 
 	/**
-	 * @param {Object} storage
+	 * Perform parsing an assign from {@link _cView#assigns}
+	 * @param {(_cView|_cWidget)} config
 	 * @param {(_cRawDirective|_cRawTag)} raw_tag
 	 */
-	_parseAssign: function(storage, raw_tag) {
+	_parseAssign: function(config, raw_tag) {
 
-		if (!('assigns' in storage)) storage.assigns = {};
+		if (!('assigns' in config)) config.assigns = {};
 
 		if (Lava.schema.DEBUG && !('attributes' in raw_tag)) Lava.t("assign: missing attributes");
 		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.t("Malformed assign");
-		if (raw_tag.attributes.name in storage.assigns) Lava.t("Duplicate assign: " + raw_tag.attributes.name);
+		if (raw_tag.attributes.name in config.assigns) Lava.t("Duplicate assign: " + raw_tag.attributes.name);
 
 		var arguments = Lava.ExpressionParser.parse(raw_tag.content[0]);
 		if (Lava.schema.DEBUG && arguments.length != 1) Lava.t("Expression block requires exactly one argument");
@@ -845,11 +924,12 @@ Lava.parsers.Directives = {
 
 		}
 
-		storage.assigns[raw_tag.attributes.name] = arguments[0];
+		config.assigns[raw_tag.attributes.name] = arguments[0];
 
 	},
 
 	/**
+	 * Parse an option for {@link _cView#options}
 	 * @param {_cRawDirective} raw_directive
 	 * @param {_cView} view_config
 	 */
@@ -860,11 +940,12 @@ Lava.parsers.Directives = {
 	},
 
 	/**
-	 * @param {Object} storage
+	 * Perform parsing of a tag with serialized JavaScript object inside it
+	 * @param {(_cView|_cWidget)} config
 	 * @param {(_cRawDirective|_cRawTag)} raw_tag
-	 * @param {string} storage_property_name
+	 * @param {string} config_property_name Name of the config member, which holds target JavaScript object
 	 */
-	_parseOption: function(storage, raw_tag, storage_property_name) {
+	_parseOption: function(config, raw_tag, config_property_name) {
 
 		if (Lava.schema.DEBUG && !('attributes' in raw_tag)) Lava.t("option: missing attributes");
 		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.t("Malformed option: " + raw_tag.attributes.name);
@@ -894,24 +975,26 @@ Lava.parsers.Directives = {
 
 		}
 
-		Lava.store(storage, storage_property_name, raw_tag.attributes.name, result);
+		Lava.store(config, config_property_name, raw_tag.attributes.name, result);
 
 	},
 
 	/**
-	 * @param {_cWidget} storage
+	 * Perform parsing a property from {@link _cWidget#properties}
+	 * @param {_cWidget} config
 	 * @param {(_cRawDirective|_cRawTag)} raw_tag
-	 * @param {string} storage_property_name
+	 * @param {string} config_property_name Name of the config member, which holds target JavaScript object
 	 */
-	_parseProperty: function(storage, raw_tag, storage_property_name) {
+	_parseProperty: function(config, raw_tag, config_property_name) {
 
 		if (Lava.schema.DEBUG && !('attributes' in raw_tag)) Lava.t("option: missing attributes");
 		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.t("Malformed option: " + raw_tag.attributes.name);
-		Lava.store(storage, storage_property_name, raw_tag.attributes.name, Lava.parseOptions(raw_tag.content[0]));
+		Lava.store(config, config_property_name, raw_tag.attributes.name, Lava.parseOptions(raw_tag.content[0]));
 
 	},
 
 	/**
+	 * Parse {@link _cView#roles}
 	 * @param {_cRawDirective} raw_directive
 	 * @param {_cView} view_config
 	 */
@@ -921,15 +1004,21 @@ Lava.parsers.Directives = {
 
 	},
 
-	_parseRoles: function(storage, raw_tag) {
+	/**
+	 * Perform parsing a role from {@link _cView#roles}
+	 * @param {(_cView|_cWidget)} config
+	 * @param {_cRawTag} raw_tag
+	 */
+	_parseRoles: function(config, raw_tag) {
 
-		if ('roles' in storage) Lava.t("Roles are already defined");
+		if ('roles' in config) Lava.t("Roles are already defined");
 		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.t("Malformed roles tag/directive");
-		storage.roles = Lava.parsers.Common.parseTargets(raw_tag.content[0]);
+		config.roles = Lava.parsers.Common.parseTargets(raw_tag.content[0]);
 
 	},
 
 	/**
+	 * Parse {@link _cView#container}
 	 * @param {_cRawDirective} raw_directive
 	 * @param {_cView} view_config
 	 */
@@ -957,6 +1046,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cView#refresher}
 	 * @param {_cRawDirective} raw_directive
 	 * @param {_cView} view_config
 	 */
@@ -970,6 +1060,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Perform parsing {@link _cWidget#broadcast}
 	 * @param {_cWidget} widget_config
 	 * @param {(_cRawDirective|_cRawTag)} raw_element
 	 */
@@ -991,6 +1082,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cWidget#broadcast}
 	 * @param {_cRawDirective} raw_directive
 	 * @param {_cWidget} widget_config
 	 */
@@ -1003,6 +1095,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Perform parsing {@link _cWidget#bindings}
 	 * @param {_cWidget} widget_config
 	 * @param {(_cRawDirective|_cRawTag)} raw_element
 	 */
@@ -1012,7 +1105,7 @@ Lava.parsers.Directives = {
 
 		var binding = {
 			property_name: raw_element.attributes.name,
-			path_config: Lava.ExpressionParser.parsePath(raw_element.content[0])
+			path_config: Lava.ExpressionParser.parseScopeEval(raw_element.content[0])
 		};
 		if ('direction' in raw_element.attributes) {
 			if (!(raw_element.attributes.direction in Lava.BINDING_DIRECTIONS))
@@ -1024,6 +1117,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cWidget#bindings}
 	 * @param {_cRawDirective} raw_directive
 	 * @param {_cWidget} widget_config
 	 */
@@ -1035,6 +1129,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse a tag with JavaScript object inside
 	 * @param {(_cView|_cWidget)} config
 	 * @param {string} name
 	 * @param {(_cRawDirective|_cRawTag)} raw_tag
@@ -1048,6 +1143,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cView#options}
 	 * @param {_cRawDirective} raw_directive
 	 * @param {(_cView|_cWidget)} config
 	 */
@@ -1058,6 +1154,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse a property for {@link _cWidget#properties}
 	 * @param {_cRawDirective} raw_directive
 	 * @param {_cWidget} widget_config
 	 */
@@ -1070,6 +1167,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cWidget#properties}
 	 * @param {_cRawDirective} raw_directive
 	 * @param {_cWidget} widget_config
 	 */
@@ -1081,15 +1179,22 @@ Lava.parsers.Directives = {
 
 	},
 
-	_storeDirectiveContent: function(widget_config, raw_directive, storage_name) {
+	/**
+	 * Helper method for widget directives
+	 * @param {_cWidget} widget_config
+	 * @param {_cRawDirective} raw_directive
+	 * @param {string} config_property_name
+	 */
+	_storeDirectiveContent: function(widget_config, raw_directive, config_property_name) {
 
 		if (Lava.schema.DEBUG && !('attributes' in raw_directive)) Lava.t("option: missing attributes");
 		if (Lava.schema.DEBUG && (!raw_directive.content || raw_directive.content.length != 1)) Lava.t("Malformed property: " + raw_directive.attributes.name);
-		Lava.store(widget_config, storage_name, raw_directive.attributes.name, raw_directive.content[0]);
+		Lava.store(widget_config, config_property_name, raw_directive.attributes.name, raw_directive.content[0]);
 
 	},
 
 	/**
+	 * Parse a property for {@link _cWidget#properties} as a string
 	 * @param {_cRawDirective} raw_directive
 	 * @param {_cWidget} widget_config
 	 */
@@ -1102,6 +1207,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Store a string as an option value
 	 * @param {_cRawDirective} raw_directive
 	 * @param {_cWidget} widget_config
 	 */
@@ -1112,6 +1218,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Standalone resources definition for global widget
 	 * @param {_cRawDirective} raw_directive
 	 */
 	_xdefine_resources: function(raw_directive) {
@@ -1128,6 +1235,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cWidget#resources}
 	 * @param {(_cRawDirective|_cRawTag)} raw_directive
 	 * @param {_cWidget} widget_config
 	 */
@@ -1147,6 +1255,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cStaticValue}
 	 * @param {_cRawDirective} raw_directive
 	 */
 	_xstatic_value: function(raw_directive) {
@@ -1162,8 +1271,9 @@ Lava.parsers.Directives = {
 	},
 
 	/**
-	 * Caution! Inner argument should depend only on static data.
-	 * Bindings are allowed, but not recommended, cause at the moment when template is rendered - they may be dirty.
+	 * Parse {@link _cStaticEval}.
+	 * Warning! Inner argument should depend only on static data.
+	 * Bindings are allowed, but not recommended, cause at the moment when template is rendered - they may be dirty
 	 *
 	 * @param {_cRawDirective} raw_directive
 	 */
@@ -1184,10 +1294,10 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Wrapper, used to apply directives to a void tag
 	 * @param {_cRawDirective} raw_directive
-	 * @param {_cWidget} widget_config
 	 */
-	_xattach_directives: function(raw_directive, widget_config) {
+	_xattach_directives: function(raw_directive) {
 
 		if (Lava.schema.DEBUG && !raw_directive.content) Lava.t("empty attach_directives");
 
@@ -1209,6 +1319,11 @@ Lava.parsers.Directives = {
 
 	},
 
+	/**
+	 * Perform parsing of {@link _cWidget#default_events}
+	 * @param {_cRawTag} raw_tag
+	 * @param {_cWidget} widget_config
+	 */
 	_parseDefaultEvents: function(raw_tag, widget_config) {
 
 		if (Lava.schema.DEBUG && (!raw_tag.content || !raw_tag.content.length)) Lava.t('default_events: tag content is required');
@@ -1233,6 +1348,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse {@link _cWidget#default_events}
 	 * @param {_cRawDirective} raw_directive
 	 * @param {_cWidget} widget_config
 	 */
@@ -1242,6 +1358,13 @@ Lava.parsers.Directives = {
 
 	},
 
+	/**
+	 * Search for an item inside template, for edit_template
+	 * @param {_tTemplate} template
+	 * @param {string} node_type Type of template item to search for
+	 * @param {string} condition JavaScript expression which returns <kw>true</kw> for valid items
+	 * @returns {_tTemplateItem}
+	 */
 	_selectFirst: function(template, node_type, condition) {
 
 		var filter,
@@ -1266,6 +1389,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Predefined template editing task for edit_template: set any JavaScript object at some path inside template item
 	 * @param {_tTemplate} template
 	 * @param {_cRawTag} task_tag
 	 * @param {Object.<string,_cRawTag>} content_blocks_hash
@@ -1309,6 +1433,13 @@ Lava.parsers.Directives = {
 
 	},
 
+	/**
+	 * Predefined task for edit_template: add a class to view's container
+	 * @param {_tTemplate} template
+	 * @param {_cRawTag} task_tag
+	 * @param {Object.<string,_cRawTag>} content_blocks_hash
+	 * @param {Array.<*>} task_arguments
+	 */
 	_editTaskAddClass: function(template, task_tag, content_blocks_hash, task_arguments) {
 
 		if (Lava.schema.DEBUG && !task_tag.attributes.node_type) Lava.t('_editTaskAddClass: malformed attributes');

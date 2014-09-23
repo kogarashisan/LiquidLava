@@ -2,6 +2,7 @@
 Lava.define(
 'Lava.widget.CalendarAbstract',
 /**
+ * Base class for calendar widgets
  * @lends Lava.widget.CalendarAbstract#
  * @extends Lava.widget.Standard#
  */
@@ -11,16 +12,24 @@ Lava.define(
 	name: 'calendar',
 
 	_properties: {
+		/** Currently selected year */
 		_current_year: 0,
+		/** Currently selected month */
 		_current_month: 0,
+		/** Currently selected day */
 		_current_day: 0
 	},
 
-	_getMonthDescriptors: function(locale) {
+	/**
+	 * Get data, which is used to build the month selection view
+	 * @param {string} locale_name
+	 * @returns {Array}
+	 */
+	_getMonthDescriptors: function(locale_name) {
 
 		var i,
 			result = [],
-			month_names = Lava.locales[locale].short_month_names;
+			month_names = Lava.locales[locale_name].short_month_names;
 
 		for (i = 0; i < 12; i++) {
 
@@ -35,6 +44,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Split array of month descriptors into rows
+	 * @param {Array} descriptors
+	 * @returns {Array}
+	 */
 	_getMonthDescriptorRows: function(descriptors) {
 
 		var result = [];
@@ -45,6 +59,11 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get descriptors for rendering the day names, with respect to cultural offset
+	 * @param {string} locale
+	 * @returns {Array}
+	 */
 	_getWeekDays: function(locale) {
 
 		var culture_offset = Lava.locales[locale].first_day_offset,
@@ -66,9 +85,16 @@ Lava.define(
 
 	},
 
-	_renderMonth: function(year, month, locale) {
+	/**
+	 * Get data, which is needed to display a month in template
+	 * @param {number} year
+	 * @param {number} month
+	 * @param {string} locale_name
+	 * @returns {{year: number, index: number, weeks: Array}}
+	 */
+	_renderMonth: function(year, month, locale_name) {
 
-		var culture_offset = Lava.locales[locale].first_day_offset,
+		var culture_offset = Lava.locales[locale_name].first_day_offset,
 			first_day_in_sequence = new Date(Date.UTC(year, month)),
 			first_day_of_week = (first_day_in_sequence.getDay() - culture_offset + 7) % 7;
 
@@ -88,10 +114,8 @@ Lava.define(
 	},
 
 	/**
-	 * Render the 6 rows of 7 days. Receives the date of the first day in the first row.
-	 * (day of week always starts from zero)
-	 *
-	 * @param {Date} start_date
+	 * Render 6 rows of 7 days
+	 * @param {Date} start_date Date of the first day in the first row (day of week always starts from zero)
 	 */
 	_renderMonthWeeks: function(start_date) {
 
@@ -137,6 +161,15 @@ Lava.define(
 
 	},
 
+	/**
+	 * Create a structure, which is used to display a day number in calendar template
+	 * @param {number} year
+	 * @param {number} month
+	 * @param {number} day Day index in month, 0..30
+	 * @param {number} day_of_week Weekday index, 0..6
+	 * @param milliseconds Absolute time of the day
+	 * @returns {{year: number, month: number, day: number, day_of_week: number, milliseconds: number, is_today: boolean}}
+	 */
 	_renderDay: function(year, month, day, day_of_week, milliseconds) {
 		return {
 			year: year,

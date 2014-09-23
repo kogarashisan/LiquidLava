@@ -69,7 +69,7 @@ module.exports = function(grunt) {
 				jsdoc_support.callbacks.forEach(function(data){
 					result += '<h3 data-scroll-name="member:' + data.name + '">' + data.name + '</h3>\n';
 					LavaBuild.processDescriptorMarkdown(data);
-					if (data.description) result += '<div>' + data + '</div>\n';
+					if (data.description) result += '<div>' + data.description + '</div>\n';
 					if (data.params) {
 						data.params.forEach(function(param_descriptor) {
 							LavaBuild.processDescriptorMarkdown(param_descriptor);
@@ -117,6 +117,8 @@ module.exports = function(grunt) {
 				description: result,
 				support_objects: jsdoc_support.objects
 			}));
+
+			if (global.LavaBuild.has_errors) throw new Error("build process has errors, aborting");
 
 		} catch (e) {
 

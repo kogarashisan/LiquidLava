@@ -1,6 +1,15 @@
+
+/**
+ * Value of this DataBinding instance has changed
+ * @event Lava.scope.DataBinding#changed
+ */
+
 Lava.define(
 'Lava.scope.DataBinding',
 /**
+ * Binding to a property of a JavaScript object with special support for {@link Lava.mixin.Properties}
+ * and {@link Lava.system.Enumerable} instances
+ *
  * @lends Lava.scope.DataBinding#
  * @extends Lava.scope.Abstract
  * @implements _iValueContainer
@@ -8,31 +17,76 @@ Lava.define(
 {
 
 	Extends: 'Lava.scope.Abstract',
+	/**
+	 * This instance supports two-way data binding
+	 * @type {boolean}
+	 * @const
+	 */
 	isSetValue: true,
+	/**
+	 * Global unique identifier of this instance
+	 * @type {_tGUID}
+	 */
 	guid: null,
 
 	/**
+	 * The name of property to which this scope is bound
 	 * @type {string}
 	 */
 	_property_name: null,
+	/**
+	 * Current value of this instance (equals to property value in data source)
+	 * @type {*}
+	 */
 	_value: null,
 
 	/**
+	 * Scope, that provides data source for this instance
 	 * @type {_iValueContainer}
 	 */
 	_value_container: null,
+	/**
+	 * Listener for {Lava.mixin.Refreshable#event:waits_refresh} in `_value_container`
+	 * @type {_tListener}
+	 */
 	_container_waits_refresh_listener: null,
+	/**
+	 * Listener for "changed" event in `_value_container`
+	 * @type {_tListener}
+	 */
 	_container_changed_listener: null,
+	/**
+	 * Listener for {Lava.mixin.Refreshable#event:refreshed} in `_value_container`
+	 * @type {_tListener}
+	 */
 	_container_refreshed_listener: null,
 
+	/**
+	 * Listener for onPropertyChanged in data source of this scope (if data source is instance of {@link Lava.mixin.Properties})
+	 * @type {_tListener}
+	 */
 	_property_changed_listener: null,
+	/**
+	 * Listener for {@link Lava.system.Enumerable#event:collection_changed} in data source of this scope
+	 * (if data source is instance of {@link Lava.system.Enumerable})
+	 * @type {_tListener}
+	 */
 	_enumerable_changed_listener: null,
+	/**
+	 * Data source for this scope, from which this scope gets it's value. Also, value of the `_value_container`
+	 * @type {*}
+	 */
 	_property_container: null,
 
+	/**
+	 * Is `_property_container` an existing object, or this scope is not bound to an existing value
+	 * @type {boolean}
+	 */
 	_is_connected: false,
 
 	/**
-	 * @param {_iValueContainer} value_container
+	 * Create DataBinding instance
+	 * @param {_iValueContainer} value_container The scope, which provides the data source for this instance
 	 * @param {string} property_name
 	 * @param {number} level
 	 */
@@ -57,6 +111,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_property_container` from `_value_container`, and get `_property_name` from `_property_container`
+	 */
 	_refreshValue: function() {
 
 		var property_container = this._value_container.getValue(),
@@ -108,12 +165,19 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_is_connected`
+	 * @returns {boolean}
+	 */
 	isConnected: function() {
 
 		return this._is_connected;
 
 	},
 
+	/**
+	 * Data source for this instance has changed. Remove listeners to old data source and schedule refresh
+	 */
 	onParentDataSourceChanged: function() {
 
 		if (this._property_changed_listener && (this._value_container.getValue() != this._property_container)) {
@@ -139,6 +203,9 @@ Lava.define(
 
 	},
 
+	/**
+	 * Data source remains the same, but it's property has changed (property we are currently bound to)
+	 */
 	onValueChanged: function() {
 
 		this._queueForRefresh();
@@ -147,6 +214,7 @@ Lava.define(
 	},
 
 	/**
+	 * If this instance is bound to existing object - set object's property value
 	 * @param {*} value
 	 */
 	setValue: function(value) {

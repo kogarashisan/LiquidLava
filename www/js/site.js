@@ -272,6 +272,7 @@ Lava.define(
 		});
 
 		this._request.send();
+		Lava.refreshViews();
 
 	},
 
@@ -290,6 +291,7 @@ Lava.define(
 
 		this.set('is_loading', false);
 		this._request = null;
+		Lava.refreshViews();
 
 	},
 
@@ -439,6 +441,7 @@ Lava.define(
 
 	_modifiers: {
 		render_params: '_renderParams',
+		render_event_ext: '_renderEventExt',
 		render_method_extended: '_renderMethodExtended'
 	},
 
@@ -534,7 +537,7 @@ Lava.define(
 		var member_descriptor = template_arguments[0];
 		if (dom_event.target.nodeName.toLowerCase() != 'a') { // links inside member description
 
-			if (member_descriptor.isProperties && (member_descriptor.get('returns') || member_descriptor.get('params'))) {
+			if (member_descriptor.isProperties && member_descriptor.get('guid')) {
 				var meta_record = this._properties.meta_storage.get(template_arguments[0].get('guid'));
 				meta_record.set('is_expanded', !meta_record.get('is_expanded'));
 			}
@@ -672,7 +675,7 @@ Lava.define(
 		var hash_data = this._parseHash(hash),
 			item = hash_data['item'];
 
-		if (hash['tab']) this._selectTab(hash['tab']);
+		if (hash_data['tab']) this._selectTab(hash_data['tab']);
 
 		if (item) {
 
@@ -736,7 +739,6 @@ Lava.define(
 		if (is_item_changed || is_tab_changed) {
 			if (tab_widget && !tab_widget.isInDOM()) tab_widget.inject(content_area, 'Top');
 		}
-
 		Lava.refreshViews();
 
 	},
@@ -819,6 +821,12 @@ Lava.define(
 
 	},
 
+	_renderEventExt: function(event_descriptor) {
+
+		return ApiCommon.renderEventExt(event_descriptor.getProperties());
+
+	},
+
 	_renderMethodExtended: function(descriptor, table_class) {
 
 		var result = '';
@@ -844,7 +852,7 @@ Lava.define(
 	_handleNavTabs: function(tabs_widget) {
 
 		this._tabs_widget = tabs_widget;
-		tabs_widget.getTabs()[this._tab_names.indexOf(this._active_tab_name)].set('is_active', true);
+		tabs_widget.getTabObjects()[this._tab_names.indexOf(this._active_tab_name)].set('is_active', true);
 		this._active_tab_changed_listener = tabs_widget.onPropertyChanged('active_tab', this._onTabSelected, this);
 
 	},
@@ -859,11 +867,11 @@ Lava.define(
 
 		if (this._tabs_widget) {
 			Lava.suspendListener(this._active_tab_changed_listener);
-			this._tabs_widget.getTabs()[this._tab_names.indexOf(tab_name)].set('is_active', true);
+			this._tabs_widget.getTabObjects()[this._tab_names.indexOf(tab_name)].set('is_active', true);
 			Lava.resumeListener(this._active_tab_changed_listener);
-			this._active_tab_name = tab_name;
 		}
-		
+		this._active_tab_name = tab_name;
+
 	},
 
 	_expandItemParents: function(item) {
@@ -1015,7 +1023,6 @@ Lava.define(
 			for (; i < count; i++) {
 				this._addTab(tabs[i].title, tabs[i].content);
 			}
-
 			Lava.refreshViews();
 
 		}
@@ -1168,7 +1175,7 @@ var ApiCommon = {
 			table_attributes: 'class="' + table_class + '"',
 			header_cell_attributes: ['class="api-flag-td"'],
 			column_cell_attributes: ['class="api-flag-td"', 'class="api-name-column"'],
-			description_attributes: 'class="api-description-td"',
+			description_attributes: 'class="api-description-td api-description-row-td"',
 			scroll_prefix: scroll_prefix || ''
 		});
 
@@ -1189,6 +1196,41 @@ var ApiCommon = {
 		result += '</div>';
 		if (returns.description) {
 			result += '<div class="api-pad-left">' + returns.description + '</div>';
+		}
+
+		return result;
+
+	},
+
+	renderEventExt: function(descriptor) {
+
+		var result = '';
+
+		if (descriptor.type_names) {
+
+			result = '<div><b>Event argument:</b> ';
+			if (descriptor.is_nullable) result += '<img title="Nullable" src="/www/design/nullable.png" />';
+			if (descriptor.is_non_nullable) result += '<img title="Non-nullable" src="/www/design/non-nullable.png" />';
+			if (descriptor.is_optional) result += '[optional]';
+			if (descriptor.type_names) {
+				if (descriptor.type_names.length > 1) {
+					result += '(' + descriptor.type_names.join('|') + ')';
+				} else {
+					result += descriptor.type_names[0] || '';
+				}
+			}
+			result += '</div>';
+			if (descriptor.argument_description) {
+				result += '<div class="api-pad-left">' + descriptor.argument_description + '</div>';
+			}
+
+		}
+
+		if (descriptor.params) {
+
+			result += '<b class="api-member-extended-header">Argument properties</b>';
+			result += ApiCommon.renderParamsTable(descriptor.params, 'api-member-inner-table');
+
 		}
 
 		return result;
