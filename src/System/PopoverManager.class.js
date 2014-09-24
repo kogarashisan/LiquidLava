@@ -8,7 +8,7 @@ Lava.define(
 {
 
 	/**
-	 * Listener for {@link Lava.system.ViewManager#event:mouseover_stack_changed}
+	 * Listener for {@link Lava.system.ViewManager#event:EVENTNAME_stack_changed}
 	 * @type {_tListener}
 	 */
 	_mouseover_stack_changed_listener: null,

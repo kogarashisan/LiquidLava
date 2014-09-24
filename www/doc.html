@@ -237,7 +237,9 @@
 					</thead>
 					<tbody>
 					{#foreach($widget.extended_descriptor.events) as=descriptor}
-						<tr x:type="view" class="api-member-row api-member-row-expandable"
+						<tr x:type="view"
+							class="api-member-row"
+							x:classes="(descriptor.type_names || descriptor.params) ? 'api-member-row-expandable' : ''"
 							x:event:click="#page.member_row_click(descriptor)"
 							x:bind:data-scroll-name="'event:' + descriptor.name">
 							<td class="api-flag-td">
@@ -245,7 +247,11 @@
 							</td>
 							<td class="api-name-column">{#>descriptor.name}</td>
 							<td class="api-description-td">{#expression(descriptor.description) escape_off}{/expression}</td>
-							<td valign="middle" class="api-member-cell-expandable">&#9660;</td>
+							{#if(descriptor.type_names || descriptor.params)}
+								<td valign="middle" class="api-member-cell-expandable">&#9660;</td>
+							{else}
+								<td></td>
+							{/if}
 						</tr>
 						{$if(#page.meta_storage[descriptor.guid].is_expanded)}
 							<x:container_config>
@@ -399,7 +405,6 @@
 			<tbody>
 			{#foreach(member_group.descriptors) as=descriptor}
 				<tr x:type="view" class="api-member-row"
-					x:event:click="#page.member_row_click(descriptor)"
 					x:bind:data-scroll-name="'member:' + (extended_scroll_names ? object.name + '.' : '') + descriptor.name">
 					<td class="api-flag-td">
 						{#if(descriptor.is_private)}
@@ -541,7 +546,7 @@
 				<roles>$page.nav_tabs</roles>
 			</x:widget>
 		</div>
-		<div class="col-md-9" role="main" id="content_area">
+		<div class="col-md-9" role="main" id="content_area" x:type="view" x:event:click="$page.content_area_click">
 
 		</div>
 	</div>

@@ -438,9 +438,9 @@ module.exports = function(grunt) {
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			// describe _properties
 
-			if (cd.hierarchy_paths.indexOf('Lava.widget.Standard') != -1) {
+			if (cd.hierarchy_paths.indexOf('Lava.view.Abstract') != -1) {
 				var proeprties_skeleton = cd.skeleton._properties.skeleton;
-				var property_descriptors = cd.shared._property_descriptors;
+				var property_descriptors = cd.shared ? cd.shared._property_descriptors || {} : {};
 				var properties_export = {};
 				for (name in proeprties_skeleton) {
 					var longname = path + '#_properties.' + name;
@@ -717,7 +717,7 @@ module.exports = function(grunt) {
 					// if there is text - remove asterisks
 					short_descriptor.description = matches[1].replace(/[\r\n]+\s+\*\s?/, function() {
 						return '\r\n';
-					});
+					}).replace(/[*\s]+$/, '');
 				} else {
 					if (/[a-zA-Z]/.test(comment.substr(0, comment.indexOf('@')))) throw new Error('Malformed class description: ' + file_path);
 					missing_descriptions_log.push({priority: 1, text: 'Class is missing description: ' + file_path});

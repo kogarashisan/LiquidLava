@@ -14306,11 +14306,12 @@ Lava.define(
 
 });
 /**
- * Mouse pointer has crossed an element boundary
- * @event Lava.system.ViewManager#mouseover_stack_changed
+ * Each time a DOM event is received, ViewManager assembles an array from the element, which is source of the event, and all it's parents.
+ * "EVENTNAME" is replaced with actual event name, like "mouseover_stack_changed"
+ * @event Lava.system.ViewManager#EVENTNAME_stack_changed
  * @type {Array.<HTMLElement>}
- * @lava-type-description List of elements under mouse cursor, with topmost element being the first item in array,
- *  and all it's parents
+ * @lava-type-description List of elements, with the first item in array being the event source,
+ *  and all it's parents. Readonly.
  */
 
 Lava.define(
@@ -15013,15 +15014,15 @@ Lava.define(
 
 	/**
 	 * Algorithm for dispatching of mouseenter, mouseleave, mouseover and mouseout events to views.
-	 * Maintains stack of elements under cursor, dispatches {@link Lava.system.ViewManager#event:mouseover_stack_changed}
+	 * Maintains stack of elements under cursor, dispatches {@link Lava.system.ViewManager#event:EVENTNAME_stack_changed}
 	 * @param {string} event_name
 	 * @param {Object} event_object
 	 */
 	handleMouseMovement:  function(event_name, event_object) {
 
 		var new_mouseover_target = (event_name == 'mouseover') ? event_object.target : event_object.relatedTarget,
+			new_mouseover_element_stack = new_mouseover_target ? this._buildElementStack(new_mouseover_target) : [],
 			new_mouseover_view_stack = [],
-			new_mouseover_element_stack,
 			view,
 			container,
 			i,
@@ -15031,31 +15032,19 @@ Lava.define(
 
 		if (this._new_mouseover_target !== new_mouseover_target) {
 
-			if (this._hasListeners('mouseover_stack_changed')) {
+			// Warning! You must not modify `new_mouseover_element_stack` array!
+			this._fire('mouseover_stack_changed', new_mouseover_element_stack);
 
-				new_mouseover_element_stack = new_mouseover_target ? this._buildElementStack(new_mouseover_target) : [];
-				// Warning! You must not modify this array!
-				this._fire('mouseover_stack_changed', new_mouseover_element_stack);
+			if (new_mouseover_target) { // moved from one element to another or entered the window
 
-			}
-
-			if (new_mouseover_target) {
-
-				// moved from one element to another or entered the window
-				view = this._findNearestView(new_mouseover_target);
-
-				while (view) {
-
-					container = view.getContainer();
-
-					if (container.isElementContainer) {
-
-						new_mouseover_view_stack.push(view);
-
+				for (i = 0, count = new_mouseover_element_stack.length; i < count; i++) {
+					view = this.getViewByElement(new_mouseover_element_stack[i]);
+					if (view) {
+						container = view.getContainer();
+						if (container.isElementContainer) {
+							new_mouseover_view_stack.push(view);
+						}
 					}
-
-					view = view.getParentWithContainer();
-
 				}
 
 			}
@@ -15126,29 +15115,6 @@ Lava.define(
 	},
 
 	/**
-	 * Get the first view with an Element container, which wraps the given `element`
-	 * (including element's owner view, if `element` belongs to a view)
-	 * @param {HTMLElement} element
-	 * @returns {Lava.view.Abstract}
-	 */
-	_findNearestView: function(element) {
-
-		var view,
-			document_ref = window.document;
-
-		while (!view && element && element != document_ref) {
-
-			view = this.getViewByElement(element);
-
-			element = element.parentNode;
-
-		}
-
-		return view;
-
-	},
-
-	/**
 	 * Dispatch DOM events to views
 	 * @param {string} event_name
 	 * @param {Object} event_object
@@ -15156,44 +15122,31 @@ Lava.define(
 	onDOMEvent: function(event_name, event_object) {
 
 		var target = event_object.target,
-			view = this._findNearestView(target),
+			view,
 			container,
 			stack_changed_event_name = event_name + '_stack_changed',
-			stack;
+			stack = target ? this._buildElementStack(target) : [],
+			i = 0,
+			count = stack.length;
 
-		if (this._hasListeners(stack_changed_event_name)) {
+		// Warning! You must not modify the `stack` array!
+		this._fire(stack_changed_event_name, stack);
 
-			stack = target ? this._buildElementStack(target) : [];
-			// Warning! You must not modify this array!
-			this._fire(stack_changed_event_name, stack);
+		for (; i < count; i++) {
+			view = this.getViewByElement(stack[i]);
+			if (view && !view.isSleeping()) {
+				container = view.getContainer();
+				if (container.isElementContainer) {
+					if (container.getEventTargets(event_name)) {
 
-		}
+						this._dispatchViewEvents(view, event_name, event_object);
+						if (this._cancel_bubble) {
+							break;
+						}
 
-		while (view && view.isSleeping()) {
-
-			view = view.getParentWithContainer();
-
-		}
-
-		while (view) {
-
-			container = view.getContainer();
-
-			if (container.isElementContainer) {
-
-				if (container.getEventTargets(event_name)) {
-
-					this._dispatchViewEvents(view, event_name, event_object);
-					if (this._cancel_bubble) {
-						break;
 					}
-
 				}
-
 			}
-
-			view = view.getParentWithContainer();
-
 		}
 
 	},
@@ -15822,7 +15775,7 @@ Lava.define(
 {
 
 	/**
-	 * Listener for {@link Lava.system.ViewManager#event:mouseover_stack_changed}
+	 * Listener for {@link Lava.system.ViewManager#event:EVENTNAME_stack_changed}
 	 * @type {_tListener}
 	 */
 	_mouseover_stack_changed_listener: null,
@@ -16172,7 +16125,7 @@ Lava.define(
 Lava.define(
 'Lava.data.field.Basic',
 /**
- * Field that holds any value
+ * Field with no restrictions on value type
  *
  * @lends Lava.data.field.Basic#
  * @extends Lava.data.field.Abstract

@@ -432,7 +432,8 @@ Lava.define(
 
 	_event_handlers: {
 		node_click: '_onNodeClick',
-		member_row_click: '_onMemberRowClick'
+		member_row_click: '_onMemberRowClick',
+		content_area_click: '_onContentAreaClick'
 	},
 
 	_role_handlers: {
@@ -534,16 +535,26 @@ Lava.define(
 
 	_onMemberRowClick: function(dom_event_name, dom_event, view, template_arguments) {
 
-		var member_descriptor = template_arguments[0];
+		var member_descriptor = template_arguments[0],
+			may_be_expanded = member_descriptor.get('params') || member_descriptor.get('type_names') || member_descriptor.get('returns');
+
 		if (dom_event.target.nodeName.toLowerCase() != 'a') { // links inside member description
 
-			if (member_descriptor.isProperties && member_descriptor.get('guid')) {
+			if (member_descriptor.isProperties && member_descriptor.get('guid') && may_be_expanded) {
 				var meta_record = this._properties.meta_storage.get(template_arguments[0].get('guid'));
 				meta_record.set('is_expanded', !meta_record.get('is_expanded'));
 			}
 
 		}
 
+	},
+
+	_onContentAreaClick: function(dom_event_name, dom_event) {
+		var target = dom_event.target,
+			hash = window.location.hash;
+		if (target && target.nodeName.toLowerCase() == 'a' && target.href && target.href.substr(-hash.length) == hash) {
+			this._scrollToTarget();
+		}
 	},
 
 	_initItemChain: function(chain) {
@@ -679,6 +690,8 @@ Lava.define(
 
 		if (item) {
 
+			this._tab_hash_data[hash_data['tab']] = hash_data;
+
 			if (item.get('is_loaded')) {
 
 				this._showItem(item);
@@ -690,8 +703,6 @@ Lava.define(
 
 			}
 
-			this._tab_hash_data[hash_data['tab']] = hash_data;
-
 		} else if (hash_data.is_invalid) {
 
 			window.alert('Invalid URL: ' + hash);
@@ -702,7 +713,7 @@ Lava.define(
 
 	_showItem: function(item) {
 
-		var content_area = Firestorm.getElementById('content_area'),
+		var content_area = Lava.view_manager.getViewById('content_area').getContainer().getDOMElement(),
 			item_tab = item.get('tab_name'),
 			is_item_changed = (this._tab_items[item_tab] != item),
 			is_tab_changed = (this._active_tab_name != item_tab),
@@ -755,7 +766,7 @@ Lava.define(
 
 			window.setTimeout(function(){
 
-				content_area = Firestorm.getElementById('content_area');
+				content_area = Lava.view_manager.getViewById('content_area').getContainer().getDOMElement();
 				scroll_target = Firestorm.Element.selectElements(content_area, '*[data-scroll-name=' + scroll_target_attribute + ']')[0];
 				if (scroll_target) {
 
@@ -789,7 +800,10 @@ Lava.define(
 		if (this._request == null && new_tab_name != this._active_tab_name) {
 
 			current_active_widget && current_active_widget.isInDOM() && current_active_widget.remove();
-			new_tab_widget && !new_tab_widget.isInDOM() && new_tab_widget.inject(Firestorm.getElementById('content_area'), 'Top');
+			new_tab_widget && !new_tab_widget.isInDOM() && new_tab_widget.inject(
+				Lava.view_manager.getViewById('content_area').getContainer().getDOMElement(),
+				'Top'
+			);
 			new_tab_hash_data && this._setWindowHash(new_tab_hash_data.hash);
 			this._active_tab_name = new_tab_name;
 

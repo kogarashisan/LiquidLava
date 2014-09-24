@@ -57,7 +57,7 @@ module.exports = function(grunt) {
 						result += '<tr>' +
 							'<td class="api-name-column">' + property_data.name + '</td>' +
 							'<td>' + tmp.default_value + '</td>' +
-							'<td>' + (property_data.description || '') + '</td>' +
+							'<td class="api-description-td">' + (property_data.description || '') + '</td>' +
 							'</tr>\n'
 					});
 					result += '</tbody></table>\n\n';

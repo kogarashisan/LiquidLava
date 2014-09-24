@@ -147,6 +147,7 @@ exports.publish = function(taffyData, opts, tutorials) {
 
 		} else {
 
+			if (doclet.kind == 'constant') export_descriptor.is_constant = true;
 			ApiHelper.export_type_data(doclet, export_descriptor, true);
 			if (export_descriptor.is_optional || export_descriptor.is_variable) throw new Error('TODO: unexpected flags on class member');
 			delete export_descriptor.name;
