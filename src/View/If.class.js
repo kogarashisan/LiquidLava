@@ -36,16 +36,16 @@ Lava.define(
 	 * Content of each if/elseif section
 	 * @type {Array.<Lava.system.Template>}
 	 */
-	_contents: [],
+	_content: [],
 	/**
 	 * Template to display when all if/elseif conditions are <kw>false</kw>
 	 * @type {Lava.system.Template}
 	 */
-	_else_contents: null,
+	_else_content: null,
 
 	/**
 	 * Refreshers animates insertion and removal of templates
-	 * @type {(Lava.view.refresher.Default)}
+	 * @type {(Lava.view.refresher.Standard)}
 	 */
 	_refresher: null,
 	/**
@@ -86,7 +86,7 @@ Lava.define(
 			// otherwise, it will not be able to insert the template
 			if (Lava.schema.DEBUG && !this._container) Lava.t('View/If: refresher needs container to work');
 			constructor = Lava.ClassManager.getConstructor(this._config.refresher['class'], 'Lava.view.refresher');
-			this._refresher = /** @type {Lava.view.refresher.Default} */ new constructor(
+			this._refresher = /** @type {Lava.view.refresher.Standard} */ new constructor(
 				this._config.refresher,
 				this, this._container
 			);
@@ -99,7 +99,7 @@ Lava.define(
 
 	/**
 	 * Get `_refresher`
-	 * @returns {Lava.view.refresher.Default}
+	 * @returns {Lava.view.refresher.Standard}
 	 */
 	getRefresher: function() {
 
@@ -140,15 +140,15 @@ Lava.define(
 
 		if (this._active_argument_index != null) {
 
-			this._createContents(this._active_argument_index);
+			this._createContent(this._active_argument_index);
 
-			result = this._contents[this._active_argument_index];
+			result = this._content[this._active_argument_index];
 
 		} else if ('else_template' in this._config) {
 
-			this._createElseContents();
+			this._createElseContent();
 
-			result = this._else_contents;
+			result = this._else_content;
 
 		}
 
@@ -193,7 +193,7 @@ Lava.define(
 	 * Render the currently active if/elseif section
 	 * @returns {string}
 	 */
-	_renderContents: function() {
+	_renderContent: function() {
 
 		if (Lava.schema.DEBUG && this._active_argument_index != null && this._arguments[this._active_argument_index].isWaitingRefresh()) Lava.t();
 
@@ -261,15 +261,15 @@ Lava.define(
 	 * Create the template that corresponds to a if/elseif section
 	 * @param {number} index
 	 */
-	_createContents: function(index) {
+	_createContent: function(index) {
 
-		if (typeof(this._contents[index]) == 'undefined') {
+		if (typeof(this._content[index]) == 'undefined') {
 
-			this._contents[index] = (index == 0)
+			this._content[index] = (index == 0)
 				? new Lava.system.Template(this._config.template || [], this._widget, this)
 				: new Lava.system.Template(this._config.elseif_templates[index - 1] || [], this._widget, this);
 
-			this._contents[index].batchSetProperty('if_index', index);
+			this._content[index].batchSetProperty('if_index', index);
 
 		}
 
@@ -278,11 +278,11 @@ Lava.define(
 	/**
 	 * Create the 'else' template
 	 */
-	_createElseContents: function() {
+	_createElseContent: function() {
 
-		if (this._else_contents == null) {
+		if (this._else_content == null) {
 
-			this._else_contents = new Lava.system.Template(this._config.else_template || [], this._widget, this);
+			this._else_content = new Lava.system.Template(this._config.else_template || [], this._widget, this);
 
 		}
 
@@ -296,7 +296,7 @@ Lava.define(
 
 		} else {
 
-			this._container.setHTML(this._renderContents());
+			this._container.setHTML(this._renderContent());
 			this._broadcastToChildren('broadcastInDOM');
 
 		}
@@ -312,14 +312,14 @@ Lava.define(
 		for (; i < this._count_arguments; i++) {
 
 			this._arguments[i].destroy();
-			this._contents[i] && this._contents[i].destroy();
+			this._content[i] && this._content[i].destroy();
 
 		}
 
-		this._else_contents && this._else_contents.destroy();
+		this._else_content && this._else_content.destroy();
 
 		// to speed up garbage collection and break this object forever (destroyed objects must not be used!)
-		this._refresher = this._contents = this._else_contents = this._arguments = this._active_template
+		this._refresher = this._content = this._else_content = this._arguments = this._active_template
 			= this._argument_changed_listeners = null;
 
 		this.Abstract$destroy();

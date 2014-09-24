@@ -154,7 +154,8 @@ footer .container {background: #f7f5fa;}
 .api-highlight-empty {font-weight: bold;}
 
 /* sugar page formatting */
-.api-sugar-wrapper {border: 1px solid #ddd;border-radius: 4px 4px 0 0;padding: 1em;margin: 0.5em 0;}
+.api-sugar-wrapper {margin-top: 1em}
+.api-sugar-wrapper::after {content: "SUGAR"}
 .api-sugar-container {border: 1px solid green;padding: 1em;position: relative;border-radius: 6px;}
 .api-sugar-container:before {color: #ffffff;position: absolute;right: 0;top: 0;background: #008000}
 .api-sugar-container-template {width: 7em;padding: 0;background: #008000;}

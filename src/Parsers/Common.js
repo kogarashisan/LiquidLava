@@ -286,8 +286,8 @@ Lava.parsers.Common = {
 		if ('elseif_arguments' in raw_block) {
 			config.elseif_arguments = raw_block.elseif_arguments;
 			config.elseif_templates = [];
-			for (count = raw_block.elseif_contents.length; i < count; i++) {
-				config.elseif_templates.push(this.compileTemplate(raw_block.elseif_contents[i]));
+			for (count = raw_block.elseif_content.length; i < count; i++) {
+				config.elseif_templates.push(this.compileTemplate(raw_block.elseif_content[i]));
 			}
 		}
 
@@ -435,7 +435,7 @@ Lava.parsers.Common = {
 
 		} else {
 
-			Lava.t("Malformed contents of tag with type='container'");
+			Lava.t("Malformed content of tag with type='container'");
 
 		}
 
@@ -446,7 +446,7 @@ Lava.parsers.Common = {
 
 		if (container_config_directive) {
 			if (Lava.schema.DEBUG && (container_config_directive.type != 'directive' || container_config_directive.name == 'container_config'))
-				Lava.t("Malformed contents of tag with type='container'");
+				Lava.t("Malformed content of tag with type='container'");
 			Lava.parsers.Directives.processDirective(container_config_directive, view_config, true);
 		}
 
@@ -747,7 +747,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * Parse style attribute contents (plain string) into object with keys being individual style names,
+	 * Parse style attribute content (plain string) into object with keys being individual style names,
 	 * and values being actual style values
 	 *
 	 * @param {string} styles_string

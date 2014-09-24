@@ -58,7 +58,7 @@ Lava.define(
 
 	/**
 	 * Refreshers perform insertion, removal and animation of items
-	 * @type {Lava.view.refresher.Default}
+	 * @type {Lava.view.refresher.Standard}
 	 */
 	_refresher: null,
 
@@ -75,7 +75,7 @@ Lava.define(
 
 			if (Lava.schema.DEBUG && !this._container) Lava.t('View/Foreach: refresher needs container to work');
 			var constructor = Lava.ClassManager.getConstructor(this._config.refresher['class'], 'Lava.view.refresher');
-			this._refresher = /** @type {Lava.view.refresher.Default} */ new constructor(
+			this._refresher = /** @type {Lava.view.refresher.Standard} */ new constructor(
 				this._config.refresher,
 				this,
 				this._container
@@ -91,7 +91,7 @@ Lava.define(
 
 	/**
 	 * Get `_refresher`
-	 * @returns {Lava.view.refresher.Default}
+	 * @returns {Lava.view.refresher.Standard}
 	 */
 	getRefresher: function() {
 
@@ -252,7 +252,7 @@ Lava.define(
 
 	},
 
-	_renderContents: function() {
+	_renderContent: function() {
 
 		if (Lava.schema.DEBUG && (this._argument.isWaitingRefresh() || this._foreach_scope.isWaitingRefresh())) Lava.t();
 
@@ -279,7 +279,7 @@ Lava.define(
 
 		} else {
 
-			this._container.setHTML(this._renderContents());
+			this._container.setHTML(this._renderContent());
 			this._broadcastToChildren('broadcastInDOM');
 
 		}
@@ -315,6 +315,17 @@ Lava.define(
 		this._refreshChildren();
 
 		this.Abstract$_wakeup();
+
+	},
+
+	/**
+	 * Get `_foreach_scope`.
+	 * The only purpose of this method is to attach a listener to scope's {@link Lava.scope.Foreach#event:after_refresh} event
+	 * @returns {Lava.scope.Foreach}
+	 */
+	getScope: function() {
+
+		return this._foreach_scope;
 
 	},
 

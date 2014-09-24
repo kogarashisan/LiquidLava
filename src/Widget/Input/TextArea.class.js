@@ -12,7 +12,7 @@ Lava.define(
 
 	name: 'textarea',
 
-	_renderContents: function() {
+	_renderContent: function() {
 
 		return Firestorm.String.escape(this._properties.value, Firestorm.String.TEXTAREA_ESCAPE_REGEX);
 

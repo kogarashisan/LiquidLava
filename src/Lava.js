@@ -841,6 +841,18 @@ var Lava = {
 	/**
 	 * Do nothing
 	 */
-	noop: function() {}
+	noop: function() {},
+
+	/**
+	 * Does given class instance extend or implement `class_name`
+	 * @param {Object} instance
+	 * @param {string} class_name
+	 * @returns {boolean}
+	 */
+	instanceOf: function(instance, class_name) {
+
+		return instance.Class.hierarchy_paths.indexOf(class_name) != -1 || instance.Class.implements.indexOf(class_name) != -1;
+
+	}
 
 };

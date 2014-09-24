@@ -14,12 +14,12 @@ Lava.define(
 	/**
 	 * @param module
 	 * @param fields
-	 * @param properties_storage_ref
+	 * @param properties_ref
 	 * @param {Object} raw_properties Object with record field values from server
 	 */
-	init: function(module, fields, properties_storage_ref, raw_properties) {
+	init: function(module, fields, properties_ref, raw_properties) {
 
-		this.RecordAbstract$init(module, fields, properties_storage_ref);
+		this.RecordAbstract$init(module, fields, properties_ref);
 
 		var field;
 
@@ -27,7 +27,7 @@ Lava.define(
 
 			for (field in fields) {
 
-				fields[field]['import'](this, properties_storage_ref, raw_properties);
+				fields[field]['import'](this, properties_ref, raw_properties);
 
 			}
 
@@ -35,7 +35,7 @@ Lava.define(
 
 			for (field in fields) {
 
-				fields[field].initNewRecord(this, properties_storage_ref);
+				fields[field].initNewRecord(this, properties_ref);
 
 			}
 

@@ -46,7 +46,7 @@ Lava.define(
 
 	},
 
-	_renderContents: function() {
+	_renderContent: function() {
 
 		if (Lava.schema.DEBUG && this._argument.isWaitingRefresh()) Lava.t();
 

@@ -40,7 +40,7 @@ Lava.define(
 	 * The renderable items, constructed from `_config`
 	 * @type {Array.<_tRenderable>}
 	 */
-	_contents: [],
+	_content: [],
 	/**
 	 * Is the template currently in DOM
 	 * @type {boolean}
@@ -86,8 +86,8 @@ Lava.define(
 		this._widget = widget;
 		this._config = template_config;
 
-		this._createChildren(this._contents, template_config, [], child_properties);
-		this._count = this._contents.length;
+		this._createChildren(this._content, template_config, [], child_properties);
+		this._count = this._content.length;
 
 	},
 
@@ -292,9 +292,9 @@ Lava.define(
 
 		for (var i = 0; i < this._count; i++) {
 
-			if (this._contents[i].isView) {
+			if (this._content[i].isView) {
 
-				this._contents[i][function_name]();
+				this._content[i][function_name]();
 
 			}
 
@@ -310,23 +310,23 @@ Lava.define(
 
 		var buffer = '',
 			i = 0,
-			contents = this._contents;
+			content = this._content;
 
 		this._is_sleeping = false;
 
 		for (; i < this._count; i++) {
 
-			if (typeof(contents[i]) == 'string') {
+			if (typeof(content[i]) == 'string') {
 
-				buffer += contents[i];
+				buffer += content[i];
 
-			} else if (typeof(contents[i]) == 'function') {
+			} else if (typeof(content[i]) == 'function') {
 
 				Lava.t("Not implemented");
 
 			} else {
 
-				buffer += contents[i].render();
+				buffer += content[i].render();
 
 			}
 
@@ -386,7 +386,7 @@ Lava.define(
 	},
 
 	/**
-	 * Set this property to all views inside `_contents`
+	 * Set this property to all views inside `_content`
 	 * @param {string} name Property name
 	 * @param {*} value Property value
 	 */
@@ -394,9 +394,9 @@ Lava.define(
 
 		for (var i = 0; i < this._count; i++) {
 
-			if (this._contents[i].isView) {
+			if (this._content[i].isView) {
 
-				this._contents[i].set(name, value);
+				this._content[i].set(name, value);
 
 			}
 
@@ -405,16 +405,16 @@ Lava.define(
 	},
 
 	/**
-	 * Set properties to all views inside `_contents`
+	 * Set properties to all views inside `_content`
 	 * @param {Object} properties_object
 	 */
 	batchSetProperties: function(properties_object) {
 
 		for (var i = 0; i < this._count; i++) {
 
-			if (this._contents[i].isView) {
+			if (this._content[i].isView) {
 
-				this._contents[i].setProperties(properties_object);
+				this._content[i].setProperties(properties_object);
 
 			}
 
@@ -423,7 +423,7 @@ Lava.define(
 	},
 
 	/**
-	 * Find first view in `_contents` and return it
+	 * Find first view in `_content` and return it
 	 * @returns {Lava.view.Abstract} First view
 	 */
 	getFirstView: function() {
@@ -433,7 +433,7 @@ Lava.define(
 	},
 
 	/**
-	 * Find last view in `_contents` and return it
+	 * Find last view in `_content` and return it
 	 * @returns {Lava.view.Abstract} Last view
 	 */
 	getLastView: function() {
@@ -473,8 +473,8 @@ Lava.define(
 		var result = null;
 
 		while (i < this._count) {
-			if (this._contents[i].isView) {
-				result = this._contents[i];
+			if (this._content[i].isView) {
+				result = this._content[i];
 				break;
 			}
 			i++;
@@ -493,8 +493,8 @@ Lava.define(
 		var result = null;
 
 		while (i >= 0) {
-			if (this._contents[i].isView) {
-				result = this._contents[i];
+			if (this._content[i].isView) {
+				result = this._content[i];
 				break;
 			}
 			i--;
@@ -505,7 +505,7 @@ Lava.define(
 	},
 
 	/**
-	 * Search `_contents` and find all views with given label
+	 * Search `_content` and find all views with given label
 	 * @param {string} label Label to search for
 	 * @returns {Array.<Lava.view.Abstract>} Views with given label
 	 */
@@ -516,9 +516,9 @@ Lava.define(
 
 		for (; i < this._count; i++) {
 
-			if (this._contents[i].isView && this._contents[i].label == label) {
+			if (this._content[i].isView && this._content[i].label == label) {
 
-				result.push(this._contents[i]);
+				result.push(this._content[i]);
 
 			}
 
@@ -529,7 +529,7 @@ Lava.define(
 	},
 
 	/**
-	 * Find all widgets with given name inside `_contents`
+	 * Find all widgets with given name inside `_content`
 	 * @param {string} name Name to search for
 	 * @returns {Array.<Lava.widget.Standard>} Found widgets
 	 */
@@ -540,9 +540,9 @@ Lava.define(
 
 		for (; i < this._count; i++) {
 
-			if (this._contents[i].isWidget && this._contents[i].name == name) {
+			if (this._content[i].isWidget && this._content[i].name == name) {
 
-				result.push(this._contents[i]);
+				result.push(this._content[i]);
 
 			}
 
@@ -569,7 +569,7 @@ Lava.define(
 	 */
 	getAt: function(index) {
 
-		return this._contents[index];
+		return this._content[index];
 
 	},
 
@@ -599,7 +599,7 @@ Lava.define(
 	destroy: function() {
 
 		this._broadcast('destroy');
-		this._contents = null;
+		this._content = null;
 
 	}
 

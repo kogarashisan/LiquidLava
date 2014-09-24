@@ -55,7 +55,7 @@ Lava.define(
 	_has_id: false,
 
 	/**
-	 * Create a Module instance, init fields, generate the method that returns initial record storage
+	 * Create a Module instance, init fields, generate the method that returns initial record properties
 	 * @param {Lava.system.App} lava_app Application instance
 	 * @param {_cModule} config
 	 * @param {string} name Module's name
@@ -66,15 +66,15 @@ Lava.define(
 		this._config = config;
 		this._name = name;
 
-		var default_storage = this._initFields(config);
+		var default_properties = this._initFields(config);
 
 		this._record_constructor = Lava.ClassManager.getConstructor(
 			config.record_class || Lava.schema.data.DEFAULT_RECORD_CLASS,
 			'Lava.data'
 		);
 
-		this._createEmptyRecordStorage = new Function(
-			"return " + Lava.Serializer.serialize(default_storage)
+		this._createRecordProperties = new Function(
+			"return " + Lava.Serializer.serialize(default_properties)
 		);
 
 		if ('id' in this._fields) {
@@ -210,18 +210,18 @@ Lava.define(
 	 */
 	_createRecordInstance: function(raw_properties) {
 
-		var storage = this._createEmptyRecordStorage(),
-			record = new this._record_constructor(this, this._fields, storage, raw_properties);
+		var properties = this._createRecordProperties(),
+			record = new this._record_constructor(this, this._fields, properties, raw_properties);
 
-		if (storage.id) {
+		if (properties.id) {
 
-			if (storage.id in this._records_by_id) Lava.t("Duplicate record id in module " + this._name);
-			this._records_by_id[storage.id] = record;
+			if (properties.id in this._records_by_id) Lava.t("Duplicate record id in module " + this._name);
+			this._records_by_id[properties.id] = record;
 
 		}
 
 		this._records.push(record);
-		this._storages_by_guid[record.guid] = storage;
+		this._properties_by_guid[record.guid] = properties;
 		this._records_by_guid[record.guid] = record;
 		return record;
 

@@ -115,7 +115,7 @@
 	<include name="content">
 		<div x:type="container" x:resource_id="$accordion.ACCORDION_CONTAINER">
 			{#foreach($accordion._panels) as=panel}
-				<x:refresher>{class: 'Default', insertion_strategy: 'sequential_elements'}</x:refresher>
+				<x:refresher>{class: 'Standard', insertion_strategy: 'sequential_elements'}</x:refresher>
 				<collapsible-panel x:roles="$accordion.panel" x:resource_id="$accordion.panel">
 					<x:assign name="is_expanded">panel.is_expanded</x:assign>
 					<title>
@@ -177,7 +177,7 @@
 		</ul>
 		<div x:type="container" x:resource_id="$tabs.TABS_CONTENT_CONTAINER">
 			{#foreach($tabs._tabs) as=tab}
-				<x:refresher>{class: 'Default', insertion_strategy: 'sequential_elements'}</x:refresher>
+				<x:refresher>{class: 'Standard', insertion_strategy: 'sequential_elements'}</x:refresher>
 				<div x:type="view" class="tab-pane" x:classes="tab.is_active ? 'active' : ''">
 					{>$tabs.tab_include(tab, 'content'))}
 				</div>
@@ -399,7 +399,7 @@
 		</div>
 	</include>
 	<include name="months">
-		{#foreach($calendar._months) as=month}
+		{#foreach($calendar._months_data) as=month}
 			<table class="lava-calendar-month" cellspacing="0" cellpadding="0">
 				<thead>
 					<tr>

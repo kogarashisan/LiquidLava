@@ -15,7 +15,7 @@
 		{
 			type: "widget",
 			"class": "Lava.WidgetConfigExtensionGateway",
-			extender_type: "Default",
+			extender_type: "Standard",
 			"extends": "Example",
 			includes: {
 				content: [
@@ -23,7 +23,7 @@
 					{
 						type: "widget",
 						"class": "Lava.WidgetConfigExtensionGateway",
-						extender_type: "Default",
+						extender_type: "Standard",
 						template: [
 							"\r\n\t\t\t\t",
 							{

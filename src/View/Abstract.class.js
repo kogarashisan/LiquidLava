@@ -52,7 +52,7 @@ Lava.define(
 	depth: 0,
 
 	/**
-	 * View's index in {@link Lava.system.Template#_contents|_contents} array of parent template
+	 * View's index in {@link Lava.system.Template#_content|_content} array of parent template
 	 * @type {number}
 	 * @readonly
 	 */
@@ -421,9 +421,9 @@ Lava.define(
 	/**
 	 * Render the inner hierarchy
 	 */
-	_renderContents: function() {
+	_renderContent: function() {
 
-		Lava.t("_renderContents must be overridden in inherited classes");
+		Lava.t("_renderContent must be overridden in inherited classes");
 
 	},
 
@@ -435,7 +435,7 @@ Lava.define(
 
 		if (this._is_sleeping) this._wakeup();
 
-		var buffer = this._renderContents(),
+		var buffer = this._renderContent(),
 			result;
 
 		if (this._container) {
@@ -479,7 +479,7 @@ Lava.define(
 	 */
 	_refresh: function() {
 
-		this._container.setHTML(this._renderContents());
+		this._container.setHTML(this._renderContent());
 		this._broadcastToChildren('broadcastInDOM');
 
 	},

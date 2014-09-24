@@ -18,7 +18,7 @@
 		{
 			type: "widget",
 			"class": "Lava.WidgetConfigExtensionGateway",
-			extender_type: "Default",
+			extender_type: "Standard",
 			"extends": "Example",
 			includes: {
 				content: [
@@ -60,7 +60,7 @@ return (this._binds[0].getValue());
 							}
 						},
 						"class": "Lava.WidgetConfigExtensionGateway",
-						extender_type: "Default",
+						extender_type: "Standard",
 						type: "widget"
 					},
 					"\r\n"

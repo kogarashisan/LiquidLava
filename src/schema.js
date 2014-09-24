@@ -190,7 +190,7 @@ Lava.schema = {
 		/**
 		 * Default config extension algorithm
 		 */
-		DEFAULT_EXTENDER: 'Default'
+		DEFAULT_EXTENDER: 'Standard'
 	},
 	/**
 	 * Classes, that parse sugar. An instance of each class will be created at the time of initialization

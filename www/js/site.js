@@ -458,8 +458,8 @@ Lava.define(
 	_hashchange_listener: null,
 	_active_tab_changed_listener: null,
 
-	_name_groups: {object: {}, reference: {}, tutorial: {}}, // used to find items from navigation trees by hash
-	_tab_hash_data: {object: {}, reference: {}, tutorial: {}},
+	_name_groups: {api: {}, reference: {}, tutorials: {}}, // used to find items from navigation trees by hash
+	_tab_hash_data: {api: {}, reference: {}, tutorials: {}},
 	_tab_content_widgets: {},
 	_tab_items: {},
 	_active_tab_name: 'reference',
@@ -477,21 +477,21 @@ Lava.define(
 		}, null);
 
 		this._properties.api_tree = Examples.makeLive(api_tree_source);
-		this._prepareTree(this._name_groups.object, this._properties.api_tree, 'api', null);
+		this._prepareTree(this._name_groups.api, this._properties.api_tree, 'api', null);
 		this._properties.firestorm_api_tree = Examples.makeLive(firestorm_api_tree_source);
-		this._prepareTree(this._name_groups.object, this._properties.firestorm_api_tree, 'api', null);
+		this._prepareTree(this._name_groups.api, this._properties.firestorm_api_tree, 'api', null);
 		this._properties.reference_nav_tree = Examples.makeLive(reference_nav_tree_source);
 		this._prepareTree(this._name_groups.reference, this._properties.reference_nav_tree, 'reference', null);
 
 		this._tab_content_widgets.api = Lava.createWidget('ClassContent');
 		this._properties.sugar_descriptor = new Lava.mixin.Properties({
-			type: 'object', name: 'Sugar', title: 'Sugar', tab_name: 'api', parent: null
+			type: 'object', name: 'Widgets', title: 'Widgets', tab_name: 'api', parent: null
 		});
-		this._name_groups.object['Sugar'] = this._properties.sugar_descriptor;
+		this._name_groups.api['Widgets'] = this._properties.sugar_descriptor;
 		this._properties.support_descriptor = new Lava.mixin.Properties({
 			type: 'object', name: 'Support', title: 'Support', tab_name: 'api', parent: null
 		});
-		this._name_groups.object['Support'] = this._properties.support_descriptor;
+		this._name_groups.api['Support'] = this._properties.support_descriptor;
 
 		this.ContentLoader$init(config, widget, parent_view, template, properties);
 
@@ -623,7 +623,9 @@ Lava.define(
 	_parseHash: function(hash_string) {
 
 		var result = {
-				hash: hash_string
+				hash: hash_string,
+				item_hash: null,
+				item:null
 			},
 			segments = hash_string.substr(1).split(';'),
 			parts,
@@ -659,12 +661,12 @@ Lava.define(
 			}
 		}
 
-		result['item'] = null;
 		if (item_type && hash[item_type]) {
-			name_group = this._name_groups[item_type == 'class' ? 'object' : item_type];
+			name_group = this._name_groups[this._type_to_tab_map[item_type]];
 			item_name = hash[item_type];
 			if (item_name in name_group) {
 				result['item'] = name_group[item_name];
+				result.item_hash = '#' + item_type + '=' + item_name;
 			} else {
 				result.is_invalid = true;
 			}
@@ -804,7 +806,7 @@ Lava.define(
 				Lava.view_manager.getViewById('content_area').getContainer().getDOMElement(),
 				'Top'
 			);
-			new_tab_hash_data && this._setWindowHash(new_tab_hash_data.hash);
+			this._setWindowHash(new_tab_hash_data.item_hash || 'tab=' + new_tab_name);
 			this._active_tab_name = new_tab_name;
 
 		}
@@ -1440,7 +1442,7 @@ function isBody(element){
 Lava.widgets["Example"] = {
 	type: "widget",
 	"class": "Lava.WidgetConfigExtensionGateway",
-	extender_type: "Default",
+	extender_type: "Standard",
 	template: [
 		"\r\n\t\t\t",
 		{
@@ -1505,7 +1507,7 @@ return ('lava-tree-icon-' + this._binds[0].getValue());
 		]
 	},
 	"class": "Lava.WidgetConfigExtensionGateway",
-	extender_type: "Default",
+	extender_type: "Standard",
 	is_extended: false
 };
 Lava.widgets["EditableTable"] = {
@@ -1651,7 +1653,7 @@ return (this._binds[0].getValue() == this._binds[1].getValue());
 				{
 					type: "widget",
 					"class": "Lava.WidgetConfigExtensionGateway",
-					extender_type: "Default",
+					extender_type: "Standard",
 					"extends": "TextInput",
 					bindings: {
 						value: {
@@ -1673,7 +1675,7 @@ return (this._binds[0].getValue() == this._binds[1].getValue());
 				{
 					type: "widget",
 					"class": "Lava.WidgetConfigExtensionGateway",
-					extender_type: "Default",
+					extender_type: "Standard",
 					"extends": "CheckBox",
 					bindings: {
 						is_checked: {
@@ -1705,6 +1707,6 @@ return (this._binds[0].getValue() == this._binds[1].getValue());
 	},
 	real_class: "EditableTableExample",
 	"class": "Lava.WidgetConfigExtensionGateway",
-	extender_type: "Default",
+	extender_type: "Standard",
 	is_extended: false
 };

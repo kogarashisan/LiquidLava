@@ -284,7 +284,7 @@ Lava.define(
 		if (Lava.schema.DEBUG && !this._container.isElementContainer) Lava.t("injectIntoExistingElement expects an element containers");
 
 		this._container.captureExistingElement(element);
-		this._container.setHTML(this._renderContents());
+		this._container.setHTML(this._renderContent());
 
 		// rewritten broadcastInDOM - without this._container.informInDOM()
 		this._is_inDOM = true;

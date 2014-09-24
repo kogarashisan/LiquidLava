@@ -92,7 +92,7 @@ Lava.define(
 	 * @param {string} locale_name
 	 * @returns {{year: number, index: number, weeks: Array}}
 	 */
-	_renderMonth: function(year, month, locale_name) {
+	_renderMonthData: function(year, month, locale_name) {
 
 		var culture_offset = Lava.locales[locale_name].first_day_offset,
 			first_day_in_sequence = new Date(Date.UTC(year, month)),
@@ -108,7 +108,7 @@ Lava.define(
 		return {
 			year: year,
 			index: month,
-			weeks: this._renderMonthWeeks(first_day_in_sequence)
+			weeks: this._renderMonthWeeksData(first_day_in_sequence)
 		}
 
 	},
@@ -117,7 +117,7 @@ Lava.define(
 	 * Render 6 rows of 7 days
 	 * @param {Date} start_date Date of the first day in the first row (day of week always starts from zero)
 	 */
-	_renderMonthWeeks: function(start_date) {
+	_renderMonthWeeksData: function(start_date) {
 
 		var year = start_date.getUTCFullYear(),
 			month = start_date.getUTCMonth(),
@@ -129,7 +129,7 @@ Lava.define(
 			result = [],
 			week = [];
 
-		week.push(this._renderDay(year, month, day, day_of_week, milliseconds));
+		week.push(this._renderDayData(year, month, day, day_of_week, milliseconds));
 
 		do {
 
@@ -153,7 +153,7 @@ Lava.define(
 				week = [];
 			}
 
-			week.push(this._renderDay(year, month, day, day_of_week, milliseconds));
+			week.push(this._renderDayData(year, month, day, day_of_week, milliseconds));
 
 		} while (i < 42); // 7*6
 
@@ -170,7 +170,7 @@ Lava.define(
 	 * @param milliseconds Absolute time of the day
 	 * @returns {{year: number, month: number, day: number, day_of_week: number, milliseconds: number, is_today: boolean}}
 	 */
-	_renderDay: function(year, month, day, day_of_week, milliseconds) {
+	_renderDayData: function(year, month, day, day_of_week, milliseconds) {
 		return {
 			year: year,
 			month: month,

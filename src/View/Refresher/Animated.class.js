@@ -4,11 +4,11 @@ Lava.define(
 /**
  * Base class for refreshers, which support animation
  * @lends Lava.view.refresher.Animated#
- * @extends Lava.view.refresher.Default
+ * @extends Lava.view.refresher.Standard
  */
 {
 
-	Extends: 'Lava.view.refresher.Default',
+	Extends: 'Lava.view.refresher.Standard',
 
 	_is_animation_enabled: true,
 
@@ -20,7 +20,7 @@ Lava.define(
 
 		} else {
 
-			this.Default$refresh(current_templates);
+			this.Standard$refresh(current_templates);
 
 		}
 
@@ -64,7 +64,7 @@ Lava.define(
 
 		this.stopAnimations();
 
-		this.Default$onRender(current_templates);
+		this.Standard$onRender(current_templates);
 
 	},
 

@@ -93,7 +93,7 @@
 		"View/Container/Morph.class.js",
 		"View/Container/Emulated.class.js",
 
-		"View/Refresher/Default.class.js",
+		"View/Refresher/Standard.class.js",
 		"View/Refresher/Animated.class.js",
 		"View/Refresher/Collapse.class.js",
 

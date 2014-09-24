@@ -22,7 +22,7 @@
 					}
 				},
 				"class": "Lava.WidgetConfigExtensionGateway",
-				extender_type: "Default",
+				extender_type: "Standard",
 				type: "widget"
 			},
 			"\r\n\t\t<br/>\r\n\t\t<h1>Hello ",
@@ -43,7 +43,7 @@ return (this._binds[0].getValue());
 		"extends": "Example",
 		real_class: "HelloExample",
 		"class": "Lava.WidgetConfigExtensionGateway",
-		extender_type: "Default",
+		extender_type: "Standard",
 		type: "widget"
 	}]
 })

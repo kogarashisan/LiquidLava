@@ -90,16 +90,16 @@ Lava.define(
 	 * @param module
 	 * @param name
 	 * @param {_cRecordField} config
-	 * @param module_storages
+	 * @param module_storage
 	 */
-	init: function(module, name, config, module_storages) {
+	init: function(module, name, config, module_storage) {
 
-		this.Abstract$init(module, name, config, module_storages);
+		this.Abstract$init(module, name, config, module_storage);
 		this._referenced_module = (config.module == 'this') ? module : module.getApp().getModule(config.module);
 
 	},
 
-	onModuleFieldsCreated: function(default_storage) {
+	onModuleFieldsCreated: function(default_properties) {
 
 		if (this._config.foreign_key_field) {
 
@@ -116,7 +116,7 @@ Lava.define(
 		}
 
 		// this field stores the referenced record
-		default_storage[this._name] = null;
+		default_properties[this._name] = null;
 
 	},
 
@@ -145,7 +145,7 @@ Lava.define(
 			// Now, as the foreign record is loaded - the field can be updated.
 			for (local_count = local_records.length, local_index = 0; local_index < local_count; local_index++) {
 				local_record = local_records[local_index];
-				this._storages_by_guid[local_record.guid][this._name] = records[i];
+				this._properties_by_guid[local_record.guid][this._name] = records[i];
 				this._fireFieldChangedEvents(local_record);
 			}
 
@@ -203,22 +203,22 @@ Lava.define(
 	_onForeignKeyChanged: function(foreign_key_field, event_args) {
 
 		var record = event_args.record, // record belongs to this module
-			storage = this._storages_by_guid[record.guid];
+			properties = this._properties_by_guid[record.guid];
 
-		if (storage[this._name] != null) {
+		if (properties[this._name] != null) {
 
 			// remove old record from collection
-			this._unregisterRecord(record, storage[this._name]);
+			this._unregisterRecord(record, properties[this._name]);
 
 		}
 
-		if (storage[this._foreign_key_field_name]) {
+		if (properties[this._foreign_key_field_name]) {
 
-			this._registerByReferencedId(record, storage, storage[this._foreign_key_field_name]);
+			this._registerByReferencedId(record, properties, properties[this._foreign_key_field_name]);
 
 		} else {
 
-			storage[this._name] = null;
+			properties[this._name] = null;
 
 		}
 
@@ -259,26 +259,26 @@ Lava.define(
 
 	},
 
-	initNewRecord: function(record, storage) {
+	initNewRecord: function(record, properties) {
 
-		if (this._foreign_key_field && storage[this._foreign_key_field_name]) {
+		if (this._foreign_key_field && properties[this._foreign_key_field_name]) {
 
-			this._registerByReferencedId(record, storage, storage[this._foreign_key_field_name]);
+			this._registerByReferencedId(record, properties, properties[this._foreign_key_field_name]);
 
 		}
 
 	},
 
-	'import': function(record, storage, raw_properties) {
+	'import': function(record, properties, raw_properties) {
 
 		var foreign_id;
 
 		if (this._foreign_key_field) {
 
 			// if foreign id is in import - then it will replace the default value (if foreign kay has default)
-			foreign_id = raw_properties[this._foreign_key_field_name] || storage[this._foreign_key_field_name];
+			foreign_id = raw_properties[this._foreign_key_field_name] || properties[this._foreign_key_field_name];
 			if (foreign_id) {
-				this._registerByReferencedId(record, storage, foreign_id);
+				this._registerByReferencedId(record, properties, foreign_id);
 			}
 
 		}
@@ -288,16 +288,16 @@ Lava.define(
 	/**
 	 * Update value of this field in local `record` and add the record to field's internal collections
 	 * @param {Lava.data.RecordAbstract} record The local record
-	 * @param {Object} storage The properties of local record
+	 * @param {Object} properties The properties of local record
 	 * @param {string} referenced_record_id The id of foreign record, which it belongs to
 	 */
-	_registerByReferencedId: function(record, storage, referenced_record_id) {
+	_registerByReferencedId: function(record, properties, referenced_record_id) {
 
-		storage[this._name] = this._referenced_module.getRecordById(referenced_record_id) || null;
+		properties[this._name] = this._referenced_module.getRecordById(referenced_record_id) || null;
 
-		if (storage[this._name]) {
+		if (properties[this._name]) {
 
-			this._registerRecord(record, storage[this._name]);
+			this._registerRecord(record, properties[this._name]);
 
 		}
 
@@ -307,25 +307,25 @@ Lava.define(
 
 	},
 
-	getValue: function(record, storage) {
+	getValue: function(record, properties) {
 
-		return storage[this._name];
+		return properties[this._name];
 
 	},
 
-	setValue: function(record, storage, new_ref_record) {
+	setValue: function(record, properties, new_ref_record) {
 
 		if (!this.isValidValue(new_ref_record))
 			Lava.t("Field/Record: assigned value is not valid. Reason: " + this.getInvalidReason(new_ref_record));
 
-		if (storage[this._name] != null) {
+		if (properties[this._name] != null) {
 
 			// remove from the old record's collection
-			this._unregisterRecord(record, storage[this._name]);
+			this._unregisterRecord(record, properties[this._name]);
 
 		}
 
-		storage[this._name] = new_ref_record;
+		properties[this._name] = new_ref_record;
 		if (new_ref_record != null) {
 
 			this._registerRecord(record, new_ref_record)
@@ -440,8 +440,8 @@ Lava.define(
 	 */
 	_getComparisonValue: function(record) {
 
-		if (Lava.schema.DEBUG && !(record.guid in this._storages_by_guid)) Lava.t("isLess: record does not belong to this module");
-		var ref_record_a = this._storages_by_guid[record.guid][this._name];
+		if (Lava.schema.DEBUG && !(record.guid in this._properties_by_guid)) Lava.t("isLess: record does not belong to this module");
+		var ref_record_a = this._properties_by_guid[record.guid][this._name];
 		// must return undefined, cause comparison against nulls behaves differently
 		return ref_record_a ? ref_record_a.get('id') : void 0;
 

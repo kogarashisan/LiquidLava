@@ -21,9 +21,9 @@ module.exports = function(grunt) {
 
 		// replace includes in html files. Currently, all content is pure html files, need to update it somehow.
 		function processWebFile(filename) {
-			var contents = grunt.file.read(filename);
+			var content = grunt.file.read(filename);
 			var was_modified = false;
-			contents = contents.replace(
+			content = content.replace(
 				/<!--LAVA_BUILD_INCLUDE:([a-zA-Z0-9\.\_]+)-->\s*([\s\S]*?)\s*<!--LAVA_BUILD_INCLUDE_END-->/g,
 				function() {
 					var include_name = arguments[1];
@@ -49,7 +49,7 @@ module.exports = function(grunt) {
 			);
 
 			if (was_modified) {
-				grunt.file.write(filename, contents);
+				grunt.file.write(filename, content);
 			}
 
 		}

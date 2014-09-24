@@ -393,7 +393,7 @@ _cRefresher = {
 	 * @type {string}
 	 * @const
 	 */
-	'class': 'Default',
+	'class': 'Standard',
 
 	/**
 	 * Callback, which is used for inserting templates into DOM
@@ -422,7 +422,7 @@ _cWidget = {
 	/**
 	 * Currently, the only extender available
 	 */
-	extender_type: 'Default',
+	extender_type: 'Standard',
 
 	/**
 	 * Name of the widget - arbitrary identifier, just like label. Used to reference the widget from templates

@@ -17,13 +17,13 @@ Lava.define(
 	 */
 	isMetaRecord: true,
 
-	init: function(meta_storage, fields, properties_storage_ref) {
+	init: function(meta_storage, fields, properties_ref) {
 
-		this.RecordAbstract$init(meta_storage, fields, properties_storage_ref);
+		this.RecordAbstract$init(meta_storage, fields, properties_ref);
 
 		for (var field in fields) {
 
-			fields[field].initNewRecord(this, properties_storage_ref);
+			fields[field].initNewRecord(this, properties_ref);
 
 		}
 

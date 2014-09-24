@@ -9,6 +9,16 @@
  * @event Lava.scope.Foreach#new_enumerable
  */
 
+/**
+ * Scope has refreshed it's value from argument. May be used to sort and filter data in Foreach views.
+ * @event Lava.scope.Foreach#after_refresh
+ * @type {Object}
+ * @property {Lava.system.Enumerable} value Scope's own Enumerable instance, which is served for the {@link Lava.view.Foreach} view.
+ *  When scope's argument has returned an Enumerable instance, and "create_own_enumerable" option is not set
+ *  - this will be the Enumerable instance, which was returned from Argument.
+ * @property {*} argument_value Argument result (may be an object, Enumerable, array or Properties)
+ */
+
 Lava.define(
 'Lava.scope.Foreach',
 /**
@@ -93,11 +103,6 @@ Lava.define(
 	 * @type {boolean}
 	 */
 	_create_own_enumerable: false,
-	/**
-	 * When local Enumerable is refreshed from argument, scope instance may call it's widget to apply sorting and filtering
-	 * @type {string}
-	 */
-	_after_refresh_callback: null,
 
 	/**
 	 * Create an instance of the Foreach scope. Refresh value
@@ -122,7 +127,6 @@ Lava.define(
 
 		if (options) {
 			this._create_own_enumerable = options['create_own_enumerable'] || false;
-			this._after_refresh_callback = options['after_refresh_callback'] || null;
 		}
 
 		this._argument_waits_refresh_listener = this._argument.on('waits_refresh', this._onDependencyWaitsRefresh, this);
@@ -197,9 +201,10 @@ Lava.define(
 
 		}
 
-		if (this._after_refresh_callback) {
-			this._widget[this._after_refresh_callback](this._value, argument_value, this._view);
-		}
+		this._fire('after_refresh', {
+			value: this._value,
+			argument_value: argument_value
+		});
 
 	},
 

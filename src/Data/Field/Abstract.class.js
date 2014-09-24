@@ -37,7 +37,7 @@ Lava.define(
 	 * Reference to object from module with properties of all records
 	 * @type {Object.<_tGUID, Object>}
 	 */
-	_storages_by_guid: null,
+	_properties_by_guid: null,
 	/**
 	 * May this field be assigned a <kw>null</kw> value
 	 * @type {boolean}
@@ -49,24 +49,24 @@ Lava.define(
 	 * @param {Lava.data.Module} module
 	 * @param {string} name Field name
 	 * @param {_cField} config
-	 * @param {object} module_storages Reference to object from module with properties of all records
+	 * @param {object} module_storage Reference to object from module with properties of all records
 	 */
-	init: function(module, name, config, module_storages) {
+	init: function(module, name, config, module_storage) {
 
 		this._module = module;
 		this._name = name;
 		this._config = config;
-		this._storages_by_guid = module_storages;
+		this._properties_by_guid = module_storage;
 		if ('is_nullable' in config) this._is_nullable = config.is_nullable;
 
 	},
 
 	/**
 	 * Module calls this method when all field objects are already created,
-	 * and passes the object which will become default property storage for all records.
+	 * and passes the object which will become default properties for all records.
 	 * Common purpose of this method is to set this field's default value and attach listeners to other fields
 	 */
-	onModuleFieldsCreated: function(default_storage) {},
+	onModuleFieldsCreated: function(default_properties) {},
 
 	/**
 	 * Is the given `value` valid for assignment to this field
@@ -117,15 +117,15 @@ Lava.define(
 	 * Records are either loaded from existing data, or created with default properties.
 	 * Here a field may perform initialization of new records, for example: generate an id
 	 */
-	initNewRecord: function(record, storage) {},
+	initNewRecord: function(record, properties) {},
 
 	/**
 	 * Initialize a field from server-side data
 	 * @param {Lava.data.RecordAbstract} record
-	 * @param {Object} storage
+	 * @param {Object} properties
 	 * @param {Object} raw_properties
 	 */
-	'import': function(record, storage, raw_properties) {},
+	'import': function(record, properties, raw_properties) {},
 
 	/**
 	 * Export the field's value back to server-side data
@@ -139,19 +139,19 @@ Lava.define(
 	/**
 	 * Get this field's value from a record's properties
 	 * @param {Lava.data.RecordAbstract} record
-	 * @param {Object} storage
+	 * @param {Object} properties
 	 */
-	getValue: function(record, storage) {
+	getValue: function(record, properties) {
 		Lava.t("Abstract function call: getValue");
 	},
 
 	/**
 	 * Set this field's value to record's properties
 	 * @param {Lava.data.RecordAbstract} record
-	 * @param {Object} storage
+	 * @param {Object} properties
 	 * @param {*} value
 	 */
-	setValue: function(record, storage, value) {
+	setValue: function(record, properties, value) {
 		Lava.t("Abstract function call: setValue");
 	},
 
@@ -168,11 +168,11 @@ Lava.define(
 
 	/**
 	 * Helper method for importing values from server-side data. Performs validation
-	 * @param {Object} storage
+	 * @param {Object} properties
 	 * @param {Object} raw_properties
 	 * @returns {*}
 	 */
-	_getImportValue: function(storage, raw_properties) {
+	_getImportValue: function(properties, raw_properties) {
 
 		if (Lava.schema.data.VALIDATE_IMPORT_DATA && !this.isValidValue(raw_properties[this._name]))
 			Lava.t('Invalid value in import data (' + this._name + '): ' + raw_properties[this._name]);
@@ -189,7 +189,7 @@ Lava.define(
 	 */
 	isLess: function(record_a, record_b) {
 
-		return this._storages_by_guid[record_a.guid][this._name] < this._storages_by_guid[record_b.guid][this._name];
+		return this._properties_by_guid[record_a.guid][this._name] < this._properties_by_guid[record_b.guid][this._name];
 
 	},
 
@@ -201,7 +201,7 @@ Lava.define(
 	 */
 	isEqual: function(record_a, record_b) {
 
-		return this._storages_by_guid[record_a.guid][this._name] == this._storages_by_guid[record_b.guid][this._name];
+		return this._properties_by_guid[record_a.guid][this._name] == this._properties_by_guid[record_b.guid][this._name];
 
 	},
 
@@ -210,7 +210,7 @@ Lava.define(
 	 */
 	destroy: function() {
 
-		this._storages_by_guid = this._module = null;
+		this._properties_by_guid = this._module = null;
 
 	}
 

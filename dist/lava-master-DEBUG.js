@@ -2392,7 +2392,19 @@ var Lava = {
 	/**
 	 * Do nothing
 	 */
-	noop: function() {}
+	noop: function() {},
+
+	/**
+	 * Does given class instance extend or implement `class_name`
+	 * @param {Object} instance
+	 * @param {string} class_name
+	 * @returns {boolean}
+	 */
+	instanceOf: function(instance, class_name) {
+
+		return instance.Class.hierarchy_paths.indexOf(class_name) != -1 || instance.Class.implements.indexOf(class_name) != -1;
+
+	}
 
 };
 /**
@@ -2587,7 +2599,7 @@ Lava.schema = {
 		/**
 		 * Default config extension algorithm
 		 */
-		DEFAULT_EXTENDER: 'Default'
+		DEFAULT_EXTENDER: 'Standard'
 	},
 	/**
 	 * Classes, that parse sugar. An instance of each class will be created at the time of initialization
@@ -3849,7 +3861,7 @@ Lava.extenders = {
 	 * Extend raw widget config
 	 * @param {_cWidget} config
 	 */
-	Default: function(config) {
+	Standard: function(config) {
 
 		var parent_config,
 			parent_widget_name;
@@ -4632,7 +4644,7 @@ Lava.ScopeManager = {
 };
 
 /**
- * Stable sort algorithm (by definition)
+ * Stable sort algorithm (by definition). May not be called recursively
  */
 Lava.algorithms.sorting.mergeSort = (function(){
 	"use strict";
@@ -4712,8 +4724,6 @@ Lava.algorithms.sorting.mergeSort = (function(){
 
 	return function(items, less) {
 
-		if (_less) Lava.t("This version of mergeSort may not be called recursively");
-
 		var length = items.length,
 			result;
 
@@ -4723,9 +4733,8 @@ Lava.algorithms.sorting.mergeSort = (function(){
 
 		} else {
 
-			_less = less || Lava.DEFAULT_LESS;
+			_less = less;
 			result = _sort(items, length);
-			_less = null;
 
 		}
 
@@ -5151,16 +5160,6 @@ Lava.ClassManager = {
 	 */
 	_root: {},
 
-	ClassData: {
-
-		instanceOf: function(class_name) {
-
-			return this.hierarchy_paths.indexOf(class_name) != -1;
-
-		}
-
-	},
-
 	/**
 	 * Add a namespace, that can contain class constructors
 	 * @param {string} name The name of the namespace
@@ -5201,7 +5200,7 @@ Lava.ClassManager = {
 			name: class_path.split('.').pop(),
 			path: class_path,
 			source_object: source_object,
-			hierarchy_index: 0,
+			level: 0,
 			extends: null,
 			implements: [],
 			parent_class_data: null,
@@ -5210,8 +5209,7 @@ Lava.ClassManager = {
 			references: [],
 			shared: {},
 			constructor: null,
-			own_references_count: 0,
-			instanceOf: this.ClassData.instanceOf
+			own_references_count: 0
 		};
 
 		if ('Extends' in source_object) {
@@ -5224,7 +5222,7 @@ Lava.ClassManager = {
 			if (!parent_data) Lava.t('[define] Base class not found: "' + source_object.Extends + '"');
 			if (!parent_data.skeleton) Lava.t("[define] Parent class was loaded without skeleton, extension is not possible: " + class_data.extends);
 
-			class_data.hierarchy_index = parent_data.hierarchy_index + 1;
+			class_data.level = parent_data.level + 1;
 			class_data.hierarchy_paths = parent_data.hierarchy_paths.slice();
 			class_data.hierarchy_paths.push(class_path);
 			class_data.references = parent_data.references.slice();
@@ -5273,7 +5271,7 @@ Lava.ClassManager = {
 
 		}
 
-		class_data.skeleton = this._disassemble(class_data, source_object, class_data.hierarchy_index, true);
+		class_data.skeleton = this._disassemble(class_data, source_object, class_data.level, true);
 
 		if (parent_data) {
 
@@ -5402,11 +5400,11 @@ Lava.ClassManager = {
 	 * Recursively create skeletons for all objects inside class body
 	 * @param {_cClassData} class_data
 	 * @param {Object} source_object
-	 * @param {number} hierarchy_index
+	 * @param {number} level
 	 * @param {boolean} is_root
 	 * @returns {Object}
 	 */
-	_disassemble: function(class_data, source_object, hierarchy_index, is_root) {
+	_disassemble: function(class_data, source_object, level, is_root) {
 
 		var name,
 			skeleton = {},
@@ -5429,7 +5427,7 @@ Lava.ClassManager = {
 				case 'object':
 					skeleton_value = {
 						type: 'object',
-						skeleton: this._disassemble(class_data, value, hierarchy_index, false)
+						skeleton: this._disassemble(class_data, value, level, false)
 					};
 					break;
 				case 'function':
@@ -5841,7 +5839,7 @@ Lava.ClassManager = {
 			// string data
 			name: class_data.name,
 			path: class_data.path,
-			hierarchy_index: class_data.hierarchy_index,
+			level: class_data.level,
 			extends: class_data.extends,
 			implements: null,
 			hierarchy_paths: class_data.hierarchy_paths,
@@ -5923,7 +5921,6 @@ Lava.ClassManager = {
 		}
 
 		class_data.constructor.prototype = class_data.prototype_generator(class_data);
-		class_data.instanceOf = this.ClassData.instanceOf;
 
 		this._registerClass(class_data);
 
@@ -6281,8 +6278,8 @@ Lava.parsers.Common = {
 		if ('elseif_arguments' in raw_block) {
 			config.elseif_arguments = raw_block.elseif_arguments;
 			config.elseif_templates = [];
-			for (count = raw_block.elseif_contents.length; i < count; i++) {
-				config.elseif_templates.push(this.compileTemplate(raw_block.elseif_contents[i]));
+			for (count = raw_block.elseif_content.length; i < count; i++) {
+				config.elseif_templates.push(this.compileTemplate(raw_block.elseif_content[i]));
 			}
 		}
 
@@ -6430,7 +6427,7 @@ Lava.parsers.Common = {
 
 		} else {
 
-			Lava.t("Malformed contents of tag with type='container'");
+			Lava.t("Malformed content of tag with type='container'");
 
 		}
 
@@ -6441,7 +6438,7 @@ Lava.parsers.Common = {
 
 		if (container_config_directive) {
 			if (Lava.schema.DEBUG && (container_config_directive.type != 'directive' || container_config_directive.name == 'container_config'))
-				Lava.t("Malformed contents of tag with type='container'");
+				Lava.t("Malformed content of tag with type='container'");
 			Lava.parsers.Directives.processDirective(container_config_directive, view_config, true);
 		}
 
@@ -6742,7 +6739,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * Parse style attribute contents (plain string) into object with keys being individual style names,
+	 * Parse style attribute content (plain string) into object with keys being individual style names,
 	 * and values being actual style values
 	 *
 	 * @param {string} styles_string
@@ -10287,7 +10284,7 @@ case 11:
 			if ($$[$0-2].name != $$[$0]) Lava.t('End block ("' + $$[$0] + '") does not match the start block ("' + $$[$0-2].name + '") (3)');
 			if ('elseif_arguments' in $$[$0-1]) {
 				$$[$0-2].elseif_arguments = $$[$0-1].elseif_arguments;
-				$$[$0-2].elseif_contents = $$[$0-1].elseif_contents;
+				$$[$0-2].elseif_content = $$[$0-1].elseif_content;
 			}
 			if ('else_content' in $$[$0-1]) $$[$0-2].else_content = $$[$0-1].else_content;
 			this.$ = $$[$0-2];
@@ -10298,7 +10295,7 @@ case 12:
 			$$[$0-3].content = $$[$0-2];
 			if ('elseif_arguments' in $$[$0-1]) {
 				$$[$0-3].elseif_arguments = $$[$0-1].elseif_arguments;
-				$$[$0-3].elseif_contents = $$[$0-1].elseif_contents;
+				$$[$0-3].elseif_content = $$[$0-1].elseif_content;
 			}
 			if ('else_content' in $$[$0-1]) $$[$0-3].else_content = $$[$0-1].else_content;
 			this.$ = $$[$0-3];
@@ -10439,27 +10436,27 @@ case 34:
 break;
 case 35:
 			$$[$0-2].elseif_arguments.push($$[$0-1]);
-			$$[$0-2].elseif_contents.push($$[$0]);
+			$$[$0-2].elseif_content.push($$[$0]);
 			this.$ = $$[$0-2];
 		
 break;
 case 36:
 			$$[$0-1].elseif_arguments.push($$[$0]);
-			$$[$0-1].elseif_contents.push([]);
+			$$[$0-1].elseif_content.push([]);
 			this.$ = $$[$0-1];
 		
 break;
 case 37:
 			this.$ = {
 				elseif_arguments: [$$[$0-1]],
-				elseif_contents: [$$[$0]]
+				elseif_content: [$$[$0]]
 			};
 		
 break;
 case 38:
 			this.$ = {
 				elseif_arguments: [$$[$0]],
-				elseif_contents: [[]]
+				elseif_content: [[]]
 			};
 		
 break;
@@ -13422,7 +13419,7 @@ Lava.define(
 	 */
 	sort: function(less, algorithm_name) {
 
-		this._sort(less, this._data_values, algorithm_name);
+		this._sort(less || Lava.DEFAULT_LESS, this._data_values, algorithm_name);
 
 	},
 
@@ -13433,7 +13430,7 @@ Lava.define(
 	 */
 	sortByNames: function(less, algorithm_name) {
 
-		this._sort(less, this._data_names, algorithm_name);
+		this._sort(less || Lava.DEFAULT_LESS, this._data_names, algorithm_name);
 
 	},
 
@@ -13741,7 +13738,7 @@ Lava.define(
 	 * The renderable items, constructed from `_config`
 	 * @type {Array.<_tRenderable>}
 	 */
-	_contents: [],
+	_content: [],
 	/**
 	 * Is the template currently in DOM
 	 * @type {boolean}
@@ -13787,8 +13784,8 @@ Lava.define(
 		this._widget = widget;
 		this._config = template_config;
 
-		this._createChildren(this._contents, template_config, [], child_properties);
-		this._count = this._contents.length;
+		this._createChildren(this._content, template_config, [], child_properties);
+		this._count = this._content.length;
 
 	},
 
@@ -13993,9 +13990,9 @@ Lava.define(
 
 		for (var i = 0; i < this._count; i++) {
 
-			if (this._contents[i].isView) {
+			if (this._content[i].isView) {
 
-				this._contents[i][function_name]();
+				this._content[i][function_name]();
 
 			}
 
@@ -14011,23 +14008,23 @@ Lava.define(
 
 		var buffer = '',
 			i = 0,
-			contents = this._contents;
+			content = this._content;
 
 		this._is_sleeping = false;
 
 		for (; i < this._count; i++) {
 
-			if (typeof(contents[i]) == 'string') {
+			if (typeof(content[i]) == 'string') {
 
-				buffer += contents[i];
+				buffer += content[i];
 
-			} else if (typeof(contents[i]) == 'function') {
+			} else if (typeof(content[i]) == 'function') {
 
 				Lava.t("Not implemented");
 
 			} else {
 
-				buffer += contents[i].render();
+				buffer += content[i].render();
 
 			}
 
@@ -14087,7 +14084,7 @@ Lava.define(
 	},
 
 	/**
-	 * Set this property to all views inside `_contents`
+	 * Set this property to all views inside `_content`
 	 * @param {string} name Property name
 	 * @param {*} value Property value
 	 */
@@ -14095,9 +14092,9 @@ Lava.define(
 
 		for (var i = 0; i < this._count; i++) {
 
-			if (this._contents[i].isView) {
+			if (this._content[i].isView) {
 
-				this._contents[i].set(name, value);
+				this._content[i].set(name, value);
 
 			}
 
@@ -14106,16 +14103,16 @@ Lava.define(
 	},
 
 	/**
-	 * Set properties to all views inside `_contents`
+	 * Set properties to all views inside `_content`
 	 * @param {Object} properties_object
 	 */
 	batchSetProperties: function(properties_object) {
 
 		for (var i = 0; i < this._count; i++) {
 
-			if (this._contents[i].isView) {
+			if (this._content[i].isView) {
 
-				this._contents[i].setProperties(properties_object);
+				this._content[i].setProperties(properties_object);
 
 			}
 
@@ -14124,7 +14121,7 @@ Lava.define(
 	},
 
 	/**
-	 * Find first view in `_contents` and return it
+	 * Find first view in `_content` and return it
 	 * @returns {Lava.view.Abstract} First view
 	 */
 	getFirstView: function() {
@@ -14134,7 +14131,7 @@ Lava.define(
 	},
 
 	/**
-	 * Find last view in `_contents` and return it
+	 * Find last view in `_content` and return it
 	 * @returns {Lava.view.Abstract} Last view
 	 */
 	getLastView: function() {
@@ -14174,8 +14171,8 @@ Lava.define(
 		var result = null;
 
 		while (i < this._count) {
-			if (this._contents[i].isView) {
-				result = this._contents[i];
+			if (this._content[i].isView) {
+				result = this._content[i];
 				break;
 			}
 			i++;
@@ -14194,8 +14191,8 @@ Lava.define(
 		var result = null;
 
 		while (i >= 0) {
-			if (this._contents[i].isView) {
-				result = this._contents[i];
+			if (this._content[i].isView) {
+				result = this._content[i];
 				break;
 			}
 			i--;
@@ -14206,7 +14203,7 @@ Lava.define(
 	},
 
 	/**
-	 * Search `_contents` and find all views with given label
+	 * Search `_content` and find all views with given label
 	 * @param {string} label Label to search for
 	 * @returns {Array.<Lava.view.Abstract>} Views with given label
 	 */
@@ -14217,9 +14214,9 @@ Lava.define(
 
 		for (; i < this._count; i++) {
 
-			if (this._contents[i].isView && this._contents[i].label == label) {
+			if (this._content[i].isView && this._content[i].label == label) {
 
-				result.push(this._contents[i]);
+				result.push(this._content[i]);
 
 			}
 
@@ -14230,7 +14227,7 @@ Lava.define(
 	},
 
 	/**
-	 * Find all widgets with given name inside `_contents`
+	 * Find all widgets with given name inside `_content`
 	 * @param {string} name Name to search for
 	 * @returns {Array.<Lava.widget.Standard>} Found widgets
 	 */
@@ -14241,9 +14238,9 @@ Lava.define(
 
 		for (; i < this._count; i++) {
 
-			if (this._contents[i].isWidget && this._contents[i].name == name) {
+			if (this._content[i].isWidget && this._content[i].name == name) {
 
-				result.push(this._contents[i]);
+				result.push(this._content[i]);
 
 			}
 
@@ -14270,7 +14267,7 @@ Lava.define(
 	 */
 	getAt: function(index) {
 
-		return this._contents[index];
+		return this._content[index];
 
 	},
 
@@ -14300,7 +14297,7 @@ Lava.define(
 	destroy: function() {
 
 		this._broadcast('destroy');
-		this._contents = null;
+		this._content = null;
 
 	}
 
@@ -15943,7 +15940,7 @@ Lava.define(
 	 * Reference to object from module with properties of all records
 	 * @type {Object.<_tGUID, Object>}
 	 */
-	_storages_by_guid: null,
+	_properties_by_guid: null,
 	/**
 	 * May this field be assigned a <kw>null</kw> value
 	 * @type {boolean}
@@ -15955,24 +15952,24 @@ Lava.define(
 	 * @param {Lava.data.Module} module
 	 * @param {string} name Field name
 	 * @param {_cField} config
-	 * @param {object} module_storages Reference to object from module with properties of all records
+	 * @param {object} module_storage Reference to object from module with properties of all records
 	 */
-	init: function(module, name, config, module_storages) {
+	init: function(module, name, config, module_storage) {
 
 		this._module = module;
 		this._name = name;
 		this._config = config;
-		this._storages_by_guid = module_storages;
+		this._properties_by_guid = module_storage;
 		if ('is_nullable' in config) this._is_nullable = config.is_nullable;
 
 	},
 
 	/**
 	 * Module calls this method when all field objects are already created,
-	 * and passes the object which will become default property storage for all records.
+	 * and passes the object which will become default properties for all records.
 	 * Common purpose of this method is to set this field's default value and attach listeners to other fields
 	 */
-	onModuleFieldsCreated: function(default_storage) {},
+	onModuleFieldsCreated: function(default_properties) {},
 
 	/**
 	 * Is the given `value` valid for assignment to this field
@@ -16023,15 +16020,15 @@ Lava.define(
 	 * Records are either loaded from existing data, or created with default properties.
 	 * Here a field may perform initialization of new records, for example: generate an id
 	 */
-	initNewRecord: function(record, storage) {},
+	initNewRecord: function(record, properties) {},
 
 	/**
 	 * Initialize a field from server-side data
 	 * @param {Lava.data.RecordAbstract} record
-	 * @param {Object} storage
+	 * @param {Object} properties
 	 * @param {Object} raw_properties
 	 */
-	'import': function(record, storage, raw_properties) {},
+	'import': function(record, properties, raw_properties) {},
 
 	/**
 	 * Export the field's value back to server-side data
@@ -16045,19 +16042,19 @@ Lava.define(
 	/**
 	 * Get this field's value from a record's properties
 	 * @param {Lava.data.RecordAbstract} record
-	 * @param {Object} storage
+	 * @param {Object} properties
 	 */
-	getValue: function(record, storage) {
+	getValue: function(record, properties) {
 		Lava.t("Abstract function call: getValue");
 	},
 
 	/**
 	 * Set this field's value to record's properties
 	 * @param {Lava.data.RecordAbstract} record
-	 * @param {Object} storage
+	 * @param {Object} properties
 	 * @param {*} value
 	 */
-	setValue: function(record, storage, value) {
+	setValue: function(record, properties, value) {
 		Lava.t("Abstract function call: setValue");
 	},
 
@@ -16074,11 +16071,11 @@ Lava.define(
 
 	/**
 	 * Helper method for importing values from server-side data. Performs validation
-	 * @param {Object} storage
+	 * @param {Object} properties
 	 * @param {Object} raw_properties
 	 * @returns {*}
 	 */
-	_getImportValue: function(storage, raw_properties) {
+	_getImportValue: function(properties, raw_properties) {
 
 		if (Lava.schema.data.VALIDATE_IMPORT_DATA && !this.isValidValue(raw_properties[this._name]))
 			Lava.t('Invalid value in import data (' + this._name + '): ' + raw_properties[this._name]);
@@ -16095,7 +16092,7 @@ Lava.define(
 	 */
 	isLess: function(record_a, record_b) {
 
-		return this._storages_by_guid[record_a.guid][this._name] < this._storages_by_guid[record_b.guid][this._name];
+		return this._properties_by_guid[record_a.guid][this._name] < this._properties_by_guid[record_b.guid][this._name];
 
 	},
 
@@ -16107,7 +16104,7 @@ Lava.define(
 	 */
 	isEqual: function(record_a, record_b) {
 
-		return this._storages_by_guid[record_a.guid][this._name] == this._storages_by_guid[record_b.guid][this._name];
+		return this._properties_by_guid[record_a.guid][this._name] == this._properties_by_guid[record_b.guid][this._name];
 
 	},
 
@@ -16116,7 +16113,7 @@ Lava.define(
 	 */
 	destroy: function() {
 
-		this._storages_by_guid = this._module = null;
+		this._properties_by_guid = this._module = null;
 
 	}
 
@@ -16140,9 +16137,9 @@ Lava.define(
 	 */
 	_default: null,
 
-	init: function(module, name, config, module_storages) {
+	init: function(module, name, config, module_storage) {
 
-		this.Abstract$init(module, name, config, module_storages);
+		this.Abstract$init(module, name, config, module_storage);
 
 		if ('default' in config) {
 
@@ -16162,17 +16159,17 @@ Lava.define(
 
 	},
 
-	onModuleFieldsCreated: function(default_storage) {
+	onModuleFieldsCreated: function(default_properties) {
 
-		default_storage[this._name] = this._default;
+		default_properties[this._name] = this._default;
 
 	},
 
-	'import': function(record, storage, raw_properties) {
+	'import': function(record, properties, raw_properties) {
 
 		if (this._name in raw_properties) {
 
-			storage[this._name] = this._getImportValue(storage, raw_properties);
+			properties[this._name] = this._getImportValue(properties, raw_properties);
 
 		}
 
@@ -16180,24 +16177,24 @@ Lava.define(
 
 	'export': function(record, destination_object) {
 
-		destination_object[this._name] = this._storages_by_guid[record.guid][this._name];
+		destination_object[this._name] = this._properties_by_guid[record.guid][this._name];
 
 	},
 
-	getValue: function(record, storage) {
+	getValue: function(record, properties) {
 
-		return storage[this._name];
+		return properties[this._name];
 
 	},
 
-	setValue: function(record, storage, value) {
+	setValue: function(record, properties, value) {
 
-		if (storage[this._name] !== value) {
+		if (properties[this._name] !== value) {
 
 			if (!this.isValidValue(value)) Lava.t('[Field name=' + this._name + '] Invalid field value: '
 				+ value + ". Reason: " + this.getInvalidReason(value));
 
-			storage[this._name] = value;
+			properties[this._name] = value;
 			this._fireFieldChangedEvents(record);
 
 		}
@@ -16272,11 +16269,11 @@ Lava.define(
 	 * @param module
 	 * @param name
 	 * @param {_cCollectionField} config
-	 * @param module_storages
+	 * @param module_storage
 	 */
-	init: function(module, name, config, module_storages) {
+	init: function(module, name, config, module_storage) {
 
-		this.Abstract$init(module, name, config, module_storages);
+		this.Abstract$init(module, name, config, module_storage);
 
 		if (Lava.schema.DEBUG && !config.record_field)
 			Lava.t("Missing corresponding Record field. Record fields are used by Collection fields.");
@@ -16285,7 +16282,7 @@ Lava.define(
 
 	},
 
-	onModuleFieldsCreated: function(default_storage) {
+	onModuleFieldsCreated: function(default_properties) {
 
 		this._target_module = (this._config.module == 'this') ? this._module : this._module.getApp().getModule(this._config.module);
 		this._target_record_field = this._target_module.getField(this._target_record_field_name);
@@ -16339,7 +16336,7 @@ Lava.define(
 
 	},
 
-	'import': function(record, storage, raw_properties) {
+	'import': function(record, properties, raw_properties) {
 
 		if (raw_properties[this._name]) {
 
@@ -16364,7 +16361,7 @@ Lava.define(
 
 	},
 
-	getValue: function(record, storage) {
+	getValue: function(record, properties) {
 
 		var guid = record.guid,
 			collection;
@@ -16432,10 +16429,10 @@ Lava.define(
 	/**
 	 * Get count of items in record's collection of this field
 	 * @param {Lava.data.RecordAbstract} record
-	 * @param {Object} storage
+	 * @param {Object} properties
 	 * @returns {Number}
 	 */
-	getCount: function(record, storage) {
+	getCount: function(record, properties) {
 
 		return this._target_record_field.getCollectionCount(record);
 
@@ -16495,15 +16492,15 @@ Lava.define(
 
 	Extends: 'Lava.data.field.Basic',
 
-	Shared: '_shared',
-
-	_shared: {
-		valid_value_regex: /^(\-|\+)?([1-9]\d*|0)$/
-	},
+	/**
+	 * Numbers, consisting of digits and optionally a sign
+	 * @type {RegExp}
+	 */
+	VALID_VALUE_REGEX: /^(\-|\+)?([1-9]\d*|0)$/,
 
 	isValidValue: function(value) {
 
-		return (value === null && this._is_nullable) || (typeof(value) == 'number' && this._shared.valid_value_regex.test(value));
+		return (value === null && this._is_nullable) || (typeof(value) == 'number' && this.VALID_VALUE_REGEX.test(value));
 
 	},
 
@@ -16517,7 +16514,7 @@ Lava.define(
 
 				reason = "Value is not a number";
 
-			} else if (this._shared.valid_value_regex.test(value)) {
+			} else if (this.VALID_VALUE_REGEX.test(value)) {
 
 				reason = "Value is not an integer";
 
@@ -16544,35 +16541,35 @@ Lava.define(
 
 	Extends: 'Lava.data.field.Abstract',
 
-	Shared: '_shared',
-
-	_shared: {
-		valid_value_regex: /^[1-9]\d*$/
-	},
+	/**
+	 * Numbers, consisting of digits, not zero
+	 * @type {RegExp}
+	 */
+	VALID_VALUE_REGEX: /^[1-9]\d*$/,
 
 	/**
 	 * ID may be null for new records, which are not saved into database yet
 	 */
 	_is_nullable: true,
 
-	init: function(module, name, config, module_storages) {
+	init: function(module, name, config, module_storage) {
 
 		if (Lava.schema.DEBUG && (('is_nullable' in config) || ('default' in config)))
 			Lava.t("Standard ID field can not be configured as nullable or have a default value");
 
-		this.Abstract$init(module, name, config, module_storages);
+		this.Abstract$init(module, name, config, module_storage);
 
 	},
 
-	onModuleFieldsCreated: function(default_storage) {
+	onModuleFieldsCreated: function(default_properties) {
 
-		default_storage[this._name] = null;
+		default_properties[this._name] = null;
 
 	},
 
 	isValidValue: function(value) {
 
-		return (value === null && this._is_nullable) || (typeof(value) == 'number' && this._shared.valid_value_regex.test(value));
+		return (value === null && this._is_nullable) || (typeof(value) == 'number' && this.VALID_VALUE_REGEX.test(value));
 
 	},
 
@@ -16586,7 +16583,7 @@ Lava.define(
 
 				reason = "Value is not a number";
 
-			} else if (this._shared.valid_value_regex.test(value)) {
+			} else if (this.VALID_VALUE_REGEX.test(value)) {
 
 				reason = "Valid values for ID field are positive integers";
 
@@ -16598,11 +16595,11 @@ Lava.define(
 
 	},
 
-	'import': function(record, storage, raw_properties) {
+	'import': function(record, properties, raw_properties) {
 
 		if (this._name in raw_properties) {
 
-			storage[this._name] = this._getImportValue(storage, raw_properties);
+			properties[this._name] = this._getImportValue(properties, raw_properties);
 
 		} else {
 
@@ -16614,13 +16611,13 @@ Lava.define(
 
 	'export': function(record, destination_object) {
 
-		destination_object[this._name] = this._storages_by_guid[record.guid][this._name];
+		destination_object[this._name] = this._properties_by_guid[record.guid][this._name];
 
 	},
 
-	getValue: function(record, storage) {
+	getValue: function(record, properties) {
 
-		return storage[this._name];
+		return properties[this._name];
 
 	},
 
@@ -16666,17 +16663,17 @@ Lava.define(
 	 */
 	_default: 0,
 
-	initNewRecord: function(record, storage) {
+	initNewRecord: function(record, properties) {
 
-		this._registerByForeignKey(record, storage[this._name]);
-		this.Basic$initNewRecord(record, storage);
+		this._registerByForeignKey(record, properties[this._name]);
+		this.Basic$initNewRecord(record, properties);
 
 	},
 
-	'import': function(record, storage, raw_properties) {
+	'import': function(record, properties, raw_properties) {
 
-		this._registerByForeignKey(record, raw_properties[this._name] || storage[this._name]);// it may have a default
-		this.Basic$import(record, storage, raw_properties);
+		this._registerByForeignKey(record, raw_properties[this._name] || properties[this._name]);// it may have a default
+		this.Basic$import(record, properties, raw_properties);
 
 	},
 
@@ -16699,12 +16696,12 @@ Lava.define(
 
 	},
 
-	setValue: function(record, storage, new_foreign_key) {
+	setValue: function(record, properties, new_foreign_key) {
 
-		Firestorm.Array.exclude(this._collections_by_foreign_id[storage[this._name]], record);
+		Firestorm.Array.exclude(this._collections_by_foreign_id[properties[this._name]], record);
 		this._registerByForeignKey(record, new_foreign_key);
 
-		this.Basic$setValue(record, storage, new_foreign_key);
+		this.Basic$setValue(record, properties, new_foreign_key);
 
 	},
 
@@ -16819,16 +16816,16 @@ Lava.define(
 	 * @param module
 	 * @param name
 	 * @param {_cRecordField} config
-	 * @param module_storages
+	 * @param module_storage
 	 */
-	init: function(module, name, config, module_storages) {
+	init: function(module, name, config, module_storage) {
 
-		this.Abstract$init(module, name, config, module_storages);
+		this.Abstract$init(module, name, config, module_storage);
 		this._referenced_module = (config.module == 'this') ? module : module.getApp().getModule(config.module);
 
 	},
 
-	onModuleFieldsCreated: function(default_storage) {
+	onModuleFieldsCreated: function(default_properties) {
 
 		if (this._config.foreign_key_field) {
 
@@ -16845,7 +16842,7 @@ Lava.define(
 		}
 
 		// this field stores the referenced record
-		default_storage[this._name] = null;
+		default_properties[this._name] = null;
 
 	},
 
@@ -16874,7 +16871,7 @@ Lava.define(
 			// Now, as the foreign record is loaded - the field can be updated.
 			for (local_count = local_records.length, local_index = 0; local_index < local_count; local_index++) {
 				local_record = local_records[local_index];
-				this._storages_by_guid[local_record.guid][this._name] = records[i];
+				this._properties_by_guid[local_record.guid][this._name] = records[i];
 				this._fireFieldChangedEvents(local_record);
 			}
 
@@ -16932,22 +16929,22 @@ Lava.define(
 	_onForeignKeyChanged: function(foreign_key_field, event_args) {
 
 		var record = event_args.record, // record belongs to this module
-			storage = this._storages_by_guid[record.guid];
+			properties = this._properties_by_guid[record.guid];
 
-		if (storage[this._name] != null) {
+		if (properties[this._name] != null) {
 
 			// remove old record from collection
-			this._unregisterRecord(record, storage[this._name]);
+			this._unregisterRecord(record, properties[this._name]);
 
 		}
 
-		if (storage[this._foreign_key_field_name]) {
+		if (properties[this._foreign_key_field_name]) {
 
-			this._registerByReferencedId(record, storage, storage[this._foreign_key_field_name]);
+			this._registerByReferencedId(record, properties, properties[this._foreign_key_field_name]);
 
 		} else {
 
-			storage[this._name] = null;
+			properties[this._name] = null;
 
 		}
 
@@ -16988,26 +16985,26 @@ Lava.define(
 
 	},
 
-	initNewRecord: function(record, storage) {
+	initNewRecord: function(record, properties) {
 
-		if (this._foreign_key_field && storage[this._foreign_key_field_name]) {
+		if (this._foreign_key_field && properties[this._foreign_key_field_name]) {
 
-			this._registerByReferencedId(record, storage, storage[this._foreign_key_field_name]);
+			this._registerByReferencedId(record, properties, properties[this._foreign_key_field_name]);
 
 		}
 
 	},
 
-	'import': function(record, storage, raw_properties) {
+	'import': function(record, properties, raw_properties) {
 
 		var foreign_id;
 
 		if (this._foreign_key_field) {
 
 			// if foreign id is in import - then it will replace the default value (if foreign kay has default)
-			foreign_id = raw_properties[this._foreign_key_field_name] || storage[this._foreign_key_field_name];
+			foreign_id = raw_properties[this._foreign_key_field_name] || properties[this._foreign_key_field_name];
 			if (foreign_id) {
-				this._registerByReferencedId(record, storage, foreign_id);
+				this._registerByReferencedId(record, properties, foreign_id);
 			}
 
 		}
@@ -17017,16 +17014,16 @@ Lava.define(
 	/**
 	 * Update value of this field in local `record` and add the record to field's internal collections
 	 * @param {Lava.data.RecordAbstract} record The local record
-	 * @param {Object} storage The properties of local record
+	 * @param {Object} properties The properties of local record
 	 * @param {string} referenced_record_id The id of foreign record, which it belongs to
 	 */
-	_registerByReferencedId: function(record, storage, referenced_record_id) {
+	_registerByReferencedId: function(record, properties, referenced_record_id) {
 
-		storage[this._name] = this._referenced_module.getRecordById(referenced_record_id) || null;
+		properties[this._name] = this._referenced_module.getRecordById(referenced_record_id) || null;
 
-		if (storage[this._name]) {
+		if (properties[this._name]) {
 
-			this._registerRecord(record, storage[this._name]);
+			this._registerRecord(record, properties[this._name]);
 
 		}
 
@@ -17036,25 +17033,25 @@ Lava.define(
 
 	},
 
-	getValue: function(record, storage) {
+	getValue: function(record, properties) {
 
-		return storage[this._name];
+		return properties[this._name];
 
 	},
 
-	setValue: function(record, storage, new_ref_record) {
+	setValue: function(record, properties, new_ref_record) {
 
 		if (!this.isValidValue(new_ref_record))
 			Lava.t("Field/Record: assigned value is not valid. Reason: " + this.getInvalidReason(new_ref_record));
 
-		if (storage[this._name] != null) {
+		if (properties[this._name] != null) {
 
 			// remove from the old record's collection
-			this._unregisterRecord(record, storage[this._name]);
+			this._unregisterRecord(record, properties[this._name]);
 
 		}
 
-		storage[this._name] = new_ref_record;
+		properties[this._name] = new_ref_record;
 		if (new_ref_record != null) {
 
 			this._registerRecord(record, new_ref_record)
@@ -17169,8 +17166,8 @@ Lava.define(
 	 */
 	_getComparisonValue: function(record) {
 
-		if (Lava.schema.DEBUG && !(record.guid in this._storages_by_guid)) Lava.t("isLess: record does not belong to this module");
-		var ref_record_a = this._storages_by_guid[record.guid][this._name];
+		if (Lava.schema.DEBUG && !(record.guid in this._properties_by_guid)) Lava.t("isLess: record does not belong to this module");
+		var ref_record_a = this._properties_by_guid[record.guid][this._name];
 		// must return undefined, cause comparison against nulls behaves differently
 		return ref_record_a ? ref_record_a.get('id') : void 0;
 
@@ -17269,10 +17266,10 @@ Lava.define(
 	/**
 	 * Get record's `guid` property
 	 * @param record
-	 * @param storage
+	 * @param properties
 	 * @returns {_tGUID}
 	 */
-	getValue: function(record, storage) {
+	getValue: function(record, properties) {
 
 		return record.guid;
 
@@ -17281,7 +17278,7 @@ Lava.define(
 	/**
 	 * Throws an error
 	 */
-	setValue: function(record, storage, value) {
+	setValue: function(record, properties, value) {
 
 		Lava.t('Guid field is read only');
 
@@ -17325,19 +17322,19 @@ Lava.define(
 	 * Record's properties by their global unique identifiers
 	 * @type {Object.<string, Lava.data.RecordAbstract>}
 	 */
-	_storages_by_guid: {},
+	_properties_by_guid: {},
 
 	/**
-	 * Create field instances and return the default record storage object
+	 * Create field instances and return the default record properties object
 	 * @param {(_cModule|_cMetaStorage)} config
-	 * @returns {Object} Default record storage object with initial values for each field
+	 * @returns {Object} Default record properties object with initial values for each field
 	 */
 	_initFields: function(config) {
 
 		var field_name,
 			type,
 			constructor,
-			default_storage = {};
+			default_properties = {};
 
 		for (field_name in config.fields) {
 
@@ -17347,26 +17344,26 @@ Lava.define(
 				this,
 				field_name,
 				config.fields[field_name],
-				this._storages_by_guid
+				this._properties_by_guid
 			);
 
 		}
 
 		for (field_name in this._fields) {
 
-			this._fields[field_name].onModuleFieldsCreated(default_storage);
+			this._fields[field_name].onModuleFieldsCreated(default_properties);
 
 		}
 
-		return default_storage;
+		return default_properties;
 
 	},
 
 	/**
-	 * Returns an object with record's initial properties. This function is autogenerated in constructor
+	 * Returns an object with record's initial properties. This function is generated in constructor
 	 * @returns {Object}
 	 */
-	_createEmptyRecordStorage: function() {
+	_createRecordProperties: function() {
 
 		return {};
 
@@ -17393,7 +17390,7 @@ Lava.define(
 
 		}
 
-		this._records = this._records_by_guid = this._storages_by_guid = this._fields = null;
+		this._records = this._records_by_guid = this._properties_by_guid = this._fields = null;
 
 	}
 
@@ -17455,7 +17452,7 @@ Lava.define(
 	_has_id: false,
 
 	/**
-	 * Create a Module instance, init fields, generate the method that returns initial record storage
+	 * Create a Module instance, init fields, generate the method that returns initial record properties
 	 * @param {Lava.system.App} lava_app Application instance
 	 * @param {_cModule} config
 	 * @param {string} name Module's name
@@ -17466,15 +17463,15 @@ Lava.define(
 		this._config = config;
 		this._name = name;
 
-		var default_storage = this._initFields(config);
+		var default_properties = this._initFields(config);
 
 		this._record_constructor = Lava.ClassManager.getConstructor(
 			config.record_class || Lava.schema.data.DEFAULT_RECORD_CLASS,
 			'Lava.data'
 		);
 
-		this._createEmptyRecordStorage = new Function(
-			"return " + Lava.Serializer.serialize(default_storage)
+		this._createRecordProperties = new Function(
+			"return " + Lava.Serializer.serialize(default_properties)
 		);
 
 		if ('id' in this._fields) {
@@ -17610,18 +17607,18 @@ Lava.define(
 	 */
 	_createRecordInstance: function(raw_properties) {
 
-		var storage = this._createEmptyRecordStorage(),
-			record = new this._record_constructor(this, this._fields, storage, raw_properties);
+		var properties = this._createRecordProperties(),
+			record = new this._record_constructor(this, this._fields, properties, raw_properties);
 
-		if (storage.id) {
+		if (properties.id) {
 
-			if (storage.id in this._records_by_id) Lava.t("Duplicate record id in module " + this._name);
-			this._records_by_id[storage.id] = record;
+			if (properties.id in this._records_by_id) Lava.t("Duplicate record id in module " + this._name);
+			this._records_by_id[properties.id] = record;
 
 		}
 
 		this._records.push(record);
-		this._storages_by_guid[record.guid] = storage;
+		this._properties_by_guid[record.guid] = properties;
 		this._records_by_guid[record.guid] = record;
 		return record;
 
@@ -17726,14 +17723,14 @@ Lava.define(
 	 * Create record instance
 	 * @param {Lava.data.ModuleAbstract} module Records module
 	 * @param {Object.<string, Lava.data.field.Abstract>} fields Object with module's fields
-	 * @param {Object} properties_storage_ref Reference to an object with record's properties
+	 * @param {Object} properties_ref Reference to an object with record's properties
 	 */
-	init: function(module, fields, properties_storage_ref) {
+	init: function(module, fields, properties_ref) {
 
 		this.guid = Lava.guid++;
 		this._module = module;
 		this._fields = fields;
-		this._properties = properties_storage_ref;
+		this._properties = properties_ref;
 
 	},
 
@@ -17796,12 +17793,12 @@ Lava.define(
 	/**
 	 * @param module
 	 * @param fields
-	 * @param properties_storage_ref
+	 * @param properties_ref
 	 * @param {Object} raw_properties Object with record field values from server
 	 */
-	init: function(module, fields, properties_storage_ref, raw_properties) {
+	init: function(module, fields, properties_ref, raw_properties) {
 
-		this.RecordAbstract$init(module, fields, properties_storage_ref);
+		this.RecordAbstract$init(module, fields, properties_ref);
 
 		var field;
 
@@ -17809,7 +17806,7 @@ Lava.define(
 
 			for (field in fields) {
 
-				fields[field]['import'](this, properties_storage_ref, raw_properties);
+				fields[field]['import'](this, properties_ref, raw_properties);
 
 			}
 
@@ -17817,7 +17814,7 @@ Lava.define(
 
 			for (field in fields) {
 
-				fields[field].initNewRecord(this, properties_storage_ref);
+				fields[field].initNewRecord(this, properties_ref);
 
 			}
 
@@ -17845,13 +17842,13 @@ Lava.define(
 	 */
 	isMetaRecord: true,
 
-	init: function(meta_storage, fields, properties_storage_ref) {
+	init: function(meta_storage, fields, properties_ref) {
 
-		this.RecordAbstract$init(meta_storage, fields, properties_storage_ref);
+		this.RecordAbstract$init(meta_storage, fields, properties_ref);
 
 		for (var field in fields) {
 
-			fields[field].initNewRecord(this, properties_storage_ref);
+			fields[field].initNewRecord(this, properties_ref);
 
 		}
 
@@ -17882,7 +17879,7 @@ Lava.define(
 
 		this._config = config;
 
-		var default_storage = this._initFields(config),
+		var default_properties = this._initFields(config),
 			field;
 
 		if (Lava.schema.DEBUG) {
@@ -17892,8 +17889,8 @@ Lava.define(
 			}
 		}
 
-		this._createEmptyRecordStorage = new Function(
-			"return " + Lava.Serializer.serialize(default_storage)
+		this._createRecordProperties = new Function(
+			"return " + Lava.Serializer.serialize(default_properties)
 		);
 
 	},
@@ -17931,12 +17928,12 @@ Lava.define(
 	 */
 	_createRecordInstance: function() {
 
-		var storage = this._createEmptyRecordStorage(),
+		var properties = this._createRecordProperties(),
 			constructor = Lava.ClassManager.getConstructor('MetaRecord', 'Lava.data'),
-			record = new constructor(this, this._fields, storage);
+			record = new constructor(this, this._fields, properties);
 
 		this._records.push(record);
-		this._storages_by_guid[record.guid] = storage;
+		this._properties_by_guid[record.guid] = properties;
 		this._records_by_guid[record.guid] = record;
 		return record;
 
@@ -18848,6 +18845,16 @@ Lava.define(
  * @event Lava.scope.Foreach#new_enumerable
  */
 
+/**
+ * Scope has refreshed it's value from argument. May be used to sort and filter data in Foreach views.
+ * @event Lava.scope.Foreach#after_refresh
+ * @type {Object}
+ * @property {Lava.system.Enumerable} value Scope's own Enumerable instance, which is served for the {@link Lava.view.Foreach} view.
+ *  When scope's argument has returned an Enumerable instance, and "create_own_enumerable" option is not set
+ *  - this will be the Enumerable instance, which was returned from Argument.
+ * @property {*} argument_value Argument result (may be an object, Enumerable, array or Properties)
+ */
+
 Lava.define(
 'Lava.scope.Foreach',
 /**
@@ -18932,11 +18939,6 @@ Lava.define(
 	 * @type {boolean}
 	 */
 	_create_own_enumerable: false,
-	/**
-	 * When local Enumerable is refreshed from argument, scope instance may call it's widget to apply sorting and filtering
-	 * @type {string}
-	 */
-	_after_refresh_callback: null,
 
 	/**
 	 * Create an instance of the Foreach scope. Refresh value
@@ -18961,7 +18963,6 @@ Lava.define(
 
 		if (options) {
 			this._create_own_enumerable = options['create_own_enumerable'] || false;
-			this._after_refresh_callback = options['after_refresh_callback'] || null;
 		}
 
 		this._argument_waits_refresh_listener = this._argument.on('waits_refresh', this._onDependencyWaitsRefresh, this);
@@ -19036,9 +19037,10 @@ Lava.define(
 
 		}
 
-		if (this._after_refresh_callback) {
-			this._widget[this._after_refresh_callback](this._value, argument_value, this._view);
-		}
+		this._fire('after_refresh', {
+			value: this._value,
+			argument_value: argument_value
+		});
 
 	},
 
@@ -21136,10 +21138,10 @@ Lava.define(
 });
 
 Lava.define(
-'Lava.view.refresher.Default',
+'Lava.view.refresher.Standard',
 /**
- * Base class for animation support in views. Default refresher does not animate templates, but inserts and removes them separately
- * @lends Lava.view.refresher.Default#
+ * Base class for animation support in views. Standard refresher does not animate templates, but inserts and removes them separately
+ * @lends Lava.view.refresher.Standard#
  * @extends Lava.mixin.Observable
  */
 {
@@ -21533,11 +21535,11 @@ Lava.define(
 /**
  * Base class for refreshers, which support animation
  * @lends Lava.view.refresher.Animated#
- * @extends Lava.view.refresher.Default
+ * @extends Lava.view.refresher.Standard
  */
 {
 
-	Extends: 'Lava.view.refresher.Default',
+	Extends: 'Lava.view.refresher.Standard',
 
 	_is_animation_enabled: true,
 
@@ -21549,7 +21551,7 @@ Lava.define(
 
 		} else {
 
-			this.Default$refresh(current_templates);
+			this.Standard$refresh(current_templates);
 
 		}
 
@@ -21593,7 +21595,7 @@ Lava.define(
 
 		this.stopAnimations();
 
-		this.Default$onRender(current_templates);
+		this.Standard$onRender(current_templates);
 
 	},
 
@@ -21727,7 +21729,7 @@ Lava.define(
 	depth: 0,
 
 	/**
-	 * View's index in {@link Lava.system.Template#_contents|_contents} array of parent template
+	 * View's index in {@link Lava.system.Template#_content|_content} array of parent template
 	 * @type {number}
 	 * @readonly
 	 */
@@ -22096,9 +22098,9 @@ Lava.define(
 	/**
 	 * Render the inner hierarchy
 	 */
-	_renderContents: function() {
+	_renderContent: function() {
 
-		Lava.t("_renderContents must be overridden in inherited classes");
+		Lava.t("_renderContent must be overridden in inherited classes");
 
 	},
 
@@ -22110,7 +22112,7 @@ Lava.define(
 
 		if (this._is_sleeping) this._wakeup();
 
-		var buffer = this._renderContents(),
+		var buffer = this._renderContent(),
 			result;
 
 		if (this._container) {
@@ -22154,7 +22156,7 @@ Lava.define(
 	 */
 	_refresh: function() {
 
-		this._container.setHTML(this._renderContents());
+		this._container.setHTML(this._renderContent());
 		this._broadcastToChildren('broadcastInDOM');
 
 	},
@@ -22497,7 +22499,7 @@ Lava.define(
 	 * The content of the view
 	 * @type {Lava.system.Template}
 	 */
-	_contents: null,
+	_content: null,
 
 	_postInit: function() {
 
@@ -22522,11 +22524,11 @@ Lava.define(
 			// Check is done to speed up the rendering process.
 			result = (this._container.isElementContainer && this._container.isVoid())
 				? this._container.renderVoid()
-				: this._container.wrap(this._renderContents());
+				: this._container.wrap(this._renderContent());
 
 		} else {
 
-			result = this._renderContents();
+			result = this._renderContent();
 
 		}
 
@@ -22537,15 +22539,15 @@ Lava.define(
 	_refresh: function() {
 
 		if (!this._container.isVoid()) {
-			this._container.setHTML(this._renderContents());
+			this._container.setHTML(this._renderContent());
 			this._broadcastToChildren('broadcastInDOM');
 		}
 
 	},
 
-	_renderContents: function() {
+	_renderContent: function() {
 
-		return this._getContents().render();
+		return this._getContent().render();
 
 	},
 
@@ -22554,35 +22556,35 @@ Lava.define(
 	 */
 	_broadcastToChildren: function(function_name) {
 
-		if (this._contents != null) {
+		if (this._content != null) {
 
-			this._contents[function_name]();
+			this._content[function_name]();
 
 		}
 
 	},
 
 	/**
-	 * Get `_contents`. Create, if needed
+	 * Get `_content`. Create, if needed
 	 * @returns {Lava.system.Template}
 	 */
-	_getContents: function() {
+	_getContent: function() {
 
-		if (this._contents == null) {
+		if (this._content == null) {
 
-			this._contents = new Lava.system.Template(this._config.template || [], this._widget, this)
+			this._content = new Lava.system.Template(this._config.template || [], this._widget, this)
 
 		}
 
-		return this._contents;
+		return this._content;
 
 	},
 
 	destroy: function() {
 
-		if (this._contents) {
-			this._contents.destroy();
-			this._contents = null;
+		if (this._content) {
+			this._content.destroy();
+			this._content = null;
 		}
 
 		this.Abstract$destroy();
@@ -22638,7 +22640,7 @@ Lava.define(
 
 	},
 
-	_renderContents: function() {
+	_renderContent: function() {
 
 		if (Lava.schema.DEBUG && this._argument.isWaitingRefresh()) Lava.t();
 
@@ -22756,7 +22758,7 @@ Lava.define(
 
 	/**
 	 * Refreshers perform insertion, removal and animation of items
-	 * @type {Lava.view.refresher.Default}
+	 * @type {Lava.view.refresher.Standard}
 	 */
 	_refresher: null,
 
@@ -22773,7 +22775,7 @@ Lava.define(
 
 			if (Lava.schema.DEBUG && !this._container) Lava.t('View/Foreach: refresher needs container to work');
 			var constructor = Lava.ClassManager.getConstructor(this._config.refresher['class'], 'Lava.view.refresher');
-			this._refresher = /** @type {Lava.view.refresher.Default} */ new constructor(
+			this._refresher = /** @type {Lava.view.refresher.Standard} */ new constructor(
 				this._config.refresher,
 				this,
 				this._container
@@ -22789,7 +22791,7 @@ Lava.define(
 
 	/**
 	 * Get `_refresher`
-	 * @returns {Lava.view.refresher.Default}
+	 * @returns {Lava.view.refresher.Standard}
 	 */
 	getRefresher: function() {
 
@@ -22950,7 +22952,7 @@ Lava.define(
 
 	},
 
-	_renderContents: function() {
+	_renderContent: function() {
 
 		if (Lava.schema.DEBUG && (this._argument.isWaitingRefresh() || this._foreach_scope.isWaitingRefresh())) Lava.t();
 
@@ -22977,7 +22979,7 @@ Lava.define(
 
 		} else {
 
-			this._container.setHTML(this._renderContents());
+			this._container.setHTML(this._renderContent());
 			this._broadcastToChildren('broadcastInDOM');
 
 		}
@@ -23013,6 +23015,17 @@ Lava.define(
 		this._refreshChildren();
 
 		this.Abstract$_wakeup();
+
+	},
+
+	/**
+	 * Get `_foreach_scope`.
+	 * The only purpose of this method is to attach a listener to scope's {@link Lava.scope.Foreach#event:after_refresh} event
+	 * @returns {Lava.scope.Foreach}
+	 */
+	getScope: function() {
+
+		return this._foreach_scope;
 
 	},
 
@@ -23077,16 +23090,16 @@ Lava.define(
 	 * Content of each if/elseif section
 	 * @type {Array.<Lava.system.Template>}
 	 */
-	_contents: [],
+	_content: [],
 	/**
 	 * Template to display when all if/elseif conditions are <kw>false</kw>
 	 * @type {Lava.system.Template}
 	 */
-	_else_contents: null,
+	_else_content: null,
 
 	/**
 	 * Refreshers animates insertion and removal of templates
-	 * @type {(Lava.view.refresher.Default)}
+	 * @type {(Lava.view.refresher.Standard)}
 	 */
 	_refresher: null,
 	/**
@@ -23127,7 +23140,7 @@ Lava.define(
 			// otherwise, it will not be able to insert the template
 			if (Lava.schema.DEBUG && !this._container) Lava.t('View/If: refresher needs container to work');
 			constructor = Lava.ClassManager.getConstructor(this._config.refresher['class'], 'Lava.view.refresher');
-			this._refresher = /** @type {Lava.view.refresher.Default} */ new constructor(
+			this._refresher = /** @type {Lava.view.refresher.Standard} */ new constructor(
 				this._config.refresher,
 				this, this._container
 			);
@@ -23140,7 +23153,7 @@ Lava.define(
 
 	/**
 	 * Get `_refresher`
-	 * @returns {Lava.view.refresher.Default}
+	 * @returns {Lava.view.refresher.Standard}
 	 */
 	getRefresher: function() {
 
@@ -23181,15 +23194,15 @@ Lava.define(
 
 		if (this._active_argument_index != null) {
 
-			this._createContents(this._active_argument_index);
+			this._createContent(this._active_argument_index);
 
-			result = this._contents[this._active_argument_index];
+			result = this._content[this._active_argument_index];
 
 		} else if ('else_template' in this._config) {
 
-			this._createElseContents();
+			this._createElseContent();
 
-			result = this._else_contents;
+			result = this._else_content;
 
 		}
 
@@ -23234,7 +23247,7 @@ Lava.define(
 	 * Render the currently active if/elseif section
 	 * @returns {string}
 	 */
-	_renderContents: function() {
+	_renderContent: function() {
 
 		if (Lava.schema.DEBUG && this._active_argument_index != null && this._arguments[this._active_argument_index].isWaitingRefresh()) Lava.t();
 
@@ -23302,15 +23315,15 @@ Lava.define(
 	 * Create the template that corresponds to a if/elseif section
 	 * @param {number} index
 	 */
-	_createContents: function(index) {
+	_createContent: function(index) {
 
-		if (typeof(this._contents[index]) == 'undefined') {
+		if (typeof(this._content[index]) == 'undefined') {
 
-			this._contents[index] = (index == 0)
+			this._content[index] = (index == 0)
 				? new Lava.system.Template(this._config.template || [], this._widget, this)
 				: new Lava.system.Template(this._config.elseif_templates[index - 1] || [], this._widget, this);
 
-			this._contents[index].batchSetProperty('if_index', index);
+			this._content[index].batchSetProperty('if_index', index);
 
 		}
 
@@ -23319,11 +23332,11 @@ Lava.define(
 	/**
 	 * Create the 'else' template
 	 */
-	_createElseContents: function() {
+	_createElseContent: function() {
 
-		if (this._else_contents == null) {
+		if (this._else_content == null) {
 
-			this._else_contents = new Lava.system.Template(this._config.else_template || [], this._widget, this);
+			this._else_content = new Lava.system.Template(this._config.else_template || [], this._widget, this);
 
 		}
 
@@ -23337,7 +23350,7 @@ Lava.define(
 
 		} else {
 
-			this._container.setHTML(this._renderContents());
+			this._container.setHTML(this._renderContent());
 			this._broadcastToChildren('broadcastInDOM');
 
 		}
@@ -23353,14 +23366,14 @@ Lava.define(
 		for (; i < this._count_arguments; i++) {
 
 			this._arguments[i].destroy();
-			this._contents[i] && this._contents[i].destroy();
+			this._content[i] && this._content[i].destroy();
 
 		}
 
-		this._else_contents && this._else_contents.destroy();
+		this._else_content && this._else_content.destroy();
 
 		// to speed up garbage collection and break this object forever (destroyed objects must not be used!)
-		this._refresher = this._contents = this._else_contents = this._arguments = this._active_template
+		this._refresher = this._content = this._else_content = this._arguments = this._active_template
 			= this._argument_changed_listeners = null;
 
 		this.Abstract$destroy();
@@ -23654,7 +23667,7 @@ Lava.define(
 		if (Lava.schema.DEBUG && !this._container.isElementContainer) Lava.t("injectIntoExistingElement expects an element containers");
 
 		this._container.captureExistingElement(element);
-		this._container.setHTML(this._renderContents());
+		this._container.setHTML(this._renderContent());
 
 		// rewritten broadcastInDOM - without this._container.informInDOM()
 		this._is_inDOM = true;
@@ -24317,7 +24330,7 @@ Lava.define(
 
 	name: 'textarea',
 
-	_renderContents: function() {
+	_renderContent: function() {
 
 		return Firestorm.String.escape(this._properties.value, Firestorm.String.TEXTAREA_ESCAPE_REGEX);
 
@@ -26035,7 +26048,7 @@ Lava.define(
 
 	/**
 	 * Refresher of the panel's body
-	 * @type {Lava.view.refresher.Default}
+	 * @type {Lava.view.refresher.Standard}
 	 */
 	_content_refresher: null,
 
@@ -26688,7 +26701,7 @@ Lava.define(
 	 * @param {string} locale_name
 	 * @returns {{year: number, index: number, weeks: Array}}
 	 */
-	_renderMonth: function(year, month, locale_name) {
+	_renderMonthData: function(year, month, locale_name) {
 
 		var culture_offset = Lava.locales[locale_name].first_day_offset,
 			first_day_in_sequence = new Date(Date.UTC(year, month)),
@@ -26704,7 +26717,7 @@ Lava.define(
 		return {
 			year: year,
 			index: month,
-			weeks: this._renderMonthWeeks(first_day_in_sequence)
+			weeks: this._renderMonthWeeksData(first_day_in_sequence)
 		}
 
 	},
@@ -26713,7 +26726,7 @@ Lava.define(
 	 * Render 6 rows of 7 days
 	 * @param {Date} start_date Date of the first day in the first row (day of week always starts from zero)
 	 */
-	_renderMonthWeeks: function(start_date) {
+	_renderMonthWeeksData: function(start_date) {
 
 		var year = start_date.getUTCFullYear(),
 			month = start_date.getUTCMonth(),
@@ -26725,7 +26738,7 @@ Lava.define(
 			result = [],
 			week = [];
 
-		week.push(this._renderDay(year, month, day, day_of_week, milliseconds));
+		week.push(this._renderDayData(year, month, day, day_of_week, milliseconds));
 
 		do {
 
@@ -26749,7 +26762,7 @@ Lava.define(
 				week = [];
 			}
 
-			week.push(this._renderDay(year, month, day, day_of_week, milliseconds));
+			week.push(this._renderDayData(year, month, day, day_of_week, milliseconds));
 
 		} while (i < 42); // 7*6
 
@@ -26766,7 +26779,7 @@ Lava.define(
 	 * @param milliseconds Absolute time of the day
 	 * @returns {{year: number, month: number, day: number, day_of_week: number, milliseconds: number, is_today: boolean}}
 	 */
-	_renderDay: function(year, month, day, day_of_week, milliseconds) {
+	_renderDayData: function(year, month, day, day_of_week, milliseconds) {
 		return {
 			year: year,
 			month: month,
@@ -26807,18 +26820,30 @@ Lava.define(
 		/** Culture-dependent list of week day descriptors */
 		_weekdays: null,
 		/** Displayed months for template */
-		_months: null,
+		_months_data: null,
 		/** Example: "May 2014" - displayed above the days_table */
 		_month_year_string: null,
 		/** Example: "24 May 2014" - displayed on the "today" link */
 		_today_string: null,
-		/** Start of selection, in milliseconds */
+		/**
+		 * Start of selection, in milliseconds
+		 * @type {number}
+		 */
 		_selection_start: 0,
-		/** End of selection, in milliseconds (by default, always equals to <wp>_selection_start</wp>) */
+		/**
+		 * End of selection, in milliseconds (by default, always equals to <wp>_selection_start</wp>)
+		 * @type {number}
+		 */
 		_selection_end: 0,
-		/** Current year, displayed in calendar */
+		/**
+		 * Current year, displayed by calendar
+		 * @type {number}
+		 */
 		_displayed_year: null,
-		/** Current month of the displayed year */
+		/**
+		 * Current month of the displayed year
+		 * @type {number}
+		 */
 		_displayed_month: null,
 		/** Collection of template data, used to render month names */
 		_month_descriptors: null,
@@ -26902,7 +26927,7 @@ Lava.define(
 		var locale_object = Lava.locales[Lava.schema.LOCALE],
 			month_data = this._getMonthData(this._properties._displayed_year, this._properties._displayed_month);
 
-		this.set('_months', [month_data]);
+		this.set('_months_data', [month_data]);
 
 		// Formatting by hands, cause in future there may be added a possibility to set locale in options
 		this.set(
@@ -26923,7 +26948,7 @@ Lava.define(
 		var month_key = year + '' + month;
 
 		if (!(month_key in this._months_cache)) {
-			this._months_cache[month_key] = this._renderMonth(year, month, Lava.schema.LOCALE);
+			this._months_cache[month_key] = this._renderMonthData(year, month, Lava.schema.LOCALE);
 		}
 
 		return this._months_cache[month_key];
@@ -27238,7 +27263,7 @@ Lava.widgets = {
 			}
 		},
 		"class": "Lava.WidgetConfigExtensionGateway",
-		extender_type: "Default",
+		extender_type: "Standard",
 		is_extended: false
 	},
 	CheckBox: {
@@ -27355,7 +27380,7 @@ return (this._binds[0].getValue());
 		},
 		real_class: "input.CheckBox",
 		"class": "Lava.WidgetConfigExtensionGateway",
-		extender_type: "Default",
+		extender_type: "Standard",
 		is_extended: false
 	},
 	TextArea: {
@@ -27461,7 +27486,7 @@ return (this._binds[0].getValue());
 		default_events: ["input"],
 		real_class: "input.TextArea",
 		"class": "Lava.WidgetConfigExtensionGateway",
-		extender_type: "Default",
+		extender_type: "Standard",
 		is_extended: false
 	},
 	TextInput: {
@@ -27567,14 +27592,14 @@ return (this._binds[0].getValue());
 		default_events: ["input"],
 		real_class: "input.Text",
 		"class": "Lava.WidgetConfigExtensionGateway",
-		extender_type: "Default",
+		extender_type: "Standard",
 		is_extended: false
 	},
 	Numeric: {
 		"extends": "TextInput",
 		real_class: "input.Numeric",
 		"class": "Lava.WidgetConfigExtensionGateway",
-		extender_type: "Default",
+		extender_type: "Standard",
 		is_extended: false
 	},
 	Radio: {
@@ -27686,7 +27711,7 @@ return (this._binds[0].getValue());
 		},
 		real_class: "input.Radio",
 		"class": "Lava.WidgetConfigExtensionGateway",
-		extender_type: "Default",
+		extender_type: "Standard",
 		is_extended: false
 	},
 	SubmitInput: {
@@ -27769,7 +27794,7 @@ return (this._binds[0].getValue());
 		},
 		real_class: "input.Submit",
 		"class": "Lava.WidgetConfigExtensionGateway",
-		extender_type: "Default",
+		extender_type: "Standard",
 		is_extended: false
 	},
 	SubmitButton: {
@@ -27865,7 +27890,7 @@ return (this._binds[0].getValue());
 		},
 		real_class: "input.Submit",
 		"class": "Lava.WidgetConfigExtensionGateway",
-		extender_type: "Default",
+		extender_type: "Standard",
 		is_extended: false
 	},
 	SelectAbstract: {
@@ -28068,21 +28093,21 @@ return (this._binds[0].getValue());
 			]
 		},
 		"class": "Lava.WidgetConfigExtensionGateway",
-		extender_type: "Default",
+		extender_type: "Standard",
 		is_extended: false
 	},
 	Select: {
 		"extends": "SelectAbstract",
 		real_class: "input.Select",
 		"class": "Lava.WidgetConfigExtensionGateway",
-		extender_type: "Default",
+		extender_type: "Standard",
 		is_extended: false
 	},
 	MultipleSelect: {
 		"extends": "SelectAbstract",
 		real_class: "input.MultipleSelect",
 		"class": "Lava.WidgetConfigExtensionGateway",
-		extender_type: "Default",
+		extender_type: "Standard",
 		is_extended: false
 	},
 	Collapsible: {
@@ -28153,7 +28178,7 @@ return (this._binds[0].getValue());
 		},
 		real_class: "Collapsible",
 		"class": "Lava.widget.Collapsible",
-		extender_type: "Default",
+		extender_type: "Standard",
 		is_extended: true,
 		resources_cache: {
 			en: {
@@ -28170,7 +28195,7 @@ return (this._binds[0].getValue());
 	CollapsiblePanel: {
 		type: "widget",
 		"class": "Lava.widget.CollapsiblePanel",
-		extender_type: "Default",
+		extender_type: "Standard",
 		template: [
 			"\r\n\t\t\t",
 			{
@@ -28507,7 +28532,7 @@ return (this._binds[0].getValue());
 		},
 		real_class: "CollapsiblePanelExt",
 		"class": "Lava.WidgetConfigExtensionGateway",
-		extender_type: "Default",
+		extender_type: "Standard",
 		is_extended: false
 	},
 	Accordion: {
@@ -28540,7 +28565,7 @@ return (this._binds[0].getValue());
 					},
 					as: "panel",
 					refresher: {
-						"class": "Default",
+						"class": "Standard",
 						insertion_strategy: "sequential_elements"
 					},
 					template: [
@@ -28548,7 +28573,7 @@ return (this._binds[0].getValue());
 						{
 							type: "widget",
 							"class": "Lava.WidgetConfigExtensionGateway",
-							extender_type: "Default",
+							extender_type: "Standard",
 							"extends": "CollapsiblePanel",
 							assigns: {
 								is_expanded: {
@@ -28685,7 +28710,7 @@ return (this._binds[0].getValue());
 		},
 		real_class: "Accordion",
 		"class": "Lava.WidgetConfigExtensionGateway",
-		extender_type: "Default",
+		extender_type: "Standard",
 		is_extended: false
 	},
 	Tabs: {
@@ -28836,7 +28861,7 @@ return (this._binds[0].getValue());
 				},
 				as: "tab",
 				refresher: {
-					"class": "Default",
+					"class": "Standard",
 					insertion_strategy: "sequential_elements"
 				},
 				template: [
@@ -28955,13 +28980,13 @@ return (this._binds[0].getValue() ? 'active' : '');
 		},
 		real_class: "Tabs",
 		"class": "Lava.WidgetConfigExtensionGateway",
-		extender_type: "Default",
+		extender_type: "Standard",
 		is_extended: false
 	},
 	Tooltip: {
 		type: "widget",
 		"class": "Lava.WidgetConfigExtensionGateway",
-		extender_type: "Default",
+		extender_type: "Standard",
 		template: [
 			"\r\n\t\t\t",
 			{
@@ -29048,13 +29073,13 @@ return (this._binds[0].getValue() ? 'in' : 'hidden');
 		options: {target_class: "open"},
 		real_class: "DropDown",
 		"class": "Lava.WidgetConfigExtensionGateway",
-		extender_type: "Default",
+		extender_type: "Standard",
 		is_extended: false
 	},
 	Tree: {
 		type: "widget",
 		"class": "Lava.WidgetConfigExtensionGateway",
-		extender_type: "Default",
+		extender_type: "Standard",
 		template: [
 			"\r\n\t\t\t\r\n\t\t\t\r\n\t\t\t",
 			{
@@ -29394,7 +29419,7 @@ return (this._binds[0].getValue() ? 'lava-tree-title-expandable' : '');
 	Table: {
 		type: "widget",
 		"class": "Lava.WidgetConfigExtensionGateway",
-		extender_type: "Default",
+		extender_type: "Standard",
 		template: [
 			"\r\n\t\t\t",
 			{
@@ -29679,7 +29704,7 @@ return (this._callGlobalModifier("translateBoolean", [!! this._binds[0].getValue
 	Calendar: {
 		type: "widget",
 		"class": "Lava.WidgetConfigExtensionGateway",
-		extender_type: "Default",
+		extender_type: "Standard",
 		template: [
 			"\r\n\t\t\t",
 			{
@@ -29871,7 +29896,7 @@ return (this._binds[0].getValue() + '');
 						name: "_year_input"
 					}],
 					"class": "Lava.WidgetConfigExtensionGateway",
-					extender_type: "Default",
+					extender_type: "Standard",
 					resource_id: {
 						locator_type: "Name",
 						locator: "calendar",
@@ -29920,7 +29945,7 @@ return (this._binds[0].getValue());
 						binds: [{
 							locator_type: "Name",
 							locator: "calendar",
-							tail: ["_months"]
+							tail: ["_months_data"]
 						}]
 					},
 					as: "month",

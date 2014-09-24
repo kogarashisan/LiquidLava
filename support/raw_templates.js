@@ -162,7 +162,7 @@ _cRawBlock = {
 	 * Content of the "elseif" sections
 	 * @type {Array.<_tRawTemplate>}
 	 */
-	elseif_contents: [] // array of arrays
+	elseif_content: [] // array of arrays
 };
 
 _cRawExpression = {

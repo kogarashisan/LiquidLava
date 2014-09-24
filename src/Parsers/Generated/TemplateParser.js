@@ -156,7 +156,7 @@ case 11:
 			if ($$[$0-2].name != $$[$0]) Lava.t('End block ("' + $$[$0] + '") does not match the start block ("' + $$[$0-2].name + '") (3)');
 			if ('elseif_arguments' in $$[$0-1]) {
 				$$[$0-2].elseif_arguments = $$[$0-1].elseif_arguments;
-				$$[$0-2].elseif_contents = $$[$0-1].elseif_contents;
+				$$[$0-2].elseif_content = $$[$0-1].elseif_content;
 			}
 			if ('else_content' in $$[$0-1]) $$[$0-2].else_content = $$[$0-1].else_content;
 			this.$ = $$[$0-2];
@@ -167,7 +167,7 @@ case 12:
 			$$[$0-3].content = $$[$0-2];
 			if ('elseif_arguments' in $$[$0-1]) {
 				$$[$0-3].elseif_arguments = $$[$0-1].elseif_arguments;
-				$$[$0-3].elseif_contents = $$[$0-1].elseif_contents;
+				$$[$0-3].elseif_content = $$[$0-1].elseif_content;
 			}
 			if ('else_content' in $$[$0-1]) $$[$0-3].else_content = $$[$0-1].else_content;
 			this.$ = $$[$0-3];
@@ -308,27 +308,27 @@ case 34:
 break;
 case 35:
 			$$[$0-2].elseif_arguments.push($$[$0-1]);
-			$$[$0-2].elseif_contents.push($$[$0]);
+			$$[$0-2].elseif_content.push($$[$0]);
 			this.$ = $$[$0-2];
 		
 break;
 case 36:
 			$$[$0-1].elseif_arguments.push($$[$0]);
-			$$[$0-1].elseif_contents.push([]);
+			$$[$0-1].elseif_content.push([]);
 			this.$ = $$[$0-1];
 		
 break;
 case 37:
 			this.$ = {
 				elseif_arguments: [$$[$0-1]],
-				elseif_contents: [$$[$0]]
+				elseif_content: [$$[$0]]
 			};
 		
 break;
 case 38:
 			this.$ = {
 				elseif_arguments: [$$[$0]],
-				elseif_contents: [[]]
+				elseif_content: [[]]
 			};
 		
 break;

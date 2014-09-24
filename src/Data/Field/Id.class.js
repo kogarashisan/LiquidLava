@@ -12,35 +12,35 @@ Lava.define(
 
 	Extends: 'Lava.data.field.Abstract',
 
-	Shared: '_shared',
-
-	_shared: {
-		valid_value_regex: /^[1-9]\d*$/
-	},
+	/**
+	 * Numbers, consisting of digits, not zero
+	 * @type {RegExp}
+	 */
+	VALID_VALUE_REGEX: /^[1-9]\d*$/,
 
 	/**
 	 * ID may be null for new records, which are not saved into database yet
 	 */
 	_is_nullable: true,
 
-	init: function(module, name, config, module_storages) {
+	init: function(module, name, config, module_storage) {
 
 		if (Lava.schema.DEBUG && (('is_nullable' in config) || ('default' in config)))
 			Lava.t("Standard ID field can not be configured as nullable or have a default value");
 
-		this.Abstract$init(module, name, config, module_storages);
+		this.Abstract$init(module, name, config, module_storage);
 
 	},
 
-	onModuleFieldsCreated: function(default_storage) {
+	onModuleFieldsCreated: function(default_properties) {
 
-		default_storage[this._name] = null;
+		default_properties[this._name] = null;
 
 	},
 
 	isValidValue: function(value) {
 
-		return (value === null && this._is_nullable) || (typeof(value) == 'number' && this._shared.valid_value_regex.test(value));
+		return (value === null && this._is_nullable) || (typeof(value) == 'number' && this.VALID_VALUE_REGEX.test(value));
 
 	},
 
@@ -54,7 +54,7 @@ Lava.define(
 
 				reason = "Value is not a number";
 
-			} else if (this._shared.valid_value_regex.test(value)) {
+			} else if (this.VALID_VALUE_REGEX.test(value)) {
 
 				reason = "Valid values for ID field are positive integers";
 
@@ -66,11 +66,11 @@ Lava.define(
 
 	},
 
-	'import': function(record, storage, raw_properties) {
+	'import': function(record, properties, raw_properties) {
 
 		if (this._name in raw_properties) {
 
-			storage[this._name] = this._getImportValue(storage, raw_properties);
+			properties[this._name] = this._getImportValue(properties, raw_properties);
 
 		} else {
 
@@ -82,13 +82,13 @@ Lava.define(
 
 	'export': function(record, destination_object) {
 
-		destination_object[this._name] = this._storages_by_guid[record.guid][this._name];
+		destination_object[this._name] = this._properties_by_guid[record.guid][this._name];
 
 	},
 
-	getValue: function(record, storage) {
+	getValue: function(record, properties) {
 
-		return storage[this._name];
+		return properties[this._name];
 
 	},
 

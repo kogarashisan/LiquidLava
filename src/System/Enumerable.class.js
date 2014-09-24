@@ -809,7 +809,7 @@ Lava.define(
 	 */
 	sort: function(less, algorithm_name) {
 
-		this._sort(less, this._data_values, algorithm_name);
+		this._sort(less || Lava.DEFAULT_LESS, this._data_values, algorithm_name);
 
 	},
 
@@ -820,7 +820,7 @@ Lava.define(
 	 */
 	sortByNames: function(less, algorithm_name) {
 
-		this._sort(less, this._data_names, algorithm_name);
+		this._sort(less || Lava.DEFAULT_LESS, this._data_names, algorithm_name);
 
 	},
 

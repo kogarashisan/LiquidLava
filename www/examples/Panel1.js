@@ -15,7 +15,7 @@
 		{
 			type: "widget",
 			"class": "Lava.WidgetConfigExtensionGateway",
-			extender_type: "Default",
+			extender_type: "Standard",
 			"extends": "Example",
 			includes: {
 				content: [
@@ -67,7 +67,7 @@ return (this._binds[0].getValue() ? 'block' : 'none');
 						],
 						real_class: "PanelExample1",
 						"class": "Lava.WidgetConfigExtensionGateway",
-						extender_type: "Default",
+						extender_type: "Standard",
 						type: "widget"
 					},
 					"\r\n"

@@ -46,14 +46,14 @@ Lava.define(
 	 * Create record instance
 	 * @param {Lava.data.ModuleAbstract} module Records module
 	 * @param {Object.<string, Lava.data.field.Abstract>} fields Object with module's fields
-	 * @param {Object} properties_storage_ref Reference to an object with record's properties
+	 * @param {Object} properties_ref Reference to an object with record's properties
 	 */
-	init: function(module, fields, properties_storage_ref) {
+	init: function(module, fields, properties_ref) {
 
 		this.guid = Lava.guid++;
 		this._module = module;
 		this._fields = fields;
-		this._properties = properties_storage_ref;
+		this._properties = properties_ref;
 
 	},
 

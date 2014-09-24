@@ -16,7 +16,7 @@ Lava.ClassManager.define(
 			? this._getMonthData(this._properties._displayed_year + 1, 0)
 			: this._getMonthData(this._properties._displayed_year, this._properties._displayed_month + 1);
 
-		this.set('_months', [prev_month_data, month_data, next_month_data]);
+		this.set('_months_data', [prev_month_data, month_data, next_month_data]);
 
 		// Formatting by hands, cause in future there may be added a possibility to set locale in options
 		this.set(

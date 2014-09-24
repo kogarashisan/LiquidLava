@@ -36,16 +36,6 @@ Lava.ClassManager = {
 	 */
 	_root: {},
 
-	ClassData: {
-
-		instanceOf: function(class_name) {
-
-			return this.hierarchy_paths.indexOf(class_name) != -1;
-
-		}
-
-	},
-
 	/**
 	 * Add a namespace, that can contain class constructors
 	 * @param {string} name The name of the namespace
@@ -86,7 +76,7 @@ Lava.ClassManager = {
 			name: class_path.split('.').pop(),
 			path: class_path,
 			source_object: source_object,
-			hierarchy_index: 0,
+			level: 0,
 			extends: null,
 			implements: [],
 			parent_class_data: null,
@@ -95,8 +85,7 @@ Lava.ClassManager = {
 			references: [],
 			shared: {},
 			constructor: null,
-			own_references_count: 0,
-			instanceOf: this.ClassData.instanceOf
+			own_references_count: 0
 		};
 
 		if ('Extends' in source_object) {
@@ -109,7 +98,7 @@ Lava.ClassManager = {
 			if (!parent_data) Lava.t('[define] Base class not found: "' + source_object.Extends + '"');
 			if (!parent_data.skeleton) Lava.t("[define] Parent class was loaded without skeleton, extension is not possible: " + class_data.extends);
 
-			class_data.hierarchy_index = parent_data.hierarchy_index + 1;
+			class_data.level = parent_data.level + 1;
 			class_data.hierarchy_paths = parent_data.hierarchy_paths.slice();
 			class_data.hierarchy_paths.push(class_path);
 			class_data.references = parent_data.references.slice();
@@ -158,7 +147,7 @@ Lava.ClassManager = {
 
 		}
 
-		class_data.skeleton = this._disassemble(class_data, source_object, class_data.hierarchy_index, true);
+		class_data.skeleton = this._disassemble(class_data, source_object, class_data.level, true);
 
 		if (parent_data) {
 
@@ -287,11 +276,11 @@ Lava.ClassManager = {
 	 * Recursively create skeletons for all objects inside class body
 	 * @param {_cClassData} class_data
 	 * @param {Object} source_object
-	 * @param {number} hierarchy_index
+	 * @param {number} level
 	 * @param {boolean} is_root
 	 * @returns {Object}
 	 */
-	_disassemble: function(class_data, source_object, hierarchy_index, is_root) {
+	_disassemble: function(class_data, source_object, level, is_root) {
 
 		var name,
 			skeleton = {},
@@ -314,7 +303,7 @@ Lava.ClassManager = {
 				case 'object':
 					skeleton_value = {
 						type: 'object',
-						skeleton: this._disassemble(class_data, value, hierarchy_index, false)
+						skeleton: this._disassemble(class_data, value, level, false)
 					};
 					break;
 				case 'function':
@@ -726,7 +715,7 @@ Lava.ClassManager = {
 			// string data
 			name: class_data.name,
 			path: class_data.path,
-			hierarchy_index: class_data.hierarchy_index,
+			level: class_data.level,
 			extends: class_data.extends,
 			implements: null,
 			hierarchy_paths: class_data.hierarchy_paths,
@@ -808,7 +797,6 @@ Lava.ClassManager = {
 		}
 
 		class_data.constructor.prototype = class_data.prototype_generator(class_data);
-		class_data.instanceOf = this.ClassData.instanceOf;
 
 		this._registerClass(class_data);
 

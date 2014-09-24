@@ -65,11 +65,11 @@ Lava.define(
 	 * @param module
 	 * @param name
 	 * @param {_cCollectionField} config
-	 * @param module_storages
+	 * @param module_storage
 	 */
-	init: function(module, name, config, module_storages) {
+	init: function(module, name, config, module_storage) {
 
-		this.Abstract$init(module, name, config, module_storages);
+		this.Abstract$init(module, name, config, module_storage);
 
 		if (Lava.schema.DEBUG && !config.record_field)
 			Lava.t("Missing corresponding Record field. Record fields are used by Collection fields.");
@@ -78,7 +78,7 @@ Lava.define(
 
 	},
 
-	onModuleFieldsCreated: function(default_storage) {
+	onModuleFieldsCreated: function(default_properties) {
 
 		this._target_module = (this._config.module == 'this') ? this._module : this._module.getApp().getModule(this._config.module);
 		this._target_record_field = this._target_module.getField(this._target_record_field_name);
@@ -132,7 +132,7 @@ Lava.define(
 
 	},
 
-	'import': function(record, storage, raw_properties) {
+	'import': function(record, properties, raw_properties) {
 
 		if (raw_properties[this._name]) {
 
@@ -157,7 +157,7 @@ Lava.define(
 
 	},
 
-	getValue: function(record, storage) {
+	getValue: function(record, properties) {
 
 		var guid = record.guid,
 			collection;
@@ -225,10 +225,10 @@ Lava.define(
 	/**
 	 * Get count of items in record's collection of this field
 	 * @param {Lava.data.RecordAbstract} record
-	 * @param {Object} storage
+	 * @param {Object} properties
 	 * @returns {Number}
 	 */
-	getCount: function(record, storage) {
+	getCount: function(record, properties) {
 
 		return this._target_record_field.getCollectionCount(record);
 

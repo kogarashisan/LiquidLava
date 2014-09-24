@@ -19,10 +19,10 @@ Lava.define(
 	/**
 	 * Get record's `guid` property
 	 * @param record
-	 * @param storage
+	 * @param properties
 	 * @returns {_tGUID}
 	 */
-	getValue: function(record, storage) {
+	getValue: function(record, properties) {
 
 		return record.guid;
 
@@ -31,7 +31,7 @@ Lava.define(
 	/**
 	 * Throws an error
 	 */
-	setValue: function(record, storage, value) {
+	setValue: function(record, properties, value) {
 
 		Lava.t('Guid field is read only');
 

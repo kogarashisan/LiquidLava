@@ -61,7 +61,7 @@ Lava.define(
 
 	/**
 	 * Refresher of the panel's body
-	 * @type {Lava.view.refresher.Default}
+	 * @type {Lava.view.refresher.Standard}
 	 */
 	_content_refresher: null,
 

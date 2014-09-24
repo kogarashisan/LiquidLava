@@ -221,7 +221,7 @@ Lava.extenders = {
 	 * Extend raw widget config
 	 * @param {_cWidget} config
 	 */
-	Default: function(config) {
+	Standard: function(config) {
 
 		var parent_config,
 			parent_widget_name;

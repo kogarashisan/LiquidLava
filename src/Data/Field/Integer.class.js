@@ -10,15 +10,15 @@ Lava.define(
 
 	Extends: 'Lava.data.field.Basic',
 
-	Shared: '_shared',
-
-	_shared: {
-		valid_value_regex: /^(\-|\+)?([1-9]\d*|0)$/
-	},
+	/**
+	 * Numbers, consisting of digits and optionally a sign
+	 * @type {RegExp}
+	 */
+	VALID_VALUE_REGEX: /^(\-|\+)?([1-9]\d*|0)$/,
 
 	isValidValue: function(value) {
 
-		return (value === null && this._is_nullable) || (typeof(value) == 'number' && this._shared.valid_value_regex.test(value));
+		return (value === null && this._is_nullable) || (typeof(value) == 'number' && this.VALID_VALUE_REGEX.test(value));
 
 	},
 
@@ -32,7 +32,7 @@ Lava.define(
 
 				reason = "Value is not a number";
 
-			} else if (this._shared.valid_value_regex.test(value)) {
+			} else if (this.VALID_VALUE_REGEX.test(value)) {
 
 				reason = "Value is not an integer";
 

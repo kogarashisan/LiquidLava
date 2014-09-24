@@ -71,7 +71,7 @@ _cClassData = {
 	 * How many parents does it have (via Extends directive)
 	 * @type {number}
 	 */
-	hierarchy_index: 0,
+	level: 0,
 
 	/**
 	 * When Extends is present - a string with full name of the parent
@@ -119,9 +119,7 @@ _cClassData = {
 	 * Temporary counter for class serialization
 	 * @type {number}
 	 */
-	own_references_count: 0,
-
-	instanceOf: function(class_name) {}
+	own_references_count: 0
 };
 
 /**
@@ -194,11 +192,7 @@ _cScopeForeach = {
 	 * May be used to apply sorting and filtering
 	 * @type {boolean}
 	 */
-	create_own_enumerable: false,
-	/**
-	 * @type {?string}
-	 */
-	after_refresh_callback: null
+	create_own_enumerable: false
 
 };
 

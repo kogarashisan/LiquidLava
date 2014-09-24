@@ -17,9 +17,9 @@ Lava.define(
 	 */
 	_default: null,
 
-	init: function(module, name, config, module_storages) {
+	init: function(module, name, config, module_storage) {
 
-		this.Abstract$init(module, name, config, module_storages);
+		this.Abstract$init(module, name, config, module_storage);
 
 		if ('default' in config) {
 
@@ -39,17 +39,17 @@ Lava.define(
 
 	},
 
-	onModuleFieldsCreated: function(default_storage) {
+	onModuleFieldsCreated: function(default_properties) {
 
-		default_storage[this._name] = this._default;
+		default_properties[this._name] = this._default;
 
 	},
 
-	'import': function(record, storage, raw_properties) {
+	'import': function(record, properties, raw_properties) {
 
 		if (this._name in raw_properties) {
 
-			storage[this._name] = this._getImportValue(storage, raw_properties);
+			properties[this._name] = this._getImportValue(properties, raw_properties);
 
 		}
 
@@ -57,24 +57,24 @@ Lava.define(
 
 	'export': function(record, destination_object) {
 
-		destination_object[this._name] = this._storages_by_guid[record.guid][this._name];
+		destination_object[this._name] = this._properties_by_guid[record.guid][this._name];
 
 	},
 
-	getValue: function(record, storage) {
+	getValue: function(record, properties) {
 
-		return storage[this._name];
+		return properties[this._name];
 
 	},
 
-	setValue: function(record, storage, value) {
+	setValue: function(record, properties, value) {
 
-		if (storage[this._name] !== value) {
+		if (properties[this._name] !== value) {
 
 			if (!this.isValidValue(value)) Lava.t('[Field name=' + this._name + '] Invalid field value: '
 				+ value + ". Reason: " + this.getInvalidReason(value));
 
-			storage[this._name] = value;
+			properties[this._name] = value;
 			this._fireFieldChangedEvents(record);
 
 		}

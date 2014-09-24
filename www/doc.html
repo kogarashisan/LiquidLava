@@ -158,7 +158,7 @@
 				<div><b>Widgets that use this class as controller:</b></div>
 				<div>
 					{#foreach($widget.extended_descriptor.associated_widgets) as=data}
-						{#>data.title} {#if(data.has_sugar)}(<a x:type="view" x:bind:href="'#object=Sugar;member=' + data.title">sugar</a>){/if}
+						{#>data.title} {#if(data.has_sugar)}(<a x:type="view" x:bind:href="'#object=Widgets;member=' + data.title">sugar</a>){/if}
 					{/foreach}
 				</div>
 			{/if}
@@ -167,7 +167,7 @@
 				which will overlap with Extends box *}
 
 			{#if($widget.extended_descriptor.description)}
-				{#if($widget.descriptor.name != 'Support' && $widget.descriptor.name != 'Sugar')}
+				{#if($widget.descriptor.name != 'Support' && $widget.descriptor.name != 'Widgets')}
 					<h2>Remarks</h2>
 				{/if}
 				{#expression($widget.extended_descriptor.description) escape_off}{/expression}
@@ -262,7 +262,7 @@
 									}
 								}
 							</x:container_config>
-							<x:refresher>{class: 'Default', insertion_strategy: 'sequential_elements'}</x:refresher>
+							<x:refresher>{class: 'Standard', insertion_strategy: 'sequential_elements'}</x:refresher>
 							<tr x:type="view" class="api-member-extended-row">
 								<td colspan="3">
 									{#expression(#page.render_event_ext(descriptor)) escape_off}{/expression}
@@ -373,7 +373,7 @@
 							}
 						}
 					</x:container_config>
-					<x:refresher>{class: 'Default', insertion_strategy: 'sequential_elements'}</x:refresher>
+					<x:refresher>{class: 'Standard', insertion_strategy: 'sequential_elements'}</x:refresher>
 					<tr x:type="view" class="api-member-extended-row">
 						<td colspan="3">
 							{#expression(#page.render_method_extended(descriptor, 'api-member-inner-table')) escape_off}{/expression}
@@ -469,7 +469,7 @@
 	</edit_template>
 	<edit_template name="node_children">
 		<task type="known" name="replace_config_option" node_type="View" condition="node.refresher">
-			<assign path="refresher.class">"Default"</assign>
+			<assign path="refresher.class">"Standard"</assign>
 		</task>
 	</edit_template>
 </x:define>
@@ -489,7 +489,7 @@
 		</ul>
 		<div x:type="container" class="api-tabs-container">
 			{#foreach($tabs._tabs) as=tab}
-				<x:refresher>{class: 'Default', insertion_strategy: 'sequential_elements'}</x:refresher>
+				<x:refresher>{class: 'Standard', insertion_strategy: 'sequential_elements'}</x:refresher>
 				<div x:type="view" class="api-tabs-tab"
 					x:style:display="tab.is_active ? 'block' : 'none'">
 					{>$tabs.tab_include(tab, 'content'))}
@@ -527,7 +527,7 @@
 					<x:widget extends="ApiTree">
 						<assign name="records">$page.api_tree</assign>
 					</x:widget>
-					<a class="api-system-link" x:type="view" x:event:click="$page.node_click(#page.sugar_descriptor)" href="#object=Sugar">Sugar</a>
+					<a class="api-system-link" x:type="view" x:event:click="$page.node_click(#page.sugar_descriptor)" href="#object=Widgets">Widgets</a>
 					<a class="api-system-link" x:type="view" x:event:click="$page.node_click(#page.support_descriptor)" href="#object=Support">Support</a>
 					<div class="api-tree-header">Firestorm API</div>
 					<x:widget extends="ApiTree">

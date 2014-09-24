@@ -55,7 +55,7 @@ return ('level-' + this._binds[0].getValue());
 									{
 										type: "widget",
 										"class": "Lava.WidgetConfigExtensionGateway",
-										extender_type: "Default",
+										extender_type: "Standard",
 										"extends": "CheckBox",
 										assigns: {
 											is_checked: {
@@ -181,7 +181,7 @@ return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() -
 					},
 					options: {use_meta_storage: true},
 					"class": "Lava.WidgetConfigExtensionGateway",
-					extender_type: "Default",
+					extender_type: "Standard",
 					type: "widget"
 				},
 				"\r\n\t\t</div>\r\n\t"
@@ -202,7 +202,7 @@ return (this._binds[0].getValue());
 			},
 			real_class: "CheckTreeExample",
 			"class": "Lava.WidgetConfigExtensionGateway",
-			extender_type: "Default",
+			extender_type: "Standard",
 			type: "widget"
 		}
 	]

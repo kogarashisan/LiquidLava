@@ -236,12 +236,12 @@ module.exports = function(grunt) {
 				}
 
 				result += html
-					+ '<div class="api-sugar-wrapper xml">'
+					+ '<div class="bs-example api-sugar-wrapper xml">'
 						+ wrapInTag(sugar_config.tag_name, fragment, renderAttributes(sugar_config.attribute_mappings))
 					+ '</div>\n\n';
 
 				LavaBuild.registerLink('sugar:' + title, {
-					hash: 'object=Sugar;member=' + title,
+					hash: 'object=Widgets;member=' + title,
 					page: 'api',
 					title: title,
 					type: 'sugar'
@@ -277,7 +277,7 @@ module.exports = function(grunt) {
 			var temp = JSON.stringify({
 				description: result
 			});
-			grunt.file.write('www/api/Sugar.js', temp);
+			grunt.file.write('www/api/Widgets.js', temp);
 
 		} catch (e) {
 

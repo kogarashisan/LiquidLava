@@ -22,7 +22,7 @@ Lava.define(
 
 		this._config = config;
 
-		var default_storage = this._initFields(config),
+		var default_properties = this._initFields(config),
 			field;
 
 		if (Lava.schema.DEBUG) {
@@ -32,8 +32,8 @@ Lava.define(
 			}
 		}
 
-		this._createEmptyRecordStorage = new Function(
-			"return " + Lava.Serializer.serialize(default_storage)
+		this._createRecordProperties = new Function(
+			"return " + Lava.Serializer.serialize(default_properties)
 		);
 
 	},
@@ -71,12 +71,12 @@ Lava.define(
 	 */
 	_createRecordInstance: function() {
 
-		var storage = this._createEmptyRecordStorage(),
+		var properties = this._createRecordProperties(),
 			constructor = Lava.ClassManager.getConstructor('MetaRecord', 'Lava.data'),
-			record = new constructor(this, this._fields, storage);
+			record = new constructor(this, this._fields, properties);
 
 		this._records.push(record);
-		this._storages_by_guid[record.guid] = storage;
+		this._properties_by_guid[record.guid] = properties;
 		this._records_by_guid[record.guid] = record;
 		return record;
 

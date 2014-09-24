@@ -217,7 +217,7 @@ return (this._binds[0].getValue());
 						{
 							type: "widget",
 							"class": "Lava.WidgetConfigExtensionGateway",
-							extender_type: "Default",
+							extender_type: "Standard",
 							"extends": "TextInput",
 							bindings: {
 								value: {
@@ -237,7 +237,7 @@ return (this._binds[0].getValue());
 			"extends": "Example",
 			real_class: "CirclesExample",
 			"class": "Lava.WidgetConfigExtensionGateway",
-			extender_type: "Default",
+			extender_type: "Standard",
 			type: "widget"
 		}
 	]

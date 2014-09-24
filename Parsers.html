@@ -733,7 +733,7 @@ block
 			if ($1.name != $3) Lava.t('End block ("' + $3 + '") does not match the start block ("' + $1.name + '") (3)');
 			if ('elseif_arguments' in $2) {
 				$1.elseif_arguments = $2.elseif_arguments;
-				$1.elseif_contents = $2.elseif_contents;
+				$1.elseif_content = $2.elseif_content;
 			}
 			if ('else_content' in $2) $1.else_content = $2.else_content;
 			$$ = $1;
@@ -743,7 +743,7 @@ block
 			$1.content = $2;
 			if ('elseif_arguments' in $3) {
 				$1.elseif_arguments = $3.elseif_arguments;
-				$1.elseif_contents = $3.elseif_contents;
+				$1.elseif_content = $3.elseif_content;
 			}
 			if ('else_content' in $3) $1.else_content = $3.else_content;
 			$$ = $1;
@@ -879,24 +879,24 @@ elsePart
 elseifChain
 	: elseifChain blockElseif blocks {
 			$1.elseif_arguments.push($2);
-			$1.elseif_contents.push($3);
+			$1.elseif_content.push($3);
 			$$ = $1;
 		}
 	| elseifChain blockElseif {
 			$1.elseif_arguments.push($2);
-			$1.elseif_contents.push([]);
+			$1.elseif_content.push([]);
 			$$ = $1;
 		}
 	| blockElseif blocks {
 			$$ = {
 				elseif_arguments: [$1],
-				elseif_contents: [$2]
+				elseif_content: [$2]
 			};
 		}
 	| blockElseif {
 			$$ = {
 				elseif_arguments: [$1],
-				elseif_contents: [[]]
+				elseif_content: [[]]
 			};
 		}
 	;

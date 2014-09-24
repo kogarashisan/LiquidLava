@@ -25,18 +25,30 @@ Lava.define(
 		/** Culture-dependent list of week day descriptors */
 		_weekdays: null,
 		/** Displayed months for template */
-		_months: null,
+		_months_data: null,
 		/** Example: "May 2014" - displayed above the days_table */
 		_month_year_string: null,
 		/** Example: "24 May 2014" - displayed on the "today" link */
 		_today_string: null,
-		/** Start of selection, in milliseconds */
+		/**
+		 * Start of selection, in milliseconds
+		 * @type {number}
+		 */
 		_selection_start: 0,
-		/** End of selection, in milliseconds (by default, always equals to <wp>_selection_start</wp>) */
+		/**
+		 * End of selection, in milliseconds (by default, always equals to <wp>_selection_start</wp>)
+		 * @type {number}
+		 */
 		_selection_end: 0,
-		/** Current year, displayed in calendar */
+		/**
+		 * Current year, displayed by calendar
+		 * @type {number}
+		 */
 		_displayed_year: null,
-		/** Current month of the displayed year */
+		/**
+		 * Current month of the displayed year
+		 * @type {number}
+		 */
 		_displayed_month: null,
 		/** Collection of template data, used to render month names */
 		_month_descriptors: null,
@@ -120,7 +132,7 @@ Lava.define(
 		var locale_object = Lava.locales[Lava.schema.LOCALE],
 			month_data = this._getMonthData(this._properties._displayed_year, this._properties._displayed_month);
 
-		this.set('_months', [month_data]);
+		this.set('_months_data', [month_data]);
 
 		// Formatting by hands, cause in future there may be added a possibility to set locale in options
 		this.set(
@@ -141,7 +153,7 @@ Lava.define(
 		var month_key = year + '' + month;
 
 		if (!(month_key in this._months_cache)) {
-			this._months_cache[month_key] = this._renderMonth(year, month, Lava.schema.LOCALE);
+			this._months_cache[month_key] = this._renderMonthData(year, month, Lava.schema.LOCALE);
 		}
 
 		return this._months_cache[month_key];

@@ -1,9 +1,9 @@
 
 Lava.define(
-'Lava.view.refresher.Default',
+'Lava.view.refresher.Standard',
 /**
- * Base class for animation support in views. Default refresher does not animate templates, but inserts and removes them separately
- * @lends Lava.view.refresher.Default#
+ * Base class for animation support in views. Standard refresher does not animate templates, but inserts and removes them separately
+ * @lends Lava.view.refresher.Standard#
  * @extends Lava.mixin.Observable
  */
 {

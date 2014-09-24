@@ -16,7 +16,7 @@ Lava.define(
 	 * The content of the view
 	 * @type {Lava.system.Template}
 	 */
-	_contents: null,
+	_content: null,
 
 	_postInit: function() {
 
@@ -41,11 +41,11 @@ Lava.define(
 			// Check is done to speed up the rendering process.
 			result = (this._container.isElementContainer && this._container.isVoid())
 				? this._container.renderVoid()
-				: this._container.wrap(this._renderContents());
+				: this._container.wrap(this._renderContent());
 
 		} else {
 
-			result = this._renderContents();
+			result = this._renderContent();
 
 		}
 
@@ -56,15 +56,15 @@ Lava.define(
 	_refresh: function() {
 
 		if (!this._container.isVoid()) {
-			this._container.setHTML(this._renderContents());
+			this._container.setHTML(this._renderContent());
 			this._broadcastToChildren('broadcastInDOM');
 		}
 
 	},
 
-	_renderContents: function() {
+	_renderContent: function() {
 
-		return this._getContents().render();
+		return this._getContent().render();
 
 	},
 
@@ -73,35 +73,35 @@ Lava.define(
 	 */
 	_broadcastToChildren: function(function_name) {
 
-		if (this._contents != null) {
+		if (this._content != null) {
 
-			this._contents[function_name]();
+			this._content[function_name]();
 
 		}
 
 	},
 
 	/**
-	 * Get `_contents`. Create, if needed
+	 * Get `_content`. Create, if needed
 	 * @returns {Lava.system.Template}
 	 */
-	_getContents: function() {
+	_getContent: function() {
 
-		if (this._contents == null) {
+		if (this._content == null) {
 
-			this._contents = new Lava.system.Template(this._config.template || [], this._widget, this)
+			this._content = new Lava.system.Template(this._config.template || [], this._widget, this)
 
 		}
 
-		return this._contents;
+		return this._content;
 
 	},
 
 	destroy: function() {
 
-		if (this._contents) {
-			this._contents.destroy();
-			this._contents = null;
+		if (this._content) {
+			this._content.destroy();
+			this._content = null;
 		}
 
 		this.Abstract$destroy();

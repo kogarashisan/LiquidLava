@@ -1,6 +1,6 @@
 
 /**
- * Stable sort algorithm (by definition)
+ * Stable sort algorithm (by definition). May not be called recursively
  */
 Lava.algorithms.sorting.mergeSort = (function(){
 	"use strict";
@@ -80,8 +80,6 @@ Lava.algorithms.sorting.mergeSort = (function(){
 
 	return function(items, less) {
 
-		if (_less) Lava.t("This version of mergeSort may not be called recursively");
-
 		var length = items.length,
 			result;
 
@@ -91,9 +89,8 @@ Lava.algorithms.sorting.mergeSort = (function(){
 
 		} else {
 
-			_less = less || Lava.DEFAULT_LESS;
+			_less = less;
 			result = _sort(items, length);
-			_less = null;
 
 		}
 

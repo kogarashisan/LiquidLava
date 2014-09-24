@@ -30,17 +30,17 @@ Lava.define(
 	 */
 	_default: 0,
 
-	initNewRecord: function(record, storage) {
+	initNewRecord: function(record, properties) {
 
-		this._registerByForeignKey(record, storage[this._name]);
-		this.Basic$initNewRecord(record, storage);
+		this._registerByForeignKey(record, properties[this._name]);
+		this.Basic$initNewRecord(record, properties);
 
 	},
 
-	'import': function(record, storage, raw_properties) {
+	'import': function(record, properties, raw_properties) {
 
-		this._registerByForeignKey(record, raw_properties[this._name] || storage[this._name]);// it may have a default
-		this.Basic$import(record, storage, raw_properties);
+		this._registerByForeignKey(record, raw_properties[this._name] || properties[this._name]);// it may have a default
+		this.Basic$import(record, properties, raw_properties);
 
 	},
 
@@ -63,12 +63,12 @@ Lava.define(
 
 	},
 
-	setValue: function(record, storage, new_foreign_key) {
+	setValue: function(record, properties, new_foreign_key) {
 
-		Firestorm.Array.exclude(this._collections_by_foreign_id[storage[this._name]], record);
+		Firestorm.Array.exclude(this._collections_by_foreign_id[properties[this._name]], record);
 		this._registerByForeignKey(record, new_foreign_key);
 
-		this.Basic$setValue(record, storage, new_foreign_key);
+		this.Basic$setValue(record, properties, new_foreign_key);
 
 	},
 
