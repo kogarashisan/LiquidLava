@@ -63,7 +63,7 @@ Lava.define(
 	_binds_count: 0,
 	/**
 	 * objects with listeners for {@link Lava.mixin.Refreshable#event:waits_refresh}, {@link Lava.mixin.Refreshable#event:refreshed}
-	 * and <kw>"changed"</kw> events
+	 * and <str>"changed"</str> events
 	 * @type {Array.<Object>}
 	 */
 	_bind_listeners: [],
@@ -321,7 +321,7 @@ Lava.define(
 
 	/**
 	 * Resume argument's listeners and refresh state
-	 * @param {boolean} fire_changed Whether to fire the <kw>"changed"</kw> event
+	 * @param {boolean} fire_changed Whether to fire the <str>"changed"</str> event
 	 */
 	wakeup: function(fire_changed) {
 

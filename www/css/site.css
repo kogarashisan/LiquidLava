@@ -7668,6 +7668,7 @@ footer .container {background: #f7f5fa;}
 /* cell content styles */
 .api-keyword {color: rgb(0,0,128);}
 .api-string {color: rgb(0,128,0);}
+.api-widget-property {font-style: italic; font-weight: bold}
 .api-highlight-gray {color: gray;font-weight: bold;}
 .api-highlight-empty {font-weight: bold;}
 

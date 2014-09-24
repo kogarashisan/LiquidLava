@@ -76,7 +76,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
-	 * Allowed item types in <kw>"array"</kw> resource
+	 * Allowed item types in <str>"array"</str> resource
 	 * @type {Array.<string>}
 	 */
 	RESOURCE_ARRAY_ALLOWED_TYPES: ['string', 'boolean', 'null', 'number'],

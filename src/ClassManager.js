@@ -363,7 +363,7 @@ Lava.ClassManager = {
 	},
 
 	/**
-	 * Build class constructor that can be used with the "new" keyword
+	 * Build class constructor that can be used with the <kw>new</kw> keyword
 	 * @param {_cClassData} class_data
 	 * @returns {function} The class constructor
 	 */
@@ -566,7 +566,7 @@ Lava.ClassManager = {
 	/**
 	 * Get class constructor
 	 * @param {string} class_path Full name of a class, or a short name (if namespace is provided)
-	 * @param {string} [default_namespace] The default prefix where to search for the class, like <kw>"Lava.widget"</kw>
+	 * @param {string} [default_namespace] The default prefix where to search for the class, like <str>"Lava.widget"</str>
 	 * @returns {function}
 	 */
 	getConstructor: function(class_path, default_namespace) {

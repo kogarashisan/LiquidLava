@@ -282,27 +282,19 @@ module.exports = function(grunt) {
 
 		_replaceKW: function(content) {
 
-			return content.replace(/\<kw\>([\s\S]+?)\<\/kw\>/g, function(match, inner) {
-				global.Lava.ObjectParser.parse(inner);
-				var value = eval('(' + inner + ')');
-				var type = Firestorm.getType(value);
-				var result;
-				switch (type) {
-					case 'null':
-					case 'undefined':
-						result = '<span class="api-keyword">' + type + '</span>';
-						break;
-					case 'boolean':
-						result = '<span class="api-keyword">' + value + '</span>';
-						break;
-					case 'string':
-						result = '<span class="api-string">' + Firestorm.String.quote(value) + '</span>';
-						break;
-					default:
-						throw new Error();
-				}
-				return result;
+			content = content.replace(/\<kw\>([\s\S]+?)\<\/kw\>/g, function(match, inner) {
+				return '<span class="api-keyword">' + inner + '</span>';
 			});
+			content = content.replace(/\<str\>([\s\S]+?)\<\/str\>/g, function(match, inner) {
+				return '<span class="api-string">'
+					+ global.Firestorm.String.escape(inner, global.Firestorm.String.HTML_ESCAPE_REGEX)
+					+ '</span>';
+			});
+			content = content.replace(/\<wp\>([\s\S]+?)\<\/wp\>/g, function(match, inner) {
+				return '<span class="api-widget-property">' + inner + '</span>';
+			});
+
+			return content;
 
 		},
 

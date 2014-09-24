@@ -53,7 +53,7 @@ Lava.define(
 	},
 
 	/**
-	 * Element's checked state has changed. Update local <i>is_checked</i> property
+	 * Element's checked state has changed. Update local <wp>is_checked</wp> property
 	 */
 	_onCheckedChanged: function() {
 

@@ -197,9 +197,9 @@ Lava.define(
 	},
 
 	/**
-	 * The only supported property is <kw>"length"</kw>
+	 * The only supported property is <str>"length"</str>
 	 * @param {string} name
-	 * @returns {number} Returns `_count` for <kw>"length"</kw> property
+	 * @returns {number} Returns `_count` for <str>"length"</str> property
 	 */
 	get: function(name) {
 
@@ -377,7 +377,7 @@ Lava.define(
 	},
 
 	/**
-	 * Used in editing operations to set `_count` and fire changed events for <kw>"length"</kw> property
+	 * Used in editing operations to set `_count` and fire changed events for <str>"length"</str> property
 	 * @param {number} new_length
 	 */
 	_setLength: function(new_length) {

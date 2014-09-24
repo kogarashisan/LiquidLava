@@ -199,7 +199,7 @@ Lava.schema = {
 	SUGAR_CLASSES: ['Lava.system.Sugar'],
 
 	/**
-	 * Current locale. Must not be <kw>null</kw> or <kw>"default"</kw>
+	 * Current locale. Must not be <kw>null</kw> or <str>"default"</str>
 	 * @const
 	 */
 	LOCALE: 'en',

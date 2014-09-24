@@ -2,7 +2,7 @@
 Lava.define(
 'Lava.data.field.Basic',
 /**
- * Field that holds any value
+ * Field with no restrictions on value type
  *
  * @lends Lava.data.field.Basic#
  * @extends Lava.data.field.Abstract

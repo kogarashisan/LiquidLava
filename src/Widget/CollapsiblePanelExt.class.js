@@ -103,7 +103,7 @@ Lava.define(
 	},
 
 	/**
-	 * Toggle <i>is_expanded</i> property, if not locked
+	 * Toggle <wp>is_expanded</wp> property, if not locked
 	 */
 	_onHeaderClick: function() {
 

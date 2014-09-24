@@ -72,7 +72,7 @@ Lava.define(
 	},
 
 	/**
-	 * Change <i>is_open</i> state
+	 * Change <wp>is_open</wp> state (open dropdown which is closed and vice versa)
 	 * @param dom_event_name
 	 * @param dom_event
 	 */
@@ -140,7 +140,7 @@ Lava.define(
 	},
 
 	/**
-	 * Setter for <i>is_open</i> property
+	 * Setter for <wp>is_open</wp> property
 	 * @param {boolean} value
 	 * @param {string} name
 	 */

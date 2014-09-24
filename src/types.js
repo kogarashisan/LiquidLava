@@ -213,8 +213,9 @@ Lava.types = {
 
 	/**
 	 * An HTML attribute which can take it's name as a value. Converts to <kw>true</kw>
-	 * Example:
-	 * checked="checked"
+	 *
+	 * Example: <br/>
+	 * checked="checked"<br/>
 	 * checked=""
 	 */
 	SwitchAttribute: {

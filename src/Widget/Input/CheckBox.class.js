@@ -55,7 +55,7 @@ Lava.define(
 	},
 
 	/**
-	 * Setter for <i>is_indeterminate</i> property
+	 * Setter for <wp>is_indeterminate</wp> property
 	 * @param {boolean} value
 	 */
 	_setIsIndeterminate: function(value) {

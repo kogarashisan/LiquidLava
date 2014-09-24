@@ -36,7 +36,7 @@ Lava.define(
 	},
 
 	/**
-	 * DOM element's value has changed: refresh local <i>value</i> property
+	 * DOM element's value has changed: refresh local <wp>value</wp> property
 	 */
 	_onValueChanged: function() {
 
@@ -53,7 +53,7 @@ Lava.define(
 	},
 
 	/**
-	 * Refresh local <i>value</i> property from DOM input element
+	 * Refresh local <wp>value</wp> property from DOM input element
 	 */
 	_refreshValue: function() {
 

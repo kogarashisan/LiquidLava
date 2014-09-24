@@ -19,7 +19,7 @@ Firestorm.Element,
 	},
 
 	/**
-	 * Set CSS property, which accepts a list of pixel values (like <kw>"border: 1px 2px 3px 4px"</kw>)
+	 * Set CSS property, which accepts a list of pixel values (like <str>"border: 1px 2px 3px 4px"</str>)
 	 * Rounds numbers and adds 'px' before setting them to element
 	 *
 	 * @param {HTMLElement} element
@@ -44,7 +44,7 @@ Firestorm.Element,
 	/**
 	 * Get value of CSS style property
 	 * @param {HTMLElement} element
-	 * @param {string} name Name of the property, like <kw>"height"</kw>
+	 * @param {string} name Name of the property, like <str>"height"</str>
 	 * @returns {*}
 	 */
 	getStyle: function(element, name) {

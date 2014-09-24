@@ -258,7 +258,7 @@ Lava.Serializer = {
 	},
 
 	/**
-	 * Return <kw>"null"</kw>
+	 * Return <str>"null"</str>
 	 * @returns {string}
 	 */
 	_serializeNull: function() {
@@ -268,7 +268,7 @@ Lava.Serializer = {
 	},
 
 	/**
-	 * Return <kw>"undefined"</kw>
+	 * Return <str>"undefined"</str>
 	 * @returns {string}
 	 */
 	_serializeUndefined: function() {

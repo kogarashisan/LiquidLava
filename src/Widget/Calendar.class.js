@@ -32,7 +32,7 @@ Lava.define(
 		_today_string: null,
 		/** Start of selection, in milliseconds */
 		_selection_start: 0,
-		/** End of selection, in milliseconds (by default, always equals to <i>_selection_start</i>) */
+		/** End of selection, in milliseconds (by default, always equals to <wp>_selection_start</wp>) */
 		_selection_end: 0,
 		/** Current year, displayed in calendar */
 		_displayed_year: null,
@@ -338,7 +338,7 @@ Lava.define(
 	},
 
 	/**
-	 * Refresh <i>_displayed_year</i> property from year input
+	 * Refresh <wp>_displayed_year</wp> property from year input
 	 * @param {Lava.widget.input.Abstract} widget
 	 */
 	_onYearInputValueChanged: function(widget) {
@@ -356,7 +356,7 @@ Lava.define(
 	},
 
 	/**
-	 * Set selected date. Setter for <i>value</i> property
+	 * Set selected date. Setter for <wp>value</wp> property
 	 * @param {Date} value
 	 */
 	_setValue: function(value) {

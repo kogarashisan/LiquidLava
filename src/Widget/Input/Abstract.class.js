@@ -133,8 +133,8 @@ Lava.define(
 	},
 
 	/**
-	 * Protected setter for readonly <i>is_valid</i> property
-	 * @param {boolean} value New value for <i>is_valid</i> property
+	 * Protected setter for readonly <wp>is_valid</wp> property
+	 * @param {boolean} value New value for <wp>is_valid</wp> property
 	 */
 	_setValidity: function(value) {
 

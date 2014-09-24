@@ -56,7 +56,7 @@ Lava.define(
 	},
 
 	/**
-	 * Setter for the <i>value</i> property
+	 * Setter for the <wp>value</wp> property
 	 * @param {Array.<string>} value
 	 */
 	_setValue: function(value) {
@@ -84,7 +84,7 @@ Lava.define(
 	},
 
 	/**
-	 * {modifier} This widget does not need live bindings of <i>selected</i> property, so this modifier is used to speed up rendering
+	 * {modifier} This widget does not use bindings of "selected" property, so this modifier is used to speed up rendering
 	 * @param {string} value
 	 * @returns {boolean}
 	 */

@@ -32,7 +32,7 @@ Lava.define(
 
 	/**
 	 * @param config
-	 * @param {boolean} config.options.cancel_refresh_on_input Update widget's <i>value</i> when input element loses focus.
+	 * @param {boolean} config.options.cancel_refresh_on_input Update widget's <wp>value</wp> when input element loses focus.
 	 *  By default, value is updated on each user input
 	 * @param widget
 	 * @param parent_view

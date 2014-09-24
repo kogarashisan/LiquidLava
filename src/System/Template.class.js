@@ -337,7 +337,7 @@ Lava.define(
 	},
 
 	/**
-	 * Broadcast <kw>"broadcastRemove"</kw> to instance content
+	 * Broadcast <str>"broadcastRemove"</str> to instance content
 	 */
 	broadcastRemove: function() {
 
@@ -352,7 +352,7 @@ Lava.define(
 	},
 
 	/**
-	 * Broadcast <kw>"broadcastInDOM"</kw> to instance content
+	 * Broadcast <str>"broadcastInDOM"</str> to instance content
 	 */
 	broadcastInDOM: function() {
 
@@ -362,7 +362,7 @@ Lava.define(
 	},
 
 	/**
-	 * Broadcast <kw>"broadcastSleep"</kw> to instance content
+	 * Broadcast <str>"broadcastSleep"</str> to instance content
 	 */
 	broadcastSleep: function() {
 
@@ -374,7 +374,7 @@ Lava.define(
 	},
 
 	/**
-	 * Broadcast <kw>"broadcastWakeup"</kw> to instance content
+	 * Broadcast <str>"broadcastWakeup"</str> to instance content
 	 */
 	broadcastWakeup: function() {
 

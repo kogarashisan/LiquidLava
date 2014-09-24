@@ -155,7 +155,7 @@ var Lava = {
 	},
 
 	/**
-	 * <kw>"id"</kw> attribute of framework's DOM elements start with this prefix.
+	 * <str>"id"</str> attribute of framework's DOM elements start with this prefix.
 	 * When changing this, you must also change SYSTEM_ID_REGEX
 	 * @const
 	 * */
@@ -427,7 +427,7 @@ var Lava = {
 
 	/**
 	 * Throw an error
-	 * @param {string} [message] Defaults to <kw>"Debug assertion failed"</kw>
+	 * @param {string} [message] Defaults to <str>"Debug assertion failed"</str>
 	 */
 	t: function(message) {
 

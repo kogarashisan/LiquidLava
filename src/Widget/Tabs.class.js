@@ -38,7 +38,7 @@ Lava.define(
 	},
 
 	/**
-	 * Reference to <i>_tabs</i> property
+	 * Reference to <wp>_tabs</wp> property
 	 * @type {Lava.system.Enumerable}
 	 */
 	_tab_objects: null,

@@ -217,7 +217,7 @@ Firestorm.schema = {
 		PREFER_RANGE_API: true
 	},
 	/**
-	 * Perform DEBUG checks. Should be <kw>false</kw> in production,
+	 * Perform DEBUG checks. May be <kw>false</kw> in production,
 	 * but it's strictly recommended to keep it <kw>true</kw> during development and testing
 	 * @define
 	 */
@@ -604,7 +604,7 @@ Firestorm.Element,
 	},
 
 	/**
-	 * Set CSS property, which accepts a list of pixel values (like <kw>"border: 1px 2px 3px 4px"</kw>)
+	 * Set CSS property, which accepts a list of pixel values (like <str>"border: 1px 2px 3px 4px"</str>)
 	 * Rounds numbers and adds 'px' before setting them to element
 	 *
 	 * @param {HTMLElement} element
@@ -629,7 +629,7 @@ Firestorm.Element,
 	/**
 	 * Get value of CSS style property
 	 * @param {HTMLElement} element
-	 * @param {string} name Name of the property, like <kw>"height"</kw>
+	 * @param {string} name Name of the property, like <str>"height"</str>
 	 * @returns {*}
 	 */
 	getStyle: function(element, name) {
@@ -1706,7 +1706,7 @@ var Lava = {
 	},
 
 	/**
-	 * <kw>"id"</kw> attribute of framework's DOM elements start with this prefix.
+	 * <str>"id"</str> attribute of framework's DOM elements start with this prefix.
 	 * When changing this, you must also change SYSTEM_ID_REGEX
 	 * @const
 	 * */
@@ -1978,7 +1978,7 @@ var Lava = {
 
 	/**
 	 * Throw an error
-	 * @param {string} [message] Defaults to <kw>"Debug assertion failed"</kw>
+	 * @param {string} [message] Defaults to <str>"Debug assertion failed"</str>
 	 */
 	t: function(message) {
 
@@ -2596,7 +2596,7 @@ Lava.schema = {
 	SUGAR_CLASSES: ['Lava.system.Sugar'],
 
 	/**
-	 * Current locale. Must not be <kw>null</kw> or <kw>"default"</kw>
+	 * Current locale. Must not be <kw>null</kw> or <str>"default"</str>
 	 * @const
 	 */
 	LOCALE: 'en',
@@ -2873,7 +2873,7 @@ Lava.Serializer = {
 	},
 
 	/**
-	 * Return <kw>"null"</kw>
+	 * Return <str>"null"</str>
 	 * @returns {string}
 	 */
 	_serializeNull: function() {
@@ -2883,7 +2883,7 @@ Lava.Serializer = {
 	},
 
 	/**
-	 * Return <kw>"undefined"</kw>
+	 * Return <str>"undefined"</str>
 	 * @returns {string}
 	 */
 	_serializeUndefined: function() {
@@ -3481,8 +3481,9 @@ Lava.types = {
 
 	/**
 	 * An HTML attribute which can take it's name as a value. Converts to <kw>true</kw>
-	 * Example:
-	 * checked="checked"
+	 *
+	 * Example: <br/>
+	 * checked="checked"<br/>
 	 * checked=""
 	 */
 	SwitchAttribute: {
@@ -5477,7 +5478,7 @@ Lava.ClassManager = {
 	},
 
 	/**
-	 * Build class constructor that can be used with the "new" keyword
+	 * Build class constructor that can be used with the <kw>new</kw> keyword
 	 * @param {_cClassData} class_data
 	 * @returns {function} The class constructor
 	 */
@@ -5680,7 +5681,7 @@ Lava.ClassManager = {
 	/**
 	 * Get class constructor
 	 * @param {string} class_path Full name of a class, or a short name (if namespace is provided)
-	 * @param {string} [default_namespace] The default prefix where to search for the class, like <kw>"Lava.widget"</kw>
+	 * @param {string} [default_namespace] The default prefix where to search for the class, like <str>"Lava.widget"</str>
 	 * @returns {function}
 	 */
 	getConstructor: function(class_path, default_namespace) {
@@ -6035,7 +6036,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * A widget with a name after dot. Example: <kw>"@accordion.accordion_panel"</kw>
+	 * A widget with a name after dot. Example: <str>"@accordion.accordion_panel"</str>
 	 * @type {RegExp}
 	 */
 	_locator_regex: /^[\$\#\@]([a-zA-Z\_][a-zA-Z0-9\_]*)\.([a-zA-Z\_][a-zA-Z0-9\_]*)/,
@@ -6046,12 +6047,12 @@ Lava.parsers.Common = {
 	_identifier_regex: /^[a-zA-Z\_][a-zA-Z0-9\_]*/,
 
 	/**
-	 * Same as `_locator_regex`, but allows the <kw>"$"</kw> symbol in include name
-	 * (overridden includes have '$' in their name). Example: <kw>"$tree.Tree$node"</kw>
+	 * Same as `_locator_regex`, but allows the <str>"$"</str> symbol in include name
+	 * (overridden includes have '$' in their name). Example: <str>"$tree.Tree$node"</str>
 	 */
 	_include_locator_regex: /^[\$\#\@]([a-zA-Z\_][a-zA-Z0-9\_]*)\.([a-zA-Z\_][\$a-zA-Z0-9\_]*)/,
 	/**
-	 * Same as `_identifier_regex`, but <kw>"$"</kw> symbol is also allowed
+	 * Same as `_identifier_regex`, but <str>"$"</str> symbol is also allowed
 	 * @type {RegExp}
 	 */
 	_include_identifier_regex: /^[a-zA-Z\_][\$a-zA-Z0-9\_]*/,
@@ -7244,7 +7245,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
-	 * Allowed item types in <kw>"array"</kw> resource
+	 * Allowed item types in <str>"array"</str> resource
 	 * @type {Array.<string>}
 	 */
 	RESOURCE_ARRAY_ALLOWED_TYPES: ['string', 'boolean', 'null', 'number'],
@@ -12809,9 +12810,9 @@ Lava.define(
 	},
 
 	/**
-	 * The only supported property is <kw>"length"</kw>
+	 * The only supported property is <str>"length"</str>
 	 * @param {string} name
-	 * @returns {number} Returns `_count` for <kw>"length"</kw> property
+	 * @returns {number} Returns `_count` for <str>"length"</str> property
 	 */
 	get: function(name) {
 
@@ -12989,7 +12990,7 @@ Lava.define(
 	},
 
 	/**
-	 * Used in editing operations to set `_count` and fire changed events for <kw>"length"</kw> property
+	 * Used in editing operations to set `_count` and fire changed events for <str>"length"</str> property
 	 * @param {number} new_length
 	 */
 	_setLength: function(new_length) {
@@ -14037,7 +14038,7 @@ Lava.define(
 	},
 
 	/**
-	 * Broadcast <kw>"broadcastRemove"</kw> to instance content
+	 * Broadcast <str>"broadcastRemove"</str> to instance content
 	 */
 	broadcastRemove: function() {
 
@@ -14052,7 +14053,7 @@ Lava.define(
 	},
 
 	/**
-	 * Broadcast <kw>"broadcastInDOM"</kw> to instance content
+	 * Broadcast <str>"broadcastInDOM"</str> to instance content
 	 */
 	broadcastInDOM: function() {
 
@@ -14062,7 +14063,7 @@ Lava.define(
 	},
 
 	/**
-	 * Broadcast <kw>"broadcastSleep"</kw> to instance content
+	 * Broadcast <str>"broadcastSleep"</str> to instance content
 	 */
 	broadcastSleep: function() {
 
@@ -14074,7 +14075,7 @@ Lava.define(
 	},
 
 	/**
-	 * Broadcast <kw>"broadcastWakeup"</kw> to instance content
+	 * Broadcast <str>"broadcastWakeup"</str> to instance content
 	 */
 	broadcastWakeup: function() {
 
@@ -18162,7 +18163,7 @@ Lava.define(
 	_binds_count: 0,
 	/**
 	 * objects with listeners for {@link Lava.mixin.Refreshable#event:waits_refresh}, {@link Lava.mixin.Refreshable#event:refreshed}
-	 * and <kw>"changed"</kw> events
+	 * and <str>"changed"</str> events
 	 * @type {Array.<Object>}
 	 */
 	_bind_listeners: [],
@@ -18420,7 +18421,7 @@ Lava.define(
 
 	/**
 	 * Resume argument's listeners and refresh state
-	 * @param {boolean} fire_changed Whether to fire the <kw>"changed"</kw> event
+	 * @param {boolean} fire_changed Whether to fire the <str>"changed"</str> event
 	 */
 	wakeup: function(fire_changed) {
 
@@ -24230,8 +24231,8 @@ Lava.define(
 	},
 
 	/**
-	 * Protected setter for readonly <i>is_valid</i> property
-	 * @param {boolean} value New value for <i>is_valid</i> property
+	 * Protected setter for readonly <wp>is_valid</wp> property
+	 * @param {boolean} value New value for <wp>is_valid</wp> property
 	 */
 	_setValidity: function(value) {
 
@@ -24276,7 +24277,7 @@ Lava.define(
 
 	/**
 	 * @param config
-	 * @param {boolean} config.options.cancel_refresh_on_input Update widget's <i>value</i> when input element loses focus.
+	 * @param {boolean} config.options.cancel_refresh_on_input Update widget's <wp>value</wp> when input element loses focus.
 	 *  By default, value is updated on each user input
 	 * @param widget
 	 * @param parent_view
@@ -24448,7 +24449,7 @@ Lava.define(
 	},
 
 	/**
-	 * Element's checked state has changed. Update local <i>is_checked</i> property
+	 * Element's checked state has changed. Update local <wp>is_checked</wp> property
 	 */
 	_onCheckedChanged: function() {
 
@@ -24521,7 +24522,7 @@ Lava.define(
 	},
 
 	/**
-	 * Setter for <i>is_indeterminate</i> property
+	 * Setter for <wp>is_indeterminate</wp> property
 	 * @param {boolean} value
 	 */
 	_setIsIndeterminate: function(value) {
@@ -24644,7 +24645,7 @@ Lava.define(
 	},
 
 	/**
-	 * DOM element's value has changed: refresh local <i>value</i> property
+	 * DOM element's value has changed: refresh local <wp>value</wp> property
 	 */
 	_onValueChanged: function() {
 
@@ -24661,7 +24662,7 @@ Lava.define(
 	},
 
 	/**
-	 * Refresh local <i>value</i> property from DOM input element
+	 * Refresh local <wp>value</wp> property from DOM input element
 	 */
 	_refreshValue: function() {
 
@@ -24697,7 +24698,7 @@ Lava.define(
 	},
 
 	/**
-	 * Setter for the <i>value</i> property
+	 * Setter for the <wp>value</wp> property
 	 * @param {string} value
 	 */
 	_setValue: function(value) {
@@ -24721,7 +24722,7 @@ Lava.define(
 	},
 
 	/**
-	 * {modifier} This widget does not need live bindings of <i>selected</i> property, so this modifier is used to speed up rendering
+	 * {modifier} This widget does not use live bindings of "selected" property, so this modifier is used to speed up rendering
 	 * @param {string} value
 	 * @returns {boolean}
 	 */
@@ -24788,7 +24789,7 @@ Lava.define(
 	},
 
 	/**
-	 * Setter for the <i>value</i> property
+	 * Setter for the <wp>value</wp> property
 	 * @param {Array.<string>} value
 	 */
 	_setValue: function(value) {
@@ -24816,7 +24817,7 @@ Lava.define(
 	},
 
 	/**
-	 * {modifier} This widget does not need live bindings of <i>selected</i> property, so this modifier is used to speed up rendering
+	 * {modifier} This widget does not use bindings of "selected" property, so this modifier is used to speed up rendering
 	 * @param {string} value
 	 * @returns {boolean}
 	 */
@@ -25141,7 +25142,7 @@ Lava.define(
 	},
 
 	/**
-	 * Reference to the <i>_panels</i> property
+	 * Reference to the <wp>_panels</wp> property
 	 * @type {Lava.system.Enumerable}
 	 */
 	_panels: null,
@@ -25510,7 +25511,7 @@ Lava.define(
 	},
 
 	/**
-	 * Reference to <i>_tabs</i> property
+	 * Reference to <wp>_tabs</wp> property
 	 * @type {Lava.system.Enumerable}
 	 */
 	_tab_objects: null,
@@ -25901,7 +25902,7 @@ Lava.define(
 	},
 
 	/**
-	 * Setter for <i>is_expanded</i> property
+	 * Setter for <wp>is_expanded</wp> property
 	 * @param {boolean} value
 	 * @param {string} name
 	 */
@@ -26005,7 +26006,7 @@ Lava.define(
 	},
 
 	/**
-	 * Toggle <i>is_expanded</i> property, when not locked
+	 * Toggle <wp>is_expanded</wp> property, when not locked
 	 */
 	_onHeaderClick: function() {
 
@@ -26123,7 +26124,7 @@ Lava.define(
 	},
 
 	/**
-	 * Toggle <i>is_expanded</i> property, if not locked
+	 * Toggle <wp>is_expanded</wp> property, if not locked
 	 */
 	_onHeaderClick: function() {
 
@@ -26243,7 +26244,7 @@ Lava.define(
 	},
 
 	/**
-	 * Change <i>is_open</i> state
+	 * Change <wp>is_open</wp> state (open dropdown which is closed and vice versa)
 	 * @param dom_event_name
 	 * @param dom_event
 	 */
@@ -26311,7 +26312,7 @@ Lava.define(
 	},
 
 	/**
-	 * Setter for <i>is_open</i> property
+	 * Setter for <wp>is_open</wp> property
 	 * @param {boolean} value
 	 * @param {string} name
 	 */
@@ -26860,7 +26861,7 @@ Lava.define(
 		_today_string: null,
 		/** Start of selection, in milliseconds */
 		_selection_start: 0,
-		/** End of selection, in milliseconds (by default, always equals to <i>_selection_start</i>) */
+		/** End of selection, in milliseconds (by default, always equals to <wp>_selection_start</wp>) */
 		_selection_end: 0,
 		/** Current year, displayed in calendar */
 		_displayed_year: null,
@@ -27166,7 +27167,7 @@ Lava.define(
 	},
 
 	/**
-	 * Refresh <i>_displayed_year</i> property from year input
+	 * Refresh <wp>_displayed_year</wp> property from year input
 	 * @param {Lava.widget.input.Abstract} widget
 	 */
 	_onYearInputValueChanged: function(widget) {
@@ -27184,7 +27185,7 @@ Lava.define(
 	},
 
 	/**
-	 * Set selected date. Setter for <i>value</i> property
+	 * Set selected date. Setter for <wp>value</wp> property
 	 * @param {Date} value
 	 */
 	_setValue: function(value) {

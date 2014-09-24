@@ -41,7 +41,7 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * A widget with a name after dot. Example: <kw>"@accordion.accordion_panel"</kw>
+	 * A widget with a name after dot. Example: <str>"@accordion.accordion_panel"</str>
 	 * @type {RegExp}
 	 */
 	_locator_regex: /^[\$\#\@]([a-zA-Z\_][a-zA-Z0-9\_]*)\.([a-zA-Z\_][a-zA-Z0-9\_]*)/,
@@ -52,12 +52,12 @@ Lava.parsers.Common = {
 	_identifier_regex: /^[a-zA-Z\_][a-zA-Z0-9\_]*/,
 
 	/**
-	 * Same as `_locator_regex`, but allows the <kw>"$"</kw> symbol in include name
-	 * (overridden includes have '$' in their name). Example: <kw>"$tree.Tree$node"</kw>
+	 * Same as `_locator_regex`, but allows the <str>"$"</str> symbol in include name
+	 * (overridden includes have '$' in their name). Example: <str>"$tree.Tree$node"</str>
 	 */
 	_include_locator_regex: /^[\$\#\@]([a-zA-Z\_][a-zA-Z0-9\_]*)\.([a-zA-Z\_][\$a-zA-Z0-9\_]*)/,
 	/**
-	 * Same as `_identifier_regex`, but <kw>"$"</kw> symbol is also allowed
+	 * Same as `_identifier_regex`, but <str>"$"</str> symbol is also allowed
 	 * @type {RegExp}
 	 */
 	_include_identifier_regex: /^[a-zA-Z\_][\$a-zA-Z0-9\_]*/,

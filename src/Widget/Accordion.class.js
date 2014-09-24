@@ -48,7 +48,7 @@ Lava.define(
 	},
 
 	/**
-	 * Reference to the <i>_panels</i> property
+	 * Reference to the <wp>_panels</wp> property
 	 * @type {Lava.system.Enumerable}
 	 */
 	_panels: null,

@@ -125,7 +125,7 @@ Lava.define(
 	},
 
 	/**
-	 * Setter for <i>is_expanded</i> property
+	 * Setter for <wp>is_expanded</wp> property
 	 * @param {boolean} value
 	 * @param {string} name
 	 */
