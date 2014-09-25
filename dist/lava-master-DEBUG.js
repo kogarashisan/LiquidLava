@@ -157,7 +157,7 @@ var Firestorm = {
 	 */
 	selectElements: function(selector) {
 
-		return Slick.search(window.document, selector, new Elements);
+		return Slick.search(window.document, selector, []);
 
 	},
 
@@ -487,7 +487,7 @@ Firestorm.Element = {
 	 */
 	selectElements: function(element, selector) {
 
-		return Slick.search(element, selector, new Elements);
+		return Slick.search(element, selector, []);
 
 	}
 
@@ -7175,7 +7175,11 @@ Lava.parsers.Directives = {
 	 */
 	_directives_schema: {
 		define: {view_config_presence: false},
+		define_resources: {view_config_presence: false},
 		widget: {},
+		static_value: {},
+		static_eval: {},
+		attach_directives: {},
 		assign: {view_config_presence: true, is_top_directive: true},
 		roles: {view_config_presence: true, is_top_directive: true},
 		container_config: {view_config_presence: true, is_top_directive: true},
@@ -7189,10 +7193,6 @@ Lava.parsers.Directives = {
 		properties: {view_config_presence: true, is_top_directive: true},
 		property_string: {view_config_presence: true, is_top_directive: true},
 		resources: {view_config_presence: true, is_top_directive: true},
-		define_resources: {view_config_presence: false},
-		static_value: {},
-		static_eval: {},
-		attach_directives: {},
 		default_events: {view_config_presence: true, is_top_directive: true}
 	},
 
@@ -11810,7 +11810,7 @@ Lava.define(
 Lava.define(
 'Lava.animation.Abstract',
 /**
- * Animation changes properties of HTML Elements over time
+ * Animation changes properties of HTML elements over time
  * @lends Lava.animation.Abstract#
  * @extends Lava.mixin.Observable
  */
@@ -18302,13 +18302,13 @@ Lava.define(
 	 */
 	_doRefresh: function() {
 
-		var newValue = this._evaluate(),
+		var new_value = this._evaluate(),
 			event_args;
 
-		if (newValue !== this._value) {
+		if (new_value !== this._value) {
 
 			event_args = {old_value: this._value};
-			this._value = newValue;
+			this._value = new_value;
 			this._fire('changed', event_args);
 
 		}
@@ -18375,12 +18375,16 @@ Lava.define(
 	 */
 	wakeup: function(fire_changed) {
 
-		for (var i = 0, count = this._bind_listeners.length; i < count; i++) {
+		var i = 0,
+			count = this._bind_listeners.length,
+			new_value,
+			event_args;
+
+		for (; i < count; i++) {
 
 			if (this._binds[i].isWaitingRefresh()) {
 
-				//this._count_dependencies_waiting_refresh++;
-				Lava.t();
+				this._count_dependencies_waiting_refresh++;
 
 			}
 
@@ -18390,21 +18394,23 @@ Lava.define(
 
 		}
 
-		//if (this._count_dependencies_waiting_refresh) {
+		if (this._count_dependencies_waiting_refresh) {
 
-		//	this._waits_refresh = true;
+			this._waits_refresh = true;
+			this._is_dirty = true;
 
-		//} else {
+		} else {
 
-			var newValue = this._evaluate();
+			new_value = this._evaluate();
 
-			if (newValue !== this._value) {
+			if (new_value !== this._value) {
 
-				this._value = newValue;
+				event_args = {old_value: this._value};
+				this._value = new_value;
 
 				if (fire_changed) {
 
-					this._fire('changed');
+					this._fire('changed', event_args);
 
 				}
 
@@ -18412,7 +18418,7 @@ Lava.define(
 
 			this._is_dirty = false;
 
-		//}
+		}
 
 	},
 
@@ -23645,6 +23651,9 @@ Lava.define(
 		if (Lava.schema.DEBUG && this._parent_view) Lava.t("Widget: only top-level widgets can be inserted into DOM");
 		if (Lava.schema.DEBUG && !this._container) Lava.t("Widget: root widgets must have a container");
 
+		// If you assign data to a widget, that was removed from DOM (sleeping widget),
+		// and then render it - it would render with old data.
+		Lava.ScopeManager.refreshScopes();
 		var html = this.render();
 
 		Firestorm.DOM.insertHTML(element, html, position);

@@ -7,7 +7,7 @@
 Lava.define(
 'Lava.animation.Abstract',
 /**
- * Animation changes properties of HTML Elements over time
+ * Animation changes properties of HTML elements over time
  * @lends Lava.animation.Abstract#
  * @extends Lava.mixin.Observable
  */

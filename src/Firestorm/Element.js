@@ -195,7 +195,7 @@ Firestorm.Element = {
 	 */
 	selectElements: function(element, selector) {
 
-		return Slick.search(element, selector, new Elements);
+		return Slick.search(element, selector, []);
 
 	}
 

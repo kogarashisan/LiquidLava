@@ -262,6 +262,9 @@ Lava.define(
 		if (Lava.schema.DEBUG && this._parent_view) Lava.t("Widget: only top-level widgets can be inserted into DOM");
 		if (Lava.schema.DEBUG && !this._container) Lava.t("Widget: root widgets must have a container");
 
+		// If you assign data to a widget, that was removed from DOM (sleeping widget),
+		// and then render it - it would render with old data.
+		Lava.ScopeManager.refreshScopes();
 		var html = this.render();
 
 		Firestorm.DOM.insertHTML(element, html, position);

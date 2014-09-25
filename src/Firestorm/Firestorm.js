@@ -157,7 +157,7 @@ var Firestorm = {
 	 */
 	selectElements: function(selector) {
 
-		return Slick.search(window.document, selector, new Elements);
+		return Slick.search(window.document, selector, []);
 
 	},
 

@@ -9,7 +9,11 @@ Lava.parsers.Directives = {
 	 */
 	_directives_schema: {
 		define: {view_config_presence: false},
+		define_resources: {view_config_presence: false},
 		widget: {},
+		static_value: {},
+		static_eval: {},
+		attach_directives: {},
 		assign: {view_config_presence: true, is_top_directive: true},
 		roles: {view_config_presence: true, is_top_directive: true},
 		container_config: {view_config_presence: true, is_top_directive: true},
@@ -23,10 +27,6 @@ Lava.parsers.Directives = {
 		properties: {view_config_presence: true, is_top_directive: true},
 		property_string: {view_config_presence: true, is_top_directive: true},
 		resources: {view_config_presence: true, is_top_directive: true},
-		define_resources: {view_config_presence: false},
-		static_value: {},
-		static_eval: {},
-		attach_directives: {},
 		default_events: {view_config_presence: true, is_top_directive: true}
 	},
 

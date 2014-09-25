@@ -252,13 +252,13 @@ Lava.define(
 	 */
 	_doRefresh: function() {
 
-		var newValue = this._evaluate(),
+		var new_value = this._evaluate(),
 			event_args;
 
-		if (newValue !== this._value) {
+		if (new_value !== this._value) {
 
 			event_args = {old_value: this._value};
-			this._value = newValue;
+			this._value = new_value;
 			this._fire('changed', event_args);
 
 		}
@@ -325,12 +325,16 @@ Lava.define(
 	 */
 	wakeup: function(fire_changed) {
 
-		for (var i = 0, count = this._bind_listeners.length; i < count; i++) {
+		var i = 0,
+			count = this._bind_listeners.length,
+			new_value,
+			event_args;
+
+		for (; i < count; i++) {
 
 			if (this._binds[i].isWaitingRefresh()) {
 
-				//this._count_dependencies_waiting_refresh++;
-				Lava.t();
+				this._count_dependencies_waiting_refresh++;
 
 			}
 
@@ -340,21 +344,23 @@ Lava.define(
 
 		}
 
-		//if (this._count_dependencies_waiting_refresh) {
+		if (this._count_dependencies_waiting_refresh) {
 
-		//	this._waits_refresh = true;
+			this._waits_refresh = true;
+			this._is_dirty = true;
 
-		//} else {
+		} else {
 
-			var newValue = this._evaluate();
+			new_value = this._evaluate();
 
-			if (newValue !== this._value) {
+			if (new_value !== this._value) {
 
-				this._value = newValue;
+				event_args = {old_value: this._value};
+				this._value = new_value;
 
 				if (fire_changed) {
 
-					this._fire('changed');
+					this._fire('changed', event_args);
 
 				}
 
@@ -362,7 +368,7 @@ Lava.define(
 
 			this._is_dirty = false;
 
-		//}
+		}
 
 	},
 
