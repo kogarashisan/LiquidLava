@@ -17880,6 +17880,7 @@ Lava.define(
 
 		this._config = config;
 		this._createFields(config);
+		this.initFields(); // MetaStorage is constructed directly, not via App class
 
 		var field;
 
