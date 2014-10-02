@@ -62,7 +62,7 @@ _cAnimation = {
 	 * Animation duration in milliseconds
 	 * @type {number}
 	 */
-	duration: null,
+	duration: 0,
 
 	/**
 	 * Name of transition from {@link Lava.transitions}

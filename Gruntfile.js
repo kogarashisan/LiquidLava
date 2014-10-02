@@ -76,7 +76,7 @@ module.exports = function(grunt) {
 				content += this._wrapCodeBlock(parse_result.text, parse_result.type, parse_result.lines_text, parse_result.overlay_text, parse_result.tooltip_text);
 			}
 
-			return '<div class="lava-code-container ' + (custom_wrapper_class || 'lava-code-container-plain') + '">' + content + '</div>';
+			return '```formatted\n<div class="lava-code-container ' + (custom_wrapper_class || 'lava-code-container-plain') + '">' + content + '</div>\n```';
 
 		},
 
@@ -280,7 +280,7 @@ module.exports = function(grunt) {
 			}
 		},
 
-		_replaceKW: function(content) {
+		_replaceMarkers: function(content) {
 
 			content = content.replace(/\<kw\>([\s\S]+?)\<\/kw\>/g, function(match, inner) {
 				return '<span class="api-keyword">' + inner + '</span>';
@@ -386,21 +386,46 @@ module.exports = function(grunt) {
 				return self.wrapHighlightedBlocks(parsed_blocks);
 			});
 
+			content = content.replace(/\<lavabuild\:template_result[^\>]*?\>([\s\S]+?)\<\/lavabuild\:template_result\>/g, function(region, region_content_text){
+				var ast = global.Lava.TemplateParser.parseRaw(region);
+				if (ast.length != 1 || !ast[0].content) throw new Error('wrong lavabuild/template_result region format');
+				var region_content;
+				var as = ast[0].attributes ? ast[0].attributes.as : '';
+				switch (as) {
+					case 'single_view':
+						region_content = global.Lava.parsers.Common.compileAsView(ast[0].content);
+						break;
+					default:
+						region_content = global.Lava.parsers.Common.compileTemplate(ast[0].content)
+				}
+
+				var serialized_eval_result = self.smartSerialize(region_content);
+				return self.wrapHighlightedBlocks([
+					self._packCode('xml', 'Template source', 'api-code-header-blue', region_content_text),
+					self._packCode('javascript', 'Parse result', 'api-code-header-blue', serialized_eval_result)
+				]);
+			});
+
 			return content;
 
 		},
 
-		processMarkdown: function(content) {
+		for_template: false,
 
-			content = this._replaceKW(content);
+		processMarkdown: function(content, for_template) {
+
+			this.for_template = for_template;
+			content = this._replaceMarkers(content);
 			content = this._replaceCodes(content);
 			content = this._replaceLinks(content);
-			return this.marked(content);
+			var result = this.marked(content);
+			this.for_template = false;
+			return result;
 
 		},
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		//
+		// lava-style search for files in directory
 
 		_expand_result: [],
 
@@ -456,8 +481,12 @@ module.exports = function(grunt) {
 			result = LavaBuild.wrapHighlightedCode(code, 'text', LavaBuild.createLineNumbers(code), '', '');
 		} else if (lang == 'xml' || lang == 'javascript') {
 			result = LavaBuild.highlight(lang, code);
+		} else if (lang == 'formatted') {
+			result = code;
+		} else {
+			throw new Error('highlight: unknown language');
 		}
-		return result;
+		return LavaBuild.for_template ? ('{literal:}' + result + '{:literal}') : result;
 
 	};
 

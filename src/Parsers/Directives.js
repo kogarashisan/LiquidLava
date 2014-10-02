@@ -8,6 +8,11 @@ Lava.parsers.Directives = {
 	 * @type {Object.<string, Object>}
 	 */
 	_directives_schema: {
+
+		// view_config_presence:
+		//  true, in case the directive is valid only inside view or widget. This automatically means that it should be at top.
+		//  false, if it must be outside of view config
+
 		define: {view_config_presence: false},
 		define_resources: {view_config_presence: false},
 		widget: {},

@@ -18,12 +18,6 @@ Lava.define(
 	_modules: {},
 
 	/**
-	 * Debug mode variable to print a user-friendly message in case of circular dependencies in modules
-	 * @type {Array.<string>}
-	 */
-	_getmodule_recursion_protection: [],
-
-	/**
 	 * Get a global named module instance
 	 * @param {string} name Module name
 	 * @returns {Lava.data.Module}
@@ -32,24 +26,15 @@ Lava.define(
 
 		if (!(name in this._modules)) {
 
-			if (Lava.schema.DEBUG) {
-
-				if (this._getmodule_recursion_protection.indexOf(name) != -1) Lava.t("Circular module dependency");
-				this._getmodule_recursion_protection.push(name);
-
-			}
-
 			var config = Lava.schema.modules[name],
 				className = config.type || Lava.schema.data.DEFAULT_MODULE_CLASS,
 				constructor = Lava.ClassManager.getConstructor(className, 'Lava.data');
 
+			// construction is split into two phases, cause initFields() may reference other modules
+			// - this will result in recursive call to getModule().
+			// In case of circular dependency, the first module must be already constructed.
 			this._modules[name] = new constructor(this, config, name);
-
-			if (Lava.schema.DEBUG) {
-
-				this._getmodule_recursion_protection.pop();
-
-			}
+			this._modules[name].initFields();
 
 		}
 

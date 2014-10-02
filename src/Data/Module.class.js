@@ -37,12 +37,6 @@ Lava.define(
 	_name: null,
 
 	/**
-	 * Cached record class constructor
-	 * @type {string}
-	 */
-	_record_constructor: null,
-
-	/**
 	 * All records by their unique ID key (if module has an ID field)
 	 * @type {Object.<string, Lava.data.Record>}
 	 */
@@ -66,15 +60,11 @@ Lava.define(
 		this._config = config;
 		this._name = name;
 
-		var default_properties = this._initFields(config);
+		this._createFields(config);
 
 		this._record_constructor = Lava.ClassManager.getConstructor(
 			config.record_class || Lava.schema.data.DEFAULT_RECORD_CLASS,
 			'Lava.data'
-		);
-
-		this._createRecordProperties = new Function(
-			"return " + Lava.Serializer.serialize(default_properties)
 		);
 
 		if ('id' in this._fields) {
@@ -247,26 +237,6 @@ Lava.define(
 		this._fire('records_loaded', {records: records});
 
 		return records;
-
-	},
-
-	/**
-	 * Return a copy of local `_records` array
-	 * @returns {Array.<Lava.data.Record>}
-	 */
-	getAllRecords: function() {
-
-		return this._records.slice();
-
-	},
-
-	/**
-	 * Get number of records in the module
-	 * @returns {number}
-	 */
-	getCount: function() {
-
-		return this._records.length;
 
 	},
 

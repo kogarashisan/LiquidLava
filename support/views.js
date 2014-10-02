@@ -225,6 +225,7 @@ _cElementContainerCommon = {
 _cElementContainer = {
 
 	/**
+	 * Class name. Default namespace is 'Lava.view.container'
 	 * @const
 	 */
 	'class': "Element",

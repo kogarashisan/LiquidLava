@@ -2,7 +2,7 @@
 Lava.define(
 'Lava.animation.Emulated',
 /**
- * Used to animate with CSS transitions. Does not have keyframes, just a single timeout event
+ * Used to animate with CSS transitions. Does not use {@link Lava.Cron}, has a single timeout event
  * @lends Lava.animation.Emulated#
  * @extends Lava.animation.Abstract
  */

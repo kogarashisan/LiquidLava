@@ -5,7 +5,7 @@
 Firestorm.Object = {
 
 	/**
-	 * Return true for object with no properties, and false otherwise
+	 * Return <kw>true</kw> for object with no properties, and <kw>false</kw> otherwise
 	 * @param {Object} object_instance
 	 * @returns {boolean} <kw>true</kw>, if object is empty
 	 */

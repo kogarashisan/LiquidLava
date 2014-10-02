@@ -1479,7 +1479,7 @@ Firestorm.String = {
 Firestorm.Object = {
 
 	/**
-	 * Return true for object with no properties, and false otherwise
+	 * Return <kw>true</kw> for object with no properties, and <kw>false</kw> otherwise
 	 * @param {Object} object_instance
 	 * @returns {boolean} <kw>true</kw>, if object is empty
 	 */
@@ -1627,12 +1627,12 @@ var Lava = {
 	/** @ignore */
 	scope: {},
 	/**
-	 * place for any other user defined classes and variables
+	 * Place for any other user defined classes and variables
 	 */
 	user: {},
 
 	/**
-	 * Globak App class instance
+	 * Global App class instance
 	 * @type {Lava.system.App}
 	 */
 	app: null,
@@ -1759,7 +1759,7 @@ var Lava = {
 	// class members
 
 	/**
-	 * Cache for sugar API
+	 * Cache for sugar API: sugar class instances for global widgets
 	 * @type {Object.<string, Lava.system.Sugar>}
 	 */
 	_widget_title_to_sugar_instance: {},
@@ -2081,18 +2081,10 @@ var Lava = {
 			bootstrap_targets = Firestorm.selectElements('script[type="lava/app"],lava-app');
 			for (var i = 0, count = bootstrap_targets.length; i < count; i ++) {
 
-				//try {
-
-					element = bootstrap_targets[i];
-					result = this._elementToWidget(element, {class: 'Morph'});
-					result.inject(element, 'After');
-					Firestorm.Element.destroy(element);
-
-				//} catch (e) {
-
-				//	Lava.logException(e);
-
-				//}
+				element = bootstrap_targets[i];
+				result = this._elementToWidget(element, {class: 'Morph'});
+				result.inject(element, 'After');
+				Firestorm.Element.destroy(element);
 
 			}
 
@@ -2299,7 +2291,7 @@ var Lava = {
 	},
 
 	/**
-	 * Returns true, if tag name is void (does nor require closing tag), like "img" or "input"
+	 * Returns <kw>true</kw>, if tag name is void (does nor require closing tag), like "img" or "input"
 	 * @param {string} name
 	 * @returns {boolean}
 	 */
@@ -4422,7 +4414,7 @@ Lava.ScopeManager = {
 	/**
 	 * One refresh cycle in the refresh loop.
 	 * Warning: violates codestyle with multiple return statements
-	 * @returns {boolean} true if another cycle is needed, false when done and queue is clean
+	 * @returns {boolean} <kw>true</kw> if another cycle is needed, <kw>false</kw> when done and queue is clean
 	 */
 	_scopeRefreshCycle: function() {
 
@@ -5128,7 +5120,8 @@ Lava.TemplateWalker = {
 Lava.ClassManager = {
 
 	/**
-	 * Whether to serialize them and inline as a value, or slice() from original array in original object
+	 * Whether to serialize them and inline as a value, when building constructor,
+	 * or slice() from original array in original object
 	 * @type {boolean}
 	 * @const
 	 */
@@ -5344,7 +5337,7 @@ Lava.ClassManager = {
 	 * @param {Object} child_skeleton The skeleton of a child object
 	 * @param {_cClassData} parent_data
 	 * @param {Object} parent_skeleton The skeleton of a parent object
-	 * @param {boolean} is_root <kw>true</kw>, when extending skeletons class bodies, and false in all other cases
+	 * @param {boolean} is_root <kw>true</kw>, when extending skeletons class bodies, and <kw>false</kw> in all other cases
 	 * @param {number} [references_offset] Also acts as a sign of 'implements' mode
 	 */
 	_extend: function (child_data, child_skeleton, parent_data, parent_skeleton, is_root, references_offset) {
@@ -6413,17 +6406,17 @@ Lava.parsers.Common = {
 
 		}
 
-		inner_template = this.asBlocks(this.compileTemplate(raw_tag.content));
+		inner_template = this.asBlocks(raw_tag.content);
 
 		// inside there may be either a single view, or x:container_config, followed by the view
 		if (inner_template.length == 1) {
 
-			view_config = inner_template[0];
+			view_config = this.compileAsView(inner_template);
 
 		} else if (inner_template.length == 2) {
 
 			container_config_directive = inner_template[0];
-			view_config = inner_template[1];
+			view_config = this.compileAsView([inner_template[1]]);
 
 		} else {
 
@@ -6431,13 +6424,12 @@ Lava.parsers.Common = {
 
 		}
 
-		if (Lava.schema.DEBUG && view_config.type != 'view' && view_config.type != 'widget') Lava.t("Expected: view or widget inside container, got: " + view_config.type);
 		if (Lava.schema.DEBUG && view_config.container) Lava.t("Container wraps a view with it's container already defined.");
 		container_config = this._toContainer(raw_tag);
 		view_config.container = container_config;
 
 		if (container_config_directive) {
-			if (Lava.schema.DEBUG && (container_config_directive.type != 'directive' || container_config_directive.name == 'container_config'))
+			if (Lava.schema.DEBUG && (container_config_directive.type != 'directive' || container_config_directive.name != 'container_config'))
 				Lava.t("Malformed content of tag with type='container'");
 			Lava.parsers.Directives.processDirective(container_config_directive, view_config, true);
 		}
@@ -7072,7 +7064,7 @@ Lava.parsers.Common = {
 
 				}
 
-				targets_string = targets_string.substr(targets_string.length - config_ref.tail_length + 2);
+				targets_string = targets_string.substr(targets_string.length - config_ref.tail_length);
 
 			}
 
@@ -7082,13 +7074,12 @@ Lava.parsers.Common = {
 
 			} else if (targets_string.length) {
 
-				Lava.t('Malformed targets (2): ' + targets_string);
+				targets_string = targets_string.trim();
+				if (targets_string.length) Lava.t('Malformed targets (2): ' + targets_string);
 
 			}
 
 			result.push(target);
-
-			targets_string = targets_string.trim();
 
 		}
 
@@ -7174,6 +7165,11 @@ Lava.parsers.Directives = {
 	 * @type {Object.<string, Object>}
 	 */
 	_directives_schema: {
+
+		// view_config_presence:
+		//  true, in case the directive is valid only inside view or widget. This automatically means that it should be at top.
+		//  false, if it must be outside of view config
+
 		define: {view_config_presence: false},
 		define_resources: {view_config_presence: false},
 		widget: {},
@@ -11151,6 +11147,13 @@ Lava.define(
 	 */
 	_addListener: function(event_name, fn, context, listener_args, listeners_by_event) {
 
+		// otherwise, listener would be called on window object
+		if (Lava.schema.DEBUG && !context) Lava.t('Listener was created without a context');
+
+		// note 1: member count for a plain object like this must not exceed 8
+		// otherwise, chrome will slow down greatly (!)
+		// note 2: there is no 'remove()' method inside the listener, cause depending on implementation,
+		// it may either slow down script execution or lead to memory leaks
 		var listener = {
 			event_name: event_name,
 			fn: fn,
@@ -11317,7 +11320,7 @@ Lava.define(
 	},
 
 	/**
-	 * Returns true if property exists, even if it's null/undefined
+	 * Returns <kw>true</kw> if property exists, even if it's null/undefined
 	 * @param {string} name Property name
 	 * @returns {boolean} True, if property exists
 	 */
@@ -12058,7 +12061,7 @@ Lava.define(
 Lava.define(
 'Lava.animation.Standard',
 /**
- * Common JavaScript-driven animation with keyframes
+ * Common JavaScript-driven animation. Uses {@link Lava.Cron}
  * @lends Lava.animation.Standard#
  * @extends Lava.animation.Abstract
  */
@@ -12376,7 +12379,7 @@ Lava.define(
 Lava.define(
 'Lava.animation.Emulated',
 /**
- * Used to animate with CSS transitions. Does not have keyframes, just a single timeout event
+ * Used to animate with CSS transitions. Does not use {@link Lava.Cron}, has a single timeout event
  * @lends Lava.animation.Emulated#
  * @extends Lava.animation.Abstract
  */
@@ -15321,12 +15324,6 @@ Lava.define(
 	_modules: {},
 
 	/**
-	 * Debug mode variable to print a user-friendly message in case of circular dependencies in modules
-	 * @type {Array.<string>}
-	 */
-	_getmodule_recursion_protection: [],
-
-	/**
 	 * Get a global named module instance
 	 * @param {string} name Module name
 	 * @returns {Lava.data.Module}
@@ -15335,24 +15332,15 @@ Lava.define(
 
 		if (!(name in this._modules)) {
 
-			if (Lava.schema.DEBUG) {
-
-				if (this._getmodule_recursion_protection.indexOf(name) != -1) Lava.t("Circular module dependency");
-				this._getmodule_recursion_protection.push(name);
-
-			}
-
 			var config = Lava.schema.modules[name],
 				className = config.type || Lava.schema.data.DEFAULT_MODULE_CLASS,
 				constructor = Lava.ClassManager.getConstructor(className, 'Lava.data');
 
+			// construction is split into two phases, cause initFields() may reference other modules
+			// - this will result in recursive call to getModule().
+			// In case of circular dependency, the first module must be already constructed.
 			this._modules[name] = new constructor(this, config, name);
-
-			if (Lava.schema.DEBUG) {
-
-				this._getmodule_recursion_protection.pop();
-
-			}
+			this._modules[name].initFields();
 
 		}
 
@@ -15428,6 +15416,7 @@ Lava.define(
 		if (raw_tag.content) {
 
 			// Lava.isVoidTag is a workaround for <x:attach_directives>
+			// It's highly discouraged to make sugar from void tags
 			if (Lava.isVoidTag(raw_tag.name) || !schema.content_schema) {
 
 				tags = Lava.parsers.Common.asBlocks(raw_tag.content);
@@ -16305,7 +16294,9 @@ Lava.define(
 
 		var local_record = event_args.collection_owner;
 		if (local_record.guid in this._collections_by_record_guid) {
+			Lava.suspendListener(this._collection_listeners_by_guid[local_record.guid].removed);
 			this._collections_by_record_guid[local_record.guid].removeValue(event_args.child);
+			Lava.resumeListener(this._collection_listeners_by_guid[local_record.guid].removed);
 		}
 
 	},
@@ -16319,7 +16310,9 @@ Lava.define(
 
 		var local_record = event_args.collection_owner;
 		if (local_record.guid in this._collections_by_record_guid) {
+			Lava.suspendListener(this._collection_listeners_by_guid[local_record.guid].added);
 			this._collections_by_record_guid[local_record.guid].includeValue(event_args.child);
+			Lava.suspendListener(this._collection_listeners_by_guid[local_record.guid].added);
 		}
 
 	},
@@ -16812,6 +16805,8 @@ Lava.define(
 	 */
 	EMPTY_FOREIGN_ID: 0,
 
+	_is_nullable: true,
+
 	/**
 	 * @param module
 	 * @param name
@@ -16837,7 +16832,7 @@ Lava.define(
 			this._foreign_key_changed_listener = this._foreign_key_field.on('changed', this._onForeignKeyChanged, this);
 			this._external_id_field = this._referenced_module.getField('id');
 			this._external_id_changed_listener = this._external_id_field.on('changed', this._onExternalIdCreated, this);
-			this._external_records_loaded_listener = this._referenced_module.on('records_loaded', this._onReferencedModuleRecordsLoaded);
+			this._external_records_loaded_listener = this._referenced_module.on('records_loaded', this._onReferencedModuleRecordsLoaded, this);
 
 		}
 
@@ -17323,18 +17318,22 @@ Lava.define(
 	 * @type {Object.<string, Lava.data.RecordAbstract>}
 	 */
 	_properties_by_guid: {},
+	/**
+	 * Cached record class constructor
+	 * @type {function}
+	 */
+	_record_constructor: null,
 
 	/**
 	 * Create field instances and return the default record properties object
 	 * @param {(_cModule|_cMetaStorage)} config
 	 * @returns {Object} Default record properties object with initial values for each field
 	 */
-	_initFields: function(config) {
+	_createFields: function(config) {
 
 		var field_name,
 			type,
-			constructor,
-			default_properties = {};
+			constructor;
 
 		for (field_name in config.fields) {
 
@@ -17349,13 +17348,25 @@ Lava.define(
 
 		}
 
+	},
+
+	/**
+	 * Called by App instance. Do not call this function directly.
+	 */
+	initFields: function() {
+
+		var default_properties = {},
+			field_name;
+
 		for (field_name in this._fields) {
 
 			this._fields[field_name].onModuleFieldsCreated(default_properties);
 
 		}
 
-		return default_properties;
+		this._createRecordProperties = new Function(
+			"return " + Lava.Serializer.serialize(default_properties)
+		);
 
 	},
 
@@ -17365,7 +17376,27 @@ Lava.define(
 	 */
 	_createRecordProperties: function() {
 
-		return {};
+		Lava.t('Module requires initialization');
+
+	},
+
+	/**
+	 * Return a copy of local `_records` array
+	 * @returns {Array.<Lava.data.RecordAbstract>}
+	 */
+	getAllRecords: function() {
+
+		return this._records.slice();
+
+	},
+
+	/**
+	 * Get number of records in the module
+	 * @returns {number}
+	 */
+	getCount: function() {
+
+		return this._records.length;
 
 	},
 
@@ -17434,12 +17465,6 @@ Lava.define(
 	_name: null,
 
 	/**
-	 * Cached record class constructor
-	 * @type {string}
-	 */
-	_record_constructor: null,
-
-	/**
 	 * All records by their unique ID key (if module has an ID field)
 	 * @type {Object.<string, Lava.data.Record>}
 	 */
@@ -17463,15 +17488,11 @@ Lava.define(
 		this._config = config;
 		this._name = name;
 
-		var default_properties = this._initFields(config);
+		this._createFields(config);
 
 		this._record_constructor = Lava.ClassManager.getConstructor(
 			config.record_class || Lava.schema.data.DEFAULT_RECORD_CLASS,
 			'Lava.data'
-		);
-
-		this._createRecordProperties = new Function(
-			"return " + Lava.Serializer.serialize(default_properties)
 		);
 
 		if ('id' in this._fields) {
@@ -17644,26 +17665,6 @@ Lava.define(
 		this._fire('records_loaded', {records: records});
 
 		return records;
-
-	},
-
-	/**
-	 * Return a copy of local `_records` array
-	 * @returns {Array.<Lava.data.Record>}
-	 */
-	getAllRecords: function() {
-
-		return this._records.slice();
-
-	},
-
-	/**
-	 * Get number of records in the module
-	 * @returns {number}
-	 */
-	getCount: function() {
-
-		return this._records.length;
 
 	},
 
@@ -17878,9 +17879,9 @@ Lava.define(
 		if ('id' in config.fields) Lava.t("Id field in MetaStorage is not permitted");
 
 		this._config = config;
+		this._createFields(config);
 
-		var default_properties = this._initFields(config),
-			field;
+		var field;
 
 		if (Lava.schema.DEBUG) {
 			for (field in this._fields) {
@@ -17889,9 +17890,7 @@ Lava.define(
 			}
 		}
 
-		this._createRecordProperties = new Function(
-			"return " + Lava.Serializer.serialize(default_properties)
-		);
+		this._record_constructor = Lava.ClassManager.getConstructor('MetaRecord', 'Lava.data');
 
 	},
 
@@ -17929,30 +17928,12 @@ Lava.define(
 	_createRecordInstance: function() {
 
 		var properties = this._createRecordProperties(),
-			constructor = Lava.ClassManager.getConstructor('MetaRecord', 'Lava.data'),
-			record = new constructor(this, this._fields, properties);
+			record = new this._record_constructor(this, this._fields, properties);
 
 		this._records.push(record);
 		this._properties_by_guid[record.guid] = properties;
 		this._records_by_guid[record.guid] = record;
 		return record;
-
-	},
-
-	/**
-	 * Get all records in this module
-	 * @returns {Array.<Lava.data.MetaRecord>}
-	 */
-	getAllRecords: function() {
-
-		var result = [],
-			guid;
-
-		for (guid in this._properties) {
-			result.push(this._properties[guid]);
-		}
-
-		return result;
 
 	}
 
@@ -18122,11 +18103,10 @@ Lava.define(
 	 * Objects with a reference to modifier's widget (it's cached to speed up calling) and modifier name
 	 * @type {Array.<Object>}
 	 */
-	_modifiers: [],
-	/**
-	 * Alpha version. Not used
-	 */
-	_active_modifiers: [],
+	_modifier_descriptors: [],
+
+	// Alpha version. Not used
+	//_active_modifiers: [],
 
 	/**
 	 * Create an Argument instance. Acquire binds, find modifier sources, apply correct state
@@ -18200,7 +18180,7 @@ Lava.define(
 
 			for (i = 0, count = config.modifiers.length; i < count; i++) {
 
-				this._modifiers.push({
+				this._modifier_descriptors.push({
 					widget: this.getWidgetByModifierConfig(config.modifiers[i]),
 					callback_name: config.modifiers[i].callback_name
 				});
@@ -18323,7 +18303,7 @@ Lava.define(
 	 */
 	_callModifier: function(index, arguments_array) {
 
-		return this._modifiers[index].widget.callModifier(this._modifiers[index].callback_name, arguments_array);
+		return this._modifier_descriptors[index].widget.callModifier(this._modifier_descriptors[index].callback_name, arguments_array);
 
 	},
 
@@ -18334,8 +18314,6 @@ Lava.define(
 	 * @returns {*}
 	 */
 	_callActiveModifier: function(index, arguments_array) {
-
-		return this._modifiers[index].widget.callActiveModifier(this._modifiers[index].callback_name, arguments_array);
 
 	},
 
@@ -19483,7 +19461,7 @@ Lava.define(
 	},
 
 	/**
-	 * Return true, if the Segment is bound to existing object
+	 * Return <kw>true</kw>, if the Segment is bound to existing object
 	 * @returns {boolean}
 	 */
 	isConnected: function() {
@@ -23608,16 +23586,7 @@ Lava.define(
 
 		if (target_name in this._event_handlers) {
 
-			//try {
-
-				this[this._event_handlers[target_name]](dom_event_name, dom_event, view, template_arguments);
-
-			//} catch (e) {
-
-			//	Lava.logException(e);
-
-			//}
-
+			this[this._event_handlers[target_name]](dom_event_name, dom_event, view, template_arguments);
 			result = true;
 
 		}
@@ -28726,209 +28695,227 @@ return (this._binds[0].getValue());
 		template: [
 			"\r\n\t\t",
 			{
-				type: "view",
-				"class": "Foreach",
-				argument: {
-					evaluator: function() {
-return (this._binds[0].getValue());
-},
-					flags: {isScopeEval: true},
-					binds: [{
-						locator_type: "Name",
-						locator: "tabs",
-						tail: ["_tabs"]
-					}]
-				},
-				as: "tab",
-				template: [
-					"\r\n\t\t\t\t",
-					{
-						type: "view",
-						"class": "If",
-						argument: {
-							evaluator: function() {
-return (! this._binds[0].getValue());
-},
-							binds: [{
-								property_name: "tab",
-								tail: ["is_hidden"]
-							}]
-						},
-						template: [
-							"\r\n\t\t\t\t\t",
-							{
-								type: "view",
-								"class": "View",
-								container: {
-									"class": "Element",
-									tag_name: "li",
-									class_bindings: {
-										"0": {
-											evaluator: function() {
-return (this._binds[0].getValue() ? 'active' : '');
-},
-											binds: [{
-												property_name: "tab",
-												tail: ["is_active"]
-											}]
-										},
-										"1": {
-											evaluator: function() {
-return (this._binds[0].getValue() ? '' : 'disabled');
-},
-											binds: [{
-												property_name: "tab",
-												tail: ["is_enabled"]
-											}]
-										}
-									}
-								},
-								template: [
-									"\r\n\t\t\t\t\t\t",
-									{
-										type: "view",
-										"class": "View",
-										container: {
-											"class": "Element",
-											tag_name: "a",
-											events: {
-												click: [{
-													locator_type: "Name",
-													locator: "tabs",
-													name: "header_click",
-													arguments: [{
-														type: 2,
-														data: {property_name: "tab"}
-													}]
-												}]
-											},
-											property_bindings: {
-												href: {
-													evaluator: function() {
-return ('#' + (this._binds[0].getValue() || ''));
-},
-													binds: [{
-														property_name: "tab",
-														tail: ["name"]
-													}]
-												}
-											}
-										},
-										template: [
-											"\r\n\t\t\t\t\t\t\t",
-											{
-												locator_type: "Name",
-												locator: "tabs",
-												name: "tab_include",
-												arguments: [
-													{
-														type: 2,
-														data: {property_name: "tab"}
-													},
-													{
-														type: 1,
-														data: "title"
-													}
-												],
-												type: "include"
-											},
-											"\r\n\t\t\t\t\t\t"
-										]
-									},
-									"\r\n\t\t\t\t\t"
-								]
-							},
-							"\r\n\t\t\t\t"
-						]
-					},
-					"\r\n\t\t\t"
-				],
-				container: {
-					"class": "Element",
-					tag_name: "ul",
-					resource_id: {
-						locator_type: "Name",
-						locator: "tabs",
-						name: "TABS_HEADERS_CONTAINER"
-					}
-				}
+				name: "tabs_header",
+				type: "include"
 			},
 			"\r\n\t\t",
 			{
-				type: "view",
-				"class": "Foreach",
-				argument: {
-					evaluator: function() {
-return (this._binds[0].getValue());
-},
-					flags: {isScopeEval: true},
-					binds: [{
-						locator_type: "Name",
-						locator: "tabs",
-						tail: ["_tabs"]
-					}]
-				},
-				as: "tab",
-				refresher: {
-					"class": "Standard",
-					insertion_strategy: "sequential_elements"
-				},
-				template: [
-					"\r\n\t\t\t\t\r\n\t\t\t\t",
-					{
-						type: "view",
-						"class": "View",
-						container: {
-							"class": "Element",
-							tag_name: "div",
-							static_classes: ["tab-pane"],
-							class_bindings: {
-								"0": {
-									evaluator: function() {
-return (this._binds[0].getValue() ? 'active' : '');
-},
-									binds: [{
-										property_name: "tab",
-										tail: ["is_active"]
-									}]
-								}
-							}
-						},
-						template: [
-							"\r\n\t\t\t\t\t",
-							{
-								locator_type: "Name",
-								locator: "tabs",
-								name: "tab_include",
-								arguments: [
-									{
-										type: 2,
-										data: {property_name: "tab"}
-									},
-									{
-										type: 1,
-										data: "content"
-									}
-								],
-								type: "include"
-							},
-							"\r\n\t\t\t\t"
-						]
-					},
-					"\r\n\t\t\t"
-				],
-				container: {
-					"class": "Element",
-					tag_name: "div",
-					resource_id: {
-						locator_type: "Name",
-						locator: "tabs",
-						name: "TABS_CONTENT_CONTAINER"
-					}
-				}
+				name: "tabs_body",
+				type: "include"
 			},
 			"\r\n\t"
 		],
+		includes: {
+			tabs_header: [
+				"\r\n\t\t",
+				{
+					type: "view",
+					"class": "Foreach",
+					argument: {
+						evaluator: function() {
+return (this._binds[0].getValue());
+},
+						flags: {isScopeEval: true},
+						binds: [{
+							locator_type: "Name",
+							locator: "tabs",
+							tail: ["_tabs"]
+						}]
+					},
+					as: "tab",
+					template: [
+						"\r\n\t\t\t\t",
+						{
+							type: "view",
+							"class": "If",
+							argument: {
+								evaluator: function() {
+return (! this._binds[0].getValue());
+},
+								binds: [{
+									property_name: "tab",
+									tail: ["is_hidden"]
+								}]
+							},
+							template: [
+								"\r\n\t\t\t\t\t",
+								{
+									type: "view",
+									"class": "View",
+									container: {
+										"class": "Element",
+										tag_name: "li",
+										class_bindings: {
+											"0": {
+												evaluator: function() {
+return (this._binds[0].getValue() ? 'active' : '');
+},
+												binds: [{
+													property_name: "tab",
+													tail: ["is_active"]
+												}]
+											},
+											"1": {
+												evaluator: function() {
+return (this._binds[0].getValue() ? '' : 'disabled');
+},
+												binds: [{
+													property_name: "tab",
+													tail: ["is_enabled"]
+												}]
+											}
+										}
+									},
+									template: [
+										"\r\n\t\t\t\t\t\t",
+										{
+											type: "view",
+											"class": "View",
+											container: {
+												"class": "Element",
+												tag_name: "a",
+												events: {
+													click: [{
+														locator_type: "Name",
+														locator: "tabs",
+														name: "header_click",
+														arguments: [{
+															type: 2,
+															data: {property_name: "tab"}
+														}]
+													}]
+												},
+												property_bindings: {
+													href: {
+														evaluator: function() {
+return ('#' + (this._binds[0].getValue() || ''));
+},
+														binds: [{
+															property_name: "tab",
+															tail: ["name"]
+														}]
+													}
+												}
+											},
+											template: [
+												"\r\n\t\t\t\t\t\t\t",
+												{
+													locator_type: "Name",
+													locator: "tabs",
+													name: "tab_include",
+													arguments: [
+														{
+															type: 2,
+															data: {property_name: "tab"}
+														},
+														{
+															type: 1,
+															data: "title"
+														}
+													],
+													type: "include"
+												},
+												"\r\n\t\t\t\t\t\t"
+											]
+										},
+										"\r\n\t\t\t\t\t"
+									]
+								},
+								"\r\n\t\t\t\t"
+							]
+						},
+						"\r\n\t\t\t"
+					],
+					container: {
+						"class": "Element",
+						tag_name: "ul",
+						resource_id: {
+							locator_type: "Name",
+							locator: "tabs",
+							name: "TABS_HEADERS_CONTAINER"
+						}
+					}
+				},
+				"\r\n\t"
+			],
+			tabs_body: [
+				"\r\n\t\t",
+				{
+					type: "view",
+					"class": "Foreach",
+					argument: {
+						evaluator: function() {
+return (this._binds[0].getValue());
+},
+						flags: {isScopeEval: true},
+						binds: [{
+							locator_type: "Name",
+							locator: "tabs",
+							tail: ["_tabs"]
+						}]
+					},
+					as: "tab",
+					refresher: {
+						"class": "Standard",
+						insertion_strategy: "sequential_elements"
+					},
+					template: [
+						"\r\n\t\t\t\t\r\n\t\t\t\t",
+						{
+							type: "view",
+							"class": "View",
+							container: {
+								"class": "Element",
+								tag_name: "div",
+								static_classes: ["tab-pane"],
+								class_bindings: {
+									"0": {
+										evaluator: function() {
+return (this._binds[0].getValue() ? 'active' : '');
+},
+										binds: [{
+											property_name: "tab",
+											tail: ["is_active"]
+										}]
+									}
+								}
+							},
+							template: [
+								"\r\n\t\t\t\t\t",
+								{
+									locator_type: "Name",
+									locator: "tabs",
+									name: "tab_include",
+									arguments: [
+										{
+											type: 2,
+											data: {property_name: "tab"}
+										},
+										{
+											type: 1,
+											data: "content"
+										}
+									],
+									type: "include"
+								},
+								"\r\n\t\t\t\t"
+							]
+						},
+						"\r\n\t\t\t"
+					],
+					container: {
+						"class": "Element",
+						tag_name: "div",
+						resource_id: {
+							locator_type: "Name",
+							locator: "tabs",
+							name: "TABS_CONTENT_CONTAINER"
+						}
+					}
+				},
+				"\r\n\t"
+			]
+		},
 		storage_schema: {
 			tabs: {
 				type: "object_collection",

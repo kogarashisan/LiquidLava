@@ -87,6 +87,10 @@ member descriptor:
 
 var ApiHelper = require('../ApiHelper.js');
 
+function __debug(arg) {
+	var test = 1;
+}
+
 module.exports = function(grunt) {
 
 	grunt.registerTask('buildDoc', function() {
@@ -1176,10 +1180,12 @@ module.exports = function(grunt) {
 			for (i = 0, count = names_ext.length; i < count; i++) {
 
 				var content = grunt.file.read(names_ext[i].full_name);
+				var markdown = LavaBuild.processMarkdown(content, true);
+				__debug(markdown);
 				var widget_config = {
 					type: 'widget',
 					is_extended: true,
-					template: Lava.TemplateParser.parse(LavaBuild.processMarkdown(content)),
+					template: Lava.TemplateParser.parse(markdown),
 					container: {'class': 'Element', tag_name: 'div'}
 				};
 

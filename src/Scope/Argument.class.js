@@ -72,11 +72,10 @@ Lava.define(
 	 * Objects with a reference to modifier's widget (it's cached to speed up calling) and modifier name
 	 * @type {Array.<Object>}
 	 */
-	_modifiers: [],
-	/**
-	 * Alpha version. Not used
-	 */
-	_active_modifiers: [],
+	_modifier_descriptors: [],
+
+	// Alpha version. Not used
+	//_active_modifiers: [],
 
 	/**
 	 * Create an Argument instance. Acquire binds, find modifier sources, apply correct state
@@ -150,7 +149,7 @@ Lava.define(
 
 			for (i = 0, count = config.modifiers.length; i < count; i++) {
 
-				this._modifiers.push({
+				this._modifier_descriptors.push({
 					widget: this.getWidgetByModifierConfig(config.modifiers[i]),
 					callback_name: config.modifiers[i].callback_name
 				});
@@ -273,7 +272,7 @@ Lava.define(
 	 */
 	_callModifier: function(index, arguments_array) {
 
-		return this._modifiers[index].widget.callModifier(this._modifiers[index].callback_name, arguments_array);
+		return this._modifier_descriptors[index].widget.callModifier(this._modifier_descriptors[index].callback_name, arguments_array);
 
 	},
 
@@ -284,8 +283,6 @@ Lava.define(
 	 * @returns {*}
 	 */
 	_callActiveModifier: function(index, arguments_array) {
-
-		return this._modifiers[index].widget.callActiveModifier(this._modifiers[index].callback_name, arguments_array);
 
 	},
 

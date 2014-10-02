@@ -2,7 +2,7 @@
 Lava.define(
 'Lava.animation.Standard',
 /**
- * Common JavaScript-driven animation with keyframes
+ * Common JavaScript-driven animation. Uses {@link Lava.Cron}
  * @lends Lava.animation.Standard#
  * @extends Lava.animation.Abstract
  */

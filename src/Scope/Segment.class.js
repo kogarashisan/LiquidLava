@@ -105,7 +105,7 @@ Lava.define(
 	},
 
 	/**
-	 * Return true, if the Segment is bound to existing object
+	 * Return <kw>true</kw>, if the Segment is bound to existing object
 	 * @returns {boolean}
 	 */
 	isConnected: function() {

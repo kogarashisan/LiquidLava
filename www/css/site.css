@@ -7706,7 +7706,7 @@ footer .container {background: #f7f5fa;}
 .lava-code-container-plain {border: 2px solid #DADADA}
 .lava-code-container-plain .lava-code-line-numbers {margin: 0!important}
 .lava-code-container-plain pre {border: 0!important;border-radius: 0!important;margin: 0!important}
-.api-code-header {background: #EEEEEE;font-weight: bold;padding: 3px 0 3px 3em;}
+.api-code-header {background: #EEEEEE;font-weight: bold;padding: 3px 0 3px 3em;clear:both}
 .api-code-header-blue {background: #BFD8F3!important;}
 .api-code-header-red {background: #f3a1a1 !important;}
 .api-code-header-green {background: #b8f3b3 !important;}

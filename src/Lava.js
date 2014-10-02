@@ -76,12 +76,12 @@ var Lava = {
 	/** @ignore */
 	scope: {},
 	/**
-	 * place for any other user defined classes and variables
+	 * Place for any other user defined classes and variables
 	 */
 	user: {},
 
 	/**
-	 * Globak App class instance
+	 * Global App class instance
 	 * @type {Lava.system.App}
 	 */
 	app: null,
@@ -208,7 +208,7 @@ var Lava = {
 	// class members
 
 	/**
-	 * Cache for sugar API
+	 * Cache for sugar API: sugar class instances for global widgets
 	 * @type {Object.<string, Lava.system.Sugar>}
 	 */
 	_widget_title_to_sugar_instance: {},
@@ -530,18 +530,10 @@ var Lava = {
 			bootstrap_targets = Firestorm.selectElements('script[type="lava/app"],lava-app');
 			for (var i = 0, count = bootstrap_targets.length; i < count; i ++) {
 
-				//try {
-
-					element = bootstrap_targets[i];
-					result = this._elementToWidget(element, {class: 'Morph'});
-					result.inject(element, 'After');
-					Firestorm.Element.destroy(element);
-
-				//} catch (e) {
-
-				//	Lava.logException(e);
-
-				//}
+				element = bootstrap_targets[i];
+				result = this._elementToWidget(element, {class: 'Morph'});
+				result.inject(element, 'After');
+				Firestorm.Element.destroy(element);
 
 			}
 
@@ -748,7 +740,7 @@ var Lava = {
 	},
 
 	/**
-	 * Returns true, if tag name is void (does nor require closing tag), like "img" or "input"
+	 * Returns <kw>true</kw>, if tag name is void (does nor require closing tag), like "img" or "input"
 	 * @param {string} name
 	 * @returns {boolean}
 	 */

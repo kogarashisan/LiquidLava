@@ -86,6 +86,8 @@ Lava.define(
 	 */
 	EMPTY_FOREIGN_ID: 0,
 
+	_is_nullable: true,
+
 	/**
 	 * @param module
 	 * @param name
@@ -111,7 +113,7 @@ Lava.define(
 			this._foreign_key_changed_listener = this._foreign_key_field.on('changed', this._onForeignKeyChanged, this);
 			this._external_id_field = this._referenced_module.getField('id');
 			this._external_id_changed_listener = this._external_id_field.on('changed', this._onExternalIdCreated, this);
-			this._external_records_loaded_listener = this._referenced_module.on('records_loaded', this._onReferencedModuleRecordsLoaded);
+			this._external_records_loaded_listener = this._referenced_module.on('records_loaded', this._onReferencedModuleRecordsLoaded, this);
 
 		}
 

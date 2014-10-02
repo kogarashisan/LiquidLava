@@ -36,18 +36,22 @@ Lava.define(
 	 * @type {Object.<string, Lava.data.RecordAbstract>}
 	 */
 	_properties_by_guid: {},
+	/**
+	 * Cached record class constructor
+	 * @type {function}
+	 */
+	_record_constructor: null,
 
 	/**
 	 * Create field instances and return the default record properties object
 	 * @param {(_cModule|_cMetaStorage)} config
 	 * @returns {Object} Default record properties object with initial values for each field
 	 */
-	_initFields: function(config) {
+	_createFields: function(config) {
 
 		var field_name,
 			type,
-			constructor,
-			default_properties = {};
+			constructor;
 
 		for (field_name in config.fields) {
 
@@ -62,13 +66,25 @@ Lava.define(
 
 		}
 
+	},
+
+	/**
+	 * Called by App instance. Do not call this function directly.
+	 */
+	initFields: function() {
+
+		var default_properties = {},
+			field_name;
+
 		for (field_name in this._fields) {
 
 			this._fields[field_name].onModuleFieldsCreated(default_properties);
 
 		}
 
-		return default_properties;
+		this._createRecordProperties = new Function(
+			"return " + Lava.Serializer.serialize(default_properties)
+		);
 
 	},
 
@@ -78,7 +94,27 @@ Lava.define(
 	 */
 	_createRecordProperties: function() {
 
-		return {};
+		Lava.t('Module requires initialization');
+
+	},
+
+	/**
+	 * Return a copy of local `_records` array
+	 * @returns {Array.<Lava.data.RecordAbstract>}
+	 */
+	getAllRecords: function() {
+
+		return this._records.slice();
+
+	},
+
+	/**
+	 * Get number of records in the module
+	 * @returns {number}
+	 */
+	getCount: function() {
+
+		return this._records.length;
 
 	},
 

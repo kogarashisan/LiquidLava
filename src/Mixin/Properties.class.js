@@ -60,7 +60,7 @@ Lava.define(
 	},
 
 	/**
-	 * Returns true if property exists, even if it's null/undefined
+	 * Returns <kw>true</kw> if property exists, even if it's null/undefined
 	 * @param {string} name Property name
 	 * @returns {boolean} True, if property exists
 	 */

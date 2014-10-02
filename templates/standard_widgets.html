@@ -163,6 +163,10 @@
 
 <x:define controller="Tabs" title="Tabs">
 	<main_template>
+		{>tabs_header}
+		{>tabs_body}
+	</main_template>
+	<include name="tabs_header">
 		<ul x:type="container" x:resource_id="$tabs.TABS_HEADERS_CONTAINER">
 			{#foreach($tabs._tabs) as=tab}
 				{#if(!tab.is_hidden)}
@@ -175,15 +179,17 @@
 				{/if}
 			{/foreach}
 		</ul>
+	</include>
+	<include name="tabs_body">
 		<div x:type="container" x:resource_id="$tabs.TABS_CONTENT_CONTAINER">
 			{#foreach($tabs._tabs) as=tab}
 				<x:refresher>{class: 'Standard', insertion_strategy: 'sequential_elements'}</x:refresher>
 				<div x:type="view" class="tab-pane" x:classes="tab.is_active ? 'active' : ''">
-					{>$tabs.tab_include(tab, 'content'))}
+					{>$tabs.tab_include(tab, 'content')}
 				</div>
 			{/foreach}
 		</div>
-	</main_template>
+	</include>
 	<script x:equiv="storage_schema" type="application/json">
 		{
 			tabs: {

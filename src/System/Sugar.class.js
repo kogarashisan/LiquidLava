@@ -54,6 +54,7 @@ Lava.define(
 		if (raw_tag.content) {
 
 			// Lava.isVoidTag is a workaround for <x:attach_directives>
+			// It's highly discouraged to make sugar from void tags
 			if (Lava.isVoidTag(raw_tag.name) || !schema.content_schema) {
 
 				tags = Lava.parsers.Common.asBlocks(raw_tag.content);

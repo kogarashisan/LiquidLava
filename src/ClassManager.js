@@ -4,7 +4,8 @@
 Lava.ClassManager = {
 
 	/**
-	 * Whether to serialize them and inline as a value, or slice() from original array in original object
+	 * Whether to serialize them and inline as a value, when building constructor,
+	 * or slice() from original array in original object
 	 * @type {boolean}
 	 * @const
 	 */
@@ -220,7 +221,7 @@ Lava.ClassManager = {
 	 * @param {Object} child_skeleton The skeleton of a child object
 	 * @param {_cClassData} parent_data
 	 * @param {Object} parent_skeleton The skeleton of a parent object
-	 * @param {boolean} is_root <kw>true</kw>, when extending skeletons class bodies, and false in all other cases
+	 * @param {boolean} is_root <kw>true</kw>, when extending skeletons class bodies, and <kw>false</kw> in all other cases
 	 * @param {number} [references_offset] Also acts as a sign of 'implements' mode
 	 */
 	_extend: function (child_data, child_skeleton, parent_data, parent_skeleton, is_root, references_offset) {

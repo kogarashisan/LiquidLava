@@ -219,16 +219,7 @@ Lava.define(
 
 		if (target_name in this._event_handlers) {
 
-			//try {
-
-				this[this._event_handlers[target_name]](dom_event_name, dom_event, view, template_arguments);
-
-			//} catch (e) {
-
-			//	Lava.logException(e);
-
-			//}
-
+			this[this._event_handlers[target_name]](dom_event_name, dom_event, view, template_arguments);
 			result = true;
 
 		}

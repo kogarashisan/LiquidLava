@@ -101,7 +101,9 @@ Lava.define(
 
 		var local_record = event_args.collection_owner;
 		if (local_record.guid in this._collections_by_record_guid) {
+			Lava.suspendListener(this._collection_listeners_by_guid[local_record.guid].removed);
 			this._collections_by_record_guid[local_record.guid].removeValue(event_args.child);
+			Lava.resumeListener(this._collection_listeners_by_guid[local_record.guid].removed);
 		}
 
 	},
@@ -115,7 +117,9 @@ Lava.define(
 
 		var local_record = event_args.collection_owner;
 		if (local_record.guid in this._collections_by_record_guid) {
+			Lava.suspendListener(this._collection_listeners_by_guid[local_record.guid].added);
 			this._collections_by_record_guid[local_record.guid].includeValue(event_args.child);
+			Lava.suspendListener(this._collection_listeners_by_guid[local_record.guid].added);
 		}
 
 	},

@@ -46,6 +46,13 @@ Lava.define(
 	 */
 	_addListener: function(event_name, fn, context, listener_args, listeners_by_event) {
 
+		// otherwise, listener would be called on window object
+		if (Lava.schema.DEBUG && !context) Lava.t('Listener was created without a context');
+
+		// note 1: member count for a plain object like this must not exceed 8
+		// otherwise, chrome will slow down greatly (!)
+		// note 2: there is no 'remove()' method inside the listener, cause depending on implementation,
+		// it may either slow down script execution or lead to memory leaks
 		var listener = {
 			event_name: event_name,
 			fn: fn,

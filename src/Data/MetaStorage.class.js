@@ -21,9 +21,9 @@ Lava.define(
 		if ('id' in config.fields) Lava.t("Id field in MetaStorage is not permitted");
 
 		this._config = config;
+		this._createFields(config);
 
-		var default_properties = this._initFields(config),
-			field;
+		var field;
 
 		if (Lava.schema.DEBUG) {
 			for (field in this._fields) {
@@ -32,9 +32,7 @@ Lava.define(
 			}
 		}
 
-		this._createRecordProperties = new Function(
-			"return " + Lava.Serializer.serialize(default_properties)
-		);
+		this._record_constructor = Lava.ClassManager.getConstructor('MetaRecord', 'Lava.data');
 
 	},
 
@@ -72,30 +70,12 @@ Lava.define(
 	_createRecordInstance: function() {
 
 		var properties = this._createRecordProperties(),
-			constructor = Lava.ClassManager.getConstructor('MetaRecord', 'Lava.data'),
-			record = new constructor(this, this._fields, properties);
+			record = new this._record_constructor(this, this._fields, properties);
 
 		this._records.push(record);
 		this._properties_by_guid[record.guid] = properties;
 		this._records_by_guid[record.guid] = record;
 		return record;
-
-	},
-
-	/**
-	 * Get all records in this module
-	 * @returns {Array.<Lava.data.MetaRecord>}
-	 */
-	getAllRecords: function() {
-
-		var result = [],
-			guid;
-
-		for (guid in this._properties) {
-			result.push(this._properties[guid]);
-		}
-
-		return result;
 
 	}
 

@@ -421,17 +421,17 @@ Lava.parsers.Common = {
 
 		}
 
-		inner_template = this.asBlocks(this.compileTemplate(raw_tag.content));
+		inner_template = this.asBlocks(raw_tag.content);
 
 		// inside there may be either a single view, or x:container_config, followed by the view
 		if (inner_template.length == 1) {
 
-			view_config = inner_template[0];
+			view_config = this.compileAsView(inner_template);
 
 		} else if (inner_template.length == 2) {
 
 			container_config_directive = inner_template[0];
-			view_config = inner_template[1];
+			view_config = this.compileAsView([inner_template[1]]);
 
 		} else {
 
@@ -439,13 +439,12 @@ Lava.parsers.Common = {
 
 		}
 
-		if (Lava.schema.DEBUG && view_config.type != 'view' && view_config.type != 'widget') Lava.t("Expected: view or widget inside container, got: " + view_config.type);
 		if (Lava.schema.DEBUG && view_config.container) Lava.t("Container wraps a view with it's container already defined.");
 		container_config = this._toContainer(raw_tag);
 		view_config.container = container_config;
 
 		if (container_config_directive) {
-			if (Lava.schema.DEBUG && (container_config_directive.type != 'directive' || container_config_directive.name == 'container_config'))
+			if (Lava.schema.DEBUG && (container_config_directive.type != 'directive' || container_config_directive.name != 'container_config'))
 				Lava.t("Malformed content of tag with type='container'");
 			Lava.parsers.Directives.processDirective(container_config_directive, view_config, true);
 		}
@@ -1080,7 +1079,7 @@ Lava.parsers.Common = {
 
 				}
 
-				targets_string = targets_string.substr(targets_string.length - config_ref.tail_length + 2);
+				targets_string = targets_string.substr(targets_string.length - config_ref.tail_length);
 
 			}
 
@@ -1090,13 +1089,12 @@ Lava.parsers.Common = {
 
 			} else if (targets_string.length) {
 
-				Lava.t('Malformed targets (2): ' + targets_string);
+				targets_string = targets_string.trim();
+				if (targets_string.length) Lava.t('Malformed targets (2): ' + targets_string);
 
 			}
 
 			result.push(target);
-
-			targets_string = targets_string.trim();
 
 		}
 

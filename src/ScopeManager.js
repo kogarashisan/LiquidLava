@@ -173,7 +173,7 @@ Lava.ScopeManager = {
 	/**
 	 * One refresh cycle in the refresh loop.
 	 * Warning: violates codestyle with multiple return statements
-	 * @returns {boolean} true if another cycle is needed, false when done and queue is clean
+	 * @returns {boolean} <kw>true</kw> if another cycle is needed, <kw>false</kw> when done and queue is clean
 	 */
 	_scopeRefreshCycle: function() {
 
