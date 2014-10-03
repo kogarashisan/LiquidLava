@@ -50,27 +50,15 @@ var Lava = {
 	/** @ignore */
 	animator: {},
 	/** @ignore */
-	data: {
-		/** @ignore */
-		field: {}
-	},
+	data: {},
 	/** @ignore */
 	system: {},
 	/** @ignore */
 	mixin: {},
 	/** @ignore */
-	parsers: {
-		Common: null,
-		Directives: null,
-		Storage: null
-	},
+	parsers: {},
 	/** @ignore */
-	view: {
-		/** @ignore */
-		refresher: {},
-		/** @ignore */
-		container: {}
-	},
+	view: {},
 	/** @ignore */
 	widget: {},
 	/** @ignore */
@@ -242,7 +230,7 @@ var Lava = {
 
 		var path,
 			i = 0,
-			count = this.schema.SUGAR_CLASSES.length;
+			count;
 
 		// You must know this yourself
 		// for (var name in {}) Lava.t("LiquidLava framework can not coexist with frameworks that modify native object's prototype");
@@ -263,7 +251,7 @@ var Lava = {
 			this.ClassManager.registerExistingConstructor('Lava.ClassLocatorGateway', this.ClassLocatorGateway);
 		}
 
-		for (; i < count; i++) {
+		for (count = this.schema.SUGAR_CLASSES.length; i < count; i++) {
 
 			this.registerSugar(this.schema.SUGAR_CLASSES[i]);
 
