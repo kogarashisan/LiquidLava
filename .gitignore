@@ -2,3 +2,4 @@ node\_modules
 \.idea
 \.ssh
 dist/lava-master-compiled-DEBUG.js
+build/temp/*

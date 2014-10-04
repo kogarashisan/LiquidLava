@@ -1,5 +1,5 @@
 
-// create a file, that can be require()'d by Node. It's not a true Node module, cause it exports to global.
+// Create a Node "module". It's not a true module, cause it exports Lava to global namespace.
 // Export to global is needed by ClassManager constructors to work
 
 module.exports = function(grunt) {
@@ -20,7 +20,8 @@ module.exports = function(grunt) {
 			+ '\n'
 			+ 'global.Lava = Lava;\n' // export is needed by class constructors to work
 			+ 'global.Firestorm = Firestorm;\n'
-			+ 'Lava.init();\n';
+			+ 'Lava.init();\n'
+			+ grunt.file.read('build/src/ApiHelper.js');
 
 		grunt.file.write('./build/temp/lava_module.js', module_content);
 

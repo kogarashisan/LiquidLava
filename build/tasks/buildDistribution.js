@@ -1,5 +1,6 @@
 
-// depends on modules, built by previous task
+// Compile classes and widgets, write the distribution file.
+// Depends on module, exported by previous task.
 
 module.exports = function(grunt) {
 
