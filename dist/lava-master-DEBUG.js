@@ -2054,7 +2054,7 @@ var Lava = {
 
 		if (app_class != null) {
 
-			result = this._elementToWidget(body, {class: 'Element', tag_name: 'body'});
+			result = this._elementToWidget(body, {type: 'Element', tag_name: 'body'});
 			result.injectIntoExistingElement(body);
 
 		} else {
@@ -2063,7 +2063,7 @@ var Lava = {
 			for (var i = 0, count = bootstrap_targets.length; i < count; i ++) {
 
 				element = bootstrap_targets[i];
-				result = this._elementToWidget(element, {class: 'Morph'});
+				result = this._elementToWidget(element, {type: 'Morph'});
 				result.inject(element, 'After');
 				Firestorm.Element.destroy(element);
 
@@ -6242,7 +6242,7 @@ Lava.parsers.Common = {
 		}
 
 		if (raw_block.prefix == '$') {
-			config.container = {class: 'Morph'};
+			config.container = {type: 'Morph'};
 		}
 
 		this._parseViewHash(config, raw_block.hash); // before content, so directives could be parsed into the config
@@ -6286,7 +6286,7 @@ Lava.parsers.Common = {
 
 		if (raw_expression.prefix == '$') {
 
-			config.container = {class: 'Morph'};
+			config.container = {type: 'Morph'};
 
 		}
 
@@ -6616,7 +6616,7 @@ Lava.parsers.Common = {
 	_toContainer: function(raw_tag) {
 
 		var container_config = {
-				class: 'Element',
+				type: 'Element',
 				tag_name: raw_tag.name
 			};
 
@@ -8089,11 +8089,11 @@ Lava.parsers.Directives = {
 
 		if (Lava.schema.DEBUG) {
 			for (name in config) {
-				if (['class', 'options'].indexOf(name) == -1) Lava.t('[_xcontainer_config] setting config property is not allowed: ' + name);
+				if (['type', 'options'].indexOf(name) == -1) Lava.t('[_xcontainer_config] setting config property is not allowed: ' + name);
 			}
 		}
 
-		if ('class' in config) original_config['class'] = config['class'];
+		if ('type' in config) original_config['type'] = config['type'];
 		if ('options' in config) {
 			if (!('options' in original_config)) original_config.options = {};
 			Firestorm.extend(original_config.options, config.options);
@@ -21726,7 +21726,7 @@ Lava.define(
 
 		if ('container' in config) {
 
-			constructor = Lava.ClassManager.getConstructor(config.container['class'], 'Lava.view.container');
+			constructor = Lava.ClassManager.getConstructor(config.container['type'], 'Lava.view.container');
 			this._container = new constructor(this, config.container, widget);
 
 		}
@@ -22643,7 +22643,7 @@ Lava.define(
 		if (this._config.refresher) {
 
 			if (Lava.schema.DEBUG && !this._container) Lava.t('View/Foreach: refresher needs container to work');
-			var constructor = Lava.ClassManager.getConstructor(this._config.refresher['class'], 'Lava.view.refresher');
+			var constructor = Lava.ClassManager.getConstructor(this._config.refresher['type'], 'Lava.view.refresher');
 			this._refresher = /** @type {Lava.view.refresher.Standard} */ new constructor(
 				this._config.refresher,
 				this,
@@ -23008,7 +23008,7 @@ Lava.define(
 
 			// otherwise, it will not be able to insert the template
 			if (Lava.schema.DEBUG && !this._container) Lava.t('View/If: refresher needs container to work');
-			constructor = Lava.ClassManager.getConstructor(this._config.refresher['class'], 'Lava.view.refresher');
+			constructor = Lava.ClassManager.getConstructor(this._config.refresher['type'], 'Lava.view.refresher');
 			this._refresher = /** @type {Lava.view.refresher.Standard} */ new constructor(
 				this._config.refresher,
 				this, this._container
@@ -23353,7 +23353,7 @@ Lava.define(
 			for (name in this._property_descriptors) {
 				if (!(name in this._properties)) Lava.t("All widget properties must have a default value");
 			}
-			if (this._config.default_events) {
+			if (config.default_events) {
 				for (i = 0, count = this._config.default_events.length; i < count; i++) {
 					if (!Lava.view_manager.isEventRouted(this._config.default_events[i])) Lava.t('Event is not routed: ' + this._config.default_events[i]);
 				}
@@ -27062,7 +27062,7 @@ Lava.widgets = {
 					type: "view",
 					"class": "View",
 					container: {
-						"class": "Element",
+						type: "Element",
 						tag_name: "input",
 						events: {
 							change: [{
@@ -27179,7 +27179,7 @@ return (this._binds[0].getValue());
 					type: "view",
 					"class": "View",
 					container: {
-						"class": "Element",
+						type: "Element",
 						tag_name: "textarea",
 						events: {
 							change: [{
@@ -27284,7 +27284,7 @@ return (this._binds[0].getValue());
 					type: "view",
 					"class": "View",
 					container: {
-						"class": "Element",
+						type: "Element",
 						tag_name: "input",
 						events: {
 							change: [{
@@ -27396,7 +27396,7 @@ return (this._binds[0].getValue());
 					type: "view",
 					"class": "View",
 					container: {
-						"class": "Element",
+						type: "Element",
 						tag_name: "input",
 						events: {
 							change: [{
@@ -27508,7 +27508,7 @@ return (this._binds[0].getValue());
 					type: "view",
 					"class": "View",
 					container: {
-						"class": "Element",
+						type: "Element",
 						tag_name: "input",
 						events: {
 							click: [{
@@ -27591,7 +27591,7 @@ return (this._binds[0].getValue());
 					type: "view",
 					"class": "View",
 					container: {
-						"class": "Element",
+						type: "Element",
 						tag_name: "button",
 						events: {
 							click: [{
@@ -27687,7 +27687,7 @@ return (this._binds[0].getValue());
 					type: "view",
 					"class": "View",
 					container: {
-						"class": "Element",
+						type: "Element",
 						tag_name: "select",
 						events: {
 							change: [{
@@ -27746,7 +27746,7 @@ return (this._binds[0].getValue());
 											type: "view",
 											"class": "View",
 											container: {
-												"class": "Element",
+												type: "Element",
 												tag_name: "optgroup",
 												property_bindings: {
 													label: {
@@ -27831,7 +27831,7 @@ return (this._binds[0].getValue());
 								}]
 							},
 							container: {
-								"class": "Element",
+								type: "Element",
 								tag_name: "option",
 								property_bindings: {
 									value: {
@@ -27902,7 +27902,7 @@ return (this._binds[0].getValue());
 				type: "view",
 				"class": "View",
 				container: {
-					"class": "Element",
+					type: "Element",
 					tag_name: "div",
 					resource_id: {
 						locator_type: "Name",
@@ -27999,7 +27999,7 @@ return (this._binds[0].getValue());
 			"\r\n\t\t"
 		],
 		container: {
-			"class": "Element",
+			type: "Element",
 			tag_name: "div",
 			resource_id: {
 				locator_type: "Name",
@@ -28015,7 +28015,7 @@ return (this._binds[0].getValue());
 					type: "view",
 					"class": "View",
 					container: {
-						"class": "Element",
+						type: "Element",
 						tag_name: "div",
 						events: {
 							click: [{
@@ -28049,7 +28049,7 @@ return (this._binds[0].getValue());
 					type: "view",
 					"class": "View",
 					container: {
-						"class": "Element",
+						type: "Element",
 						tag_name: "div"
 					},
 					roles: [{
@@ -28255,7 +28255,7 @@ return (this._binds[0].getValue());
 						}]
 					},
 					container: {
-						"class": "Emulated",
+						type: "Emulated",
 						options: {appender: "AfterPrevious"}
 					},
 					roles: [{
@@ -28263,14 +28263,14 @@ return (this._binds[0].getValue());
 						locator: "collapsible_panel",
 						name: "_content_if"
 					}],
-					refresher: {"class": "Collapse"},
+					refresher: {type: "Collapse"},
 					template: [
 						"\r\n\t\t\t\r\n\t\t\t\r\n\t\t\t\r\n\t\t\t",
 						{
 							type: "view",
 							"class": "View",
 							container: {
-								"class": "Element",
+								type: "Element",
 								tag_name: "div"
 							},
 							template: [
@@ -28350,7 +28350,7 @@ return (this._binds[0].getValue());
 					},
 					as: "panel",
 					refresher: {
-						"class": "Standard",
+						type: "Standard",
 						insertion_strategy: "sequential_elements"
 					},
 					template: [
@@ -28428,7 +28428,7 @@ return (this._binds[0].getValue());
 						"\r\n\t\t\t"
 					],
 					container: {
-						"class": "Element",
+						type: "Element",
 						tag_name: "div",
 						resource_id: {
 							locator_type: "Name",
@@ -28550,7 +28550,7 @@ return (! this._binds[0].getValue());
 									type: "view",
 									"class": "View",
 									container: {
-										"class": "Element",
+										type: "Element",
 										tag_name: "li",
 										class_bindings: {
 											"0": {
@@ -28579,7 +28579,7 @@ return (this._binds[0].getValue() ? '' : 'disabled');
 											type: "view",
 											"class": "View",
 											container: {
-												"class": "Element",
+												type: "Element",
 												tag_name: "a",
 												events: {
 													click: [{
@@ -28634,7 +28634,7 @@ return ('#' + (this._binds[0].getValue() || ''));
 						"\r\n\t\t\t"
 					],
 					container: {
-						"class": "Element",
+						type: "Element",
 						tag_name: "ul",
 						resource_id: {
 							locator_type: "Name",
@@ -28663,7 +28663,7 @@ return (this._binds[0].getValue());
 					},
 					as: "tab",
 					refresher: {
-						"class": "Standard",
+						type: "Standard",
 						insertion_strategy: "sequential_elements"
 					},
 					template: [
@@ -28672,7 +28672,7 @@ return (this._binds[0].getValue());
 							type: "view",
 							"class": "View",
 							container: {
-								"class": "Element",
+								type: "Element",
 								tag_name: "div",
 								static_classes: ["tab-pane"],
 								class_bindings: {
@@ -28711,7 +28711,7 @@ return (this._binds[0].getValue() ? 'active' : '');
 						"\r\n\t\t\t"
 					],
 					container: {
-						"class": "Element",
+						type: "Element",
 						tag_name: "div",
 						resource_id: {
 							locator_type: "Name",
@@ -28809,7 +28809,7 @@ return (this._binds[0].getValue());
 				escape_off: true,
 				template: [],
 				container: {
-					"class": "Element",
+					type: "Element",
 					tag_name: "div",
 					static_classes: ["tooltip-inner"]
 				}
@@ -28817,7 +28817,7 @@ return (this._binds[0].getValue());
 			"\r\n\t\t\t<div class=\"tooltip-arrow\"></div>\r\n\t\t"
 		],
 		container: {
-			"class": "Element",
+			type: "Element",
 			tag_name: "div",
 			static_classes: ["tooltip"],
 			style_bindings: {
@@ -28899,7 +28899,7 @@ return (this._binds[0].getValue());
 						tail: ["records"]
 					}]
 				},
-				container: {"class": "Morph"},
+				container: {type: "Morph"},
 				as: "node",
 				template: [
 					"\r\n\t\t\t\t",
@@ -28915,7 +28915,7 @@ return (this._binds[0].getValue());
 			"\r\n\t\t"
 		],
 		container: {
-			"class": "Element",
+			type: "Element",
 			tag_name: "div",
 			resource_id: {
 				locator_type: "Name",
@@ -28967,7 +28967,7 @@ return (0);
 					type: "view",
 					"class": "View",
 					container: {
-						"class": "Element",
+						type: "Element",
 						tag_name: "div",
 						static_classes: ["lava-tree-node"],
 						static_properties: {unselectable: "on"},
@@ -28999,7 +28999,7 @@ return (this._binds[0].getValue());
 							type: "view",
 							"class": "View",
 							container: {
-								"class": "Element",
+								type: "Element",
 								tag_name: "i",
 								static_classes: ["lava-tree-expander"],
 								events: {
@@ -29089,10 +29089,10 @@ return (this._binds[0].getValue() && this._binds[1].getValue());
 						]
 					},
 					container: {
-						"class": "Emulated",
+						type: "Emulated",
 						options: {appender: "AfterPrevious"}
 					},
-					refresher: {"class": "Collapse"},
+					refresher: {type: "Collapse"},
 					assigns: {
 						pad: {
 							evaluator: function() {
@@ -29143,7 +29143,7 @@ return (this._binds[0].getValue());
 								"\r\n\t\t\t\t"
 							],
 							container: {
-								"class": "Element",
+								type: "Element",
 								tag_name: "div",
 								static_classes: ["lava-tree-container"]
 							}
@@ -29169,7 +29169,7 @@ return (this._binds[0].getValue());
 						}]
 					},
 					container: {
-						"class": "Element",
+						type: "Element",
 						tag_name: "span",
 						static_classes: ["lava-tree-title"],
 						events: {
@@ -29241,7 +29241,7 @@ return (this._binds[0].getValue() ? 'lava-tree-title-expandable' : '');
 			"\r\n\t\t"
 		],
 		container: {
-			"class": "Element",
+			type: "Element",
 			tag_name: "table",
 			resource_id: {
 				locator_type: "Name",
@@ -29256,7 +29256,7 @@ return (this._binds[0].getValue() ? 'lava-tree-title-expandable' : '');
 					type: "view",
 					"class": "View",
 					container: {
-						"class": "Element",
+						type: "Element",
 						tag_name: "thead",
 						resource_id: {
 							locator_type: "Name",
@@ -29287,7 +29287,7 @@ return (this._binds[0].getValue());
 									type: "view",
 									"class": "View",
 									container: {
-										"class": "Element",
+										type: "Element",
 										tag_name: "td",
 										events: {
 											click: [{
@@ -29317,7 +29317,7 @@ return (this._binds[0].getValue());
 												}]
 											},
 											container: {
-												"class": "Element",
+												type: "Element",
 												tag_name: "span",
 												class_bindings: {
 													"0": {
@@ -29346,7 +29346,7 @@ return (this._binds[0].getValue() == this._binds[1].getValue() ? ('lava-column-s
 								"\r\n\t\t\t\t"
 							],
 							container: {
-								"class": "Element",
+								type: "Element",
 								tag_name: "tr"
 							}
 						},
@@ -29395,7 +29395,7 @@ return (this._binds[0].getValue());
 									type: "view",
 									"class": "View",
 									container: {
-										"class": "Element",
+										type: "Element",
 										tag_name: "td"
 									},
 									template: [
@@ -29416,14 +29416,14 @@ return (this._binds[0].getValue());
 								"\r\n\t\t\t\t\t"
 							],
 							container: {
-								"class": "Element",
+								type: "Element",
 								tag_name: "tr"
 							}
 						},
 						"\r\n\t\t\t"
 					],
 					container: {
-						"class": "Element",
+						type: "Element",
 						tag_name: "tbody",
 						resource_id: {
 							locator_type: "Name",
@@ -29547,7 +29547,7 @@ return (this._binds[0].getValue() == 'days');
 			"\r\n\t\t"
 		],
 		container: {
-			"class": "Element",
+			type: "Element",
 			tag_name: "div",
 			static_classes: ["lava-calendar"]
 		},
@@ -29558,7 +29558,7 @@ return (this._binds[0].getValue() == 'days');
 					type: "view",
 					"class": "View",
 					container: {
-						"class": "Element",
+						type: "Element",
 						tag_name: "a",
 						static_classes: ["lava-calendar-left-arrow"],
 						static_properties: {href: "#"},
@@ -29588,7 +29588,7 @@ return (this._binds[0].getValue());
 						}]
 					},
 					container: {
-						"class": "Element",
+						type: "Element",
 						tag_name: "a",
 						static_classes: ["lava-calendar-days-view-month-name"],
 						static_properties: {href: "#"},
@@ -29606,7 +29606,7 @@ return (this._binds[0].getValue());
 					type: "view",
 					"class": "View",
 					container: {
-						"class": "Element",
+						type: "Element",
 						tag_name: "a",
 						static_classes: ["lava-calendar-right-arrow"],
 						static_properties: {href: "#"},
@@ -29643,7 +29643,7 @@ return (this._binds[0].getValue());
 						}]
 					},
 					container: {
-						"class": "Element",
+						type: "Element",
 						tag_name: "a",
 						static_classes: ["lava-calendar-today-link"],
 						static_properties: {href: "#"},
@@ -29664,7 +29664,7 @@ return (this._binds[0].getValue());
 					type: "view",
 					"class": "View",
 					container: {
-						"class": "Element",
+						type: "Element",
 						tag_name: "a",
 						static_classes: ["lava-calendar-left-arrow"],
 						static_properties: {href: "#"},
@@ -29712,7 +29712,7 @@ return (this._binds[0].getValue() + '');
 					type: "view",
 					"class": "View",
 					container: {
-						"class": "Element",
+						type: "Element",
 						tag_name: "a",
 						static_classes: ["lava-calendar-right-arrow"],
 						static_properties: {href: "#"},
@@ -29841,7 +29841,7 @@ return (this._binds[0].getValue());
 					type: "view",
 					"class": "View",
 					container: {
-						"class": "Element",
+						type: "Element",
 						tag_name: "td",
 						events: {
 							mousedown: [{
@@ -29973,7 +29973,7 @@ return (this._binds[0].getValue());
 										}]
 									},
 									container: {
-										"class": "Element",
+										type: "Element",
 										tag_name: "td",
 										events: {
 											click: [{

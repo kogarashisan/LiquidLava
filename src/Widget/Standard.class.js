@@ -101,7 +101,7 @@ Lava.define(
 			for (name in this._property_descriptors) {
 				if (!(name in this._properties)) Lava.t("All widget properties must have a default value");
 			}
-			if (this._config.default_events) {
+			if (config.default_events) {
 				for (i = 0, count = this._config.default_events.length; i < count; i++) {
 					if (!Lava.view_manager.isEventRouted(this._config.default_events[i])) Lava.t('Event is not routed: ' + this._config.default_events[i]);
 				}

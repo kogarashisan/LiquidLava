@@ -228,7 +228,7 @@ _cElementContainer = {
 	 * Class name. Default namespace is 'Lava.view.container'
 	 * @const
 	 */
-	'class': "Element",
+	type: "Element",
 
 	/**
 	 * Tag name for container's DOM element (like "div")
@@ -269,7 +269,7 @@ _cEmulatedContainer = {
 	 * @type {string}
 	 * @const
 	 */
-	'class': "Emulated",
+	type: "Emulated",
 
 	options: {
 		appender: 'Top' || 'Bottom' || 'AfterPrevious' || 'BeforeNext',
@@ -394,7 +394,7 @@ _cRefresher = {
 	 * @type {string}
 	 * @const
 	 */
-	'class': 'Standard',
+	type: 'Standard',
 
 	/**
 	 * Callback, which is used for inserting templates into DOM

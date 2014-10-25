@@ -943,11 +943,11 @@ Lava.parsers.Directives = {
 
 		if (Lava.schema.DEBUG) {
 			for (name in config) {
-				if (['class', 'options'].indexOf(name) == -1) Lava.t('[_xcontainer_config] setting config property is not allowed: ' + name);
+				if (['type', 'options'].indexOf(name) == -1) Lava.t('[_xcontainer_config] setting config property is not allowed: ' + name);
 			}
 		}
 
-		if ('class' in config) original_config['class'] = config['class'];
+		if ('type' in config) original_config['type'] = config['type'];
 		if ('options' in config) {
 			if (!('options' in original_config)) original_config.options = {};
 			Firestorm.extend(original_config.options, config.options);

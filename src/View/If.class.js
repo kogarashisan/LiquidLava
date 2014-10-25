@@ -85,7 +85,7 @@ Lava.define(
 
 			// otherwise, it will not be able to insert the template
 			if (Lava.schema.DEBUG && !this._container) Lava.t('View/If: refresher needs container to work');
-			constructor = Lava.ClassManager.getConstructor(this._config.refresher['class'], 'Lava.view.refresher');
+			constructor = Lava.ClassManager.getConstructor(this._config.refresher['type'], 'Lava.view.refresher');
 			this._refresher = /** @type {Lava.view.refresher.Standard} */ new constructor(
 				this._config.refresher,
 				this, this._container

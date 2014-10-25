@@ -83,14 +83,14 @@
 		{$if($collapsible_panel.is_expanded)}
 			<x:container_config>
 				{
-					class: "Emulated",
+					type: "Emulated",
 					options: {
 						appender: 'AfterPrevious'
 					}
 				}
 			</x:container_config>
 			<x:roles>$collapsible_panel._content_if</x:roles>
-			<x:refresher>{class: 'Collapse'}</x:refresher>
+			<x:refresher>{type: 'Collapse'}</x:refresher>
 			<div x:type="view">
 				<div x:type="static" x:resource_id="$collapsible_panel.COLLAPSIBLE_PANEL_EXT_BODY_CONTAINER">
 					{>$collapsible_panel.content}
@@ -115,7 +115,7 @@
 	<include name="content">
 		<div x:type="container" x:resource_id="$accordion.ACCORDION_CONTAINER">
 			{#foreach($accordion._panels) as=panel}
-				<x:refresher>{class: 'Standard', insertion_strategy: 'sequential_elements'}</x:refresher>
+				<x:refresher>{type: 'Standard', insertion_strategy: 'sequential_elements'}</x:refresher>
 				<collapsible-panel x:roles="$accordion.panel" x:resource_id="$accordion.panel">
 					<x:assign name="is_expanded">panel.is_expanded</x:assign>
 					<title>
@@ -183,7 +183,7 @@
 	<include name="tabs_body">
 		<div x:type="container" x:resource_id="$tabs.TABS_CONTENT_CONTAINER">
 			{#foreach($tabs._tabs) as=tab}
-				<x:refresher>{class: 'Standard', insertion_strategy: 'sequential_elements'}</x:refresher>
+				<x:refresher>{type: 'Standard', insertion_strategy: 'sequential_elements'}</x:refresher>
 				<div x:type="view" class="tab-pane" x:classes="tab.is_active ? 'active' : ''">
 					{>$tabs.tab_include(tab, 'content')}
 				</div>
@@ -272,10 +272,10 @@
 	<include name="icon"></include>
 	<include name="node_children">
 		{$if(node.children.length && $tree{is_expanded})}
-			<x:refresher>{class: 'Collapse'}</x:refresher>
+			<x:refresher>{type: 'Collapse'}</x:refresher>
 			<x:container_config>
 				{
-					class: "Emulated",
+					type: "Emulated",
 					options: {
 						appender: 'AfterPrevious'
 					}

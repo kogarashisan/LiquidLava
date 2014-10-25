@@ -503,7 +503,7 @@ var Lava = {
 
 		if (app_class != null) {
 
-			result = this._elementToWidget(body, {class: 'Element', tag_name: 'body'});
+			result = this._elementToWidget(body, {type: 'Element', tag_name: 'body'});
 			result.injectIntoExistingElement(body);
 
 		} else {
@@ -512,7 +512,7 @@ var Lava = {
 			for (var i = 0, count = bootstrap_targets.length; i < count; i ++) {
 
 				element = bootstrap_targets[i];
-				result = this._elementToWidget(element, {class: 'Morph'});
+				result = this._elementToWidget(element, {type: 'Morph'});
 				result.inject(element, 'After');
 				Firestorm.Element.destroy(element);
 

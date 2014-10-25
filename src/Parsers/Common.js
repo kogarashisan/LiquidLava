@@ -268,7 +268,7 @@ Lava.parsers.Common = {
 		}
 
 		if (raw_block.prefix == '$') {
-			config.container = {class: 'Morph'};
+			config.container = {type: 'Morph'};
 		}
 
 		this._parseViewHash(config, raw_block.hash); // before content, so directives could be parsed into the config
@@ -312,7 +312,7 @@ Lava.parsers.Common = {
 
 		if (raw_expression.prefix == '$') {
 
-			config.container = {class: 'Morph'};
+			config.container = {type: 'Morph'};
 
 		}
 
@@ -642,7 +642,7 @@ Lava.parsers.Common = {
 	_toContainer: function(raw_tag) {
 
 		var container_config = {
-				class: 'Element',
+				type: 'Element',
 				tag_name: raw_tag.name
 			};
 
