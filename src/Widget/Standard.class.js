@@ -91,13 +91,20 @@ Lava.define(
 	 */
 	init: function(config, widget, parent_view, template, properties) {
 
-		var name;
+		var name,
+			count,
+			i;
 
 		if (Lava.schema.DEBUG && !config.is_extended) Lava.t("Widget was created with partial (unextended) config");
 
 		if (Lava.schema.DEBUG) {
 			for (name in this._property_descriptors) {
 				if (!(name in this._properties)) Lava.t("All widget properties must have a default value");
+			}
+			if (this._config.default_events) {
+				for (i = 0, count = this._config.default_events.length; i < count; i++) {
+					if (!Lava.view_manager.isEventRouted(this._config.default_events[i])) Lava.t('Event is not routed: ' + this._config.default_events[i]);
+				}
 			}
 		}
 
@@ -228,20 +235,6 @@ Lava.define(
 
 	},
 
-	broadcastInDOM: function() {
-
-		this.View$broadcastInDOM();
-		this._acquireDefaultEvents();
-
-	},
-
-	broadcastRemove: function() {
-
-		this.View$broadcastRemove();
-		this._releaseAllEvents();
-
-	},
-
 	/**
 	 * Render and insert the widget instance into DOM
 	 * @param {HTMLElement} element
@@ -284,72 +277,6 @@ Lava.define(
 		this._is_inDOM = true;
 		this._is_dirty = false;
 		this._broadcastToChildren('broadcastInDOM');
-		this._acquireDefaultEvents();
-
-	},
-
-	/**
-	 * Register this widget in {@link Lava.system.ViewManager} as a consumer for each of `default_events` from config
-	 */
-	_acquireDefaultEvents: function() {
-
-		var i = 0,
-			count;
-
-		if (this._config.default_events) {
-			count = this._config.default_events.length;
-			for (; i < count; i++) {
-
-				this._lendEvent(this._config.default_events[i]);
-
-			}
-		}
-
-	},
-
-	/**
-	 * "lend" an event name from {@link Lava.system.ViewManager} and save it's name in local `_acquired_events` list
-	 * @param {string} event_name
-	 */
-	_lendEvent: function(event_name) {
-
-		if (Firestorm.Array.include(this._acquired_events, event_name)) {
-
-			Lava.view_manager.lendEvent(event_name);
-
-		}
-
-	},
-
-	/**
-	 * Inform {@link Lava.system.ViewManager} that this instance does not need to route that event anymore
-	 * @param {string} event_name
-	 */
-	_releaseEvent: function(event_name) {
-
-		if (Firestorm.Array.exclude(this._acquired_events, event_name)) {
-
-			Lava.view_manager.releaseEvent(event_name);
-
-		}
-
-	},
-
-	/**
-	 * "release" all `_acquired_events`
-	 */
-	_releaseAllEvents: function() {
-
-		var i = 0,
-			count = this._acquired_events.length;
-
-		for (; i < count; i++) {
-
-			Lava.view_manager.releaseEvent(this._acquired_events[i]);
-
-		}
-
-		this._acquired_events = [];
 
 	},
 
@@ -361,7 +288,6 @@ Lava.define(
 		if (!this._is_inDOM) Lava.t("remove: widget is not in DOM");
 		if (Lava.schema.DEBUG && !this._container) Lava.t("remove: widget doesn't have a container");
 
-		this._releaseAllEvents();
 		if (!this._is_sleeping) this._sleep();
 		this._is_inDOM = false;
 		this._is_dirty = false;
@@ -657,8 +583,6 @@ Lava.define(
 	destroy: function() {
 
 		var name;
-
-		this._releaseAllEvents();
 
 		for (name in this._bindings) {
 

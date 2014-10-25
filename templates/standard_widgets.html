@@ -247,13 +247,13 @@
 <x:define controller="Tree" title="Tree">
 	<main_view>
 		<div x:type="view" x:resource_id="$tree.MAIN_TREE_CONTAINER">
-			<x:assign name="pad">''</x:assign>
-			<x:assign name="level">0</x:assign>
 			{$foreach($tree.records) as=node}
 				{>$tree.node}
 			{/foreach}
 		</div>
 	</main_view>
+	<assign name="pad">''</assign>
+	<assign name="level">0</assign>
 	<include name="node">
 		{>$tree.node_body}
 		{>$tree.node_children}

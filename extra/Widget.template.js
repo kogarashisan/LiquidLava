@@ -9,7 +9,7 @@ Lava.define(
 
 	Extends: 'Lava.widget.Standard',
 
-	name: null,
+	//name: null,
 
 	//_property_descriptors: {
 	//	property_name: {}
@@ -28,7 +28,7 @@ Lava.define(
 	//},
 
 	//_include_handlers: {
-	//	include_name: '_getInclude'
+	//	my_include: '_getMyInclude'
 	//},
 
 	init: function(config, widget, parent_view, template, properties) {
@@ -41,6 +41,6 @@ Lava.define(
 
 	//_roleHandler: function(view, template_arguments) {}
 
-	//_getInclude: function(template_arguments) {}
+	//_getMyInclude: function(template_arguments) {}
 
 });

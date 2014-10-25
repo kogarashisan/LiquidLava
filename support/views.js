@@ -455,7 +455,7 @@ _cWidget = {
 
 	/**
 	 * Schema for the `storage` config property
-	 * @type {Object.<name, _cStorageItemSchema>}
+	 * @type {Object.<string, _cStorageItemSchema>}
 	 */
 	storage_schema: {},
 
@@ -507,9 +507,10 @@ _cBinding = {
 	property_name: '',
 
 	/**
-	 * @type {Lava.BINDING_DIRECTIONS}
+	 * If you want to assign values only from widget to scope, but not from scope to widget
+	 * @type {boolean}
 	 */
-	direction: null,
+	from_widget: false,
 
 	/**
 	 * Route to scope, which will be bound to widget's property

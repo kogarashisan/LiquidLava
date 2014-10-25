@@ -1085,7 +1085,7 @@ Lava.parsers.Common = {
 
 			if (targets_string[0] == ';') {
 
-				targets_string = targets_string.substr(1);
+				targets_string = targets_string.substr(1).trim();
 
 			} else if (targets_string.length) {
 
@@ -1113,7 +1113,7 @@ Lava.parsers.Common = {
 		var match = this._locator_regex.exec(id_string),
 			result;
 
-		if (!match) Lava.t("Malformed resource id");
+		if (!match) Lava.t("Malformed resource id: " + id_string);
 
 		/** @type {_cResourceId} */
 		result = {

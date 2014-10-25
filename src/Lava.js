@@ -112,17 +112,6 @@ var Lava = {
 	// constants and predefined data
 
 	/**
-	 * Directions for {@link Lava.scope.Binding}
-	 * @enum {number}
-	 */
-	BINDING_DIRECTIONS: {
-		/** @const */
-		TO_WIDGET: 1,
-		/** @const */
-		FROM_WIDGET: 2
-	},
-
-	/**
 	 * Types of template arguments, allowed in view events and roles
 	 * @enum {number}
 	 */
@@ -228,6 +217,8 @@ var Lava = {
 	 */
 	init: function() {
 
+		if (this.is_init_done) Lava.t();
+
 		var path,
 			i = 0,
 			count;
@@ -256,6 +247,8 @@ var Lava = {
 			this.registerSugar(this.schema.SUGAR_CLASSES[i]);
 
 		}
+
+		this.define = this.define_Normal;
 
 		this.is_init_done = true;
 
@@ -618,21 +611,24 @@ var Lava = {
 	},
 
 	/**
-	 * Store class body in `this.classes` (before `init()`), or call {@link Lava.ClassManager#define} directly (after `init()`)
+	 * Store class body in `this.classes`. Will be replaced with `define_Normal` inside `init()`
 	 * @param {string} class_name Name of the class
 	 * @param {Object} class_object Class body
 	 */
 	define: function(class_name, class_object) {
 
-		if (this.is_init_done) {
+		this.classes[class_name] = class_object;
 
-			this.ClassManager.define(class_name, class_object);
+	},
 
-		} else {
+	/**
+	 * Proxy to {@link Lava.ClassManager#define}
+	 * @param {string} class_name Name of the class
+	 * @param {Object} class_object Class body
+	 */
+	define_Normal: function(class_name, class_object) {
 
-			this.classes[class_name] = class_object;
-
-		}
+		this.ClassManager.define(class_name, class_object);
 
 	},
 
@@ -740,8 +736,8 @@ var Lava = {
 
 	/**
 	 * Used in process of config extension to merge {@link _cWidget#storage_schema}
-	 * @param {Object} dest Child schema
-	 * @param {Object} source Parent schema
+	 * @param {Object.<string, _cStorageItemSchema>} dest Child schema
+	 * @param {Object.<string, _cStorageItemSchema>} source Parent schema
 	 */
 	mergeStorageSchema: function(dest, source) {
 
@@ -755,16 +751,21 @@ var Lava = {
 
 			} else {
 
-				if (Lava.schema.DEBUG && dest[name].type != source[name].type) Lava.t("[Config storage_schema] property types must match: " + name);
+				if (Lava.schema.DEBUG && (dest[name].type != source[name].type || dest[name].tag_name != source[name].tag_name)) Lava.t("[Config storage_schema] property types must match: " + name);
 
-				if (('content_schema' in dest[name]) && ('content_schema' in source[name])) {
+				if ('properties' in source[name]) {
 
-					// copy object property descriptors
-					Firestorm.implement(dest[name].content_schema, source[name].content_schema);
+					if (!('properties' in dest[name])) {
+
+						dest[name].properties = source[name].properties;
+
+					} else {
+
+						Firestorm.implement(dest[name].properties, source[name].properties);
+
+					}
 
 				}
-
-				Firestorm.implement(dest[name], source[name]);
 
 			}
 
@@ -803,7 +804,7 @@ var Lava = {
 	},
 
 	/**
-	 * Suspend a listener, returned by {@link Lava.mixin.Observable#on}
+	 * Suspend a listener, returned by {@link Lava.mixin.Observable#on} or {@link Lava.mixin.Properties#onPropertyChanged}
 	 * @param {_tListener} listener
 	 */
 	suspendListener: function(listener) {

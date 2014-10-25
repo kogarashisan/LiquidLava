@@ -187,7 +187,7 @@ Lava.define(
 
 		resource_value = resource_owner.getResource(resource_id.name);
 		if (Lava.schema.DEBUG && !resource_value) Lava.t("static_value: resource not found: " + resource_id.locator_type + '=' + resource_id.locator);
-		if (['string', 'number', 'boolean', 'translate'].indexOf(resource_value.type) == -1) Lava.t("static_value: resource has wrong type");
+		if (Lava.schema.DEBUG && ['string', 'number', 'boolean'].indexOf(Firestorm.getType(resource_value.value)) == -1) Lava.t("static_value: resource has wrong type");
 
 		result.push(resource_value.value);
 

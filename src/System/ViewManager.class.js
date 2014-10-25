@@ -910,6 +910,17 @@ Lava.define(
 	},
 
 	/**
+	 * Is event routed to views (routing starts with a call to `lendEvent`)
+	 * @param {string} event_name Event name
+	 * @returns {boolean}
+	 */
+	isEventRouted: function(event_name) {
+
+		return this._event_usage_counters[event_name] > 0;
+
+	},
+
+	/**
 	 * Stop listening to an event
 	 * @param {string} event_name
 	 */

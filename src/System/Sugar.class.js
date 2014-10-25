@@ -33,7 +33,7 @@ Lava.define(
 	 * @type {Object.<string, string>}
 	 */
 	_root_attributes_handlers: {
-		expression_option: '_parseRootExpressionOptionAttribute',
+		expressions_option: '_parseRootExpressionsOptionAttribute',
 		targets_option: '_parseRootTargetsOptionAttribute',
 		property: '_parseRootPropertyAttribute',
 		'switch': '_parseRootSwitchAttribute',
@@ -373,7 +373,7 @@ Lava.define(
 	 * @param {_cSugarRootAttribute} descriptor
 	 * @param {string} name
 	 */
-	_parseRootExpressionOptionAttribute: function(widget_config, attribute_value, descriptor, name) {
+	_parseRootExpressionsOptionAttribute: function(widget_config, attribute_value, descriptor, name) {
 
 		Lava.store(
 			widget_config,

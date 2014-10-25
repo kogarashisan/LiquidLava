@@ -128,7 +128,7 @@ Lava.parsers.Storage = {
 	 * Convert `raw_rag` into object with given `schema`
 	 * @param {_cStorageItemSchema} schema
 	 * @param {_cRawTag} raw_tag
-	 * @param {bool} exclude_name
+	 * @param {boolean} exclude_name
 	 * @returns {Object}
 	 */
 	_asObject: function(schema, raw_tag, exclude_name) {

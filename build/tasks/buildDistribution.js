@@ -59,6 +59,16 @@ module.exports = function(grunt) {
 				+ grunt.file.read('./templates/standard_widgets.html')
 			);
 
+			for (var name in Lava.widgets) {
+				if (Lava.widgets[name].default_events) {
+					Lava.widgets[name].default_events.forEach(function(event_name){
+						if (Lava.schema.system.DEFAULT_EVENTS.indexOf(event_name) == -1) {
+							throw new Error('Event ' + event_name + ' is used by widget ' + name + ' and not in schema');
+						}
+					})
+				}
+			}
+
 			var compiled_templates =
 				'Lava.widgets = ' + Lava.Serializer.serialize(Lava.widgets) + ';\n'
 					+ 'Lava.sugar_map = ' + Lava.Serializer.serialize(Lava.sugar_map) + ';\n';

@@ -44,39 +44,19 @@ Lava.define(
 		this._property_name = config.property_name;
 		this._scope = widget.getScopeByPathConfig(config.path_config);
 
-		var widget_listener = true,
-			scope_listener = true;
+		if (config.from_widget) {
 
-		if ('direction' in config) {
-
-			if (config.direction == Lava.BINDING_DIRECTIONS.TO_WIDGET) {
-
-				this._widget.set(this._property_name, this._scope.getValue());
-				widget_listener = false;
-
-			} else {
-
-				if (Lava.schema.DEBUG && config.direction != Lava.BINDING_DIRECTIONS.FROM_WIDGET) Lava.t();
-
-				this._scope.setValue(this._widget.get(this._property_name));
-				scope_listener = false;
-
-			}
+			this._scope.setValue(this._widget.get(this._property_name));
 
 		} else {
 
 			this._widget.set(this._property_name, this._scope.getValue());
-
-		}
-
-		if (scope_listener) {
 			this._scope_changed_listener = this._scope.on('changed', this.onScopeChanged, this);
+
 		}
 
-		if (widget_listener) {
-			if (!this._scope.isSetValue) Lava.t("Binding: bound scope does not implement setValue");
-			this._widget_property_changed_listener = widget.onPropertyChanged(this._property_name, this.onWidgetPropertyChanged, this);
-		}
+		if (!this._scope.isSetValue) Lava.t("Binding: bound scope does not implement setValue");
+		this._widget_property_changed_listener = widget.onPropertyChanged(this._property_name, this.onWidgetPropertyChanged, this);
 
 	},
 

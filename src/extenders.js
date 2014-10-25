@@ -9,13 +9,13 @@ Lava.extenders = {
 	 */
 	_widget_config_merged_properties: {
 		includes: '_mergeIncludes',
+		sugar: '_mergeSugar',
+		storage_schema: '_mergeStorageSchema',
 		bindings: '_mergeConfigProperty',
 		assigns: '_mergeConfigProperty',
 		options: '_mergeConfigProperty',
 		properties: '_mergeConfigProperty',
-		sugar: '_mergeSugar',
-		broadcast: '_mergeConfigProperty',
-		storage_schema: '_mergeStorageSchema'
+		broadcast: '_mergeConfigProperty'
 	},
 
 	/**

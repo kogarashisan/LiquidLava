@@ -48,7 +48,7 @@ Lava.schema = {
 		DEFAULT_EVENTS: [
 			'click', 'dblclick', 'mouseup', 'mousedown', 'contextmenu',
 			'mousewheel', 'keydown', 'keypress', 'keyup',
-			'change', 'focus', 'blur'
+			'change', 'focus', 'blur', 'input'
 		],
 
 		/**

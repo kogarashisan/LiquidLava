@@ -1663,17 +1663,6 @@ var Lava = {
 	// constants and predefined data
 
 	/**
-	 * Directions for {@link Lava.scope.Binding}
-	 * @enum {number}
-	 */
-	BINDING_DIRECTIONS: {
-		/** @const */
-		TO_WIDGET: 1,
-		/** @const */
-		FROM_WIDGET: 2
-	},
-
-	/**
 	 * Types of template arguments, allowed in view events and roles
 	 * @enum {number}
 	 */
@@ -1779,6 +1768,8 @@ var Lava = {
 	 */
 	init: function() {
 
+		if (this.is_init_done) Lava.t();
+
 		var path,
 			i = 0,
 			count;
@@ -1807,6 +1798,8 @@ var Lava = {
 			this.registerSugar(this.schema.SUGAR_CLASSES[i]);
 
 		}
+
+		this.define = this.define_Normal;
 
 		this.is_init_done = true;
 
@@ -2169,21 +2162,24 @@ var Lava = {
 	},
 
 	/**
-	 * Store class body in `this.classes` (before `init()`), or call {@link Lava.ClassManager#define} directly (after `init()`)
+	 * Store class body in `this.classes`. Will be replaced with `define_Normal` inside `init()`
 	 * @param {string} class_name Name of the class
 	 * @param {Object} class_object Class body
 	 */
 	define: function(class_name, class_object) {
 
-		if (this.is_init_done) {
+		this.classes[class_name] = class_object;
 
-			this.ClassManager.define(class_name, class_object);
+	},
 
-		} else {
+	/**
+	 * Proxy to {@link Lava.ClassManager#define}
+	 * @param {string} class_name Name of the class
+	 * @param {Object} class_object Class body
+	 */
+	define_Normal: function(class_name, class_object) {
 
-			this.classes[class_name] = class_object;
-
-		}
+		this.ClassManager.define(class_name, class_object);
 
 	},
 
@@ -2291,8 +2287,8 @@ var Lava = {
 
 	/**
 	 * Used in process of config extension to merge {@link _cWidget#storage_schema}
-	 * @param {Object} dest Child schema
-	 * @param {Object} source Parent schema
+	 * @param {Object.<string, _cStorageItemSchema>} dest Child schema
+	 * @param {Object.<string, _cStorageItemSchema>} source Parent schema
 	 */
 	mergeStorageSchema: function(dest, source) {
 
@@ -2306,16 +2302,21 @@ var Lava = {
 
 			} else {
 
-				if (Lava.schema.DEBUG && dest[name].type != source[name].type) Lava.t("[Config storage_schema] property types must match: " + name);
+				if (Lava.schema.DEBUG && (dest[name].type != source[name].type || dest[name].tag_name != source[name].tag_name)) Lava.t("[Config storage_schema] property types must match: " + name);
 
-				if (('content_schema' in dest[name]) && ('content_schema' in source[name])) {
+				if ('properties' in source[name]) {
 
-					// copy object property descriptors
-					Firestorm.implement(dest[name].content_schema, source[name].content_schema);
+					if (!('properties' in dest[name])) {
+
+						dest[name].properties = source[name].properties;
+
+					} else {
+
+						Firestorm.implement(dest[name].properties, source[name].properties);
+
+					}
 
 				}
-
-				Firestorm.implement(dest[name], source[name]);
 
 			}
 
@@ -2354,7 +2355,7 @@ var Lava = {
 	},
 
 	/**
-	 * Suspend a listener, returned by {@link Lava.mixin.Observable#on}
+	 * Suspend a listener, returned by {@link Lava.mixin.Observable#on} or {@link Lava.mixin.Properties#onPropertyChanged}
 	 * @param {_tListener} listener
 	 */
 	suspendListener: function(listener) {
@@ -2437,7 +2438,7 @@ Lava.schema = {
 		DEFAULT_EVENTS: [
 			'click', 'dblclick', 'mouseup', 'mousedown', 'contextmenu',
 			'mousewheel', 'keydown', 'keypress', 'keyup',
-			'change', 'focus', 'blur'
+			'change', 'focus', 'blur', 'input'
 		],
 
 		/**
@@ -3629,13 +3630,13 @@ Lava.extenders = {
 	 */
 	_widget_config_merged_properties: {
 		includes: '_mergeIncludes',
+		sugar: '_mergeSugar',
+		storage_schema: '_mergeStorageSchema',
 		bindings: '_mergeConfigProperty',
 		assigns: '_mergeConfigProperty',
 		options: '_mergeConfigProperty',
 		properties: '_mergeConfigProperty',
-		sugar: '_mergeSugar',
-		broadcast: '_mergeConfigProperty',
-		storage_schema: '_mergeStorageSchema'
+		broadcast: '_mergeConfigProperty'
 	},
 
 	/**
@@ -7058,7 +7059,7 @@ Lava.parsers.Common = {
 
 			if (targets_string[0] == ';') {
 
-				targets_string = targets_string.substr(1);
+				targets_string = targets_string.substr(1).trim();
 
 			} else if (targets_string.length) {
 
@@ -7086,7 +7087,7 @@ Lava.parsers.Common = {
 		var match = this._locator_regex.exec(id_string),
 			result;
 
-		if (!match) Lava.t("Malformed resource id");
+		if (!match) Lava.t("Malformed resource id: " + id_string);
 
 		/** @type {_cResourceId} */
 		result = {
@@ -7185,6 +7186,7 @@ Lava.parsers.Directives = {
 	 * @type {Object.<string, string>}
 	 */
 	_widget_tag_actions: {
+		// with directive analog
 		bind: '_widgetTagBind',
 		assign: '_widgetTagAssign',
 		option: '_widgetTagOption',
@@ -7192,12 +7194,13 @@ Lava.parsers.Directives = {
 		options: '_widgetTagOptions',
 		properties: '_widgetTagProperties',
 		roles: '_widgetTagRoles',
-		sugar: '_widgetTagSugar',
-		broadcast: '_widgetTagBroadcast',
-		storage: '_widgetTagStorage',
-		storage_schema: '_widgetTagStorageSchema',
 		resources: '_widgetTagResources',
 		default_events: '_widgetTagDefaultEvents',
+		broadcast: '_widgetTagBroadcast',
+		// without directive analog
+		sugar: '_widgetTagSugar',
+		storage: '_widgetTagStorage',
+		storage_schema: '_widgetTagStorageSchema',
 		edit_template: '_widgetTagEditTemplate',
 		include: '_widgetTagInclude'
 	},
@@ -7207,10 +7210,7 @@ Lava.parsers.Directives = {
 	 * @type {Object.<string, string>}
 	 */
 	_resource_tag_actions: {
-		string: '_resourceTagString',
-		number: '_resourceTagNumber',
-		boolean: '_resourceTagBoolean',
-		array: '_resourceTagArray',
+		options: '_resourceTagOptions',
 		container: '_resourceTagContainer',
 		translate: '_resourceTagTranslate',
 		ntranslate: '_resourceTagTranslatePlural'
@@ -7226,16 +7226,11 @@ Lava.parsers.Directives = {
 	},
 
 	/**
-	 * Allowed item types in <str>"array"</str> resource
+	 * Allowed properties on config of &lt;main_view&gt; in widget definition
 	 * @type {Array.<string>}
 	 */
-	RESOURCE_ARRAY_ALLOWED_TYPES: ['string', 'boolean', 'null', 'number'],
+	WIDGET_DEFINITION_ALLOWED_MAIN_VIEW_MEMBERS: ['template', 'container', 'class', 'type'],
 
-	/**
-	 * To prevent nested defines
-	 * @type {boolean}
-	 */
-	_is_processing_define: false,
 	/**
 	 * The title of the widget in x:define directive, which is currently being processed
 	 * @type {string}
@@ -7643,79 +7638,16 @@ Lava.parsers.Directives = {
 	},
 
 	/**
-	 * Parse a string resource
+	 * Parse resource value as any JavaScript type, including arrays, objects and literals
 	 * @param {_cRawTag} raw_tag
 	 */
-	_resourceTagString: function(raw_tag) {
-
-		var value = '';
-
-		if (raw_tag.content) {
-
-			if (Lava.schema.DEBUG && raw_tag.content.length != 1) Lava.t("Malformed resources string tag");
-			value = raw_tag.content[0];
-
-		}
-
-		return {
-			type: 'string',
-			value: value
-		};
-
-	},
-
-	/**
-	 * Parse number resource
-	 * @param {_cRawTag} raw_tag
-	 */
-	_resourceTagNumber: function(raw_tag) {
+	_resourceTagOptions: function(raw_tag) {
 
 		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1 || raw_tag.content[0] == '')) Lava.t("Malformed resources tag");
 
 		return {
-			type: 'number',
-			value: +raw_tag.content[0]
-		};
-
-	},
-
-	/**
-	 * Parse boolean resource
-	 * @param {_cRawTag} raw_tag
-	 */
-	_resourceTagBoolean: function(raw_tag) {
-
-		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1 || raw_tag.content[0] == '')) Lava.t("Malformed resources tag");
-
-		return {
-			type: 'boolean',
-			value: Lava.types.Boolean.fromString(raw_tag.content[0])
-		};
-
-	},
-
-	/**
-	 * Parse array resource
-	 * @param {_cRawTag} raw_tag
-	 */
-	_resourceTagArray: function(raw_tag) {
-
-		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1 || raw_tag.content[0] == '')) Lava.t("Malformed resources tag");
-
-		var value = Lava.parseOptions(raw_tag.content[0]),
-			i,
-			count;
-
-		if (Lava.schema.DEBUG) {
-			if (!Array.isArray(value)) Lava.t("Malformed resources array tag content");
-			for (i = 0, count = value.length; i < count; i++) {
-				if (this.RESOURCE_ARRAY_ALLOWED_TYPES.indexOf(Lava.getType(value[i])) == -1) Lava.t("resources/array contains value type that is not allowed: " + Lava.getType(value[i]));
-			}
-		}
-
-		return {
-			type: 'array',
-			value: value
+			type: 'options',
+			value: Lava.parseOptions(raw_tag.content[0])
 		};
 
 	},
@@ -7726,15 +7658,14 @@ Lava.parsers.Directives = {
 	 */
 	_resourceTagTranslate: function(raw_tag) {
 
-		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1 || raw_tag.content[0] == '')) Lava.t("Malformed resources tag");
+		if (Lava.schema.DEBUG && raw_tag.content && raw_tag.content.length != 1) Lava.t("Malformed translate tag");
 
 		var result = {
 			type: 'translate',
-			value: raw_tag.content[0]
+			value: raw_tag.content ? raw_tag.content[0].trim() : ''
 		};
 
 		if (raw_tag.attributes.description) result.description = raw_tag.attributes.description;
-		if (raw_tag.attributes.context) result.context = raw_tag.attributes.context;
 
 		return result;
 
@@ -7758,8 +7689,8 @@ Lava.parsers.Directives = {
 
 		for (; i < count; i++) {
 
-			if (Lava.schema.DEBUG && (!plural_tags[i].content || !plural_tags[i].content[0])) Lava.t("Resources, malformed plural string");
-			plurals.push(plural_tags[i].content[0]);
+			if (Lava.schema.DEBUG && (plural_tags[i].name != 'string' || !plural_tags[i].content || !plural_tags[i].content[0])) Lava.t("Resources, malformed plural string");
+			plurals.push(plural_tags[i].content[0].trim());
 
 		}
 
@@ -7769,7 +7700,6 @@ Lava.parsers.Directives = {
 		};
 
 		if (raw_tag.attributes.description) result.description = raw_tag.attributes.description;
-		if (raw_tag.attributes.context) result.context = raw_tag.attributes.context;
 
 		return result;
 
@@ -7876,17 +7806,16 @@ Lava.parsers.Directives = {
 			name;
 
 		if (Lava.schema.DEBUG) {
-			if (view_config['class'] != 'View') Lava.t("define: view in 'main' role must be pure View, not subclass");
+			if (view_config['class'] != 'View') Lava.t("define: view in 'main_view' must be pure View, not subclass");
 			if ('argument' in view_config) Lava.t("Widgets do not support arguments");
-			if ('roles' in view_config) Lava.t("Widget definition: move the roles from main view to widget");
 			for (name in view_config) {
-				if (['assigns', 'options', 'class', 'type', 'template', 'container'].indexOf(name) == -1) {
+				if (this.WIDGET_DEFINITION_ALLOWED_MAIN_VIEW_MEMBERS.indexOf(name) == -1) {
 					Lava.t("main_view: view has an option, which can not be copied to widget: " + name + ". Probably, it must be specified via separate tag");
 				}
 			}
 		}
 
-		this._importVars(widget_config, view_config, ['template', 'container', 'assigns', 'options']);
+		this._importVars(widget_config, view_config, ['template', 'container']);
 
 		return widget_config;
 
@@ -7944,13 +7873,13 @@ Lava.parsers.Directives = {
 		if (raw_directive.attributes.controller) {
 
 			path = raw_directive.attributes.controller;
-			// example: "$widgetname/ClassName1/ClassName2"
+			// example: "$widgetname/ClassName1"
 			if (path[0] in Lava.parsers.Common.locator_types) {
 
 				i = path.indexOf('/');
 				if (Lava.schema.DEBUG && i == -1) Lava.t("Malformed class name locator: " + path);
 				name = path.substr(0, i); // cut the locator part, "$widgetname"
-				widget_config.real_class = path.substr(i); // leave the name part: "/ClassName1/ClassName2"
+				widget_config.real_class = path.substr(i); // leave the name part: "/ClassName1"
 				widget_config.class_locator = {locator_type: Lava.parsers.Common.locator_types[name[0]], name: name.substr(1)};
 				if (Lava.schema.DEBUG && (!widget_config.class_locator.name || !widget_config.class_locator.locator_type)) Lava.t("Malformed class name locator: " + path);
 
@@ -7978,44 +7907,20 @@ Lava.parsers.Directives = {
 	},
 
 	/**
-	 * Wrapper for `_parseWidgetDefinition` in x:define to guarantee that there are no nested defines
-	 * @param {_cRawDirective} raw_directive
-	 * @returns {_cWidget}
-	 */
-	_parseWidgetDefinitionWrapper: function(raw_directive) {
-
-		if (this._is_processing_define) Lava.t("Nested defines are not allowed");
-		this._is_processing_define = true;
-		var result;
-
-		// need to ensure that _is_processing_define flag stays off,
-		// cause in case of exception, parser will be left in unusable state
-		try {
-
-			result = this._parseWidgetDefinition(raw_directive);
-
-		} finally {
-
-			this._is_processing_define = false;
-
-		}
-
-		return result;
-
-	},
-
-	/**
 	 * Define a widget
 	 * @param {_cRawDirective} raw_directive
 	 */
 	_xdefine: function(raw_directive) {
 
-		if (Lava.schema.DEBUG && (!raw_directive.attributes || !raw_directive.attributes.title)) Lava.t("define: missing 'title' attribute");
-		if (Lava.schema.DEBUG && raw_directive.attributes.title.indexOf(' ') != -1) Lava.t("Widget title must not contain spaces");
-		if (Lava.schema.DEBUG && ('resource_id' in raw_directive.attributes)) Lava.t("resource_id is not allowed on define");
+		if (Lava.schema.DEBUG) {
+			if (!raw_directive.attributes || !raw_directive.attributes.title) Lava.t("define: missing 'title' attribute");
+			if (raw_directive.attributes.title.indexOf(' ') != -1) Lava.t("Widget title must not contain spaces");
+			if ('resource_id' in raw_directive.attributes) Lava.t("resource_id is not allowed on define");
+			if (this._current_widget_title) Lava.t("Nested defines are not allowed: " + raw_directive.attributes.title);
+		}
 
 		this._current_widget_title = raw_directive.attributes.title;
-		var widget_config = this._parseWidgetDefinitionWrapper(raw_directive);
+		var widget_config = this._parseWidgetDefinition(raw_directive);
 		this._current_widget_title = null;
 		widget_config.is_extended = false; // reserve it for serialization
 
@@ -8033,6 +7938,7 @@ Lava.parsers.Directives = {
 
 		var widget_config = this._parseWidgetDefinition(raw_directive);
 
+		if (Lava.schema.DEBUG && ('sugar' in widget_config)) Lava.t("Inline widgets must not have sugar");
 		if (Lava.schema.DEBUG && !widget_config['class'] && !widget_config.extends) Lava.t("x:define: widget definition is missing either 'controller' or 'extends' attribute");
 		if (raw_directive.attributes.resource_id) widget_config.resource_id = Lava.parsers.Common.parseResourceId(raw_directive.attributes.resource_id);
 
@@ -8109,7 +8015,7 @@ Lava.parsers.Directives = {
 
 				result = Lava.parsers.Common.parseTargets(raw_tag.content[0]);
 
-			} else if (option_type == 'expression') {
+			} else if (option_type == 'expressions') {
 
 				result = Lava.ExpressionParser.parse(raw_tag.content[0], Lava.ExpressionParser.SEPARATORS.SEMICOLON);
 
@@ -8257,10 +8163,9 @@ Lava.parsers.Directives = {
 			property_name: raw_element.attributes.name,
 			path_config: Lava.ExpressionParser.parseScopeEval(raw_element.content[0])
 		};
-		if ('direction' in raw_element.attributes) {
-			if (!(raw_element.attributes.direction in Lava.BINDING_DIRECTIONS))
-				Lava.t("Unknown binding direction: " + raw_element.attributes.direction);
-			binding.direction = Lava.BINDING_DIRECTIONS[raw_element.attributes.direction];
+		if ('from_widget' in raw_element.attributes) {
+			if (Lava.schema.DEBUG && ['', '1', 'true'].indexOf(raw_element.attributes['from_widget']) == -1) Lava.t('binding: invalid from_widget attribute');
+			binding.from_widget = true;
 		}
 		Lava.store(widget_config, 'bindings', raw_element.attributes.name, binding);
 
@@ -8745,7 +8650,7 @@ Lava.parsers.Storage = {
 	 * Convert `raw_rag` into object with given `schema`
 	 * @param {_cStorageItemSchema} schema
 	 * @param {_cRawTag} raw_tag
-	 * @param {bool} exclude_name
+	 * @param {boolean} exclude_name
 	 * @returns {Object}
 	 */
 	_asObject: function(schema, raw_tag, exclude_name) {
@@ -12378,7 +12283,7 @@ Lava.define(
 	/**
 	 * Tell other classes that this is instance of Lava.animation.Emulated
 	 */
-	isEmulatedAnimation: true,
+	isEmulated: true,
 
 	/**
 	 * Window timeout id
@@ -13876,7 +13781,7 @@ Lava.define(
 
 		resource_value = resource_owner.getResource(resource_id.name);
 		if (Lava.schema.DEBUG && !resource_value) Lava.t("static_value: resource not found: " + resource_id.locator_type + '=' + resource_id.locator);
-		if (['string', 'number', 'boolean', 'translate'].indexOf(resource_value.type) == -1) Lava.t("static_value: resource has wrong type");
+		if (Lava.schema.DEBUG && ['string', 'number', 'boolean'].indexOf(Firestorm.getType(resource_value.value)) == -1) Lava.t("static_value: resource has wrong type");
 
 		result.push(resource_value.value);
 
@@ -15205,6 +15110,17 @@ Lava.define(
 	},
 
 	/**
+	 * Is event routed to views (routing starts with a call to `lendEvent`)
+	 * @param {string} event_name Event name
+	 * @returns {boolean}
+	 */
+	isEventRouted: function(event_name) {
+
+		return this._event_usage_counters[event_name] > 0;
+
+	},
+
+	/**
 	 * Stop listening to an event
 	 * @param {string} event_name
 	 */
@@ -15383,7 +15299,7 @@ Lava.define(
 	 * @type {Object.<string, string>}
 	 */
 	_root_attributes_handlers: {
-		expression_option: '_parseRootExpressionOptionAttribute',
+		expressions_option: '_parseRootExpressionsOptionAttribute',
 		targets_option: '_parseRootTargetsOptionAttribute',
 		property: '_parseRootPropertyAttribute',
 		'switch': '_parseRootSwitchAttribute',
@@ -15723,7 +15639,7 @@ Lava.define(
 	 * @param {_cSugarRootAttribute} descriptor
 	 * @param {string} name
 	 */
-	_parseRootExpressionOptionAttribute: function(widget_config, attribute_value, descriptor, name) {
+	_parseRootExpressionsOptionAttribute: function(widget_config, attribute_value, descriptor, name) {
 
 		Lava.store(
 			widget_config,
@@ -18454,39 +18370,19 @@ Lava.define(
 		this._property_name = config.property_name;
 		this._scope = widget.getScopeByPathConfig(config.path_config);
 
-		var widget_listener = true,
-			scope_listener = true;
+		if (config.from_widget) {
 
-		if ('direction' in config) {
-
-			if (config.direction == Lava.BINDING_DIRECTIONS.TO_WIDGET) {
-
-				this._widget.set(this._property_name, this._scope.getValue());
-				widget_listener = false;
-
-			} else {
-
-				if (Lava.schema.DEBUG && config.direction != Lava.BINDING_DIRECTIONS.FROM_WIDGET) Lava.t();
-
-				this._scope.setValue(this._widget.get(this._property_name));
-				scope_listener = false;
-
-			}
+			this._scope.setValue(this._widget.get(this._property_name));
 
 		} else {
 
 			this._widget.set(this._property_name, this._scope.getValue());
-
-		}
-
-		if (scope_listener) {
 			this._scope_changed_listener = this._scope.on('changed', this.onScopeChanged, this);
+
 		}
 
-		if (widget_listener) {
-			if (!this._scope.isSetValue) Lava.t("Binding: bound scope does not implement setValue");
-			this._widget_property_changed_listener = widget.onPropertyChanged(this._property_name, this.onWidgetPropertyChanged, this);
-		}
+		if (!this._scope.isSetValue) Lava.t("Binding: bound scope does not implement setValue");
+		this._widget_property_changed_listener = widget.onPropertyChanged(this._property_name, this.onWidgetPropertyChanged, this);
 
 	},
 
@@ -23447,13 +23343,20 @@ Lava.define(
 	 */
 	init: function(config, widget, parent_view, template, properties) {
 
-		var name;
+		var name,
+			count,
+			i;
 
 		if (Lava.schema.DEBUG && !config.is_extended) Lava.t("Widget was created with partial (unextended) config");
 
 		if (Lava.schema.DEBUG) {
 			for (name in this._property_descriptors) {
 				if (!(name in this._properties)) Lava.t("All widget properties must have a default value");
+			}
+			if (this._config.default_events) {
+				for (i = 0, count = this._config.default_events.length; i < count; i++) {
+					if (!Lava.view_manager.isEventRouted(this._config.default_events[i])) Lava.t('Event is not routed: ' + this._config.default_events[i]);
+				}
 			}
 		}
 
@@ -23584,20 +23487,6 @@ Lava.define(
 
 	},
 
-	broadcastInDOM: function() {
-
-		this.View$broadcastInDOM();
-		this._acquireDefaultEvents();
-
-	},
-
-	broadcastRemove: function() {
-
-		this.View$broadcastRemove();
-		this._releaseAllEvents();
-
-	},
-
 	/**
 	 * Render and insert the widget instance into DOM
 	 * @param {HTMLElement} element
@@ -23640,72 +23529,6 @@ Lava.define(
 		this._is_inDOM = true;
 		this._is_dirty = false;
 		this._broadcastToChildren('broadcastInDOM');
-		this._acquireDefaultEvents();
-
-	},
-
-	/**
-	 * Register this widget in {@link Lava.system.ViewManager} as a consumer for each of `default_events` from config
-	 */
-	_acquireDefaultEvents: function() {
-
-		var i = 0,
-			count;
-
-		if (this._config.default_events) {
-			count = this._config.default_events.length;
-			for (; i < count; i++) {
-
-				this._lendEvent(this._config.default_events[i]);
-
-			}
-		}
-
-	},
-
-	/**
-	 * "lend" an event name from {@link Lava.system.ViewManager} and save it's name in local `_acquired_events` list
-	 * @param {string} event_name
-	 */
-	_lendEvent: function(event_name) {
-
-		if (Firestorm.Array.include(this._acquired_events, event_name)) {
-
-			Lava.view_manager.lendEvent(event_name);
-
-		}
-
-	},
-
-	/**
-	 * Inform {@link Lava.system.ViewManager} that this instance does not need to route that event anymore
-	 * @param {string} event_name
-	 */
-	_releaseEvent: function(event_name) {
-
-		if (Firestorm.Array.exclude(this._acquired_events, event_name)) {
-
-			Lava.view_manager.releaseEvent(event_name);
-
-		}
-
-	},
-
-	/**
-	 * "release" all `_acquired_events`
-	 */
-	_releaseAllEvents: function() {
-
-		var i = 0,
-			count = this._acquired_events.length;
-
-		for (; i < count; i++) {
-
-			Lava.view_manager.releaseEvent(this._acquired_events[i]);
-
-		}
-
-		this._acquired_events = [];
 
 	},
 
@@ -23717,7 +23540,6 @@ Lava.define(
 		if (!this._is_inDOM) Lava.t("remove: widget is not in DOM");
 		if (Lava.schema.DEBUG && !this._container) Lava.t("remove: widget doesn't have a container");
 
-		this._releaseAllEvents();
 		if (!this._is_sleeping) this._sleep();
 		this._is_inDOM = false;
 		this._is_dirty = false;
@@ -24013,8 +23835,6 @@ Lava.define(
 	destroy: function() {
 
 		var name;
-
-		this._releaseAllEvents();
 
 		for (name in this._bindings) {
 
@@ -27450,7 +27270,6 @@ return (this._binds[0].getValue());
 				}
 			}
 		},
-		default_events: ["input"],
 		real_class: "input.TextArea",
 		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Standard",
@@ -27556,7 +27375,6 @@ return (this._binds[0].getValue());
 				}
 			}
 		},
-		default_events: ["input"],
 		real_class: "input.Text",
 		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Standard",
@@ -29066,7 +28884,7 @@ return (this._binds[0].getValue() ? 'in' : 'hidden');
 		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Standard",
 		template: [
-			"\r\n\t\t\t\r\n\t\t\t\r\n\t\t\t",
+			"\r\n\t\t\t",
 			{
 				type: "view",
 				"class": "Foreach",

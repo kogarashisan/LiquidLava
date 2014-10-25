@@ -13,7 +13,7 @@ Lava.define(
 	/**
 	 * Tell other classes that this is instance of Lava.animation.Emulated
 	 */
-	isEmulatedAnimation: true,
+	isEmulated: true,
 
 	/**
 	 * Window timeout id

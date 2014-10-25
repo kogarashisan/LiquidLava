@@ -81,7 +81,7 @@ _cSugar = {
  */
 _eSugarRootAttributeType = {
 	/** Attribute value will be parsed by {@link Lava.ExpressionParser} and stored in {@link _cView#options} */
-	expression_option: 'expression_option',
+	expressions_option: 'expressions_option',
 	/** Attribute value will be parsed by {@link Lava.parsers.Common#parseTargets} and stored in {@link _cView#options} */
 	targets_option: 'targets_option',
 	/** Content will be optionally converted and stored in {@link _cWidget#properties} */
