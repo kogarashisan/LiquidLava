@@ -311,7 +311,6 @@ Lava.define(
 		this._argument.wakeup();
 		this._foreach_scope.wakeup();
 		Lava.resumeListener(this._foreach_scope_changed_listener);
-
 		this._refreshChildren();
 
 		this.Abstract$_wakeup();
@@ -319,8 +318,7 @@ Lava.define(
 	},
 
 	/**
-	 * Get `_foreach_scope`.
-	 * The only purpose of this method is to attach a listener to scope's {@link Lava.scope.Foreach#event:after_refresh} event
+	 * Get `_foreach_scope`. Can be used to sort and filter items.
 	 * @returns {Lava.scope.Foreach}
 	 */
 	getScope: function() {

@@ -188,11 +188,11 @@ _cTranslatablePlural = {
 _cScopeForeach = {
 
 	/**
-	 * Whether to create another (own) instance of Enumerable, when argument result is also Enumerable.
-	 * May be used to apply sorting and filtering
-	 * @type {boolean}
+	 * Whether to create another (own) instance of Enumerable or DataView, when argument result is also Enumerable.
+	 * May be used to apply sorting and filtering. Allowed values: "Enumerable", "DataView"
+	 * @type {string}
 	 */
-	create_own_enumerable: false
+	own_enumerable_mode: null
 
 };
 

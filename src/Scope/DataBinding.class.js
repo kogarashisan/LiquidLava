@@ -122,7 +122,7 @@ Lava.define(
 
 		if (property_container != null) {
 
-			if (property_container.isEnumerable && /^\d+$/.test(this._property_name)) {
+			if (property_container.isCollection && /^\d+$/.test(this._property_name)) {
 
 				if (this._enumerable_changed_listener == null) {
 

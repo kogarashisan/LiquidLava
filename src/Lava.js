@@ -121,17 +121,6 @@ var Lava = {
 	},
 
 	/**
-	 * Enumerable can refresh itself from these kinds of sources
-	 * @enum {number}
-	 */
-	ENUMERABLE_SOURCE_OBJECT_TYPES: {
-		OBJECT: 0,
-		ARRAY: 1,
-		ENUMERABLE: 2,
-		PROPERTIES: 3
-	},
-
-	/**
 	 * <str>"id"</str> attribute of framework's DOM elements start with this prefix.
 	 * When changing this, you must also change SYSTEM_ID_REGEX
 	 * @const

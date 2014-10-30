@@ -10,13 +10,9 @@
  */
 
 /**
- * Scope has refreshed it's value from argument. May be used to sort and filter data in Foreach views.
+ * Scope has refreshed it's value from argument.
+ * This event is fired before 'changed' event and may be used to sort and filter data in Foreach views.
  * @event Lava.scope.Foreach#after_refresh
- * @type {Object}
- * @property {Lava.system.Enumerable} value Scope's own Enumerable instance, which is served for the {@link Lava.view.Foreach} view.
- *  When scope's argument has returned an Enumerable instance, and "create_own_enumerable" option is not set
- *  - this will be the Enumerable instance, which was returned from Argument.
- * @property {*} argument_value Argument result (may be an object, Enumerable, array or Properties)
  */
 
 Lava.define(
@@ -95,14 +91,13 @@ Lava.define(
 	 * which was returned from `_argument`
 	 * @type {boolean}
 	 */
-	_own_enumerable: false,
+	_own_collection: false,
 
 	/**
-	 * Should this scope create it's own instance of Enumerable, when argument's value is also Enumerable
-	 * (or it will use argument's value). May be used to apply sorting and filtering
-	 * @type {boolean}
+	 * Scope options
+	 * @type {?_cScopeForeach}
 	 */
-	_create_own_enumerable: false,
+	_config: null,
 
 	/**
 	 * Create an instance of the Foreach scope. Refresh value
@@ -110,9 +105,9 @@ Lava.define(
 	 * @param {Lava.scope.Argument} argument
 	 * @param {Lava.view.Foreach} view
 	 * @param {Lava.widget.Standard} widget
-	 * @param {?_cScopeForeach} options
+	 * @param {?_cScopeForeach} config
 	 */
-	init: function(argument, view, widget, options) {
+	init: function(argument, view, widget, config) {
 
 		this.guid = Lava.guid++;
 		this._argument = argument;
@@ -125,59 +120,97 @@ Lava.define(
 			this._waits_refresh = true;
 		}
 
-		if (options) {
-			this._create_own_enumerable = options['create_own_enumerable'] || false;
+		if (config) {
+
+			if (Lava.schema.DEBUG && ['Enumerable', 'DataView'].indexOf(config['own_enumerable_mode']) == -1) Lava.t('Unknown value in own_enumerable_mode option: ' + config['own_enumerable_mode']);
+
+			if (config['own_enumerable_mode'] == "DataView") {
+				this._refreshDataSource = this._refreshDataSource_DataView;
+				this._value = new Lava.system.DataView();
+			} else {
+				this._refreshDataSource = this._refreshDataSource_Enumerable;
+				this._value = new Lava.system.Enumerable();
+			}
+
+			this._own_collection = true;
+
 		}
 
 		this._argument_waits_refresh_listener = this._argument.on('waits_refresh', this._onDependencyWaitsRefresh, this);
 		this._argument_changed_listener = this._argument.on('changed', this.onDataSourceChanged, this);
 		this._argument_refreshed_listener = this._argument.on('refreshed', this._onDependencyRefreshed, this);
 
-		this._refreshDataSource();
+		this.refreshDataSource();
+
+	},
+
+	/**
+	 * Perform refresh in regular mode (without "own_enumerable_mode" option)
+	 * @param {(object|Array|Lava.mixin.Properties|Lava.system.Enumerable)} argument_value value, received from argument
+	 */
+	_refreshDataSource: function(argument_value) {
+
+		if (argument_value.isCollection) {
+
+			if (this._own_collection) {
+
+				this._value.destroy();
+				this._own_collection = false;
+				this._value = null;
+
+			}
+
+			if (this._value != argument_value) {
+				this._value = argument_value;
+				this._fire('new_enumerable');
+			}
+
+		} else if (this._own_collection) {
+
+			this._value.refreshFromDataSource(argument_value);
+
+		} else {
+
+			this._createCollection(argument_value);
+
+		}
+
+	},
+
+	_refreshDataSource_Enumerable: function(argument_value) {
+
+		if (Lava.schema.DEBUG && !argument_value.isCollection) Lava.t("Argument result must be Enumerable");
+		this._value.refreshFromDataSource(argument_value);
+
+	},
+
+	_refreshDataSource_DataView: function(argument_value) {
+
+		if (Lava.schema.DEBUG && !argument_value.isCollection) Lava.t("Argument result must be Enumerable");
+
+		if (this._value.getDataSource() != argument_value) {
+			// DataView copies UIDs from original Enumerable instance
+			this._fire('new_enumerable');
+		}
+
+		this._value.refreshFromDataSource(argument_value);
 
 	},
 
 	/**
 	 * Get new value from the `_argument`, and create a new instance of local Enumerable, or update the content of the old one
 	 */
-	_refreshDataSource: function() {
+	refreshDataSource: function() {
 
 		var argument_value = this._argument.getValue();
 
 		if (argument_value) {
 
-			if (argument_value.isEnumerable) {
-
-				if (this._create_own_enumerable) {
-
-					this._createOrUpdateCollection(argument_value);
-
-				} else {
-
-					if (this._own_enumerable) {
-
-						this._value.destroy();
-						this._own_enumerable = false;
-						this._value = null;
-
-					}
-
-					if (this._value != argument_value) {
-						this._value = argument_value;
-						this._fire('new_enumerable');
-					}
-
-				}
-
-			} else {
-
-				this._createOrUpdateCollection(argument_value);
-
-			}
+			this._refreshDataSource(argument_value);
 
 			if (this._observable_listener == null) {
 
-				if (argument_value.isEnumerable) {
+				if (argument_value.isCollection) {
 
 					this._observable_listener = argument_value.on('collection_changed', this._onObservableChanged, this);
 					this._observable = argument_value;
@@ -191,39 +224,25 @@ Lava.define(
 
 			}
 
-		} else if (this._own_enumerable) {
+		} else if (this._own_collection) {
 
 			this._value.removeAll();
 
 		} else {
 
+			// will be called only when "own_enumerable_mode" is off, cause otherwise this._own_collection is always true
 			this._createCollection(null);
 
 		}
 
-		this._fire('after_refresh', {
-			value: this._value,
-			argument_value: argument_value
-		});
+		this._fire('after_refresh');
+		this._fire('changed');
 
 	},
 
-	/**
-	 * Depending on current value, create new Enumerable instance or update the old one
-	 * @param {*} argument_value
-	 */
-	_createOrUpdateCollection: function(argument_value) {
+	createsOwnEnumerable: function() {
 
-		if (this._own_enumerable) {
-
-			this._value.setSourceObject(argument_value);
-			this._value.updateFromSourceObject();
-
-		} else {
-
-			this._createCollection(argument_value);
-
-		}
+		return this._config['own_enumerable_mode'];
 
 	},
 
@@ -234,7 +253,7 @@ Lava.define(
 	_createCollection: function(argument_value) {
 
 		this._value = new Lava.system.Enumerable(argument_value);
-		this._own_enumerable = true;
+		this._own_collection = true;
 		this._fire('new_enumerable');
 
 	},
@@ -276,8 +295,7 @@ Lava.define(
 	 */
 	_doRefresh: function() {
 
-		this._refreshDataSource();
-		this._fire('changed');
+		this.refreshDataSource();
 
 	},
 
@@ -321,7 +339,8 @@ Lava.define(
 
 		}
 
-		this._refreshDataSource();
+		this.refreshDataSource();
+
 		Lava.resumeListener(this._argument_changed_listener);
 		this._is_dirty = false;
 
@@ -337,7 +356,7 @@ Lava.define(
 		this._argument.removeListener(this._argument_refreshed_listener);
 		this._observable_listener && this._flushObservable();
 
-		if (this._own_enumerable) {
+		if (this._own_collection) {
 
 			this._value.destroy();
 

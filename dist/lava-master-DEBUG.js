@@ -1672,17 +1672,6 @@ var Lava = {
 	},
 
 	/**
-	 * Enumerable can refresh itself from these kinds of sources
-	 * @enum {number}
-	 */
-	ENUMERABLE_SOURCE_OBJECT_TYPES: {
-		OBJECT: 0,
-		ARRAY: 1,
-		ENUMERABLE: 2,
-		PROPERTIES: 3
-	},
-
-	/**
 	 * <str>"id"</str> attribute of framework's DOM elements start with this prefix.
 	 * When changing this, you must also change SYSTEM_ID_REGEX
 	 * @const
@@ -12515,26 +12504,15 @@ Lava.define(
  */
 
 /**
- * Values were added to collection
- * @event Lava.system.Enumerable#items_added
- * @type {Object}
- * @property {Array.<number>} uids Internal unique IDs that were generated for added values
- * @property {array.<*>} values Values, that were added
- * @property {Array.<string>} names Names (keys) of values that were added
- */
-
-/**
  * Fires when either content or order of items in collection changes
  * @event Lava.system.Enumerable#collection_changed
  */
 
-Lava.define(
-'Lava.system.Enumerable',
+Lava.define('Lava.system.CollectionAbstract',
 /**
- * Array-like collection of elements, suitable for scope binding
- *
- * @lends Lava.system.Enumerable#
- * @extends Lava.mixin.Properties
+ * Base class for Enumerable, containing all methods, that do not require UID generation
+ * @lends Lava.system.CollectionAbstract#
+ * @extends Lava.mixin.Properties#
  */
 {
 
@@ -12544,12 +12522,8 @@ Lava.define(
 	 * To tell other classes that this is instance of Enumerable
 	 * @const
 	 */
-	isEnumerable: true,
-	/**
-	 * Global unique identifier of this instance
-	 * @type {_tGUID}
-	 */
-	guid: null,
+	isCollection: true,
+
 	/**
 	 * Unique identifiers for values, internal to this instance of enumerable. Note: they are not globally unique, just to this instance
 	 * @type {Array.<number>}
@@ -12566,119 +12540,25 @@ Lava.define(
 	 */
 	_data_names: [],
 	/**
-	 * Object, from which this collection was constructed or refreshed
-	 * @type {(Array|Object|Lava.mixin.Properties|Lava.system.Enumerable)}
-	 */
-	_source_object: null,
-	/**
-	 * The type of `_source_object`
-	 * @type {Lava.ENUMERABLE_SOURCE_OBJECT_TYPES}
-	 */
-	_source_object_type: null,
-	/**
 	 * Count of items in Enumerable instance
 	 * @type {number}
 	 */
 	_count: 0,
-	/**
-	 * Counter for next internal UID
-	 * @type {number}
-	 */
-	_uid: 1,
 
 	/**
-	 * Creates Enumerable instance, sets `_source_object`
-	 * @param {(Array|Object|Lava.mixin.Properties|Lava.system.Enumerable)} data_source What will become `_source_object`
+	 * Global unique identifier of this instance
+	 * @type {_tGUID}
 	 */
-	init: function(data_source) {
-
-		this.guid = Lava.guid++;
-
-		if (data_source) {
-
-			var count = 0,
-				i = 0;
-
-			this.setSourceObject(data_source);
-
-			if (this._source_object_type == Lava.ENUMERABLE_SOURCE_OBJECT_TYPES.ARRAY) {
-
-				for (count = data_source.length; i < count; i++) {
-
-					this._push(this._uid++, data_source[i], null);
-
-				}
-
-			} else if (this._source_object_type == Lava.ENUMERABLE_SOURCE_OBJECT_TYPES.ENUMERABLE) {
-
-				this._data_names = data_source.getNames();
-				this._data_values = data_source.getValues();
-				this._data_uids = data_source.getUIDs();
-
-			} else if (this._source_object_type == Lava.ENUMERABLE_SOURCE_OBJECT_TYPES.PROPERTIES) {
-
-				this._initFromObject(data_source.getProperties());
-
-			} else {
-
-				this._initFromObject(data_source);
-
-			}
-
-			this._count = this._data_uids.length;
-
-		}
-
-	},
+	guid: null,
 
 	/**
-	 * If `_source_object` is an Object
-	 * @param {Object} data_source
+	 * Used in editing operations to set `_count` and fire changed events for <str>"length"</str> property
+	 * @param {number} new_length
 	 */
-	_initFromObject: function(data_source) {
+	_setLength: function(new_length) {
 
-		for (var name in data_source) {
-
-			this._push(this._uid++, data_source[name], name);
-
-		}
-
-	},
-
-	/**
-	 * Append the given uid, value and name to corresponding instance arrays: `_data_uids`, `_data_values` and `_data_names`
-	 * @param {number} uid
-	 * @param {*} value
-	 * @param {string} name
-	 */
-	_push: function(uid, value, name) {
-
-		this._data_uids.push(uid);
-		this._data_values.push(value);
-		this._data_names.push(name);
-
-	},
-
-	/**
-	 * Take the temporary helper object, returned from {@link Lava.system.Enumerable#_createHelperStorage}
-	 * and assign it's corresponding arrays to local arrays
-	 * @param {_cEnumerableHelperStorage} storage Temporary helper object
-	 */
-	_assignStorage: function(storage) {
-
-		this._data_uids = storage.uids;
-		this._data_values = storage.values;
-		this._data_names = storage.names;
-
-	},
-
-	/**
-	 * Does it have `_source_object`
-	 * @returns {boolean} True, if `_source_object` is not null
-	 */
-	hasSourceObject: function() {
-
-		return this._source_object !== null;
+		this._count = new_length;
+		this.firePropertyChangedEvents('length');
 
 	},
 
@@ -12883,101 +12763,6 @@ Lava.define(
 	},
 
 	/**
-	 * Used in editing operations to set `_count` and fire changed events for <str>"length"</str> property
-	 * @param {number} new_length
-	 */
-	_setLength: function(new_length) {
-
-		this._count = new_length;
-		this.firePropertyChangedEvents('length');
-
-	},
-
-	/**
-	 * Replace the corresponding `value` and `name` at specified `index`, generating a new UID
-	 * @param {number} index Index of value in Enumerable
-	 * @param {*} value New value for given index
-	 * @param {number} [name] New name for the value
-	 */
-	replaceAt: function(index, value, name) {
-
-		if (index > this._count) Lava.t("Index is out of range");
-
-		var old_uid = this._data_uids[index],
-			old_value = this._data_values[index],
-			old_name = this._data_names[index],
-			new_uid = this._uid++;
-
-		this._data_uids[index] = new_uid;
-		this._data_values[index] = value;
-		if (name) {
-			this._data_names[index] = name;
-		}
-
-		this._fire('items_removed', {
-			uids: [old_uid],
-			values: [old_value],
-			names: [old_name]
-		});
-
-		this._fire('items_added', {
-			uids: [new_uid],
-			values: [value],
-			names: [this._data_names[index]]
-		});
-
-		this._fire('collection_changed');
-
-	},
-
-	/**
-	 * Swap values, names and UIDs at given index. Does not generate {@link Lava.system.Enumerable#event:items_removed}
-	 * and {@link Lava.system.Enumerable#event:items_added} events, just {@link Lava.system.Enumerable#event:collection_changed}
-	 * @param {number} index_a First index to swap
-	 * @param {number} index_b Second index to swap
-	 */
-	swap: function(index_a, index_b) {
-
-		if (index_a > this._count || index_b > this._count) Lava.t("Index is out of range (2)");
-
-		var swap = Firestorm.Array.swap;
-
-		swap(this._data_uids, index_a, index_b);
-		swap(this._data_values, index_a, index_b);
-		swap(this._data_names, index_a, index_b);
-
-		this._fire('collection_changed');
-
-	},
-
-	/**
-	 * Add the name/value pair to the end of the collection, generating a new UID
-	 * @param {*} value New value to add
-	 * @param {string} [name] New name
-	 * @returns {number} New collection `_count`
-	 */
-	push: function(value, name) {
-
-		var count = this._count,
-			new_uid = this._uid++;
-
-		this._push(new_uid, value, name || null);
-
-		this._setLength(count + 1);
-
-		this._fire('items_added', {
-			uids: [new_uid],
-			values: [value],
-			names: [name || null]
-		});
-
-		this._fire('collection_changed');
-
-		return this._count; // after _setLength() this was incremented by one
-
-	},
-
-	/**
 	 * Remove a value from the end of the collection
 	 * @returns {*} Removed value
 	 */
@@ -13002,29 +12787,6 @@ Lava.define(
 	},
 
 	/**
-	 * Execute the `callback` for each item in collection
-	 * @param {_tEnumerableEachCallback} callback
-	 */
-	each: function(callback) {
-
-		// everything is copied in case the collection is modified during the cycle
-		var values = this._data_values.slice(),
-			uids = this._data_uids.slice(),
-			names = this._data_names.slice(),
-			i = 0,
-			count = this._count;
-
-		for (; i < count; i++) {
-
-			if (callback(values[i], names[i], uids[i], i) === false) {
-				break;
-			}
-
-		}
-
-	},
-
-	/**
 	 * Removes the first occurrence of value within collection
 	 *
 	 * @param {*} value
@@ -13045,230 +12807,45 @@ Lava.define(
 	},
 
 	/**
-	 * If value does not exist - push it into collection
-	 * @param {*} value New value
-	 * @param {string} [name] New name
-	 * @returns {boolean} <kw>true</kw>, if value did not exist and was included
+	 * Swap values, names and UIDs at given index. Does not generate {@link Lava.system.Enumerable#event:items_removed}
+	 * and {@link Lava.system.Enumerable#event:items_added} events, just {@link Lava.system.Enumerable#event:collection_changed}
+	 * @param {number} index_a First index to swap
+	 * @param {number} index_b Second index to swap
 	 */
-	includeValue: function(value, name) {
+	swap: function(index_a, index_b) {
 
-		var result = false,
-			index = this._data_values.indexOf(value);
+		if (index_a > this._count || index_b > this._count) Lava.t("Index is out of range (2)");
 
-		if (index == -1) {
-			this.push(value, name);
-			result = true;
-		}
+		var swap = Firestorm.Array.swap;
 
-		return result;
+		swap(this._data_uids, index_a, index_b);
+		swap(this._data_values, index_a, index_b);
+		swap(this._data_names, index_a, index_b);
+
+		this._fire('collection_changed');
 
 	},
 
 	/**
-	 * Set `_source_object`
-	 * @param {(Array|Object|Lava.mixin.Properties|Lava.system.Enumerable)} data_source
+	 * Execute the `callback` for each item in collection
+	 * @param {_tEnumerableEachCallback} callback
 	 */
-	setSourceObject: function(data_source) {
+	each: function(callback) {
 
-		if (Lava.schema.DEBUG && typeof(data_source) != 'object') Lava.t("Wrong argument supplied for Enumerable constructor");
-		this._source_object = data_source;
-		this._source_object_type = Array.isArray(data_source)
-			? Lava.ENUMERABLE_SOURCE_OBJECT_TYPES.ARRAY
-			: (data_source.isEnumerable
-				? Lava.ENUMERABLE_SOURCE_OBJECT_TYPES.ENUMERABLE
-				: (data_source.isProperties
-					? Lava.ENUMERABLE_SOURCE_OBJECT_TYPES.PROPERTIES
-					: Lava.ENUMERABLE_SOURCE_OBJECT_TYPES.OBJECT));
-
-	},
-
-	/**
-	 * Update the collection from `_source_object`: remove values, that are not in source object, and add new values
-	 */
-	updateFromSourceObject: function() {
-
-		if (Lava.schema.DEBUG && !this._source_object) Lava.t("Enumerable was not created from object");
-
-		switch (this._source_object_type) {
-			case Lava.ENUMERABLE_SOURCE_OBJECT_TYPES.PROPERTIES:
-				this._updateFromObject(this._source_object.getProperties());
-				break;
-			case Lava.ENUMERABLE_SOURCE_OBJECT_TYPES.OBJECT:
-				this._updateFromObject(this._source_object);
-				break;
-			case Lava.ENUMERABLE_SOURCE_OBJECT_TYPES.ARRAY:
-				this._updateFromArray(this._source_object);
-				break;
-			case Lava.ENUMERABLE_SOURCE_OBJECT_TYPES.ENUMERABLE:
-				this._updateFromEnumerable(this._source_object);
-				break;
-			default:
-				Lava.t();
-		}
-
-	},
-
-	/**
-	 * Update from `_source_object` version for arrays
-	 * @param {Array} source_array
-	 */
-	_updateFromArray: function(source_array) {
-
-		var new_count = source_array.length,
-			count = (new_count < this._count) ? new_count : this._count,
+		// everything is copied in case the collection is modified during the cycle
+		var values = this._data_values.slice(),
+			uids = this._data_uids.slice(),
+			names = this._data_names.slice(),
 			i = 0,
-			uid,
-			result = this._createHelperStorage(),
-			removed = this._createHelperStorage(),
-			added = this._createHelperStorage();
+			count = this._count;
 
 		for (; i < count; i++) {
 
-			if (this._data_values[i] === source_array[i]) {
-				result.push(this._data_uids[i], this._data_values[i], this._data_names[i]);
-			} else {
-				uid = this._uid++;
-				added.push(uid, source_array[i], null);
-				result.push(uid, source_array[i], null);
-				removed.push(this._data_uids[i], this._data_values[i], this._data_names[i]);
+			if (callback(values[i], names[i], uids[i], i) === false) {
+				break;
 			}
 
 		}
-
-		if (this._count < new_count) {
-
-			for (i = this._count; i < new_count; i++) {
-
-				uid = this._uid++;
-				added.push(uid, source_array[i], null);
-				result.push(uid, source_array[i], null);
-
-			}
-
-		} else {
-
-			for (i = this._count; i < new_count; i++) {
-
-				removed.push(this._data_uids[i], this._data_values[i], this._data_names[i]);
-
-			}
-
-		}
-
-		this._assignStorage(result);
-		this._setLength(this._data_uids.length);
-
-		removed.uids.length && this._fire('items_removed', removed.getObject());
-		added.uids.length && this._fire('items_added', added.getObject());
-		this._fire('collection_changed');
-
-	},
-
-	/**
-	 * Update from `_source_object` version for Enumerable
-	 * @param {Lava.system.Enumerable} data_source
-	 */
-	_updateFromEnumerable: function(data_source) {
-
-		var new_names = data_source.getNames(),
-			new_values = data_source.getValues(),
-			new_uids = data_source.getUIDs(),
-			i,
-			count,
-			uid,
-			old_uids_hash = {},
-			new_uids_hash = {},
-			removed = this._createHelperStorage(),
-			added = this._createHelperStorage();
-
-		for (i = 0, count = new_uids.length; i < count; i++) {
-			new_uids_hash[new_uids[i]] = true;
-		}
-
-		for (i = 0, count = this._count; i < count; i++) {
-			uid = this._data_uids[i];
-			old_uids_hash[uid] = true;
-			if (!(uid in new_uids_hash)) {
-				removed.push(uid, this._data_values[i], this._data_names[i]);
-			}
-		}
-
-		for (i = 0, count = new_uids.length; i < count; i++) {
-			uid = new_uids[i];
-			if (!(uid in old_uids_hash)) {
-				added.push(uid, new_values[i], new_names[i]);
-			}
-		}
-
-		this._data_names = new_names;
-		this._data_values = new_values;
-		this._data_uids = new_uids;
-		this._setLength(this._data_uids.length);
-
-		removed.uids.length && this._fire('items_removed', removed.getObject());
-		added.uids.length && this._fire('items_added', added.getObject());
-		this._fire('collection_changed');
-
-	},
-
-	/**
-	 * Update from `_source_object` - version for objects
-	 * @param {Object} source_object
-	 */
-	_updateFromObject: function(source_object) {
-
-		var i = 0,
-			name,
-			uid,
-			result = this._createHelperStorage(),
-			removed = this._createHelperStorage(),
-			added = this._createHelperStorage();
-
-		for (; i < this._count; i++) {
-
-			name = this._data_names[i];
-			if (name in source_object) {
-
-				if (source_object[name] === this._data_values[i]) {
-
-					result.push(this._data_uids[i], this._data_values[i], this._data_names[i]);
-
-				} else {
-
-					// Attention: the name has NOT changed, but it will be present in both added and removed names!
-					removed.push(this._data_uids[i], this._data_values[i], name);
-					uid = this._uid++;
-					result.push(uid, source_object[name], name);
-					added.push(uid, source_object[name], name);
-
-				}
-
-			} else {
-
-				removed.push(this._data_uids[i], this._data_values[i], this._data_names[i]);
-
-			}
-
-		}
-
-		for (name in source_object) {
-
-			if (this._data_names.indexOf(name) == -1) {
-
-				uid = this._uid++;
-				result.push(uid, source_object[name], name);
-				added.push(uid, source_object[name], name);
-
-			}
-
-		}
-
-		this._assignStorage(result);
-		this._setLength(this._data_uids.length);
-
-		removed.uids.length && this._fire('items_removed', removed.getObject());
-		added.uids.length && this._fire('items_added', added.getObject());
-		this._fire('collection_changed');
 
 	},
 
@@ -13422,6 +12999,405 @@ Lava.define(
 	},
 
 	/**
+	 * Remove all values and return them
+	 * @returns {Array} Values that were in collection
+	 */
+	removeAll: function() {
+
+		return (this._count > 0) ? this.removeRange(0, this._count) : [];
+
+	},
+
+	/**
+	 * Remove value at `index`
+	 * @param {number} index Index to remove
+	 * @returns {*} The removed value
+	 */
+	removeAt: function(index) {
+
+		return this.removeRange(index, 1)[0];
+
+	},
+
+	/**
+	 * Remove value from the beginning of collection
+	 * @returns {*} The removed value
+	 */
+	shift: function() {
+
+		return this.removeRange(0, 1)[0];
+
+	},
+
+	/**
+	 * Create an internal helper object, which allows to write less code
+	 * @returns {_cEnumerableHelperStorage} Helper object
+	 */
+	_createHelperStorage: function() {
+
+		return {
+			uids: [],
+			values: [],
+			names: [],
+			push: function(uid, value, name) {
+				this.uids.push(uid);
+				this.values.push(value);
+				this.names.push(name);
+			},
+			getObject: function() {
+				return {
+					uids: this.uids,
+					values: this.values,
+					names: this.names
+				}
+			}
+		}
+
+	},
+
+	/**
+	 * Take the temporary helper object, returned from {@link Lava.system.Enumerable#_createHelperStorage}
+	 * and assign it's corresponding arrays to local arrays
+	 * @param {_cEnumerableHelperStorage} storage Temporary helper object
+	 */
+	_assignStorage: function(storage) {
+
+		this._data_uids = storage.uids;
+		this._data_values = storage.values;
+		this._data_names = storage.names;
+
+	},
+
+	/**
+	 * Free resources and make this instance unusable
+	 */
+	destroy: function() {
+
+		this._fire('destroy');
+
+	}
+
+});
+
+/**
+ * Values were added to collection
+ * @event Lava.system.Enumerable#items_added
+ * @type {Object}
+ * @property {Array.<number>} uids Internal unique IDs that were generated for added values
+ * @property {array.<*>} values Values, that were added
+ * @property {Array.<string>} names Names (keys) of values that were added
+ */
+
+Lava.define(
+'Lava.system.Enumerable',
+/**
+ * Array-like collection of elements, suitable for scope binding
+ *
+ * @lends Lava.system.Enumerable#
+ * @extends Lava.system.CollectionAbstract#
+ */
+{
+
+	Extends: 'Lava.system.CollectionAbstract',
+
+	/**
+	 * To tell other classes that this is instance of Enumerable
+	 * @const
+	 */
+	isEnumerable: true,
+
+	/**
+	 * Counter for next internal UID
+	 * @type {number}
+	 */
+	_uid: 1,
+
+	/**
+	 * Creates Enumerable instance and fills initial data from `data_source`
+	 * @param {(Array|Object|Lava.mixin.Properties|Lava.system.Enumerable)} data_source
+	 */
+	init: function(data_source) {
+
+		this.guid = Lava.guid++;
+
+		if (data_source) {
+
+			var count = 0,
+				i = 0,
+				name;
+
+			if (Array.isArray(data_source)) {
+
+				for (count = data_source.length; i < count; i++) {
+
+					this._push(this._uid++, data_source[i], null);
+
+				}
+
+			} else if (data_source.isCollection) {
+
+				this._data_names = data_source.getNames();
+				this._data_values = data_source.getValues();
+				for (count = this._data_values.length; i < count; i++) {
+
+					this._data_uids.push(this._uid++);
+
+				}
+
+			} else {
+
+				if (data_source.isProperties) {
+
+					data_source = data_source.getProperties();
+
+				}
+
+				for (name in data_source) {
+
+					this._push(this._uid++, data_source[name], name);
+
+				}
+
+			}
+
+			this._count = this._data_uids.length;
+
+		}
+
+	},
+
+	/**
+	 * Update the collection from `data_source`
+	 * @param {(Array|Object|Lava.mixin.Properties|Lava.system.Enumerable)} data_source
+	 */
+	refreshFromDataSource: function(data_source) {
+
+		if (Lava.schema.DEBUG && typeof(data_source) != 'object') Lava.t("Wrong argument passed to updateFromSourceObject");
+
+		if (Array.isArray(data_source)) {
+
+			this._updateFromArray(data_source, []);
+
+		} else if (data_source.isCollection) {
+
+			this._updateFromEnumerable(data_source);
+
+		} else {
+
+			this._updateFromObject(data_source.isProperties ? data_source.getProperties() : data_source);
+
+		}
+
+	},
+
+	/**
+	 * Remove all current values and add values from array
+	 * @param {Array} source_array
+	 * @param {Array.<string>} names
+	 */
+	_updateFromArray: function(source_array, names) {
+
+		var i = 0,
+			count = source_array.length,
+			items_removed_argument = {
+				uids: this._data_uids,
+				values: this._data_values,
+				names: this._data_names
+			};
+
+		this._data_uids = [];
+		this._data_values = [];
+		this._data_names = [];
+
+		for (; i < count; i++) {
+			this._push(this._uid++, source_array[i], names[i] || null);
+		}
+
+		this._setLength(count);
+
+		this._fire('items_removed', items_removed_argument);
+
+		this._fire('items_added', {
+			uids: this._data_uids.slice(),
+			values: this._data_values.slice(),
+			names: this._data_names.slice()
+		});
+
+		this._fire('collection_changed');
+
+	},
+
+	/**
+	 * Same as `_updateFromArray`, but uses names from `data_source`
+	 * @param {Lava.system.Enumerable} data_source
+	 */
+	_updateFromEnumerable: function(data_source) {
+
+		this._updateFromArray(data_source.getValues(), data_source.getNames());
+
+	},
+
+	/**
+	 * Compares item names with object keys, removing values without names and values that do not match.
+	 * Adds new values from `source_object`
+	 * @param {Object} source_object
+	 */
+	_updateFromObject: function(source_object) {
+
+		var i = 0,
+			name,
+			uid,
+			result = this._createHelperStorage(),
+			removed = this._createHelperStorage(),
+			added = this._createHelperStorage();
+
+		for (; i < this._count; i++) {
+
+			name = this._data_names[i];
+			if (name != null && (name in source_object)) {
+
+				if (source_object[name] === this._data_values[i]) {
+
+					result.push(this._data_uids[i], this._data_values[i], this._data_names[i]);
+
+				} else {
+
+					// Attention: the name has NOT changed, but it will be present in both added and removed names!
+					removed.push(this._data_uids[i], this._data_values[i], name);
+					uid = this._uid++;
+					result.push(uid, source_object[name], name);
+					added.push(uid, source_object[name], name);
+
+				}
+
+			} else {
+
+				removed.push(this._data_uids[i], this._data_values[i], this._data_names[i]);
+
+			}
+
+		}
+
+		for (name in source_object) {
+
+			if (this._data_names.indexOf(name) == -1) {
+
+				uid = this._uid++;
+				result.push(uid, source_object[name], name);
+				added.push(uid, source_object[name], name);
+
+			}
+
+		}
+
+		this._assignStorage(result);
+		this._setLength(this._data_uids.length);
+
+		removed.uids.length && this._fire('items_removed', removed.getObject());
+		added.uids.length && this._fire('items_added', added.getObject());
+		this._fire('collection_changed');
+
+	},
+
+	/**
+	 * Append the given uid, value and name to corresponding instance arrays: `_data_uids`, `_data_values` and `_data_names`
+	 * @param {number} uid
+	 * @param {*} value
+	 * @param {string} name
+	 */
+	_push: function(uid, value, name) {
+
+		this._data_uids.push(uid);
+		this._data_values.push(value);
+		this._data_names.push(name);
+
+	},
+
+	/**
+	 * Replace the corresponding `value` and `name` at specified `index`, generating a new UID
+	 * @param {number} index Index of value in Enumerable
+	 * @param {*} value New value for given index
+	 * @param {number} [name] New name for the value
+	 */
+	replaceAt: function(index, value, name) {
+
+		if (index > this._count) Lava.t("Index is out of range");
+
+		var old_uid = this._data_uids[index],
+			old_value = this._data_values[index],
+			old_name = this._data_names[index],
+			new_uid = this._uid++;
+
+		this._data_uids[index] = new_uid;
+		this._data_values[index] = value;
+		if (name) {
+			this._data_names[index] = name;
+		}
+
+		this._fire('items_removed', {
+			uids: [old_uid],
+			values: [old_value],
+			names: [old_name]
+		});
+
+		this._fire('items_added', {
+			uids: [new_uid],
+			values: [value],
+			names: [this._data_names[index]]
+		});
+
+		this._fire('collection_changed');
+
+	},
+
+	/**
+	 * Add the name/value pair to the end of the collection, generating a new UID
+	 * @param {*} value New value to add
+	 * @param {string} [name] New name
+	 * @returns {number} New collection `_count`
+	 */
+	push: function(value, name) {
+
+		var count = this._count,
+			new_uid = this._uid++;
+
+		this._push(new_uid, value, name || null);
+
+		this._setLength(count + 1);
+
+		this._fire('items_added', {
+			uids: [new_uid],
+			values: [value],
+			names: [name || null]
+		});
+
+		this._fire('collection_changed');
+
+		return this._count; // after _setLength() this was incremented by one
+
+	},
+
+	/**
+	 * If value does not exist - push it into collection
+	 * @param {*} value New value
+	 * @param {string} [name] New name
+	 * @returns {boolean} <kw>true</kw>, if value did not exist and was included
+	 */
+	includeValue: function(value, name) {
+
+		var result = false,
+			index = this._data_values.indexOf(value);
+
+		if (index == -1) {
+			this.push(value, name);
+			result = true;
+		}
+
+		return result;
+
+	},
+
+	/**
 	 * Insert a sequence of values into collection
 	 * @param {number} start_index Index of the beginning of new values. Must be less or equal to collection's `_count`
 	 * @param {Array.<*>} values New values
@@ -13503,16 +13479,6 @@ Lava.define(
 	},
 
 	/**
-	 * Remove all values and return them
-	 * @returns {Array} Values that were in collection
-	 */
-	removeAll: function() {
-
-		return (this._count > 0) ? this.removeRange(0, this._count) : [];
-
-	},
-
-	/**
 	 * Insert a value at index
 	 * @param {number} index Index to insert at
 	 * @param {*} value New value
@@ -13533,61 +13499,73 @@ Lava.define(
 
 		this.insertRange(0, [value], [name]);
 
-	},
+	}
+
+});
+
+Lava.define(
+'Lava.system.DataView',
+/**
+ * Holds a subset of values from {@link Lava.system.Enumerable}, preserving item UIDs.
+ * Can remove, filter and sort existing values, but can't be used to add new values.
+ *
+ * @lends Lava.system.DataView#
+ * @extends Lava.system.CollectionAbstract#
+ */
+{
+
+	Extends: 'Lava.system.CollectionAbstract',
 
 	/**
-	 * Remove value at `index`
-	 * @param {number} index Index to remove
-	 * @returns {*} The removed value
+	 * To tell other classes that this is instance of Enumerable
+	 * @const
 	 */
-	removeAt: function(index) {
-
-		return this.removeRange(index, 1)[0];
-
-	},
+	isDataView: true,
 
 	/**
-	 * Remove value from the beginning of collection
-	 * @returns {*} The removed value
+	 * @type {Lava.system.Enumerable}
 	 */
-	shift: function() {
-
-		return this.removeRange(0, 1)[0];
-
-	},
+	_data_source: null,
 
 	/**
-	 * Create an internal helper object, which allows to write less code
-	 * @returns {_cEnumerableHelperStorage} Helper object
+	 * Create DataView instance
+	 * @param {Lava.system.Enumerable} data_source
 	 */
-	_createHelperStorage: function() {
+	init: function(data_source) {
 
-		return {
-			uids: [],
-			values: [],
-			names: [],
-			push: function(uid, value, name) {
-				this.uids.push(uid);
-				this.values.push(value);
-				this.names.push(name);
-			},
-			getObject: function() {
-				return {
-					uids: this.uids,
-					values: this.values,
-					names: this.names
-				}
-			}
-		}
+		this.guid = Lava.guid++;
+		data_source && this.refreshFromDataSource(data_source);
 
 	},
 
 	/**
-	 * Free resources and make this instance unusable
+	 * Refresh the DataView from it's Enumerable
 	 */
-	destroy: function() {
+	refresh: function() {
 
-		this._fire('destroy');
+		this._data_names = this._data_source.getNames();
+		this._data_values = this._data_source.getValues();
+		this._data_uids = this._data_source.getUIDs();
+
+	},
+
+	setDataSource: function(data_source) {
+
+		if (Lava.schema.DEBUG && !data_source.isCollection) Lava.t("Wrong argument supplied for DataView constructor");
+		this._data_source = data_source;
+
+	},
+
+	refreshFromDataSource: function (data_source) {
+
+		this.setDataSource(data_source);
+		this.refresh();
+
+	},
+
+	getDataSource: function() {
+
+		return this._data_source;
 
 	}
 
@@ -18551,7 +18529,7 @@ Lava.define(
 
 		if (property_container != null) {
 
-			if (property_container.isEnumerable && /^\d+$/.test(this._property_name)) {
+			if (property_container.isCollection && /^\d+$/.test(this._property_name)) {
 
 				if (this._enumerable_changed_listener == null) {
 
@@ -18715,13 +18693,9 @@ Lava.define(
  */
 
 /**
- * Scope has refreshed it's value from argument. May be used to sort and filter data in Foreach views.
+ * Scope has refreshed it's value from argument.
+ * This event is fired before 'changed' event and may be used to sort and filter data in Foreach views.
  * @event Lava.scope.Foreach#after_refresh
- * @type {Object}
- * @property {Lava.system.Enumerable} value Scope's own Enumerable instance, which is served for the {@link Lava.view.Foreach} view.
- *  When scope's argument has returned an Enumerable instance, and "create_own_enumerable" option is not set
- *  - this will be the Enumerable instance, which was returned from Argument.
- * @property {*} argument_value Argument result (may be an object, Enumerable, array or Properties)
  */
 
 Lava.define(
@@ -18800,14 +18774,13 @@ Lava.define(
 	 * which was returned from `_argument`
 	 * @type {boolean}
 	 */
-	_own_enumerable: false,
+	_own_collection: false,
 
 	/**
-	 * Should this scope create it's own instance of Enumerable, when argument's value is also Enumerable
-	 * (or it will use argument's value). May be used to apply sorting and filtering
-	 * @type {boolean}
+	 * Scope options
+	 * @type {?_cScopeForeach}
 	 */
-	_create_own_enumerable: false,
+	_config: null,
 
 	/**
 	 * Create an instance of the Foreach scope. Refresh value
@@ -18815,9 +18788,9 @@ Lava.define(
 	 * @param {Lava.scope.Argument} argument
 	 * @param {Lava.view.Foreach} view
 	 * @param {Lava.widget.Standard} widget
-	 * @param {?_cScopeForeach} options
+	 * @param {?_cScopeForeach} config
 	 */
-	init: function(argument, view, widget, options) {
+	init: function(argument, view, widget, config) {
 
 		this.guid = Lava.guid++;
 		this._argument = argument;
@@ -18830,59 +18803,97 @@ Lava.define(
 			this._waits_refresh = true;
 		}
 
-		if (options) {
-			this._create_own_enumerable = options['create_own_enumerable'] || false;
+		if (config) {
+
+			if (Lava.schema.DEBUG && ['Enumerable', 'DataView'].indexOf(config['own_enumerable_mode']) == -1) Lava.t('Unknown value in own_enumerable_mode option: ' + config['own_enumerable_mode']);
+
+			if (config['own_enumerable_mode'] == "DataView") {
+				this._refreshDataSource = this._refreshDataSource_DataView;
+				this._value = new Lava.system.DataView();
+			} else {
+				this._refreshDataSource = this._refreshDataSource_Enumerable;
+				this._value = new Lava.system.Enumerable();
+			}
+
+			this._own_collection = true;
+
 		}
 
 		this._argument_waits_refresh_listener = this._argument.on('waits_refresh', this._onDependencyWaitsRefresh, this);
 		this._argument_changed_listener = this._argument.on('changed', this.onDataSourceChanged, this);
 		this._argument_refreshed_listener = this._argument.on('refreshed', this._onDependencyRefreshed, this);
 
-		this._refreshDataSource();
+		this.refreshDataSource();
+
+	},
+
+	/**
+	 * Perform refresh in regular mode (without "own_enumerable_mode" option)
+	 * @param {(object|Array|Lava.mixin.Properties|Lava.system.Enumerable)} argument_value value, received from argument
+	 */
+	_refreshDataSource: function(argument_value) {
+
+		if (argument_value.isCollection) {
+
+			if (this._own_collection) {
+
+				this._value.destroy();
+				this._own_collection = false;
+				this._value = null;
+
+			}
+
+			if (this._value != argument_value) {
+				this._value = argument_value;
+				this._fire('new_enumerable');
+			}
+
+		} else if (this._own_collection) {
+
+			this._value.refreshFromDataSource(argument_value);
+
+		} else {
+
+			this._createCollection(argument_value);
+
+		}
+
+	},
+
+	_refreshDataSource_Enumerable: function(argument_value) {
+
+		if (Lava.schema.DEBUG && !argument_value.isCollection) Lava.t("Argument result must be Enumerable");
+		this._value.refreshFromDataSource(argument_value);
+
+	},
+
+	_refreshDataSource_DataView: function(argument_value) {
+
+		if (Lava.schema.DEBUG && !argument_value.isCollection) Lava.t("Argument result must be Enumerable");
+
+		if (this._value.getDataSource() != argument_value) {
+			// DataView copies UIDs from original Enumerable instance
+			this._fire('new_enumerable');
+		}
+
+		this._value.refreshFromDataSource(argument_value);
 
 	},
 
 	/**
 	 * Get new value from the `_argument`, and create a new instance of local Enumerable, or update the content of the old one
 	 */
-	_refreshDataSource: function() {
+	refreshDataSource: function() {
 
 		var argument_value = this._argument.getValue();
 
 		if (argument_value) {
 
-			if (argument_value.isEnumerable) {
-
-				if (this._create_own_enumerable) {
-
-					this._createOrUpdateCollection(argument_value);
-
-				} else {
-
-					if (this._own_enumerable) {
-
-						this._value.destroy();
-						this._own_enumerable = false;
-						this._value = null;
-
-					}
-
-					if (this._value != argument_value) {
-						this._value = argument_value;
-						this._fire('new_enumerable');
-					}
-
-				}
-
-			} else {
-
-				this._createOrUpdateCollection(argument_value);
-
-			}
+			this._refreshDataSource(argument_value);
 
 			if (this._observable_listener == null) {
 
-				if (argument_value.isEnumerable) {
+				if (argument_value.isCollection) {
 
 					this._observable_listener = argument_value.on('collection_changed', this._onObservableChanged, this);
 					this._observable = argument_value;
@@ -18896,39 +18907,25 @@ Lava.define(
 
 			}
 
-		} else if (this._own_enumerable) {
+		} else if (this._own_collection) {
 
 			this._value.removeAll();
 
 		} else {
 
+			// will be called only when "own_enumerable_mode" is off, cause otherwise this._own_collection is always true
 			this._createCollection(null);
 
 		}
 
-		this._fire('after_refresh', {
-			value: this._value,
-			argument_value: argument_value
-		});
+		this._fire('after_refresh');
+		this._fire('changed');
 
 	},
 
-	/**
-	 * Depending on current value, create new Enumerable instance or update the old one
-	 * @param {*} argument_value
-	 */
-	_createOrUpdateCollection: function(argument_value) {
+	createsOwnEnumerable: function() {
 
-		if (this._own_enumerable) {
-
-			this._value.setSourceObject(argument_value);
-			this._value.updateFromSourceObject();
-
-		} else {
-
-			this._createCollection(argument_value);
-
-		}
+		return this._config['own_enumerable_mode'];
 
 	},
 
@@ -18939,7 +18936,7 @@ Lava.define(
 	_createCollection: function(argument_value) {
 
 		this._value = new Lava.system.Enumerable(argument_value);
-		this._own_enumerable = true;
+		this._own_collection = true;
 		this._fire('new_enumerable');
 
 	},
@@ -18981,8 +18978,7 @@ Lava.define(
 	 */
 	_doRefresh: function() {
 
-		this._refreshDataSource();
-		this._fire('changed');
+		this.refreshDataSource();
 
 	},
 
@@ -19026,7 +19022,8 @@ Lava.define(
 
 		}
 
-		this._refreshDataSource();
+		this.refreshDataSource();
+
 		Lava.resumeListener(this._argument_changed_listener);
 		this._is_dirty = false;
 
@@ -19042,7 +19039,7 @@ Lava.define(
 		this._argument.removeListener(this._argument_refreshed_listener);
 		this._observable_listener && this._flushObservable();
 
-		if (this._own_enumerable) {
+		if (this._own_collection) {
 
 			this._value.destroy();
 
@@ -22256,7 +22253,7 @@ Lava.define(
 
 				property_name = (typeof(tail[i]) == 'object') ? this.evalPathConfig(tail[i]) : tail[i];
 
-				if (result.isEnumerable && /^\d+$/.test(property_name)) {
+				if (result.isCollection && /^\d+$/.test(property_name)) {
 
 					result = result.getValueAt(+property_name);
 
@@ -22880,7 +22877,6 @@ Lava.define(
 		this._argument.wakeup();
 		this._foreach_scope.wakeup();
 		Lava.resumeListener(this._foreach_scope_changed_listener);
-
 		this._refreshChildren();
 
 		this.Abstract$_wakeup();
@@ -22888,8 +22884,7 @@ Lava.define(
 	},
 
 	/**
-	 * Get `_foreach_scope`.
-	 * The only purpose of this method is to attach a listener to scope's {@link Lava.scope.Foreach#event:after_refresh} event
+	 * Get `_foreach_scope`. Can be used to sort and filter items.
 	 * @returns {Lava.scope.Foreach}
 	 */
 	getScope: function() {

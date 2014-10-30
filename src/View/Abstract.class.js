@@ -710,7 +710,7 @@ Lava.define(
 
 				property_name = (typeof(tail[i]) == 'object') ? this.evalPathConfig(tail[i]) : tail[i];
 
-				if (result.isEnumerable && /^\d+$/.test(property_name)) {
+				if (result.isCollection && /^\d+$/.test(property_name)) {
 
 					result = result.getValueAt(+property_name);
 
