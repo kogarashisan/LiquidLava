@@ -143,7 +143,7 @@ _cTranslatableString = {
 	 * @type {string}
 	 * @const
 	 */
-	type: 'translate',
+	type: 'string',
 	/**
 	 * String content
 	 */
@@ -169,7 +169,7 @@ _cTranslatablePlural = {
 	 * @type {string}
 	 * @const
 	 */
-	type: 'ntranslate',
+	type: 'plural_string',
 	/**
 	 * @type {Array.<string>}
 	 */

@@ -66,8 +66,8 @@ Lava.parsers.Directives = {
 	_resource_tag_actions: {
 		options: '_resourceTagOptions',
 		container: '_resourceTagContainer',
-		translate: '_resourceTagTranslate',
-		ntranslate: '_resourceTagTranslatePlural'
+		string: '_resourceTagString',
+		plural_string: '_resourceTagPluralString'
 	},
 
 	/**
@@ -480,7 +480,7 @@ Lava.parsers.Directives = {
 			if (Lava.schema.DEBUG && (!tag.attributes || !tag.attributes.path)) Lava.t("resources, tag is missing attributes: " + tag.name);
 			if (Lava.schema.DEBUG && !(tag.name in this._resource_tag_actions)) Lava.t("resources, unknown tag: " + tag.name);
 			value = this[this._resource_tag_actions[tag.name]](tag);
-			if (Lava.schema.parsers.EXPORT_STRINGS && (value.type == 'translate' || value.type == 'ntranslate')) {
+			if (Lava.schema.parsers.EXPORT_STRINGS && (value.type == 'string' || value.type == 'plural_string')) {
 				Lava.resources.exportTranslatableString(value, widget_title, raw_tag.attributes.locale, tag.attributes.path);
 			}
 			Lava.resources.putResourceValue(resources, tag.attributes.path, value);
@@ -510,12 +510,12 @@ Lava.parsers.Directives = {
 	 * Parse a translatable string
 	 * @param {_cRawTag} raw_tag
 	 */
-	_resourceTagTranslate: function(raw_tag) {
+	_resourceTagString: function(raw_tag) {
 
-		if (Lava.schema.DEBUG && raw_tag.content && raw_tag.content.length != 1) Lava.t("Malformed translate tag");
+		if (Lava.schema.DEBUG && raw_tag.content && raw_tag.content.length != 1) Lava.t("Malformed resources string tag");
 
 		var result = {
-			type: 'translate',
+			type: 'string',
 			value: raw_tag.content ? raw_tag.content[0].trim() : ''
 		};
 
@@ -529,7 +529,7 @@ Lava.parsers.Directives = {
 	 * Parse translatable plural string
 	 * @param {_cRawTag} raw_tag
 	 */
-	_resourceTagTranslatePlural: function(raw_tag) {
+	_resourceTagPluralString: function(raw_tag) {
 
 		if (Lava.schema.DEBUG && (!raw_tag.content)) Lava.t("Malformed resources tag");
 
@@ -549,7 +549,7 @@ Lava.parsers.Directives = {
 		}
 
 		result = {
-			type: 'ntranslate',
+			type: 'plural_string',
 			value: plurals
 		};
 

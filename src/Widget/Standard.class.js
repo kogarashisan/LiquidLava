@@ -498,7 +498,8 @@ Lava.define(
 	},
 
 	/**
-	 * (modifier) Translate a string from resources
+	 * (modifier) Translate a string from resources. If `arguments_list` is present - then also replaces
+	 * `{&lt;number&gt;}` sequences with corresponding value from array.
 	 * @param {string} resource_name
 	 * @param {Array} arguments_list
 	 * @param {string} locale
@@ -511,7 +512,7 @@ Lava.define(
 
 		if (string_descriptor) {
 
-			if (Lava.schema.DEBUG && string_descriptor.type != 'translate') Lava.t("[translate] resource is not a string: " + resource_name);
+			if (Lava.schema.DEBUG && string_descriptor.type != 'string') Lava.t("[translate] resource is not a string: " + resource_name);
 
 			if (arguments_list) {
 
@@ -537,7 +538,8 @@ Lava.define(
 	},
 
 	/**
-	 * (modifier) Translate a plural string from resources
+	 * (modifier) Translate a plural string from resources. If `arguments_list` is present - then also replaces
+	 * `{&lt;number&gt;}` sequences with corresponding value from array.
 	 * @param {string} string_name
 	 * @param {number} n
 	 * @param {Array} arguments_list
@@ -553,7 +555,7 @@ Lava.define(
 
 		if (string_descriptor) {
 
-			if (Lava.schema.DEBUG && string_descriptor.type != 'ntranslate') Lava.t("[ntranslate] resource is not a string: " + string_name);
+			if (Lava.schema.DEBUG && string_descriptor.type != 'plural_string') Lava.t("[ntranslate] resource is not a plural_string: " + string_name);
 			pluralform = string_descriptor.value[form_index];
 			if (Lava.schema.DEBUG && pluralform == null) Lava.t("[ntranslate] requested plural string is missing one of it's plural forms:" + string_name);
 
