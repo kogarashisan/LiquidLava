@@ -190,23 +190,15 @@ var Lava = {
 	 */
 	guid: 1,
 	/**
-	 * Was init() called
-	 * @type {boolean}
-	 * @readonly
-	 */
-	is_init_done: false,
-	/**
 	 * Used to delay refresh loop after the current JavaScript thread exits. See {@link Lava#scheduleRefresh}
 	 */
 	_refresh_timer: null,
 
 	/**
 	 * Create all classes and global class instances.
-	 * Must be called before bootstrap() or creating any widgets
+	 * Must be called before bootstrap() or creating any widgets. Replaces itself with <kw>null</kw> after first use.
 	 */
 	init: function() {
-
-		if (this.is_init_done) Lava.t();
 
 		var path,
 			i = 0,
@@ -238,8 +230,7 @@ var Lava = {
 		}
 
 		this.define = this.define_Normal;
-
-		this.is_init_done = true;
+		this.init = null;
 
 	},
 
@@ -486,9 +477,7 @@ var Lava = {
 			element,
 			result;
 
-		if (!this.is_init_done) {
-			this.init();
-		}
+		this.init && this.init();
 
 		if (app_class != null) {
 

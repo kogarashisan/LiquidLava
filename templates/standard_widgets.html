@@ -15,6 +15,7 @@
 	<script x:equiv="sugar" type="application/json">
 		{
 			tag_name: 'collapsible',
+			root_resource_name: 'COLLAPSIBLE_CONTAINER',
 			content_schema: {type: 'include', name: 'content'},
 			attribute_mappings: {
 				'is-expanded': {type: 'property', type_name: 'Boolean', name: 'is_expanded'},
@@ -58,6 +59,7 @@
 	<script x:equiv="sugar" type="application/json">
 		{
 			tag_name: 'collapsible-panel',
+			root_resource_name: 'COLLAPSIBLE_PANEL_CONTAINER',
 			content_schema: {
 				type: 'union',
 				tag_roles: {
@@ -144,6 +146,7 @@
 	<script x:equiv="sugar" type="application/json">
 		{
 			tag_name: 'accordion',
+			root_resource_name: 'ACCORDION_CONTAINER',
 			content_schema: {
 				type: 'union',
 				tag_roles: {
@@ -260,14 +263,17 @@
 	</include>
 	<include name="node_body">
 		<div class="lava-tree-node" x:type="view" unselectable="on" x:classes="'level-' + level">
-			{#expression(pad) escape_off}{/expression}{* remove whitespace
-			*}<i class="lava-tree-expander" x:type="view"
-				x:event:click="$tree.node_click(node)"
-				x:classes="'lava-tree' + ((foreach_index == @parent->count - 1) ? '-bottom' : '-middle')
-					+ (node.children.length ? ($tree{is_expanded} ? '-expanded' : '-collapsed') : '-node')"></i>
-			{>$tree.icon}
-			{>$tree.node_title}
+			{>$tree.node_body_content}
 		</div>
+	</include>
+	<include name="node_body_content">
+		{#expression(pad) escape_off}{/expression}{* remove whitespace
+		*}<i class="lava-tree-expander" x:type="view"
+			x:event:click="$tree.node_click(node)"
+			x:classes="'lava-tree' + ((foreach_index == @parent->count - 1) ? '-bottom' : '-middle')
+				+ (node.children.length ? ($tree{is_expanded} ? '-expanded' : '-collapsed') : '-node')"></i>
+		{>$tree.icon}
+		{>$tree.node_title}
 	</include>
 	<include name="icon"></include>
 	<include name="node_children">

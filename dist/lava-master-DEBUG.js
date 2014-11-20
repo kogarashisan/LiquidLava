@@ -1741,23 +1741,15 @@ var Lava = {
 	 */
 	guid: 1,
 	/**
-	 * Was init() called
-	 * @type {boolean}
-	 * @readonly
-	 */
-	is_init_done: false,
-	/**
 	 * Used to delay refresh loop after the current JavaScript thread exits. See {@link Lava#scheduleRefresh}
 	 */
 	_refresh_timer: null,
 
 	/**
 	 * Create all classes and global class instances.
-	 * Must be called before bootstrap() or creating any widgets
+	 * Must be called before bootstrap() or creating any widgets. Replaces itself with <kw>null</kw> after first use.
 	 */
 	init: function() {
-
-		if (this.is_init_done) Lava.t();
 
 		var path,
 			i = 0,
@@ -1789,8 +1781,7 @@ var Lava = {
 		}
 
 		this.define = this.define_Normal;
-
-		this.is_init_done = true;
+		this.init = null;
 
 	},
 
@@ -2037,9 +2028,7 @@ var Lava = {
 			element,
 			result;
 
-		if (!this.is_init_done) {
-			this.init();
-		}
+		this.init && this.init();
 
 		if (app_class != null) {
 
@@ -4614,7 +4603,7 @@ Lava.ScopeManager = {
 };
 
 /**
- * Stable sort algorithm (by definition). May not be called recursively
+ * Stable. Can not be called recursively
  */
 Lava.algorithms.sorting.mergeSort = (function(){
 	"use strict";
@@ -7211,7 +7200,7 @@ Lava.parsers.Directives = {
 	 */
 	_known_edit_tasks: {
 		replace_config_option: '_editTaskSetConfigOptions',
-		add_class: '_editTaskAddClass'
+		add_class_binding: '_editTaskAddClassBinding'
 	},
 
 	/**
@@ -7788,7 +7777,7 @@ Lava.parsers.Directives = {
 	 * Parse main_view widget tag: compile, extract and validate a single view inside it
 	 * @param {_cRawTag} raw_tag
 	 */
-	_asMainWidget: function(raw_tag) {
+	_asMainView: function(raw_tag) {
 
 		var view_config = Lava.parsers.Common.compileAsView(raw_tag.content),
 			widget_config = Lava.parsers.Common.createDefaultWidgetConfig(),
@@ -7834,7 +7823,7 @@ Lava.parsers.Directives = {
 
 			if (tags[0].name == 'main_view') {
 
-				widget_config = this._asMainWidget(tags[0]);
+				widget_config = this._asMainView(tags[0]);
 				i = 1;
 
 			} else if (tags[0].name == 'main_template') {
@@ -8384,10 +8373,7 @@ Lava.parsers.Directives = {
 			}
 		}
 
-		events = Lava.excludeDefaultEvents(events);
-		if (events.length != 0 || (raw_tag.attributes && ('force_replace' in raw_tag.attributes))) {
-			widget_config.default_events = events;
-		}
+		widget_config.default_events = Lava.excludeDefaultEvents(events);
 
 	},
 
@@ -8484,19 +8470,19 @@ Lava.parsers.Directives = {
 	 * @param {Object.<string,_cRawTag>} content_blocks_hash
 	 * @param {Array.<*>} task_arguments
 	 */
-	_editTaskAddClass: function(template, task_tag, content_blocks_hash, task_arguments) {
+	_editTaskAddClassBinding: function(template, task_tag, content_blocks_hash, task_arguments) {
 
-		if (Lava.schema.DEBUG && !task_tag.attributes.node_type) Lava.t('_editTaskAddClass: malformed attributes');
+		if (Lava.schema.DEBUG && !task_tag.attributes.node_type) Lava.t('_editTaskAddClassBinding: malformed attributes');
 
 		var target,
 			i = 0;
 
 		target = this._selectFirst(template, task_tag.attributes.node_type, task_tag.attributes.condition);
 
-		if (!target || !target.container) Lava.t('_editTaskAddClass: target not found or does not have a container');
+		if (!target || !target.container) Lava.t('_editTaskAddClassBinding: target not found or does not have a container');
 
 		if (target.container.class_bindings) {
-			while (i in target.container.class_bindings) {
+			while (i in target.container.class_bindings) { // find the first free index
 				i++;
 			}
 			target.container.class_bindings[i] = task_arguments[0];
@@ -9231,9 +9217,9 @@ Lava.ObjectParser.yy = {
 Lava.ExpressionParser = (function(){
 var parser = {trace: function trace(){},
 yy: {},
-symbols_: {"error":2,"root":3,"EOF":4,"expressions":5,"SEMICOLON":6,"expressionWithOptionalDepends":7,"COMMA":8,"depends":9,"DEPENDS_START":10,"OPEN_CURLY":11,"scopeEvalList":12,"CLOSE_CURLY":13,"scopeEval":14,"expression":15,"expressionTail":16,"operand":17,"OPERATOR":18,"OPEN_BRACE":19,"CLOSE_BRACE":20,"arrayDefinition":21,"NUMBER":22,"RAW_STRING":23,"LITERAL":24,"dynamicScope":25,"functionCall":26,"OPEN_SQUARE":27,"expressionList":28,"CLOSE_SQUARE":29,"knownView":30,"VIEW_BY_LABEL":31,"VIEW_BY_ID":32,"VIEW_BY_NAME":33,"lookupOperator":34,"LOOK_UP":35,"LOOK_DOWN":36,"viewLocator":37,"DEEPNESS_OPERATOR":38,"GLOBAL_MODIFIER_CALL":39,"WIDGET_MODIFIER_CALL":40,"ACTIVE_MODIFIER_CALL":41,"IDENTIFIER":42,"scopePath":43,"SEARCH_OPERATOR":44,"scopePathSegment":45,"DOT_PROPERTY":46,"$accept":0,"$end":1},
-terminals_: {2:"error",4:"EOF",6:"SEMICOLON",8:"COMMA",10:"DEPENDS_START",11:"OPEN_CURLY",13:"CLOSE_CURLY",18:"OPERATOR",19:"OPEN_BRACE",20:"CLOSE_BRACE",22:"NUMBER",23:"RAW_STRING",24:"LITERAL",27:"OPEN_SQUARE",29:"CLOSE_SQUARE",31:"VIEW_BY_LABEL",32:"VIEW_BY_ID",33:"VIEW_BY_NAME",35:"LOOK_UP",36:"LOOK_DOWN",38:"DEEPNESS_OPERATOR",39:"GLOBAL_MODIFIER_CALL",40:"WIDGET_MODIFIER_CALL",41:"ACTIVE_MODIFIER_CALL",42:"IDENTIFIER",44:"SEARCH_OPERATOR",46:"DOT_PROPERTY"},
-productions_: [0,[3,1],[3,2],[5,3],[5,3],[5,1],[9,4],[12,3],[12,1],[7,2],[7,1],[15,1],[15,1],[15,2],[16,3],[16,2],[17,3],[17,1],[17,1],[17,1],[17,1],[17,1],[17,1],[17,1],[21,3],[21,2],[28,3],[28,1],[30,1],[30,1],[30,1],[34,1],[34,1],[37,1],[37,2],[37,2],[37,3],[26,3],[26,4],[26,4],[26,5],[26,4],[26,5],[25,4],[14,1],[14,2],[14,3],[14,2],[14,2],[43,2],[43,1],[45,1],[45,3]],
+symbols_: {"error":2,"root":3,"EOF":4,"expressions":5,"SEMICOLON":6,"expressionWithOptionalDepends":7,"COMMA":8,"scopeEvalList":9,"scopeEval":10,"expression":11,"DEPENDS_START":12,"OPEN_CURLY":13,"CLOSE_CURLY":14,"expressionTail":15,"operand":16,"OPERATOR":17,"OPEN_BRACE":18,"CLOSE_BRACE":19,"arrayDefinition":20,"NUMBER":21,"RAW_STRING":22,"LITERAL":23,"dynamicScope":24,"functionCall":25,"OPEN_SQUARE":26,"expressionList":27,"CLOSE_SQUARE":28,"knownView":29,"VIEW_BY_LABEL":30,"VIEW_BY_ID":31,"VIEW_BY_NAME":32,"lookupOperator":33,"LOOK_UP":34,"LOOK_DOWN":35,"viewLocator":36,"DEEPNESS_OPERATOR":37,"GLOBAL_MODIFIER_CALL":38,"WIDGET_MODIFIER_CALL":39,"ACTIVE_MODIFIER_CALL":40,"IDENTIFIER":41,"scopePath":42,"SEARCH_OPERATOR":43,"scopePathSegment":44,"DOT_PROPERTY":45,"$accept":0,"$end":1},
+terminals_: {2:"error",4:"EOF",6:"SEMICOLON",8:"COMMA",12:"DEPENDS_START",13:"OPEN_CURLY",14:"CLOSE_CURLY",17:"OPERATOR",18:"OPEN_BRACE",19:"CLOSE_BRACE",21:"NUMBER",22:"RAW_STRING",23:"LITERAL",26:"OPEN_SQUARE",28:"CLOSE_SQUARE",30:"VIEW_BY_LABEL",31:"VIEW_BY_ID",32:"VIEW_BY_NAME",34:"LOOK_UP",35:"LOOK_DOWN",37:"DEEPNESS_OPERATOR",38:"GLOBAL_MODIFIER_CALL",39:"WIDGET_MODIFIER_CALL",40:"ACTIVE_MODIFIER_CALL",41:"IDENTIFIER",43:"SEARCH_OPERATOR",45:"DOT_PROPERTY"},
+productions_: [0,[3,1],[3,2],[5,3],[5,3],[5,1],[9,3],[9,1],[7,5],[7,1],[11,1],[11,1],[11,2],[15,3],[15,2],[16,3],[16,1],[16,1],[16,1],[16,1],[16,1],[16,1],[16,1],[20,3],[20,2],[27,3],[27,1],[29,1],[29,1],[29,1],[33,1],[33,1],[36,1],[36,2],[36,2],[36,3],[25,3],[25,4],[25,4],[25,5],[25,4],[25,5],[24,4],[10,1],[10,2],[10,3],[10,2],[10,2],[42,2],[42,1],[44,1],[44,3]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */
 /**/) {
 /* this == yyval */
@@ -9256,173 +9242,173 @@ case 4:
 break;
 case 5: yy.finishArgument($$[$0].trim()); 
 break;
+case 6: yy.x_argument_binds.push($$[$0]); 
+break;
 case 7: yy.x_argument_binds.push($$[$0]); 
 break;
-case 8: yy.x_argument_binds.push($$[$0]); 
+case 8: this.$ = $$[$0-4]; 
 break;
-case 9: this.$ = $$[$0-1]; 
+case 9: this.$ = $$[$0]; 
 break;
-case 10: this.$ = $$[$0]; 
+case 10:
+			yy.x_counters.expression_tails++;
+			this.$ = $$[$0];
+		
 break;
 case 11:
-			yy.x_counters.expression_tails++;
+			yy.x_counters.operands++;
 			this.$ = $$[$0];
 		
 break;
 case 12:
 			yy.x_counters.operands++;
-			this.$ = $$[$0];
-		
-break;
-case 13:
-			yy.x_counters.operands++;
 			yy.x_counters.expression_tails++;
 			this.$ = $$[$0-1] + ' ' + $$[$0];
 		
 break;
-case 14:
+case 13:
 			yy.x_counters.operands++;
 			this.$ = $$[$0-2] + ' ' + $$[$0-1] + ' ' + $$[$0];
 		
 break;
-case 15:
+case 14:
 			yy.x_counters.operands++;
 			this.$ = $$[$0-1] + ' ' + $$[$0];
 		
 break;
-case 16:
+case 15:
 			yy.x_counters.braces++;
 			this.$ = '(' + $$[$0-1] + ')';
 		
 break;
-case 17: this.$ = $$[$0]; 
+case 16: this.$ = $$[$0]; 
 break;
-case 18:
+case 17:
 			yy.x_counters.numbers++;
 			this.$ = $$[$0];
 		
 break;
-case 19:
+case 18:
 			yy.x_counters.strings++;
 			this.$ = $$[$0];
 		
 break;
-case 20:
+case 19:
 			yy.x_counters.literals++;
 			this.$ = $$[$0];
 		
 break;
-case 21:
+case 20:
 			var index = yy.x_argument_binds.push($$[$0]) - 1;
 			this.$ = 'this._binds[' + index + '].getValue()';
 		
 break;
-case 22:
+case 21:
 			yy.x_counters.dynamic_scopes++;
 			var index = yy.x_argument_binds.push($$[$0]) - 1;
 			this.$ = 'this._binds[' + index + '].getValue()';
 		
 break;
-case 23: this.$ = $$[$0]; 
+case 22: this.$ = $$[$0]; 
 break;
-case 24: this.$ = '[' + $$[$0-1] + ']'; 
+case 23: this.$ = '[' + $$[$0-1] + ']'; 
 break;
-case 25: this.$ = '[]'; 
+case 24: this.$ = '[]'; 
 break;
-case 26: this.$ = $$[$0-2] + ', ' + $$[$0]; 
+case 25: this.$ = $$[$0-2] + ', ' + $$[$0]; 
 break;
-case 27: this.$ = $$[$0]; 
+case 26: this.$ = $$[$0]; 
 break;
-case 28: this.$ = {locator_type: 'Label', locator: $$[$0]}; 
+case 27: this.$ = {locator_type: 'Label', locator: $$[$0]}; 
 break;
-case 29: this.$ = {locator_type: 'Id', locator: $$[$0]}; 
+case 28: this.$ = {locator_type: 'Id', locator: $$[$0]}; 
 break;
-case 30: this.$ = {locator_type: 'Name', locator: $$[$0]}; 
+case 29: this.$ = {locator_type: 'Name', locator: $$[$0]}; 
 break;
-case 31: this.$ = {label: $$[$0], direction: 'look_up'}; 
+case 30: this.$ = {label: $$[$0], direction: 'look_up'}; 
 break;
-case 32: this.$ = {label: $$[$0], direction: 'look_down'}; 
+case 31: this.$ = {label: $$[$0], direction: 'look_down'}; 
 break;
-case 33: this.$ = $$[$0]; 
+case 32: this.$ = $$[$0]; 
 break;
-case 34: Lava.t("Lookup operator is not supported yet."); 
+case 33: Lava.t("Lookup operator is not supported yet."); 
 break;
-case 35:
+case 34:
 			$$[$0-1].depth = parseInt($$[$0]);
 			if (!$$[$0-1].depth) Lava.t('Deepness operator: depth must be > 0');
 			this.$ = $$[$0-1];
 		
 break;
-case 36: Lava.t("Lookup operator is not supported yet."); 
+case 35: Lava.t("Lookup operator is not supported yet."); 
 break;
-case 37:
+case 36:
 			yy.x_counters.global_modifiers++;
 			this.$ = 'this._callGlobalModifier("' + $$[$0-2] + '", [])';
 		
 break;
-case 38:
+case 37:
 			yy.x_counters.global_modifiers++;
 			this.$ = 'this._callGlobalModifier("' + $$[$0-3] + '", [' + $$[$0-1] + '])';
 		
 break;
-case 39:
+case 38:
 			yy.x_counters.widget_modifiers++;
 			$$[$0-3].callback_name = $$[$0-2];
 			var index = yy.x_argument_widget_modifiers.push($$[$0-3]) - 1;
 			this.$ = 'this._callModifier("' + index + '", [])';
 		
 break;
-case 40:
+case 39:
 			yy.x_counters.widget_modifiers++;
 			$$[$0-4].callback_name = $$[$0-3];
 			var index = yy.x_argument_widget_modifiers.push($$[$0-4]) - 1;
 			this.$ = 'this._callModifier("' + index + '", [' + $$[$0-1] + '])';
 		
 break;
-case 41:
+case 40:
 			yy.x_counters.active_modifiers++;
 			$$[$0-3].callback_name = $$[$0-2];
 			var index = yy.x_argument_active_modifiers.push($$[$0-3]) - 1;
 			this.$ = 'this._callActiveModifier("' + index + '", [])';
 		
 break;
-case 42:
+case 41:
 			yy.x_counters.active_modifiers++;
 			$$[$0-4].callback_name = $$[$0-3];
 			var index = yy.x_argument_active_modifiers.push($$[$0-4]) - 1;
 			this.$ = 'this._callActiveModifier("' + index + '", [' + $$[$0-1] + '])';
 		
 break;
-case 43:
+case 42:
 			$$[$0-3].isDynamic = true;
 			$$[$0-3].property_name = $$[$0-1];
 			this.$ = $$[$0-3];
 		
 break;
-case 44: this.$ = {property_name: $$[$0]}; 
+case 43: this.$ = {property_name: $$[$0]}; 
 break;
-case 45: this.$ = {property_name: $$[$0-1], tail: $$[$0]}; 
+case 44: this.$ = {property_name: $$[$0-1], tail: $$[$0]}; 
 break;
-case 46:
+case 45:
 			$$[$0-2].property_name = $$[$0-1];
 			$$[$0-2].tail = $$[$0];
 			this.$ = $$[$0-2];
 		
 break;
-case 47:
+case 46:
 			$$[$0-1].property_name = $$[$0];
 			this.$ = $$[$0-1];
 		
 break;
-case 48: $$[$0-1].tail = $$[$0]; this.$ = $$[$0-1]; 
+case 47: $$[$0-1].tail = $$[$0]; this.$ = $$[$0-1]; 
 break;
-case 49: $$[$0-1].push($$[$0]); this.$ = $$[$0-1]; 
+case 48: $$[$0-1].push($$[$0]); this.$ = $$[$0-1]; 
 break;
-case 50: this.$ = [$$[$0]]; 
+case 49: this.$ = [$$[$0]]; 
 break;
-case 51: this.$ = $$[$0]; 
+case 50: this.$ = $$[$0]; 
 break;
-case 52:
+case 51:
 			var segments = $$[$0-1].path_segments;
 			if (segments) {
 				for (var i = 0, count = segments.length; i < count; i++) {
@@ -9434,7 +9420,7 @@ case 52:
 break;
 }
 },
-table: [{3:1,4:[1,2],5:3,7:4,14:14,15:5,16:6,17:7,18:[1,8],19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:16,27:[1,17],30:20,31:[1,22],32:[1,23],33:[1,24],37:19,39:[1,21],42:[1,18]},{1:[3]},{1:[2,1]},{4:[1,25],6:[1,26],8:[1,27]},{4:[2,5],6:[2,5],8:[2,5]},{4:[2,10],6:[2,10],8:[2,10],9:28,10:[1,29]},{4:[2,11],6:[2,11],8:[2,11],10:[2,11],18:[1,30],20:[2,11],29:[2,11]},{4:[2,12],6:[2,12],8:[2,12],10:[2,12],16:31,18:[1,8],20:[2,12],29:[2,12]},{14:14,17:32,19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:16,27:[1,17],30:20,31:[1,22],32:[1,23],33:[1,24],37:19,39:[1,21],42:[1,18]},{14:14,15:33,16:6,17:7,18:[1,8],19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:16,27:[1,17],30:20,31:[1,22],32:[1,23],33:[1,24],37:19,39:[1,21],42:[1,18]},{4:[2,17],6:[2,17],8:[2,17],10:[2,17],18:[2,17],20:[2,17],29:[2,17]},{4:[2,18],6:[2,18],8:[2,18],10:[2,18],18:[2,18],20:[2,18],29:[2,18]},{4:[2,19],6:[2,19],8:[2,19],10:[2,19],18:[2,19],20:[2,19],29:[2,19]},{4:[2,20],6:[2,20],8:[2,20],10:[2,20],18:[2,20],20:[2,20],29:[2,20]},{4:[2,21],6:[2,21],8:[2,21],10:[2,21],18:[2,21],20:[2,21],29:[2,21]},{4:[2,22],6:[2,22],8:[2,22],10:[2,22],18:[2,22],20:[2,22],29:[2,22]},{4:[2,23],6:[2,23],8:[2,23],10:[2,23],18:[2,23],20:[2,23],29:[2,23]},{14:14,15:36,16:6,17:7,18:[1,8],19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:16,27:[1,17],28:34,29:[1,35],30:20,31:[1,22],32:[1,23],33:[1,24],37:19,39:[1,21],42:[1,18]},{4:[2,44],6:[2,44],8:[2,44],10:[2,44],13:[2,44],18:[2,44],20:[2,44],27:[1,40],29:[2,44],43:37,45:38,46:[1,39]},{27:[1,40],43:42,44:[1,41],45:38,46:[1,39]},{11:[1,43],27:[2,33],34:46,35:[1,48],36:[1,49],38:[1,47],40:[1,44],41:[1,45],44:[2,33],46:[2,33]},{19:[1,50]},{11:[2,28],27:[2,28],35:[2,28],36:[2,28],38:[2,28],40:[2,28],41:[2,28],44:[2,28],46:[2,28]},{11:[2,29],27:[2,29],35:[2,29],36:[2,29],38:[2,29],40:[2,29],41:[2,29],44:[2,29],46:[2,29]},{11:[2,30],27:[2,30],35:[2,30],36:[2,30],38:[2,30],40:[2,30],41:[2,30],44:[2,30],46:[2,30]},{1:[2,2]},{7:51,14:14,15:5,16:6,17:7,18:[1,8],19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:16,27:[1,17],30:20,31:[1,22],32:[1,23],33:[1,24],37:19,39:[1,21],42:[1,18]},{7:52,14:14,15:5,16:6,17:7,18:[1,8],19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:16,27:[1,17],30:20,31:[1,22],32:[1,23],33:[1,24],37:19,39:[1,21],42:[1,18]},{4:[2,9],6:[2,9],8:[2,9]},{11:[1,53]},{14:14,17:54,19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:16,27:[1,17],30:20,31:[1,22],32:[1,23],33:[1,24],37:19,39:[1,21],42:[1,18]},{4:[2,13],6:[2,13],8:[2,13],10:[2,13],18:[1,30],20:[2,13],29:[2,13]},{4:[2,15],6:[2,15],8:[2,15],10:[2,15],18:[2,15],20:[2,15],29:[2,15]},{20:[1,55]},{8:[1,57],29:[1,56]},{4:[2,25],6:[2,25],8:[2,25],10:[2,25],18:[2,25],20:[2,25],29:[2,25]},{8:[2,27],20:[2,27],29:[2,27]},{4:[2,45],6:[2,45],8:[2,45],10:[2,45],13:[2,45],18:[2,45],20:[2,45],27:[1,40],29:[2,45],45:58,46:[1,39]},{4:[2,50],6:[2,50],8:[2,50],10:[2,50],13:[2,50],18:[2,50],20:[2,50],27:[2,50],29:[2,50],46:[2,50]},{4:[2,51],6:[2,51],8:[2,51],10:[2,51],13:[2,51],18:[2,51],20:[2,51],27:[2,51],29:[2,51],46:[2,51]},{14:59,30:60,31:[1,22],32:[1,23],33:[1,24],37:19,42:[1,18]},{4:[2,47],6:[2,47],8:[2,47],10:[2,47],13:[2,47],18:[2,47],20:[2,47],27:[1,40],29:[2,47],43:61,45:38,46:[1,39]},{4:[2,48],6:[2,48],8:[2,48],10:[2,48],13:[2,48],18:[2,48],20:[2,48],27:[1,40],29:[2,48],45:58,46:[1,39]},{42:[1,62]},{19:[1,63]},{19:[1,64]},{27:[2,34],44:[2,34],46:[2,34]},{27:[2,35],34:65,35:[1,48],36:[1,49],44:[2,35],46:[2,35]},{27:[2,31],44:[2,31],46:[2,31]},{27:[2,32],44:[2,32],46:[2,32]},{14:14,15:36,16:6,17:7,18:[1,8],19:[1,9],20:[1,66],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:16,27:[1,17],28:67,30:20,31:[1,22],32:[1,23],33:[1,24],37:19,39:[1,21],42:[1,18]},{4:[2,3],6:[2,3],8:[2,3]},{4:[2,4],6:[2,4],8:[2,4]},{12:68,14:69,30:60,31:[1,22],32:[1,23],33:[1,24],37:19,42:[1,18]},{4:[2,14],6:[2,14],8:[2,14],10:[2,14],18:[2,14],20:[2,14],29:[2,14]},{4:[2,16],6:[2,16],8:[2,16],10:[2,16],18:[2,16],20:[2,16],29:[2,16]},{4:[2,24],6:[2,24],8:[2,24],10:[2,24],18:[2,24],20:[2,24],29:[2,24]},{14:14,15:70,16:6,17:7,18:[1,8],19:[1,9],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:16,27:[1,17],30:20,31:[1,22],32:[1,23],33:[1,24],37:19,39:[1,21],42:[1,18]},{4:[2,49],6:[2,49],8:[2,49],10:[2,49],13:[2,49],18:[2,49],20:[2,49],27:[2,49],29:[2,49],46:[2,49]},{29:[1,71]},{27:[2,33],34:46,35:[1,48],36:[1,49],38:[1,47],44:[2,33],46:[2,33]},{4:[2,46],6:[2,46],8:[2,46],10:[2,46],13:[2,46],18:[2,46],20:[2,46],27:[1,40],29:[2,46],45:58,46:[1,39]},{13:[1,72]},{14:14,15:36,16:6,17:7,18:[1,8],19:[1,9],20:[1,73],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:16,27:[1,17],28:74,30:20,31:[1,22],32:[1,23],33:[1,24],37:19,39:[1,21],42:[1,18]},{14:14,15:36,16:6,17:7,18:[1,8],19:[1,9],20:[1,75],21:10,22:[1,11],23:[1,12],24:[1,13],25:15,26:16,27:[1,17],28:76,30:20,31:[1,22],32:[1,23],33:[1,24],37:19,39:[1,21],42:[1,18]},{27:[2,36],44:[2,36],46:[2,36]},{4:[2,37],6:[2,37],8:[2,37],10:[2,37],18:[2,37],20:[2,37],29:[2,37]},{8:[1,57],20:[1,77]},{8:[1,79],13:[1,78]},{8:[2,8],13:[2,8]},{8:[2,26],20:[2,26],29:[2,26]},{4:[2,52],6:[2,52],8:[2,52],10:[2,52],13:[2,52],18:[2,52],20:[2,52],27:[2,52],29:[2,52],46:[2,52]},{4:[2,43],6:[2,43],8:[2,43],10:[2,43],18:[2,43],20:[2,43],29:[2,43]},{4:[2,39],6:[2,39],8:[2,39],10:[2,39],18:[2,39],20:[2,39],29:[2,39]},{8:[1,57],20:[1,80]},{4:[2,41],6:[2,41],8:[2,41],10:[2,41],18:[2,41],20:[2,41],29:[2,41]},{8:[1,57],20:[1,81]},{4:[2,38],6:[2,38],8:[2,38],10:[2,38],18:[2,38],20:[2,38],29:[2,38]},{4:[2,6],6:[2,6],8:[2,6]},{14:82,30:60,31:[1,22],32:[1,23],33:[1,24],37:19,42:[1,18]},{4:[2,40],6:[2,40],8:[2,40],10:[2,40],18:[2,40],20:[2,40],29:[2,40]},{4:[2,42],6:[2,42],8:[2,42],10:[2,42],18:[2,42],20:[2,42],29:[2,42]},{8:[2,7],13:[2,7]}],
+table: [{3:1,4:[1,2],5:3,7:4,10:14,11:5,15:6,16:7,17:[1,8],18:[1,9],20:10,21:[1,11],22:[1,12],23:[1,13],24:15,25:16,26:[1,17],29:20,30:[1,22],31:[1,23],32:[1,24],36:19,38:[1,21],41:[1,18]},{1:[3]},{1:[2,1]},{4:[1,25],6:[1,26],8:[1,27]},{4:[2,5],6:[2,5],8:[2,5]},{4:[2,9],6:[2,9],8:[2,9],12:[1,28]},{4:[2,10],6:[2,10],8:[2,10],12:[2,10],17:[1,29],19:[2,10],28:[2,10]},{4:[2,11],6:[2,11],8:[2,11],12:[2,11],15:30,17:[1,8],19:[2,11],28:[2,11]},{10:14,16:31,18:[1,9],20:10,21:[1,11],22:[1,12],23:[1,13],24:15,25:16,26:[1,17],29:20,30:[1,22],31:[1,23],32:[1,24],36:19,38:[1,21],41:[1,18]},{10:14,11:32,15:6,16:7,17:[1,8],18:[1,9],20:10,21:[1,11],22:[1,12],23:[1,13],24:15,25:16,26:[1,17],29:20,30:[1,22],31:[1,23],32:[1,24],36:19,38:[1,21],41:[1,18]},{4:[2,16],6:[2,16],8:[2,16],12:[2,16],17:[2,16],19:[2,16],28:[2,16]},{4:[2,17],6:[2,17],8:[2,17],12:[2,17],17:[2,17],19:[2,17],28:[2,17]},{4:[2,18],6:[2,18],8:[2,18],12:[2,18],17:[2,18],19:[2,18],28:[2,18]},{4:[2,19],6:[2,19],8:[2,19],12:[2,19],17:[2,19],19:[2,19],28:[2,19]},{4:[2,20],6:[2,20],8:[2,20],12:[2,20],17:[2,20],19:[2,20],28:[2,20]},{4:[2,21],6:[2,21],8:[2,21],12:[2,21],17:[2,21],19:[2,21],28:[2,21]},{4:[2,22],6:[2,22],8:[2,22],12:[2,22],17:[2,22],19:[2,22],28:[2,22]},{10:14,11:35,15:6,16:7,17:[1,8],18:[1,9],20:10,21:[1,11],22:[1,12],23:[1,13],24:15,25:16,26:[1,17],27:33,28:[1,34],29:20,30:[1,22],31:[1,23],32:[1,24],36:19,38:[1,21],41:[1,18]},{4:[2,43],6:[2,43],8:[2,43],12:[2,43],14:[2,43],17:[2,43],19:[2,43],26:[1,39],28:[2,43],42:36,44:37,45:[1,38]},{26:[1,39],42:41,43:[1,40],44:37,45:[1,38]},{13:[1,42],26:[2,32],33:45,34:[1,47],35:[1,48],37:[1,46],39:[1,43],40:[1,44],43:[2,32],45:[2,32]},{18:[1,49]},{13:[2,27],26:[2,27],34:[2,27],35:[2,27],37:[2,27],39:[2,27],40:[2,27],43:[2,27],45:[2,27]},{13:[2,28],26:[2,28],34:[2,28],35:[2,28],37:[2,28],39:[2,28],40:[2,28],43:[2,28],45:[2,28]},{13:[2,29],26:[2,29],34:[2,29],35:[2,29],37:[2,29],39:[2,29],40:[2,29],43:[2,29],45:[2,29]},{1:[2,2]},{7:50,10:14,11:5,15:6,16:7,17:[1,8],18:[1,9],20:10,21:[1,11],22:[1,12],23:[1,13],24:15,25:16,26:[1,17],29:20,30:[1,22],31:[1,23],32:[1,24],36:19,38:[1,21],41:[1,18]},{7:51,10:14,11:5,15:6,16:7,17:[1,8],18:[1,9],20:10,21:[1,11],22:[1,12],23:[1,13],24:15,25:16,26:[1,17],29:20,30:[1,22],31:[1,23],32:[1,24],36:19,38:[1,21],41:[1,18]},{13:[1,52]},{10:14,16:53,18:[1,9],20:10,21:[1,11],22:[1,12],23:[1,13],24:15,25:16,26:[1,17],29:20,30:[1,22],31:[1,23],32:[1,24],36:19,38:[1,21],41:[1,18]},{4:[2,12],6:[2,12],8:[2,12],12:[2,12],17:[1,29],19:[2,12],28:[2,12]},{4:[2,14],6:[2,14],8:[2,14],12:[2,14],17:[2,14],19:[2,14],28:[2,14]},{19:[1,54]},{8:[1,56],28:[1,55]},{4:[2,24],6:[2,24],8:[2,24],12:[2,24],17:[2,24],19:[2,24],28:[2,24]},{8:[2,26],19:[2,26],28:[2,26]},{4:[2,44],6:[2,44],8:[2,44],12:[2,44],14:[2,44],17:[2,44],19:[2,44],26:[1,39],28:[2,44],44:57,45:[1,38]},{4:[2,49],6:[2,49],8:[2,49],12:[2,49],14:[2,49],17:[2,49],19:[2,49],26:[2,49],28:[2,49],45:[2,49]},{4:[2,50],6:[2,50],8:[2,50],12:[2,50],14:[2,50],17:[2,50],19:[2,50],26:[2,50],28:[2,50],45:[2,50]},{10:58,29:59,30:[1,22],31:[1,23],32:[1,24],36:19,41:[1,18]},{4:[2,46],6:[2,46],8:[2,46],12:[2,46],14:[2,46],17:[2,46],19:[2,46],26:[1,39],28:[2,46],42:60,44:37,45:[1,38]},{4:[2,47],6:[2,47],8:[2,47],12:[2,47],14:[2,47],17:[2,47],19:[2,47],26:[1,39],28:[2,47],44:57,45:[1,38]},{41:[1,61]},{18:[1,62]},{18:[1,63]},{26:[2,33],43:[2,33],45:[2,33]},{26:[2,34],33:64,34:[1,47],35:[1,48],43:[2,34],45:[2,34]},{26:[2,30],43:[2,30],45:[2,30]},{26:[2,31],43:[2,31],45:[2,31]},{10:14,11:35,15:6,16:7,17:[1,8],18:[1,9],19:[1,65],20:10,21:[1,11],22:[1,12],23:[1,13],24:15,25:16,26:[1,17],27:66,29:20,30:[1,22],31:[1,23],32:[1,24],36:19,38:[1,21],41:[1,18]},{4:[2,3],6:[2,3],8:[2,3]},{4:[2,4],6:[2,4],8:[2,4]},{9:67,10:68,29:59,30:[1,22],31:[1,23],32:[1,24],36:19,41:[1,18]},{4:[2,13],6:[2,13],8:[2,13],12:[2,13],17:[2,13],19:[2,13],28:[2,13]},{4:[2,15],6:[2,15],8:[2,15],12:[2,15],17:[2,15],19:[2,15],28:[2,15]},{4:[2,23],6:[2,23],8:[2,23],12:[2,23],17:[2,23],19:[2,23],28:[2,23]},{10:14,11:69,15:6,16:7,17:[1,8],18:[1,9],20:10,21:[1,11],22:[1,12],23:[1,13],24:15,25:16,26:[1,17],29:20,30:[1,22],31:[1,23],32:[1,24],36:19,38:[1,21],41:[1,18]},{4:[2,48],6:[2,48],8:[2,48],12:[2,48],14:[2,48],17:[2,48],19:[2,48],26:[2,48],28:[2,48],45:[2,48]},{28:[1,70]},{26:[2,32],33:45,34:[1,47],35:[1,48],37:[1,46],43:[2,32],45:[2,32]},{4:[2,45],6:[2,45],8:[2,45],12:[2,45],14:[2,45],17:[2,45],19:[2,45],26:[1,39],28:[2,45],44:57,45:[1,38]},{14:[1,71]},{10:14,11:35,15:6,16:7,17:[1,8],18:[1,9],19:[1,72],20:10,21:[1,11],22:[1,12],23:[1,13],24:15,25:16,26:[1,17],27:73,29:20,30:[1,22],31:[1,23],32:[1,24],36:19,38:[1,21],41:[1,18]},{10:14,11:35,15:6,16:7,17:[1,8],18:[1,9],19:[1,74],20:10,21:[1,11],22:[1,12],23:[1,13],24:15,25:16,26:[1,17],27:75,29:20,30:[1,22],31:[1,23],32:[1,24],36:19,38:[1,21],41:[1,18]},{26:[2,35],43:[2,35],45:[2,35]},{4:[2,36],6:[2,36],8:[2,36],12:[2,36],17:[2,36],19:[2,36],28:[2,36]},{8:[1,56],19:[1,76]},{8:[1,78],14:[1,77]},{8:[2,7],14:[2,7]},{8:[2,25],19:[2,25],28:[2,25]},{4:[2,51],6:[2,51],8:[2,51],12:[2,51],14:[2,51],17:[2,51],19:[2,51],26:[2,51],28:[2,51],45:[2,51]},{4:[2,42],6:[2,42],8:[2,42],12:[2,42],17:[2,42],19:[2,42],28:[2,42]},{4:[2,38],6:[2,38],8:[2,38],12:[2,38],17:[2,38],19:[2,38],28:[2,38]},{8:[1,56],19:[1,79]},{4:[2,40],6:[2,40],8:[2,40],12:[2,40],17:[2,40],19:[2,40],28:[2,40]},{8:[1,56],19:[1,80]},{4:[2,37],6:[2,37],8:[2,37],12:[2,37],17:[2,37],19:[2,37],28:[2,37]},{4:[2,8],6:[2,8],8:[2,8]},{10:81,29:59,30:[1,22],31:[1,23],32:[1,24],36:19,41:[1,18]},{4:[2,39],6:[2,39],8:[2,39],12:[2,39],17:[2,39],19:[2,39],28:[2,39]},{4:[2,41],6:[2,41],8:[2,41],12:[2,41],17:[2,41],19:[2,41],28:[2,41]},{8:[2,6],14:[2,6]}],
 defaultActions: {2:[2,1],25:[2,2]},
 parseError: function parseError(str,hash){if(hash.recoverable){this.trace(str)}else{throw new Error(str)}},
 parse: function parse(input) {
@@ -9636,75 +9622,75 @@ case 3: Lava.t('Spaces in scope path are not allowed (1)');
 break;
 case 4: Lava.t('Spaces in scope path are not allowed (2)'); 
 break;
-case 5: yy_.yytext = yy_.yytext.slice(1); return 31; 
+case 5: yy_.yytext = yy_.yytext.slice(1); return 30; 
 break;
-case 6: yy_.yytext = yy_.yytext.slice(1); return 32; 
+case 6: yy_.yytext = yy_.yytext.slice(1); return 31; 
 break;
-case 7: yy_.yytext = yy_.yytext.slice(1); return 33; 
+case 7: yy_.yytext = yy_.yytext.slice(1); return 32; 
 break;
-case 8: yy_.yytext = yy_.yytext.slice(2); return 41; 
+case 8: yy_.yytext = yy_.yytext.slice(2); return 40; 
 break;
-case 9: yy_.yytext = yy_.yytext.slice(5); return 41; 
+case 9: yy_.yytext = yy_.yytext.slice(5); return 40; 
 break;
-case 10: yy_.yytext = yy_.yytext.slice(1); return 40; 
+case 10: yy_.yytext = yy_.yytext.slice(1); return 39; 
 break;
-case 11: return 39; 
+case 11: return 38; 
 break;
-case 12: yy_.yytext = yy_.yytext.slice(1); return 38; 
+case 12: yy_.yytext = yy_.yytext.slice(1); return 37; 
 break;
-case 13: yy_.yytext = yy_.yytext.slice(1); return 46; 
+case 13: yy_.yytext = yy_.yytext.slice(1); return 45; 
 break;
-case 14: yy_.yytext = yy_.yytext.slice(2); return 44; 
+case 14: yy_.yytext = yy_.yytext.slice(2); return 43; 
 break;
-case 15: yy_.yytext = yy_.yytext.slice(5); return 44; 
+case 15: yy_.yytext = yy_.yytext.slice(5); return 43; 
 break;
-case 16: yy_.yytext = yy_.yytext.substr(4, yy_.yyleng - 5); return 35; 
+case 16: yy_.yytext = yy_.yytext.substr(4, yy_.yyleng - 5); return 34; 
 break;
-case 17: yy_.yytext = yy_.yytext.substr(4, yy_.yyleng - 5); return 36; 
+case 17: yy_.yytext = yy_.yytext.substr(4, yy_.yyleng - 5); return 35; 
 break;
-case 18: yy_.yytext = yy.unescape(yy_.yytext); return 18; /*escaped operator versions*/ 
+case 18: yy_.yytext = yy.unescape(yy_.yytext); return 17; /*escaped operator versions*/ 
 break;
-case 19: yy_.yytext = yy.unescape(yy_.yytext); return 18; /*escaped operator versions + "&", "&&" */ 
+case 19: yy_.yytext = yy.unescape(yy_.yytext); return 17; /*escaped operator versions + "&", "&&" */ 
 break;
-case 20: return 18; /*arithmetic*/ 
+case 20: return 12; 
 break;
-case 21: return 18; /*logical, without "&&" and "!" */ 
+case 21: return 17; /*arithmetic*/ 
 break;
-case 22: return 18; /*comparison*/ 
+case 22: return 17; /*logical, without "&&" and "!" */ 
 break;
-case 23: return 18; /*bitwise, without "&" */ 
+case 23: return 17; /*comparison*/ 
 break;
-case 24: return 18; /*ternary*/ 
+case 24: return 17; /*bitwise, without "&" */ 
 break;
-case 25: return 18; /*unary*/ 
+case 25: return 17; /*ternary*/ 
 break;
-case 26: return 8; 
+case 26: return 17; /*unary*/ 
 break;
-case 27: return 6; 
+case 27: return 8; 
 break;
-case 28: return 22; 
+case 28: return 6; 
 break;
-case 29: return 22; 
+case 29: return 21; 
 break;
-case 30: return 23; 
+case 30: return 21; 
 break;
-case 31: return 23; 
+case 31: return 22; 
 break;
-case 32: return 27; 
+case 32: return 22; 
 break;
-case 33: return 29; 
+case 33: return 26; 
 break;
-case 34: /* skip whitespace */ 
+case 34: return 28; 
 break;
-case 35: return 10; 
+case 35: /* skip whitespace */ 
 break;
-case 36: return 11; 
+case 36: return 13; 
 break;
-case 37: return 13; 
+case 37: return 14; 
 break;
 case 38:
 		this.x_lex_brace_levels++;
-		return 19;
+		return 18;
 	
 break;
 case 39:
@@ -9715,7 +9701,7 @@ case 39:
 			return 4;
 		} else {
 			this.x_lex_brace_levels--;
-			return 20;
+			return 19;
 		}
 	
 break;
@@ -9732,22 +9718,22 @@ case 40:
 
 		if (lowercase in map) {
 			yy_.yytext = map[lowercase];
-			return 18;
+			return 17;
 		}
 
 		if (Lava.parsers.Common.isLiteral(yy_.yytext)) {
 			if (lowercase != yy_.yytext) Lava.t("Expression parser, code style: literals must be lower case");
-			return 24;
+			return 23;
 		}
 
-		return 42;
+		return 41;
 	
 break;
 case 41: return 4; 
 break;
 }
 },
-rules: [/^(?:->([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\s+)\()/,/^(?:-&gt;([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\s+)\()/,/^(?:\.([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\s+)\()/,/^(?:\s+[\~\.\[\]])/,/^(?:\[\s\b)/,/^(?:@([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:#([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:\$([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:->([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\())/,/^(?:-&gt;([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\())/,/^(?:\.([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\())/,/^(?:([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\())/,/^(?:~\d+)/,/^(?:\.[a-zA-Z0-9\_]+)/,/^(?:->([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:-&gt;([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?::up\(([a-zA-Z\_][a-zA-Z0-9\_]*)\))/,/^(?::dn\(([a-zA-Z\_][a-zA-Z0-9\_]*)\))/,/^(?:(&lt;|&gt;))/,/^(?:(&amp;|&lt;|&gt;|&)+)/,/^(?:[\+\-\*\/\%])/,/^(?:\|\||!!)/,/^(?:===|!==|==|!=|<=|>=|<|>)/,/^(?:>>>|>>|<<|[\|\^])/,/^(?:[\?\:])/,/^(?:!)/,/^(?:,)/,/^(?:;)/,/^(?:\d+(\.\d+)?((e|E)(\+|-)\d+)?)/,/^(?:0x[a-fA-F0-9]+)/,/^(?:"(\\"|[^"])*")/,/^(?:'(\\'|[^'])*')/,/^(?:\[(?=[^\s]))/,/^(?:\])/,/^(?:\s+)/,/^(?:\/\/depends\b)/,/^(?:\{)/,/^(?:\})/,/^(?:\()/,/^(?:\))/,/^(?:([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:$)/],
+rules: [/^(?:->([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\s+)\()/,/^(?:-&gt;([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\s+)\()/,/^(?:\.([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\s+)\()/,/^(?:\s+[\~\.\[\]])/,/^(?:\[\s\b)/,/^(?:@([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:#([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:\$([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:->([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\())/,/^(?:-&gt;([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\())/,/^(?:\.([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\())/,/^(?:([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\())/,/^(?:~\d+)/,/^(?:\.[a-zA-Z0-9\_]+)/,/^(?:->([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:-&gt;([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?::up\(([a-zA-Z\_][a-zA-Z0-9\_]*)\))/,/^(?::dn\(([a-zA-Z\_][a-zA-Z0-9\_]*)\))/,/^(?:(&lt;|&gt;))/,/^(?:(&amp;|&lt;|&gt;|&)+)/,/^(?:\/\/depends:)/,/^(?:[\+\-\*\/\%])/,/^(?:\|\||!!)/,/^(?:===|!==|==|!=|<=|>=|<|>)/,/^(?:>>>|>>|<<|[\|\^])/,/^(?:[\?\:])/,/^(?:!)/,/^(?:,)/,/^(?:;)/,/^(?:\d+(\.\d+)?((e|E)(\+|-)\d+)?)/,/^(?:0x[a-fA-F0-9]+)/,/^(?:"(\\"|[^"])*")/,/^(?:'(\\'|[^'])*')/,/^(?:\[(?=[^\s]))/,/^(?:\])/,/^(?:\s+)/,/^(?:\{)/,/^(?:\})/,/^(?:\()/,/^(?:\))/,/^(?:([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:$)/],
 conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41],"inclusive":true}}
 };
 return lexer;
@@ -15513,7 +15499,7 @@ Lava.define(
 		if ('class' in unknown_attributes) {
 
 			operations_stack.push({
-				name: 'static_classes',
+				name: 'add_classes',
 				value: unknown_attributes['class'].trim().split(/\s+/)
 			});
 			delete unknown_attributes['class'];
@@ -15523,7 +15509,7 @@ Lava.define(
 		if ('style' in unknown_attributes) {
 
 			operations_stack.push({
-				name: 'static_styles',
+				name: 'add_styles',
 				value: Lava.parsers.Common.parseStyleAttribute(unknown_attributes.style)
 			});
 			delete  unknown_attributes.style;
@@ -15533,7 +15519,7 @@ Lava.define(
 		if (!Firestorm.Object.isEmpty(unknown_attributes)) {
 
 			operations_stack.push({
-				name: 'static_properties',
+				name: 'add_properties',
 				value: Firestorm.Object.copy(unknown_attributes) // copying to reduce possible slowdowns (object may contain deleted values)
 			});
 
@@ -21996,7 +21982,8 @@ Lava.define(
 	},
 
 	/**
-	 * Refresh the view, if it's dirty (render the view's content and replace old content with the fresh version)
+	 * Refresh the view, if it's dirty (render the view's content and replace old content with the fresh version).
+	 * This method is called by ViewManager, you do not need to call it manually.
 	 */
 	refresh: function() {
 
@@ -23349,8 +23336,8 @@ Lava.define(
 				if (!(name in this._properties)) Lava.t("All widget properties must have a default value");
 			}
 			if (config.default_events) {
-				for (i = 0, count = this._config.default_events.length; i < count; i++) {
-					if (!Lava.view_manager.isEventRouted(this._config.default_events[i])) Lava.t('Event is not routed: ' + this._config.default_events[i]);
+				for (i = 0, count = config.default_events.length; i < count; i++) {
+					if (!Lava.view_manager.isEventRouted(config.default_events[i])) Lava.t('Event is not routed: ' + config.default_events[i]);
 				}
 			}
 		}
@@ -23498,7 +23485,7 @@ Lava.define(
 		Lava.ScopeManager.refreshScopes();
 		var html = this.render();
 
-		Firestorm.DOM.insertHTML(element, html, position);
+		Firestorm.DOM.insertHTML(element, html, position || 'Top');
 		this.broadcastInDOM();
 
 		Lava.scheduleRefresh(); // see comment for scheduleRefresh
@@ -27162,6 +27149,7 @@ return (this._binds[0].getValue());
 				}
 			}
 		},
+		default_events: [],
 		real_class: "input.CheckBox",
 		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Standard",
@@ -27267,6 +27255,7 @@ return (this._binds[0].getValue());
 				}
 			}
 		},
+		default_events: [],
 		real_class: "input.TextArea",
 		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Standard",
@@ -27372,6 +27361,7 @@ return (this._binds[0].getValue());
 				}
 			}
 		},
+		default_events: [],
 		real_class: "input.Text",
 		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Standard",
@@ -27491,6 +27481,7 @@ return (this._binds[0].getValue());
 				}
 			}
 		},
+		default_events: [],
 		real_class: "input.Radio",
 		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Standard",
@@ -27574,6 +27565,7 @@ return (this._binds[0].getValue());
 			tag_name: "submit_input",
 			root_resource_name: "SUBMIT_INPUT_ELEMENT"
 		},
+		default_events: [],
 		real_class: "input.Submit",
 		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Standard",
@@ -27670,6 +27662,7 @@ return (this._binds[0].getValue());
 			},
 			root_resource_name: "SUBMIT_BUTTON_ELEMENT"
 		},
+		default_events: [],
 		real_class: "input.Submit",
 		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Standard",
@@ -27874,6 +27867,7 @@ return (this._binds[0].getValue());
 				"\r\n\t"
 			]
 		},
+		default_events: [],
 		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Standard",
 		is_extended: false
@@ -28131,6 +28125,7 @@ return (this._binds[0].getValue());
 		},
 		sugar: {
 			tag_name: "collapsible-panel",
+			root_resource_name: "COLLAPSIBLE_PANEL_CONTAINER",
 			content_schema: {
 				type: "union",
 				tag_roles: {
@@ -28188,6 +28183,7 @@ return (this._binds[0].getValue());
 				}
 			}
 		},
+		default_events: [],
 		real_class: "CollapsiblePanel",
 		is_extended: true,
 		options: {
@@ -28454,6 +28450,7 @@ return (this._binds[0].getValue());
 		},
 		sugar: {
 			tag_name: "accordion",
+			root_resource_name: "ACCORDION_CONTAINER",
 			content_schema: {
 				type: "union",
 				tag_roles: {
@@ -28778,6 +28775,7 @@ return (this._binds[0].getValue() ? 'active' : '');
 				}
 			}
 		},
+		default_events: [],
 		real_class: "Tabs",
 		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Standard",
@@ -28980,82 +28978,92 @@ return ('level-' + this._binds[0].getValue());
 					template: [
 						"\r\n\t\t\t",
 						{
-							type: "view",
-							"class": "Expression",
-							argument: {
-								evaluator: function() {
-return (this._binds[0].getValue());
-},
-								flags: {isScopeEval: true},
-								binds: [{property_name: "pad"}]
-							},
-							escape_off: true,
-							template: []
-						},
-						{
-							type: "view",
-							"class": "View",
-							container: {
-								type: "Element",
-								tag_name: "i",
-								static_classes: ["lava-tree-expander"],
-								events: {
-									click: [{
-										locator_type: "Name",
-										locator: "tree",
-										name: "node_click",
-										arguments: [{
-											type: 2,
-											data: {property_name: "node"}
-										}]
-									}]
-								},
-								class_bindings: {
-									"0": {
-										evaluator: function() {
-return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() - 1) ? '-bottom' : '-middle') + (this._binds[2].getValue() ? (this._binds[3].getValue() ? '-expanded' : '-collapsed') : '-node'));
-},
-										binds: [
-											{property_name: "foreach_index"},
-											{
-												locator_type: "Label",
-												locator: "parent",
-												property_name: "count"
-											},
-											{
-												property_name: "node",
-												tail: [
-													"children",
-													"length"
-												]
-											},
-											{
-												locator_type: "Name",
-												locator: "tree",
-												isDynamic: true,
-												property_name: "is_expanded"
-											}
-										]
-									}
-								}
-							}
-						},
-						"\r\n\t\t\t",
-						{
 							locator_type: "Name",
 							locator: "tree",
-							name: "icon",
-							type: "include"
-						},
-						"\r\n\t\t\t",
-						{
-							locator_type: "Name",
-							locator: "tree",
-							name: "node_title",
+							name: "node_body_content",
 							type: "include"
 						},
 						"\r\n\t\t"
 					]
+				},
+				"\r\n\t"
+			],
+			node_body_content: [
+				"\r\n\t\t",
+				{
+					type: "view",
+					"class": "Expression",
+					argument: {
+						evaluator: function() {
+return (this._binds[0].getValue());
+},
+						flags: {isScopeEval: true},
+						binds: [{property_name: "pad"}]
+					},
+					escape_off: true,
+					template: []
+				},
+				{
+					type: "view",
+					"class": "View",
+					container: {
+						type: "Element",
+						tag_name: "i",
+						static_classes: ["lava-tree-expander"],
+						events: {
+							click: [{
+								locator_type: "Name",
+								locator: "tree",
+								name: "node_click",
+								arguments: [{
+									type: 2,
+									data: {property_name: "node"}
+								}]
+							}]
+						},
+						class_bindings: {
+							"0": {
+								evaluator: function() {
+return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() - 1) ? '-bottom' : '-middle') + (this._binds[2].getValue() ? (this._binds[3].getValue() ? '-expanded' : '-collapsed') : '-node'));
+},
+								binds: [
+									{property_name: "foreach_index"},
+									{
+										locator_type: "Label",
+										locator: "parent",
+										property_name: "count"
+									},
+									{
+										property_name: "node",
+										tail: [
+											"children",
+											"length"
+										]
+									},
+									{
+										locator_type: "Name",
+										locator: "tree",
+										isDynamic: true,
+										property_name: "is_expanded"
+									}
+								]
+							}
+						}
+					}
+				},
+				"\r\n\t\t",
+				{
+					locator_type: "Name",
+					locator: "tree",
+					name: "icon",
+					type: "include"
+				},
+				"\r\n\t\t",
+				{
+					locator_type: "Name",
+					locator: "tree",
+					name: "node_title",
+					type: "include"
 				},
 				"\r\n\t"
 			],
@@ -29213,6 +29221,7 @@ return (this._binds[0].getValue() ? 'lava-tree-title-expandable' : '');
 				}
 			}
 		},
+		default_events: [],
 		real_class: "Tree",
 		is_extended: false
 	},
@@ -29498,6 +29507,7 @@ return (this._callGlobalModifier("translateBoolean", [!! this._binds[0].getValue
 				}
 			}
 		},
+		default_events: [],
 		real_class: "Table",
 		is_extended: false
 	},
@@ -30042,6 +30052,7 @@ return (this._binds[0].getValue() == this._binds[1].getValue() ? 'lava-calendar-
 			}
 		},
 		options: {invalid_input_class: "lava-calendar-input-invalid"},
+		default_events: [],
 		real_class: "Calendar",
 		is_extended: false
 	}

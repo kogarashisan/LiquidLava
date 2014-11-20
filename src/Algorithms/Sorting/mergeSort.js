@@ -1,6 +1,6 @@
 
 /**
- * Stable sort algorithm (by definition). May not be called recursively
+ * Stable. Can not be called recursively
  */
 Lava.algorithms.sorting.mergeSort = (function(){
 	"use strict";

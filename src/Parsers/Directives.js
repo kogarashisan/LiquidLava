@@ -76,7 +76,7 @@ Lava.parsers.Directives = {
 	 */
 	_known_edit_tasks: {
 		replace_config_option: '_editTaskSetConfigOptions',
-		add_class: '_editTaskAddClass'
+		add_class_binding: '_editTaskAddClassBinding'
 	},
 
 	/**
@@ -653,7 +653,7 @@ Lava.parsers.Directives = {
 	 * Parse main_view widget tag: compile, extract and validate a single view inside it
 	 * @param {_cRawTag} raw_tag
 	 */
-	_asMainWidget: function(raw_tag) {
+	_asMainView: function(raw_tag) {
 
 		var view_config = Lava.parsers.Common.compileAsView(raw_tag.content),
 			widget_config = Lava.parsers.Common.createDefaultWidgetConfig(),
@@ -699,7 +699,7 @@ Lava.parsers.Directives = {
 
 			if (tags[0].name == 'main_view') {
 
-				widget_config = this._asMainWidget(tags[0]);
+				widget_config = this._asMainView(tags[0]);
 				i = 1;
 
 			} else if (tags[0].name == 'main_template') {
@@ -1249,10 +1249,7 @@ Lava.parsers.Directives = {
 			}
 		}
 
-		events = Lava.excludeDefaultEvents(events);
-		if (events.length != 0 || (raw_tag.attributes && ('force_replace' in raw_tag.attributes))) {
-			widget_config.default_events = events;
-		}
+		widget_config.default_events = Lava.excludeDefaultEvents(events);
 
 	},
 
@@ -1349,19 +1346,19 @@ Lava.parsers.Directives = {
 	 * @param {Object.<string,_cRawTag>} content_blocks_hash
 	 * @param {Array.<*>} task_arguments
 	 */
-	_editTaskAddClass: function(template, task_tag, content_blocks_hash, task_arguments) {
+	_editTaskAddClassBinding: function(template, task_tag, content_blocks_hash, task_arguments) {
 
-		if (Lava.schema.DEBUG && !task_tag.attributes.node_type) Lava.t('_editTaskAddClass: malformed attributes');
+		if (Lava.schema.DEBUG && !task_tag.attributes.node_type) Lava.t('_editTaskAddClassBinding: malformed attributes');
 
 		var target,
 			i = 0;
 
 		target = this._selectFirst(template, task_tag.attributes.node_type, task_tag.attributes.condition);
 
-		if (!target || !target.container) Lava.t('_editTaskAddClass: target not found or does not have a container');
+		if (!target || !target.container) Lava.t('_editTaskAddClassBinding: target not found or does not have a container');
 
 		if (target.container.class_bindings) {
-			while (i in target.container.class_bindings) {
+			while (i in target.container.class_bindings) { // find the first free index
 				i++;
 			}
 			target.container.class_bindings[i] = task_arguments[0];

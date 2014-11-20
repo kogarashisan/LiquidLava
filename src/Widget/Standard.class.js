@@ -102,8 +102,8 @@ Lava.define(
 				if (!(name in this._properties)) Lava.t("All widget properties must have a default value");
 			}
 			if (config.default_events) {
-				for (i = 0, count = this._config.default_events.length; i < count; i++) {
-					if (!Lava.view_manager.isEventRouted(this._config.default_events[i])) Lava.t('Event is not routed: ' + this._config.default_events[i]);
+				for (i = 0, count = config.default_events.length; i < count; i++) {
+					if (!Lava.view_manager.isEventRouted(config.default_events[i])) Lava.t('Event is not routed: ' + config.default_events[i]);
 				}
 			}
 		}
@@ -251,7 +251,7 @@ Lava.define(
 		Lava.ScopeManager.refreshScopes();
 		var html = this.render();
 
-		Firestorm.DOM.insertHTML(element, html, position);
+		Firestorm.DOM.insertHTML(element, html, position || 'Top');
 		this.broadcastInDOM();
 
 		Lava.scheduleRefresh(); // see comment for scheduleRefresh

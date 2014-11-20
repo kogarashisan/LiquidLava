@@ -94,6 +94,9 @@ _cArgumentCommon = {
 	 * @type {?Object}
 	 */
 	flags: {
+		/**
+		 * <kw>true</kw> in case `evaluator` has calls to global modifiers
+		 */
 		hasGlobalModifiers: false,
 		/**
 		 * Argument returns value from a single scope, without expressions.
@@ -104,8 +107,17 @@ _cArgumentCommon = {
 		 * There are no dependencies on scope or active modifiers. The value of the argument will never change
 		 */
 		isStatic: false,
+		/**
+		 * <kw>true</kw> if evaluator returns a JavaScript literal, like <kw>null</kw> or <kw>true</kw>
+		 */
 		isLiteral: false,
+		/**
+		 * <kw>true</kw> if evaluator returns a number
+		 */
 		isNumber: false,
+		/**
+		 * <kw>true</kw> if evaluator returns a string
+		 */
 		isString: false
 	},
 

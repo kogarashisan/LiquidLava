@@ -453,7 +453,8 @@ Lava.define(
 	},
 
 	/**
-	 * Refresh the view, if it's dirty (render the view's content and replace old content with the fresh version)
+	 * Refresh the view, if it's dirty (render the view's content and replace old content with the fresh version).
+	 * This method is called by ViewManager, you do not need to call it manually.
 	 */
 	refresh: function() {
 

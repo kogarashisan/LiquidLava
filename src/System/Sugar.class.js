@@ -269,7 +269,7 @@ Lava.define(
 		if ('class' in unknown_attributes) {
 
 			operations_stack.push({
-				name: 'static_classes',
+				name: 'add_classes',
 				value: unknown_attributes['class'].trim().split(/\s+/)
 			});
 			delete unknown_attributes['class'];
@@ -279,7 +279,7 @@ Lava.define(
 		if ('style' in unknown_attributes) {
 
 			operations_stack.push({
-				name: 'static_styles',
+				name: 'add_styles',
 				value: Lava.parsers.Common.parseStyleAttribute(unknown_attributes.style)
 			});
 			delete  unknown_attributes.style;
@@ -289,7 +289,7 @@ Lava.define(
 		if (!Firestorm.Object.isEmpty(unknown_attributes)) {
 
 			operations_stack.push({
-				name: 'static_properties',
+				name: 'add_properties',
 				value: Firestorm.Object.copy(unknown_attributes) // copying to reduce possible slowdowns (object may contain deleted values)
 			});
 

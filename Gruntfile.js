@@ -38,6 +38,7 @@ module.exports = function(grunt) {
 	grunt.loadTasks('build/tasks/');
 
 	grunt.registerTask('default', ['buildModule']);
+	// depends on buildModule
 	grunt.registerTask('export', ['buildDistribution', 'jsdocExport']);
 
 };

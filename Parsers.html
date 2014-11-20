@@ -1,7 +1,7 @@
 <html lang="ru" xmlns="">
 <head>
 	<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-	<script src="http://ajax.googleapis.com/ajax/libs/mootools/1.5.0/mootools-yui-compressed.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/mootools/1.5.1/mootools-yui-compressed.js"></script>
 	<script src="lib/jison/webtoolkit.base64.js"></script>
 	<script src="lib/jison/es5.js"></script>
 	<script src="lib/jison/jison.js"></script>
@@ -188,6 +188,7 @@ IDENTIFIER				[a-zA-Z\_][a-zA-Z0-9\_]*
 (\&lt\;=|\&gt\;=)								{ yytext = yy.unescape(yytext); return 'OPERATOR'; /*escaped operator versions*/ }
 (\&amp\;|\&lt\;|\&gt\;|\&)+						{ yytext = yy.unescape(yytext); return 'OPERATOR'; /*escaped operator versions + "&", "&&" */ }
 
+\/\/depends\:									{ return 'DEPENDS_START'; }
 [\+\-\*\/\%]									{ return 'OPERATOR'; /*arithmetic*/ }
 \|\||\!\!										{ return 'OPERATOR'; /*logical, without "&&" and "!" */ }
 \=\=\=|\!\=\=|\=\=|\!\=|\<\=|\>\=|\<|\>			{ return 'OPERATOR'; /*comparison*/ }
@@ -203,7 +204,6 @@ IDENTIFIER				[a-zA-Z\_][a-zA-Z0-9\_]*
 \[/[^\s]										{ return 'OPEN_SQUARE'; }
 \]												{ return 'CLOSE_SQUARE'; }
 \s+												{ /* skip whitespace */ }
-\/\/depends:									{ return 'DEPENDS_START'; }
 \{												{ return 'OPEN_CURLY'; }
 \}												{ return 'CLOSE_CURLY'; }
 
@@ -272,17 +272,13 @@ expressions
 	| expressionWithOptionalDepends { yy.finishArgument($1.trim()); }
 	;
 
-depends
-	: DEPENDS_START OPEN_CURLY scopeEvalList CLOSE_CURLY {}
-	;
-
 scopeEvalList
 	: scopeEvalList COMMA scopeEval { yy.x_argument_binds.push($3); }
 	| scopeEval { yy.x_argument_binds.push($1); }
 	;
 
 expressionWithOptionalDepends
-	: expression depends { $$ = $1; }
+	: expression DEPENDS_START OPEN_CURLY scopeEvalList CLOSE_CURLY { $$ = $1; }
 	| expression { $$ = $1; }
 	;
 
