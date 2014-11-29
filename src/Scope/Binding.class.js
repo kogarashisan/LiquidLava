@@ -71,10 +71,10 @@ Lava.define(
 			// turning off both of them to avoid infinite loop. From architect's point of view, better solution would be
 			// to hang up developer's browser, but if it happens in production - it may have disastrous consequences.
 			Lava.suspendListener(this._widget_property_changed_listener);
-			Lava.suspendListener(this._scope_changed_listener);
+			this._scope_changed_listener && Lava.suspendListener(this._scope_changed_listener);
 			this._widget.set(this._property_name, this._scope.getValue());
 			Lava.resumeListener(this._widget_property_changed_listener);
-			Lava.resumeListener(this._scope_changed_listener);
+			this._scope_changed_listener && Lava.resumeListener(this._scope_changed_listener);
 
 		}
 
@@ -86,17 +86,17 @@ Lava.define(
 	onWidgetPropertyChanged: function() {
 
 		Lava.suspendListener(this._widget_property_changed_listener);
-		Lava.suspendListener(this._scope_changed_listener);
+		this._scope_changed_listener && Lava.suspendListener(this._scope_changed_listener);
 		this._scope.setValue(this._widget.get(this._property_name));
 		Lava.resumeListener(this._widget_property_changed_listener);
-		Lava.resumeListener(this._scope_changed_listener);
+		this._scope_changed_listener && Lava.resumeListener(this._scope_changed_listener);
 
 	},
 
 	destroy: function() {
 
 		this._scope_changed_listener && this._scope.removeListener(this._scope_changed_listener);
-		this._widget_property_changed_listener && this._widget.removePropertyListener(this._widget_property_changed_listener);
+		this._widget.removePropertyListener(this._widget_property_changed_listener);
 
 	}
 

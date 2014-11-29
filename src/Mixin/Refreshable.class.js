@@ -84,7 +84,7 @@ Lava.define(
 				if (Lava.schema.DEBUG) Lava.logError('Scope was refreshed more than once during one refresh loop');
 
 				this._refresh_cycle_count++;
-				if (this._refresh_cycle_count == Lava.schema.REFRESH_INFINITE_LOOP_THRESHOLD && !is_safe) {
+				if (this._refresh_cycle_count == Lava.schema.system.REFRESH_INFINITE_LOOP_THRESHOLD && !is_safe) {
 
 					return true; // infinite loop exception
 

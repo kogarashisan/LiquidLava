@@ -1,6 +1,8 @@
 /**
  * Each time a DOM event is received, ViewManager assembles an array from the element, which is source of the event, and all it's parents.
- * "EVENTNAME" is replaced with actual event name, like "mouseover_stack_changed"
+ * "EVENTNAME" is replaced with actual event name, like "mouseover_stack_changed".
+ * You must not modify the the argument of this event, but you can slice() it.
+ *
  * @event Lava.system.ViewManager#EVENTNAME_stack_changed
  * @type {Array.<HTMLElement>}
  * @lava-type-description List of elements, with the first item in array being the event source,
@@ -28,7 +30,7 @@ Lava.define(
 	 * View refresh loop is in progress
 	 * @type {boolean}
 	 */
-	_views_refreshing: false,
+	_is_refreshing: false,
 
 	/**
 	 * Hash of all views with user-defined ID
@@ -122,7 +124,7 @@ Lava.define(
 	 */
 	scheduleViewRefresh: function(view) {
 
-		if (this._views_refreshing) Lava.t("Views may not become dirty while they are being refreshed");
+		if (this._is_refreshing) Lava.t("Views may not become dirty while they are being refreshed");
 
 		if (view.depth in this._dirty_views) {
 
@@ -141,24 +143,29 @@ Lava.define(
 	 */
 	refresh: function() {
 
+		if (Lava.Core.isProcessingEvent()) {
+			Lava.logError("ViewManager::refresh() must not be called inside event listeners");
+			return;
+		}
+
+		if (this._is_refreshing) {
+			Lava.logError("ViewManager: recursive call to refresh()");
+			return;
+		}
+
 		var level = 0,
 			deepness,
 			views_list,
 			i,
 			count;
 
-		if (Lava.Core.isProcessingEvent()) {
-			Lava.logError("ViewManager::refresh() may not be manually called in event listeners");
-			return;
-		}
-
 		Lava.ScopeManager.refreshScopes();
 
-		deepness = this._dirty_views.length;
+		deepness = this._dirty_views.length; // this line must be after refreshScopes()
 
 		if (deepness) {
 
-			this._views_refreshing = true;
+			this._is_refreshing = true;
 
 			for (; level < deepness; level++) {
 
@@ -176,11 +183,21 @@ Lava.define(
 
 			}
 
-			this._views_refreshing = false;
+			this._is_refreshing = false;
 
 			this._dirty_views = [];
 
 		}
+
+	},
+
+	/**
+	 * Get `_is_refreshing`
+	 * @returns {boolean}
+	 */
+	isRefreshing: function() {
+
+		return this._is_refreshing;
 
 	},
 
@@ -195,8 +212,6 @@ Lava.define(
 		if (instance.id) {
 
 			if (Lava.schema.DEBUG && (instance.id in this._views_by_id)) Lava.t("Duplicate view id: " + instance.id);
-			if (Lava.schema.DEBUG && !Lava.isValidId(instance.id)) Lava.t(); // Element ID is either malformed or conflicts with framework id patterns
-
 			this._views_by_id[instance.id] = instance;
 
 		}
@@ -799,7 +814,7 @@ Lava.define(
 		}
 
 		// you must not modify the returned array, but you can slice() it
-		if (Object.freeze) {
+		if (Lava.schema.DEBUG && Object.freeze) {
 			Object.freeze(result);
 		}
 

@@ -1,12 +1,3 @@
-/**
- * Input's element got focus
- * @event Lava.widget.input.Abstract#focused
- */
-
-/**
- * Input's element lost it's focus
- * @event Lava.widget.input.Abstract#blurred
- */
 
 Lava.define(
 'Lava.widget.input.Abstract',
@@ -49,7 +40,8 @@ Lava.define(
 	},
 
 	_role_handlers: {
-		_input_view: '_handleInputView'
+		_input_view: '_handleInputView',
+		label: '_handleLabel'
 	},
 
 	/**
@@ -98,26 +90,35 @@ Lava.define(
 	},
 
 	/**
-	 * Fire {@link Lava.widget.input.Abstract#event:focused}
+	 * Fire global "focus_acquired" event
 	 */
-	_onInputFocused: function() {
+	_onInputFocused: function(dom_event_name, dom_event, view) {
 
-		this._fire('focused');
+		Lava.app.fireGlobalEvent('focus_acquired', {
+			target: this,
+			element: view.getContainer().getDOMElement()
+		});
 
 	},
 
 	/**
-	 * Fire {@link Lava.widget.input.Abstract#event:blurred}
+	 * Fire global "focus_lost" event
 	 */
 	_onInputBlurred: function() {
 
-		this._fire('blurred');
+		Lava.app.fireGlobalEvent('focus_lost');
 
 	},
 
-	destroy: function() {
-		this._input_container = null;
-		this.Standard$destroy();
+	/**
+	 * Focus the input's element, if it's currently in DOM
+	 */
+	focus: function(){
+
+		if (this._input_container && this._input_container.isInDOM()) {
+			this._input_container.getDOMElement().focus();
+		}
+
 	},
 
 	/**
@@ -142,6 +143,21 @@ Lava.define(
 			this._set('is_valid', value);
 		}
 
+	},
+
+	/**
+	 * Assign "for" attribute to label
+	 * @param view
+	 */
+	_handleLabel: function(view) {
+
+		view.getContainer().setProperty('for', Lava.ELEMENT_ID_PREFIX + this.guid);
+
+	},
+
+	destroy: function() {
+		this._input_container = null;
+		this.Standard$destroy();
 	}
 
 });

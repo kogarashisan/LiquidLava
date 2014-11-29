@@ -65,6 +65,7 @@
 		"System/App.class.js",
 		"System/Sugar.class.js",
 		"System/PopoverManager.class.js",
+		"System/FocusManager.class.js",
 
 		"Data/Field/Abstract.class.js",
 		"Data/Field/Basic.class.js",

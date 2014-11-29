@@ -7,7 +7,7 @@ Firestorm.schema = {
 		 * Allow using of Range API, if browser is capable of it
 		 * @const
 		 */
-		PREFER_RANGE_API: true
+		PREFER_RANGE_API: false
 	},
 	/**
 	 * Perform DEBUG checks. May be <kw>false</kw> in production,

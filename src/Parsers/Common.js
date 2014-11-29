@@ -24,11 +24,6 @@ Lava.parsers.Common = {
 	 * @type {Array.<string>}
 	 */
 	_reserved_labels: ['parent', 'widget', 'this', 'root'],
-	/**
-	 * The only control attributes ("x:") that can be placed on widget's sugar tag
-	 * @type {Array.<string>}
-	 */
-	_allowed_sugar_control_attributes: ['label', 'roles', 'resource_id'],
 
 	/**
 	 * When widgets are referenced in expressions - they are prefixed with these special characters, which define the kind of reference
@@ -41,26 +36,15 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * A widget with a name after dot. Example: <str>"@accordion.accordion_panel"</str>
-	 * @type {RegExp}
+	 * A widget locator with a name (`_identifier_regex`) after dot. Examples: <str>"@accordion.accordion_panel"</str>,
+	 * <str>"$tree.Tree$node"</str>.
 	 */
-	_locator_regex: /^[\$\#\@]([a-zA-Z\_][a-zA-Z0-9\_]*)\.([a-zA-Z\_][a-zA-Z0-9\_]*)/,
+	_locator_regex: /^[\$\#\@]([a-zA-Z\_][a-zA-Z0-9\_]*)\.([a-zA-Z\_][\$a-zA-Z0-9\_]*)/,
 	/**
 	 * Valid name of a variable
 	 * @type {RegExp}
 	 */
-	_identifier_regex: /^[a-zA-Z\_][a-zA-Z0-9\_]*/,
-
-	/**
-	 * Same as `_locator_regex`, but allows the <str>"$"</str> symbol in include name
-	 * (overridden includes have '$' in their name). Example: <str>"$tree.Tree$node"</str>
-	 */
-	_include_locator_regex: /^[\$\#\@]([a-zA-Z\_][a-zA-Z0-9\_]*)\.([a-zA-Z\_][\$a-zA-Z0-9\_]*)/,
-	/**
-	 * Same as `_identifier_regex`, but <str>"$"</str> symbol is also allowed
-	 * @type {RegExp}
-	 */
-	_include_identifier_regex: /^[a-zA-Z\_][\$a-zA-Z0-9\_]*/,
+	_identifier_regex: /^[a-zA-Z\_][\$a-zA-Z0-9\_]*/,
 
 	/**
 	 * Special setters for some properties in view config
@@ -439,7 +423,7 @@ Lava.parsers.Common = {
 
 		}
 
-		if (Lava.schema.DEBUG && view_config.container) Lava.t("Container wraps a view with it's container already defined.");
+		if (Lava.schema.DEBUG && view_config.container) Lava.t("Wrapped view already has a container");
 		container_config = this._toContainer(raw_tag);
 		view_config.container = container_config;
 
@@ -533,9 +517,7 @@ Lava.parsers.Common = {
 		var schema = Lava.sugar_map[raw_tag.name],
 			widget_config,
 			sugar,
-			result_config,
-			name,
-			x = raw_tag.x;
+			result_config;
 
 		if ('parse' in schema) {
 
@@ -545,23 +527,7 @@ Lava.parsers.Common = {
 
 			widget_config = Lava.getWidgetConfig(schema.widget_title);
 			sugar = Lava.getWidgetSugarInstance(schema.widget_title);
-			result_config = this.createDefaultWidgetConfig();
-			result_config.extends = schema.widget_title;
-			sugar.parse(widget_config.sugar, raw_tag, result_config);
-
-		}
-
-		if (x) {
-
-			if (Lava.schema.DEBUG && x) {
-				for (name in x) {
-					if (this._allowed_sugar_control_attributes.indexOf(name) == -1) Lava.t("Control attribute is not allowed on sugar: " + name);
-				}
-			}
-
-			if ('label' in x) this.setViewConfigLabel(result_config, x.label);
-			if ('roles' in x) result_config.roles = this.parseTargets(x.roles);
-			if ('resource_id' in x) result_config.resource_id = this.parseResourceId(x.resource_id);
+			result_config = sugar.parse(widget_config.sugar, raw_tag, schema.widget_title);
 
 		}
 
@@ -1012,7 +978,7 @@ Lava.parsers.Common = {
 
 		while (targets_string.length) {
 
-			match = this._include_locator_regex.exec(targets_string);
+			match = this._locator_regex.exec(targets_string);
 			if (!match) guid_match = /^\d+$/.exec(targets_string);
 
 			if (match) {
@@ -1028,7 +994,7 @@ Lava.parsers.Common = {
 
 			} else {
 
-				match = this._include_identifier_regex.exec(targets_string);
+				match = this._identifier_regex.exec(targets_string);
 				if (!match) Lava.t("Malformed targets (1): " + targets_string);
 				target.name = match[0];
 
@@ -1113,7 +1079,7 @@ Lava.parsers.Common = {
 		var match = this._locator_regex.exec(id_string),
 			result;
 
-		if (!match) Lava.t("Malformed resource id: " + id_string);
+		if (!match || match[2].indexOf('$') != -1) Lava.t("Malformed resource id: " + id_string);
 
 		/** @type {_cResourceId} */
 		result = {
@@ -1166,6 +1132,18 @@ Lava.parsers.Common = {
 		}
 
 		return result;
+
+	},
+
+	toWidget: function(raw_tag) {
+
+		var config = this.createDefaultWidgetConfig();
+		config.container = this._toContainer(raw_tag);
+		this._parseViewAttributes(config, raw_tag);
+
+		if (raw_tag.content) config.template = this.compileTemplate(raw_tag.content, config);
+
+		return config
 
 	}
 

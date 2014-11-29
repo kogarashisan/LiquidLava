@@ -37,11 +37,12 @@ Lava.Core = {
 	_event_handlers: {},
 
 	/**
-	 * Is set at the beginning of Core's DOM event listener and removed at the end. Used to delay refresh of views
-	 * until the end of event processing
-	 * @type {boolean}
+	 * Incremented at the beginning of Core's DOM event listener and decremented at the end.
+	 * Used to delay refresh of views until the end of event processing.
+	 *
+	 * @type {number}
 	 */
-	_is_processing_event: false,
+	_nested_handlers_count: 0,
 
 	/**
 	 * In case of infinite loops in scope layer, there may be lags, when processing mousemove and other frequent events
@@ -172,7 +173,18 @@ Lava.Core = {
 			i = 0,
 			count = handlers.length;
 
-		this._is_processing_event = true;
+		// unfortunately, browser can raise an event inside another event.
+		// Example test case:
+		// {$if(is_visible)}
+		// 		<button x:click="remove_me">click me</button>
+		// {/if}
+		// Click handler should set `is_visible` to false, so the button is removed.
+		// Button element will be removed from DOM inside click handler, in view_manager.refresh()
+		// At the moment of removal, browser fires focusout event. Each event ends with view_manager.refresh(),
+		// which will also try to remove the button.
+		// Read more here:
+		// for understanding, see http://stackoverflow.com/questions/21926083/failed-to-execute-removechild-on-node
+		this._nested_handlers_count++;
 
 		for (; i < count; i++) {
 
@@ -180,9 +192,13 @@ Lava.Core = {
 
 		}
 
-		this._is_processing_event = false;
+		this._nested_handlers_count--;
 
-		if (!freeze_protection || !Lava.ScopeManager.hasInfiniteLoop()) {
+		if (
+			this._nested_handlers_count == 0
+			&& !Lava.view_manager.isRefreshing()
+			&& (!freeze_protection || !Lava.ScopeManager.hasInfiniteLoop())
+		) {
 
 			Lava.view_manager.refresh();
 
@@ -191,12 +207,12 @@ Lava.Core = {
 	},
 
 	/**
-	 * Get `_is_processing_event`
+	 * Return <kw>true</kw>, if `_nested_handlers_count > 0`
 	 * @returns {boolean} True, if Core is in the process of calling framework listeners
 	 */
 	isProcessingEvent: function() {
 
-		return this._is_processing_event;
+		return this._nested_handlers_count > 0;
 
 	}
 

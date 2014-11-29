@@ -42,6 +42,8 @@ Lava.define(
 		this._data_names = this._data_source.getNames();
 		this._data_values = this._data_source.getValues();
 		this._data_uids = this._data_source.getUIDs();
+		this._count = this._data_uids.length;
+		this._fire('collection_changed');
 
 	},
 

@@ -55,6 +55,7 @@ var Firestorm = {
 	 * @enum {number}
 	 */
 	KEY_CODES: {
+		ENTER: 13,
 		ESCAPE: 27,
 		LEFT_ARROW: 37,
 		UP_ARROW: 38,
@@ -214,7 +215,7 @@ Firestorm.schema = {
 		 * Allow using of Range API, if browser is capable of it
 		 * @const
 		 */
-		PREFER_RANGE_API: true
+		PREFER_RANGE_API: false
 	},
 	/**
 	 * Perform DEBUG checks. May be <kw>false</kw> in production,
@@ -488,6 +489,12 @@ Firestorm.Element = {
 	selectElements: function(element, selector) {
 
 		return Slick.search(element, selector, []);
+
+	},
+
+	getTagName: function(element) {
+
+		return element.nodeName.toLowerCase();
 
 	}
 
@@ -941,15 +948,22 @@ Firestorm.DOM = {
 	 */
 	clearInnerRange_Nodes: function(start_element, end_element) {
 
-		var node = start_element.nextSibling;
+		/*var parent_node = start_element.parentNode,
+			next_sibling = start_element.nextSibling,
+			tmp;
 
-		while (node) {
+		while (next_sibling != end_element) {
+			tmp = next_sibling.nextSibling;
+			parent_node.removeChild(next_sibling);
+			next_sibling = tmp;
+		}*/
 
-			if (node === end_element) {
-				break;
-			}
+		var parent_node = start_element.parentNode,
+			node = start_element.nextSibling;
 
-			node.parentNode.removeChild(node);
+		while (node && node !== end_element) {
+
+			parent_node.removeChild(node);
 			node = start_element.nextSibling;
 
 		}
@@ -1634,6 +1648,11 @@ var Lava = {
 	 * @type {Lava.system.PopoverManager}
 	 */
 	popover_manager: null,
+	/**
+	 * Global FocusManager instance
+	 * @type {Lava.system.FocusManager}
+	 */
+	focus_manager: null,
 
 	/**
 	 * Container for locale-specific data (strings, date formats, etc)
@@ -1795,6 +1814,8 @@ var Lava = {
 		this.view_manager = new constructor();
 		constructor = this.ClassManager.getConstructor(Lava.schema.system.APP_CLASS);
 		this.app = new constructor();
+		constructor = this.ClassManager.getConstructor(Lava.schema.system.FOCUS_MANAGER_CLASS);
+		this.focus_manager = new constructor();
 
 		if (Lava.schema.popover_manager.IS_ENABLED) {
 			constructor = this.ClassManager.getConstructor(Lava.schema.popover_manager.CLASS);
@@ -1897,6 +1918,7 @@ var Lava = {
 		}
 
 		constructor = Lava.ClassManager.getConstructor(config['class']);
+		if (Lava.schema.DEBUG && !constructor) Lava.t('Class not found: ' + class_name);
 		return /** @type {Lava.widget.Standard} */ new constructor(config, null, null, null, properties);
 
 	},
@@ -2022,28 +2044,26 @@ var Lava = {
 	 */
 	bootstrap: function() {
 
-		var body = document.body,
-			app_class = Firestorm.Element.getProperty(document.body, 'lava-app'),
-			bootstrap_targets,
-			element,
-			result;
-
 		this.init && this.init();
+
+		var body = document.body,
+			app_class = Firestorm.Element.getProperty(body, 'lava-app'),
+			bootstrap_targets;
 
 		if (app_class != null) {
 
-			result = this._elementToWidget(body, {type: 'Element', tag_name: 'body'});
-			result.injectIntoExistingElement(body);
+			this._elementToWidget(body);
 
 		} else {
 
 			bootstrap_targets = Firestorm.selectElements('script[type="lava/app"],lava-app');
-			for (var i = 0, count = bootstrap_targets.length; i < count; i ++) {
+			for (var i = 0, count = bootstrap_targets.length; i < count; i++) {
 
-				element = bootstrap_targets[i];
-				result = this._elementToWidget(element, {type: 'Morph'});
-				result.inject(element, 'After');
-				Firestorm.Element.destroy(element);
+				if (Firestorm.Element.getTagName(bootstrap_targets[i]) == 'script') {
+					this._scriptToWidget(bootstrap_targets[i]);
+				} else {
+					this._elementToWidget(bootstrap_targets[i]);
+				}
 
 			}
 
@@ -2056,35 +2076,67 @@ var Lava = {
 	},
 
 	/**
-	 * Parse the DOM element instance as a widget template and create a widget
+	 * Convert a DOM element to widget instance
 	 * @param {HTMLElement} element
-	 * @param {Object} container_config
 	 * @returns {Lava.widget.Standard}
 	 */
-	_elementToWidget: function(element, container_config) {
+	_elementToWidget: function(element) {
 
-		var config,
+		var widget,
+			raw_template = Lava.TemplateParser.parseRaw(element.outerHTML),
+			raw_tag,
+			config,
+			constructor;
+
+		if (Lava.schema.DEBUG && raw_template.length != 1) Lava.t();
+
+		raw_tag = raw_template[0];
+		config = Lava.parsers.Common.toWidget(raw_tag);
+		config.is_extended = true;
+		config['class'] = raw_tag.attributes['lava-app'];
+
+		if (raw_tag.attributes.id) Firestorm.Element.removeProperty(element, 'id'); // needed for captureExistingElement
+
+		constructor = Lava.ClassManager.getConstructor(config['class'] || 'Lava.widget.Standard', 'Lava.widget');
+		if (Lava.schema.DEBUG && !constructor) Lava.t('Class not found: ' + config['class']);
+		widget = /** @type {Lava.widget.Standard} */ new constructor(config);
+		widget.injectIntoExistingElement(element);
+		return widget;
+
+	},
+
+	/**
+	 * Convert a script DOM element to widget instance
+	 * @param {HTMLElement} script_element
+	 * @returns {Lava.widget.Standard}
+	 */
+	_scriptToWidget: function(script_element) {
+
+		var widget,
+			config,
 			constructor,
-			name = Firestorm.Element.getProperty(element, 'name'),
-			id = Firestorm.Element.getProperty(element, 'id'),
-			class_name = Firestorm.Element.getProperty(element, 'lava-app');
+			id = Firestorm.Element.getProperty(script_element, 'id'),
+			class_name = Firestorm.Element.getProperty(script_element, 'lava-app');
 
 		config = {
 			type: 'widget',
 			is_extended: true,
 			template: null,
-			container: container_config
+			container: {type: 'Morph'}
 		};
-		config.template = Lava.TemplateParser.parse(element.get('html'), config);
+		config.template = Lava.TemplateParser.parse(script_element.get('html'), config);
 
 		if (id) {
 			config.id = id;
-			Firestorm.Element.removeProperty(element, 'id');
+			Firestorm.Element.removeProperty(script_element, 'id');
 		}
 
 		constructor = Lava.ClassManager.getConstructor(class_name || 'Lava.widget.Standard', 'Lava.widget');
 		if (Lava.schema.DEBUG && !constructor) Lava.t('Class not found: ' + class_name);
-		return /** @type {Lava.widget.Standard} */ new constructor(config);
+		widget = /** @type {Lava.widget.Standard} */ new constructor(config);
+		widget.inject(script_element, 'After');
+		Firestorm.Element.destroy(script_element);
+		return widget;
 
 	},
 
@@ -2239,7 +2291,7 @@ var Lava = {
 	 */
 	refreshViews: function() {
 
-		if (!Lava.Core.isProcessingEvent()) {
+		if (!Lava.Core.isProcessingEvent() && !Lava.view_manager.isRefreshing()) {
 
 			this.view_manager.refresh();
 
@@ -2410,6 +2462,11 @@ Lava.schema = {
 		 */
 		VIEW_MANAGER_CLASS: 'Lava.system.ViewManager',
 		/**
+		 * Class for {@link Lava#focus_manager}
+		 * @const
+		 */
+		FOCUS_MANAGER_CLASS: 'Lava.system.FocusManager',
+		/**
 		 * ViewManager events (routed via templates), which are enabled by default, so does not require a call to lendEvent()
 		 * @const
 		 */
@@ -2423,7 +2480,13 @@ Lava.schema = {
 		 * {@link Lava.Cron} uses requestAnimationFrame, if browser supports it
 		 * @const
 		 */
-		ALLOW_REQUEST_ANIMATION_FRAME: true
+		ALLOW_REQUEST_ANIMATION_FRAME: true,
+		/**
+		 * How much times a scope may be refreshed during one refresh loop, before it's considered
+		 * an infinite refresh loop
+		 * @const
+		 */
+		REFRESH_INFINITE_LOOP_THRESHOLD: 3
 	},
 	/**
 	 * Settings for {@link Lava#popover_manager}
@@ -2489,12 +2552,6 @@ Lava.schema = {
 		 * @const
 		 */
 		VALIDATE_STYLES: true,
-		/**
-		 * How much times a scope may be refreshed during one refresh loop, before it's considered
-		 * an infinite refresh loop
-		 * @const
-		 */
-		REFRESH_INFINITE_LOOP_THRESHOLD: 3,
 		/**
 		 * Gateway, which constructs the views with dynamic class names
 		 * @const
@@ -4042,11 +4099,12 @@ Lava.Core = {
 	_event_handlers: {},
 
 	/**
-	 * Is set at the beginning of Core's DOM event listener and removed at the end. Used to delay refresh of views
-	 * until the end of event processing
-	 * @type {boolean}
+	 * Incremented at the beginning of Core's DOM event listener and decremented at the end.
+	 * Used to delay refresh of views until the end of event processing.
+	 *
+	 * @type {number}
 	 */
-	_is_processing_event: false,
+	_nested_handlers_count: 0,
 
 	/**
 	 * In case of infinite loops in scope layer, there may be lags, when processing mousemove and other frequent events
@@ -4177,7 +4235,18 @@ Lava.Core = {
 			i = 0,
 			count = handlers.length;
 
-		this._is_processing_event = true;
+		// unfortunately, browser can raise an event inside another event.
+		// Example test case:
+		// {$if(is_visible)}
+		// 		<button x:click="remove_me">click me</button>
+		// {/if}
+		// Click handler should set `is_visible` to false, so the button is removed.
+		// Button element will be removed from DOM inside click handler, in view_manager.refresh()
+		// At the moment of removal, browser fires focusout event. Each event ends with view_manager.refresh(),
+		// which will also try to remove the button.
+		// Read more here:
+		// for understanding, see http://stackoverflow.com/questions/21926083/failed-to-execute-removechild-on-node
+		this._nested_handlers_count++;
 
 		for (; i < count; i++) {
 
@@ -4185,9 +4254,13 @@ Lava.Core = {
 
 		}
 
-		this._is_processing_event = false;
+		this._nested_handlers_count--;
 
-		if (!freeze_protection || !Lava.ScopeManager.hasInfiniteLoop()) {
+		if (
+			this._nested_handlers_count == 0
+			&& !Lava.view_manager.isRefreshing()
+			&& (!freeze_protection || !Lava.ScopeManager.hasInfiniteLoop())
+		) {
 
 			Lava.view_manager.refresh();
 
@@ -4196,12 +4269,12 @@ Lava.Core = {
 	},
 
 	/**
-	 * Get `_is_processing_event`
+	 * Return <kw>true</kw>, if `_nested_handlers_count > 0`
 	 * @returns {boolean} True, if Core is in the process of calling framework listeners
 	 */
 	isProcessingEvent: function() {
 
-		return this._is_processing_event;
+		return this._nested_handlers_count > 0;
 
 	}
 
@@ -4263,6 +4336,12 @@ Lava.ScopeManager = {
 	_has_infinite_loop: false,
 
 	/**
+	 * Is refresh loop in progress
+	 * @type {boolean}
+	 */
+	_is_refreshing: false,
+
+	/**
 	 * Queue a scope for update
 	 * @param {Lava.mixin.Refreshable} target
 	 * @param {number} level
@@ -4276,7 +4355,7 @@ Lava.ScopeManager = {
 
 		}
 
-		if (!(level in this._scope_refresh_queues)) {
+		if (!this._scope_refresh_queues[level]) {
 
 			this._scope_refresh_queues[level] = [];
 
@@ -4298,7 +4377,7 @@ Lava.ScopeManager = {
 
 		if (Lava.schema.DEBUG && refresh_ticket == null) Lava.t();
 
-		this._scope_refresh_queues[level][refresh_ticket.index] = undefined;
+		this._scope_refresh_queues[level][refresh_ticket.index] = null;
 
 	},
 
@@ -4325,6 +4404,13 @@ Lava.ScopeManager = {
 			return;
 
 		}
+
+		if (this._is_refreshing) {
+			Lava.logError("ScopeManager: recursive call to refreshScopes()");
+			return;
+		}
+
+		this._is_refreshing = true;
 
 		this._has_exceptions = false;
 		this._refresh_id++;
@@ -4373,6 +4459,8 @@ Lava.ScopeManager = {
 		}
 
 		this._has_infinite_loop = this._has_exceptions;
+
+		this._is_refreshing = false;
 
 		Lava.schema.DEBUG && this.debugVerify();
 
@@ -4434,7 +4522,7 @@ Lava.ScopeManager = {
 
 		} while (i < queue_length);
 
-		this._scope_refresh_queues[current_level] = undefined;
+		this._scope_refresh_queues[current_level] = null;
 		this._scope_refresh_current_indices[current_level] = 0;
 
 		count_levels = this._scope_refresh_queues.length;
@@ -5976,11 +6064,6 @@ Lava.parsers.Common = {
 	 * @type {Array.<string>}
 	 */
 	_reserved_labels: ['parent', 'widget', 'this', 'root'],
-	/**
-	 * The only control attributes ("x:") that can be placed on widget's sugar tag
-	 * @type {Array.<string>}
-	 */
-	_allowed_sugar_control_attributes: ['label', 'roles', 'resource_id'],
 
 	/**
 	 * When widgets are referenced in expressions - they are prefixed with these special characters, which define the kind of reference
@@ -5993,26 +6076,15 @@ Lava.parsers.Common = {
 	},
 
 	/**
-	 * A widget with a name after dot. Example: <str>"@accordion.accordion_panel"</str>
-	 * @type {RegExp}
+	 * A widget locator with a name (`_identifier_regex`) after dot. Examples: <str>"@accordion.accordion_panel"</str>,
+	 * <str>"$tree.Tree$node"</str>.
 	 */
-	_locator_regex: /^[\$\#\@]([a-zA-Z\_][a-zA-Z0-9\_]*)\.([a-zA-Z\_][a-zA-Z0-9\_]*)/,
+	_locator_regex: /^[\$\#\@]([a-zA-Z\_][a-zA-Z0-9\_]*)\.([a-zA-Z\_][\$a-zA-Z0-9\_]*)/,
 	/**
 	 * Valid name of a variable
 	 * @type {RegExp}
 	 */
-	_identifier_regex: /^[a-zA-Z\_][a-zA-Z0-9\_]*/,
-
-	/**
-	 * Same as `_locator_regex`, but allows the <str>"$"</str> symbol in include name
-	 * (overridden includes have '$' in their name). Example: <str>"$tree.Tree$node"</str>
-	 */
-	_include_locator_regex: /^[\$\#\@]([a-zA-Z\_][a-zA-Z0-9\_]*)\.([a-zA-Z\_][\$a-zA-Z0-9\_]*)/,
-	/**
-	 * Same as `_identifier_regex`, but <str>"$"</str> symbol is also allowed
-	 * @type {RegExp}
-	 */
-	_include_identifier_regex: /^[a-zA-Z\_][\$a-zA-Z0-9\_]*/,
+	_identifier_regex: /^[a-zA-Z\_][\$a-zA-Z0-9\_]*/,
 
 	/**
 	 * Special setters for some properties in view config
@@ -6391,7 +6463,7 @@ Lava.parsers.Common = {
 
 		}
 
-		if (Lava.schema.DEBUG && view_config.container) Lava.t("Container wraps a view with it's container already defined.");
+		if (Lava.schema.DEBUG && view_config.container) Lava.t("Wrapped view already has a container");
 		container_config = this._toContainer(raw_tag);
 		view_config.container = container_config;
 
@@ -6485,9 +6557,7 @@ Lava.parsers.Common = {
 		var schema = Lava.sugar_map[raw_tag.name],
 			widget_config,
 			sugar,
-			result_config,
-			name,
-			x = raw_tag.x;
+			result_config;
 
 		if ('parse' in schema) {
 
@@ -6497,23 +6567,7 @@ Lava.parsers.Common = {
 
 			widget_config = Lava.getWidgetConfig(schema.widget_title);
 			sugar = Lava.getWidgetSugarInstance(schema.widget_title);
-			result_config = this.createDefaultWidgetConfig();
-			result_config.extends = schema.widget_title;
-			sugar.parse(widget_config.sugar, raw_tag, result_config);
-
-		}
-
-		if (x) {
-
-			if (Lava.schema.DEBUG && x) {
-				for (name in x) {
-					if (this._allowed_sugar_control_attributes.indexOf(name) == -1) Lava.t("Control attribute is not allowed on sugar: " + name);
-				}
-			}
-
-			if ('label' in x) this.setViewConfigLabel(result_config, x.label);
-			if ('roles' in x) result_config.roles = this.parseTargets(x.roles);
-			if ('resource_id' in x) result_config.resource_id = this.parseResourceId(x.resource_id);
+			result_config = sugar.parse(widget_config.sugar, raw_tag, schema.widget_title);
 
 		}
 
@@ -6964,7 +7018,7 @@ Lava.parsers.Common = {
 
 		while (targets_string.length) {
 
-			match = this._include_locator_regex.exec(targets_string);
+			match = this._locator_regex.exec(targets_string);
 			if (!match) guid_match = /^\d+$/.exec(targets_string);
 
 			if (match) {
@@ -6980,7 +7034,7 @@ Lava.parsers.Common = {
 
 			} else {
 
-				match = this._include_identifier_regex.exec(targets_string);
+				match = this._identifier_regex.exec(targets_string);
 				if (!match) Lava.t("Malformed targets (1): " + targets_string);
 				target.name = match[0];
 
@@ -7065,7 +7119,7 @@ Lava.parsers.Common = {
 		var match = this._locator_regex.exec(id_string),
 			result;
 
-		if (!match) Lava.t("Malformed resource id: " + id_string);
+		if (!match || match[2].indexOf('$') != -1) Lava.t("Malformed resource id: " + id_string);
 
 		/** @type {_cResourceId} */
 		result = {
@@ -7118,6 +7172,18 @@ Lava.parsers.Common = {
 		}
 
 		return result;
+
+	},
+
+	toWidget: function(raw_tag) {
+
+		var config = this.createDefaultWidgetConfig();
+		config.container = this._toContainer(raw_tag);
+		this._parseViewAttributes(config, raw_tag);
+
+		if (raw_tag.content) config.template = this.compileTemplate(raw_tag.content, config);
+
+		return config
 
 	}
 
@@ -10870,7 +10936,8 @@ Lava.TemplateParser.yy = {
 
 			} else {
 
-				if (attribute.name in attributes) Lava.t('Duplicate attribute on tag: ' + attribute.name);
+				// reason for second check: IE bug - it can duplicate attributes when serializing a tag
+				if (Lava.schema.DEBUG && (attribute.name in attributes) && attributes[attribute.name] != attribute.value) Lava.t('Duplicate attribute on tag: ' + attribute.name);
 				attributes[attribute.name] = attribute.value;
 
 			}
@@ -11388,7 +11455,7 @@ Lava.define(
 				if (Lava.schema.DEBUG) Lava.logError('Scope was refreshed more than once during one refresh loop');
 
 				this._refresh_cycle_count++;
-				if (this._refresh_cycle_count == Lava.schema.REFRESH_INFINITE_LOOP_THRESHOLD && !is_safe) {
+				if (this._refresh_cycle_count == Lava.schema.system.REFRESH_INFINITE_LOOP_THRESHOLD && !is_safe) {
 
 					return true; // infinite loop exception
 
@@ -13532,6 +13599,8 @@ Lava.define(
 		this._data_names = this._data_source.getNames();
 		this._data_values = this._data_source.getValues();
 		this._data_uids = this._data_source.getUIDs();
+		this._count = this._data_uids.length;
+		this._fire('collection_changed');
 
 	},
 
@@ -14164,7 +14233,9 @@ Lava.define(
 });
 /**
  * Each time a DOM event is received, ViewManager assembles an array from the element, which is source of the event, and all it's parents.
- * "EVENTNAME" is replaced with actual event name, like "mouseover_stack_changed"
+ * "EVENTNAME" is replaced with actual event name, like "mouseover_stack_changed".
+ * You must not modify the the argument of this event, but you can slice() it.
+ *
  * @event Lava.system.ViewManager#EVENTNAME_stack_changed
  * @type {Array.<HTMLElement>}
  * @lava-type-description List of elements, with the first item in array being the event source,
@@ -14192,7 +14263,7 @@ Lava.define(
 	 * View refresh loop is in progress
 	 * @type {boolean}
 	 */
-	_views_refreshing: false,
+	_is_refreshing: false,
 
 	/**
 	 * Hash of all views with user-defined ID
@@ -14286,7 +14357,7 @@ Lava.define(
 	 */
 	scheduleViewRefresh: function(view) {
 
-		if (this._views_refreshing) Lava.t("Views may not become dirty while they are being refreshed");
+		if (this._is_refreshing) Lava.t("Views may not become dirty while they are being refreshed");
 
 		if (view.depth in this._dirty_views) {
 
@@ -14305,24 +14376,29 @@ Lava.define(
 	 */
 	refresh: function() {
 
+		if (Lava.Core.isProcessingEvent()) {
+			Lava.logError("ViewManager::refresh() must not be called inside event listeners");
+			return;
+		}
+
+		if (this._is_refreshing) {
+			Lava.logError("ViewManager: recursive call to refresh()");
+			return;
+		}
+
 		var level = 0,
 			deepness,
 			views_list,
 			i,
 			count;
 
-		if (Lava.Core.isProcessingEvent()) {
-			Lava.logError("ViewManager::refresh() may not be manually called in event listeners");
-			return;
-		}
-
 		Lava.ScopeManager.refreshScopes();
 
-		deepness = this._dirty_views.length;
+		deepness = this._dirty_views.length; // this line must be after refreshScopes()
 
 		if (deepness) {
 
-			this._views_refreshing = true;
+			this._is_refreshing = true;
 
 			for (; level < deepness; level++) {
 
@@ -14340,11 +14416,21 @@ Lava.define(
 
 			}
 
-			this._views_refreshing = false;
+			this._is_refreshing = false;
 
 			this._dirty_views = [];
 
 		}
+
+	},
+
+	/**
+	 * Get `_is_refreshing`
+	 * @returns {boolean}
+	 */
+	isRefreshing: function() {
+
+		return this._is_refreshing;
 
 	},
 
@@ -14359,8 +14445,6 @@ Lava.define(
 		if (instance.id) {
 
 			if (Lava.schema.DEBUG && (instance.id in this._views_by_id)) Lava.t("Duplicate view id: " + instance.id);
-			if (Lava.schema.DEBUG && !Lava.isValidId(instance.id)) Lava.t(); // Element ID is either malformed or conflicts with framework id patterns
-
 			this._views_by_id[instance.id] = instance;
 
 		}
@@ -14963,7 +15047,7 @@ Lava.define(
 		}
 
 		// you must not modify the returned array, but you can slice() it
-		if (Object.freeze) {
+		if (Lava.schema.DEBUG && Object.freeze) {
 			Object.freeze(result);
 		}
 
@@ -15275,11 +15359,16 @@ Lava.define(
 	 * Parse raw tag as a widget
 	 * @param {_cSugar} schema
 	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} widget_config
+	 * @param {string} parent_title
 	 */
-	parse: function(schema, raw_tag, widget_config) {
+	parse: function(schema, raw_tag, parent_title) {
 
-		var tags;
+		var widget_config = Lava.parsers.Common.createDefaultWidgetConfig(),
+			tags,
+			name,
+			x = raw_tag.x;
+
+		widget_config.extends = parent_title;
 
 		if (raw_tag.content) {
 
@@ -15305,6 +15394,23 @@ Lava.define(
 			this._parseRootAttributes(schema, raw_tag, widget_config);
 
 		}
+
+		if (x) {
+
+			if (Lava.schema.DEBUG && x) {
+				for (name in x) {
+					if (['label', 'roles', 'resource_id', 'controller'].indexOf(name) == -1) Lava.t("Control attribute is not allowed on sugar: " + name);
+				}
+			}
+
+			if ('label' in x) this.setViewConfigLabel(widget_config, x.label);
+			if ('roles' in x) widget_config.roles = Lava.parsers.Common.parseTargets(x.roles);
+			if ('resource_id' in x) widget_config.resource_id = Lava.parsers.Common.parseResourceId(x.resource_id);
+			if ('controller' in x) widget_config.real_class = x.controller;
+
+		}
+
+		return widget_config;
 
 	},
 
@@ -15754,6 +15860,178 @@ Lava.define(
 
 		this._tooltip.set('x', event_object.page.x); // left
 		this._tooltip.set('y', event_object.page.y); // top
+
+	}
+
+});
+
+/**
+ * Virtual focus target has changed
+ * @event Lava.system.FocusManager#focus_target_changed
+ * @type {Lava.widget.Standard}
+ * @lava-type-description New widget that owns the virtual focus
+ */
+
+Lava.define(
+'Lava.system.FocusManager',
+/**
+ * Tracks current focused element and widget, delegates keyboard navigation events. [Alpha, work in progress]
+ * @lends Lava.system.FocusManager#
+ * @extends Lava.mixin.Observable#
+ */
+{
+	Extends: 'Lava.mixin.Observable',
+
+	/**
+	 * DOM element, which holds the focus
+	 * @type {HTMLElement}
+	 */
+	_focused_element: null,
+
+	/**
+	 * Virtual focus target
+	 * @type {Lava.widget.Standard}
+	 */
+	_focus_target: null,
+
+	/**
+	 * Listener for global "focus_acquired" event
+	 * @type {_tListener}
+	 */
+	_focus_acquired_listener: null,
+	/**
+	 * Listener for global "focus_lost" event
+	 * @type {_tListener}
+	 */
+	_focus_lost_listener: null,
+	/**
+	 * Listener for Core "focus" event
+	 * @type {_tListener}
+	 */
+	_focus_listener: null,
+	/**
+	 * Listener for Core "blur" event
+	 * @type {_tListener}
+	 */
+	_blur_listener: null,
+
+	/**
+	 * Initialize FocusManager instance
+	 */
+	init: function() {
+
+		this._focus_acquired_listener = Lava.app.on('focus_acquired', this._onFocusTargetAcquired, this);
+		this._focus_lost_listener = Lava.app.on('focus_lost', this.clearFocusedTarget, this);
+		this._focus_listener = Lava.Core.addGlobalHandler('blur', this._onElementBlurred, this);
+		this._blur_listener = Lava.Core.addGlobalHandler('focus', this._onElementFocused, this);
+
+	},
+
+	/**
+	 * Get `_focus_target`
+	 * @returns {Lava.widget.Standard}
+	 */
+	getFocusedTarget: function() {
+
+		return this._focus_target;
+
+	},
+
+	/**
+	 * Get `_focused_element`
+	 * @returns {HTMLElement}
+	 */
+	getFocusedElement: function() {
+
+		return this._focused_element;
+
+	},
+
+	/**
+	 * Replace old virtual focus target widget with the new one. Fire "focus_target_changed"
+	 * @param new_target
+	 */
+	_setTarget: function(new_target) {
+
+		// will be implemented later
+		//if (this._focus_target && this._focus_target != new_target) {
+		//	this._focus_target.informFocusLost();
+		//}
+
+		if (this._focus_target != new_target) {
+			this._focus_target = new_target;
+			this._fire('focus_target_changed', new_target);
+		}
+
+	},
+
+	/**
+	 * Clear old virtual focus target and `_focused_element`
+	 */
+	_onElementBlurred: function() {
+
+		this._setTarget(null);
+		this._focused_element = null;
+
+	},
+
+	/**
+	 * Clear old virtual focus target and set new `_focused_element`.
+	 * @param event_name
+	 * @param event_object
+	 */
+	_onElementFocused: function(event_name, event_object) {
+
+		if (this._focused_element != event_object.target) {
+			this._setTarget(null);
+			this._focused_element = event_object.target;
+		}
+
+	},
+
+	/**
+	 * Set new virtual focus target and `_focused_element`
+	 * @param app
+	 * @param event_args
+	 */
+	_onFocusTargetAcquired: function(app, event_args) {
+
+		this._setTarget(event_args.target);
+		this._focused_element = event_args.element;
+
+	},
+
+	/**
+	 * Clear old virtual focus target
+	 */
+	clearFocusedTarget: function() {
+
+		this._setTarget(null);
+
+	},
+
+	/**
+	 * Blur currently focused DOM element and clear virtual focus target
+	 */
+	blur: function() {
+
+		if (this._focused_element) {
+			this._focused_element.blur();
+			this._focused_element = document.activeElement || null;
+		}
+		this._setTarget(null);
+
+	},
+
+	/**
+	 * Destroy FocusManager instance
+	 */
+	destroy: function() {
+
+		Lava.app.removeListener(this._focus_acquired_listener);
+		Lava.app.removeListener(this._focus_lost_listener);
+		Lava.Core.removeGlobalHandler(this._focus_listener);
+		Lava.Core.removeGlobalHandler(this._blur_listener);
 
 	}
 
@@ -18361,10 +18639,10 @@ Lava.define(
 			// turning off both of them to avoid infinite loop. From architect's point of view, better solution would be
 			// to hang up developer's browser, but if it happens in production - it may have disastrous consequences.
 			Lava.suspendListener(this._widget_property_changed_listener);
-			Lava.suspendListener(this._scope_changed_listener);
+			this._scope_changed_listener && Lava.suspendListener(this._scope_changed_listener);
 			this._widget.set(this._property_name, this._scope.getValue());
 			Lava.resumeListener(this._widget_property_changed_listener);
-			Lava.resumeListener(this._scope_changed_listener);
+			this._scope_changed_listener && Lava.resumeListener(this._scope_changed_listener);
 
 		}
 
@@ -18376,17 +18654,17 @@ Lava.define(
 	onWidgetPropertyChanged: function() {
 
 		Lava.suspendListener(this._widget_property_changed_listener);
-		Lava.suspendListener(this._scope_changed_listener);
+		this._scope_changed_listener && Lava.suspendListener(this._scope_changed_listener);
 		this._scope.setValue(this._widget.get(this._property_name));
 		Lava.resumeListener(this._widget_property_changed_listener);
-		Lava.resumeListener(this._scope_changed_listener);
+		this._scope_changed_listener && Lava.resumeListener(this._scope_changed_listener);
 
 	},
 
 	destroy: function() {
 
 		this._scope_changed_listener && this._scope.removeListener(this._scope_changed_listener);
-		this._widget_property_changed_listener && this._widget.removePropertyListener(this._widget_property_changed_listener);
+		this._widget.removePropertyListener(this._widget_property_changed_listener);
 
 	}
 
@@ -20144,7 +20422,7 @@ Lava.define(
 	wrap: function(html) {
 
 		if (Lava.schema.DEBUG && this._is_void) Lava.t('Trying to wrap content in void tag');
-
+		// _element is cleared in _renderOpeningTag
 		return this._renderOpeningTag() + ">" + html + "</" + this._tag_name + ">";
 
 	},
@@ -20156,7 +20434,7 @@ Lava.define(
 	renderVoid: function() {
 
 		if (Lava.schema.DEBUG && !this._is_void) Lava.t('Trying to render non-void container as void');
-
+		// _element is cleared in _renderOpeningTag
 		return this._renderOpeningTag() + "/>";
 
 	},
@@ -21670,6 +21948,7 @@ Lava.define(
 			constructor;
 
 		this.guid = Lava.guid++;
+		if (Lava.schema.DEBUG && config.id && !Lava.isValidId(config.id)) Lava.t();
 		this.id = config.id || null;
 		this.label = config.label || null;
 
@@ -21768,6 +22047,7 @@ Lava.define(
 	 */
 	setId: function(new_id) {
 
+		if (Lava.schema.DEBUG && !Lava.isValidId(new_id)) Lava.t();
 		Lava.view_manager.unregisterView(this);
 		this.id = new_id;
 		Lava.view_manager.registerView(this);
@@ -23833,15 +24113,6 @@ Lava.define(
 	}
 
 });
-/**
- * Input's element got focus
- * @event Lava.widget.input.Abstract#focused
- */
-
-/**
- * Input's element lost it's focus
- * @event Lava.widget.input.Abstract#blurred
- */
 
 Lava.define(
 'Lava.widget.input.Abstract',
@@ -23884,7 +24155,8 @@ Lava.define(
 	},
 
 	_role_handlers: {
-		_input_view: '_handleInputView'
+		_input_view: '_handleInputView',
+		label: '_handleLabel'
 	},
 
 	/**
@@ -23933,26 +24205,35 @@ Lava.define(
 	},
 
 	/**
-	 * Fire {@link Lava.widget.input.Abstract#event:focused}
+	 * Fire global "focus_acquired" event
 	 */
-	_onInputFocused: function() {
+	_onInputFocused: function(dom_event_name, dom_event, view) {
 
-		this._fire('focused');
+		Lava.app.fireGlobalEvent('focus_acquired', {
+			target: this,
+			element: view.getContainer().getDOMElement()
+		});
 
 	},
 
 	/**
-	 * Fire {@link Lava.widget.input.Abstract#event:blurred}
+	 * Fire global "focus_lost" event
 	 */
 	_onInputBlurred: function() {
 
-		this._fire('blurred');
+		Lava.app.fireGlobalEvent('focus_lost');
 
 	},
 
-	destroy: function() {
-		this._input_container = null;
-		this.Standard$destroy();
+	/**
+	 * Focus the input's element, if it's currently in DOM
+	 */
+	focus: function(){
+
+		if (this._input_container && this._input_container.isInDOM()) {
+			this._input_container.getDOMElement().focus();
+		}
+
 	},
 
 	/**
@@ -23977,6 +24258,21 @@ Lava.define(
 			this._set('is_valid', value);
 		}
 
+	},
+
+	/**
+	 * Assign "for" attribute to label
+	 * @param view
+	 */
+	_handleLabel: function(view) {
+
+		view.getContainer().setProperty('for', Lava.ELEMENT_ID_PREFIX + this.guid);
+
+	},
+
+	destroy: function() {
+		this._input_container = null;
+		this.Standard$destroy();
 	}
 
 });
@@ -27924,6 +28220,7 @@ return (this._binds[0].getValue());
 		},
 		sugar: {
 			tag_name: "collapsible",
+			root_resource_name: "COLLAPSIBLE_CONTAINER",
 			content_schema: {
 				type: "include",
 				name: "content"

@@ -83,6 +83,11 @@ var Lava = {
 	 * @type {Lava.system.PopoverManager}
 	 */
 	popover_manager: null,
+	/**
+	 * Global FocusManager instance
+	 * @type {Lava.system.FocusManager}
+	 */
+	focus_manager: null,
 
 	/**
 	 * Container for locale-specific data (strings, date formats, etc)
@@ -244,6 +249,8 @@ var Lava = {
 		this.view_manager = new constructor();
 		constructor = this.ClassManager.getConstructor(Lava.schema.system.APP_CLASS);
 		this.app = new constructor();
+		constructor = this.ClassManager.getConstructor(Lava.schema.system.FOCUS_MANAGER_CLASS);
+		this.focus_manager = new constructor();
 
 		if (Lava.schema.popover_manager.IS_ENABLED) {
 			constructor = this.ClassManager.getConstructor(Lava.schema.popover_manager.CLASS);
@@ -346,6 +353,7 @@ var Lava = {
 		}
 
 		constructor = Lava.ClassManager.getConstructor(config['class']);
+		if (Lava.schema.DEBUG && !constructor) Lava.t('Class not found: ' + class_name);
 		return /** @type {Lava.widget.Standard} */ new constructor(config, null, null, null, properties);
 
 	},
@@ -471,28 +479,26 @@ var Lava = {
 	 */
 	bootstrap: function() {
 
-		var body = document.body,
-			app_class = Firestorm.Element.getProperty(document.body, 'lava-app'),
-			bootstrap_targets,
-			element,
-			result;
-
 		this.init && this.init();
+
+		var body = document.body,
+			app_class = Firestorm.Element.getProperty(body, 'lava-app'),
+			bootstrap_targets;
 
 		if (app_class != null) {
 
-			result = this._elementToWidget(body, {type: 'Element', tag_name: 'body'});
-			result.injectIntoExistingElement(body);
+			this._elementToWidget(body);
 
 		} else {
 
 			bootstrap_targets = Firestorm.selectElements('script[type="lava/app"],lava-app');
-			for (var i = 0, count = bootstrap_targets.length; i < count; i ++) {
+			for (var i = 0, count = bootstrap_targets.length; i < count; i++) {
 
-				element = bootstrap_targets[i];
-				result = this._elementToWidget(element, {type: 'Morph'});
-				result.inject(element, 'After');
-				Firestorm.Element.destroy(element);
+				if (Firestorm.Element.getTagName(bootstrap_targets[i]) == 'script') {
+					this._scriptToWidget(bootstrap_targets[i]);
+				} else {
+					this._elementToWidget(bootstrap_targets[i]);
+				}
 
 			}
 
@@ -505,35 +511,67 @@ var Lava = {
 	},
 
 	/**
-	 * Parse the DOM element instance as a widget template and create a widget
+	 * Convert a DOM element to widget instance
 	 * @param {HTMLElement} element
-	 * @param {Object} container_config
 	 * @returns {Lava.widget.Standard}
 	 */
-	_elementToWidget: function(element, container_config) {
+	_elementToWidget: function(element) {
 
-		var config,
+		var widget,
+			raw_template = Lava.TemplateParser.parseRaw(element.outerHTML),
+			raw_tag,
+			config,
+			constructor;
+
+		if (Lava.schema.DEBUG && raw_template.length != 1) Lava.t();
+
+		raw_tag = raw_template[0];
+		config = Lava.parsers.Common.toWidget(raw_tag);
+		config.is_extended = true;
+		config['class'] = raw_tag.attributes['lava-app'];
+
+		if (raw_tag.attributes.id) Firestorm.Element.removeProperty(element, 'id'); // needed for captureExistingElement
+
+		constructor = Lava.ClassManager.getConstructor(config['class'] || 'Lava.widget.Standard', 'Lava.widget');
+		if (Lava.schema.DEBUG && !constructor) Lava.t('Class not found: ' + config['class']);
+		widget = /** @type {Lava.widget.Standard} */ new constructor(config);
+		widget.injectIntoExistingElement(element);
+		return widget;
+
+	},
+
+	/**
+	 * Convert a script DOM element to widget instance
+	 * @param {HTMLElement} script_element
+	 * @returns {Lava.widget.Standard}
+	 */
+	_scriptToWidget: function(script_element) {
+
+		var widget,
+			config,
 			constructor,
-			name = Firestorm.Element.getProperty(element, 'name'),
-			id = Firestorm.Element.getProperty(element, 'id'),
-			class_name = Firestorm.Element.getProperty(element, 'lava-app');
+			id = Firestorm.Element.getProperty(script_element, 'id'),
+			class_name = Firestorm.Element.getProperty(script_element, 'lava-app');
 
 		config = {
 			type: 'widget',
 			is_extended: true,
 			template: null,
-			container: container_config
+			container: {type: 'Morph'}
 		};
-		config.template = Lava.TemplateParser.parse(element.get('html'), config);
+		config.template = Lava.TemplateParser.parse(script_element.get('html'), config);
 
 		if (id) {
 			config.id = id;
-			Firestorm.Element.removeProperty(element, 'id');
+			Firestorm.Element.removeProperty(script_element, 'id');
 		}
 
 		constructor = Lava.ClassManager.getConstructor(class_name || 'Lava.widget.Standard', 'Lava.widget');
 		if (Lava.schema.DEBUG && !constructor) Lava.t('Class not found: ' + class_name);
-		return /** @type {Lava.widget.Standard} */ new constructor(config);
+		widget = /** @type {Lava.widget.Standard} */ new constructor(config);
+		widget.inject(script_element, 'After');
+		Firestorm.Element.destroy(script_element);
+		return widget;
 
 	},
 
@@ -688,7 +726,7 @@ var Lava = {
 	 */
 	refreshViews: function() {
 
-		if (!Lava.Core.isProcessingEvent()) {
+		if (!Lava.Core.isProcessingEvent() && !Lava.view_manager.isRefreshing()) {
 
 			this.view_manager.refresh();
 

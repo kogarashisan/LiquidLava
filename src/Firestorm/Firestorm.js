@@ -55,6 +55,7 @@ var Firestorm = {
 	 * @enum {number}
 	 */
 	KEY_CODES: {
+		ENTER: 13,
 		ESCAPE: 27,
 		LEFT_ARROW: 37,
 		UP_ARROW: 38,

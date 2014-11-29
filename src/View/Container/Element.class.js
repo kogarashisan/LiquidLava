@@ -704,7 +704,7 @@ Lava.define(
 	wrap: function(html) {
 
 		if (Lava.schema.DEBUG && this._is_void) Lava.t('Trying to wrap content in void tag');
-
+		// _element is cleared in _renderOpeningTag
 		return this._renderOpeningTag() + ">" + html + "</" + this._tag_name + ">";
 
 	},
@@ -716,7 +716,7 @@ Lava.define(
 	renderVoid: function() {
 
 		if (Lava.schema.DEBUG && !this._is_void) Lava.t('Trying to render non-void container as void');
-
+		// _element is cleared in _renderOpeningTag
 		return this._renderOpeningTag() + "/>";
 
 	},

@@ -45,11 +45,16 @@ Lava.define(
 	 * Parse raw tag as a widget
 	 * @param {_cSugar} schema
 	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} widget_config
+	 * @param {string} parent_title
 	 */
-	parse: function(schema, raw_tag, widget_config) {
+	parse: function(schema, raw_tag, parent_title) {
 
-		var tags;
+		var widget_config = Lava.parsers.Common.createDefaultWidgetConfig(),
+			tags,
+			name,
+			x = raw_tag.x;
+
+		widget_config.extends = parent_title;
 
 		if (raw_tag.content) {
 
@@ -75,6 +80,23 @@ Lava.define(
 			this._parseRootAttributes(schema, raw_tag, widget_config);
 
 		}
+
+		if (x) {
+
+			if (Lava.schema.DEBUG && x) {
+				for (name in x) {
+					if (['label', 'roles', 'resource_id', 'controller'].indexOf(name) == -1) Lava.t("Control attribute is not allowed on sugar: " + name);
+				}
+			}
+
+			if ('label' in x) this.setViewConfigLabel(widget_config, x.label);
+			if ('roles' in x) widget_config.roles = Lava.parsers.Common.parseTargets(x.roles);
+			if ('resource_id' in x) widget_config.resource_id = Lava.parsers.Common.parseResourceId(x.resource_id);
+			if ('controller' in x) widget_config.real_class = x.controller;
+
+		}
+
+		return widget_config;
 
 	},
 

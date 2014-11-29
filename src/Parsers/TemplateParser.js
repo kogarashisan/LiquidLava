@@ -110,7 +110,8 @@ Lava.TemplateParser.yy = {
 
 			} else {
 
-				if (attribute.name in attributes) Lava.t('Duplicate attribute on tag: ' + attribute.name);
+				// reason for second check: IE bug - it can duplicate attributes when serializing a tag
+				if (Lava.schema.DEBUG && (attribute.name in attributes) && attributes[attribute.name] != attribute.value) Lava.t('Duplicate attribute on tag: ' + attribute.name);
 				attributes[attribute.name] = attribute.value;
 
 			}

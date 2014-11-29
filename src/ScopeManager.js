@@ -55,6 +55,12 @@ Lava.ScopeManager = {
 	_has_infinite_loop: false,
 
 	/**
+	 * Is refresh loop in progress
+	 * @type {boolean}
+	 */
+	_is_refreshing: false,
+
+	/**
 	 * Queue a scope for update
 	 * @param {Lava.mixin.Refreshable} target
 	 * @param {number} level
@@ -68,7 +74,7 @@ Lava.ScopeManager = {
 
 		}
 
-		if (!(level in this._scope_refresh_queues)) {
+		if (!this._scope_refresh_queues[level]) {
 
 			this._scope_refresh_queues[level] = [];
 
@@ -90,7 +96,7 @@ Lava.ScopeManager = {
 
 		if (Lava.schema.DEBUG && refresh_ticket == null) Lava.t();
 
-		this._scope_refresh_queues[level][refresh_ticket.index] = undefined;
+		this._scope_refresh_queues[level][refresh_ticket.index] = null;
 
 	},
 
@@ -117,6 +123,13 @@ Lava.ScopeManager = {
 			return;
 
 		}
+
+		if (this._is_refreshing) {
+			Lava.logError("ScopeManager: recursive call to refreshScopes()");
+			return;
+		}
+
+		this._is_refreshing = true;
 
 		this._has_exceptions = false;
 		this._refresh_id++;
@@ -165,6 +178,8 @@ Lava.ScopeManager = {
 		}
 
 		this._has_infinite_loop = this._has_exceptions;
+
+		this._is_refreshing = false;
 
 		Lava.schema.DEBUG && this.debugVerify();
 
@@ -226,7 +241,7 @@ Lava.ScopeManager = {
 
 		} while (i < queue_length);
 
-		this._scope_refresh_queues[current_level] = undefined;
+		this._scope_refresh_queues[current_level] = null;
 		this._scope_refresh_current_indices[current_level] = 0;
 
 		count_levels = this._scope_refresh_queues.length;

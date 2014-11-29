@@ -222,15 +222,12 @@ Firestorm.DOM = {
 	 */
 	clearInnerRange_Nodes: function(start_element, end_element) {
 
-		var node = start_element.nextSibling;
+		var parent_node = start_element.parentNode,
+			node = start_element.nextSibling;
 
-		while (node) {
+		while (node && node !== end_element) {
 
-			if (node === end_element) {
-				break;
-			}
-
-			node.parentNode.removeChild(node);
+			parent_node.removeChild(node);
 			node = start_element.nextSibling;
 
 		}

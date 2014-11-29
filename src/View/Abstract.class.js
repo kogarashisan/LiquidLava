@@ -141,6 +141,7 @@ Lava.define(
 			constructor;
 
 		this.guid = Lava.guid++;
+		if (Lava.schema.DEBUG && config.id && !Lava.isValidId(config.id)) Lava.t();
 		this.id = config.id || null;
 		this.label = config.label || null;
 
@@ -239,6 +240,7 @@ Lava.define(
 	 */
 	setId: function(new_id) {
 
+		if (Lava.schema.DEBUG && !Lava.isValidId(new_id)) Lava.t();
 		Lava.view_manager.unregisterView(this);
 		this.id = new_id;
 		Lava.view_manager.registerView(this);

@@ -42,6 +42,11 @@ Lava.schema = {
 		 */
 		VIEW_MANAGER_CLASS: 'Lava.system.ViewManager',
 		/**
+		 * Class for {@link Lava#focus_manager}
+		 * @const
+		 */
+		FOCUS_MANAGER_CLASS: 'Lava.system.FocusManager',
+		/**
 		 * ViewManager events (routed via templates), which are enabled by default, so does not require a call to lendEvent()
 		 * @const
 		 */
@@ -55,7 +60,13 @@ Lava.schema = {
 		 * {@link Lava.Cron} uses requestAnimationFrame, if browser supports it
 		 * @const
 		 */
-		ALLOW_REQUEST_ANIMATION_FRAME: true
+		ALLOW_REQUEST_ANIMATION_FRAME: true,
+		/**
+		 * How much times a scope may be refreshed during one refresh loop, before it's considered
+		 * an infinite refresh loop
+		 * @const
+		 */
+		REFRESH_INFINITE_LOOP_THRESHOLD: 3
 	},
 	/**
 	 * Settings for {@link Lava#popover_manager}
@@ -121,12 +132,6 @@ Lava.schema = {
 		 * @const
 		 */
 		VALIDATE_STYLES: true,
-		/**
-		 * How much times a scope may be refreshed during one refresh loop, before it's considered
-		 * an infinite refresh loop
-		 * @const
-		 */
-		REFRESH_INFINITE_LOOP_THRESHOLD: 3,
 		/**
 		 * Gateway, which constructs the views with dynamic class names
 		 * @const
