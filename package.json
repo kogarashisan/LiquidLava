@@ -1,9 +1,23 @@
 {
-  "author": "Alex Galashov",
   "name": "LiquidLava",
-  "version": "0.0.0",
+  "version": "0.5.1",
+  "description": "Advanced MVC framework",
+  "author": "Alex Galashov",
+  "main": "dist/lava-master-DEBUG.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kogarashisan/LiquidLava"
+  },
+  "bugs": {
+    "url": "https://github.com/kogarashisan/LiquidLava/issues"
+  },
+  "keywords": [
+    "MVC",
+    "framework"
+  ],
   "devDependencies": {
     "grunt": ">= 0.4.4",
     "grunt-cli": ">= 0.1.13"
-  }
+  },
+  "license": "MIT"
 }
