@@ -53,9 +53,7 @@ Firestorm.Environment = {
 			|| window.webkitRequestAnimationFrame
 			|| window.msRequestAnimationFrame;
 
-		this.requestAnimationFrame = function(fn) {
-			requestAnimationFrame.call(window, fn);
-		}
+		this.requestAnimationFrame = requestAnimationFrame ? function(fn) { requestAnimationFrame.call(window, fn); } : null;
 
 	}
 

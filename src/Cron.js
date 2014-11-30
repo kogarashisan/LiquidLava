@@ -45,6 +45,7 @@ Lava.Cron = {
 	 * Callback for requestAnimationFrame()
 	 */
 	animation_frame_callback: function() {
+
 		var self = Lava.Cron;
 		self.onTimer();
 		if (self.is_running) Firestorm.Environment.requestAnimationFrame(self.animation_frame_callback);

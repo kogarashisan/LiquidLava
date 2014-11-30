@@ -284,9 +284,7 @@ Firestorm.Environment = {
 			|| window.webkitRequestAnimationFrame
 			|| window.msRequestAnimationFrame;
 
-		this.requestAnimationFrame = function(fn) {
-			requestAnimationFrame.call(window, fn);
-		}
+		this.requestAnimationFrame = requestAnimationFrame ? function(fn) { requestAnimationFrame.call(window, fn); } : null;
 
 	}
 
@@ -947,16 +945,6 @@ Firestorm.DOM = {
 	 * @param {HTMLElement} end_element
 	 */
 	clearInnerRange_Nodes: function(start_element, end_element) {
-
-		/*var parent_node = start_element.parentNode,
-			next_sibling = start_element.nextSibling,
-			tmp;
-
-		while (next_sibling != end_element) {
-			tmp = next_sibling.nextSibling;
-			parent_node.removeChild(next_sibling);
-			next_sibling = tmp;
-		}*/
 
 		var parent_node = start_element.parentNode,
 			node = start_element.nextSibling;
@@ -3985,6 +3973,7 @@ Lava.Cron = {
 	 * Callback for requestAnimationFrame()
 	 */
 	animation_frame_callback: function() {
+
 		var self = Lava.Cron;
 		self.onTimer();
 		if (self.is_running) Firestorm.Environment.requestAnimationFrame(self.animation_frame_callback);
