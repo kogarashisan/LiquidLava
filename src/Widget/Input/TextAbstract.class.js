@@ -4,11 +4,11 @@ Lava.define(
 /**
  * Base class for text inputs
  * @lends Lava.widget.input.TextAbstract#
- * @extends Lava.widget.input.Abstract#
+ * @extends Lava.widget.input.InputAbstract#
  */
 {
 
-	Extends: 'Lava.widget.input.Abstract',
+	Extends: 'Lava.widget.input.InputAbstract',
 
 	_property_descriptors: {
 		value: {type: 'String', setter: '_setValue'}
@@ -25,26 +25,33 @@ Lava.define(
 	},
 
 	/**
-	 * Whether to update widget's {@link Lava.widget.input.Abstract#property:value} property
-	 * on any change in DOM input element. Otherwise, value will be refreshed on input's "blur" event
+	 * For IE8-9: input element listener callback, bound to this instance
+	 * @type {function}
 	 */
-	_refresh_on_input: true,
-
+	_OldIE_refresh_callback: null,
 	/**
-	 * @param config
-	 * @param {boolean} config.options.cancel_refresh_on_input Update widget's <wp>value</wp> when input element loses focus.
-	 *  By default, value is updated on each user input
-	 * @param widget
-	 * @param parent_view
-	 * @param template
-	 * @param properties
+	 * For IE8-9: `onpropertychange` callback, bound to this instance
+	 * @type {function}
 	 */
+	_OldIE_property_change_callback: null,
+
 	init: function(config, widget, parent_view, template, properties) {
 
-		this.Abstract$init(config, widget, parent_view, template, properties);
+		this.InputAbstract$init(config, widget, parent_view, template, properties);
 
-		if (config.options && config.options['cancel_refresh_on_input']) {
-			this._refresh_on_input = false;
+		if (this._isNeedsIEShim()) {
+
+			var self = this;
+
+			this._OldIE_refresh_callback = function() {
+				self._refreshValue();
+			};
+			this._OldIE_property_change_callback = function(e) {
+				if (e.propertyName === "value") {
+					self._refreshValue();
+				}
+			};
+
 		}
 
 	},
@@ -78,7 +85,7 @@ Lava.define(
 	},
 
 	/**
-	 * Get value from DOM input element and set local {@link Lava.widget.input.Abstract#property:value} property
+	 * Get value from DOM input element and set local {@link Lava.widget.input.InputAbstract#property:value} property
 	 */
 	_refreshValue: function() {
 
@@ -94,13 +101,90 @@ Lava.define(
 	},
 
 	/**
-	 * DOM element's value changed: refresh local {@link Lava.widget.input.Abstract#property:value} property
+	 * DOM element's value changed: refresh local {@link Lava.widget.input.InputAbstract#property:value} property
 	 */
 	_onTextInput: function() {
 
-		if (this._refresh_on_input) {
-			this._refreshValue();
+		this._refreshValue();
+
+	},
+
+	/**
+	 * Are we in IE8-9?
+	 * @returns {boolean}
+	 */
+	_isNeedsIEShim: function() {
+
+		return (Firestorm.Environment.NEEDS_INPUT_EVENT_SHIM && (this._type == "text" || this._type == "password"));
+
+	},
+
+	/**
+	 * One-time gateway, which replaces broadcastInDOM and broadcastRemove methods with their appropriate versions:
+	 * either version, that has fixes for old IE, or parent methods.
+	 * @param {string} called_name Name of the method, which was called. Will be called after patching.
+	 */
+	_applyIEShimGateway: function(called_name) {
+
+		var needs_shim = this._isNeedsIEShim(),
+			overridden_names = {
+				// replacing local method with methods from InputAbstract$ - removes it like it never existed
+				broadcastInDOM: Lava.ClassManager.patch(this, "TextAbstract", "broadcastInDOM", needs_shim ? this.broadcastInDOM_OldIE : this.InputAbstract$broadcastInDOM),
+				broadcastRemove: Lava.ClassManager.patch(this, "TextAbstract", "broadcastRemove", needs_shim ? this.broadcastRemove_OldIE : this.InputAbstract$broadcastRemove)
+			};
+
+		this[overridden_names[called_name]]();
+
+	},
+
+	broadcastInDOM: function() {
+
+		this._applyIEShimGateway("broadcastInDOM");
+
+	},
+
+	broadcastRemove: function() {
+
+		this._applyIEShimGateway("broadcastRemove");
+
+	},
+
+	/**
+	 * Applies additional listeners for IE8-9 to track value changes.
+	 * See http://benalpert.com/2013/06/18/a-near-perfect-oninput-shim-for-ie-8-and-9.html
+	 */
+	broadcastInDOM_OldIE: function() {
+
+		this.InputAbstract$broadcastInDOM();
+
+		if (this._input_container) {
+
+			var input_element = this._input_container.getDOMElement();
+			Firestorm.Element.addListener(input_element, "onpropertychange", this._OldIE_property_change_callback);
+			Firestorm.Element.addListener(input_element, "selectionchange", this._OldIE_refresh_callback);
+			Firestorm.Element.addListener(input_element, "keyup", this._OldIE_refresh_callback);
+			Firestorm.Element.addListener(input_element, "keydown", this._OldIE_refresh_callback);
+
 		}
+
+	},
+
+	/**
+	 * Removes IE listeners
+	 */
+	broadcastRemove_OldIE: function() {
+
+		if (this._input_container) {
+
+			var input_element = this._input_container.getDOMElement();
+			Firestorm.Element.removeListener(input_element, "onpropertychange", this._OldIE_property_change_callback);
+			Firestorm.Element.removeListener(input_element, "selectionchange", this._OldIE_refresh_callback);
+			Firestorm.Element.removeListener(input_element, "keyup", this._OldIE_refresh_callback);
+			Firestorm.Element.removeListener(input_element, "keydown", this._OldIE_refresh_callback);
+
+		}
+
+		this.InputAbstract$broadcastRemove();
 
 	}
 

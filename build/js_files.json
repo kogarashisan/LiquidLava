@@ -109,10 +109,11 @@
 		"Widget/Standard.class.js"
 	],
 	"widgets": [
-		"Widget/Input/Abstract.class.js",
+		"Widget/Input/InputAbstract.class.js",
 		"Widget/Input/TextAbstract.class.js",
 		"Widget/Input/TextArea.class.js",
 		"Widget/Input/Text.class.js",
+		"Widget/Input/Password.class.js",
 		"Widget/Input/RadioAbstract.class.js",
 		"Widget/Input/CheckBox.class.js",
 		"Widget/Input/Radio.class.js",

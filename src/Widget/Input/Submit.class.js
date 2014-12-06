@@ -9,11 +9,11 @@ Lava.define(
 /**
  * Submit button input
  * @lends Lava.widget.input.Submit#
- * @extends Lava.widget.input.Abstract#
+ * @extends Lava.widget.input.InputAbstract#
  */
 {
 
-	Extends: 'Lava.widget.input.Abstract',
+	Extends: 'Lava.widget.input.InputAbstract',
 
 	name: 'submit',
 	_type: "submit",

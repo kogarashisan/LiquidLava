@@ -148,13 +148,11 @@
 			tag_name: 'accordion',
 			root_resource_name: 'ACCORDION_CONTAINER',
 			content_schema: {
-				type: 'union',
-				tag_roles: {
-					content: {type: 'include'}
-				}
+				type: 'storage_object',
+				name: 'panels'
 			},
 			attribute_mappings: {
-				'keep-expanded-on-add': {type: 'switch', name: 'keep_expanded_on_add'}
+				'keep-new-panels-expanded': {type: 'switch', name: 'keep_new_panels_expanded'}
 			}
 		}
 	</script>

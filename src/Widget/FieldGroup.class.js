@@ -23,7 +23,7 @@ Lava.define(
 
 	/**
 	 * Input widgets, registered with the FieldGroup
-	 * @type {Array.<Lava.widget.input.Abstract>}
+	 * @type {Array.<Lava.widget.input.InputAbstract>}
 	 */
 	_fields: [],
 	/**
@@ -81,7 +81,7 @@ Lava.define(
 
 	/**
 	 * Get `_fields`
-	 * @returns {Array.<Lava.widget.input.Abstract>}
+	 * @returns {Array.<Lava.widget.input.InputAbstract>}
 	 */
 	getFields: function() {
 
@@ -91,7 +91,7 @@ Lava.define(
 
 	/**
 	 * Get `_submit_fields`
-	 * @returns {Array.<Lava.widget.input.Abstract>}
+	 * @returns {Array.<Lava.widget.input.InputAbstract>}
 	 */
 	getSubmitFields: function() {
 
@@ -125,7 +125,7 @@ Lava.define(
 
 	/**
 	 * Cleanup destroyed fields from local members
-	 * @param {Lava.widget.input.Abstract} field_widget
+	 * @param {Lava.widget.input.InputAbstract} field_widget
 	 * @param event_args
 	 * @param native_args Reference to local array with input widgets
 	 */

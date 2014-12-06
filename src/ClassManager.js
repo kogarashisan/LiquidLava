@@ -82,6 +82,7 @@ Lava.ClassManager = {
 			implements: [],
 			parent_class_data: null,
 			hierarchy_paths: null,
+			hierarchy_names: null,
 			skeleton: null,
 			references: [],
 			shared: {},
@@ -98,10 +99,13 @@ Lava.ClassManager = {
 
 			if (!parent_data) Lava.t('[define] Base class not found: "' + source_object.Extends + '"');
 			if (!parent_data.skeleton) Lava.t("[define] Parent class was loaded without skeleton, extension is not possible: " + class_data.extends);
+			if (parent_data.hierarchy_names.indexOf(class_data.name) != -1) Lava.t("[define] Duplicate name in inheritance chain: " + class_data.name + " / " + class_path);
 
 			class_data.level = parent_data.level + 1;
 			class_data.hierarchy_paths = parent_data.hierarchy_paths.slice();
 			class_data.hierarchy_paths.push(class_path);
+			class_data.hierarchy_names = parent_data.hierarchy_names.slice();
+			class_data.hierarchy_names.push(class_data.name);
 			class_data.references = parent_data.references.slice();
 			class_data.own_references_count -= parent_data.references.length;
 			class_data.implements = parent_data.implements.slice();
@@ -122,6 +126,7 @@ Lava.ClassManager = {
 		} else {
 
 			class_data.hierarchy_paths = [class_path];
+			class_data.hierarchy_names = [class_data.name];
 
 		}
 
@@ -788,6 +793,12 @@ Lava.ClassManager = {
 			}
 
 			class_data.implements = parent_data.implements.concat(class_data.implements);
+			class_data.hierarchy_names = parent_data.hierarchy_names.slice();
+			class_data.hierarchy_names.push(class_data.name);
+
+		} else {
+
+			class_data.hierarchy_names = [class_data.name];
 
 		}
 
@@ -863,6 +874,40 @@ Lava.ClassManager = {
 	getClassNames: function() {
 
 		return Object.keys(this._sources);
+
+	},
+
+	/**
+	 * Replace function in a class with new body. Class may be in middle of inheritance chain.
+	 * @param {Object} instance Class instance, must be <kw>this</kw>
+	 * @param {string} instance_class_name Short name of current class
+	 * @param {string} function_name Function to replace
+	 * @param {function} new_function_body
+	 * @returns {string} name of overridden function Name, that was replaced
+	 */
+	patch: function(instance, instance_class_name, function_name, new_function_body) {
+
+		var cd = instance.Class,
+			proto = cd.constructor.prototype,
+			names = cd.hierarchy_names,
+			i = names.indexOf(instance_class_name),
+			count = names.length,
+			overridden_name,
+			found = false;
+
+		if (Lava.schema.DEBUG && i == -1) Lava.t();
+
+		for (; i < count; i++) {
+			overridden_name = names[i] + "$" + function_name;
+			if (overridden_name in proto) {
+				found = true;
+				proto[overridden_name] = new_function_body;
+				break;
+			}
+		}
+
+		proto[found ? overridden_name : function_name] = new_function_body;
+		return found ? overridden_name : function_name;
 
 	}
 

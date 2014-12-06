@@ -480,6 +480,7 @@ like "return '}'" - it will generate wrong code. These comments are needed to ba
 Note: strings '#htmlcomment#' and '#cdata#' are replaced in generated (!) parser with right regex values.
 See the end of the file.
 
+About switches: switch-like sequences should be ignored. For example: "{test:}"
 -->
 
 <script type="x-grammar" id="template_parser_grammar">
@@ -494,15 +495,13 @@ HTML_ENDTAG					\<\/{HTML_IDENTIFIER}\>
 BLOCK_OPEN_N				\{[\#\$\>\*]
 BLOCK_OPEN_E				\{\&gt\;
 OPEN_ENDBLOCK				\{\/
-SWITCH_OPEN					\{[a-zA-Z\_]+\:\}
-SWITCH_CLOSE				\{\:[a-zA-Z\_]+\}
 KNOWN_SWITCHES				\{\:[LR]\:\}|\{\:[LG]T\:\}|\{\:AMP\:\}
 
 %x block blockHash tag skipTag switch literal eatScript eatStyle
 
 %%
 
-[^\x00]*?/({BLOCK_OPEN_N}|{BLOCK_OPEN_E}|{OPEN_ENDBLOCK}|{HTML_TAGOPEN}|{HTML_ENDTAG}|\#htmlcomment\#|\#cdata\#|{SWITCH_OPEN}|{SWITCH_CLOSE}|{KNOWN_SWITCHES}|\{elseif\s*\(|\{else\})		{
+[^\x00]*?/({BLOCK_OPEN_N}|{BLOCK_OPEN_E}|{OPEN_ENDBLOCK}|{HTML_TAGOPEN}|{HTML_ENDTAG}|\#htmlcomment\#|\#cdata\#|\{literal\:\}|\{\:literal\}|{KNOWN_SWITCHES}|\{elseif\s*\(|\{else\})		{
 		if (this._input.length) {
 			if (this._input[0] == '<') {
 				if (this.x_pure_blocks_mode) {
@@ -622,7 +621,7 @@ KNOWN_SWITCHES				\{\:[LR]\:\}|\{\:[LG]T\:\}|\{\:AMP\:\}
 		yytext = _map[yytext.substr(2,yyleng-4)];
 		return 'CONTENT';
 	}
-<switch>{SWITCH_OPEN}									{
+<switch>\{literal\:\}									{
 		this.popState();
 		if (yytext == '{literal:}') {
 			this.begin('literal');
@@ -636,7 +635,7 @@ KNOWN_SWITCHES				\{\:[LR]\:\}|\{\:[LG]T\:\}|\{\:AMP\:\}
 			Lava.t('Unknown switch: ' + yytext);
 		}
 	}
-<switch>{SWITCH_CLOSE}									{
+<switch>\{\:literal\}									{
 		this.popState();
 		if (yytext == '{:pure_blocks}') {
 			if (!this.x_pure_blocks_mode) Lava.t('Redundant lexer switch "{:pure_blocks}"');

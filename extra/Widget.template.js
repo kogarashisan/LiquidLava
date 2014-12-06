@@ -12,7 +12,7 @@ Lava.define(
 	//name: null,
 
 	//_property_descriptors: {
-	//	property_name: {}
+	//	property_name: {setter: '_setName', type: '' /* Name from Lava.types */}
 	//},
 
 	//_properties: {
@@ -42,5 +42,7 @@ Lava.define(
 	//_roleHandler: function(view, template_arguments) {}
 
 	//_getMyInclude: function(template_arguments) {}
+
+	//_setName: function(value, name) {}
 
 });

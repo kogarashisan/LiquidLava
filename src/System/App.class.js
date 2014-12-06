@@ -51,6 +51,17 @@ Lava.define(
 
 		this._fire(event_name, event_args);
 
+	},
+
+	/**
+	 * Destroy this App instance and all modules
+	 */
+	destroy:  function() {
+
+		for (var name in this._modules) {
+			this._modules[name].destroy();
+		}
+
 	}
 
 });

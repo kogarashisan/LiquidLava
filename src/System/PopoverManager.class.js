@@ -48,11 +48,12 @@ Lava.define(
 	 */
 	enable: function() {
 
-		if (Lava.schema.DEBUG && this._mouseover_stack_changed_listener) Lava.t("PopoverManager is already enabled");
-		Lava.view_manager.lendEvent('mouse_events');
-		this._mouseover_stack_changed_listener = Lava.view_manager.on('mouseover_stack_changed', this._onMouseoverStackChanged, this);
-		if (!this._tooltip) this._tooltip = Lava.createWidget(this.DEFAULT_TOOLTIP_WIDGET);
-		this._tooltip.inject(document.body, 'Bottom');
+		if (!this._mouseover_stack_changed_listener) {
+			Lava.view_manager.lendEvent('mouse_events');
+			this._mouseover_stack_changed_listener = Lava.view_manager.on('mouseover_stack_changed', this._onMouseoverStackChanged, this);
+			if (!this._tooltip) this._tooltip = Lava.createWidget(this.DEFAULT_TOOLTIP_WIDGET);
+			this._tooltip.inject(document.body, 'Bottom');
+		}
 
 	},
 
@@ -61,15 +62,27 @@ Lava.define(
 	 */
 	disable: function() {
 
-		Lava.view_manager.releaseEvent('mouse_events');
-		Lava.view_manager.removeListener(this._mouseover_stack_changed_listener);
-		this._mouseover_stack_changed_listener = null;
-		if (this._mousemove_listener) {
-			Lava.Core.removeGlobalHandler(this._mousemove_listener);
-			this._mousemove_listener = null;
+		if (this._mouseover_stack_changed_listener) {
+			Lava.view_manager.releaseEvent('mouse_events');
+			Lava.view_manager.removeListener(this._mouseover_stack_changed_listener);
+			this._mouseover_stack_changed_listener = null;
+			if (this._mousemove_listener) {
+				Lava.Core.removeGlobalHandler(this._mousemove_listener);
+				this._mousemove_listener = null;
+			}
+			this._tooltip.set('is_visible', false);
+			this._tooltip.remove();
 		}
-		this._tooltip.set('is_visible', false);
-		this._tooltip.remove();
+
+	},
+
+	/**
+	 * Does it listen to mouse movements and show tooltips?
+	 * @returns {boolean}
+	 */
+	isEnabled: function() {
+
+		return this._mouseover_stack_changed_listener != null;
 
 	},
 
@@ -133,6 +146,15 @@ Lava.define(
 
 		this._tooltip.set('x', event_object.page.x); // left
 		this._tooltip.set('y', event_object.page.y); // top
+
+	},
+
+	/**
+	 * Destroy PopoverManager instance
+	 */
+	destroy: function() {
+
+		this.isEnabled() && this.disable();
 
 	}
 

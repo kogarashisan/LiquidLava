@@ -70,7 +70,7 @@ Lava.define(
 
 	/**
 	 * @param config
-	 * @param {boolean} config.options.keep_expanded_on_add If you add another expanded panel to accordion - it's collapsed by default.
+	 * @param {boolean} config.options.keep_new_panels_expanded If you add another expanded panel to accordion - it's collapsed by default.
 	 *  You may set this option to keep it expanded - in this case all expanded panels will be collapsed as soon as any panel is expanded by user
 	 * @param widget
 	 * @param parent_view
@@ -182,7 +182,7 @@ Lava.define(
 	 */
 	registerPanel: function(panel_widget) {
 
-		var collapse_on_add = !this._config.options || !this._config.options['keep_expanded_on_add'];
+		var collapse_on_add = !this._config.options || !this._config.options['keep_new_panels_expanded'];
 
 		if (panel_widget.get('is_expanded')) {
 

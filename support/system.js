@@ -98,6 +98,12 @@ _cClassData = {
 	hierarchy_paths: [],
 
 	/**
+	 * List of short class names (last segment of class path)
+	 * @type {Array.<string>}
+	 */
+	hierarchy_names: [],
+
+	/**
 	 * Used to build the class constructor
 	 * @type {Object}
 	 */
@@ -192,7 +198,14 @@ _cScopeForeach = {
 	 * May be used to apply sorting and filtering. Allowed values: "Enumerable", "DataView"
 	 * @type {string}
 	 */
-	own_enumerable_mode: null
+	own_enumerable_mode: null,
+
+	/**
+	 * Can be used to re-apply sorting and filtering in case of `own_enumerable_mode` or plain array
+	 * returned from scope's Argument.
+	 * @type {Array.<(_cScopeLocator|_cDynamicScope)>}
+	 */
+	depends: []
 
 };
 

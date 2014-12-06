@@ -50,14 +50,44 @@ Lava.define(
 	_blur_listener: null,
 
 	/**
-	 * Initialize FocusManager instance
+	 * Start listening to global focus-related events
 	 */
-	init: function() {
+	enable: function () {
 
-		this._focus_acquired_listener = Lava.app.on('focus_acquired', this._onFocusTargetAcquired, this);
-		this._focus_lost_listener = Lava.app.on('focus_lost', this.clearFocusedTarget, this);
-		this._focus_listener = Lava.Core.addGlobalHandler('blur', this._onElementBlurred, this);
-		this._blur_listener = Lava.Core.addGlobalHandler('focus', this._onElementFocused, this);
+		if (!this._focus_acquired_listener) {
+			this._focus_acquired_listener = Lava.app.on('focus_acquired', this._onFocusTargetAcquired, this);
+			this._focus_lost_listener = Lava.app.on('focus_lost', this.clearFocusedTarget, this);
+			this._focus_listener = Lava.Core.addGlobalHandler('blur', this._onElementBlurred, this);
+			this._blur_listener = Lava.Core.addGlobalHandler('focus', this._onElementFocused, this);
+		}
+
+	},
+
+	/**
+	 * Stop listening to all focus-related events
+	 */
+	disable: function() {
+
+		if (this._focus_acquired_listener) {
+			Lava.app.removeListener(this._focus_acquired_listener);
+			Lava.app.removeListener(this._focus_lost_listener);
+			Lava.Core.removeGlobalHandler(this._focus_listener);
+			Lava.Core.removeGlobalHandler(this._blur_listener);
+			this._focus_acquired_listener
+				= this._focused_element
+				= this._focus_target
+				= null;
+		}
+
+	},
+
+	/**
+	 * Does it listen to focus changes and sends navigation events
+	 * @returns {boolean}
+	 */
+	isEnabled: function() {
+
+		return this._focus_acquired_listener != null;
 
 	},
 
@@ -162,10 +192,7 @@ Lava.define(
 	 */
 	destroy: function() {
 
-		Lava.app.removeListener(this._focus_acquired_listener);
-		Lava.app.removeListener(this._focus_lost_listener);
-		Lava.Core.removeGlobalHandler(this._focus_listener);
-		Lava.Core.removeGlobalHandler(this._blur_listener);
+		this.isEnabled() && this.disable();
 
 	}
 

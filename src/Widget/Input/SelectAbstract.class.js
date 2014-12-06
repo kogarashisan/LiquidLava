@@ -4,11 +4,11 @@ Lava.define(
 /**
  * Base class for select inputs
  * @lends Lava.widget.input.SelectAbstract#
- * @extends Lava.widget.input.Abstract#
+ * @extends Lava.widget.input.InputAbstract#
  */
 {
 
-	Extends: 'Lava.widget.input.Abstract',
+	Extends: 'Lava.widget.input.InputAbstract',
 
 	name: 'select',
 
@@ -30,7 +30,7 @@ Lava.define(
 
 	broadcastInDOM: function() {
 
-		this.Abstract$broadcastInDOM();
+		this.InputAbstract$broadcastInDOM();
 		this._refreshValue();
 
 	},
@@ -47,7 +47,7 @@ Lava.define(
 	_refresh: function() {
 
 		// to synchronize the selected value after setting options and optgroups property
-		this.Abstract$_refresh();
+		this.InputAbstract$_refresh();
 		this._refreshValue();
 
 	},

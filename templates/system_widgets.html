@@ -101,6 +101,34 @@
 	<default_events>['change', 'input']</default_events>
 </x:define>
 
+<x:define controller="input.Password" title="PasswordInput" extends="InputAbstract">
+	<include name="input_view">
+		<input
+			x:type="view"
+			x:roles="_input_view"
+			x:resource_id="$password_input.PASSWORD_INPUT_ELEMENT"
+			x:event:change="$password_input.value_changed"
+			x:event:input="$password_input.input"
+			x:event:focus="$password_input._focused"
+			x:event:blur="$password_input._blurred"
+
+			x:bind:name="$password_input.name"
+			x:bind:disabled="$password_input.is_disabled"
+			x:bind:required="$password_input.is_required"
+			x:bind:readonly="$password_input.is_readonly"/>
+	</include>
+	<script x:equiv="sugar" type="application/json">
+		{
+			tag_name: 'password_input',
+			root_resource_name: 'PASSWORD_INPUT_ELEMENT',
+			attribute_mappings: {
+				'value': {type: 'property', type_name: 'String'}
+			}
+		}
+	</script>
+	<default_events>['change', 'input']</default_events>
+</x:define>
+
 <x:define controller="input.Numeric" title="Numeric" extends="TextInput"></x:define>
 
 <x:define controller="input.Radio" title="Radio" extends="InputAbstract">

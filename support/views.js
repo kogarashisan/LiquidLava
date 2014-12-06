@@ -393,9 +393,14 @@ _cView = {
 	escape_off: false,
 
 	/**
-	 * @type {_cRefresher}
+	 * @type {?_cRefresher}
 	 */
-	refresher: null
+	refresher: null,
+
+	/**
+	 * @type {?_cScopeForeach}
+	 */
+	scope: null
 
 };
 

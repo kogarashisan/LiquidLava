@@ -100,6 +100,18 @@ Lava.define(
 	_config: null,
 
 	/**
+	 * Scopes, on which this one depends. When they change - this scope is refreshed.
+	 * @type {Array.<_iValueContainer>}
+	 */
+	_binds: null,
+
+	/**
+	 * Listeners for `_binds`
+	 * @type {?Array.<_tListener>}
+	 */
+	_bind_changed_listeners: null,
+
+	/**
 	 * Create an instance of the Foreach scope. Refresh value
 	 *
 	 * @param {Lava.scope.Argument} argument
@@ -108,6 +120,11 @@ Lava.define(
 	 * @param {?_cScopeForeach} config
 	 */
 	init: function(argument, view, widget, config) {
+
+		var i = 0,
+			count,
+			depends,
+			bind;
 
 		this.guid = Lava.guid++;
 		this._argument = argument;
@@ -134,6 +151,31 @@ Lava.define(
 
 			this._own_collection = true;
 
+			if (config['depends']) {
+
+				depends = config['depends'];
+				this._binds = [];
+				this._bind_listeners = [];
+
+				for (count = depends.length; i < count; i++) {
+
+					if (depends[i].isDynamic) {
+
+						bind = view.locateViewByPathConfig(depends[i]).getDynamicScope(view, depends[i]);
+
+					} else {
+
+						bind = view.getScopeByPathConfig(depends[i]);
+
+					}
+
+					this._binds.push(bind);
+					this._bind_listeners.push(bind.on('changed', this._onDependencyChanged, this));
+
+				}
+
+			}
+
 		}
 
 		this._argument_waits_refresh_listener = this._argument.on('waits_refresh', this._onDependencyWaitsRefresh, this);
@@ -141,6 +183,16 @@ Lava.define(
 		this._argument_refreshed_listener = this._argument.on('refreshed', this._onDependencyRefreshed, this);
 
 		this.refreshDataSource();
+
+	},
+
+	/**
+	 * One of scopes from `_binds` has changed, place this scope into refresh queue
+	 */
+	_onDependencyChanged: function() {
+
+		this._is_dirty = true;
+		this._queueForRefresh();
 
 	},
 
@@ -350,6 +402,16 @@ Lava.define(
 	 * Free resources and make this instance unusable
 	 */
 	destroy: function() {
+
+		if (this._binds) {
+
+			for (var i = 0, count = this._binds.length; i < count; i++) {
+				this._binds.removeListener(this._bind_changed_listeners[i]);
+			}
+
+			this._binds = this._bind_changed_listeners = null;
+
+		}
 
 		this._argument.removeListener(this._argument_waits_refresh_listener);
 		this._argument.removeListener(this._argument_changed_listener);

@@ -9,11 +9,11 @@ Lava.define(
 /**
  * Base class for Radio and CheckBox classes
  * @lends Lava.widget.input.RadioAbstract#
- * @extends Lava.widget.input.Abstract#
+ * @extends Lava.widget.input.InputAbstract#
  */
 {
 
-	Extends: 'Lava.widget.input.Abstract',
+	Extends: 'Lava.widget.input.InputAbstract',
 
 	_property_descriptors: {
 		is_checked: {type: 'Boolean', setter: '_setIsChecked'}
@@ -30,7 +30,7 @@ Lava.define(
 
 	_handleInputView: function(view, template_arguments) {
 
-		this.Abstract$_handleInputView(view, template_arguments);
+		this.InputAbstract$_handleInputView(view, template_arguments);
 		this._input_container.storeProperty('checked', this._properties.is_checked ? 'checked' : null);
 
 	},
@@ -64,7 +64,9 @@ Lava.define(
 
 	toQueryString: function() {
 
-		return this._properties.is_checked ? this.RadioAbstract$toQueryString() : '';
+		return (this._properties.name && this._properties.is_checked)
+			? this._properties.name + "=" + (this._properties.value || 'on')
+			: '';
 
 	}
 

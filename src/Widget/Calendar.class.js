@@ -74,7 +74,7 @@ Lava.define(
 
 	/**
 	 * Year input widget
-	 * @type {Lava.widget.input.Abstract}
+	 * @type {Lava.widget.input.InputAbstract}
 	 */
 	_year_input: null,
 	/**
@@ -314,7 +314,7 @@ Lava.define(
 
 	/**
 	 * Register input for the year on months view
-	 * @param {Lava.widget.input.Abstract} view
+	 * @param {Lava.widget.input.InputAbstract} view
 	 */
 	_handleYearInput: function(view) {
 
@@ -351,7 +351,7 @@ Lava.define(
 
 	/**
 	 * Refresh <wp>_displayed_year</wp> property from year input
-	 * @param {Lava.widget.input.Abstract} widget
+	 * @param {Lava.widget.input.InputAbstract} widget
 	 */
 	_onYearInputValueChanged: function(widget) {
 

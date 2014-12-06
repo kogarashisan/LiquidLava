@@ -1,9 +1,9 @@
 
 Lava.define(
-'Lava.widget.input.Abstract',
+'Lava.widget.input.InputAbstract',
 /**
  * Base class for support of html &lt;input&gt; fields
- * @lends Lava.widget.input.Abstract#
+ * @lends Lava.widget.input.InputAbstract#
  * @extends Lava.widget.Standard#
  */
 {

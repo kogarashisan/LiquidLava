@@ -244,17 +244,21 @@ var Lava = {
 	 */
 	_initGlobals: function() {
 
-		var constructor;
-		constructor = this.ClassManager.getConstructor(Lava.schema.system.VIEW_MANAGER_CLASS);
-		this.view_manager = new constructor();
-		constructor = this.ClassManager.getConstructor(Lava.schema.system.APP_CLASS);
-		this.app = new constructor();
-		constructor = this.ClassManager.getConstructor(Lava.schema.system.FOCUS_MANAGER_CLASS);
-		this.focus_manager = new constructor();
+		this._initGlobal(Lava.schema.system.VIEW_MANAGER_CLASS, 'view_manager');
+		this._initGlobal(Lava.schema.system.APP_CLASS, 'app');
+		this._initGlobal(Lava.schema.popover_manager.CLASS, 'popover_manager');
+		this._initGlobal(Lava.schema.focus_manager.CLASS, 'focus_manager');
 
-		if (Lava.schema.popover_manager.IS_ENABLED) {
-			constructor = this.ClassManager.getConstructor(Lava.schema.popover_manager.CLASS);
-			this.popover_manager = new constructor();
+		Lava.schema.popover_manager.IS_ENABLED && this.popover_manager && this.popover_manager.enable();
+		Lava.schema.focus_manager.IS_ENABLED && this.focus_manager && this.focus_manager.enable();
+
+	},
+
+	_initGlobal: function(class_name, property_name) {
+
+		if (class_name) {
+			var constructor = this.ClassManager.getConstructor(class_name);
+			this[property_name] = new constructor();
 		}
 
 	},
@@ -504,10 +508,6 @@ var Lava = {
 
 		}
 
-		if (Lava.schema.popover_manager.IS_ENABLED) {
-			this.popover_manager.enable();
-		}
-
 	},
 
 	/**
@@ -559,7 +559,7 @@ var Lava = {
 			template: null,
 			container: {type: 'Morph'}
 		};
-		config.template = Lava.TemplateParser.parse(script_element.get('html'), config);
+		config.template = Lava.TemplateParser.parse(Firestorm.Element.getProperty(script_element, 'html'), config);
 
 		if (id) {
 			config.id = id;
@@ -849,6 +849,18 @@ var Lava = {
 	instanceOf: function(instance, class_name) {
 
 		return instance.Class.hierarchy_paths.indexOf(class_name) != -1 || instance.Class.implements.indexOf(class_name) != -1;
+
+	},
+
+	/**
+	 * Destroy global objects. Widgets must be destroyed manually, before calling this method.
+	 */
+	destroy: function () {
+
+		this.popover_manager && this.popover_manager.destroy();
+		this.view_manager && this.view_manager.destroy();
+		this.app.destroy();
+		this.view_manager.destroy();
 
 	}
 

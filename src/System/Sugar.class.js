@@ -214,11 +214,13 @@ Lava.define(
 	 */
 	_parseStorageObject: function(content_schema, raw_tag, widget_config) {
 
-		if (raw_tag.content) {
+		var tags = Lava.parsers.Common.asBlocks(raw_tag.content);
+		tags = this._applyTopDirectives(tags, widget_config);
+		if (tags.length) {
 			Lava.parsers.Storage.parse(widget_config, [{
 				type: 'tag',
 				name: content_schema.name,
-				content: raw_tag.content
+				content: tags
 			}]);
 		}
 

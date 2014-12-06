@@ -249,6 +249,11 @@ Firestorm.Environment = {
 	 */
 	MOVES_WHITESPACE_BEFORE_SCRIPT: false,
 	/**
+	 * IE8 and IE9 have bugs in "input" event, see
+	 * http://benalpert.com/2013/06/18/a-near-perfect-oninput-shim-for-ie-8-and-9.html
+	 */
+	NEEDS_INPUT_EVENT_SHIM: false,
+	/**
 	 * Calls requestAnimationFrame, if browser supports it. Actual method name may have a vendor prefix in different browsers.
 	 * If browser does not support requestAnimationFrame - this method will be <kw>null</kw>
 	 * @param {function} callback
@@ -261,7 +266,7 @@ Firestorm.Environment = {
 	init: function() {
 
 		var document = window.document,
-			testEl,
+			test_node,
 			requestAnimationFrame;
 
 		// all, even old browsers, must be able to convert a function back to sources
@@ -270,13 +275,13 @@ Firestorm.Environment = {
 		// last check is for IE9 which only partially supports ranges
 		this.SUPPORTS_RANGE = ('createRange' in document) && (typeof Range !== 'undefined') && Range.prototype.createContextualFragment;
 
-		testEl = document.createElement('div');
-		testEl.innerHTML = "<div></div>";
-		testEl.firstChild.innerHTML = "<script></script>";
-		this.STRIPS_INNER_HTML_SCRIPT_AND_STYLE_TAGS = testEl.firstChild.innerHTML === '';
+		test_node = document.createElement('div');
+		test_node.innerHTML = "<div></div>";
+		test_node.firstChild.innerHTML = "<script></script>";
+		this.STRIPS_INNER_HTML_SCRIPT_AND_STYLE_TAGS = test_node.firstChild.innerHTML === '';
 
-		testEl.innerHTML = "Test: <script type='text/x-placeholder'></script>Value";
-		this.MOVES_WHITESPACE_BEFORE_SCRIPT = testEl.childNodes[0].nodeValue === 'Test:' && testEl.childNodes[2].nodeValue === ' Value';
+		test_node.innerHTML = "Test: <script type='text/x-placeholder'></script>Value";
+		this.MOVES_WHITESPACE_BEFORE_SCRIPT = test_node.childNodes[0].nodeValue === 'Test:' && test_node.childNodes[2].nodeValue === ' Value';
 
 		requestAnimationFrame =
 			window.requestAnimationFrame
@@ -285,6 +290,8 @@ Firestorm.Environment = {
 			|| window.msRequestAnimationFrame;
 
 		this.requestAnimationFrame = requestAnimationFrame ? function(fn) { requestAnimationFrame.call(window, fn); } : null;
+
+		this.NEEDS_INPUT_EVENT_SHIM = ("documentMode" in document) && document.documentMode < 10;
 
 	}
 
@@ -1797,17 +1804,21 @@ var Lava = {
 	 */
 	_initGlobals: function() {
 
-		var constructor;
-		constructor = this.ClassManager.getConstructor(Lava.schema.system.VIEW_MANAGER_CLASS);
-		this.view_manager = new constructor();
-		constructor = this.ClassManager.getConstructor(Lava.schema.system.APP_CLASS);
-		this.app = new constructor();
-		constructor = this.ClassManager.getConstructor(Lava.schema.system.FOCUS_MANAGER_CLASS);
-		this.focus_manager = new constructor();
+		this._initGlobal(Lava.schema.system.VIEW_MANAGER_CLASS, 'view_manager');
+		this._initGlobal(Lava.schema.system.APP_CLASS, 'app');
+		this._initGlobal(Lava.schema.popover_manager.CLASS, 'popover_manager');
+		this._initGlobal(Lava.schema.focus_manager.CLASS, 'focus_manager');
 
-		if (Lava.schema.popover_manager.IS_ENABLED) {
-			constructor = this.ClassManager.getConstructor(Lava.schema.popover_manager.CLASS);
-			this.popover_manager = new constructor();
+		Lava.schema.popover_manager.IS_ENABLED && this.popover_manager && this.popover_manager.enable();
+		Lava.schema.focus_manager.IS_ENABLED && this.focus_manager && this.focus_manager.enable();
+
+	},
+
+	_initGlobal: function(class_name, property_name) {
+
+		if (class_name) {
+			var constructor = this.ClassManager.getConstructor(class_name);
+			this[property_name] = new constructor();
 		}
 
 	},
@@ -2057,10 +2068,6 @@ var Lava = {
 
 		}
 
-		if (Lava.schema.popover_manager.IS_ENABLED) {
-			this.popover_manager.enable();
-		}
-
 	},
 
 	/**
@@ -2112,7 +2119,7 @@ var Lava = {
 			template: null,
 			container: {type: 'Morph'}
 		};
-		config.template = Lava.TemplateParser.parse(script_element.get('html'), config);
+		config.template = Lava.TemplateParser.parse(Firestorm.Element.getProperty(script_element, 'html'), config);
 
 		if (id) {
 			config.id = id;
@@ -2403,6 +2410,18 @@ var Lava = {
 
 		return instance.Class.hierarchy_paths.indexOf(class_name) != -1 || instance.Class.implements.indexOf(class_name) != -1;
 
+	},
+
+	/**
+	 * Destroy global objects. Widgets must be destroyed manually, before calling this method.
+	 */
+	destroy: function () {
+
+		this.popover_manager && this.popover_manager.destroy();
+		this.view_manager && this.view_manager.destroy();
+		this.app.destroy();
+		this.view_manager.destroy();
+
 	}
 
 };
@@ -2450,11 +2469,6 @@ Lava.schema = {
 		 */
 		VIEW_MANAGER_CLASS: 'Lava.system.ViewManager',
 		/**
-		 * Class for {@link Lava#focus_manager}
-		 * @const
-		 */
-		FOCUS_MANAGER_CLASS: 'Lava.system.FocusManager',
-		/**
 		 * ViewManager events (routed via templates), which are enabled by default, so does not require a call to lendEvent()
 		 * @const
 		 */
@@ -2495,6 +2509,21 @@ Lava.schema = {
 		 * @const
 		 */
 		HIDE_EMPTY_TOOLTIPS: true
+	},
+	/**
+	 * Settings for {@link Lava#focus_manager}
+	 */
+	focus_manager: {
+		/**
+		 * Is FocusManager enabled
+		 * @const
+		 */
+		IS_ENABLED: true,
+		/**
+		 * Class for {@link Lava#focus_manager}
+		 * @const
+		 */
+		CLASS: 'Lava.system.FocusManager'
 	},
 	/**
 	 * Settings for Data layer: modules, records and fields
@@ -5242,6 +5271,7 @@ Lava.ClassManager = {
 			implements: [],
 			parent_class_data: null,
 			hierarchy_paths: null,
+			hierarchy_names: null,
 			skeleton: null,
 			references: [],
 			shared: {},
@@ -5258,10 +5288,13 @@ Lava.ClassManager = {
 
 			if (!parent_data) Lava.t('[define] Base class not found: "' + source_object.Extends + '"');
 			if (!parent_data.skeleton) Lava.t("[define] Parent class was loaded without skeleton, extension is not possible: " + class_data.extends);
+			if (parent_data.hierarchy_names.indexOf(class_data.name) != -1) Lava.t("[define] Duplicate name in inheritance chain: " + class_data.name + " / " + class_path);
 
 			class_data.level = parent_data.level + 1;
 			class_data.hierarchy_paths = parent_data.hierarchy_paths.slice();
 			class_data.hierarchy_paths.push(class_path);
+			class_data.hierarchy_names = parent_data.hierarchy_names.slice();
+			class_data.hierarchy_names.push(class_data.name);
 			class_data.references = parent_data.references.slice();
 			class_data.own_references_count -= parent_data.references.length;
 			class_data.implements = parent_data.implements.slice();
@@ -5282,6 +5315,7 @@ Lava.ClassManager = {
 		} else {
 
 			class_data.hierarchy_paths = [class_path];
+			class_data.hierarchy_names = [class_data.name];
 
 		}
 
@@ -5948,6 +5982,12 @@ Lava.ClassManager = {
 			}
 
 			class_data.implements = parent_data.implements.concat(class_data.implements);
+			class_data.hierarchy_names = parent_data.hierarchy_names.slice();
+			class_data.hierarchy_names.push(class_data.name);
+
+		} else {
+
+			class_data.hierarchy_names = [class_data.name];
 
 		}
 
@@ -6024,6 +6064,40 @@ Lava.ClassManager = {
 
 		return Object.keys(this._sources);
 
+	},
+
+	/**
+	 * Replace function in a class with new body. Class may be in middle of inheritance chain.
+	 * @param {Object} instance Class instance, must be <kw>this</kw>
+	 * @param {string} instance_class_name Short name of current class
+	 * @param {string} function_name Function to replace
+	 * @param {function} new_function_body
+	 * @returns {string} name of overridden function Name, that was replaced
+	 */
+	patch: function(instance, instance_class_name, function_name, new_function_body) {
+
+		var cd = instance.Class,
+			proto = cd.constructor.prototype,
+			names = cd.hierarchy_names,
+			i = names.indexOf(instance_class_name),
+			count = names.length,
+			overridden_name,
+			found = false;
+
+		if (Lava.schema.DEBUG && i == -1) Lava.t();
+
+		for (; i < count; i++) {
+			overridden_name = names[i] + "$" + function_name;
+			if (overridden_name in proto) {
+				found = true;
+				proto[overridden_name] = new_function_body;
+				break;
+			}
+		}
+
+		proto[found ? overridden_name : function_name] = new_function_body;
+		return found ? overridden_name : function_name;
+
 	}
 
 };
@@ -6042,7 +6116,7 @@ Lava.parsers.Common = {
 	 * The only allowed options on view's hash
 	 * @type {Array.<string>}
 	 */
-	_allowed_hash_options: ['id', 'label', 'as', 'escape_off'],
+	_allowed_hash_options: ['id', 'label', 'escape_off', 'as', 'own_enumerable_mode', 'depends'],
 	/**
 	 * Allowed "x:" attributes on elements
 	 * @type {Array.<string>}
@@ -6081,7 +6155,9 @@ Lava.parsers.Common = {
 	 */
 	_view_config_property_setters: {
 		id: 'setViewConfigId',
-		label: 'setViewConfigLabel'
+		label: 'setViewConfigLabel',
+		own_enumerable_mode: '_setOwnEnumerableMode',
+		depends: '_setDepends'
 	},
 
 	/**
@@ -6170,6 +6246,56 @@ Lava.parsers.Common = {
 		if (Lava.schema.DEBUG && !Lava.VALID_LABEL_REGEX.test(label)) Lava.t("Malformed view label");
 		if (Lava.schema.DEBUG && this._reserved_labels.indexOf(label) != -1) Lava.t("Label name is reserved: " + label);
 		view_config.label = label;
+
+	},
+
+	/**
+	 * Set {@link _cScopeForeach#own_enumerable_mode}
+	 * @param {_cView} view_config
+	 * @param {string} own_enumerable_mode <str>"Enumerable"</str> or <str>"DataView"</str>
+	 */
+	_setOwnEnumerableMode: function(view_config, own_enumerable_mode) {
+
+		if (Lava.schema.DEBUG && ['Enumerable', 'DataView'].indexOf(own_enumerable_mode) == -1) Lava.t("Malformed 'own_enumerable_mode' hash option");
+
+		if (!('scope' in view_config)) {
+			view_config['scope'] = {
+				"own_enumerable_mode": own_enumerable_mode
+			}
+		} else {
+			if (Lava.schema.DEBUG && ('own_enumerable_mode' in view_config['scope'])) Lava.t();
+			view_config['scope']['own_enumerable_mode'] = own_enumerable_mode;
+		}
+
+	},
+
+	/**
+	 * Set {@link _cScopeForeach#depends}
+	 * @param {_cView} view_config
+	 * @param {string} depends_text Semicolon-separated list of scope paths
+	 */
+	_setDepends: function(view_config, depends_text) {
+
+		var binds = [],
+			raw_arguments = Lava.ExpressionParser.parseRaw(depends_text, Lava.ExpressionParser.SEPARATORS.SEMICOLON),
+			i = 0,
+			count = raw_arguments.length;
+
+		if (Lava.schema.DEBUG && count == 0) Lava.t("malformed 'depends' hash option");
+
+		for (; i < count; i++) {
+			if (Lava.schema.DEBUG && (!raw_arguments[i].flags || !raw_arguments[i].flags.isScopeEval)) Lava.t('malformed "depends" hash option: argument ');
+			binds.push(raw_arguments[i].binds[0]);
+		}
+
+		if (!('scope' in view_config)) {
+			view_config['scope'] = {
+				"depends": binds
+			}
+		} else {
+			if (Lava.schema.DEBUG && ('depends' in view_config['scope'])) Lava.t();
+			view_config['scope']['depends'] = binds;
+		}
 
 	},
 
@@ -10798,7 +10924,7 @@ case 43: return 4;
 break;
 }
 },
-rules: [/^(?:[^\x00]*?(?=((\{[\#\$\>\*])|(\{&)|(\{\/)|(<([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)\s*)|(<\/([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)>)|(<!--(.|\s)*?-->)|(<!\[CDATA\[(.|\s)*?\]\]>)|(\{[a-zA-Z\_]+:\})|(\{:[a-zA-Z\_]+\})|(\{:[LR]:\}|\{:[LG])|\{elseif\s*\(|\{else\})))/,/^(?:[^\x00]+)/,/^(?:<)/,/^(?:\{>[^\}]*\})/,/^(?:\{&gt;[^\}]*\})/,/^(?:\{else\})/,/^(?:\{\/(([a-zA-Z\_][a-zA-Z0-9\_]*)(\/([a-zA-Z\_][a-zA-Z0-9\_]*))*)\})/,/^(?:\{\*([^\*]|\*[^\}])*\*\})/,/^(?:\{(#|\$)>[^\}]+\})/,/^(?:\{(#|\$)&gt;[^\}]+\})/,/^(?:((\{[\#\$\>\*])|(\{&))\s\b)/,/^(?:((\{[\#\$\>\*])|(\{&))(([a-zA-Z\_][a-zA-Z0-9\_]*)(\/([a-zA-Z\_][a-zA-Z0-9\_]*))*)\s\()/,/^(?:((\{[\#\$\>\*])|(\{&)))/,/^(?:\{elseif(?=\())/,/^(?::[\$\#\@]([a-zA-Z\_][a-zA-Z0-9\_]*)\/(([a-zA-Z\_][a-zA-Z0-9\_]*)(\/([a-zA-Z\_][a-zA-Z0-9\_]*))*)(?=\())/,/^(?:(([a-zA-Z\_][a-zA-Z0-9\_]*)(\/([a-zA-Z\_][a-zA-Z0-9\_]*))*)(?=\())/,/^(?:\(\s*\))/,/^(?:\()/,/^(?:([a-zA-Z\_][a-zA-Z0-9\_]*)=)/,/^(?:([a-zA-Z\_][a-zA-Z0-9\_]*)(?=[\s\}]))/,/^(?:"([^\\\"]|\\.)*"(?=[\s\}]))/,/^(?:'([^\\\']|\\.)*'(?=[\s\}]))/,/^(?:\s*\})/,/^(?:\s+)/,/^(?:(<!--(.|\s)*?-->))/,/^(?:(<!\[CDATA\[(.|\s)*?\]\]>))/,/^(?:(<\/([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)>))/,/^(?:(<([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)\s*))/,/^(?:>)/,/^(?:\/>)/,/^(?:([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)\s+)/,/^(?:([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)(?=>))/,/^(?:([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)=)/,/^(?:([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)=([a-zA-Z\_][a-zA-Z0-9\_]*)+\s\b)/,/^(?:"([^\\\"]|\\.)*")/,/^(?:'([^\\\']|\\.)*')/,/^(?:\s+)/,/^(?:[\s\S]*?<\/script>)/,/^(?:[\s\S]*?<\/style>)/,/^(?:(\{:[LR]:\}|\{:[LG]))/,/^(?:(\{[a-zA-Z\_]+:\}))/,/^(?:(\{:[a-zA-Z\_]+\}))/,/^(?:[^\x00]*?\{:literal\})/,/^(?:$)/],
+rules: [/^(?:[^\x00]*?(?=((\{[\#\$\>\*])|(\{&)|(\{\/)|(<([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)\s*)|(<\/([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)>)|(<!--(.|\s)*?-->)|(<!\[CDATA\[(.|\s)*?\]\]>)|\{literal:\}|\{:literal\}|(\{:[LR]:\}|\{:[LG])|\{elseif\s*\(|\{else\})))/,/^(?:[^\x00]+)/,/^(?:<)/,/^(?:\{>[^\}]*\})/,/^(?:\{&gt;[^\}]*\})/,/^(?:\{else\})/,/^(?:\{\/(([a-zA-Z\_][a-zA-Z0-9\_]*)(\/([a-zA-Z\_][a-zA-Z0-9\_]*))*)\})/,/^(?:\{\*([^\*]|\*[^\}])*\*\})/,/^(?:\{(#|\$)>[^\}]+\})/,/^(?:\{(#|\$)&gt;[^\}]+\})/,/^(?:((\{[\#\$\>\*])|(\{&))\s\b)/,/^(?:((\{[\#\$\>\*])|(\{&))(([a-zA-Z\_][a-zA-Z0-9\_]*)(\/([a-zA-Z\_][a-zA-Z0-9\_]*))*)\s\()/,/^(?:((\{[\#\$\>\*])|(\{&)))/,/^(?:\{elseif(?=\())/,/^(?::[\$\#\@]([a-zA-Z\_][a-zA-Z0-9\_]*)\/(([a-zA-Z\_][a-zA-Z0-9\_]*)(\/([a-zA-Z\_][a-zA-Z0-9\_]*))*)(?=\())/,/^(?:(([a-zA-Z\_][a-zA-Z0-9\_]*)(\/([a-zA-Z\_][a-zA-Z0-9\_]*))*)(?=\())/,/^(?:\(\s*\))/,/^(?:\()/,/^(?:([a-zA-Z\_][a-zA-Z0-9\_]*)=)/,/^(?:([a-zA-Z\_][a-zA-Z0-9\_]*)(?=[\s\}]))/,/^(?:"([^\\\"]|\\.)*"(?=[\s\}]))/,/^(?:'([^\\\']|\\.)*'(?=[\s\}]))/,/^(?:\s*\})/,/^(?:\s+)/,/^(?:(<!--(.|\s)*?-->))/,/^(?:(<!\[CDATA\[(.|\s)*?\]\]>))/,/^(?:(<\/([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)>))/,/^(?:(<([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)\s*))/,/^(?:>)/,/^(?:\/>)/,/^(?:([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)\s+)/,/^(?:([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)(?=>))/,/^(?:([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)=)/,/^(?:([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)=([a-zA-Z\_][a-zA-Z0-9\_]*)+\s\b)/,/^(?:"([^\\\"]|\\.)*")/,/^(?:'([^\\\']|\\.)*')/,/^(?:\s+)/,/^(?:[\s\S]*?<\/script>)/,/^(?:[\s\S]*?<\/style>)/,/^(?:(\{:[LR]:\}|\{:[LG]))/,/^(?:\{literal:\})/,/^(?:\{:literal\})/,/^(?:[^\x00]*?\{:literal\})/,/^(?:$)/],
 conditions: {"block":{"rules":[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"inclusive":false},"blockHash":{"rules":[18,19,20,21,22,23],"inclusive":false},"tag":{"rules":[24,25,26,27,28,29,30,31,32,33,34,35,36],"inclusive":false},"skipTag":{"rules":[2],"inclusive":false},"switch":{"rules":[39,40,41],"inclusive":false},"literal":{"rules":[42],"inclusive":false},"eatScript":{"rules":[37],"inclusive":false},"eatStyle":{"rules":[38],"inclusive":false},"INITIAL":{"rules":[0,1,43],"inclusive":true}}
 };
 return lexer;
@@ -15298,6 +15424,17 @@ Lava.define(
 
 		this._fire(event_name, event_args);
 
+	},
+
+	/**
+	 * Destroy this App instance and all modules
+	 */
+	destroy:  function() {
+
+		for (var name in this._modules) {
+			this._modules[name].destroy();
+		}
+
 	}
 
 });
@@ -15517,11 +15654,13 @@ Lava.define(
 	 */
 	_parseStorageObject: function(content_schema, raw_tag, widget_config) {
 
-		if (raw_tag.content) {
+		var tags = Lava.parsers.Common.asBlocks(raw_tag.content);
+		tags = this._applyTopDirectives(tags, widget_config);
+		if (tags.length) {
 			Lava.parsers.Storage.parse(widget_config, [{
 				type: 'tag',
 				name: content_schema.name,
-				content: raw_tag.content
+				content: tags
 			}]);
 		}
 
@@ -15764,11 +15903,12 @@ Lava.define(
 	 */
 	enable: function() {
 
-		if (Lava.schema.DEBUG && this._mouseover_stack_changed_listener) Lava.t("PopoverManager is already enabled");
-		Lava.view_manager.lendEvent('mouse_events');
-		this._mouseover_stack_changed_listener = Lava.view_manager.on('mouseover_stack_changed', this._onMouseoverStackChanged, this);
-		if (!this._tooltip) this._tooltip = Lava.createWidget(this.DEFAULT_TOOLTIP_WIDGET);
-		this._tooltip.inject(document.body, 'Bottom');
+		if (!this._mouseover_stack_changed_listener) {
+			Lava.view_manager.lendEvent('mouse_events');
+			this._mouseover_stack_changed_listener = Lava.view_manager.on('mouseover_stack_changed', this._onMouseoverStackChanged, this);
+			if (!this._tooltip) this._tooltip = Lava.createWidget(this.DEFAULT_TOOLTIP_WIDGET);
+			this._tooltip.inject(document.body, 'Bottom');
+		}
 
 	},
 
@@ -15777,15 +15917,27 @@ Lava.define(
 	 */
 	disable: function() {
 
-		Lava.view_manager.releaseEvent('mouse_events');
-		Lava.view_manager.removeListener(this._mouseover_stack_changed_listener);
-		this._mouseover_stack_changed_listener = null;
-		if (this._mousemove_listener) {
-			Lava.Core.removeGlobalHandler(this._mousemove_listener);
-			this._mousemove_listener = null;
+		if (this._mouseover_stack_changed_listener) {
+			Lava.view_manager.releaseEvent('mouse_events');
+			Lava.view_manager.removeListener(this._mouseover_stack_changed_listener);
+			this._mouseover_stack_changed_listener = null;
+			if (this._mousemove_listener) {
+				Lava.Core.removeGlobalHandler(this._mousemove_listener);
+				this._mousemove_listener = null;
+			}
+			this._tooltip.set('is_visible', false);
+			this._tooltip.remove();
 		}
-		this._tooltip.set('is_visible', false);
-		this._tooltip.remove();
+
+	},
+
+	/**
+	 * Does it listen to mouse movements and show tooltips?
+	 * @returns {boolean}
+	 */
+	isEnabled: function() {
+
+		return this._mouseover_stack_changed_listener != null;
 
 	},
 
@@ -15850,6 +16002,15 @@ Lava.define(
 		this._tooltip.set('x', event_object.page.x); // left
 		this._tooltip.set('y', event_object.page.y); // top
 
+	},
+
+	/**
+	 * Destroy PopoverManager instance
+	 */
+	destroy: function() {
+
+		this.isEnabled() && this.disable();
+
 	}
 
 });
@@ -15905,14 +16066,44 @@ Lava.define(
 	_blur_listener: null,
 
 	/**
-	 * Initialize FocusManager instance
+	 * Start listening to global focus-related events
 	 */
-	init: function() {
+	enable: function () {
 
-		this._focus_acquired_listener = Lava.app.on('focus_acquired', this._onFocusTargetAcquired, this);
-		this._focus_lost_listener = Lava.app.on('focus_lost', this.clearFocusedTarget, this);
-		this._focus_listener = Lava.Core.addGlobalHandler('blur', this._onElementBlurred, this);
-		this._blur_listener = Lava.Core.addGlobalHandler('focus', this._onElementFocused, this);
+		if (!this._focus_acquired_listener) {
+			this._focus_acquired_listener = Lava.app.on('focus_acquired', this._onFocusTargetAcquired, this);
+			this._focus_lost_listener = Lava.app.on('focus_lost', this.clearFocusedTarget, this);
+			this._focus_listener = Lava.Core.addGlobalHandler('blur', this._onElementBlurred, this);
+			this._blur_listener = Lava.Core.addGlobalHandler('focus', this._onElementFocused, this);
+		}
+
+	},
+
+	/**
+	 * Stop listening to all focus-related events
+	 */
+	disable: function() {
+
+		if (this._focus_acquired_listener) {
+			Lava.app.removeListener(this._focus_acquired_listener);
+			Lava.app.removeListener(this._focus_lost_listener);
+			Lava.Core.removeGlobalHandler(this._focus_listener);
+			Lava.Core.removeGlobalHandler(this._blur_listener);
+			this._focus_acquired_listener
+				= this._focused_element
+				= this._focus_target
+				= null;
+		}
+
+	},
+
+	/**
+	 * Does it listen to focus changes and sends navigation events
+	 * @returns {boolean}
+	 */
+	isEnabled: function() {
+
+		return this._focus_acquired_listener != null;
 
 	},
 
@@ -16017,10 +16208,7 @@ Lava.define(
 	 */
 	destroy: function() {
 
-		Lava.app.removeListener(this._focus_acquired_listener);
-		Lava.app.removeListener(this._focus_lost_listener);
-		Lava.Core.removeGlobalHandler(this._focus_listener);
-		Lava.Core.removeGlobalHandler(this._blur_listener);
+		this.isEnabled() && this.disable();
 
 	}
 
@@ -19036,6 +19224,18 @@ Lava.define(
 	_config: null,
 
 	/**
+	 * Scopes, on which this one depends. When they change - this scope is refreshed.
+	 * @type {Array.<_iValueContainer>}
+	 */
+	_binds: null,
+
+	/**
+	 * Listeners for `_binds`
+	 * @type {?Array.<_tListener>}
+	 */
+	_bind_changed_listeners: null,
+
+	/**
 	 * Create an instance of the Foreach scope. Refresh value
 	 *
 	 * @param {Lava.scope.Argument} argument
@@ -19044,6 +19244,11 @@ Lava.define(
 	 * @param {?_cScopeForeach} config
 	 */
 	init: function(argument, view, widget, config) {
+
+		var i = 0,
+			count,
+			depends,
+			bind;
 
 		this.guid = Lava.guid++;
 		this._argument = argument;
@@ -19070,6 +19275,31 @@ Lava.define(
 
 			this._own_collection = true;
 
+			if (config['depends']) {
+
+				depends = config['depends'];
+				this._binds = [];
+				this._bind_listeners = [];
+
+				for (count = depends.length; i < count; i++) {
+
+					if (depends[i].isDynamic) {
+
+						bind = view.locateViewByPathConfig(depends[i]).getDynamicScope(view, depends[i]);
+
+					} else {
+
+						bind = view.getScopeByPathConfig(depends[i]);
+
+					}
+
+					this._binds.push(bind);
+					this._bind_listeners.push(bind.on('changed', this._onDependencyChanged, this));
+
+				}
+
+			}
+
 		}
 
 		this._argument_waits_refresh_listener = this._argument.on('waits_refresh', this._onDependencyWaitsRefresh, this);
@@ -19077,6 +19307,16 @@ Lava.define(
 		this._argument_refreshed_listener = this._argument.on('refreshed', this._onDependencyRefreshed, this);
 
 		this.refreshDataSource();
+
+	},
+
+	/**
+	 * One of scopes from `_binds` has changed, place this scope into refresh queue
+	 */
+	_onDependencyChanged: function() {
+
+		this._is_dirty = true;
+		this._queueForRefresh();
 
 	},
 
@@ -19286,6 +19526,16 @@ Lava.define(
 	 * Free resources and make this instance unusable
 	 */
 	destroy: function() {
+
+		if (this._binds) {
+
+			for (var i = 0, count = this._binds.length; i < count; i++) {
+				this._binds.removeListener(this._bind_changed_listeners[i]);
+			}
+
+			this._binds = this._bind_changed_listeners = null;
+
+		}
 
 		this._argument.removeListener(this._argument_waits_refresh_listener);
 		this._argument.removeListener(this._argument_changed_listener);
@@ -22930,7 +23180,7 @@ Lava.define(
 		this.Abstract$_initMembers(properties);
 
 		this._argument = new Lava.scope.Argument(this._config.argument, this, this._widget);
-		this._foreach_scope = new Lava.scope.Foreach(this._argument, this, this._widget, this._config.options ? this._config.options.scope : null);
+		this._foreach_scope = new Lava.scope.Foreach(this._argument, this, this._widget, this._config.scope);
 		this._foreach_scope_changed_listener = this._foreach_scope.on('changed', this._onDataSourceChanged, this);
 		this._foreach_scope.on('new_enumerable', this._onEnumerableChanged, this);
 		this._as = this._config.as;
@@ -24104,10 +24354,10 @@ Lava.define(
 });
 
 Lava.define(
-'Lava.widget.input.Abstract',
+'Lava.widget.input.InputAbstract',
 /**
  * Base class for support of html &lt;input&gt; fields
- * @lends Lava.widget.input.Abstract#
+ * @lends Lava.widget.input.InputAbstract#
  * @extends Lava.widget.Standard#
  */
 {
@@ -24271,11 +24521,11 @@ Lava.define(
 /**
  * Base class for text inputs
  * @lends Lava.widget.input.TextAbstract#
- * @extends Lava.widget.input.Abstract#
+ * @extends Lava.widget.input.InputAbstract#
  */
 {
 
-	Extends: 'Lava.widget.input.Abstract',
+	Extends: 'Lava.widget.input.InputAbstract',
 
 	_property_descriptors: {
 		value: {type: 'String', setter: '_setValue'}
@@ -24292,26 +24542,33 @@ Lava.define(
 	},
 
 	/**
-	 * Whether to update widget's {@link Lava.widget.input.Abstract#property:value} property
-	 * on any change in DOM input element. Otherwise, value will be refreshed on input's "blur" event
+	 * For IE8-9: input element listener callback, bound to this instance
+	 * @type {function}
 	 */
-	_refresh_on_input: true,
-
+	_OldIE_refresh_callback: null,
 	/**
-	 * @param config
-	 * @param {boolean} config.options.cancel_refresh_on_input Update widget's <wp>value</wp> when input element loses focus.
-	 *  By default, value is updated on each user input
-	 * @param widget
-	 * @param parent_view
-	 * @param template
-	 * @param properties
+	 * For IE8-9: `onpropertychange` callback, bound to this instance
+	 * @type {function}
 	 */
+	_OldIE_property_change_callback: null,
+
 	init: function(config, widget, parent_view, template, properties) {
 
-		this.Abstract$init(config, widget, parent_view, template, properties);
+		this.InputAbstract$init(config, widget, parent_view, template, properties);
 
-		if (config.options && config.options['cancel_refresh_on_input']) {
-			this._refresh_on_input = false;
+		if (this._isNeedsIEShim()) {
+
+			var self = this;
+
+			this._OldIE_refresh_callback = function() {
+				self._refreshValue();
+			};
+			this._OldIE_property_change_callback = function(e) {
+				if (e.propertyName === "value") {
+					self._refreshValue();
+				}
+			};
+
 		}
 
 	},
@@ -24345,7 +24602,7 @@ Lava.define(
 	},
 
 	/**
-	 * Get value from DOM input element and set local {@link Lava.widget.input.Abstract#property:value} property
+	 * Get value from DOM input element and set local {@link Lava.widget.input.InputAbstract#property:value} property
 	 */
 	_refreshValue: function() {
 
@@ -24361,13 +24618,90 @@ Lava.define(
 	},
 
 	/**
-	 * DOM element's value changed: refresh local {@link Lava.widget.input.Abstract#property:value} property
+	 * DOM element's value changed: refresh local {@link Lava.widget.input.InputAbstract#property:value} property
 	 */
 	_onTextInput: function() {
 
-		if (this._refresh_on_input) {
-			this._refreshValue();
+		this._refreshValue();
+
+	},
+
+	/**
+	 * Are we in IE8-9?
+	 * @returns {boolean}
+	 */
+	_isNeedsIEShim: function() {
+
+		return (Firestorm.Environment.NEEDS_INPUT_EVENT_SHIM && (this._type == "text" || this._type == "password"));
+
+	},
+
+	/**
+	 * One-time gateway, which replaces broadcastInDOM and broadcastRemove methods with their appropriate versions:
+	 * either version, that has fixes for old IE, or parent methods.
+	 * @param {string} called_name Name of the method, which was called. Will be called after patching.
+	 */
+	_applyIEShimGateway: function(called_name) {
+
+		var needs_shim = this._isNeedsIEShim(),
+			overridden_names = {
+				// replacing local method with methods from InputAbstract$ - removes it like it never existed
+				broadcastInDOM: Lava.ClassManager.patch(this, "TextAbstract", "broadcastInDOM", needs_shim ? this.broadcastInDOM_OldIE : this.InputAbstract$broadcastInDOM),
+				broadcastRemove: Lava.ClassManager.patch(this, "TextAbstract", "broadcastRemove", needs_shim ? this.broadcastRemove_OldIE : this.InputAbstract$broadcastRemove)
+			};
+
+		this[overridden_names[called_name]]();
+
+	},
+
+	broadcastInDOM: function() {
+
+		this._applyIEShimGateway("broadcastInDOM");
+
+	},
+
+	broadcastRemove: function() {
+
+		this._applyIEShimGateway("broadcastRemove");
+
+	},
+
+	/**
+	 * Applies additional listeners for IE8-9 to track value changes.
+	 * See http://benalpert.com/2013/06/18/a-near-perfect-oninput-shim-for-ie-8-and-9.html
+	 */
+	broadcastInDOM_OldIE: function() {
+
+		this.InputAbstract$broadcastInDOM();
+
+		if (this._input_container) {
+
+			var input_element = this._input_container.getDOMElement();
+			Firestorm.Element.addListener(input_element, "onpropertychange", this._OldIE_property_change_callback);
+			Firestorm.Element.addListener(input_element, "selectionchange", this._OldIE_refresh_callback);
+			Firestorm.Element.addListener(input_element, "keyup", this._OldIE_refresh_callback);
+			Firestorm.Element.addListener(input_element, "keydown", this._OldIE_refresh_callback);
+
 		}
+
+	},
+
+	/**
+	 * Removes IE listeners
+	 */
+	broadcastRemove_OldIE: function() {
+
+		if (this._input_container) {
+
+			var input_element = this._input_container.getDOMElement();
+			Firestorm.Element.removeListener(input_element, "onpropertychange", this._OldIE_property_change_callback);
+			Firestorm.Element.removeListener(input_element, "selectionchange", this._OldIE_refresh_callback);
+			Firestorm.Element.removeListener(input_element, "keyup", this._OldIE_refresh_callback);
+			Firestorm.Element.removeListener(input_element, "keydown", this._OldIE_refresh_callback);
+
+		}
+
+		this.InputAbstract$broadcastRemove();
 
 	}
 
@@ -24417,6 +24751,22 @@ Lava.define(
 
 });
 
+Lava.define(
+'Lava.widget.input.Password',
+/**
+ * Password input field
+ * @lends Lava.widget.input.Password#
+ * @extends Lava.widget.input.Text#
+ */
+{
+
+	Extends: 'Lava.widget.input.Text',
+
+	name: 'password_input',
+	_type: "password"
+
+});
+
 /**
  * Radio or checkbox has changed it's "checked" state
  * @event Lava.widget.input.RadioAbstract#checked_changed
@@ -24427,11 +24777,11 @@ Lava.define(
 /**
  * Base class for Radio and CheckBox classes
  * @lends Lava.widget.input.RadioAbstract#
- * @extends Lava.widget.input.Abstract#
+ * @extends Lava.widget.input.InputAbstract#
  */
 {
 
-	Extends: 'Lava.widget.input.Abstract',
+	Extends: 'Lava.widget.input.InputAbstract',
 
 	_property_descriptors: {
 		is_checked: {type: 'Boolean', setter: '_setIsChecked'}
@@ -24448,7 +24798,7 @@ Lava.define(
 
 	_handleInputView: function(view, template_arguments) {
 
-		this.Abstract$_handleInputView(view, template_arguments);
+		this.InputAbstract$_handleInputView(view, template_arguments);
 		this._input_container.storeProperty('checked', this._properties.is_checked ? 'checked' : null);
 
 	},
@@ -24482,7 +24832,9 @@ Lava.define(
 
 	toQueryString: function() {
 
-		return this._properties.is_checked ? this.RadioAbstract$toQueryString() : '';
+		return (this._properties.name && this._properties.is_checked)
+			? this._properties.name + "=" + (this._properties.value || 'on')
+			: '';
 
 	}
 
@@ -24603,11 +24955,11 @@ Lava.define(
 /**
  * Submit button input
  * @lends Lava.widget.input.Submit#
- * @extends Lava.widget.input.Abstract#
+ * @extends Lava.widget.input.InputAbstract#
  */
 {
 
-	Extends: 'Lava.widget.input.Abstract',
+	Extends: 'Lava.widget.input.InputAbstract',
 
 	name: 'submit',
 	_type: "submit",
@@ -24635,11 +24987,11 @@ Lava.define(
 /**
  * Base class for select inputs
  * @lends Lava.widget.input.SelectAbstract#
- * @extends Lava.widget.input.Abstract#
+ * @extends Lava.widget.input.InputAbstract#
  */
 {
 
-	Extends: 'Lava.widget.input.Abstract',
+	Extends: 'Lava.widget.input.InputAbstract',
 
 	name: 'select',
 
@@ -24661,7 +25013,7 @@ Lava.define(
 
 	broadcastInDOM: function() {
 
-		this.Abstract$broadcastInDOM();
+		this.InputAbstract$broadcastInDOM();
 		this._refreshValue();
 
 	},
@@ -24678,7 +25030,7 @@ Lava.define(
 	_refresh: function() {
 
 		// to synchronize the selected value after setting options and optgroups property
-		this.Abstract$_refresh();
+		this.InputAbstract$_refresh();
 		this._refreshValue();
 
 	},
@@ -25001,7 +25353,7 @@ Lava.define(
 
 	/**
 	 * Input widgets, registered with the FieldGroup
-	 * @type {Array.<Lava.widget.input.Abstract>}
+	 * @type {Array.<Lava.widget.input.InputAbstract>}
 	 */
 	_fields: [],
 	/**
@@ -25059,7 +25411,7 @@ Lava.define(
 
 	/**
 	 * Get `_fields`
-	 * @returns {Array.<Lava.widget.input.Abstract>}
+	 * @returns {Array.<Lava.widget.input.InputAbstract>}
 	 */
 	getFields: function() {
 
@@ -25069,7 +25421,7 @@ Lava.define(
 
 	/**
 	 * Get `_submit_fields`
-	 * @returns {Array.<Lava.widget.input.Abstract>}
+	 * @returns {Array.<Lava.widget.input.InputAbstract>}
 	 */
 	getSubmitFields: function() {
 
@@ -25103,7 +25455,7 @@ Lava.define(
 
 	/**
 	 * Cleanup destroyed fields from local members
-	 * @param {Lava.widget.input.Abstract} field_widget
+	 * @param {Lava.widget.input.InputAbstract} field_widget
 	 * @param event_args
 	 * @param native_args Reference to local array with input widgets
 	 */
@@ -25186,7 +25538,7 @@ Lava.define(
 
 	/**
 	 * @param config
-	 * @param {boolean} config.options.keep_expanded_on_add If you add another expanded panel to accordion - it's collapsed by default.
+	 * @param {boolean} config.options.keep_new_panels_expanded If you add another expanded panel to accordion - it's collapsed by default.
 	 *  You may set this option to keep it expanded - in this case all expanded panels will be collapsed as soon as any panel is expanded by user
 	 * @param widget
 	 * @param parent_view
@@ -25298,7 +25650,7 @@ Lava.define(
 	 */
 	registerPanel: function(panel_widget) {
 
-		var collapse_on_add = !this._config.options || !this._config.options['keep_expanded_on_add'];
+		var collapse_on_add = !this._config.options || !this._config.options['keep_new_panels_expanded'];
 
 		if (panel_widget.get('is_expanded')) {
 
@@ -26925,7 +27277,7 @@ Lava.define(
 
 	/**
 	 * Year input widget
-	 * @type {Lava.widget.input.Abstract}
+	 * @type {Lava.widget.input.InputAbstract}
 	 */
 	_year_input: null,
 	/**
@@ -27165,7 +27517,7 @@ Lava.define(
 
 	/**
 	 * Register input for the year on months view
-	 * @param {Lava.widget.input.Abstract} view
+	 * @param {Lava.widget.input.InputAbstract} view
 	 */
 	_handleYearInput: function(view) {
 
@@ -27202,7 +27554,7 @@ Lava.define(
 
 	/**
 	 * Refresh <wp>_displayed_year</wp> property from year input
-	 * @param {Lava.widget.input.Abstract} widget
+	 * @param {Lava.widget.input.InputAbstract} widget
 	 */
 	_onYearInputValueChanged: function(widget) {
 
@@ -27648,6 +28000,112 @@ return (this._binds[0].getValue());
 		},
 		default_events: [],
 		real_class: "input.Text",
+		"class": "Lava.WidgetConfigExtensionGateway",
+		extender_type: "Standard",
+		is_extended: false
+	},
+	PasswordInput: {
+		"extends": "InputAbstract",
+		includes: {
+			input_view: [
+				"\r\n\t\t",
+				{
+					type: "view",
+					"class": "View",
+					container: {
+						type: "Element",
+						tag_name: "input",
+						events: {
+							change: [{
+								locator_type: "Name",
+								locator: "password_input",
+								name: "value_changed"
+							}],
+							input: [{
+								locator_type: "Name",
+								locator: "password_input",
+								name: "input"
+							}],
+							focus: [{
+								locator_type: "Name",
+								locator: "password_input",
+								name: "_focused"
+							}],
+							blur: [{
+								locator_type: "Name",
+								locator: "password_input",
+								name: "_blurred"
+							}]
+						},
+						property_bindings: {
+							name: {
+								evaluator: function() {
+return (this._binds[0].getValue());
+},
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "password_input",
+									tail: ["name"]
+								}]
+							},
+							disabled: {
+								evaluator: function() {
+return (this._binds[0].getValue());
+},
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "password_input",
+									tail: ["is_disabled"]
+								}]
+							},
+							required: {
+								evaluator: function() {
+return (this._binds[0].getValue());
+},
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "password_input",
+									tail: ["is_required"]
+								}]
+							},
+							readonly: {
+								evaluator: function() {
+return (this._binds[0].getValue());
+},
+								flags: {isScopeEval: true},
+								binds: [{
+									locator_type: "Name",
+									locator: "password_input",
+									tail: ["is_readonly"]
+								}]
+							}
+						},
+						resource_id: {
+							locator_type: "Name",
+							locator: "password_input",
+							name: "PASSWORD_INPUT_ELEMENT"
+						}
+					},
+					roles: [{name: "_input_view"}]
+				},
+				"\r\n\t"
+			]
+		},
+		sugar: {
+			tag_name: "password_input",
+			root_resource_name: "PASSWORD_INPUT_ELEMENT",
+			attribute_mappings: {
+				value: {
+					type: "property",
+					type_name: "String"
+				}
+			}
+		},
+		default_events: [],
+		real_class: "input.Password",
 		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Standard",
 		is_extended: false
@@ -28738,15 +29196,13 @@ return (this._binds[0].getValue());
 			tag_name: "accordion",
 			root_resource_name: "ACCORDION_CONTAINER",
 			content_schema: {
-				type: "union",
-				tag_roles: {
-					content: {type: "include"}
-				}
+				type: "storage_object",
+				name: "panels"
 			},
 			attribute_mappings: {
-				"keep-expanded-on-add": {
+				"keep-new-panels-expanded": {
 					type: "switch",
-					name: "keep_expanded_on_add"
+					name: "keep_new_panels_expanded"
 				}
 			}
 		},
@@ -30347,6 +30803,7 @@ Lava.sugar_map = {
 	checkbox: {widget_title: "CheckBox"},
 	text_area: {widget_title: "TextArea"},
 	text_input: {widget_title: "TextInput"},
+	password_input: {widget_title: "PasswordInput"},
 	radio: {widget_title: "Radio"},
 	submit_input: {widget_title: "SubmitInput"},
 	submit_button: {widget_title: "SubmitButton"},

@@ -42,11 +42,6 @@ Lava.schema = {
 		 */
 		VIEW_MANAGER_CLASS: 'Lava.system.ViewManager',
 		/**
-		 * Class for {@link Lava#focus_manager}
-		 * @const
-		 */
-		FOCUS_MANAGER_CLASS: 'Lava.system.FocusManager',
-		/**
 		 * ViewManager events (routed via templates), which are enabled by default, so does not require a call to lendEvent()
 		 * @const
 		 */
@@ -87,6 +82,21 @@ Lava.schema = {
 		 * @const
 		 */
 		HIDE_EMPTY_TOOLTIPS: true
+	},
+	/**
+	 * Settings for {@link Lava#focus_manager}
+	 */
+	focus_manager: {
+		/**
+		 * Is FocusManager enabled
+		 * @const
+		 */
+		IS_ENABLED: true,
+		/**
+		 * Class for {@link Lava#focus_manager}
+		 * @const
+		 */
+		CLASS: 'Lava.system.FocusManager'
 	},
 	/**
 	 * Settings for Data layer: modules, records and fields

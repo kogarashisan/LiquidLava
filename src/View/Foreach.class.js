@@ -108,7 +108,7 @@ Lava.define(
 		this.Abstract$_initMembers(properties);
 
 		this._argument = new Lava.scope.Argument(this._config.argument, this, this._widget);
-		this._foreach_scope = new Lava.scope.Foreach(this._argument, this, this._widget, this._config.options ? this._config.options.scope : null);
+		this._foreach_scope = new Lava.scope.Foreach(this._argument, this, this._widget, this._config.scope);
 		this._foreach_scope_changed_listener = this._foreach_scope.on('changed', this._onDataSourceChanged, this);
 		this._foreach_scope.on('new_enumerable', this._onEnumerableChanged, this);
 		this._as = this._config.as;
