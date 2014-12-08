@@ -879,35 +879,40 @@ Lava.ClassManager = {
 
 	/**
 	 * Replace function in a class with new body. Class may be in middle of inheritance chain.
-	 * @param {Object} instance Class instance, must be <kw>this</kw>
+	 * Also replaces old method with <kw>null</kw>.
+	 *
+	 * @param {Object} instance Current class instance, must be <kw>this</kw>
 	 * @param {string} instance_class_name Short name of current class
 	 * @param {string} function_name Function to replace
-	 * @param {function} new_function_body
+	 * @param {string} new_function_name Name of new method from the prototype
 	 * @returns {string} name of overridden function Name, that was replaced
 	 */
-	patch: function(instance, instance_class_name, function_name, new_function_body) {
+	patch: function(instance, instance_class_name, function_name, new_function_name) {
 
 		var cd = instance.Class,
 			proto = cd.constructor.prototype,
 			names = cd.hierarchy_names,
 			i = names.indexOf(instance_class_name),
 			count = names.length,
-			overridden_name,
-			found = false;
+			overridden_name;
 
 		if (Lava.schema.DEBUG && i == -1) Lava.t();
 
+		// find method that belongs to this class body
 		for (; i < count; i++) {
 			overridden_name = names[i] + "$" + function_name;
-			if (overridden_name in proto) {
-				found = true;
-				proto[overridden_name] = new_function_body;
+			// must not use "in" operator, as function body can be removed and assigned null (see below)
+			if (proto[overridden_name]) {
+				function_name = overridden_name;
 				break;
 			}
 		}
 
-		proto[found ? overridden_name : function_name] = new_function_body;
-		return found ? overridden_name : function_name;
+		proto[function_name] = proto[new_function_name];
+		// this plays role when class replaces it's method with parent's method (removes it's own method)
+		// and parent also wants to apply patches to the same method (see comment above)
+		proto[new_function_name] = null;
+		return function_name;
 
 	}
 

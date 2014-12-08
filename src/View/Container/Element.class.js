@@ -108,12 +108,35 @@ Lava.define(
 	_is_element_owner: true,
 
 	/**
-	 * Create Element container instance. Create bindings
+	 * One-time static constructor, which modifies container's prototype and replaces itself with correct version
+	 *
 	 * @param {Lava.view.Abstract} view
 	 * @param {_cElementContainer} config
 	 * @param {Lava.widget.Standard} widget
 	 */
 	init: function(view, config, widget) {
+
+		// About IOS bugfixes:
+		// http://www.quirksmode.org/blog/archives/2010/09/click_event_del.html
+		// http://www.quirksmode.org/blog/archives/2010/10/click_event_del_1.html
+
+		var needs_shim = Firestorm.Environment.platform == "ios";
+		Lava.ClassManager.patch(this, "Element", "addEventTarget", needs_shim ? "addEventTarget_IOS" : "addEventTarget_Normal");
+		Lava.ClassManager.patch(this, "Element", "informInDOM", needs_shim ? "informInDOM_IOS" : "informInDOM_Normal");
+
+		this.init_Normal(view, config, widget);
+		Lava.ClassManager.patch(this, "Element", "init", "init_Normal");
+
+	},
+
+	/**
+	 * Real constructor
+	 *
+	 * @param {Lava.view.Abstract} view
+	 * @param {_cElementContainer} config
+	 * @param {Lava.widget.Standard} widget
+	 */
+	init_Normal: function(view, config, widget) {
 
 		var name,
 			resource_owner,
@@ -194,36 +217,13 @@ Lava.define(
 	},
 
 	/**
-	 * One-time gateway for IOS bugfixes
-	 * http://www.quirksmode.org/blog/archives/2010/09/click_event_del.html
-	 * http://www.quirksmode.org/blog/archives/2010/10/click_event_del_1.html
-	 */
-	_fixIOS: function() {
-
-		var prototype = this.Class.constructor.prototype;
-		if (navigator.userAgent.match(/i(Phone|Pod|Pad)/)) {
-
-			prototype.addEventTarget = this.addEventTarget_IOS;
-			prototype.informInDOM = this.informInDOM_IOS;
-
-		} else {
-
-			prototype.addEventTarget = this.addEventTarget_Original;
-			prototype.informInDOM = this.informInDOM_Original;
-
-		}
-
-	},
-
-	/**
 	 * Add a route for DOM event
 	 * @param {string} event_name
 	 * @param {_cTarget} target
 	 */
 	addEventTarget: function(event_name, target) {
 
-		this._fixIOS();
-		this.addEventTarget(event_name, target);
+		Lava.t();
 
 	},
 
@@ -237,7 +237,7 @@ Lava.define(
 		if (this._is_inDOM && event_name == 'click' && !(event_name in this._events)) {
 			this.getDOMElement().onclick = Lava.noop;
 		}
-		this.addEventTarget_Original(event_name, target)
+		this.addEventTarget_Normal(event_name, target)
 
 	},
 
@@ -246,7 +246,7 @@ Lava.define(
 	 * @param {string} event_name
 	 * @param {_cTarget} target
 	 */
-	addEventTarget_Original: function(event_name, target) {
+	addEventTarget_Normal: function(event_name, target) {
 
 		if (!(event_name in this._events)) {
 
@@ -780,8 +780,7 @@ Lava.define(
 	 */
 	informInDOM: function() {
 
-		this._fixIOS();
-		this.informInDOM();
+		Lava.t();
 
 	},
 
@@ -790,7 +789,7 @@ Lava.define(
 	 */
 	informInDOM_IOS: function() {
 
-		this.informInDOM_Original();
+		this.informInDOM_Normal();
 		this.getDOMElement().onclick = Lava.noop;
 
 	},
@@ -798,7 +797,7 @@ Lava.define(
 	/**
 	 * Normal version of informInDOM
 	 */
-	informInDOM_Original: function() {
+	informInDOM_Normal: function() {
 
 		this._is_inDOM = true;
 		if (Lava.schema.DEBUG && this._element) Lava.t();
@@ -890,19 +889,6 @@ Lava.define(
 		for (name in this._style_bindings) this._style_bindings[name][callback_name](callback_argument);
 
 		for (name in this._class_bindings) this._class_bindings[name][callback_name](callback_argument);
-
-	},
-
-	/**
-	 * Set new tag name for container
-	 * @param {string} tag_name
-	 */
-	setSignature: function(tag_name) {
-
-		if (Lava.schema.DEBUG && tag_name != tag_name.toLowerCase()) Lava.t("Tag names must be lower case");
-		if (this._is_inDOM) Lava.t("Can not change signature on elements that are in dom");
-		this._tag_name = tag_name;
-		this._is_void = Lava.isVoidTag(tag_name);
 
 	},
 

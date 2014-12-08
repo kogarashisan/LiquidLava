@@ -1,6 +1,6 @@
 
 /**
- * Radio or checkbox has changed it's "checked" state
+ * Radio or checkbox has changed it's "checked" or "indeterminate" state
  * @event Lava.widget.input.RadioAbstract#checked_changed
  */
 

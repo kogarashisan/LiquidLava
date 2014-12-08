@@ -94,11 +94,12 @@ Lava.define(
 	 * @type {boolean}
 	 */
 	_cancel_bubble: false,
+
 	/**
-	 * True, if bubbling of current event or role may be cancelled
+	 * Is in process of dispatching roles or events (so we know that bubble can be cancelled)
 	 * @type {boolean}
 	 */
-	_is_bubble_cancellable: false,
+	_is_dispatching: false,
 
 	/**
 	 * Create an instance of the class, acquire event listeners
@@ -375,6 +376,8 @@ Lava.define(
 			bubble_index = 0,
 			bubble_targets_count;
 
+		this._is_dispatching = true;
+
 		for (; i < count; i++) {
 
 			target = targets[i];
@@ -415,6 +418,8 @@ Lava.define(
 					callback(widget, target_name, view, template_arguments, callback_arguments);
 
 					if (this._cancel_bubble) {
+						this._cancel_bubble = false;
+						this._is_dispatching = false;
 						return;
 					}
 
@@ -435,6 +440,8 @@ Lava.define(
 						);
 
 						if (this._cancel_bubble) {
+							this._cancel_bubble = false;
+							this._is_dispatching = false;
 							return;
 						}
 
@@ -445,6 +452,8 @@ Lava.define(
 			}
 
 		}
+
+		this._is_dispatching = false;
 
 	},
 
@@ -470,10 +479,13 @@ Lava.define(
 	 */
 	dispatchRoles: function(view, targets) {
 
-		this._cancel_bubble = false;
-		this._is_bubble_cancellable = true; // there may be nested widgets of the same type (example: hierarchical menu items)
-
-		this._dispatchCallback(view, targets, this._callRegisterViewInRole, null, this._global_role_targets);
+		this._dispatchCallback(
+			view,
+			targets,
+			this._callRegisterViewInRole,
+			null,
+			this._global_role_targets
+		);
 
 	},
 
@@ -489,8 +501,8 @@ Lava.define(
 	_callHandleEvent: function(widget, target_name, view, template_arguments, callback_arguments) {
 
 		return widget.handleEvent(
-			callback_arguments.dom_event_name,
-			callback_arguments.dom_event,
+			callback_arguments.event_name,
+			callback_arguments.event_object,
 			target_name,
 			view,
 			template_arguments
@@ -499,32 +511,43 @@ Lava.define(
 	},
 
 	/**
-	 * Perform dispatching of view DOM events
+	 * Helper method which checks for events presence on container and dispatches them
 	 * @param {Lava.view.Abstract} view
 	 * @param {string} event_name
-	 * @param {Object} dom_event
+	 * @param {Object} event_object
 	 */
-	_dispatchViewEvents: function(view, event_name, dom_event) {
+	_dispatchViewEvent: function(view, event_name, event_object) {
 
 		var targets = view.getContainer().getEventTargets(event_name);
 
 		if (targets) {
 
-			this._is_bubble_cancellable = true;
-			this._cancel_bubble = false;
-
-			this._dispatchCallback(
-				view,
-				targets,
-				this._callHandleEvent,
-				{
-					dom_event_name: event_name,
-					dom_event: dom_event
-				},
-				this._global_event_targets
-			);
+			this.dispatchEvent(view, event_name, event_object, targets);
 
 		}
+
+	},
+
+	/**
+	 * Dispatch DOM events to targets
+	 *
+	 * @param {Lava.view.Abstract} view View, that owns the container, which raised the events
+	 * @param {string} event_name
+	 * @param {Object} event_object DOM event object
+	 * @param {Array.<_cTarget>} targets
+	 */
+	dispatchEvent: function(view, event_name, event_object, targets) {
+
+		this._dispatchCallback(
+			view,
+			targets,
+			this._callHandleEvent,
+			{
+				event_name: event_name,
+				event_object: event_object
+			},
+			this._global_event_targets
+		);
 
 	},
 
@@ -582,7 +605,7 @@ Lava.define(
 	},
 
 	/**
-	 * Add global user-defined handler for unhandled template events
+	 * Add a widget which will globally handle bubbling events
 	 * @param {string} callback_name
 	 * @param {Lava.widget.Standard} widget
 	 */
@@ -604,7 +627,7 @@ Lava.define(
 	},
 
 	/**
-	 * Add a global user-defined handler for unhandled roles
+	 * Add a widget which will globally handle bubbling roles
 	 * @param {string} callback_name
 	 * @param {Lava.widget.Standard} widget
 	 */
@@ -736,8 +759,6 @@ Lava.define(
 			i,
 			count;
 
-		this._is_bubble_cancellable = false;
-
 		if (this._new_mouseover_target !== new_mouseover_target) {
 
 			// Warning! You must not modify `new_mouseover_element_stack` array!
@@ -770,11 +791,11 @@ Lava.define(
 
 				if (this._new_mouseover_view_stack.indexOf(this._old_mouseover_view_stack[i]) == -1) {
 
-					this._dispatchViewEvents(this._old_mouseover_view_stack[i], 'mouseleave', event_object);
+					this._dispatchViewEvent(this._old_mouseover_view_stack[i], 'mouseleave', event_object);
 
 				}
 
-				this._dispatchViewEvents(this._old_mouseover_view_stack[i], 'mouseout', event_object);
+				this._dispatchViewEvent(this._old_mouseover_view_stack[i], 'mouseout', event_object);
 
 			}
 
@@ -782,11 +803,11 @@ Lava.define(
 
 			for (i = 0, count = this._new_mouseover_view_stack.length; i < count; i++) {
 
-				this._dispatchViewEvents(this._new_mouseover_view_stack[i], 'mouseover', event_object);
+				this._dispatchViewEvent(this._new_mouseover_view_stack[i], 'mouseover', event_object);
 
 				if (this._old_mouseover_view_stack.indexOf(this._new_mouseover_view_stack[i]) == -1) {
 
-					this._dispatchViewEvents(this._new_mouseover_view_stack[i], 'mouseenter', event_object);
+					this._dispatchViewEvent(this._new_mouseover_view_stack[i], 'mouseenter', event_object);
 
 				}
 
@@ -846,12 +867,7 @@ Lava.define(
 				container = view.getContainer();
 				if (container.isElementContainer) {
 					if (container.getEventTargets(event_name)) {
-
-						this._dispatchViewEvents(view, event_name, event_object);
-						if (this._cancel_bubble) {
-							break;
-						}
-
+						this.dispatchEvent(view, event_name, event_object, container.getEventTargets(event_name));
 					}
 				}
 			}
@@ -995,11 +1011,11 @@ Lava.define(
 	 */
 	cancelBubble: function() {
 
-		if (Lava.schema.DEBUG && !this._is_bubble_cancellable) Lava.t("This event is not cancellable");
-
-		if (this._is_bubble_cancellable) {
-			this._cancel_bubble = true;
+		if (!this._is_dispatching) {
+			Lava.logError("Call to cancelBubble outside of dispatch cycle");
+			return;
 		}
+		this._cancel_bubble = true;
 
 	},
 

@@ -3,6 +3,22 @@
  */
 Firestorm.Environment = {
 
+	/**
+	 * opera|ie|firefox|chrome|safari|unknown
+	 * @type {string}
+	 */
+	browser_name: null,
+	/**
+	 * Browser version number
+	 * @type {string}
+	 */
+	browser_version: null,
+	/**
+	 * ios|windows|other|?
+	 * @type {number}
+	 */
+	platform: null,
+
 	//SUPPORTS_FUNCTION_SERIALIZATION: false,
 	/**
 	 * Supports HTML Range API
@@ -37,6 +53,10 @@ Firestorm.Environment = {
 		var document = window.document,
 			test_node,
 			requestAnimationFrame;
+
+		this.browser_name = Browser.name;
+		this.browser_version = Browser.version;
+		this.platform = Browser.platform;
 
 		// all, even old browsers, must be able to convert a function back to sources
 		//this.SUPPORTS_FUNCTION_SERIALIZATION = /xyz/.test(function(){xyz;});

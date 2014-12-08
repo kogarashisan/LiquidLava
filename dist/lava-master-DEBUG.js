@@ -234,6 +234,22 @@ Firestorm.KNOWN_EXCEPTIONS = {
  */
 Firestorm.Environment = {
 
+	/**
+	 * opera|ie|firefox|chrome|safari|unknown
+	 * @type {string}
+	 */
+	browser_name: null,
+	/**
+	 * Browser version number
+	 * @type {string}
+	 */
+	browser_version: null,
+	/**
+	 * ios|windows|other|?
+	 * @type {number}
+	 */
+	platform: null,
+
 	//SUPPORTS_FUNCTION_SERIALIZATION: false,
 	/**
 	 * Supports HTML Range API
@@ -268,6 +284,10 @@ Firestorm.Environment = {
 		var document = window.document,
 			test_node,
 			requestAnimationFrame;
+
+		this.browser_name = Browser.name;
+		this.browser_version = Browser.version;
+		this.platform = Browser.platform;
 
 		// all, even old browsers, must be able to convert a function back to sources
 		//this.SUPPORTS_FUNCTION_SERIALIZATION = /xyz/.test(function(){xyz;});
@@ -6068,35 +6088,40 @@ Lava.ClassManager = {
 
 	/**
 	 * Replace function in a class with new body. Class may be in middle of inheritance chain.
-	 * @param {Object} instance Class instance, must be <kw>this</kw>
+	 * Also replaces old method with <kw>null</kw>.
+	 *
+	 * @param {Object} instance Current class instance, must be <kw>this</kw>
 	 * @param {string} instance_class_name Short name of current class
 	 * @param {string} function_name Function to replace
-	 * @param {function} new_function_body
+	 * @param {string} new_function_name Name of new method from the prototype
 	 * @returns {string} name of overridden function Name, that was replaced
 	 */
-	patch: function(instance, instance_class_name, function_name, new_function_body) {
+	patch: function(instance, instance_class_name, function_name, new_function_name) {
 
 		var cd = instance.Class,
 			proto = cd.constructor.prototype,
 			names = cd.hierarchy_names,
 			i = names.indexOf(instance_class_name),
 			count = names.length,
-			overridden_name,
-			found = false;
+			overridden_name;
 
 		if (Lava.schema.DEBUG && i == -1) Lava.t();
 
+		// find method that belongs to this class body
 		for (; i < count; i++) {
 			overridden_name = names[i] + "$" + function_name;
-			if (overridden_name in proto) {
-				found = true;
-				proto[overridden_name] = new_function_body;
+			// must not use "in" operator, as function body can be removed and assigned null (see below)
+			if (proto[overridden_name]) {
+				function_name = overridden_name;
 				break;
 			}
 		}
 
-		proto[found ? overridden_name : function_name] = new_function_body;
-		return found ? overridden_name : function_name;
+		proto[function_name] = proto[new_function_name];
+		// this plays role when class replaces it's method with parent's method (removes it's own method)
+		// and parent also wants to apply patches to the same method (see comment above)
+		proto[new_function_name] = null;
+		return function_name;
 
 	}
 
@@ -14442,11 +14467,12 @@ Lava.define(
 	 * @type {boolean}
 	 */
 	_cancel_bubble: false,
+
 	/**
-	 * True, if bubbling of current event or role may be cancelled
+	 * Is in process of dispatching roles or events (so we know that bubble can be cancelled)
 	 * @type {boolean}
 	 */
-	_is_bubble_cancellable: false,
+	_is_dispatching: false,
 
 	/**
 	 * Create an instance of the class, acquire event listeners
@@ -14723,6 +14749,8 @@ Lava.define(
 			bubble_index = 0,
 			bubble_targets_count;
 
+		this._is_dispatching = true;
+
 		for (; i < count; i++) {
 
 			target = targets[i];
@@ -14763,6 +14791,8 @@ Lava.define(
 					callback(widget, target_name, view, template_arguments, callback_arguments);
 
 					if (this._cancel_bubble) {
+						this._cancel_bubble = false;
+						this._is_dispatching = false;
 						return;
 					}
 
@@ -14783,6 +14813,8 @@ Lava.define(
 						);
 
 						if (this._cancel_bubble) {
+							this._cancel_bubble = false;
+							this._is_dispatching = false;
 							return;
 						}
 
@@ -14793,6 +14825,8 @@ Lava.define(
 			}
 
 		}
+
+		this._is_dispatching = false;
 
 	},
 
@@ -14818,10 +14852,13 @@ Lava.define(
 	 */
 	dispatchRoles: function(view, targets) {
 
-		this._cancel_bubble = false;
-		this._is_bubble_cancellable = true; // there may be nested widgets of the same type (example: hierarchical menu items)
-
-		this._dispatchCallback(view, targets, this._callRegisterViewInRole, null, this._global_role_targets);
+		this._dispatchCallback(
+			view,
+			targets,
+			this._callRegisterViewInRole,
+			null,
+			this._global_role_targets
+		);
 
 	},
 
@@ -14837,8 +14874,8 @@ Lava.define(
 	_callHandleEvent: function(widget, target_name, view, template_arguments, callback_arguments) {
 
 		return widget.handleEvent(
-			callback_arguments.dom_event_name,
-			callback_arguments.dom_event,
+			callback_arguments.event_name,
+			callback_arguments.event_object,
 			target_name,
 			view,
 			template_arguments
@@ -14847,32 +14884,43 @@ Lava.define(
 	},
 
 	/**
-	 * Perform dispatching of view DOM events
+	 * Helper method which checks for events presence on container and dispatches them
 	 * @param {Lava.view.Abstract} view
 	 * @param {string} event_name
-	 * @param {Object} dom_event
+	 * @param {Object} event_object
 	 */
-	_dispatchViewEvents: function(view, event_name, dom_event) {
+	_dispatchViewEvent: function(view, event_name, event_object) {
 
 		var targets = view.getContainer().getEventTargets(event_name);
 
 		if (targets) {
 
-			this._is_bubble_cancellable = true;
-			this._cancel_bubble = false;
-
-			this._dispatchCallback(
-				view,
-				targets,
-				this._callHandleEvent,
-				{
-					dom_event_name: event_name,
-					dom_event: dom_event
-				},
-				this._global_event_targets
-			);
+			this.dispatchEvent(view, event_name, event_object, targets);
 
 		}
+
+	},
+
+	/**
+	 * Dispatch DOM events to targets
+	 *
+	 * @param {Lava.view.Abstract} view View, that owns the container, which raised the events
+	 * @param {string} event_name
+	 * @param {Object} event_object DOM event object
+	 * @param {Array.<_cTarget>} targets
+	 */
+	dispatchEvent: function(view, event_name, event_object, targets) {
+
+		this._dispatchCallback(
+			view,
+			targets,
+			this._callHandleEvent,
+			{
+				event_name: event_name,
+				event_object: event_object
+			},
+			this._global_event_targets
+		);
 
 	},
 
@@ -14930,7 +14978,7 @@ Lava.define(
 	},
 
 	/**
-	 * Add global user-defined handler for unhandled template events
+	 * Add a widget which will globally handle bubbling events
 	 * @param {string} callback_name
 	 * @param {Lava.widget.Standard} widget
 	 */
@@ -14952,7 +15000,7 @@ Lava.define(
 	},
 
 	/**
-	 * Add a global user-defined handler for unhandled roles
+	 * Add a widget which will globally handle bubbling roles
 	 * @param {string} callback_name
 	 * @param {Lava.widget.Standard} widget
 	 */
@@ -15084,8 +15132,6 @@ Lava.define(
 			i,
 			count;
 
-		this._is_bubble_cancellable = false;
-
 		if (this._new_mouseover_target !== new_mouseover_target) {
 
 			// Warning! You must not modify `new_mouseover_element_stack` array!
@@ -15118,11 +15164,11 @@ Lava.define(
 
 				if (this._new_mouseover_view_stack.indexOf(this._old_mouseover_view_stack[i]) == -1) {
 
-					this._dispatchViewEvents(this._old_mouseover_view_stack[i], 'mouseleave', event_object);
+					this._dispatchViewEvent(this._old_mouseover_view_stack[i], 'mouseleave', event_object);
 
 				}
 
-				this._dispatchViewEvents(this._old_mouseover_view_stack[i], 'mouseout', event_object);
+				this._dispatchViewEvent(this._old_mouseover_view_stack[i], 'mouseout', event_object);
 
 			}
 
@@ -15130,11 +15176,11 @@ Lava.define(
 
 			for (i = 0, count = this._new_mouseover_view_stack.length; i < count; i++) {
 
-				this._dispatchViewEvents(this._new_mouseover_view_stack[i], 'mouseover', event_object);
+				this._dispatchViewEvent(this._new_mouseover_view_stack[i], 'mouseover', event_object);
 
 				if (this._old_mouseover_view_stack.indexOf(this._new_mouseover_view_stack[i]) == -1) {
 
-					this._dispatchViewEvents(this._new_mouseover_view_stack[i], 'mouseenter', event_object);
+					this._dispatchViewEvent(this._new_mouseover_view_stack[i], 'mouseenter', event_object);
 
 				}
 
@@ -15194,12 +15240,7 @@ Lava.define(
 				container = view.getContainer();
 				if (container.isElementContainer) {
 					if (container.getEventTargets(event_name)) {
-
-						this._dispatchViewEvents(view, event_name, event_object);
-						if (this._cancel_bubble) {
-							break;
-						}
-
+						this.dispatchEvent(view, event_name, event_object, container.getEventTargets(event_name));
 					}
 				}
 			}
@@ -15343,11 +15384,11 @@ Lava.define(
 	 */
 	cancelBubble: function() {
 
-		if (Lava.schema.DEBUG && !this._is_bubble_cancellable) Lava.t("This event is not cancellable");
-
-		if (this._is_bubble_cancellable) {
-			this._cancel_bubble = true;
+		if (!this._is_dispatching) {
+			Lava.logError("Call to cancelBubble outside of dispatch cycle");
+			return;
 		}
+		this._cancel_bubble = true;
 
 	},
 
@@ -20065,12 +20106,35 @@ Lava.define(
 	_is_element_owner: true,
 
 	/**
-	 * Create Element container instance. Create bindings
+	 * One-time static constructor, which modifies container's prototype and replaces itself with correct version
+	 *
 	 * @param {Lava.view.Abstract} view
 	 * @param {_cElementContainer} config
 	 * @param {Lava.widget.Standard} widget
 	 */
 	init: function(view, config, widget) {
+
+		// About IOS bugfixes:
+		// http://www.quirksmode.org/blog/archives/2010/09/click_event_del.html
+		// http://www.quirksmode.org/blog/archives/2010/10/click_event_del_1.html
+
+		var needs_shim = Firestorm.Environment.platform == "ios";
+		Lava.ClassManager.patch(this, "Element", "addEventTarget", needs_shim ? "addEventTarget_IOS" : "addEventTarget_Normal");
+		Lava.ClassManager.patch(this, "Element", "informInDOM", needs_shim ? "informInDOM_IOS" : "informInDOM_Normal");
+
+		this.init_Normal(view, config, widget);
+		Lava.ClassManager.patch(this, "Element", "init", "init_Normal");
+
+	},
+
+	/**
+	 * Real constructor
+	 *
+	 * @param {Lava.view.Abstract} view
+	 * @param {_cElementContainer} config
+	 * @param {Lava.widget.Standard} widget
+	 */
+	init_Normal: function(view, config, widget) {
 
 		var name,
 			resource_owner,
@@ -20151,36 +20215,13 @@ Lava.define(
 	},
 
 	/**
-	 * One-time gateway for IOS bugfixes
-	 * http://www.quirksmode.org/blog/archives/2010/09/click_event_del.html
-	 * http://www.quirksmode.org/blog/archives/2010/10/click_event_del_1.html
-	 */
-	_fixIOS: function() {
-
-		var prototype = this.Class.constructor.prototype;
-		if (navigator.userAgent.match(/i(Phone|Pod|Pad)/)) {
-
-			prototype.addEventTarget = this.addEventTarget_IOS;
-			prototype.informInDOM = this.informInDOM_IOS;
-
-		} else {
-
-			prototype.addEventTarget = this.addEventTarget_Original;
-			prototype.informInDOM = this.informInDOM_Original;
-
-		}
-
-	},
-
-	/**
 	 * Add a route for DOM event
 	 * @param {string} event_name
 	 * @param {_cTarget} target
 	 */
 	addEventTarget: function(event_name, target) {
 
-		this._fixIOS();
-		this.addEventTarget(event_name, target);
+		Lava.t();
 
 	},
 
@@ -20194,7 +20235,7 @@ Lava.define(
 		if (this._is_inDOM && event_name == 'click' && !(event_name in this._events)) {
 			this.getDOMElement().onclick = Lava.noop;
 		}
-		this.addEventTarget_Original(event_name, target)
+		this.addEventTarget_Normal(event_name, target)
 
 	},
 
@@ -20203,7 +20244,7 @@ Lava.define(
 	 * @param {string} event_name
 	 * @param {_cTarget} target
 	 */
-	addEventTarget_Original: function(event_name, target) {
+	addEventTarget_Normal: function(event_name, target) {
 
 		if (!(event_name in this._events)) {
 
@@ -20737,8 +20778,7 @@ Lava.define(
 	 */
 	informInDOM: function() {
 
-		this._fixIOS();
-		this.informInDOM();
+		Lava.t();
 
 	},
 
@@ -20747,7 +20787,7 @@ Lava.define(
 	 */
 	informInDOM_IOS: function() {
 
-		this.informInDOM_Original();
+		this.informInDOM_Normal();
 		this.getDOMElement().onclick = Lava.noop;
 
 	},
@@ -20755,7 +20795,7 @@ Lava.define(
 	/**
 	 * Normal version of informInDOM
 	 */
-	informInDOM_Original: function() {
+	informInDOM_Normal: function() {
 
 		this._is_inDOM = true;
 		if (Lava.schema.DEBUG && this._element) Lava.t();
@@ -20847,19 +20887,6 @@ Lava.define(
 		for (name in this._style_bindings) this._style_bindings[name][callback_name](callback_argument);
 
 		for (name in this._class_bindings) this._class_bindings[name][callback_name](callback_argument);
-
-	},
-
-	/**
-	 * Set new tag name for container
-	 * @param {string} tag_name
-	 */
-	setSignature: function(tag_name) {
-
-		if (Lava.schema.DEBUG && tag_name != tag_name.toLowerCase()) Lava.t("Tag names must be lower case");
-		if (this._is_inDOM) Lava.t("Can not change signature on elements that are in dom");
-		this._tag_name = tag_name;
-		this._is_void = Lava.isVoidTag(tag_name);
 
 	},
 
@@ -20970,6 +20997,225 @@ Lava.define(
 
 			this._class_bindings[name].destroy();
 
+		}
+
+	}
+
+});
+
+Lava.define(
+'Lava.view.container.CheckboxElement',
+/**
+ * Container for checkbox input, which implements fixes for IE and other defect browsers.
+ * Fires custom ViewManager event "compatible_changed"
+ *
+ * @lends Lava.view.container.CheckboxElement#
+ * @extends Lava.view.container.Element#
+ */
+{
+	Extends: "Lava.view.container.Element",
+
+	/**
+	 * When running inside IE: bound "click" event handler
+	 * @type {function}
+	 */
+	_IE_click_callback: null,
+
+	init: function(view, config, widget) {
+
+		var needs_shim = (Firestorm.Environment.browser_name == 'ie'),
+			new_init_name = needs_shim ? "init_IE" : "Element$init";
+
+		Lava.ClassManager.patch(this, "CheckboxElement", "informInDOM", needs_shim ? "informInDOM_IE" : "Element$informInDOM");
+		Lava.ClassManager.patch(this, "CheckboxElement", "informRemove", needs_shim ? "informRemove_IE" : "Element$informRemove");
+
+		this[new_init_name](view, config, widget);
+		Lava.ClassManager.patch(this, "CheckboxElement", "init", new_init_name);
+
+	},
+
+	/**
+	 * Constructor for IE environment
+	 *
+	 * @param view
+	 * @param config
+	 * @param widget
+	 */
+	init_IE: function(view, config, widget) {
+
+		this.Element$init(view, config, widget);
+
+		var self = this;
+
+		this._IE_click_callback = function() {
+			if (self._events['compatible_changed']) {
+				Lava.view_manager.dispatchEvent(self._view, 'compatible_changed', null, self._events['compatible_changed']);
+			}
+		};
+
+	},
+
+	/**
+	 * Dummy method, which will be replaced in static constructor
+	 */
+	informInDOM: function() {
+
+		Lava.t();
+
+	},
+
+	/**
+	 * Dummy method, which will be replaced in static constructor
+	 */
+	informRemove: function() {
+
+		Lava.t();
+
+	},
+
+	/**
+	 * IE version of `informInDOM` - applies IE fixes.
+	 * IE 10, 11 and maybe other versions don't fire "change" when indeterminate state is cleared
+	 */
+	informInDOM_IE: function() {
+
+		this.Element$informInDOM();
+
+		var input_element = this.getDOMElement();
+		Firestorm.Element.addListener(input_element, "click", this._IE_click_callback);
+
+	},
+
+	/**
+	 * IE version of `informRemove` - clears IE fixes
+	 */
+	informRemove_IE: function() {
+
+		var input_element = this.getDOMElement();
+		Firestorm.Element.removeListener(input_element, "click", this._IE_click_callback);
+
+		this.Element$informRemove();
+
+	}
+
+});
+
+Lava.define(
+'Lava.view.container.TextInputElement',
+/**
+ * Container for "text" and "password" inputs, which implements fixes for IE and other defect browsers.
+ * Fires custom ViewManager event "compatible_changed".
+ *
+ * @lends Lava.view.container.TextInputElement#
+ * @extends Lava.view.container.Element#
+ */
+{
+	Extends: "Lava.view.container.Element",
+
+	/**
+	 * For IE8-9: input element listener callback, bound to this instance
+	 * @type {function}
+	 */
+	_OldIE_refresh_callback: null,
+	/**
+	 * For IE8-9: `onpropertychange` callback, bound to this instance
+	 * @type {function}
+	 */
+	_OldIE_property_change_callback: null,
+
+	init: function(view, config, widget) {
+
+		var needs_shim = Firestorm.Environment.NEEDS_INPUT_EVENT_SHIM,
+			new_init_name = needs_shim ? "init_IE" : "Element$init";
+
+		Lava.ClassManager.patch(this, "TextInputElement", "informInDOM", needs_shim ? "informInDOM_OldIE" : "Element$informInDOM");
+		Lava.ClassManager.patch(this, "TextInputElement", "informRemove", needs_shim ? "informRemove_OldIE" : "Element$informRemove");
+
+		this[new_init_name](view, config, widget);
+		Lava.ClassManager.patch(this, "TextInputElement", "init", new_init_name);
+
+	},
+
+	/**
+	 * Constructor for IE environment
+	 *
+	 * @param {Lava.view.Abstract} view
+	 * @param {_cElementContainer} config
+	 * @param {Lava.widget.Standard} widget
+	 */
+	init_IE: function(view, config, widget) {
+
+		this.Element$init(view, config, widget);
+
+		var self = this;
+
+		this._OldIE_refresh_callback = function() {
+			self._sendRefreshValue();
+		};
+		this._OldIE_property_change_callback = function(e) {
+			if (e.propertyName == "value") {
+				self._sendRefreshValue();
+			}
+		};
+
+	},
+
+	/**
+	 * Dummy method, which will be replaced in static constructor
+	 */
+	informInDOM: function() {
+
+		Lava.t();
+
+	},
+
+	/**
+	 * Dummy method, which will be replaced in static constructor
+	 */
+	informRemove: function() {
+
+		Lava.t();
+
+	},
+
+	/**
+	 * Applies additional listeners for IE8-9 to track value changes.
+	 * See http://benalpert.com/2013/06/18/a-near-perfect-oninput-shim-for-ie-8-and-9.html
+	 */
+	informInDOM_OldIE: function() {
+
+		this.Element$informInDOM();
+
+		var input_element = this.getDOMElement();
+		Firestorm.Element.addListener(input_element, "onpropertychange", this._OldIE_property_change_callback);
+		Firestorm.Element.addListener(input_element, "selectionchange", this._OldIE_refresh_callback);
+		Firestorm.Element.addListener(input_element, "keyup", this._OldIE_refresh_callback);
+		Firestorm.Element.addListener(input_element, "keydown", this._OldIE_refresh_callback);
+
+	},
+
+	/**
+	 * Removes IE listeners
+	 */
+	informRemove_OldIE: function() {
+
+		var input_element = this.getDOMElement();
+		Firestorm.Element.removeListener(input_element, "onpropertychange", this._OldIE_property_change_callback);
+		Firestorm.Element.removeListener(input_element, "selectionchange", this._OldIE_refresh_callback);
+		Firestorm.Element.removeListener(input_element, "keyup", this._OldIE_refresh_callback);
+		Firestorm.Element.removeListener(input_element, "keydown", this._OldIE_refresh_callback);
+
+		this.Element$informRemove();
+
+	},
+
+	/**
+	 * Dispatches custom ViewManager "compatible_changed" event
+	 */
+	_sendRefreshValue: function() {
+
+		if (this._events['compatible_changed']) {
+			Lava.view_manager.dispatchEvent(this._view, 'compatible_changed', null, this._events['compatible_changed']);
 		}
 
 	}
@@ -24542,38 +24788,6 @@ Lava.define(
 	},
 
 	/**
-	 * For IE8-9: input element listener callback, bound to this instance
-	 * @type {function}
-	 */
-	_OldIE_refresh_callback: null,
-	/**
-	 * For IE8-9: `onpropertychange` callback, bound to this instance
-	 * @type {function}
-	 */
-	_OldIE_property_change_callback: null,
-
-	init: function(config, widget, parent_view, template, properties) {
-
-		this.InputAbstract$init(config, widget, parent_view, template, properties);
-
-		if (this._isNeedsIEShim()) {
-
-			var self = this;
-
-			this._OldIE_refresh_callback = function() {
-				self._refreshValue();
-			};
-			this._OldIE_property_change_callback = function(e) {
-				if (e.propertyName === "value") {
-					self._refreshValue();
-				}
-			};
-
-		}
-
-	},
-
-	/**
 	 * Set input's value
 	 * @param {string} value
 	 */
@@ -24623,85 +24837,6 @@ Lava.define(
 	_onTextInput: function() {
 
 		this._refreshValue();
-
-	},
-
-	/**
-	 * Are we in IE8-9?
-	 * @returns {boolean}
-	 */
-	_isNeedsIEShim: function() {
-
-		return (Firestorm.Environment.NEEDS_INPUT_EVENT_SHIM && (this._type == "text" || this._type == "password"));
-
-	},
-
-	/**
-	 * One-time gateway, which replaces broadcastInDOM and broadcastRemove methods with their appropriate versions:
-	 * either version, that has fixes for old IE, or parent methods.
-	 * @param {string} called_name Name of the method, which was called. Will be called after patching.
-	 */
-	_applyIEShimGateway: function(called_name) {
-
-		var needs_shim = this._isNeedsIEShim(),
-			overridden_names = {
-				// replacing local method with methods from InputAbstract$ - removes it like it never existed
-				broadcastInDOM: Lava.ClassManager.patch(this, "TextAbstract", "broadcastInDOM", needs_shim ? this.broadcastInDOM_OldIE : this.InputAbstract$broadcastInDOM),
-				broadcastRemove: Lava.ClassManager.patch(this, "TextAbstract", "broadcastRemove", needs_shim ? this.broadcastRemove_OldIE : this.InputAbstract$broadcastRemove)
-			};
-
-		this[overridden_names[called_name]]();
-
-	},
-
-	broadcastInDOM: function() {
-
-		this._applyIEShimGateway("broadcastInDOM");
-
-	},
-
-	broadcastRemove: function() {
-
-		this._applyIEShimGateway("broadcastRemove");
-
-	},
-
-	/**
-	 * Applies additional listeners for IE8-9 to track value changes.
-	 * See http://benalpert.com/2013/06/18/a-near-perfect-oninput-shim-for-ie-8-and-9.html
-	 */
-	broadcastInDOM_OldIE: function() {
-
-		this.InputAbstract$broadcastInDOM();
-
-		if (this._input_container) {
-
-			var input_element = this._input_container.getDOMElement();
-			Firestorm.Element.addListener(input_element, "onpropertychange", this._OldIE_property_change_callback);
-			Firestorm.Element.addListener(input_element, "selectionchange", this._OldIE_refresh_callback);
-			Firestorm.Element.addListener(input_element, "keyup", this._OldIE_refresh_callback);
-			Firestorm.Element.addListener(input_element, "keydown", this._OldIE_refresh_callback);
-
-		}
-
-	},
-
-	/**
-	 * Removes IE listeners
-	 */
-	broadcastRemove_OldIE: function() {
-
-		if (this._input_container) {
-
-			var input_element = this._input_container.getDOMElement();
-			Firestorm.Element.removeListener(input_element, "onpropertychange", this._OldIE_property_change_callback);
-			Firestorm.Element.removeListener(input_element, "selectionchange", this._OldIE_refresh_callback);
-			Firestorm.Element.removeListener(input_element, "keyup", this._OldIE_refresh_callback);
-			Firestorm.Element.removeListener(input_element, "keydown", this._OldIE_refresh_callback);
-
-		}
-
-		this.InputAbstract$broadcastRemove();
 
 	}
 
@@ -24768,7 +24903,7 @@ Lava.define(
 });
 
 /**
- * Radio or checkbox has changed it's "checked" state
+ * Radio or checkbox has changed it's "checked" or "indeterminate" state
  * @event Lava.widget.input.RadioAbstract#checked_changed
  */
 
@@ -27683,7 +27818,7 @@ Lava.widgets = {
 					type: "view",
 					"class": "View",
 					container: {
-						type: "Element",
+						type: "CheckboxElement",
 						tag_name: "input",
 						events: {
 							change: [{
@@ -27700,6 +27835,11 @@ Lava.widgets = {
 								locator_type: "Name",
 								locator: "checkbox",
 								name: "_blurred"
+							}],
+							compatible_changed: [{
+								locator_type: "Name",
+								locator: "checkbox",
+								name: "checked_changed"
 							}]
 						},
 						property_bindings: {
@@ -27765,7 +27905,8 @@ return (this._binds[0].getValue());
 							name: "CHECKBOX_ELEMENT"
 						}
 					},
-					roles: [{name: "_input_view"}]
+					roles: [{name: "_input_view"}],
+					template: []
 				},
 				"\r\n\t"
 			]
@@ -27907,7 +28048,7 @@ return (this._binds[0].getValue());
 					type: "view",
 					"class": "View",
 					container: {
-						type: "Element",
+						type: "TextInputElement",
 						tag_name: "input",
 						events: {
 							change: [{
@@ -27929,6 +28070,11 @@ return (this._binds[0].getValue());
 								locator_type: "Name",
 								locator: "text_input",
 								name: "_blurred"
+							}],
+							compatible_changed: [{
+								locator_type: "Name",
+								locator: "text_input",
+								name: "value_changed"
 							}]
 						},
 						property_bindings: {
@@ -27983,7 +28129,8 @@ return (this._binds[0].getValue());
 							name: "TEXT_INPUT_ELEMENT"
 						}
 					},
-					roles: [{name: "_input_view"}]
+					roles: [{name: "_input_view"}],
+					template: []
 				},
 				"\r\n\t"
 			]
@@ -28013,7 +28160,7 @@ return (this._binds[0].getValue());
 					type: "view",
 					"class": "View",
 					container: {
-						type: "Element",
+						type: "TextInputElement",
 						tag_name: "input",
 						events: {
 							change: [{
@@ -28035,6 +28182,11 @@ return (this._binds[0].getValue());
 								locator_type: "Name",
 								locator: "password_input",
 								name: "_blurred"
+							}],
+							compatible_changed: [{
+								locator_type: "Name",
+								locator: "password_input",
+								name: "value_changed"
 							}]
 						},
 						property_bindings: {
@@ -28089,7 +28241,8 @@ return (this._binds[0].getValue());
 							name: "PASSWORD_INPUT_ELEMENT"
 						}
 					},
-					roles: [{name: "_input_view"}]
+					roles: [{name: "_input_view"}],
+					template: []
 				},
 				"\r\n\t"
 			]

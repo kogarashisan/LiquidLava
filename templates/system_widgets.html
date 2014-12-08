@@ -18,19 +18,23 @@
 
 <x:define controller="input.CheckBox" title="CheckBox" extends="InputAbstract">
 	<include name="input_view">
-		<input
-			x:type="view"
-			x:roles="_input_view"
-			x:resource_id="$checkbox.CHECKBOX_ELEMENT"
-			x:event:change="$checkbox.checked_changed"
-			x:event:focus="$checkbox._focused"
-			x:event:blur="$checkbox._blurred"
+		<x:attach_directives>
+			<input
+				x:type="view"
+				x:roles="_input_view"
+				x:resource_id="$checkbox.CHECKBOX_ELEMENT"
+				x:event:change="$checkbox.checked_changed"
+				x:event:focus="$checkbox._focused"
+				x:event:blur="$checkbox._blurred"
+				x:event:compatible_changed="$checkbox.checked_changed"
 
-			x:bind:name="$checkbox.name"
-			x:bind:value="$checkbox.value"
-			x:bind:disabled="$checkbox.is_disabled"
-			x:bind:required="$checkbox.is_required"
-			x:bind:readonly="$checkbox.is_readonly" />
+				x:bind:name="$checkbox.name"
+				x:bind:value="$checkbox.value"
+				x:bind:disabled="$checkbox.is_disabled"
+				x:bind:required="$checkbox.is_required"
+				x:bind:readonly="$checkbox.is_readonly" />
+			<x:container_config>{type: "CheckboxElement"}</x:container_config>
+		</x:attach_directives>
 	</include>
 	<script x:equiv="sugar" type="application/json">
 		{
@@ -75,19 +79,23 @@
 
 <x:define controller="input.Text" title="TextInput" extends="InputAbstract">
 	<include name="input_view">
-		<input
-			x:type="view"
-			x:roles="_input_view"
-			x:resource_id="$text_input.TEXT_INPUT_ELEMENT"
-			x:event:change="$text_input.value_changed"
-			x:event:input="$text_input.input"
-			x:event:focus="$text_input._focused"
-			x:event:blur="$text_input._blurred"
+		<x:attach_directives>
+			<input
+				x:type="view"
+				x:roles="_input_view"
+				x:resource_id="$text_input.TEXT_INPUT_ELEMENT"
+				x:event:change="$text_input.value_changed"
+				x:event:input="$text_input.input"
+				x:event:focus="$text_input._focused"
+				x:event:blur="$text_input._blurred"
+				x:event:compatible_changed="$text_input.value_changed"
 
-			x:bind:name="$text_input.name"
-			x:bind:disabled="$text_input.is_disabled"
-			x:bind:required="$text_input.is_required"
-			x:bind:readonly="$text_input.is_readonly"/>
+				x:bind:name="$text_input.name"
+				x:bind:disabled="$text_input.is_disabled"
+				x:bind:required="$text_input.is_required"
+				x:bind:readonly="$text_input.is_readonly"/>
+			<x:container_config>{type: "TextInputElement"}</x:container_config>
+		</x:attach_directives>
 	</include>
 	<script x:equiv="sugar" type="application/json">
 		{
@@ -103,19 +111,23 @@
 
 <x:define controller="input.Password" title="PasswordInput" extends="InputAbstract">
 	<include name="input_view">
-		<input
-			x:type="view"
-			x:roles="_input_view"
-			x:resource_id="$password_input.PASSWORD_INPUT_ELEMENT"
-			x:event:change="$password_input.value_changed"
-			x:event:input="$password_input.input"
-			x:event:focus="$password_input._focused"
-			x:event:blur="$password_input._blurred"
+		<x:attach_directives>
+			<input
+				x:type="view"
+				x:roles="_input_view"
+				x:resource_id="$password_input.PASSWORD_INPUT_ELEMENT"
+				x:event:change="$password_input.value_changed"
+				x:event:input="$password_input.input"
+				x:event:focus="$password_input._focused"
+				x:event:blur="$password_input._blurred"
+				x:event:compatible_changed="$password_input.value_changed"
 
-			x:bind:name="$password_input.name"
-			x:bind:disabled="$password_input.is_disabled"
-			x:bind:required="$password_input.is_required"
-			x:bind:readonly="$password_input.is_readonly"/>
+				x:bind:name="$password_input.name"
+				x:bind:disabled="$password_input.is_disabled"
+				x:bind:required="$password_input.is_required"
+				x:bind:readonly="$password_input.is_readonly"/>
+			<x:container_config>{type: "TextInputElement"}</x:container_config>
+		</x:attach_directives>
 	</include>
 	<script x:equiv="sugar" type="application/json">
 		{
