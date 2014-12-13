@@ -1,18 +1,18 @@
 
 <x:define controller="Collapsible" title="Collapsible">
-	<main_template>
+	<template>
 		<div x:type="view" x:resource_id="$collapsible.COLLAPSIBLE_CONTAINER" x:roles="$collapsible._container_view">
 			{>$collapsible.content}
 		</div>
-	</main_template>
-	<script x:equiv="options" type="application/json">
+	</template>
+	<script x:equiv="options" type="lava/options">
 		{
 			animation: {
 				'class': 'Collapse'
 			}
 		}
 	</script>
-	<script x:equiv="sugar" type="application/json">
+	<script x:equiv="sugar" type="lava/options">
 		{
 			tag_name: 'collapsible',
 			root_resource_name: 'COLLAPSIBLE_CONTAINER',
@@ -29,12 +29,12 @@
 </x:define>
 
 <x:define controller="CollapsiblePanel" title="CollapsiblePanel" extends="Collapsible">
-	<main_view>
+	<view>
 		<div x:type="view" x:resource_id="$collapsible_panel.COLLAPSIBLE_PANEL_CONTAINER">
 			{>$collapsible_panel.header_wrapper}
 			{>$collapsible_panel.content_wrapper}
 		</div>
-	</main_view>
+	</view>
 	<include name="header_wrapper">
 		<div x:type="view" x:event:click="$collapsible_panel.header_click" x:resource_id="$collapsible_panel.COLLAPSIBLE_PANEL_HEADER_CONTAINER">
 			{>$collapsible_panel.header}
@@ -56,7 +56,7 @@
 	<include name="content">
 		{#>$collapsible_panel.content}
 	</include>
-	<script x:equiv="sugar" type="application/json">
+	<script x:equiv="sugar" type="lava/options">
 		{
 			tag_name: 'collapsible-panel',
 			root_resource_name: 'COLLAPSIBLE_PANEL_CONTAINER',
@@ -100,7 +100,7 @@
 			</div>
 		{/if}
 	</include>
-	<script x:equiv="sugar" type="application/json">
+	<script x:equiv="sugar" type="lava/options">
 		{
 			tag_name: 'collapsible-panel-ext'
 		}
@@ -111,9 +111,9 @@
 </x:define>
 
 <x:define controller="Accordion" title="Accordion">
-	<main_template>
+	<template>
 		{>$accordion.content}
-	</main_template>
+	</template>
 	<include name="content">
 		<div x:type="container" x:resource_id="$accordion.ACCORDION_CONTAINER">
 			{#foreach($accordion._panels) as=panel}
@@ -130,7 +130,7 @@
 			{/foreach}
 		</div>
 	</include>
-	<script x:equiv="storage_schema" type="application/json">
+	<script x:equiv="storage_schema" type="lava/options">
 		{
 			panels: {
 				type: 'object_collection',
@@ -143,7 +143,7 @@
 			}
 		}
 	</script>
-	<script x:equiv="sugar" type="application/json">
+	<script x:equiv="sugar" type="lava/options">
 		{
 			tag_name: 'accordion',
 			root_resource_name: 'ACCORDION_CONTAINER',
@@ -163,10 +163,10 @@
 </x:define>
 
 <x:define controller="Tabs" title="Tabs">
-	<main_template>
+	<template>
 		{>tabs_header}
 		{>tabs_body}
-	</main_template>
+	</template>
 	<include name="tabs_header">
 		<ul x:type="container" x:resource_id="$tabs.TABS_HEADERS_CONTAINER">
 			{#foreach($tabs._tabs) as=tab}
@@ -191,7 +191,7 @@
 			{/foreach}
 		</div>
 	</include>
-	<script x:equiv="storage_schema" type="application/json">
+	<script x:equiv="storage_schema" type="lava/options">
 		{
 			tabs: {
 				type: 'object_collection',
@@ -207,7 +207,7 @@
 			}
 		}
 	</script>
-	<script x:equiv="sugar" type="application/json">
+	<script x:equiv="sugar" type="lava/options">
 		{
 			tag_name: 'tabs',
 			content_schema: {
@@ -224,7 +224,7 @@
 </x:define>
 
 <x:define controller="Tooltip" title="Tooltip">
-	<main_view>
+	<view>
 		<div class="tooltip" x:type="view"
 				x:style:top="($tooltip.y + $tooltip.y_offset) + 'px'"
 				x:style:left="($tooltip.x + $tooltip.x_offset) + 'px'"
@@ -234,11 +234,11 @@
 			</div>
 			<div class="tooltip-arrow"></div>
 		</div>
-	</main_view>
+	</view>
 </x:define>
 
 <x:define controller="DropDown" title="DropDown">
-	<script x:equiv="options" type="application/json">
+	<script x:equiv="options" type="lava/options">
 		{
 			target_class: 'open'
 		}
@@ -246,13 +246,13 @@
 </x:define>
 
 <x:define controller="Tree" title="Tree">
-	<main_view>
+	<view>
 		<div x:type="view" x:resource_id="$tree.MAIN_TREE_CONTAINER">
 			{$foreach($tree.records) as=node}
 				{>$tree.node}
 			{/foreach}
 		</div>
-	</main_view>
+	</view>
 	<assign name="pad">''</assign>
 	<assign name="level">0</assign>
 	<include name="node">
@@ -314,12 +314,12 @@
 </x:define>
 
 <x:define controller="Table" title="Table">
-	<main_view>
+	<view>
 		<table x:type="view" x:resource_id="$table.TABLE_ELEMENT">
 			{>$table.thead}
 			{>$table.tbody}
 		</table>
-	</main_view>
+	</view>
 	<include name="thead">
 		<thead x:type="view" x:resource_id="$table.THEAD_ELEMENT">
 			<tr x:type="container">
@@ -347,7 +347,7 @@
 			{/foreach}
 		</tbody>
 	</include>
-	<script type="application/json" x:equiv="storage_schema">
+	<script type="lava/options" x:equiv="storage_schema">
 		{
 			cells: {type: 'template_hash', tag_name: 'cell'}
 		}
@@ -371,7 +371,7 @@
 </x:define>
 
 <x:define controller="Calendar" title="Calendar">
-	<main_view>
+	<view>
 		<div x:type="view" class="lava-calendar">
 			{#if($calendar._selected_view == 'days')}
 				{>$calendar.days_view}
@@ -379,7 +379,7 @@
 				{>$calendar.months_view}
 			{/if}
 		</div>
-	</main_view>
+	</view>
 	<include name="days_view">
 		<div class="lava-calendar-header">
 			<a href="#" x:type="view" x:event:click="$calendar.previous_month_click" class="lava-calendar-left-arrow">&#9664;</a>
@@ -463,7 +463,7 @@
 			<add_properties maxlength="5"></add_properties>
 		</container>
 	</resources>
-	<script x:equiv="options" type="application/json">
+	<script x:equiv="options" type="lava/options">
 		{
 			invalid_input_class: 'lava-calendar-input-invalid'
 		}

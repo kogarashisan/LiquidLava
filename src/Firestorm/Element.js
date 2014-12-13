@@ -197,12 +197,6 @@ Firestorm.Element = {
 
 		return Slick.search(element, selector, []);
 
-	},
-
-	getTagName: function(element) {
-
-		return element.nodeName.toLowerCase();
-
 	}
 
 };

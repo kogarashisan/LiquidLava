@@ -515,12 +515,6 @@ Firestorm.Element = {
 
 		return Slick.search(element, selector, []);
 
-	},
-
-	getTagName: function(element) {
-
-		return element.nodeName.toLowerCase();
-
 	}
 
 };
@@ -589,6 +583,28 @@ Firestorm.Element,
 
 		return Slick.getAttribute(element, name);
 
+	},
+
+	/**
+	 * Get element's tag name
+	 * @param {HTMLElement} element
+	 * @returns {string}
+	 */
+	getTagName: function(element) {
+
+		return element.nodeName.toLowerCase();
+
+	},
+
+	/**
+	 * Get element's `outerHTML`
+	 * @param {HTMLElement} element
+	 * @returns {string}
+	 */
+	getOuterHTML: function(element) {
+
+		return element.outerHTML;
+
 	}
 
 });
@@ -607,7 +623,7 @@ Firestorm.Element,
 	 */
 	getSize: function(element) {
 
-		if (Firestorm.schema.DEBUG && (['body', 'html'].indexOf(element.tagName.toLowerCase()) != -1))
+		if (Firestorm.schema.DEBUG && (['body', 'html'].indexOf(element.nodeName.toLowerCase()) != -1))
 			Firestorm.t('This method requires an element inside the body tag.');
 
 		return {x: element.offsetWidth, y: element.offsetHeight};
@@ -922,7 +938,7 @@ Firestorm.DOM = {
 	 **/
 	_firstNodeFor: function(parentNode, html) {
 
-		var map = this._wrap_map[parentNode.tagName.toLowerCase()] || [ 0, "", "" ],
+		var map = this._wrap_map[parentNode.nodeName.toLowerCase()] || [ 0, "", "" ],
 			depth = map[0],
 			start = map[1],
 			end = map[2],
@@ -2098,7 +2114,7 @@ var Lava = {
 	_elementToWidget: function(element) {
 
 		var widget,
-			raw_template = Lava.TemplateParser.parseRaw(element.outerHTML),
+			raw_template = Lava.TemplateParser.parseRaw(Firestorm.Element.getOuterHTML(element)),
 			raw_tag,
 			config,
 			constructor;
@@ -2489,7 +2505,8 @@ Lava.schema = {
 		 */
 		VIEW_MANAGER_CLASS: 'Lava.system.ViewManager',
 		/**
-		 * ViewManager events (routed via templates), which are enabled by default, so does not require a call to lendEvent()
+		 * ViewManager events (routed via templates), which are enabled by default, so does not require a call to lendEvent().
+		 * Events from this list must have a valid `target` property.
 		 * @const
 		 */
 		DEFAULT_EVENTS: [
@@ -4214,11 +4231,12 @@ Lava.Core = {
 		var self = this,
 			freeze_protection = this._freeze_protected_events.indexOf(event_name) != -1;
 
-		return function(event_object) {
-
-			// Note: inside this wrapper 'this' will refer to window
-			self._onDomEvent(event_name, event_object, freeze_protection);
-
+		// I'm not sure about this, but looks like the argument should be specifically named "event"
+		// http://stackoverflow.com/questions/11188729/jquery-keyup-event-trouble-in-opera
+		// see also this to understand the roots of such behaviour:
+		// http://stackoverflow.com/questions/4968194/event-keyword-in-js
+		return function(event) {
+			self._onDomEvent(event_name, event, freeze_protection);
 		};
 
 	},
@@ -5021,9 +5039,9 @@ Lava.TemplateWalker = {
 			count;
 
 		if ('template' in node) {
-			this._has_enter_region && this._visitor.enterRegion(this, 'main_template');
+			this._has_enter_region && this._visitor.enterRegion(this, 'template');
 			this._walkTemplate(node.template);
-			this._has_leave_region && this._visitor.leaveRegion(this, 'main_template');
+			this._has_leave_region && this._visitor.leaveRegion(this, 'template');
 		}
 
 		if ('else_template' in node) {
@@ -7410,7 +7428,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
-	 * Allowed properties on config of &lt;main_view&gt; in widget definition
+	 * Allowed properties on config of &lt;view&gt; in widget definition
 	 * @type {Array.<string>}
 	 */
 	WIDGET_DEFINITION_ALLOWED_MAIN_VIEW_MEMBERS: ['template', 'container', 'class', 'type'],
@@ -7980,7 +7998,7 @@ Lava.parsers.Directives = {
 	////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Parse main_view widget tag: compile, extract and validate a single view inside it
+	 * Parse view widget tag: compile, extract and validate a single view inside it
 	 * @param {_cRawTag} raw_tag
 	 */
 	_asMainView: function(raw_tag) {
@@ -7990,11 +8008,11 @@ Lava.parsers.Directives = {
 			name;
 
 		if (Lava.schema.DEBUG) {
-			if (view_config['class'] != 'View') Lava.t("define: view in 'main_view' must be pure View, not subclass");
+			if (view_config['class'] != 'View') Lava.t("define: view in <view> must be pure View, not subclass");
 			if ('argument' in view_config) Lava.t("Widgets do not support arguments");
 			for (name in view_config) {
 				if (this.WIDGET_DEFINITION_ALLOWED_MAIN_VIEW_MEMBERS.indexOf(name) == -1) {
-					Lava.t("main_view: view has an option, which can not be copied to widget: " + name + ". Probably, it must be specified via separate tag");
+					Lava.t("<view>: view has an option, which can not be copied to widget: " + name + ". Probably, it must be specified via separate tag");
 				}
 			}
 		}
@@ -8027,12 +8045,12 @@ Lava.parsers.Directives = {
 
 		if (count) {
 
-			if (tags[0].name == 'main_view') {
+			if (tags[0].name == 'view') {
 
 				widget_config = this._asMainView(tags[0]);
 				i = 1;
 
-			} else if (tags[0].name == 'main_template') {
+			} else if (tags[0].name == 'template') {
 
 				widget_config.template = Lava.parsers.Common.compileTemplate(tags[0].content);
 				i = 1;
@@ -8048,7 +8066,7 @@ Lava.parsers.Directives = {
 
 			tag = tags[i];
 			if (tag.name == 'storage_schema' && is_storage_parsed) Lava.t('Widget definition: `storage_schema` must preceed the `storage` tag');
-			if (!(tag.name in this._widget_tag_actions)) Lava.t("Unknown tag in widget definition: " + tag.name + ". Note, that main_template and main_view tags must be on top.");
+			if (!(tag.name in this._widget_tag_actions)) Lava.t("Unknown tag in widget definition: " + tag.name + ". Note, that <template> and <view> tags must be on top.");
 			this[this._widget_tag_actions[tag.name]](tag, widget_config);
 			if (tag.name == 'storage') is_storage_parsed = true;
 
@@ -14749,6 +14767,10 @@ Lava.define(
 			bubble_index = 0,
 			bubble_targets_count;
 
+		if (this._is_dispatching) {
+			Lava.logError("recursive call to _dispatchCallback");
+			return;
+		}
 		this._is_dispatching = true;
 
 		for (; i < count; i++) {
@@ -15094,7 +15116,7 @@ Lava.define(
 	},
 
 	/**
-	 * Get all views by their label. Slow
+	 * Filter all created views and find those with `label`. Slow!
 	 * @param {string} label
 	 * @returns {Array.<Lava.view.Abstract>}
 	 */
@@ -15197,7 +15219,8 @@ Lava.define(
 	 */
 	_buildElementStack: function(element) {
 
-		var document_ref = window.document,
+		// note: target of some events can be the root html tag (for example, mousedown on a scroll bar)
+		var document_ref = window.document, // document > html > body > ...
 			result = [];
 
 		while (element && element != document_ref) {
@@ -24896,8 +24919,6 @@ Lava.define(
 {
 
 	Extends: 'Lava.widget.input.Text',
-
-	name: 'password_input',
 	_type: "password"
 
 });
@@ -28152,112 +28173,7 @@ return (this._binds[0].getValue());
 		is_extended: false
 	},
 	PasswordInput: {
-		"extends": "InputAbstract",
-		includes: {
-			input_view: [
-				"\r\n\t\t",
-				{
-					type: "view",
-					"class": "View",
-					container: {
-						type: "TextInputElement",
-						tag_name: "input",
-						events: {
-							change: [{
-								locator_type: "Name",
-								locator: "password_input",
-								name: "value_changed"
-							}],
-							input: [{
-								locator_type: "Name",
-								locator: "password_input",
-								name: "input"
-							}],
-							focus: [{
-								locator_type: "Name",
-								locator: "password_input",
-								name: "_focused"
-							}],
-							blur: [{
-								locator_type: "Name",
-								locator: "password_input",
-								name: "_blurred"
-							}],
-							compatible_changed: [{
-								locator_type: "Name",
-								locator: "password_input",
-								name: "value_changed"
-							}]
-						},
-						property_bindings: {
-							name: {
-								evaluator: function() {
-return (this._binds[0].getValue());
-},
-								flags: {isScopeEval: true},
-								binds: [{
-									locator_type: "Name",
-									locator: "password_input",
-									tail: ["name"]
-								}]
-							},
-							disabled: {
-								evaluator: function() {
-return (this._binds[0].getValue());
-},
-								flags: {isScopeEval: true},
-								binds: [{
-									locator_type: "Name",
-									locator: "password_input",
-									tail: ["is_disabled"]
-								}]
-							},
-							required: {
-								evaluator: function() {
-return (this._binds[0].getValue());
-},
-								flags: {isScopeEval: true},
-								binds: [{
-									locator_type: "Name",
-									locator: "password_input",
-									tail: ["is_required"]
-								}]
-							},
-							readonly: {
-								evaluator: function() {
-return (this._binds[0].getValue());
-},
-								flags: {isScopeEval: true},
-								binds: [{
-									locator_type: "Name",
-									locator: "password_input",
-									tail: ["is_readonly"]
-								}]
-							}
-						},
-						resource_id: {
-							locator_type: "Name",
-							locator: "password_input",
-							name: "PASSWORD_INPUT_ELEMENT"
-						}
-					},
-					roles: [{name: "_input_view"}],
-					template: []
-				},
-				"\r\n\t"
-			]
-		},
-		sugar: {
-			tag_name: "password_input",
-			root_resource_name: "PASSWORD_INPUT_ELEMENT",
-			attribute_mappings: {
-				value: {
-					type: "property",
-					type_name: "String"
-				}
-			}
-		},
-		default_events: [],
+		"extends": "TextInput",
 		real_class: "input.Password",
 		"class": "Lava.WidgetConfigExtensionGateway",
 		extender_type: "Standard",
@@ -30956,7 +30872,6 @@ Lava.sugar_map = {
 	checkbox: {widget_title: "CheckBox"},
 	text_area: {widget_title: "TextArea"},
 	text_input: {widget_title: "TextInput"},
-	password_input: {widget_title: "PasswordInput"},
 	radio: {widget_title: "Radio"},
 	submit_input: {widget_title: "SubmitInput"},
 	submit_button: {widget_title: "SubmitButton"},

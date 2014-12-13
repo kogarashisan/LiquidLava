@@ -9,8 +9,6 @@ Lava.define(
 {
 
 	Extends: 'Lava.widget.input.Text',
-
-	name: 'password_input',
 	_type: "password"
 
 });

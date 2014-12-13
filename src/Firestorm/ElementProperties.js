@@ -63,6 +63,28 @@ Firestorm.Element,
 
 		return Slick.getAttribute(element, name);
 
+	},
+
+	/**
+	 * Get element's tag name
+	 * @param {HTMLElement} element
+	 * @returns {string}
+	 */
+	getTagName: function(element) {
+
+		return element.nodeName.toLowerCase();
+
+	},
+
+	/**
+	 * Get element's `outerHTML`
+	 * @param {HTMLElement} element
+	 * @returns {string}
+	 */
+	getOuterHTML: function(element) {
+
+		return element.outerHTML;
+
 	}
 
 });

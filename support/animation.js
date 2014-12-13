@@ -84,6 +84,10 @@ _cAnimation = {
 
 };
 
+/**
+ * Implemented by classes in `Animator/` folder
+ * @interface
+ */
 _iAnimator = {
 	/**
 	 * Set current value of target's property

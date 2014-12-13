@@ -114,11 +114,12 @@ Lava.Core = {
 		var self = this,
 			freeze_protection = this._freeze_protected_events.indexOf(event_name) != -1;
 
-		return function(event_object) {
-
-			// Note: inside this wrapper 'this' will refer to window
-			self._onDomEvent(event_name, event_object, freeze_protection);
-
+		// I'm not sure about this, but looks like the argument should be specifically named "event"
+		// http://stackoverflow.com/questions/11188729/jquery-keyup-event-trouble-in-opera
+		// see also this to understand the roots of such behaviour:
+		// http://stackoverflow.com/questions/4968194/event-keyword-in-js
+		return function(event) {
+			self._onDomEvent(event_name, event, freeze_protection);
 		};
 
 	},

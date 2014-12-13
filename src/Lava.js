@@ -518,7 +518,7 @@ var Lava = {
 	_elementToWidget: function(element) {
 
 		var widget,
-			raw_template = Lava.TemplateParser.parseRaw(element.outerHTML),
+			raw_template = Lava.TemplateParser.parseRaw(Firestorm.Element.getOuterHTML(element)),
 			raw_tag,
 			config,
 			constructor;

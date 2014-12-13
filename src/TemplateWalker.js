@@ -191,9 +191,9 @@ Lava.TemplateWalker = {
 			count;
 
 		if ('template' in node) {
-			this._has_enter_region && this._visitor.enterRegion(this, 'main_template');
+			this._has_enter_region && this._visitor.enterRegion(this, 'template');
 			this._walkTemplate(node.template);
-			this._has_leave_region && this._visitor.leaveRegion(this, 'main_template');
+			this._has_leave_region && this._visitor.leaveRegion(this, 'template');
 		}
 
 		if ('else_template' in node) {

@@ -1,9 +1,9 @@
 
 <x:define title="InputAbstract">
-	<main_template>
+	<template>
 		{>input_view}
-	</main_template>
-	<script x:equiv="sugar" type="application/json">
+	</template>
+	<script x:equiv="sugar" type="lava/options">
 		{
 			attribute_mappings: {
 				'name': {type: 'property', type_name: 'String'},
@@ -36,7 +36,7 @@
 			<x:container_config>{type: "CheckboxElement"}</x:container_config>
 		</x:attach_directives>
 	</include>
-	<script x:equiv="sugar" type="application/json">
+	<script x:equiv="sugar" type="lava/options">
 		{
 			tag_name: 'checkbox',
 			root_resource_name: 'CHECKBOX_ELEMENT',
@@ -46,7 +46,7 @@
 			}
 		}
 	</script>
-	<default_events>['change']</default_events>
+	<default_events>['change', 'focus', 'blur']</default_events>
 </x:define>
 
 <x:define controller="input.TextArea" title="TextArea" extends="InputAbstract">
@@ -65,7 +65,7 @@
 			x:bind:required="$textarea.is_required"
 			x:bind:readonly="$textarea.is_readonly"></textarea>
 	</include>
-	<script x:equiv="sugar" type="application/json">
+	<script x:equiv="sugar" type="lava/options">
 		{
 			tag_name: 'text_area',
 			root_resource_name: 'TEXTAREA_ELEMENT',
@@ -74,7 +74,7 @@
 			}
 		}
 	</script>
-	<default_events>['change', 'input']</default_events>
+	<default_events>['change', 'input', 'focus', 'blur']</default_events>
 </x:define>
 
 <x:define controller="input.Text" title="TextInput" extends="InputAbstract">
@@ -97,7 +97,7 @@
 			<x:container_config>{type: "TextInputElement"}</x:container_config>
 		</x:attach_directives>
 	</include>
-	<script x:equiv="sugar" type="application/json">
+	<script x:equiv="sugar" type="lava/options">
 		{
 			tag_name: 'text_input',
 			root_resource_name: 'TEXT_INPUT_ELEMENT',
@@ -106,40 +106,10 @@
 			}
 		}
 	</script>
-	<default_events>['change', 'input']</default_events>
+	<default_events>['change', 'input', 'focus', 'blur']</default_events>
 </x:define>
 
-<x:define controller="input.Password" title="PasswordInput" extends="InputAbstract">
-	<include name="input_view">
-		<x:attach_directives>
-			<input
-				x:type="view"
-				x:roles="_input_view"
-				x:resource_id="$password_input.PASSWORD_INPUT_ELEMENT"
-				x:event:change="$password_input.value_changed"
-				x:event:input="$password_input.input"
-				x:event:focus="$password_input._focused"
-				x:event:blur="$password_input._blurred"
-				x:event:compatible_changed="$password_input.value_changed"
-
-				x:bind:name="$password_input.name"
-				x:bind:disabled="$password_input.is_disabled"
-				x:bind:required="$password_input.is_required"
-				x:bind:readonly="$password_input.is_readonly"/>
-			<x:container_config>{type: "TextInputElement"}</x:container_config>
-		</x:attach_directives>
-	</include>
-	<script x:equiv="sugar" type="application/json">
-		{
-			tag_name: 'password_input',
-			root_resource_name: 'PASSWORD_INPUT_ELEMENT',
-			attribute_mappings: {
-				'value': {type: 'property', type_name: 'String'}
-			}
-		}
-	</script>
-	<default_events>['change', 'input']</default_events>
-</x:define>
+<x:define controller="input.Password" title="PasswordInput" extends="TextInput"></x:define>
 
 <x:define controller="input.Numeric" title="Numeric" extends="TextInput"></x:define>
 
@@ -159,7 +129,7 @@
 			x:bind:required="$radio.is_required"
 			x:bind:readonly="$radio.is_readonly" />
 	</include>
-	<script x:equiv="sugar" type="application/json">
+	<script x:equiv="sugar" type="lava/options">
 		{
 			tag_name: 'radio',
 			root_resource_name: 'RADIO_ELEMENT',
@@ -168,7 +138,7 @@
 			}
 		}
 	</script>
-	<default_events>['change']</default_events>
+	<default_events>['change', 'focus', 'blur']</default_events>
 </x:define>
 
 <x:define controller="input.Submit" title="SubmitInput" extends="InputAbstract">
@@ -185,13 +155,13 @@
 			x:bind:value="$submit.value"
 			x:bind:disabled="$submit.is_disabled" />
 	</include>
-	<script x:equiv="sugar" type="application/json">
+	<script x:equiv="sugar" type="lava/options">
 		{
 			tag_name: 'submit_input',
 			root_resource_name: 'SUBMIT_INPUT_ELEMENT'
 		}
 	</script>
-	<default_events>['click']</default_events>
+	<default_events>['click', 'focus', 'blur']</default_events>
 </x:define>
 
 <x:define controller="input.Submit" title="SubmitButton" extends="InputAbstract">
@@ -211,14 +181,14 @@
 		</button>
 	</include>
 	<include name="content"></include>
-	<script x:equiv="sugar" type="application/json">
+	<script x:equiv="sugar" type="lava/options">
 		{
 			tag_name: 'submit_button',
 			content_schema: {type: 'include', name: 'content'},
 			root_resource_name: 'SUBMIT_BUTTON_ELEMENT'
 		}
 	</script>
-	<default_events>['click']</default_events>
+	<default_events>['click', 'focus', 'blur']</default_events>
 </x:define>
 
 <x:define title="SelectAbstract" extends="InputAbstract">
@@ -250,16 +220,16 @@
 			</option>
 		{/foreach}
 	</include>
-	<default_events>['change']</default_events>
+	<default_events>['change', 'focus', 'blur']</default_events>
 </x:define>
 
 <x:define controller="input.Select" title="Select" extends="SelectAbstract"></x:define>
 <x:define controller="input.MultipleSelect" title="MultipleSelect" extends="SelectAbstract"></x:define>
 
 <!--x:define controller="Form" title="Form">
-	<main_template>
+	<template>
 		{>main_view}
-	</main_template>
+	</template>
 	<include name="main_view">
 		<form x:type="view"
 			x:roles="$form.main_view"
@@ -268,7 +238,7 @@
 		</form>
 	</include>
 	<include name="content"></include>
-	<script x:equiv="sugar" type="application/json">
+	<script x:equiv="sugar" type="lava/options">
 		{
 			tag_name: 'form_widget',
 			content_schema: {

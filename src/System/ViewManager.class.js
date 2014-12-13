@@ -376,6 +376,10 @@ Lava.define(
 			bubble_index = 0,
 			bubble_targets_count;
 
+		if (this._is_dispatching) {
+			Lava.logError("recursive call to _dispatchCallback");
+			return;
+		}
 		this._is_dispatching = true;
 
 		for (; i < count; i++) {
@@ -721,7 +725,7 @@ Lava.define(
 	},
 
 	/**
-	 * Get all views by their label. Slow
+	 * Filter all created views and find those with `label`. Slow!
 	 * @param {string} label
 	 * @returns {Array.<Lava.view.Abstract>}
 	 */
@@ -824,7 +828,8 @@ Lava.define(
 	 */
 	_buildElementStack: function(element) {
 
-		var document_ref = window.document,
+		// note: target of some events can be the root html tag (for example, mousedown on a scroll bar)
+		var document_ref = window.document, // document > html > body > ...
 			result = [];
 
 		while (element && element != document_ref) {

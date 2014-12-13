@@ -80,7 +80,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
-	 * Allowed properties on config of &lt;main_view&gt; in widget definition
+	 * Allowed properties on config of &lt;view&gt; in widget definition
 	 * @type {Array.<string>}
 	 */
 	WIDGET_DEFINITION_ALLOWED_MAIN_VIEW_MEMBERS: ['template', 'container', 'class', 'type'],
@@ -650,7 +650,7 @@ Lava.parsers.Directives = {
 	////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Parse main_view widget tag: compile, extract and validate a single view inside it
+	 * Parse view widget tag: compile, extract and validate a single view inside it
 	 * @param {_cRawTag} raw_tag
 	 */
 	_asMainView: function(raw_tag) {
@@ -660,11 +660,11 @@ Lava.parsers.Directives = {
 			name;
 
 		if (Lava.schema.DEBUG) {
-			if (view_config['class'] != 'View') Lava.t("define: view in 'main_view' must be pure View, not subclass");
+			if (view_config['class'] != 'View') Lava.t("define: view in <view> must be pure View, not subclass");
 			if ('argument' in view_config) Lava.t("Widgets do not support arguments");
 			for (name in view_config) {
 				if (this.WIDGET_DEFINITION_ALLOWED_MAIN_VIEW_MEMBERS.indexOf(name) == -1) {
-					Lava.t("main_view: view has an option, which can not be copied to widget: " + name + ". Probably, it must be specified via separate tag");
+					Lava.t("<view>: view has an option, which can not be copied to widget: " + name + ". Probably, it must be specified via separate tag");
 				}
 			}
 		}
@@ -697,12 +697,12 @@ Lava.parsers.Directives = {
 
 		if (count) {
 
-			if (tags[0].name == 'main_view') {
+			if (tags[0].name == 'view') {
 
 				widget_config = this._asMainView(tags[0]);
 				i = 1;
 
-			} else if (tags[0].name == 'main_template') {
+			} else if (tags[0].name == 'template') {
 
 				widget_config.template = Lava.parsers.Common.compileTemplate(tags[0].content);
 				i = 1;
@@ -718,7 +718,7 @@ Lava.parsers.Directives = {
 
 			tag = tags[i];
 			if (tag.name == 'storage_schema' && is_storage_parsed) Lava.t('Widget definition: `storage_schema` must preceed the `storage` tag');
-			if (!(tag.name in this._widget_tag_actions)) Lava.t("Unknown tag in widget definition: " + tag.name + ". Note, that main_template and main_view tags must be on top.");
+			if (!(tag.name in this._widget_tag_actions)) Lava.t("Unknown tag in widget definition: " + tag.name + ". Note, that <template> and <view> tags must be on top.");
 			this[this._widget_tag_actions[tag.name]](tag, widget_config);
 			if (tag.name == 'storage') is_storage_parsed = true;
 

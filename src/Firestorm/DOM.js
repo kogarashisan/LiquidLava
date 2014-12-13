@@ -171,7 +171,7 @@ Firestorm.DOM = {
 	 **/
 	_firstNodeFor: function(parentNode, html) {
 
-		var map = this._wrap_map[parentNode.tagName.toLowerCase()] || [ 0, "", "" ],
+		var map = this._wrap_map[parentNode.nodeName.toLowerCase()] || [ 0, "", "" ],
 			depth = map[0],
 			start = map[1],
 			end = map[2],
