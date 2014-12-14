@@ -3724,8 +3724,7 @@ Lava.extenders = {
 		bindings: '_mergeConfigProperty',
 		assigns: '_mergeConfigProperty',
 		options: '_mergeConfigProperty',
-		properties: '_mergeConfigProperty',
-		broadcast: '_mergeConfigProperty'
+		properties: '_mergeConfigProperty'
 	},
 
 	/**
@@ -7374,7 +7373,6 @@ Lava.parsers.Directives = {
 		option: {view_config_presence: true, is_top_directive: true},
 		options: {view_config_presence: true, is_top_directive: true},
 		// Widget-only directives
-		broadcast: {view_config_presence: true, is_top_directive: true},
 		bind: {view_config_presence: true, is_top_directive: true},
 		property: {view_config_presence: true, is_top_directive: true},
 		properties: {view_config_presence: true, is_top_directive: true},
@@ -7398,7 +7396,6 @@ Lava.parsers.Directives = {
 		roles: '_widgetTagRoles',
 		resources: '_widgetTagResources',
 		default_events: '_widgetTagDefaultEvents',
-		broadcast: '_widgetTagBroadcast',
 		// without directive analog
 		sugar: '_widgetTagSugar',
 		storage: '_widgetTagStorage',
@@ -7583,17 +7580,6 @@ Lava.parsers.Directives = {
 		if ('sugar' in widget_config) Lava.t("Sugar is already defined");
 		if (Lava.schema.DEBUG && raw_tag.content.length != 1) Lava.t("Malformed option: " + raw_tag.attributes.name);
 		widget_config.sugar = Lava.parseOptions(raw_tag.content[0]);
-
-	},
-
-	/**
-	 * Parse {@link _cWidget#broadcast}
-	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} widget_config
-	 */
-	_widgetTagBroadcast: function(raw_tag, widget_config) {
-
-		this._parseBroadcast(widget_config, raw_tag);
 
 	},
 
@@ -8314,41 +8300,6 @@ Lava.parsers.Directives = {
 		if (Lava.schema.DEBUG && ('refresher' in view_config)) Lava.t("Refresher is already defined");
 		if (Lava.schema.DEBUG && (!raw_directive.content || raw_directive.content.length != 1)) Lava.t("Malformed refresher config");
 		view_config.refresher = Lava.parseOptions(raw_directive.content[0]);
-
-	},
-
-	/**
-	 * Perform parsing {@link _cWidget#broadcast}
-	 * @param {_cWidget} widget_config
-	 * @param {(_cRawDirective|_cRawTag)} raw_element
-	 */
-	_parseBroadcast: function(widget_config, raw_element) {
-
-		if ('broadcast' in widget_config) Lava.t("Broadcast is already defined");
-
-		var result = {},
-			name;
-
-		for (name in raw_element.attributes) {
-
-			result[name] = Lava.parsers.Common.parseTargets(raw_element.attributes[name]);
-
-		}
-
-		widget_config.broadcast = result;
-
-	},
-
-	/**
-	 * Parse {@link _cWidget#broadcast}
-	 * @param {_cRawDirective} raw_directive
-	 * @param {_cWidget} widget_config
-	 */
-	_xbroadcast: function(raw_directive, widget_config) {
-
-		if (Lava.schema.DEBUG && widget_config.type != 'widget') Lava.t("Broadcast directive requires a widget");
-
-		this._parseBroadcast(widget_config, raw_directive);
 
 	},
 
@@ -15364,39 +15315,6 @@ Lava.define(
 
 			Lava.Core.removeGlobalHandler(this._events_listeners[event_name]);
 			this._events_listeners[event_name] = null;
-
-		}
-
-	},
-
-	/**
-	 * Dispatch a broadcast
-	 * @param {Lava.widget.Standard} widget
-	 * @param {Object.<string, Array.<_cTarget>>} targets
-	 */
-	dispatchBroadcast: function(widget, targets) {
-
-		var event_name,
-			event_targets,
-			target,
-			destination_widget,
-			template_arguments,
-			i,
-			count;
-
-		for (event_name in targets) {
-
-			event_targets = targets[event_name];
-
-			for (i = 0, count = event_targets.length; i < count; i++) {
-
-				target = event_targets[i];
-				if (Lava.schema.DEBUG && !('locator_type' in target)) Lava.t("dispatchBroadcast: malformed target");
-				template_arguments = ('arguments' in target) ? this._evalTargetArguments(widget, target) : null;
-				destination_widget = this['_locateWidgetBy' + target.locator_type](widget, target.locator);
-				destination_widget.registerBroadcastTarget(widget, event_name, target.name, template_arguments);
-
-			}
 
 		}
 
@@ -24032,7 +23950,7 @@ Lava.define(
 {
 
 	Extends: 'Lava.view.View',
-	Shared: ['_property_descriptors', '_event_handlers', '_role_handlers', '_include_handlers', '_broadcast_handlers', '_modifiers'],
+	Shared: ['_property_descriptors', '_event_handlers', '_role_handlers', '_include_handlers', '_modifiers'],
 
 	/**
 	 * Instance is widget
@@ -24072,11 +23990,6 @@ Lava.define(
 	 * @type {Object.<string, string>}
 	 */
 	_include_handlers: {},
-	/**
-	 * Map of broadcast handlers
-	 * @type {Object.<string, string>}
-	 */
-	_broadcast_handlers: {},
 
 	/**
 	 * Two-way bindings to properties of this widget
@@ -24137,12 +24050,6 @@ Lava.define(
 		for (name in config.bindings) {
 
 			this._bindings[name] = new Lava.scope.Binding(config.bindings[name], this);
-
-		}
-
-		if ('broadcast' in config) {
-
-			Lava.view_manager.dispatchBroadcast(this, config.broadcast);
 
 		}
 
@@ -24441,43 +24348,6 @@ Lava.define(
 		return ((name in this._property_descriptors) && this._property_descriptors[name].getter)
 			? this[this._property_descriptors[name].getter](name)
 			: this.View$get(name);
-
-	},
-
-	/**
-	 * Register handlers for events, emitted by widget inside this one
-	 * @param {Lava.widget.Standard} widget
-	 * @param {string} event_name
-	 * @param {string} handler_name
-	 * @param {?Array.<*>} template_arguments
-	 */
-	registerBroadcastTarget: function(widget, event_name, handler_name, template_arguments) {
-
-		// There is no need to save listener, cause broadcast is designed to route events from widgets inside
-		// current widget's template. The source of events will always be destroyed before the target.
-		widget.on(
-			event_name,
-			this[this._broadcast_handlers[handler_name]],
-			this,
-			{
-				event_name: event_name,
-				template_arguments: template_arguments
-			}
-		);
-
-	},
-
-	/**
-	 * (broadcast handler) Fire broadcast event from this widget.
-	 * May be used to broadcast events from children to other widgets
-	 *
-	 * @param {Lava.widget.Standard} widget Event emitter
-	 * @param event_args
-	 * @param listener_args
-	 */
-	_broadcastEvent: function(widget, event_args, listener_args) {
-
-		this._fire(listener_args.event_name, event_args);
 
 	},
 

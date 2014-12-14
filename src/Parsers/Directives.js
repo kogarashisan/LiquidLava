@@ -26,7 +26,6 @@ Lava.parsers.Directives = {
 		option: {view_config_presence: true, is_top_directive: true},
 		options: {view_config_presence: true, is_top_directive: true},
 		// Widget-only directives
-		broadcast: {view_config_presence: true, is_top_directive: true},
 		bind: {view_config_presence: true, is_top_directive: true},
 		property: {view_config_presence: true, is_top_directive: true},
 		properties: {view_config_presence: true, is_top_directive: true},
@@ -50,7 +49,6 @@ Lava.parsers.Directives = {
 		roles: '_widgetTagRoles',
 		resources: '_widgetTagResources',
 		default_events: '_widgetTagDefaultEvents',
-		broadcast: '_widgetTagBroadcast',
 		// without directive analog
 		sugar: '_widgetTagSugar',
 		storage: '_widgetTagStorage',
@@ -235,17 +233,6 @@ Lava.parsers.Directives = {
 		if ('sugar' in widget_config) Lava.t("Sugar is already defined");
 		if (Lava.schema.DEBUG && raw_tag.content.length != 1) Lava.t("Malformed option: " + raw_tag.attributes.name);
 		widget_config.sugar = Lava.parseOptions(raw_tag.content[0]);
-
-	},
-
-	/**
-	 * Parse {@link _cWidget#broadcast}
-	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} widget_config
-	 */
-	_widgetTagBroadcast: function(raw_tag, widget_config) {
-
-		this._parseBroadcast(widget_config, raw_tag);
 
 	},
 
@@ -966,41 +953,6 @@ Lava.parsers.Directives = {
 		if (Lava.schema.DEBUG && ('refresher' in view_config)) Lava.t("Refresher is already defined");
 		if (Lava.schema.DEBUG && (!raw_directive.content || raw_directive.content.length != 1)) Lava.t("Malformed refresher config");
 		view_config.refresher = Lava.parseOptions(raw_directive.content[0]);
-
-	},
-
-	/**
-	 * Perform parsing {@link _cWidget#broadcast}
-	 * @param {_cWidget} widget_config
-	 * @param {(_cRawDirective|_cRawTag)} raw_element
-	 */
-	_parseBroadcast: function(widget_config, raw_element) {
-
-		if ('broadcast' in widget_config) Lava.t("Broadcast is already defined");
-
-		var result = {},
-			name;
-
-		for (name in raw_element.attributes) {
-
-			result[name] = Lava.parsers.Common.parseTargets(raw_element.attributes[name]);
-
-		}
-
-		widget_config.broadcast = result;
-
-	},
-
-	/**
-	 * Parse {@link _cWidget#broadcast}
-	 * @param {_cRawDirective} raw_directive
-	 * @param {_cWidget} widget_config
-	 */
-	_xbroadcast: function(raw_directive, widget_config) {
-
-		if (Lava.schema.DEBUG && widget_config.type != 'widget') Lava.t("Broadcast directive requires a widget");
-
-		this._parseBroadcast(widget_config, raw_directive);
 
 	},
 

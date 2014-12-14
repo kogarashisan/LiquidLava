@@ -14,8 +14,7 @@ Lava.extenders = {
 		bindings: '_mergeConfigProperty',
 		assigns: '_mergeConfigProperty',
 		options: '_mergeConfigProperty',
-		properties: '_mergeConfigProperty',
-		broadcast: '_mergeConfigProperty'
+		properties: '_mergeConfigProperty'
 	},
 
 	/**

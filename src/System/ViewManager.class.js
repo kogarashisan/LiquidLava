@@ -979,39 +979,6 @@ Lava.define(
 	},
 
 	/**
-	 * Dispatch a broadcast
-	 * @param {Lava.widget.Standard} widget
-	 * @param {Object.<string, Array.<_cTarget>>} targets
-	 */
-	dispatchBroadcast: function(widget, targets) {
-
-		var event_name,
-			event_targets,
-			target,
-			destination_widget,
-			template_arguments,
-			i,
-			count;
-
-		for (event_name in targets) {
-
-			event_targets = targets[event_name];
-
-			for (i = 0, count = event_targets.length; i < count; i++) {
-
-				target = event_targets[i];
-				if (Lava.schema.DEBUG && !('locator_type' in target)) Lava.t("dispatchBroadcast: malformed target");
-				template_arguments = ('arguments' in target) ? this._evalTargetArguments(widget, target) : null;
-				destination_widget = this['_locateWidgetBy' + target.locator_type](widget, target.locator);
-				destination_widget.registerBroadcastTarget(widget, event_name, target.name, template_arguments);
-
-			}
-
-		}
-
-	},
-
-	/**
 	 * Stop bubbling current event or role
 	 */
 	cancelBubble: function() {

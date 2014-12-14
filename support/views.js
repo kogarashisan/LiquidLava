@@ -485,11 +485,6 @@ _cWidget = {
 	sugar: null,
 
 	/**
-	 * @type {Object.<string, Array.<_cTarget>>}
-	 */
-	broadcast: {},
-
-	/**
 	 * config.resources[<locale>] = {...}
 	 * @type {Object.<string, Object>}
 	 */

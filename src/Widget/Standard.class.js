@@ -10,7 +10,7 @@ Lava.define(
 {
 
 	Extends: 'Lava.view.View',
-	Shared: ['_property_descriptors', '_event_handlers', '_role_handlers', '_include_handlers', '_broadcast_handlers', '_modifiers'],
+	Shared: ['_property_descriptors', '_event_handlers', '_role_handlers', '_include_handlers', '_modifiers'],
 
 	/**
 	 * Instance is widget
@@ -50,11 +50,6 @@ Lava.define(
 	 * @type {Object.<string, string>}
 	 */
 	_include_handlers: {},
-	/**
-	 * Map of broadcast handlers
-	 * @type {Object.<string, string>}
-	 */
-	_broadcast_handlers: {},
 
 	/**
 	 * Two-way bindings to properties of this widget
@@ -115,12 +110,6 @@ Lava.define(
 		for (name in config.bindings) {
 
 			this._bindings[name] = new Lava.scope.Binding(config.bindings[name], this);
-
-		}
-
-		if ('broadcast' in config) {
-
-			Lava.view_manager.dispatchBroadcast(this, config.broadcast);
 
 		}
 
@@ -419,43 +408,6 @@ Lava.define(
 		return ((name in this._property_descriptors) && this._property_descriptors[name].getter)
 			? this[this._property_descriptors[name].getter](name)
 			: this.View$get(name);
-
-	},
-
-	/**
-	 * Register handlers for events, emitted by widget inside this one
-	 * @param {Lava.widget.Standard} widget
-	 * @param {string} event_name
-	 * @param {string} handler_name
-	 * @param {?Array.<*>} template_arguments
-	 */
-	registerBroadcastTarget: function(widget, event_name, handler_name, template_arguments) {
-
-		// There is no need to save listener, cause broadcast is designed to route events from widgets inside
-		// current widget's template. The source of events will always be destroyed before the target.
-		widget.on(
-			event_name,
-			this[this._broadcast_handlers[handler_name]],
-			this,
-			{
-				event_name: event_name,
-				template_arguments: template_arguments
-			}
-		);
-
-	},
-
-	/**
-	 * (broadcast handler) Fire broadcast event from this widget.
-	 * May be used to broadcast events from children to other widgets
-	 *
-	 * @param {Lava.widget.Standard} widget Event emitter
-	 * @param event_args
-	 * @param listener_args
-	 */
-	_broadcastEvent: function(widget, event_args, listener_args) {
-
-		this._fire(listener_args.event_name, event_args);
 
 	},
 
