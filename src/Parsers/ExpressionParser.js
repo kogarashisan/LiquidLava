@@ -95,7 +95,9 @@ Lava.ExpressionParser.parseWithTail = function(config_ref, separator) {
 };
 
 /**
- * Parse expression which represents a single path
+ * Parse expression which represents a single path,
+ * like <str>"$my_widget.something.otherthing"</str> or <str>"$my_widget.something[name]"</str>
+ *
  * @param {string} input Expression source
  * @returns {_cScopeLocator}
  */

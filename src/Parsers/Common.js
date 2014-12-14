@@ -950,7 +950,7 @@ Lava.parsers.Common = {
 
 			if (typeof(template[i]) == 'string') {
 
-				if (!Lava.EMPTY_REGEX.test(template[i])) Lava.t("Text between tags is not allowed in this context");
+				if (!Lava.EMPTY_REGEX.test(template[i])) Lava.t("Text between tags is not allowed in this context. You may want to use a lava-style comment ({* ... *})");
 
 			} else {
 

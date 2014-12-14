@@ -755,7 +755,10 @@ block
 			if ($1.name == 'script' && $1.x && ('equiv' in $1.x)) {
 				if (!$1.x.equiv) Lava.t('empty x:equiv');
 				$$ = yy.parseRawTag($1.x.equiv); // sets name and type (it may be directive)
-				$$.x = $1.x;
+				delete $1.x.equiv;
+				if (!Firestorm.Object.isEmpty($1.x)) {
+					$$.x = Firestorm.Object.copy($1.x);
+				}
 				if ('attributes' in $1) $$.attributes = $1.attributes;
 			}
 			$$.content = [$2];

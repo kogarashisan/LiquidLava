@@ -7095,7 +7095,7 @@ Lava.parsers.Common = {
 
 			if (typeof(template[i]) == 'string') {
 
-				if (!Lava.EMPTY_REGEX.test(template[i])) Lava.t("Text between tags is not allowed in this context");
+				if (!Lava.EMPTY_REGEX.test(template[i])) Lava.t("Text between tags is not allowed in this context. You may want to use a lava-style comment ({* ... *})");
 
 			} else {
 
@@ -10020,7 +10020,9 @@ Lava.ExpressionParser.parseWithTail = function(config_ref, separator) {
 };
 
 /**
- * Parse expression which represents a single path
+ * Parse expression which represents a single path,
+ * like <str>"$my_widget.something.otherthing"</str> or <str>"$my_widget.something[name]"</str>
+ *
  * @param {string} input Expression source
  * @returns {_cScopeLocator}
  */
@@ -10354,7 +10356,10 @@ case 15:
 			if ($$[$0-1].name == 'script' && $$[$0-1].x && ('equiv' in $$[$0-1].x)) {
 				if (!$$[$0-1].x.equiv) Lava.t('empty x:equiv');
 				this.$ = yy.parseRawTag($$[$0-1].x.equiv); // sets name and type (it may be directive)
-				this.$.x = $$[$0-1].x;
+				delete $$[$0-1].x.equiv;
+				if (!Firestorm.Object.isEmpty($$[$0-1].x)) {
+					this.$.x = Firestorm.Object.copy($$[$0-1].x);
+				}
 				if ('attributes' in $$[$0-1]) this.$.attributes = $$[$0-1].attributes;
 			}
 			this.$.content = [$$[$0]];

@@ -187,7 +187,10 @@ case 15:
 			if ($$[$0-1].name == 'script' && $$[$0-1].x && ('equiv' in $$[$0-1].x)) {
 				if (!$$[$0-1].x.equiv) Lava.t('empty x:equiv');
 				this.$ = yy.parseRawTag($$[$0-1].x.equiv); // sets name and type (it may be directive)
-				this.$.x = $$[$0-1].x;
+				delete $$[$0-1].x.equiv;
+				if (!Firestorm.Object.isEmpty($$[$0-1].x)) {
+					this.$.x = Firestorm.Object.copy($$[$0-1].x);
+				}
 				if ('attributes' in $$[$0-1]) this.$.attributes = $$[$0-1].attributes;
 			}
 			this.$.content = [$$[$0]];
