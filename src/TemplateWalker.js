@@ -1,5 +1,5 @@
 /**
- * Traverse templates with provided "visitor" object
+ * Traverse templates with provided "visitor" object. ALPHA
  */
 Lava.TemplateWalker = {
 

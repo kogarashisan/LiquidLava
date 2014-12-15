@@ -276,7 +276,7 @@
 	<include name="icon"></include>
 	<include name="node_children">
 		{$if(node.children.length && $tree{is_expanded})}
-			<x:refresher>{type: 'Collapse'}</x:refresher>
+			<x:roles>$tree.node_children_view</x:roles>
 			<x:container_config>
 				{
 					type: "Emulated",

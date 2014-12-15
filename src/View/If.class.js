@@ -54,13 +54,20 @@ Lava.define(
 	 */
 	_active_template: null,
 
+	init: function(config, widget, parent_view, template, properties) {
+
+		this.Abstract$init(config, widget, parent_view, template, properties);
+
+		this._active_template = this._getActiveTemplate();
+
+	},
+
 	_postInit: function() {
 
 		if (Lava.schema.DEBUG && !('argument' in this._config)) Lava.t("If view requires an argument");
 
 		var i = 0,
 			count,
-			constructor,
 			argument = new Lava.scope.Argument(this._config.argument, this, this._widget);
 
 		this._argument_changed_listeners.push(argument.on('changed', this._onArgumentChanged, this));
@@ -82,18 +89,26 @@ Lava.define(
 		this._active_argument_index = this._getActiveArgumentIndex();
 
 		if (this._config.refresher) {
-
-			// otherwise, it will not be able to insert the template
-			if (Lava.schema.DEBUG && !this._container) Lava.t('View/If: refresher needs container to work');
-			constructor = Lava.ClassManager.getConstructor(this._config.refresher['type'], 'Lava.view.refresher');
-			this._refresher = /** @type {Lava.view.refresher.Standard} */ new constructor(
-				this._config.refresher,
-				this, this._container
-			);
-
+			this.createRefresher(this._config.refresher);
 		}
 
-		this._active_template = this._getActiveTemplate();
+	},
+
+	/**
+	 * Can be called during roles registration (at the time of `init()`), before children are created.
+	 * Initializes a refresher instance with custom config.
+	 *
+	 * @param {_cRefresher} refresher_config
+	 */
+	createRefresher: function(refresher_config) {
+
+		if (Lava.schema.DEBUG && (this._refresher || this._current_count)) Lava.t("If: refresher is already created or createRefresher() was called outside of init()");
+		if (Lava.schema.DEBUG && !this._container) Lava.t('View/If: refresher needs container to work');
+
+		var constructor = Lava.ClassManager.getConstructor(refresher_config['type'], 'Lava.view.refresher');
+		this._refresher = /** @type {Lava.view.refresher.Standard} */ new constructor(refresher_config, this, this._container);
+
+		this._refresh = this._refresh_Refresher;
 
 	},
 
@@ -290,16 +305,14 @@ Lava.define(
 
 	_refresh: function() {
 
-		if (this._refresher) {
+		this._container.setHTML(this._renderContent());
+		this._broadcastToChildren('broadcastInDOM');
 
-			this._refresher.refresh(this._active_template ? [this._active_template] : []);
+	},
 
-		} else {
+	_refresh_Refresher: function() {
 
-			this._container.setHTML(this._renderContent());
-			this._broadcastToChildren('broadcastInDOM');
-
-		}
+		this._refresher.refresh(this._active_template ? [this._active_template] : []);
 
 	},
 

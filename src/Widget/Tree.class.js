@@ -9,7 +9,7 @@ Lava.define(
 {
 
 	Extends: 'Lava.widget.Standard',
-	Shared: '_shared',
+	Shared: ['_shared', '_meta_storage_config', '_default_refresher_config'],
 
 	name: 'tree',
 
@@ -17,14 +17,27 @@ Lava.define(
 	 * Shared configs
 	 */
 	_shared: {
-		meta_storage_config: {
-			fields: {
-				'is_expanded': {type:'Boolean'}
-			}
-		},
 		is_expanded_meta_storage_bind_config: Lava.ExpressionParser.parseScopeEval('$tree.meta_storage[node.guid].is_expanded'),
 		is_expanded_direct_bind_config: Lava.ExpressionParser.parseScopeEval('node.is_expanded')
 	},
+
+	/**
+	 * MetaStorage is used by Tree to store the `expanded` state
+	 */
+	_meta_storage_config: {
+		fields: {
+			'is_expanded': {type:'Boolean'}
+		}
+	},
+
+	/**
+	 * Default refresher (without animation)
+	 */
+	_default_refresher_config: {
+		type: 'Standard'
+	},
+
+	_refresher_config: null,
 
 	_properties: {
 		/** User-assigned records in the root of the tree */
@@ -33,6 +46,10 @@ Lava.define(
 
 	_event_handlers: {
 		node_click: '_onNodeClick'
+	},
+
+	_role_handlers: {
+		node_children_view: '_handleNodeChildrenView'
 	},
 
 	/**
@@ -50,6 +67,8 @@ Lava.define(
 	 * @param config
 	 * @param {boolean} config.options.use_meta_storage Store "is_expanded" property of tree nodes in separate MetaStorage instance.
 	 *  By default, "is_expanded" property is taken directly from nodes
+	 * @param {Object} config.options.refresher You can assign custom refresher config for nodes (with animation support, etc).
+	 * 	Use {type: 'Collapse'} to apply basic animation
 	 * @param widget
 	 * @param parent_view
 	 * @param template
@@ -61,10 +80,20 @@ Lava.define(
 
 		this._is_expanded_bind_config = this._shared.is_expanded_direct_bind_config;
 		if (config.options && config.options.use_meta_storage) {
-			this._meta_storage = new Lava.data.MetaStorage(this._shared.meta_storage_config);
+			this._meta_storage = new Lava.data.MetaStorage(this._meta_storage_config);
 			this.set('meta_storage', this._meta_storage);
 			this._is_expanded_bind_config = this._shared.is_expanded_meta_storage_bind_config;
 		}
+
+		this._refresher_config = (config.options && config.options.refresher)
+			? config.options.refresher
+			: this._default_refresher_config
+
+	},
+
+	_handleNodeChildrenView: function(view) {
+
+		view.createRefresher(this._refresher_config);
 
 	},
 

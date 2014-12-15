@@ -4575,7 +4575,7 @@ Lava.algorithms.sorting.mergeSort = (function(){
 
 })();
 /**
- * Traverse templates with provided "visitor" object
+ * Traverse templates with provided "visitor" object. ALPHA
  */
 Lava.TemplateWalker = {
 
@@ -7438,7 +7438,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
-	 * Copy template and apply editing operations to it
+	 * Copy template and apply editing operations to it. ALPHA
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
@@ -23457,6 +23457,14 @@ Lava.define(
 		count: 0
 	},
 
+	init: function(config, widget, parent_view, template, properties) {
+
+		this.Abstract$init(config, widget, parent_view, template, properties);
+
+		this._refreshChildren();
+
+	},
+
 	_initMembers: function(properties) {
 
 		if (Lava.schema.DEBUG && !('argument' in this._config)) Lava.t("Foreach view requires an argument");
@@ -23479,20 +23487,28 @@ Lava.define(
 	_postInit: function() {
 
 		if (this._config.refresher) {
-
-			if (Lava.schema.DEBUG && !this._container) Lava.t('View/Foreach: refresher needs container to work');
-			var constructor = Lava.ClassManager.getConstructor(this._config.refresher['type'], 'Lava.view.refresher');
-			this._refresher = /** @type {Lava.view.refresher.Standard} */ new constructor(
-				this._config.refresher,
-				this,
-				this._container
-			);
-
-			this._refresher.on('removal_complete', this._onRemovalComplete, this);
-
+			this.createRefresher(this._config.refresher);
 		}
 
-		this._refreshChildren();
+	},
+
+	/**
+	 * Can be called during roles registration (at the time of `init()`), before children are created.
+	 * Initializes a refresher instance with custom config.
+	 *
+	 * @param {_cRefresher} refresher_config
+	 */
+	createRefresher: function(refresher_config) {
+
+		if (Lava.schema.DEBUG && (this._refresher || this._current_count)) Lava.t("Foreach: refresher is already created or createRefresher() was called outside of init()");
+		if (Lava.schema.DEBUG && !this._container) Lava.t('View/Foreach: refresher needs container to work');
+
+		var constructor = Lava.ClassManager.getConstructor(refresher_config['type'], 'Lava.view.refresher');
+		this._refresher = /** @type {Lava.view.refresher.Standard} */ new constructor(refresher_config, this, this._container);
+
+		this._refresher.on('removal_complete', this._onRemovalComplete, this);
+		this._removeTemplates = this._removeTemplates_Refresher;
+		this._refresh = this._refresh_Refresher;
 
 	},
 
@@ -23531,27 +23547,28 @@ Lava.define(
 	},
 
 	/**
-	 * Callback that removes templates for removed Enumerable items
+	 * Callback that removes templates for removed Enumerable items.
+	 * Version without Refresher support.
 	 * @param {Array.<Lava.system.Template>} removed_templates
 	 */
 	_removeTemplates: function(removed_templates) {
 
-		var i = 0,
-			removed_count;
+		for (var i = 0, removed_count = removed_templates.length; i < removed_count; i++) {
 
-		if (this._refresher) {
-
-			this._refresher.removeTemplates(removed_templates);
-
-		} else {
-
-			for (i = 0, removed_count = removed_templates.length; i < removed_count; i++) {
-
-				removed_templates[i].destroy();
-
-			}
+			removed_templates[i].destroy();
 
 		}
+
+	},
+
+	/**
+	 * Callback that removes templates for removed Enumerable items.
+	 * Version with Refresher support.
+	 * @param {Array.<Lava.system.Template>} removed_templates
+	 */
+	_removeTemplates_Refresher: function(removed_templates) {
+
+		this._refresher.removeTemplates(removed_templates);
 
 	},
 
@@ -23661,16 +23678,14 @@ Lava.define(
 
 	_refresh: function() {
 
-		if (this._refresher) {
+		this._container.setHTML(this._renderContent());
+		this._broadcastToChildren('broadcastInDOM');
 
-			this._refresher.refresh(this._current_templates);
+	},
 
-		} else {
+	_refresh_Refresher: function() {
 
-			this._container.setHTML(this._renderContent());
-			this._broadcastToChildren('broadcastInDOM');
-
-		}
+		this._refresher.refresh(this._current_templates);
 
 	},
 
@@ -23794,13 +23809,20 @@ Lava.define(
 	 */
 	_active_template: null,
 
+	init: function(config, widget, parent_view, template, properties) {
+
+		this.Abstract$init(config, widget, parent_view, template, properties);
+
+		this._active_template = this._getActiveTemplate();
+
+	},
+
 	_postInit: function() {
 
 		if (Lava.schema.DEBUG && !('argument' in this._config)) Lava.t("If view requires an argument");
 
 		var i = 0,
 			count,
-			constructor,
 			argument = new Lava.scope.Argument(this._config.argument, this, this._widget);
 
 		this._argument_changed_listeners.push(argument.on('changed', this._onArgumentChanged, this));
@@ -23822,18 +23844,26 @@ Lava.define(
 		this._active_argument_index = this._getActiveArgumentIndex();
 
 		if (this._config.refresher) {
-
-			// otherwise, it will not be able to insert the template
-			if (Lava.schema.DEBUG && !this._container) Lava.t('View/If: refresher needs container to work');
-			constructor = Lava.ClassManager.getConstructor(this._config.refresher['type'], 'Lava.view.refresher');
-			this._refresher = /** @type {Lava.view.refresher.Standard} */ new constructor(
-				this._config.refresher,
-				this, this._container
-			);
-
+			this.createRefresher(this._config.refresher);
 		}
 
-		this._active_template = this._getActiveTemplate();
+	},
+
+	/**
+	 * Can be called during roles registration (at the time of `init()`), before children are created.
+	 * Initializes a refresher instance with custom config.
+	 *
+	 * @param {_cRefresher} refresher_config
+	 */
+	createRefresher: function(refresher_config) {
+
+		if (Lava.schema.DEBUG && (this._refresher || this._current_count)) Lava.t("If: refresher is already created or createRefresher() was called outside of init()");
+		if (Lava.schema.DEBUG && !this._container) Lava.t('View/If: refresher needs container to work');
+
+		var constructor = Lava.ClassManager.getConstructor(refresher_config['type'], 'Lava.view.refresher');
+		this._refresher = /** @type {Lava.view.refresher.Standard} */ new constructor(refresher_config, this, this._container);
+
+		this._refresh = this._refresh_Refresher;
 
 	},
 
@@ -24030,16 +24060,14 @@ Lava.define(
 
 	_refresh: function() {
 
-		if (this._refresher) {
+		this._container.setHTML(this._renderContent());
+		this._broadcastToChildren('broadcastInDOM');
 
-			this._refresher.refresh(this._active_template ? [this._active_template] : []);
+	},
 
-		} else {
+	_refresh_Refresher: function() {
 
-			this._container.setHTML(this._renderContent());
-			this._broadcastToChildren('broadcastInDOM');
-
-		}
+		this._refresher.refresh(this._active_template ? [this._active_template] : []);
 
 	},
 
@@ -26893,7 +26921,7 @@ Lava.define(
 {
 
 	Extends: 'Lava.widget.Standard',
-	Shared: '_shared',
+	Shared: ['_shared', '_meta_storage_config', '_default_refresher_config'],
 
 	name: 'tree',
 
@@ -26901,14 +26929,27 @@ Lava.define(
 	 * Shared configs
 	 */
 	_shared: {
-		meta_storage_config: {
-			fields: {
-				'is_expanded': {type:'Boolean'}
-			}
-		},
 		is_expanded_meta_storage_bind_config: Lava.ExpressionParser.parseScopeEval('$tree.meta_storage[node.guid].is_expanded'),
 		is_expanded_direct_bind_config: Lava.ExpressionParser.parseScopeEval('node.is_expanded')
 	},
+
+	/**
+	 * MetaStorage is used by Tree to store the `expanded` state
+	 */
+	_meta_storage_config: {
+		fields: {
+			'is_expanded': {type:'Boolean'}
+		}
+	},
+
+	/**
+	 * Default refresher (without animation)
+	 */
+	_default_refresher_config: {
+		type: 'Standard'
+	},
+
+	_refresher_config: null,
 
 	_properties: {
 		/** User-assigned records in the root of the tree */
@@ -26917,6 +26958,10 @@ Lava.define(
 
 	_event_handlers: {
 		node_click: '_onNodeClick'
+	},
+
+	_role_handlers: {
+		node_children_view: '_handleNodeChildrenView'
 	},
 
 	/**
@@ -26934,6 +26979,8 @@ Lava.define(
 	 * @param config
 	 * @param {boolean} config.options.use_meta_storage Store "is_expanded" property of tree nodes in separate MetaStorage instance.
 	 *  By default, "is_expanded" property is taken directly from nodes
+	 * @param {Object} config.options.refresher You can assign custom refresher config for nodes (with animation support, etc).
+	 * 	Use {type: 'Collapse'} to apply basic animation
 	 * @param widget
 	 * @param parent_view
 	 * @param template
@@ -26945,10 +26992,20 @@ Lava.define(
 
 		this._is_expanded_bind_config = this._shared.is_expanded_direct_bind_config;
 		if (config.options && config.options.use_meta_storage) {
-			this._meta_storage = new Lava.data.MetaStorage(this._shared.meta_storage_config);
+			this._meta_storage = new Lava.data.MetaStorage(this._meta_storage_config);
 			this.set('meta_storage', this._meta_storage);
 			this._is_expanded_bind_config = this._shared.is_expanded_meta_storage_bind_config;
 		}
+
+		this._refresher_config = (config.options && config.options.refresher)
+			? config.options.refresher
+			: this._default_refresher_config
+
+	},
+
+	_handleNodeChildrenView: function(view) {
+
+		view.createRefresher(this._refresher_config);
 
 	},
 
@@ -29907,7 +29964,11 @@ return (this._binds[0].getValue() && this._binds[1].getValue());
 						type: "Emulated",
 						options: {appender: "AfterPrevious"}
 					},
-					refresher: {type: "Collapse"},
+					roles: [{
+						locator_type: "Name",
+						locator: "tree",
+						name: "node_children_view"
+					}],
 					assigns: {
 						pad: {
 							evaluator: function() {

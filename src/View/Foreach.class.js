@@ -69,6 +69,14 @@ Lava.define(
 		count: 0
 	},
 
+	init: function(config, widget, parent_view, template, properties) {
+
+		this.Abstract$init(config, widget, parent_view, template, properties);
+
+		this._refreshChildren();
+
+	},
+
 	_initMembers: function(properties) {
 
 		if (Lava.schema.DEBUG && !('argument' in this._config)) Lava.t("Foreach view requires an argument");
@@ -91,20 +99,28 @@ Lava.define(
 	_postInit: function() {
 
 		if (this._config.refresher) {
-
-			if (Lava.schema.DEBUG && !this._container) Lava.t('View/Foreach: refresher needs container to work');
-			var constructor = Lava.ClassManager.getConstructor(this._config.refresher['type'], 'Lava.view.refresher');
-			this._refresher = /** @type {Lava.view.refresher.Standard} */ new constructor(
-				this._config.refresher,
-				this,
-				this._container
-			);
-
-			this._refresher.on('removal_complete', this._onRemovalComplete, this);
-
+			this.createRefresher(this._config.refresher);
 		}
 
-		this._refreshChildren();
+	},
+
+	/**
+	 * Can be called during roles registration (at the time of `init()`), before children are created.
+	 * Initializes a refresher instance with custom config.
+	 *
+	 * @param {_cRefresher} refresher_config
+	 */
+	createRefresher: function(refresher_config) {
+
+		if (Lava.schema.DEBUG && (this._refresher || this._current_count)) Lava.t("Foreach: refresher is already created or createRefresher() was called outside of init()");
+		if (Lava.schema.DEBUG && !this._container) Lava.t('View/Foreach: refresher needs container to work');
+
+		var constructor = Lava.ClassManager.getConstructor(refresher_config['type'], 'Lava.view.refresher');
+		this._refresher = /** @type {Lava.view.refresher.Standard} */ new constructor(refresher_config, this, this._container);
+
+		this._refresher.on('removal_complete', this._onRemovalComplete, this);
+		this._removeTemplates = this._removeTemplates_Refresher;
+		this._refresh = this._refresh_Refresher;
 
 	},
 
@@ -143,27 +159,28 @@ Lava.define(
 	},
 
 	/**
-	 * Callback that removes templates for removed Enumerable items
+	 * Callback that removes templates for removed Enumerable items.
+	 * Version without Refresher support.
 	 * @param {Array.<Lava.system.Template>} removed_templates
 	 */
 	_removeTemplates: function(removed_templates) {
 
-		var i = 0,
-			removed_count;
+		for (var i = 0, removed_count = removed_templates.length; i < removed_count; i++) {
 
-		if (this._refresher) {
-
-			this._refresher.removeTemplates(removed_templates);
-
-		} else {
-
-			for (i = 0, removed_count = removed_templates.length; i < removed_count; i++) {
-
-				removed_templates[i].destroy();
-
-			}
+			removed_templates[i].destroy();
 
 		}
+
+	},
+
+	/**
+	 * Callback that removes templates for removed Enumerable items.
+	 * Version with Refresher support.
+	 * @param {Array.<Lava.system.Template>} removed_templates
+	 */
+	_removeTemplates_Refresher: function(removed_templates) {
+
+		this._refresher.removeTemplates(removed_templates);
 
 	},
 
@@ -273,16 +290,14 @@ Lava.define(
 
 	_refresh: function() {
 
-		if (this._refresher) {
+		this._container.setHTML(this._renderContent());
+		this._broadcastToChildren('broadcastInDOM');
 
-			this._refresher.refresh(this._current_templates);
+	},
 
-		} else {
+	_refresh_Refresher: function() {
 
-			this._container.setHTML(this._renderContent());
-			this._broadcastToChildren('broadcastInDOM');
-
-		}
+		this._refresher.refresh(this._current_templates);
 
 	},
 
