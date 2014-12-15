@@ -226,6 +226,24 @@ _tListener = {
 };
 
 /**
+ * Config for Lava.system.Serializer
+ */
+_cSerializer = {
+	/**
+	 * If you know that you serialize objects with only valid property names (all characters are alphanumeric),
+	 * you may turn this off
+	 * @type {boolean}
+	 */
+	check_property_names: true,
+	/**
+	 * Whether to pad function body (otherwise returns exact source).
+	 * Is not guaranteed to produce correct results, so may be used only for pretty-printing of source code for browser.
+	 * @type {boolean}
+	 */
+	pretty_print_functions: false
+};
+
+/**
  * Temporary object used internally by Enumerable
  */
 _cEnumerableHelperStorage = {

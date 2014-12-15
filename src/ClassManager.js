@@ -404,7 +404,7 @@ Lava.ClassManager = {
 					serialized_action = 'r[' + skeleton[name].index + '].slice()';
 					break;
 				case 'inlineArray':
-					serialized_action = skeleton[name].is_empty ? '[]' : Lava.Serializer.serialize(skeleton[name].value);
+					serialized_action = skeleton[name].is_empty ? '[]' : this._serializeInlineArray(skeleton[name].value);
 					break;
 				case 'object':
 					var object_properties = this._serializeSkeleton(skeleton[name].skeleton, class_data, "\t");
@@ -497,7 +497,7 @@ Lava.ClassManager = {
 					serialized_value = 'r[' + skeleton[name].index + '].slice()';
 					break;
 				case 'inlineArray':
-					serialized_value = skeleton[name].is_empty ? '[]' : Lava.Serializer.serialize(skeleton[name].value);
+					serialized_value = skeleton[name].is_empty ? '[]' : this._serializeInlineArray(skeleton[name].value);
 					break;
 				case 'object':
 					var object_properties = this._serializeSkeleton(skeleton[name].skeleton, class_data, padding + "\t");
@@ -597,6 +597,46 @@ Lava.ClassManager = {
 		}
 
 		return result;
+
+	},
+
+	/**
+	 * Serialize an array which contains only certain primitive types from `SIMPLE_TYPES` property
+	 *
+	 * @param {Array} data
+	 * @returns {string}
+	 */
+	_serializeInlineArray: function(data) {
+
+		var tempResult = [],
+			i = 0,
+			count = data.length,
+			type,
+			value;
+
+		for (; i < count; i++) {
+
+			type = typeof(data[i]);
+			switch (type) {
+				case 'string':
+					value = Firestorm.String.quote(data[i]);
+					break;
+				case 'boolean':
+				case 'number':
+					value = data[i].toString();
+					break;
+				case 'null':
+				case 'undefined':
+					value = type;
+					break;
+				default:
+					Lava.t();
+			}
+			tempResult.push(value);
+
+		}
+
+		return '[' + tempResult.join(", ") + ']';
 
 	},
 

@@ -83,7 +83,7 @@ Lava.define(
 		}
 
 		this._createRecordProperties = new Function(
-			"return " + Lava.Serializer.serialize(default_properties)
+			"return " + Lava.serializer.serialize(default_properties)
 		);
 
 	},

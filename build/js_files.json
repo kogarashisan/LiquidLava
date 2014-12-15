@@ -2,7 +2,6 @@
 	"core": [
 		"Lava.js",
 		"schema.js",
-		"Serializer.js",
 		"modifiers.js",
 		"transitions.js",
 		"resources.js",
@@ -57,6 +56,7 @@
 		"Animation/Emulated.class.js",
 		"Animation/BootstrapCollapse.class.js",
 
+		"System/Serializer.class.js",
 		"System/CollectionAbstract.class.js",
 		"System/Enumerable.class.js",
 		"System/DataView.class.js",

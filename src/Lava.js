@@ -33,8 +33,6 @@ var Lava = {
 	/** @ignore */
 	modifiers: null,
 	/** @ignore */
-	Serializer: null,
-	/** @ignore */
 	types: null,
 	/** @ignore */
 	extenders: null,
@@ -88,6 +86,11 @@ var Lava = {
 	 * @type {Lava.system.FocusManager}
 	 */
 	focus_manager: null,
+	/**
+	 * Default instance of {@link Lava.system.Serializer}
+	 * @type {Lava.system.Serializer}
+	 */
+	serializer: null,
 
 	/**
 	 * Container for locale-specific data (strings, date formats, etc)
@@ -221,6 +224,8 @@ var Lava = {
 			this._loadClass(path);
 
 		}
+
+		this.serializer = new Lava.system.Serializer(Lava.schema.default_serializer_config);
 
 		if (typeof(window) != 'undefined') {
 			this._initGlobals();
@@ -692,7 +697,7 @@ var Lava = {
 	 */
 	createCloner: function(config) {
 
-		return new Function('return ' + Lava.Serializer.serialize(config));
+		return new Function('return ' + this.serializer.serialize(config));
 
 	},
 

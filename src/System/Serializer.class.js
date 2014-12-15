@@ -1,14 +1,24 @@
+
+Lava.define(
+'Lava.system.Serializer',
 /**
  * Pretty-print any JavaScript object into string, which can be eval()'ed to reconstruct original object
+ * @lends Lava.system.Serializer#
  */
-Lava.Serializer = {
+{
+
+	Shared: ['_complex_types', '_callback_map'],
 
 	/**
-	 * If you know that you serialize objects with only valid property names (all characters are alphanumeric),
-	 * you may turn this off
-	 * @define {boolean}
+	 * Used to pretty-print values in objects
+	 * @type {Object.<string, true>}
 	 */
-	CHECK_PROPERTY_NAMES: true,
+	_complex_types: {
+		array: true,
+		'object': true,
+		'function': true,
+		regexp: true
+	},
 
 	/**
 	 * Concrete serializers for each value type
@@ -27,14 +37,32 @@ Lava.Serializer = {
 	},
 
 	/**
-	 * Used to pretty-print values in objects
-	 * @type {Object.<string, true>}
+	 * If you know that you serialize objects with only valid property names (all characters are alphanumeric),
+	 * you may turn this off
+	 * @define {boolean}
 	 */
-	_complex_types: {
-		array: true,
-		'object': true,
-		'function': true,
-		regexp: true
+	_check_property_names: true,
+
+	/**
+	 * String, used to pad serialized objects for pretty-printing
+	 * @type {string}
+	 */
+	_pad: '\t',
+
+	/**
+	 * Create Serializer instance
+	 * @param {?_cSerializer} config
+	 */
+	init: function(config) {
+
+		if (config) {
+			if (config.check_property_names === false) this._check_property_names = false;
+		}
+
+		this._serializeFunction = (config && config.pretty_print_functions)
+			? this._serializeFunction_PrettyPrint
+			: this._serializeFunction_Normal
+
 	},
 
 	/**
@@ -196,7 +224,7 @@ Lava.Serializer = {
 
 		// if you serialize only Lava configs, then most likely you do not need this check,
 		// cause the property names in configs are always valid.
-		if (this.CHECK_PROPERTY_NAMES && (!Lava.VALID_PROPERTY_NAME_REGEX.test(name) || Lava.JS_KEYWORDS.indexOf(name) != -1)) {
+		if (this._check_property_names && (!Lava.VALID_PROPERTY_NAME_REGEX.test(name) || Lava.JS_KEYWORDS.indexOf(name) != -1)) {
 
 			name = '"' + name.replace(/\"/g, "\\\"") + '"';
 
@@ -207,17 +235,64 @@ Lava.Serializer = {
 	},
 
 	/**
-	 * Serialize a function
+	 * Serialize a function. Default method, which is replaced in constructor.
 	 * @param {function} data
 	 * @returns {string}
 	 */
 	_serializeFunction: function(data) {
+
+		Lava.t();
+
+	},
+
+	/**
+	 * Serialize a function with exact source code.
+	 * @param {function} data
+	 * @returns {string}
+	 */
+	_serializeFunction_Normal: function(data) {
 
 		var result = data + '';
 
 		// when using new Function() constructor, it's automatically named 'anonymous' in Chrome && Firefox
 		if (result.substr(0, 18) == 'function anonymous') {
 			result = 'function' + result.substr(18);
+		}
+
+		return result;
+
+	},
+
+	/**
+	 * Serialize function, then pad it's source code. Is not guaranteed to produce correct results,
+	 * so may be used only for pretty-printing of source code for browser.
+	 *
+	 * @param {function} data
+	 * @param {string} padding
+	 * @returns {string}
+	 */
+	_serializeFunction_PrettyPrint: function(data, padding) {
+
+		var result = this._serializeFunction_Normal(data),
+			lines = result.split(/\r?\n/),
+			last_line = lines[lines.length - 1],
+			tabs,
+			num_tabs,
+			i = 1,
+			count = lines.length;
+
+		if (/^\t*\}$/.test(last_line)) {
+			if (last_line.length > 1) { // if there are tabs
+				tabs = last_line.substr(0, last_line.length - 1);
+				num_tabs = tabs.length;
+				for (; i < count; i++) {
+					if (lines[i].indexOf(tabs) == 0) {
+						lines[i] = lines[i].substr(num_tabs);
+					}
+				}
+			}
+			lines.pop();
+			result = lines.join('\r\n\t' + padding) + '\r\n' + padding + last_line;
 		}
 
 		return result;
@@ -277,4 +352,4 @@ Lava.Serializer = {
 
 	}
 
-};
+});

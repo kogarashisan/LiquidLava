@@ -65,6 +65,10 @@ Lava.schema = {
 		REFRESH_INFINITE_LOOP_THRESHOLD: 3
 	},
 	/**
+	 * Config for {@link Lava#serializer} - the default instance
+	 */
+	default_serializer_config: {},
+	/**
 	 * Settings for {@link Lava#popover_manager}
 	 */
 	popover_manager: {

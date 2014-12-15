@@ -69,6 +69,25 @@ Lava.define(
 		count: 0
 	},
 
+	_initMembers: function(properties) {
+
+		if (Lava.schema.DEBUG && !('argument' in this._config)) Lava.t("Foreach view requires an argument");
+		if (Lava.schema.DEBUG && !this._config.as) Lava.t("Foreach view requires 'as' hash parameter");
+		if (Lava.schema.DEBUG && !this._config.template) Lava.t("Foreach view must not be empty");
+
+		this.Abstract$_initMembers(properties);
+
+		this._argument = new Lava.scope.Argument(this._config.argument, this, this._widget);
+		this._foreach_scope = new Lava.scope.Foreach(this._argument, this, this._widget, this._config.scope);
+		this._foreach_scope_changed_listener = this._foreach_scope.on('changed', this._onDataSourceChanged, this);
+		this._foreach_scope.on('new_enumerable', this._onEnumerableChanged, this);
+		this._as = this._config.as;
+		// set the count before the view's container is created, cause if it depends on count
+		// - it will be dirty right after creation
+		this.set('count', this._foreach_scope.getValue().getCount());
+
+	},
+
 	_postInit: function() {
 
 		if (this._config.refresher) {
@@ -96,25 +115,6 @@ Lava.define(
 	getRefresher: function() {
 
 		return this._refresher;
-
-	},
-
-	_initMembers: function(properties) {
-
-		if (Lava.schema.DEBUG && !('argument' in this._config)) Lava.t("Foreach view requires an argument");
-		if (Lava.schema.DEBUG && !this._config.as) Lava.t("Foreach view requires 'as' hash parameter");
-		if (Lava.schema.DEBUG && !this._config.template) Lava.t("Foreach view must not be empty");
-
-		this.Abstract$_initMembers(properties);
-
-		this._argument = new Lava.scope.Argument(this._config.argument, this, this._widget);
-		this._foreach_scope = new Lava.scope.Foreach(this._argument, this, this._widget, this._config.scope);
-		this._foreach_scope_changed_listener = this._foreach_scope.on('changed', this._onDataSourceChanged, this);
-		this._foreach_scope.on('new_enumerable', this._onEnumerableChanged, this);
-		this._as = this._config.as;
-		// set the count before the view's container is created, cause if it depends on count
-		// - it will be dirty right after creation
-		this.set('count', this._foreach_scope.getValue().getCount());
 
 	},
 

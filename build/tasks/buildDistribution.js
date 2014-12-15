@@ -26,7 +26,7 @@ module.exports = function(grunt) {
 
 				delete exported.skeleton;
 				delete exported.source_object;
-				export_classes_result += "Lava.ClassManager.loadClass(" + Lava.Serializer.serialize(exported) + ");\n\n";
+				export_classes_result += "Lava.ClassManager.loadClass(" + Lava.serializer.serialize(exported) + ");\n\n";
 				exported_paths.push(path);
 
 			}
@@ -70,8 +70,8 @@ module.exports = function(grunt) {
 			}
 
 			var compiled_templates =
-				'Lava.widgets = ' + Lava.Serializer.serialize(Lava.widgets) + ';\n'
-					+ 'Lava.sugar_map = ' + Lava.Serializer.serialize(Lava.sugar_map) + ';\n';
+				'Lava.widgets = ' + Lava.serializer.serialize(Lava.widgets) + ';\n'
+					+ 'Lava.sugar_map = ' + Lava.serializer.serialize(Lava.sugar_map) + ';\n';
 
 			grunt.file.write('./build/temp/lava_widgets.js', compiled_templates);
 
