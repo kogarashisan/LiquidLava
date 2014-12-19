@@ -5406,7 +5406,9 @@ Lava.ClassManager = {
 		}
 
 		constructor = new Function(source);
-		constructor.prototype = prototype;
+		// for Chrome we could assign prototype object directly,
+		// but in Firefox this will result in performance degradation
+		Firestorm.extend(constructor.prototype, prototype);
 		return constructor;
 
 	},
@@ -5639,7 +5641,7 @@ Lava.ClassManager = {
 		var skeleton = class_data.skeleton,
 			name,
 			serialized_value,
-			serialized_properties = ['\tClass:cd'];
+			serialized_actions = ['\tp.Class = cd;'];
 
 		for (name in skeleton) {
 
@@ -5669,11 +5671,11 @@ Lava.ClassManager = {
 
 			if (Lava.VALID_PROPERTY_NAME_REGEX.test(name)) {
 
-				serialized_properties.push(name + ': ' + serialized_value);
+				serialized_actions.push('p.' + name + ' = ' + serialized_value + ';');
 
 			} else {
 
-				serialized_properties.push('"' + name.replace(/\"/g, "\\\"") + '": ' + serialized_value);
+				serialized_actions.push('p["' + name.replace(/\"/g, "\\\"") + '"] = ' + serialized_value + ';');
 
 			}
 
@@ -5681,11 +5683,11 @@ Lava.ClassManager = {
 
 		for (name in class_data.shared) {
 
-			serialized_properties.push(name + ':s.' + name);
+			serialized_actions.push('p.' + name + ' = s.' + name + ';');
 
 		}
 
-		return new Function('cd', "var r=cd.references,s=cd.shared;\nreturn {\n" + serialized_properties.join(',\n\t') + "\n};");
+		return new Function('cd,p', "\tvar r=cd.references,\n\t\ts=cd.shared;\n\n\t" + serialized_actions.join('\n\t') + "\n");
 
 	},
 
@@ -5803,7 +5805,7 @@ Lava.ClassManager = {
 
 		}
 
-		class_data.constructor.prototype = class_data.prototype_generator(class_data);
+		class_data.prototype_generator(class_data, class_data.constructor.prototype);
 
 		this._registerClass(class_data);
 

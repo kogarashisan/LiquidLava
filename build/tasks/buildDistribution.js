@@ -95,6 +95,7 @@ module.exports = function(grunt) {
 			// Finally, build compiled Lava package
 
 			package_content = group_content['_lava_core']
+				+ "Lava.ClassManager.registerRootNamespace('Lava', Lava);\n\n"
 				+ exportClasses(Lava)
 				+ compiled_templates;
 
