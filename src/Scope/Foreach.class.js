@@ -40,20 +40,10 @@ Lava.define(
 	 */
 	_argument: null,
 	/**
-	 * Listener for {@link Lava.mixin.Refreshable#event:waits_refresh}
-	 * @type {_tListener}
-	 */
-	_argument_waits_refresh_listener: null,
-	/**
 	 * Listener for {@link Lava.scope.Argument#event:changed}
 	 * @type {_tListener}
 	 */
 	_argument_changed_listener: null,
-	/**
-	 * Listener for {@link Lava.mixin.Refreshable#event:refreshed}
-	 * @type {_tListener}
-	 */
-	_argument_refreshed_listener: null,
 
 	/**
 	 * The owner Foreach view
@@ -130,12 +120,7 @@ Lava.define(
 		this._argument = argument;
 		this._view = view;
 		this._widget = widget;
-		this.level = argument.level;
-
-		if (this._argument.isWaitingRefresh()) {
-			this._count_dependencies_waiting_refresh++;
-			this._waits_refresh = true;
-		}
+		this.level = argument.level + 1;
 
 		if (config) {
 
@@ -155,7 +140,7 @@ Lava.define(
 
 				depends = config['depends'];
 				this._binds = [];
-				this._bind_listeners = [];
+				this._bind_changed_listeners = [];
 
 				for (count = depends.length; i < count; i++) {
 
@@ -170,7 +155,7 @@ Lava.define(
 					}
 
 					this._binds.push(bind);
-					this._bind_listeners.push(bind.on('changed', this._onDependencyChanged, this));
+					this._bind_changed_listeners.push(bind.on('changed', this._onDependencyChanged, this));
 
 				}
 
@@ -178,10 +163,7 @@ Lava.define(
 
 		}
 
-		this._argument_waits_refresh_listener = this._argument.on('waits_refresh', this._onDependencyWaitsRefresh, this);
 		this._argument_changed_listener = this._argument.on('changed', this.onDataSourceChanged, this);
-		this._argument_refreshed_listener = this._argument.on('refreshed', this._onDependencyRefreshed, this);
-
 		this.refreshDataSource();
 
 	},
@@ -191,7 +173,6 @@ Lava.define(
 	 */
 	_onDependencyChanged: function() {
 
-		this._is_dirty = true;
 		this._queueForRefresh();
 
 	},
@@ -327,7 +308,6 @@ Lava.define(
 	onDataSourceChanged: function() {
 
 		if (this._observable_listener) this._flushObservable();
-		this._is_dirty = true;
 		this._queueForRefresh();
 
 	},
@@ -337,7 +317,6 @@ Lava.define(
 	 */
 	_onObservableChanged: function() {
 
-		this._is_dirty = true;
 		this._queueForRefresh();
 
 	},
@@ -362,43 +341,6 @@ Lava.define(
 	},
 
 	/**
-	 * Stop listening to events
-	 */
-	sleep: function() {
-
-		Lava.suspendListener(this._argument_changed_listener);
-		this._observable_listener && Lava.suspendListener(this._observable_listener);
-		this.suspendRefreshable();
-
-	},
-
-	/**
-	 * Resume event listeners and refresh state
-	 */
-	wakeup: function() {
-
-		if (this._observable_listener) {
-
-			if (this._argument.getValue() != this._observable) {
-
-				this._flushObservable();
-
-			} else {
-
-				Lava.resumeListener(this._observable_listener);
-
-			}
-
-		}
-
-		this.refreshDataSource();
-
-		Lava.resumeListener(this._argument_changed_listener);
-		this._is_dirty = false;
-
-	},
-
-	/**
 	 * Free resources and make this instance unusable
 	 */
 	destroy: function() {
@@ -406,16 +348,14 @@ Lava.define(
 		if (this._binds) {
 
 			for (var i = 0, count = this._binds.length; i < count; i++) {
-				this._binds.removeListener(this._bind_changed_listeners[i]);
+				this._binds[i].removeListener(this._bind_changed_listeners[i]);
 			}
 
 			this._binds = this._bind_changed_listeners = null;
 
 		}
 
-		this._argument.removeListener(this._argument_waits_refresh_listener);
 		this._argument.removeListener(this._argument_changed_listener);
-		this._argument.removeListener(this._argument_refreshed_listener);
 		this._observable_listener && this._flushObservable();
 
 		if (this._own_collection) {

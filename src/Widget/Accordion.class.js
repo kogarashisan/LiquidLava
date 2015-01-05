@@ -294,28 +294,24 @@ Lava.define(
 			i = 0,
 			last_index;
 
-		if (this._properties.is_enabled != value) {
+		if (value) {
 
-			if (value) {
+			if (this._active_panels.length > 1) {
 
-				if (this._active_panels.length > 1) {
-
-					last_index = this._active_panels.length - 1;
-					// slice is needed for the listeners
-					turnoff_panels = this._active_panels.slice(0, last_index);
-					for (; i < last_index; i++) {
-						turnoff_panels[i].set('is_expanded', false);
-					}
-					// keep expanded only the last opened panel
-					this._active_panels = [this._active_panels[last_index]];
-
+				last_index = this._active_panels.length - 1;
+				// slice is needed for the listeners
+				turnoff_panels = this._active_panels.slice(0, last_index);
+				for (; i < last_index; i++) {
+					turnoff_panels[i].set('is_expanded', false);
 				}
+				// keep expanded only the last opened panel
+				this._active_panels = [this._active_panels[last_index]];
 
 			}
 
-			this._set(name, value);
-
 		}
+
+		this._set(name, value);
 
 	},
 

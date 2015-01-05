@@ -31,7 +31,7 @@ Lava.define(
 	 * Currently active if/elseif section id
 	 * @type {number}
 	 */
-	_active_argument_index: null,
+	_active_argument_index: -1,
 	/**
 	 * Content of each if/elseif section
 	 * @type {Array.<Lava.system.Template>}
@@ -44,7 +44,8 @@ Lava.define(
 	_else_content: null,
 
 	/**
-	 * Refreshers animates insertion and removal of templates
+	 * Refreshers animate insertion and removal of templates.
+	 * They can also insert and remove templates independently of each other
 	 * @type {(Lava.view.refresher.Standard)}
 	 */
 	_refresher: null,
@@ -53,14 +54,6 @@ Lava.define(
 	 * @type {Lava.system.Template}
 	 */
 	_active_template: null,
-
-	init: function(config, widget, parent_view, template, properties) {
-
-		this.Abstract$init(config, widget, parent_view, template, properties);
-
-		this._active_template = this._getActiveTemplate();
-
-	},
 
 	_postInit: function() {
 
@@ -86,7 +79,7 @@ Lava.define(
 		}
 
 		this._count_arguments = this._arguments.length;
-		this._active_argument_index = this._getActiveArgumentIndex();
+		this._refreshActiveArgumentIndex();
 
 		if (this._config.refresher) {
 			this.createRefresher(this._config.refresher);
@@ -108,7 +101,22 @@ Lava.define(
 		var constructor = Lava.ClassManager.getConstructor(refresher_config['type'], 'Lava.view.refresher');
 		this._refresher = /** @type {Lava.view.refresher.Standard} */ new constructor(refresher_config, this, this._container);
 
+		this._refresher.on('removal_complete', this._onRemovalComplete, this);
 		this._refresh = this._refresh_Refresher;
+		this._removeTemplate = this._removeTemplate_Refresher;
+		this._renderContent = this._renderContent_Refresher;
+		this._broadcastToChildren = this._broadcastToChildren_Refresher;
+
+	},
+
+	/**
+	 * Animation has ended and template was removed from DOM. Destroy it.
+	 * @param {Lava.view.refresher.Standard} refresher
+	 * @param {Lava.system.Template} template
+	 */
+	_onRemovalComplete: function(refresher, template) {
+
+		this._destroyTemplate(template);
 
 	},
 
@@ -126,21 +134,20 @@ Lava.define(
 	 * Get index of the first argument which evaluates to <kw>true</kw>
 	 * @returns {?number} Zero-based argument index, or <kw>null</kw>, if all arguments evaluate to <kw>false</kw>
 	 */
-	_getActiveArgumentIndex: function() {
+	_refreshActiveArgumentIndex: function() {
 
-		var i = 0,
-			active_argument_index = null;
+		this._active_argument_index = -1;
 
-		for (; i < this._count_arguments; i++) {
+		for (var i = 0; i < this._count_arguments; i++) {
 
 			if (!!this._arguments[i].getValue()) {
-				active_argument_index = i;
+
+				this._active_argument_index = i;
 				break;
+
 			}
 
 		}
-
-		return active_argument_index;
 
 	},
 
@@ -151,17 +158,28 @@ Lava.define(
 	 */
 	_getActiveTemplate: function() {
 
-		var result = null;
+		var result = null,
+			index = this._active_argument_index;
 
-		if (this._active_argument_index != null) {
+		if (index != -1) {
 
-			this._createContent(this._active_argument_index);
+			if (!this._content[index]) {
 
-			result = this._content[this._active_argument_index];
+				this._content[index] = (index == 0)
+					? new Lava.system.Template(this._config.template || [], this._widget, this, {if_index: index})
+					: new Lava.system.Template(this._config.elseif_templates[index - 1] || [], this._widget, this, {if_index: index});
+
+			}
+
+			result = this._content[index];
 
 		} else if ('else_template' in this._config) {
 
-			this._createElseContent();
+			if (this._else_content == null) {
+
+				this._else_content = new Lava.system.Template(this._config.else_template || [], this._widget, this);
+
+			}
 
 			result = this._else_content;
 
@@ -176,31 +194,60 @@ Lava.define(
 	 */
 	_onArgumentChanged: function() {
 
-		var active_argument_index = this._getActiveArgumentIndex();
+		var old_active_argument_index = this._active_argument_index;
+		this._refreshActiveArgumentIndex();
 
-		if (this._active_argument_index != active_argument_index) {
-
-			this._active_argument_index = active_argument_index;
+		if (this._active_argument_index != old_active_argument_index) {
 
 			if (this._active_template && this._is_inDOM) {
 
-				if (this._refresher) {
-
-					this._refresher.removeTemplates([this._active_template]);
-
-				} else {
-
-					this._active_template.broadcastRemove();
-
-				}
+				this._removeTemplate(this._active_template);
 
 			}
 
-			this._active_template = this._getActiveTemplate();
-
 			this.trySetDirty();
+			this._active_template = null;
 
 		}
+
+	},
+
+	/**
+	 * Branches that are not in DOM are destroyed
+	 * @param {Lava.system.Template} template
+	 */
+	_destroyTemplate: function(template) {
+
+		var index = this._content.indexOf(template);
+
+		if (index == -1) {
+			if (Lava.schema.DEBUG && template != this._else_content) Lava.t();
+			this._else_content = null;
+		} else {
+			this._content[index] = null;
+		}
+
+		template.destroy();
+
+	},
+
+	/**
+	 * Destroys branches, that are removed from DOM
+	 * @param {Lava.system.Template} template
+	 */
+	_removeTemplate: function(template) {
+
+		this._destroyTemplate(template);
+
+	},
+
+	/**
+	 * Removes branches from DOM using a refresher instance
+	 * @param {Lava.system.Template} template
+	 */
+	_removeTemplate_Refresher: function(template) {
+
+		this._refresher.prepareRemoval([template]);
 
 	},
 
@@ -210,10 +257,21 @@ Lava.define(
 	 */
 	_renderContent: function() {
 
-		if (Lava.schema.DEBUG && this._active_argument_index != null && this._arguments[this._active_argument_index].isWaitingRefresh()) Lava.t();
-
-		this._refresher && this._refresher.onRender(this._active_template ? [this._active_template] : []);
+		if (Lava.schema.DEBUG && this._active_argument_index != -1 && this._arguments[this._active_argument_index].isWaitingRefresh()) Lava.t();
+		this._active_template = this._getActiveTemplate();
 		return this._active_template ? this._active_template.render() : '';
+
+	},
+
+	/**
+	 * Version of `_renderContent` which uses created refresher instance
+	 * @returns {string}
+	 */
+	_renderContent_Refresher: function() {
+
+		if (Lava.schema.DEBUG && this._active_argument_index != -1 && this._arguments[this._active_argument_index].isWaitingRefresh()) Lava.t();
+		this._active_template = this._getActiveTemplate();
+		return this._refresher.render(this._active_template ? [this._active_template] : []);
 
 	},
 
@@ -223,83 +281,18 @@ Lava.define(
 	 */
 	_broadcastToChildren: function(function_name) {
 
-		if (this._active_template) {
-
-			this._active_template[function_name]();
-
-		}
-
-	},
-
-	_sleep: function() {
-
-		var i = 0,
-			count = this._arguments.length;
-
-		for (; i < count; i++) {
-
-			this._arguments[i].sleep();
-
-		}
-
-		for (i = 0, count = this._argument_changed_listeners.length; i < count; i++) {
-
-			Lava.suspendListener(this._argument_changed_listeners[i]);
-
-		}
-
-		this.Abstract$_sleep();
-
-	},
-
-	_wakeup: function() {
-
-		for (i = 0, count = this._arguments.length; i < count; i++) {
-
-			this._arguments[i].wakeup();
-
-		}
-
-		for (var i = 0, count = this._argument_changed_listeners.length; i < count; i++) {
-
-			Lava.resumeListener(this._argument_changed_listeners[i]);
-
-		}
-
-		this._onArgumentChanged();
-
-		this.Abstract$_wakeup();
+		this._active_template && this._active_template[function_name]();
 
 	},
 
 	/**
-	 * Create the template that corresponds to a if/elseif section
-	 * @param {number} index
+	 * Version of `_broadcastToChildren` for use with refresher instance
+	 * @param {string} function_name
 	 */
-	_createContent: function(index) {
+	_broadcastToChildren_Refresher: function(function_name) {
 
-		if (typeof(this._content[index]) == 'undefined') {
-
-			this._content[index] = (index == 0)
-				? new Lava.system.Template(this._config.template || [], this._widget, this)
-				: new Lava.system.Template(this._config.elseif_templates[index - 1] || [], this._widget, this);
-
-			this._content[index].batchSetProperty('if_index', index);
-
-		}
-
-	},
-
-	/**
-	 * Create the 'else' template
-	 */
-	_createElseContent: function() {
-
-		if (this._else_content == null) {
-
-			this._else_content = new Lava.system.Template(this._config.else_template || [], this._widget, this);
-
-		}
+		this._refresher[function_name] && this._refresher[function_name]();
+		this._active_template && this._active_template[function_name]();
 
 	},
 
@@ -310,8 +303,14 @@ Lava.define(
 
 	},
 
+	/**
+	 * Version of `_refresh` for use with refresher instance
+	 */
 	_refresh_Refresher: function() {
 
+		if (!this._active_template) {
+			this._active_template = this._getActiveTemplate();
+		}
 		this._refresher.refresh(this._active_template ? [this._active_template] : []);
 
 	},

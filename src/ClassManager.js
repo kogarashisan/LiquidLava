@@ -927,7 +927,7 @@ Lava.ClassManager = {
 	 * @param {string} instance_class_name Short name of current class
 	 * @param {string} function_name Function to replace
 	 * @param {string} new_function_name Name of new method from the prototype
-	 * @returns {string} name of overridden function Name, that was replaced
+	 * @returns {string} name of the method that was replaced
 	 */
 	patch: function(instance, instance_class_name, function_name, new_function_name) {
 
@@ -952,7 +952,7 @@ Lava.ClassManager = {
 
 		proto[function_name] = proto[new_function_name];
 		// this plays role when class replaces it's method with parent's method (removes it's own method)
-		// and parent also wants to apply patches to the same method (see comment above)
+		// and parent also wants to apply patches to the same method (see comment above about the "in" operator)
 		proto[new_function_name] = null;
 		return function_name;
 

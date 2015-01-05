@@ -59,32 +59,28 @@ Lava.define(
 	 * Create the PropertyBinding instance. Refresh value from view's property or set value from assign
 	 * @param {Lava.view.Abstract} view Scope's owner view, to which it's bound
 	 * @param {string} property_name
-	 * @param {number} level
 	 * @param {_cAssign} assign_config Config for the Argument, in case this scope is created in "assign" mode
 	 */
-	init: function(view, property_name, level, assign_config) {
+	init: function(view, property_name, assign_config) {
 
 		this.guid = Lava.guid++;
 		this._view = view;
 		this._property_name = property_name;
-		this.level = level;
 
 		if (assign_config) {
 
 			this._assign_argument = new Lava.scope.Argument(assign_config, view, view.getWidget());
-
-			if (this._assign_argument.isWaitingRefresh()) {
-				this._count_dependencies_waiting_refresh++;
-				this._waits_refresh = true;
-			}
-			this._assign_argument.on('waits_refresh', this._onDependencyWaitsRefresh, this);
 			this._assign_argument.on('changed', this.onAssignChanged, this);
-			this._assign_argument.on('refreshed', this._onDependencyRefreshed, this);
-
 			this._value = this._assign_argument.getValue();
 			view.set(this._property_name, this._value);
+			this.level = this._assign_argument.level + 1;
 
 		} else {
+
+			// this is needed to order implicit inheritance
+			// (in custom widget property setters logic and in view.Foreach, while refreshing children).
+			// Zero was added to simplify examples from site documentation - it's not needed by framework
+			this.level = view.depth || 0;
 
 			this._value = view.get(this._property_name);
 			this._property_changed_listener = view.onPropertyChanged(property_name, this.onContainerPropertyChanged, this);
@@ -112,7 +108,6 @@ Lava.define(
 
 		this._view.set(this._property_name, this._assign_argument.getValue());
 		this._queueForRefresh();
-		this._is_dirty = true;
 
 	},
 
@@ -122,7 +117,6 @@ Lava.define(
 	onContainerPropertyChanged: function() {
 
 		this._queueForRefresh();
-		this._is_dirty = true;
 
 	},
 
@@ -147,7 +141,6 @@ Lava.define(
 		Lava.resumeListener(this._property_changed_listener);
 
 		this._queueForRefresh();
-		this._is_dirty = true;
 
 	},
 

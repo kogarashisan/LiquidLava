@@ -38,20 +38,14 @@ Lava.define(
 	},
 
 	/**
-	 * Get or create an extension record by GUID of record in a normal module
-	 * @param {_tGUID} guid
+	 * Get an extension record by GUID of normal record
+	 * @param {_tGUID} ext_guid
 	 * @returns {Lava.data.MetaRecord}
-	 * @lava-param-renamed name -> guid
+	 * @lava-param-renamed name -> ext_guid
 	 */
-	get: function(guid) {
+	get: function(ext_guid) {
 
-		if (!(guid in this._properties)) {
-
-			this._properties[guid] = this._createRecordInstance();
-
-		}
-
-		return this._properties[guid];
+		return this._properties[ext_guid];
 
 	},
 
@@ -65,17 +59,27 @@ Lava.define(
 	},
 
 	/**
-	 * Create an instance of {@link Lava.data.MetaRecord}
+	 * Create a new MetaRecord instance
+	 * @param {_tGUID} ext_guid GUID of the external record, to which this MetaRecord will be attached
+	 * @param {Object} raw_properties Initial field values
+	 * @param {Object} [original_record] Original record, which will be saved in MetaRecord instance
 	 * @returns {Lava.data.MetaRecord}
 	 */
-	_createRecordInstance: function() {
+	createMetaRecord: function(ext_guid, raw_properties, original_record) {
+
+		if (ext_guid in this._properties) Lava.t("MetaRecord already exists");
 
 		var properties = this._createRecordProperties(),
-			record = new this._record_constructor(this, this._fields, properties);
+			record = new this._record_constructor(this, this._fields, properties, raw_properties, original_record);
 
+		record.ext_guid = ext_guid;
 		this._records.push(record);
 		this._properties_by_guid[record.guid] = properties;
 		this._records_by_guid[record.guid] = record;
+
+		this._properties[ext_guid] = record;
+		this.firePropertyChangedEvents(ext_guid);
+
 		return record;
 
 	}

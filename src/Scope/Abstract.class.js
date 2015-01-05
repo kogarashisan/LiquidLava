@@ -38,7 +38,7 @@ Lava.define(
 
 		if (!(property_name in this._data_bindings_by_property)) {
 
-			this._data_bindings_by_property[property_name] = new Lava.scope.DataBinding(this, property_name, this.level);
+			this._data_bindings_by_property[property_name] = new Lava.scope.DataBinding(this, property_name);
 
 		}
 
@@ -57,7 +57,7 @@ Lava.define(
 
 		if (!(name_source_scope.guid in this._data_segments)) {
 
-			this._data_segments[name_source_scope.guid] = new Lava.scope.Segment(this, name_source_scope, this.level);
+			this._data_segments[name_source_scope.guid] = new Lava.scope.Segment(this, name_source_scope);
 
 		}
 

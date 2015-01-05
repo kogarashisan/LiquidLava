@@ -1514,6 +1514,17 @@ Firestorm.String = {
 
 		return result;
 
+	},
+
+	/**
+	 * Before constructing regular expressions from user input - you must escape them
+	 * @param {string} string
+	 * @returns {string}
+	 */
+	escapeStringForRegExp: function(string) {
+
+		return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+
 	}
 
 };
@@ -1814,6 +1825,7 @@ var Lava = {
 		if (typeof(Firestorm) == 'undefined') Lava.t('init: Firestorm is not loaded');
 
 		this.ClassManager.registerRootNamespace('Lava', this);
+		this.ScopeManager.init();
 
 		for (path in this.classes) {
 
@@ -2305,10 +2317,9 @@ var Lava = {
 	 */
 	scheduleRefresh: function() {
 
-		var self;
+		var self = this;
 		if (!this._refresh_timer && !Lava.Core.isProcessingEvent()) {
 
-			self = this;
 			this._refresh_timer = window.setTimeout(
 				function(){
 					self._refresh_timer = null;
@@ -2530,7 +2541,7 @@ Lava.schema = {
 		 * an infinite refresh loop
 		 * @const
 		 */
-		REFRESH_INFINITE_LOOP_THRESHOLD: 3
+		REFRESH_INFINITE_LOOP_THRESHOLD: 3 // up to 5 times
 	},
 	/**
 	 * Config for {@link Lava#serializer} - the default instance
@@ -4126,20 +4137,41 @@ Lava.ScopeManager = {
 	_is_refreshing: false,
 
 	/**
-	 * Queue a scope for update
+	 * Initialize global ScopeManager object
+	 */
+	init: function() {
+
+		this.scheduleScopeRefresh = this.scheduleScopeRefresh_Normal;
+
+	},
+
+	/**
+	 * Queue a scope for update or refresh it immediately, depending on current ScopeManager state
 	 * @param {Lava.mixin.Refreshable} target
 	 * @param {number} level
 	 * @returns {{index: number}} Refresh ticket
 	 */
 	scheduleScopeRefresh: function(target, level) {
 
-		if (this._min_scope_refresh_level > level) {
+		Lava.t("Framework requires initialization");
 
-			this._min_scope_refresh_level = level;
+	},
 
-		}
+	/**
+	 * Normal version outside of view refresh cycle - adds scope into refresh queue.
+	 * @param {Lava.mixin.Refreshable} target
+	 * @param {number} level
+	 * @returns {{index: number}}
+	 */
+	scheduleScopeRefresh_Normal: function(target, level) {
 
 		if (!this._scope_refresh_queues[level]) {
+
+			if (this._min_scope_refresh_level > level) {
+
+				this._min_scope_refresh_level = level;
+
+			}
 
 			this._scope_refresh_queues[level] = [];
 
@@ -4149,6 +4181,40 @@ Lava.ScopeManager = {
 		return {
 			index: this._scope_refresh_queues[level].push(target) - 1
 		}
+
+	},
+
+	/**
+	 * Inside the refresh cycle - refreshes scope immediately
+	 * @param {Lava.mixin.Refreshable} target
+	 */
+	scheduleScopeRefresh_Locked: function(target) {
+
+		if (target.refresh(this._refresh_id)) {
+			Lava.logError('Scope Manager: infinite loop exception outside of normal refresh cycle');
+		}
+
+		return null;
+
+	},
+
+	/**
+	 * Swap `scheduleScopeRefresh` algorithm to `scheduleScopeRefresh_Locked`
+	 */
+	lock: function() {
+
+		if (Lava.schema.DEBUG && (this.scheduleScopeRefresh == this.scheduleScopeRefresh_Locked || this._is_refreshing)) Lava.t();
+		this.scheduleScopeRefresh = this.scheduleScopeRefresh_Locked;
+
+	},
+
+	/**
+	 * Swap `scheduleScopeRefresh` algorithm to `scheduleScopeRefresh_Normal`
+	 */
+	unlock: function() {
+
+		if (Lava.schema.DEBUG && this.scheduleScopeRefresh == this.scheduleScopeRefresh_Normal) Lava.t();
+		this.scheduleScopeRefresh = this.scheduleScopeRefresh_Normal;
 
 	},
 
@@ -4178,7 +4244,12 @@ Lava.ScopeManager = {
 	/**
 	 * The main refresh loop
 	 */
-	refreshScopes: function() {
+	refresh: function() {
+
+		if (this._is_refreshing) {
+			Lava.logError("ScopeManager: recursive call to ScopeManager#refresh()");
+			return;
+		}
 
 		var count_refresh_cycles = 0,
 			count_levels = this._scope_refresh_queues.length;
@@ -4187,11 +4258,6 @@ Lava.ScopeManager = {
 
 			return;
 
-		}
-
-		if (this._is_refreshing) {
-			Lava.logError("ScopeManager: recursive call to refreshScopes()");
-			return;
 		}
 
 		this._is_refreshing = true;
@@ -4230,6 +4296,7 @@ Lava.ScopeManager = {
 
 		} else {
 
+			Lava.schema.DEBUG && this.debugVerify();
 			this._scope_refresh_queues = [];
 
 		}
@@ -4245,8 +4312,6 @@ Lava.ScopeManager = {
 		this._has_infinite_loop = this._has_exceptions;
 
 		this._is_refreshing = false;
-
-		Lava.schema.DEBUG && this.debugVerify();
 
 	},
 
@@ -4279,11 +4344,11 @@ Lava.ScopeManager = {
 
 				if (current_level_queue[i]) {
 
-					if (current_level_queue[i].doRefresh(this._refresh_id)) {
+					if (current_level_queue[i].refresh(this._refresh_id)) {
 
 						this._has_exceptions = true;
 						this.statistics.count_dead_loop_exceptions++;
-						Lava.logError('View Manager: infinite loop exception, interrupting');
+						Lava.logError('Scope Manager: infinite loop exception, interrupting');
 						return false;
 
 					}
@@ -4315,7 +4380,7 @@ Lava.ScopeManager = {
 
 			this._min_scope_refresh_level++;
 
-			if (this._min_scope_refresh_level in this._scope_refresh_queues) {
+			if (this._scope_refresh_queues[this._min_scope_refresh_level]) {
 
 				return true;
 
@@ -4361,7 +4426,7 @@ Lava.ScopeManager = {
 
 					if (current_queue[i]) {
 
-						current_queue[i].doRefresh(this._refresh_id, true);
+						current_queue[i].refresh(this._refresh_id, true);
 
 					}
 
@@ -5882,7 +5947,7 @@ Lava.ClassManager = {
 	 * @param {string} instance_class_name Short name of current class
 	 * @param {string} function_name Function to replace
 	 * @param {string} new_function_name Name of new method from the prototype
-	 * @returns {string} name of overridden function Name, that was replaced
+	 * @returns {string} name of the method that was replaced
 	 */
 	patch: function(instance, instance_class_name, function_name, new_function_name) {
 
@@ -5907,7 +5972,7 @@ Lava.ClassManager = {
 
 		proto[function_name] = proto[new_function_name];
 		// this plays role when class replaces it's method with parent's method (removes it's own method)
-		// and parent also wants to apply patches to the same method (see comment above)
+		// and parent also wants to apply patches to the same method (see comment above about the "in" operator)
 		proto[new_function_name] = null;
 		return function_name;
 
@@ -7024,7 +7089,10 @@ Lava.parsers.Common = {
 			} else if (targets_string.length) {
 
 				targets_string = targets_string.trim();
-				if (targets_string.length) Lava.t('Malformed targets (2): ' + targets_string);
+				if (Lava.schema.DEBUG && targets_string.length) {
+					if (targets_string[0] == ';') Lava.t("Space between semicolon in targets is not allowed");
+					Lava.t('Malformed targets (2): ' + targets_string);
+				}
 
 			}
 
@@ -8240,7 +8308,7 @@ Lava.parsers.Directives = {
 	_xstatic_value: function(raw_directive) {
 
 		if (Lava.schema.DEBUG && (raw_directive.content || !raw_directive.attributes || !raw_directive.attributes.resource_id))
-			Lava.t('Malformed static_value directive');
+			Lava.t('Malformed static_value directive. Note: content inside directive is not allowed, check for white space.');
 
 		return {
 			type: 'static_value',
@@ -8259,7 +8327,7 @@ Lava.parsers.Directives = {
 	_xstatic_eval: function(raw_directive) {
 
 		if (Lava.schema.DEBUG && (!raw_directive.content || raw_directive.content.length != 1))
-			Lava.t('Malformed static_eval directive');
+			Lava.t('Malformed static_eval directive. No content.');
 
 		var arguments = Lava.ExpressionParser.parse(raw_directive.content[0]);
 
@@ -11255,16 +11323,6 @@ Lava.define(
 
 });
 
-/**
- * This instance may become dirty and will fire the 'refreshed' event
- * @event Lava.mixin.Refreshable#waits_refresh
- */
-
-/**
- * Instance is now clean, and scopes that depend on it can update themselves now
- * @event Lava.mixin.Refreshable#refreshed
- */
-
 Lava.define(
 'Lava.mixin.Refreshable',
 /**
@@ -11276,27 +11334,18 @@ Lava.define(
 
 	Extends: 'Lava.mixin.Observable',
 	/**
+	 * Tell other classes that this instance is inherited from Refreshable
+	 * @type {boolean}
+	 * @const
+	 */
+	isRefreshable: true,
+	/**
 	 * Indicates the priority of this scope in the hierarchy. Scopes with lower priority are refreshed first
 	 * @type {number}
+	 * @readonly
 	 */
 	level: 0,
-	/**
-	 * Force delay of refresh after the last dependency has been updated.
-	 * This flag is set depending on scope configuration
-	 * @type {boolean}
-	 */
-	_requeue: false,
 
-	/**
-	 * Scopes may depend on other scopes. Scope may refresh itself, when all dependencies are up-to-date
-	 * @type {number}
-	 */
-	_count_dependencies_waiting_refresh: 0,
-	/**
-	 * Indicates if this scope will participate in the next refresh cycle
-	 * @type {boolean}
-	 */
-	_waits_refresh: false,
 	/**
 	 * The object, which is given by {@link Lava.ScopeManager} when the scope is added into the refresh queue
 	 * @type {Object}
@@ -11315,125 +11364,36 @@ Lava.define(
 	_refresh_cycle_count: 0,
 
 	/**
-	 * Indicates if the scope needs to refresh it's value (dependencies or bindings have changed)
-	 * @type {boolean}
-	 */
-	_is_dirty: false,
-
-	/**
-	 * Called by {@link Lava.ScopeManager} during refresh loop
+	 * Called by {@link Lava.ScopeManager} during refresh loop. You should not call this method directly.
+	 * Warning: violates code style with multiple return statements.
 	 *
 	 * @param {number} refresh_id The id of current refresh loop
 	 * @param {boolean} [is_safe] Internal switch used to control infinite refresh loop exceptions
 	 * @returns {boolean} <kw>true</kw> in case of infinite loop, and <kw>false</kw> in case of normal refresh
 	 */
-	doRefresh: function(refresh_id, is_safe) {
+	refresh: function(refresh_id, is_safe) {
 
-		if (Lava.schema.DEBUG && this._count_dependencies_waiting_refresh) Lava.t();
-		if (Lava.schema.DEBUG && !this._waits_refresh && this._refresh_ticket) Lava.t();
+		// first, refresh ticket must be cleared, cause otherwise scope may stay dirty forever
+		this._refresh_ticket = null;
 
-		if (this._waits_refresh) { // to counter exceptions
+		if (this._last_refresh_id == refresh_id) {
 
-			// note: the order of the following operations is important
-			if (this._last_refresh_id == refresh_id) {
+			this._refresh_cycle_count++;
+			if (this._refresh_cycle_count > Lava.schema.system.REFRESH_INFINITE_LOOP_THRESHOLD && !is_safe) {
 
-				if (Lava.schema.DEBUG) Lava.logError('Scope was refreshed more than once during one refresh loop');
+				return true; // infinite loop exception
 
-				this._refresh_cycle_count++;
-				if (this._refresh_cycle_count == Lava.schema.system.REFRESH_INFINITE_LOOP_THRESHOLD && !is_safe) {
-
-					return true; // infinite loop exception
-
-				}
-
-			} else {
-
-				this._last_refresh_id = refresh_id;
-				this._refresh_cycle_count = 0;
-
-			}
-
-			this._waits_refresh = false;
-			this._refresh_ticket = null;
-
-			if (this._is_dirty) {
-
-				this._is_dirty = false;
-
-				this._doRefresh();
-
-			}
-
-			this._fire('refreshed');
-
-		}
-
-		return false;
-
-	},
-
-	/**
-	 * Listens to the {@link Lava.mixin.Refreshable#event:waits_refresh} event of it's dependencies (other Refreshable instances)
-	 */
-	_onDependencyWaitsRefresh: function() {
-
-		this._count_dependencies_waiting_refresh++;
-
-		if (this._waits_refresh) {
-
-			if (this._refresh_ticket) {
-				// If a scope, that was queued for refresh, has dirty dependencies - it will refresh itself automatically
-				// after it's last dependency is refreshed. So in that case it must cancel it's refresh ticket.
-				Lava.ScopeManager.cancelScopeRefresh(this._refresh_ticket, this.level);
-				this._refresh_ticket = null;
 			}
 
 		} else {
 
-			if (Lava.schema.DEBUG && this._refresh_ticket) Lava.t();
-
-			this._waits_refresh = true;
-			this._fire('waits_refresh');
+			this._last_refresh_id = refresh_id;
+			this._refresh_cycle_count = 0;
 
 		}
 
-	},
-
-	/**
-	 * Listens to the {@link Lava.mixin.Refreshable#event:refreshed} event of it's dependencies
-	 */
-	_onDependencyRefreshed: function() {
-
-		if (Lava.schema.DEBUG && !this._waits_refresh) Lava.t();
-		if (Lava.schema.DEBUG && this._refresh_ticket) Lava.t();
-
-		this._count_dependencies_waiting_refresh--;
-
-		if (this._count_dependencies_waiting_refresh == 0) {
-
-			if (this._requeue) {
-
-				if (Lava.schema.DEBUG && this._refresh_ticket) Lava.t();
-
-				this._refresh_ticket = Lava.ScopeManager.scheduleScopeRefresh(this, this.level);
-
-			} else {
-
-				this._waits_refresh = false;
-
-				if (this._is_dirty) {
-
-					this._is_dirty = false;
-
-					this._doRefresh();
-
-				}
-
-				this._fire('refreshed');
-
-			}
-
-		}
+		this._doRefresh();
+		return false;
 
 	},
 
@@ -11451,13 +11411,9 @@ Lava.define(
 	 */
 	_queueForRefresh: function() {
 
-		if (!this._waits_refresh) {
+		if (!this._refresh_ticket) {
 
-			if (Lava.schema.DEBUG && this._refresh_ticket) Lava.t();
-
-			this._waits_refresh = true;
 			this._refresh_ticket = Lava.ScopeManager.scheduleScopeRefresh(this, this.level);
-			this._fire('waits_refresh');
 
 		}
 
@@ -11468,17 +11424,17 @@ Lava.define(
 	 */
 	debugAssertClean: function() {
 
-		if (this._waits_refresh || this._refresh_ticket || this._is_dirty) Lava.t("Refreshable::debugAssertClean() failed");
+		if (this._refresh_ticket) Lava.t("Refreshable::debugAssertClean() failed");
 
 	},
 
 	/**
-	 * Get `_waits_refresh`
-	 * @returns {boolean}
+	 * Will the scope be refreshed in the next refresh cycle
+	 * @returns {boolean} <kw>true</kw>, if scope is in refresh queue, and <kw>false</kw> otherwise
 	 */
 	isWaitingRefresh: function() {
 
-		return this._waits_refresh;
+		return !!this._refresh_ticket;
 
 	},
 
@@ -11491,10 +11447,6 @@ Lava.define(
 			Lava.ScopeManager.cancelScopeRefresh(this._refresh_ticket, this.level);
 			this._refresh_ticket = null;
 		}
-
-		this._waits_refresh = false;
-		this._count_dependencies_waiting_refresh = 0;
-		this._is_dirty = true;
 
 	}
 
@@ -12218,11 +12170,6 @@ Lava.define(
 	 */
 	_timeout: null,
 
-	/**
-	 * Create an animation
-	 * @param {_cAnimation} config
-	 * @param {*} target
-	 */
 	init: function(config, target) {
 
 		this.Abstract$init(config, target);
@@ -13914,11 +13861,6 @@ Lava.define(
 	 */
 	_is_inDOM: false,
 	/**
-	 * Is template currently sleeping
-	 * @type {boolean}
-	 */
-	_is_sleeping: false,
-	/**
 	 * Global unique ID of the instance
 	 * @type {_tGUID}
 	 */
@@ -14179,8 +14121,6 @@ Lava.define(
 			i = 0,
 			content = this._content;
 
-		this._is_sleeping = false;
-
 		for (; i < this._count; i++) {
 
 			if (typeof(content[i]) == 'string') {
@@ -14210,7 +14150,6 @@ Lava.define(
 
 		if (this._is_inDOM) {
 
-			this._is_sleeping = true;
 			this._is_inDOM = false;
 			this._broadcast('broadcastRemove');
 
@@ -14225,30 +14164,6 @@ Lava.define(
 
 		this._is_inDOM = true;
 		this._broadcast('broadcastInDOM');
-
-	},
-
-	/**
-	 * Broadcast <str>"broadcastSleep"</str> to instance content
-	 */
-	broadcastSleep: function() {
-
-		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.t();
-
-		this._is_sleeping = true;
-		this._broadcast('broadcastSleep');
-
-	},
-
-	/**
-	 * Broadcast <str>"broadcastWakeup"</str> to instance content
-	 */
-	broadcastWakeup: function() {
-
-		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.t();
-
-		this._is_sleeping = false;
-		this._broadcast('broadcastWakeup');
 
 	},
 
@@ -14451,16 +14366,6 @@ Lava.define(
 	},
 
 	/**
-	 * Get `_is_sleeping`
-	 * @returns {boolean}
-	 */
-	isSleeping: function() {
-
-		return this._is_sleeping;
-
-	},
-
-	/**
 	 * Free resources and make this instance unusable
 	 */
 	destroy: function() {
@@ -14569,10 +14474,15 @@ Lava.define(
 	_cancel_bubble: false,
 
 	/**
-	 * Is in process of dispatching roles or events (so we know that bubble can be cancelled)
-	 * @type {boolean}
+	 * How many dispatch cycles are currently running
+	 * @type {number}
 	 */
-	_is_dispatching: false,
+	_nested_dispatch_count: 0,
+	/**
+	 * Number of the current refresh loop
+	 * @type {number}
+	 */
+	_refresh_id: 0,
 
 	/**
 	 * Create an instance of the class, acquire event listeners
@@ -14597,8 +14507,6 @@ Lava.define(
 	 * @param {Lava.view.Abstract} view
 	 */
 	scheduleViewRefresh: function(view) {
-
-		if (this._is_refreshing) Lava.t("Views may not become dirty while they are being refreshed");
 
 		if (view.depth in this._dirty_views) {
 
@@ -14627,41 +14535,63 @@ Lava.define(
 			return;
 		}
 
+		Lava.ScopeManager.refresh();
+
+		if (this._dirty_views.length) {
+
+			this._is_refreshing = true;
+			Lava.ScopeManager.lock();
+			this._refresh_id++;
+
+			do {
+				var dirty_views = this._dirty_views,
+					has_exceptions;
+				this._dirty_views = [];
+				has_exceptions = this._refreshCycle(dirty_views);
+			} while (this._dirty_views.length && !has_exceptions);
+
+			Lava.ScopeManager.unlock();
+			this._is_refreshing = false;
+
+		}
+
+	},
+
+	/**
+	 * Repeatable callback, that performs refresh of dirty views
+	 * @param {Array.<Array.<Lava.view.Abstract>>} dirty_views
+	 */
+	_refreshCycle: function(dirty_views) {
+
 		var level = 0,
 			deepness,
 			views_list,
+			has_exceptions = false,
 			i,
 			count;
 
-		Lava.ScopeManager.refreshScopes();
+		deepness = dirty_views.length; // this line must be after ScopeManager#refresh()
 
-		deepness = this._dirty_views.length; // this line must be after refreshScopes()
+		for (; level < deepness; level++) {
 
-		if (deepness) {
+			if (level in dirty_views) {
 
-			this._is_refreshing = true;
+				views_list = dirty_views[level];
 
-			for (; level < deepness; level++) {
+				for (i = 0, count = views_list.length; i < count; i++) {
 
-				if (level in this._dirty_views) {
-
-					views_list = this._dirty_views[level];
-
-					for (i = 0, count = views_list.length; i < count; i++) {
-
-						views_list[i].refresh();
-
+					if (views_list[i].refresh(this._refresh_id)) {
+						Lava.logError("ViewManager: view was refreshed several times in one refresh loop. Aborting.");
+						has_exceptions = true;
 					}
 
 				}
 
 			}
 
-			this._is_refreshing = false;
-
-			this._dirty_views = [];
-
 		}
+
+		return has_exceptions;
 
 	},
 
@@ -14849,11 +14779,7 @@ Lava.define(
 			bubble_index = 0,
 			bubble_targets_count;
 
-		if (this._is_dispatching) {
-			Lava.logError("recursive call to _dispatchCallback");
-			return;
-		}
-		this._is_dispatching = true;
+		this._nested_dispatch_count++;
 
 		for (; i < count; i++) {
 
@@ -14873,7 +14799,7 @@ Lava.define(
 
 				if (!widget) {
 
-					Lava.logError('ViewManager: callback target (widget) not found');
+					Lava.logError('ViewManager: callback target (widget) not found. Type: ' + target.locator_type + ', locator: ' + target.locator);
 
 				} else if (!widget.isWidget) {
 
@@ -14896,7 +14822,7 @@ Lava.define(
 
 					if (this._cancel_bubble) {
 						this._cancel_bubble = false;
-						this._is_dispatching = false;
+						this._nested_dispatch_count--;
 						return;
 					}
 
@@ -14918,7 +14844,7 @@ Lava.define(
 
 						if (this._cancel_bubble) {
 							this._cancel_bubble = false;
-							this._is_dispatching = false;
+							this._nested_dispatch_count--;
 							return;
 						}
 
@@ -14930,7 +14856,7 @@ Lava.define(
 
 		}
 
-		this._is_dispatching = false;
+		this._nested_dispatch_count--;
 
 	},
 
@@ -15341,7 +15267,7 @@ Lava.define(
 
 		for (; i < count; i++) {
 			view = this.getViewByElement(stack[i]);
-			if (view && !view.isSleeping()) {
+			if (view) {
 				container = view.getContainer();
 				if (container.isElementContainer) {
 					if (container.getEventTargets(event_name)) {
@@ -15456,7 +15382,7 @@ Lava.define(
 	 */
 	cancelBubble: function() {
 
-		if (!this._is_dispatching) {
+		if (!this._nested_dispatch_count) {
 			Lava.logError("Call to cancelBubble outside of dispatch cycle");
 			return;
 		}
@@ -18114,42 +18040,38 @@ Lava.define(
 });
 
 Lava.define(
-'Lava.data.RecordAbstract',
+'Lava.data.Record',
 /**
- * Base class for module records
- * @lends Lava.data.RecordAbstract#
+ * Standard module record
+ *
+ * @lends Lava.data.Record#
  * @extends Lava.mixin.Properties
  */
 {
 
 	Implements: 'Lava.mixin.Properties',
-
 	/**
 	 * To tell other classes that this is instance of RecordAbstract
 	 * @type {boolean}
 	 * @const
 	 */
 	isRecord: true,
-
 	/**
 	 * Record's `_properties` are assigned in constructor, so here we replace the default value (empty object)
 	 * to save some time on garbage collection
 	 * @type {Object}
 	 */
 	_properties: null,
-
 	/**
 	 * Record's module
 	 * @type {Lava.data.ModuleAbstract}
 	 */
 	_module: null,
-
 	/**
 	 * Reference to module's fields
 	 * @type {Object.<string, Lava.data.field.Abstract>}
 	 */
 	_fields: null,
-
 	/**
 	 * Global unique identifier
 	 * @type {_tGUID}
@@ -18161,13 +18083,34 @@ Lava.define(
 	 * @param {Lava.data.ModuleAbstract} module Records module
 	 * @param {Object.<string, Lava.data.field.Abstract>} fields Object with module's fields
 	 * @param {Object} properties_ref Reference to an object with record's properties
+	 * @param {Object} raw_properties Object with record field values from server
 	 */
-	init: function(module, fields, properties_ref) {
+	init: function(module, fields, properties_ref, raw_properties) {
 
 		this.guid = Lava.guid++;
 		this._module = module;
 		this._fields = fields;
 		this._properties = properties_ref;
+
+		var field;
+
+		if (typeof(raw_properties) != 'undefined') {
+
+			for (field in fields) {
+
+				fields[field]['import'](this, properties_ref, raw_properties);
+
+			}
+
+		} else {
+
+			for (field in fields) {
+
+				fields[field].initNewRecord(this, properties_ref);
+
+			}
+
+		}
 
 	},
 
@@ -18216,61 +18159,15 @@ Lava.define(
 });
 
 Lava.define(
-'Lava.data.Record',
-/**
- * Standard module's record
- *
- * @lends Lava.data.Record#
- * @extends Lava.data.RecordAbstract
- */
-{
-
-	Extends: 'Lava.data.RecordAbstract',
-
-	/**
-	 * @param module
-	 * @param fields
-	 * @param properties_ref
-	 * @param {Object} raw_properties Object with record field values from server
-	 */
-	init: function(module, fields, properties_ref, raw_properties) {
-
-		this.RecordAbstract$init(module, fields, properties_ref);
-
-		var field;
-
-		if (typeof(raw_properties) != 'undefined') {
-
-			for (field in fields) {
-
-				fields[field]['import'](this, properties_ref, raw_properties);
-
-			}
-
-		} else {
-
-			for (field in fields) {
-
-				fields[field].initNewRecord(this, properties_ref);
-
-			}
-
-		}
-
-	}
-
-});
-
-Lava.define(
 'Lava.data.MetaRecord',
 /**
  * Record for {@link Lava.data.MetaStorage} module
  * @lends Lava.data.MetaRecord#
- * @extends Lava.data.RecordAbstract
+ * @extends Lava.data.Record
  */
 {
 
-	Extends: 'Lava.data.RecordAbstract',
+	Extends: 'Lava.data.Record',
 
 	/**
 	 * Instance belongs to MetaRecord class
@@ -18279,15 +18176,44 @@ Lava.define(
 	 */
 	isMetaRecord: true,
 
-	init: function(meta_storage, fields, properties_ref) {
+	/**
+	 * GUID of external record (or object), to which this instance is attached
+	 * @type {number}
+	 * @readonly
+	 */
+	ext_guid: 0,
+	/**
+	 * Optional external record instance, which owns `ext_guid`
+	 * @type {Object}
+	 */
+	_original_record: null,
 
-		this.RecordAbstract$init(meta_storage, fields, properties_ref);
+	/**
+	 * @param module
+	 * @param fields
+	 * @param properties_ref
+	 * @param raw_properties
+	 * @param {Object} original_record Optional external record instance, to which this record is attached
+	 */
+	init: function(module, fields, properties_ref, raw_properties, original_record) {
 
-		for (var field in fields) {
+		this.Record$init(module, fields, properties_ref, raw_properties);
 
-			fields[field].initNewRecord(this, properties_ref);
+		if (original_record) {
+
+			this._original_record = original_record;
 
 		}
+
+	},
+
+	/**
+	 * Get `_original_record`
+	 * @returns {?Object}
+	 */
+	getOriginalRecord: function() {
+
+		return this._original_record;
 
 	}
 
@@ -18332,20 +18258,14 @@ Lava.define(
 	},
 
 	/**
-	 * Get or create an extension record by GUID of record in a normal module
-	 * @param {_tGUID} guid
+	 * Get an extension record by GUID of normal record
+	 * @param {_tGUID} ext_guid
 	 * @returns {Lava.data.MetaRecord}
-	 * @lava-param-renamed name -> guid
+	 * @lava-param-renamed name -> ext_guid
 	 */
-	get: function(guid) {
+	get: function(ext_guid) {
 
-		if (!(guid in this._properties)) {
-
-			this._properties[guid] = this._createRecordInstance();
-
-		}
-
-		return this._properties[guid];
+		return this._properties[ext_guid];
 
 	},
 
@@ -18359,17 +18279,27 @@ Lava.define(
 	},
 
 	/**
-	 * Create an instance of {@link Lava.data.MetaRecord}
+	 * Create a new MetaRecord instance
+	 * @param {_tGUID} ext_guid GUID of the external record, to which this MetaRecord will be attached
+	 * @param {Object} raw_properties Initial field values
+	 * @param {Object} [original_record] Original record, which will be saved in MetaRecord instance
 	 * @returns {Lava.data.MetaRecord}
 	 */
-	_createRecordInstance: function() {
+	createMetaRecord: function(ext_guid, raw_properties, original_record) {
+
+		if (ext_guid in this._properties) Lava.t("MetaRecord already exists");
 
 		var properties = this._createRecordProperties(),
-			record = new this._record_constructor(this, this._fields, properties);
+			record = new this._record_constructor(this, this._fields, properties, raw_properties, original_record);
 
+		record.ext_guid = ext_guid;
 		this._records.push(record);
 		this._properties_by_guid[record.guid] = properties;
 		this._records_by_guid[record.guid] = record;
+
+		this._properties[ext_guid] = record;
+		this.firePropertyChangedEvents(ext_guid);
+
 		return record;
 
 	}
@@ -18415,7 +18345,7 @@ Lava.define(
 
 		if (!(property_name in this._data_bindings_by_property)) {
 
-			this._data_bindings_by_property[property_name] = new Lava.scope.DataBinding(this, property_name, this.level);
+			this._data_bindings_by_property[property_name] = new Lava.scope.DataBinding(this, property_name);
 
 		}
 
@@ -18434,7 +18364,7 @@ Lava.define(
 
 		if (!(name_source_scope.guid in this._data_segments)) {
 
-			this._data_segments[name_source_scope.guid] = new Lava.scope.Segment(this, name_source_scope, this.level);
+			this._data_segments[name_source_scope.guid] = new Lava.scope.Segment(this, name_source_scope);
 
 		}
 
@@ -18530,11 +18460,10 @@ Lava.define(
 	 */
 	_binds_count: 0,
 	/**
-	 * objects with listeners for {@link Lava.mixin.Refreshable#event:waits_refresh}, {@link Lava.mixin.Refreshable#event:refreshed}
-	 * and <str>"changed"</str> events
-	 * @type {Array.<Object>}
+	 * Listeners for <str>"changed"</str> events
+	 * @type {Array.<_tListener>}
 	 */
-	_bind_listeners: [],
+	_bind_changed_listeners: [],
 
 	/**
 	 * Objects with a reference to modifier's widget (it's cached to speed up calling) and modifier name
@@ -18561,7 +18490,6 @@ Lava.define(
 		var i = 0,
 			count,
 			bind,
-			first_level = 0,
 			binds = config.binds;
 
 		if (binds) {
@@ -18578,16 +18506,8 @@ Lava.define(
 
 				}
 
-				if (bind.isWaitingRefresh()) {
-					this._count_dependencies_waiting_refresh++;
-					this._waits_refresh = true;
-				}
 				this._binds.push(bind);
-				this._bind_listeners.push({
-					waits_refresh: bind.on('waits_refresh', this._onDependencyWaitsRefresh, this),
-					changed: bind.on('changed', this.onBindingChanged, this),
-					refreshed: bind.on('refreshed', this._onDependencyRefreshed, this)
-				});
+				this._bind_changed_listeners.push(bind.on('changed', this.onBindingChanged, this));
 
 				if (this.level < bind.level) {
 
@@ -18595,21 +18515,9 @@ Lava.define(
 
 				}
 
-				if (first_level != bind.level) {
-
-					if (i == 0) {
-
-						first_level = bind.level; // replace default
-
-					} else {
-
-						this._requeue = true;
-
-					}
-
-				}
-
 			}
+
+			this.level++;
 
 		}
 
@@ -18652,7 +18560,6 @@ Lava.define(
 	getWidgetByModifierConfig: function(path_config) {
 
 		var widget = this._widget.locateViewByPathConfig(path_config);
-
 		if (Lava.schema.DEBUG && !widget.isWidget) Lava.t("Tried to call a modifier from non-widget view");
 
 		return /** @type {Lava.widget.Standard} */ widget;
@@ -18664,11 +18571,7 @@ Lava.define(
 	 */
 	onBindingChanged: function() {
 
-		// Classes that can serve as a binding: PropertyBinding, DataBinding and Segment. They all will fire 'changed'
-		// event only during the refresh cycle, so at this moment the Argument must be already in queue.
-		if (!this._waits_refresh) Lava.t();
-
-		this._is_dirty = true;
+		this._queueForRefresh();
 
 	},
 
@@ -18768,89 +18671,17 @@ Lava.define(
 	},
 
 	/**
-	 * Suspend argument's listeners
-	 */
-	sleep: function() {
-
-		for (var i = 0, count = this._bind_listeners.length; i < count; i++) {
-
-			Lava.suspendListener(this._bind_listeners[i].waits_refresh);
-			Lava.suspendListener(this._bind_listeners[i].changed);
-			Lava.suspendListener(this._bind_listeners[i].refreshed);
-
-		}
-
-		this.suspendRefreshable();
-
-	},
-
-	/**
-	 * Resume argument's listeners and refresh state
-	 * @param {boolean} fire_changed Whether to fire the <str>"changed"</str> event
-	 */
-	wakeup: function(fire_changed) {
-
-		var i = 0,
-			count = this._bind_listeners.length,
-			new_value,
-			event_args;
-
-		for (; i < count; i++) {
-
-			if (this._binds[i].isWaitingRefresh()) {
-
-				this._count_dependencies_waiting_refresh++;
-
-			}
-
-			Lava.resumeListener(this._bind_listeners[i].waits_refresh);
-			Lava.resumeListener(this._bind_listeners[i].changed);
-			Lava.resumeListener(this._bind_listeners[i].refreshed);
-
-		}
-
-		if (this._count_dependencies_waiting_refresh) {
-
-			this._waits_refresh = true;
-			this._is_dirty = true;
-
-		} else {
-
-			new_value = this._evaluate();
-
-			if (new_value !== this._value) {
-
-				event_args = {old_value: this._value};
-				this._value = new_value;
-
-				if (fire_changed) {
-
-					this._fire('changed', event_args);
-
-				}
-
-			}
-
-			this._is_dirty = false;
-
-		}
-
-	},
-
-	/**
 	 * Free resources and make this instance unusable
 	 */
 	destroy: function() {
 
-		for (var i = 0, count = this._bind_listeners.length; i < count; i++) {
+		for (var i = 0, count = this._bind_changed_listeners.length; i < count; i++) {
 
-			this._binds[i].removeListener(this._bind_listeners[i].waits_refresh);
-			this._binds[i].removeListener(this._bind_listeners[i].changed);
-			this._binds[i].removeListener(this._bind_listeners[i].refreshed);
+			this._binds[i].removeListener(this._bind_changed_listeners[i]);
 
 		}
 
-		this._bind_listeners = null;
+		this._bind_changed_listeners = null;
 		this.suspendRefreshable();
 
 	}
@@ -19007,20 +18838,10 @@ Lava.define(
 	 */
 	_value_container: null,
 	/**
-	 * Listener for {Lava.mixin.Refreshable#event:waits_refresh} in `_value_container`
-	 * @type {_tListener}
-	 */
-	_container_waits_refresh_listener: null,
-	/**
 	 * Listener for "changed" event in `_value_container`
 	 * @type {_tListener}
 	 */
 	_container_changed_listener: null,
-	/**
-	 * Listener for {Lava.mixin.Refreshable#event:refreshed} in `_value_container`
-	 * @type {_tListener}
-	 */
-	_container_refreshed_listener: null,
 
 	/**
 	 * Listener for onPropertyChanged in data source of this scope (if data source is instance of {@link Lava.mixin.Properties})
@@ -19049,23 +18870,14 @@ Lava.define(
 	 * Create DataBinding instance
 	 * @param {_iValueContainer} value_container The scope, which provides the data source for this instance
 	 * @param {string} property_name
-	 * @param {number} level
 	 */
-	init: function(value_container, property_name, level) {
+	init: function(value_container, property_name) {
 
 		this.guid = Lava.guid++;
 		this._value_container = value_container;
 		this._property_name = property_name;
-		this.level = level;
-
-		if (value_container.isWaitingRefresh()) {
-			this._count_dependencies_waiting_refresh++;
-			this._waits_refresh = true;
-		}
-		this._container_waits_refresh_listener = value_container.on('waits_refresh', this._onDependencyWaitsRefresh, this);
+		this.level = value_container.level + 1;
 		this._container_changed_listener = value_container.on('changed', this.onParentDataSourceChanged, this);
-		this._container_refreshed_listener = value_container.on('refreshed', this._onDependencyRefreshed, this);
-
 		this._refreshValue();
 
 		Lava.schema.DEBUG && Lava.ScopeManager.debugTrackScope(this);
@@ -19083,6 +18895,7 @@ Lava.define(
 
 		if (property_container != null) {
 
+			// Collection implements Properties, so if _property_name is not a number - then `get` will be called
 			if (property_container.isCollection && /^\d+$/.test(this._property_name)) {
 
 				if (this._enumerable_changed_listener == null) {
@@ -19154,8 +18967,6 @@ Lava.define(
 
 		this._queueForRefresh();
 
-		this._is_dirty = true;
-
 	},
 
 	_doRefresh: function() {
@@ -19170,7 +18981,6 @@ Lava.define(
 	onValueChanged: function() {
 
 		this._queueForRefresh();
-		this._is_dirty = true;
 
 	},
 
@@ -19207,7 +19017,6 @@ Lava.define(
 			}
 
 			this._queueForRefresh();
-			this._is_dirty = true;
 
 		}
 
@@ -19221,9 +19030,7 @@ Lava.define(
 
 	destroy: function() {
 
-		this._value_container.removeListener(this._container_waits_refresh_listener);
 		this._value_container.removeListener(this._container_changed_listener);
-		this._value_container.removeListener(this._container_refreshed_listener);
 
 		this._property_changed_listener && this._property_container.removePropertyListener(this._property_changed_listener);
 		this._enumerable_changed_listener && this._property_container.removeListener(this._enumerable_changed_listener);
@@ -19277,20 +19084,10 @@ Lava.define(
 	 */
 	_argument: null,
 	/**
-	 * Listener for {@link Lava.mixin.Refreshable#event:waits_refresh}
-	 * @type {_tListener}
-	 */
-	_argument_waits_refresh_listener: null,
-	/**
 	 * Listener for {@link Lava.scope.Argument#event:changed}
 	 * @type {_tListener}
 	 */
 	_argument_changed_listener: null,
-	/**
-	 * Listener for {@link Lava.mixin.Refreshable#event:refreshed}
-	 * @type {_tListener}
-	 */
-	_argument_refreshed_listener: null,
 
 	/**
 	 * The owner Foreach view
@@ -19367,12 +19164,7 @@ Lava.define(
 		this._argument = argument;
 		this._view = view;
 		this._widget = widget;
-		this.level = argument.level;
-
-		if (this._argument.isWaitingRefresh()) {
-			this._count_dependencies_waiting_refresh++;
-			this._waits_refresh = true;
-		}
+		this.level = argument.level + 1;
 
 		if (config) {
 
@@ -19392,7 +19184,7 @@ Lava.define(
 
 				depends = config['depends'];
 				this._binds = [];
-				this._bind_listeners = [];
+				this._bind_changed_listeners = [];
 
 				for (count = depends.length; i < count; i++) {
 
@@ -19407,7 +19199,7 @@ Lava.define(
 					}
 
 					this._binds.push(bind);
-					this._bind_listeners.push(bind.on('changed', this._onDependencyChanged, this));
+					this._bind_changed_listeners.push(bind.on('changed', this._onDependencyChanged, this));
 
 				}
 
@@ -19415,10 +19207,7 @@ Lava.define(
 
 		}
 
-		this._argument_waits_refresh_listener = this._argument.on('waits_refresh', this._onDependencyWaitsRefresh, this);
 		this._argument_changed_listener = this._argument.on('changed', this.onDataSourceChanged, this);
-		this._argument_refreshed_listener = this._argument.on('refreshed', this._onDependencyRefreshed, this);
-
 		this.refreshDataSource();
 
 	},
@@ -19428,7 +19217,6 @@ Lava.define(
 	 */
 	_onDependencyChanged: function() {
 
-		this._is_dirty = true;
 		this._queueForRefresh();
 
 	},
@@ -19564,7 +19352,6 @@ Lava.define(
 	onDataSourceChanged: function() {
 
 		if (this._observable_listener) this._flushObservable();
-		this._is_dirty = true;
 		this._queueForRefresh();
 
 	},
@@ -19574,7 +19361,6 @@ Lava.define(
 	 */
 	_onObservableChanged: function() {
 
-		this._is_dirty = true;
 		this._queueForRefresh();
 
 	},
@@ -19599,43 +19385,6 @@ Lava.define(
 	},
 
 	/**
-	 * Stop listening to events
-	 */
-	sleep: function() {
-
-		Lava.suspendListener(this._argument_changed_listener);
-		this._observable_listener && Lava.suspendListener(this._observable_listener);
-		this.suspendRefreshable();
-
-	},
-
-	/**
-	 * Resume event listeners and refresh state
-	 */
-	wakeup: function() {
-
-		if (this._observable_listener) {
-
-			if (this._argument.getValue() != this._observable) {
-
-				this._flushObservable();
-
-			} else {
-
-				Lava.resumeListener(this._observable_listener);
-
-			}
-
-		}
-
-		this.refreshDataSource();
-
-		Lava.resumeListener(this._argument_changed_listener);
-		this._is_dirty = false;
-
-	},
-
-	/**
 	 * Free resources and make this instance unusable
 	 */
 	destroy: function() {
@@ -19643,16 +19392,14 @@ Lava.define(
 		if (this._binds) {
 
 			for (var i = 0, count = this._binds.length; i < count; i++) {
-				this._binds.removeListener(this._bind_changed_listeners[i]);
+				this._binds[i].removeListener(this._bind_changed_listeners[i]);
 			}
 
 			this._binds = this._bind_changed_listeners = null;
 
 		}
 
-		this._argument.removeListener(this._argument_waits_refresh_listener);
 		this._argument.removeListener(this._argument_changed_listener);
-		this._argument.removeListener(this._argument_refreshed_listener);
 		this._observable_listener && this._flushObservable();
 
 		if (this._own_collection) {
@@ -19727,32 +19474,28 @@ Lava.define(
 	 * Create the PropertyBinding instance. Refresh value from view's property or set value from assign
 	 * @param {Lava.view.Abstract} view Scope's owner view, to which it's bound
 	 * @param {string} property_name
-	 * @param {number} level
 	 * @param {_cAssign} assign_config Config for the Argument, in case this scope is created in "assign" mode
 	 */
-	init: function(view, property_name, level, assign_config) {
+	init: function(view, property_name, assign_config) {
 
 		this.guid = Lava.guid++;
 		this._view = view;
 		this._property_name = property_name;
-		this.level = level;
 
 		if (assign_config) {
 
 			this._assign_argument = new Lava.scope.Argument(assign_config, view, view.getWidget());
-
-			if (this._assign_argument.isWaitingRefresh()) {
-				this._count_dependencies_waiting_refresh++;
-				this._waits_refresh = true;
-			}
-			this._assign_argument.on('waits_refresh', this._onDependencyWaitsRefresh, this);
 			this._assign_argument.on('changed', this.onAssignChanged, this);
-			this._assign_argument.on('refreshed', this._onDependencyRefreshed, this);
-
 			this._value = this._assign_argument.getValue();
 			view.set(this._property_name, this._value);
+			this.level = this._assign_argument.level + 1;
 
 		} else {
+
+			// this is needed to order implicit inheritance
+			// (in custom widget property setters logic and in view.Foreach, while refreshing children).
+			// Zero was added to simplify examples from site documentation - it's not needed by framework
+			this.level = view.depth || 0;
 
 			this._value = view.get(this._property_name);
 			this._property_changed_listener = view.onPropertyChanged(property_name, this.onContainerPropertyChanged, this);
@@ -19780,7 +19523,6 @@ Lava.define(
 
 		this._view.set(this._property_name, this._assign_argument.getValue());
 		this._queueForRefresh();
-		this._is_dirty = true;
 
 	},
 
@@ -19790,7 +19532,6 @@ Lava.define(
 	onContainerPropertyChanged: function() {
 
 		this._queueForRefresh();
-		this._is_dirty = true;
 
 	},
 
@@ -19815,7 +19556,6 @@ Lava.define(
 		Lava.resumeListener(this._property_changed_listener);
 
 		this._queueForRefresh();
-		this._is_dirty = true;
 
 	},
 
@@ -19888,20 +19628,10 @@ Lava.define(
 	 */
 	_name_source_container: null,
 	/**
-	 * Listener for {Lava.mixin.Refreshable#event:waits_refresh} in `_name_source_container`
-	 * @type {_tListener}
-	 */
-	_name_source_waits_refresh_listener: null,
-	/**
 	 * Listener for "changed" event in `_name_source_container`
 	 * @type {_tListener}
 	 */
 	_name_source_changed_listener: null,
-	/**
-	 * Listener for {Lava.mixin.Refreshable#event:refreshed} in `_name_source_container`
-	 * @type {_tListener}
-	 */
-	_name_source_refreshed_listener: null,
 
 	/**
 	 * The name of the property, which this Segment is bound to
@@ -19929,9 +19659,8 @@ Lava.define(
 	 * Create Segment instance. Refresh `_property_name`, `_data_binding` and get value
 	 * @param {(Lava.view.Abstract|Lava.scope.Abstract)} container
 	 * @param {(Lava.scope.PropertyBinding|Lava.scope.DataBinding)} name_source_container
-	 * @param {number} level
 	 */
-	init: function(container, name_source_container, level) {
+	init: function(container, name_source_container) {
 
 		if (Lava.schema.DEBUG && !name_source_container.isValueContainer) Lava.t();
 		if (Lava.schema.DEBUG && !name_source_container.guid) Lava.t("Name source for segments must be either PropertyBinding or DataBinding");
@@ -19941,19 +19670,15 @@ Lava.define(
 
 		this._refreshDataBinding();
 
-		if (name_source_container.isWaitingRefresh()) {
-			this._count_dependencies_waiting_refresh++;
-			this._waits_refresh = true;
+		if (container.isRefreshable) {
+			this.level = container.level;
 		}
+		this.level = this.level > name_source_container.level ? this.level : name_source_container.level;
+		this.level++;
+
 		this._name_source_container = name_source_container;
-		this._name_source_waits_refresh_listener = name_source_container.on('waits_refresh', this._onDependencyWaitsRefresh, this);
 		this._name_source_changed_listener = name_source_container.on('changed', this.onPropertyNameChanged, this);
-		this._name_source_refreshed_listener = name_source_container.on('refreshed', this._onDependencyRefreshed, this);
-
-		this.level = level > name_source_container.level ? level : name_source_container.level;
-		this._requeue = true;
 		this._value = this._data_binding.getValue();
-
 		Lava.schema.DEBUG && Lava.ScopeManager.debugTrackScope(this);
 
 	},
@@ -19996,7 +19721,6 @@ Lava.define(
 	onDataBindingChanged: function() {
 
 		this._queueForRefresh();
-		this._is_dirty = true;
 
 	},
 
@@ -20029,7 +19753,6 @@ Lava.define(
 
 		this._destroyDataBinding();
 		this._queueForRefresh();
-		this._is_dirty = true;
 
 	},
 
@@ -20057,9 +19780,7 @@ Lava.define(
 
 	destroy: function() {
 
-		this._name_source_container.removeListener(this._name_source_waits_refresh_listener);
 		this._name_source_container.removeListener(this._name_source_changed_listener);
-		this._name_source_container.removeListener(this._name_source_refreshed_listener);
 		this._data_binding_changed_listener && this._data_binding.removeListener(this._data_binding_changed_listener);
 
 		Lava.schema.DEBUG && Lava.ScopeManager.debugStopTracking(this);
@@ -20731,9 +20452,6 @@ Lava.define(
 			properties_string = '',
 			name;
 
-		// view calls this function in render(), and before that it must wake up itself and it's container
-		if (Lava.schema.DEBUG && this._is_sleeping) Lava.t();
-
 		this._element = null;
 
 		for (name in this._static_properties) {
@@ -20901,6 +20619,26 @@ Lava.define(
 	},
 
 	/**
+	 * For Element container this returns it's DOM element
+	 * @returns {HTMLElement}
+	 */
+	getStartElement: function() {
+
+		return this.getDOMElement();
+
+	},
+
+	/**
+	 * For Element container this returns it's DOM element
+	 * @returns {HTMLElement}
+	 */
+	getEndElement: function() {
+
+		return this.getDOMElement();
+
+	},
+
+	/**
 	 * Get `_id`
 	 * @returns {string}
 	 */
@@ -20924,24 +20662,6 @@ Lava.define(
 	release: function() {
 
 		this._element = null;
-
-	},
-
-	/**
-	 * Turn off bindings
-	 */
-	sleep: function() {
-
-		this._withArguments('sleep');
-
-	},
-
-	/**
-	 * Resume bindings
-	 */
-	wakeup: function() {
-
-		this._withArguments('wakeup', true);
 
 	},
 
@@ -20975,8 +20695,6 @@ Lava.define(
 		// there must not be ID attribute
 		if (Element.getProperty(element, 'id')) Lava.t("Target element already has an ID, and could be owned by another container");
 		if (Element.getProperty(element, 'tag').toLowerCase() != this._tag_name) Lava.t("Captured tag name differs from the container's tag name");
-
-		this.wakeup();
 
 		Element.setProperty(element, 'id', this._id);
 
@@ -21576,10 +21294,6 @@ Lava.define(
 
 	/** Does nothing */
 	refresh: function() {},
-	/** Does nothing */
-	sleep: function() {},
-	/** Does nothing */
-	wakeup: function() {},
 
 	/**
 	 * Get `_is_inDOM`
@@ -21793,10 +21507,6 @@ Lava.define(
 
 	/** Does nothing */
 	refresh: function() {},
-	/** Does nothing */
-	sleep: function() {},
-	/** Does nothing */
-	wakeup: function() {},
 
 	/**
 	 * Get `_is_inDOM`
@@ -21834,14 +21544,22 @@ Lava.define(
 {
 
 	Extends: 'Lava.mixin.Observable',
-	Shared: '_insertion_strategies',
+	Shared: ['_insertion_strategies', '_removal_strategies'],
 
 	/**
 	 * Map of callbacks for dynamic insertion of templates
 	 * @type {Object.<string, string>}
 	 */
 	_insertion_strategies: {
-		sequential_elements: '_insertSequentialElements'
+		sequential_elements: '_insertTemplate_SequentialElements'
+	},
+
+	/**
+	 * Map of callbacks for dynamic removal of templates
+	 * @type {Object.<string, string>}
+	 */
+	_removal_strategies: {
+		element_range: '_removeTemplate_ElementRange'
 	},
 
 	/**
@@ -21859,34 +21577,16 @@ Lava.define(
 	 * @type {_iContainer}
 	 */
 	_container: null,
-
 	/**
 	 * Temporary storage for templates which were removed during current refresh cycle
 	 * @type {Object.<_tGUID, Lava.system.Template>}
 	 */
-	_removed_templates: {},
-
+	_remove_queue: {},
 	/**
 	 * Templates, that are currently in DOM
 	 * @type {Object.<_tGUID, Lava.system.Template>}
 	 */
 	_current_templates: [],
-
-	/**
-	 * Animation instances for each template
-	 * @type {Object.<_tGUID, Lava.animation.Standard>}
-	 */
-	_animations_by_template_guid: {},
-	/**
-	 * Template of each animation
-	 * @type {Object.<_tGUID, Lava.system.Template>}
-	 */
-	_templates_by_animation_guid: {},
-	/**
-	 * Whether to perform template insertion and removal animations
-	 * @type {boolean}
-	 */
-	_is_animation_enabled: false,
 
 	/**
 	 * Create refresher instance
@@ -21904,6 +21604,20 @@ Lava.define(
 
 			this._insertTemplate = this[this._insertion_strategies[config.insertion_strategy]];
 
+		} else if (config.insert_callback) {
+
+			this._insertTemplate = config.insert_callback;
+
+		}
+
+		if (config.removal_strategy) {
+
+			this._removeTemplate = this[this._removal_strategies[config.removal_strategy]];
+
+		} else if (config.remove_callback) {
+
+			this._removeTemplate = config.remove_callback;
+
 		}
 
 	},
@@ -21912,12 +21626,11 @@ Lava.define(
 	 * Queue templates for removal
 	 * @param {Array.<Lava.system.Template>} templates
 	 */
-	removeTemplates: function(templates) {
+	prepareRemoval: function(templates) {
 
 		for (var i = 0, count = templates.length; i < count; i++) {
 
-			templates[i].broadcastSleep();
-			this._removed_templates[templates[i].guid] = templates[i];
+			this._remove_queue[templates[i].guid] = templates[i];
 
 		}
 
@@ -21926,7 +21639,7 @@ Lava.define(
 	/**
 	 * Insert new templates into DOM and remove those, which are queued for removal
 	 * @param {Array.<Lava.system.Template>} current_templates Templates, that refresher must render and insert into DOM.
-	 *  Some of them are already there, some are in DOM but sleeping, and others are not yet in DOM
+	 *  Some of them can be already in DOM.
 	 */
 	refresh: function(current_templates) {
 
@@ -21943,27 +21656,26 @@ Lava.define(
 				this._insertTemplate(current_templates[i], i);
 				this._fire('insertion_complete', current_templates[i]);
 
-			} else if (current_templates[i].guid in this._removed_templates) {
+			} else if (current_templates[i].guid in this._remove_queue) {
 
-				current_templates[i].broadcastWakeup();
-				delete this._removed_templates[current_templates[i].guid];
-
-			}
-
-		}
-
-		for (guid in this._removed_templates) {
-
-			if (this._removed_templates[guid].isInDOM()) {
-
-				this._removeTemplate(this._removed_templates[guid]);
-				this._fire('removal_complete', this._removed_templates[guid]);
+				delete this._remove_queue[current_templates[i].guid];
 
 			}
 
 		}
 
-		this._removed_templates = {};
+		for (guid in this._remove_queue) {
+
+			if (this._remove_queue[guid].isInDOM()) {
+
+				this._removeTemplate(this._remove_queue[guid]);
+				this._fire('removal_complete', this._remove_queue[guid]);
+
+			}
+
+		}
+
+		this._remove_queue = {};
 
 	},
 
@@ -21971,7 +21683,221 @@ Lava.define(
 	 * View's render callback
 	 * @param {Array.<Lava.system.Template>} current_templates Templates that must be in DOM
 	 */
-	onRender: function(current_templates) {
+	render: function(current_templates) {
+
+		var i = 0,
+			count = current_templates.length,
+			guid;
+
+		this._current_templates = current_templates;
+
+		// from templates, which are prepared for removal, filter out those, which should be in DOM
+		for (; i < count; i++) {
+
+			delete this._remove_queue[current_templates[i].guid];
+
+		}
+
+		for (guid in this._remove_queue) {
+
+			if (this._remove_queue[guid].isInDOM()) {
+
+				this._remove_queue[guid].broadcastRemove();
+				this._fire('removal_complete', this._remove_queue[guid]);
+
+			}
+
+		}
+
+		this._remove_queue = {};
+
+		return this._render();
+
+	},
+
+	/**
+	 * Render current templates
+	 * @returns {string}
+	 */
+	_render: function() {
+
+		var buffer = '',
+			i = 0,
+			count = this._current_templates.length;
+
+		for (; i < count; i++) {
+
+			buffer += this._current_templates[i].render();
+
+		}
+
+		return buffer;
+
+	},
+
+	/**
+	 * Insert template into DOM
+	 * @param {Lava.system.Template} template
+	 * @param {number} index Index of this template in list of all active templates
+	 */
+	_insertTemplate: function(template, index) {
+
+		this._view.getContainer().appendHTML(template.render());
+		template.broadcastInDOM();
+
+	},
+
+	/**
+	 * [insertion strategy]
+	 * With this callback you can insert Foreach elements at the right place.
+	 * All templates inside Foreach are treated as single view with Element container
+	 * @param {Lava.system.Template} template
+	 * @param {number} index Index of the template in the list of all active templates
+	 */
+	_insertTemplate_SequentialElements: function(template, index) {
+
+		if (index) {
+
+			this._current_templates[index - 1].getLastView().getContainer().insertHTMLAfter(template.render());
+
+		} else {
+
+			this._view.getContainer().prependHTML(template.render());
+
+		}
+
+		template.broadcastInDOM();
+
+	},
+
+	/**
+	 * Remove template from DOM
+	 * @param {Lava.system.Template} template
+	 */
+	_removeTemplate: function(template) {
+
+		// save, cause element container will throw an error if we try to do it after broadcastRemove
+		var element = template.getFirstView().getContainer().getDOMElement();
+		// first, we must inform the template, that it's going to be removed: to allow it's child views to interact
+		// with nodes while they are still in DOM
+		template.broadcastRemove();
+		Firestorm.Element.destroy(element);
+
+	},
+
+	/**
+	 * [removal strategy]
+	 * Remove a template that has views with real containers at it's beginning and at the end.
+	 * Removes the first and last views and anything between them
+	 * @param {Lava.system.Template} template
+	 */
+	_removeTemplate_ElementRange: function(template) {
+
+		// save, cause we can not retrieve container's DOM elements after broadcastRemove
+		var start_element = template.getFirstView().getContainer().getStartElement(),
+			end_element = template.getLastView().getContainer().getEndElement();
+
+		if (start_element == end_element) Lava.t();
+
+		// first, we must inform the template, that it's going to be removed: to allow it's child views to interact
+		// with nodes while they are still in DOM
+		template.broadcastRemove();
+
+		// remove everything between tags and tags themselves
+		Firestorm.DOM.clearOuterRange(start_element, end_element);
+
+	},
+
+	/**
+	 * Are there any active animations
+	 * @returns {boolean}
+	 */
+	hasAnimations: function() {
+
+		return false;
+
+	},
+
+	/**
+	 * Is insertion or removal animation enabled
+	 * @returns {boolean} <kw>false</kw>
+	 */
+	isAnimationEnabled: function() {
+
+		return false;
+
+	},
+
+	/**
+	 * Actions to take before owner view is removed from DOM
+	 */
+	broadcastRemove: function() {
+
+		for (var guid in this._remove_queue) {
+
+			this._remove_queue[guid].broadcastRemove();
+
+		}
+
+	},
+
+	/**
+	 * Free resources and make this instance unusable
+	 */
+	destroy: function() {
+
+		this._current_templates = this._remove_queue;
+
+	}
+
+});
+
+Lava.define(
+'Lava.view.refresher.Animated',
+/**
+ * Base class for refreshers, which support animation
+ * @lends Lava.view.refresher.Animated#
+ * @extends Lava.view.refresher.Standard
+ */
+{
+
+	Extends: 'Lava.view.refresher.Standard',
+
+	/**
+	 * Whether to perform template insertion and removal animations
+	 * @type {boolean}
+	 */
+	_is_animation_enabled: true,
+	/**
+	 * Animation instances for each template
+	 * @type {Object.<_tGUID, Lava.animation.Standard>}
+	 */
+	_animations_by_template_guid: {},
+	/**
+	 * Template of each animation
+	 * @type {Object.<_tGUID, Lava.system.Template>}
+	 */
+	_templates_by_animation_guid: {},
+
+	refresh: function(current_templates) {
+
+		if (this.isAnimationEnabled()) {
+
+			this._refreshAnimated(current_templates);
+
+		} else {
+
+			this.Standard$refresh(current_templates);
+
+		}
+
+	},
+
+	/**
+	 * Version of `refresh()`, which animates insertion and removal of templates
+	 * @param {Array.<Lava.system.Template>} current_templates
+	 */
+	_refreshAnimated: function(current_templates) {
 
 		var i = 0,
 			count = current_templates.length,
@@ -21981,22 +21907,82 @@ Lava.define(
 
 		for (; i < count; i++) {
 
-			delete this._removed_templates[current_templates[i].guid];
+			this._animateInsertion(current_templates[i], i);
+
+			delete this._remove_queue[current_templates[i].guid];
 
 		}
 
-		for (guid in this._removed_templates) {
+		for (guid in this._remove_queue) {
 
-			if (this._removed_templates[guid].isInDOM()) {
-
-				this._removed_templates[guid].broadcastRemove();
-				this._fire('removal_complete', this._removed_templates[guid]);
-
-			}
+			this._animateRemoval(this._remove_queue[guid]);
 
 		}
 
-		this._removed_templates = {};
+		this._remove_queue = {};
+
+	},
+
+	/**
+	 * View's render callback
+	 * @param {Array.<Lava.system.Template>} current_templates
+	 */
+	render: function(current_templates) {
+
+		this._finishAnimations();
+		return this.Standard$render(current_templates);
+
+	},
+
+	/**
+	 * Set `_is_animation_enabled` to <kw>true</kw>
+	 */
+	enableAnimation: function() {
+
+		this._is_animation_enabled = true;
+
+	},
+
+	/**
+	 * Set `_is_animation_enabled` to <kw>false</kw> and stop all animations
+	 */
+	disableAnimation: function() {
+
+		this._is_animation_enabled = false;
+		this._finishAnimations();
+
+	},
+
+	/**
+	 * Get `_is_animation_enabled`
+	 * @returns {boolean}
+	 */
+	isAnimationEnabled: function() {
+
+		return this._is_animation_enabled;
+
+	},
+
+	/**
+	 * Finish all active animations (rewind to end and raise "completed" events)
+	 */
+	_finishAnimations: function() {
+
+		for (var guid in this._animations_by_template_guid) {
+
+			// you can not just stop() them, cause you need onComplete events to fire
+			this._animations_by_template_guid[guid].finish();
+
+		}
+
+		this._animations_by_template_guid = {};
+		this._templates_by_animation_guid = {};
+
+	},
+
+	hasAnimations: function() {
+
+		return !Firestorm.Object.isEmpty(this._animations_by_template_guid);
 
 	},
 
@@ -22015,10 +22001,6 @@ Lava.define(
 
 				this._insertTemplate(template, index);
 				animation = this._createAnimation(template, index);
-
-			} else {
-
-				template.broadcastWakeup();
 
 			}
 
@@ -22057,45 +22039,6 @@ Lava.define(
 	},
 
 	/**
-	 * Insert template into DOM
-	 * @param {Lava.system.Template} template
-	 * @param {number} index Index of this template in list of all active templates
-	 */
-	_insertTemplate: function(template, index) {
-
-		this._view.getContainer().appendHTML(template.render());
-		template.broadcastInDOM();
-
-	},
-
-	/**
-	 * Remove template from DOM
-	 * @param {Lava.system.Template} template
-	 */
-	_removeTemplate: function(template) {
-
-		// save, cause element container will throw an error if we try to do it after broadcastRemove
-		var element = template.getFirstView().getContainer().getDOMElement();
-		// first, we must inform the template, that it's going to be removed: to allow it's child views to interact
-		// with nodes while they are still in DOM
-		template.broadcastRemove();
-		Firestorm.Element.destroy(element);
-
-	},
-
-	/**
-	 * Get the element of the template, that will be animated
-	 * @param {Lava.system.Template} template
-	 * @returns {HTMLElement}
-	 */
-	_getAnimationTarget: function(template) {
-
-		// get the only element inside the template
-		return template.getFirstView().getContainer().getDOMElement();
-
-	},
-
-	/**
 	 * Cleanup animation instance and update state of it's template
 	 * @param {Lava.animation.Abstract} animation
 	 */
@@ -22121,6 +22064,18 @@ Lava.define(
 	},
 
 	/**
+	 * Get the element of the template, that will be animated
+	 * @param {Lava.system.Template} template
+	 * @returns {HTMLElement}
+	 */
+	_getAnimationTarget: function(template) {
+
+		// get the only element inside the template
+		return template.getFirstView().getContainer().getDOMElement();
+
+	},
+
+	/**
 	 * Removal animation has ended. Remove template from DOM
 	 * @param {Lava.animation.Abstract} animation
 	 * @param {Lava.system.Template} template
@@ -22138,20 +22093,7 @@ Lava.define(
 	 */
 	_onInsertionComplete: function(animation, template) {
 
-		// if animation was reversed, then template must be sleeping now
-		if (template.isSleeping()) {
-			template.broadcastWakeup();
-		}
 
-	},
-
-	/**
-	 * Are there any active animations
-	 * @returns {boolean}
-	 */
-	hasAnimations: function() {
-
-		return false;
 
 	},
 
@@ -22166,161 +22108,16 @@ Lava.define(
 
 	},
 
-	/**
-	 * Get `_is_animation_enabled`
-	 * @returns {boolean}
-	 */
-	isAnimationEnabled: function() {
+	broadcastRemove: function() {
 
-		return this._is_animation_enabled;
+		this._finishAnimations();
+		this.Standard$broadcastRemove();
 
 	},
 
-	/**
-	 * Stop all active animations
-	 */
-	stopAnimations: function() {
-
-	},
-
-	/**
-	 * (insertion strategy)
-	 * With this callback you can insert Foreach elements at the right place.
-	 * All templates inside Foreach are treated as single view with Element container
-	 * @param {Lava.system.Template} template
-	 * @param {number} index Index of the template in the list of all active templates
-	 */
-	_insertSequentialElements: function(template, index) {
-
-		if (index) {
-
-			this._current_templates[index - 1].getFirstView().getContainer().insertHTMLAfter(template.render());
-
-		} else {
-
-			this._view.getContainer().prependHTML(template.render());
-
-		}
-
-		template.broadcastInDOM();
-
-	},
-
-	/**
-	 * Free resources and make this instance unusable
-	 */
 	destroy: function() {
 
-		this.stopAnimations();
-
-	}
-
-});
-
-Lava.define(
-'Lava.view.refresher.Animated',
-/**
- * Base class for refreshers, which support animation
- * @lends Lava.view.refresher.Animated#
- * @extends Lava.view.refresher.Standard
- */
-{
-
-	Extends: 'Lava.view.refresher.Standard',
-
-	_is_animation_enabled: true,
-
-	refresh: function(current_templates) {
-
-		if (this.isAnimationEnabled()) {
-
-			this._refreshAnimated(current_templates);
-
-		} else {
-
-			this.Standard$refresh(current_templates);
-
-		}
-
-	},
-
-	/**
-	 * Version of `refresh()`, which animates insertion and removal of templates
-	 * @param {Array.<Lava.system.Template>} current_templates
-	 */
-	_refreshAnimated: function(current_templates) {
-
-		var i = 0,
-			count = current_templates.length,
-			guid;
-
-		this._current_templates = current_templates;
-
-		for (; i < count; i++) {
-
-			this._animateInsertion(current_templates[i], i);
-
-			delete this._removed_templates[current_templates[i].guid];
-
-		}
-
-		for (guid in this._removed_templates) {
-
-			this._animateRemoval(this._removed_templates[guid]);
-
-		}
-
-		this._removed_templates = {};
-
-	},
-
-	/**
-	 * View's render callback
-	 * @param {Array.<Lava.system.Template>} current_templates
-	 */
-	onRender: function(current_templates) {
-
-		this.stopAnimations();
-
-		this.Standard$onRender(current_templates);
-
-	},
-
-	/**
-	 * Set `_is_animation_enabled` to <kw>true</kw>
-	 */
-	enableAnimation: function() {
-
-		this._is_animation_enabled = true;
-
-	},
-
-	/**
-	 * Set `_is_animation_enabled` to <kw>false</kw> and stop all animations
-	 */
-	disableAnimation: function() {
-
-		this._is_animation_enabled = false;
-		this.stopAnimations();
-
-	},
-
-	stopAnimations: function() {
-
-		for (var guid in this._animations_by_template_guid) {
-
-			this._animations_by_template_guid[guid].finish();
-
-		}
-
-		this._animations_by_template_guid = {};
-		this._templates_by_animation_guid = {};
-
-	},
-
-	hasAnimations: function() {
-
-		return !Firestorm.Object.isEmpty(this._animations_by_template_guid);
+		this._finishAnimations();
 
 	}
 
@@ -22463,11 +22260,6 @@ Lava.define(
 	 */
 	_is_inDOM: false,
 	/**
-	 * Is this view currently sleeping? (arguments are turned off)
-	 * @type {boolean}
-	 */
-	_is_sleeping: false,
-	/**
 	 * Does this view need refresh
 	 * @type {boolean}
 	 */
@@ -22489,6 +22281,18 @@ Lava.define(
 	 * @type {Object.<_tGUID, Lava.scope.Segment>}
 	 */
 	_data_segments: {},
+
+	/**
+	 * Each time the view is refreshed - it's assigned the id of the current refresh loop
+	 * @type {number}
+	 */
+	_last_refresh_id: 0,
+	/**
+	 * How many times this view was refreshed during current refresh loop.
+	 * Used for infinite loops protection.
+	 * @type {number}
+	 */
+	_refresh_cycle_count: 0,
 
 	/**
 	 * Create an instance of the view, including container and assigns; dispatch roles
@@ -22537,7 +22341,7 @@ Lava.define(
 
 				if (name in this._property_bindings_by_property) Lava.t("Error initializing assign: property binding already created");
 
-				this._property_bindings_by_property[name] = new Lava.scope.PropertyBinding(this, name, this.depth, config.assigns[name]);
+				this._property_bindings_by_property[name] = new Lava.scope.PropertyBinding(this, name, config.assigns[name]);
 
 			}
 
@@ -22585,12 +22389,6 @@ Lava.define(
 	 * @returns {boolean}
 	 */
 	isInDOM: function() { return this._is_inDOM; },
-
-	/**
-	 * Get `_is_sleeping`
-	 * @returns {boolean}
-	 */
-	isSleeping: function() { return this._is_sleeping; },
 
 	/**
 	 * Get `_template`
@@ -22712,8 +22510,6 @@ Lava.define(
 
 		if (this._is_inDOM) {
 
-			if (!this._is_sleeping) this._sleep();
-
 			this._is_inDOM = false;
 			this._is_dirty = false;
 			this._container && this._container.informRemove();
@@ -22725,81 +22521,10 @@ Lava.define(
 	},
 
 	/**
-	 * Put the view and it's children into 'sleeping' mode: view is still in DOM, but does not access
-	 * or refresh it's DOM content, and does not react to argument or binding changes
-	 */
-	broadcastSleep: function() {
-
-		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.t();
-
-		if (!this._is_sleeping) {
-
-			this._sleep();
-			this._broadcastToChildren('broadcastSleep');
-
-		}
-
-	},
-
-	/**
-	 * Perform the 'sleep' operation
-	 */
-	_sleep: function() {
-
-		this._is_sleeping = true;
-		this._container && this._container.sleep();
-
-	},
-
-	/**
-	 * View starts listening to it's bindings and refreshes it's DOM content, if needed
-	 */
-	broadcastWakeup: function() {
-
-		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.t();
-
-		if (this._is_sleeping) {
-
-			this._wakeup();
-			this._broadcastToChildren('broadcastWakeup');
-
-		}
-
-	},
-
-	/**
-	 * Perform 'wakeup'
-	 */
-	_wakeup: function() {
-
-		this._is_sleeping = false;
-		this._container && this._container.wakeup();
-
-		if (this._is_dirty && !this._is_queued_for_refresh) {
-
-			Lava.view_manager.scheduleViewRefresh(this);
-			this._is_queued_for_refresh = true;
-
-		}
-
-	},
-
-	/**
-	 * Render the inner hierarchy
-	 */
-	_renderContent: function() {
-
-		Lava.t("_renderContent must be overridden in inherited classes");
-
-	},
-
-	/**
 	 * Render the view, including container and all it's inner content
 	 * @returns {string} The HTML representation of the view
 	 */
 	render: function() {
-
-		if (this._is_sleeping) this._wakeup();
 
 		var buffer = this._renderContent(),
 			result;
@@ -22819,25 +22544,48 @@ Lava.define(
 	},
 
 	/**
-	 * Refresh the view, if it's dirty (render the view's content and replace old content with the fresh version).
-	 * This method is called by ViewManager, you do not need to call it manually.
+	 * Render the inner hierarchy
 	 */
-	refresh: function() {
+	_renderContent: function() {
+
+		Lava.t("_renderContent must be overridden in inherited classes");
+
+	},
+
+	/**
+	 * Refresh the view, if it's dirty (render the view's content and replace old content with the fresh version).
+	 * This method is called by ViewManager, you should not call it directly.
+	 */
+	refresh: function(refresh_id) {
 
 		if (Lava.schema.DEBUG && !this._container) Lava.t("Refresh on a view without container");
 
 		this._is_queued_for_refresh = false;
 
-		if (this._is_inDOM && !this._is_sleeping) {
+		if (this._is_inDOM && this._is_dirty) {
 
-			if (this._is_dirty) {
+			if (this._last_refresh_id == refresh_id) {
 
-				this._refresh();
-				this._is_dirty = false;
+				this._refresh_cycle_count++;
+				if (this._refresh_cycle_count > Lava.schema.system.REFRESH_INFINITE_LOOP_THRESHOLD) {
+
+					return true; // infinite loop exception
+
+				}
+
+			} else {
+
+				this._last_refresh_id = refresh_id;
+				this._refresh_cycle_count = 0;
 
 			}
 
+			this._refresh();
+			this._is_dirty = false;
+
 		}
+
+		return false;
 
 	},
 
@@ -23114,7 +22862,7 @@ Lava.define(
 
 		if (!(property_name in this._property_bindings_by_property)) {
 
-			this._property_bindings_by_property[property_name] = new Lava.scope.PropertyBinding(this, property_name, this.depth);
+			this._property_bindings_by_property[property_name] = new Lava.scope.PropertyBinding(this, property_name);
 
 		}
 
@@ -23133,7 +22881,7 @@ Lava.define(
 
 		if (!(name_source_scope.guid in this._data_segments)) {
 
-			this._data_segments[name_source_scope.guid] = new Lava.scope.Segment(this, name_source_scope, this.depth);
+			this._data_segments[name_source_scope.guid] = new Lava.scope.Segment(this, name_source_scope);
 
 		}
 
@@ -23166,7 +22914,7 @@ Lava.define(
 
 		}
 
-		this._is_sleeping = true; // to prevent refresh
+		this._is_inDOM = false; // to prevent refresh
 
 	}
 
@@ -23203,8 +22951,6 @@ Lava.define(
 	},
 
 	render: function() {
-
-		if (this._is_sleeping) this._wakeup();
 
 		var result;
 
@@ -23349,24 +23095,6 @@ Lava.define(
 
 	},
 
-	_sleep: function() {
-
-		this._argument.sleep();
-		Lava.suspendListener(this._argument_changed_listener);
-
-		this.Abstract$_sleep();
-
-	},
-
-	_wakeup: function() {
-
-		Lava.resumeListener(this._argument_changed_listener);
-		this._argument.wakeup(true);
-
-		this.Abstract$_wakeup();
-
-	},
-
 	/**
 	 * Perform escaping of HTML entities in argument's value
 	 * @param {string} string Argument's value
@@ -23447,7 +23175,8 @@ Lava.define(
 	_as: null,
 
 	/**
-	 * Refreshers perform insertion, removal and animation of items
+	 * Refreshers animate insertion and removal of templates.
+	 * They can also insert and remove templates independently of each other
 	 * @type {Lava.view.refresher.Standard}
 	 */
 	_refresher: null,
@@ -23459,11 +23188,18 @@ Lava.define(
 		count: 0
 	},
 
+	/**
+	 * Set each time when scope changes - sign to refresh child templates in `refresh()` or `render()`
+	 * @type {boolean}
+	 */
+	_requires_refresh_children: true,
+
 	init: function(config, widget, parent_view, template, properties) {
 
 		this.Abstract$init(config, widget, parent_view, template, properties);
 
-		this._refreshChildren();
+		// setting count after roles registration, cause scope can be filtered
+		this.set('count', this._foreach_scope.getValue().getCount());
 
 	},
 
@@ -23480,9 +23216,6 @@ Lava.define(
 		this._foreach_scope_changed_listener = this._foreach_scope.on('changed', this._onDataSourceChanged, this);
 		this._foreach_scope.on('new_enumerable', this._onEnumerableChanged, this);
 		this._as = this._config.as;
-		// set the count before the view's container is created, cause if it depends on count
-		// - it will be dirty right after creation
-		this.set('count', this._foreach_scope.getValue().getCount());
 
 	},
 
@@ -23509,8 +23242,10 @@ Lava.define(
 		this._refresher = /** @type {Lava.view.refresher.Standard} */ new constructor(refresher_config, this, this._container);
 
 		this._refresher.on('removal_complete', this._onRemovalComplete, this);
-		this._removeTemplates = this._removeTemplates_Refresher;
 		this._refresh = this._refresh_Refresher;
+		this._removeTemplates = this._removeTemplates_Refresher;
+		this._renderContent = this._renderContent_Refresher;
+		this._broadcastToChildren = this._broadcastToChildren_Refresher;
 
 	},
 
@@ -23545,6 +23280,7 @@ Lava.define(
 		this._current_hash = {};
 		this._current_uids = [];
 		this._current_templates = [];
+		this.set('count', 0);
 
 	},
 
@@ -23570,7 +23306,7 @@ Lava.define(
 	 */
 	_removeTemplates_Refresher: function(removed_templates) {
 
-		this._refresher.removeTemplates(removed_templates);
+		this._refresher.prepareRemoval(removed_templates);
 
 	},
 
@@ -23603,8 +23339,6 @@ Lava.define(
 
 		}
 
-		this.set('count', count);
-
 		for (i = 0; i < count; i++) {
 
 			uid = new_uids[i];
@@ -23636,6 +23370,7 @@ Lava.define(
 		this._current_count = count;
 		this._current_uids = new_uids;
 		this._current_templates = current_templates;
+		this._requires_refresh_children = false;
 
 	},
 
@@ -23644,16 +23379,18 @@ Lava.define(
 	 */
 	_onDataSourceChanged: function() {
 
-		this._refreshChildren();
+		this.set('count', this._foreach_scope.getValue().getCount());
+		this._requires_refresh_children = true;
 		this.trySetDirty();
 
 	},
 
 	/**
 	 * Animation has ended and refresher has removed the `template` from DOM
-	 * @param template
+	 * @param {Lava.view.refresher.Standard} refresher
+	 * @param {Lava.system.Template} template
 	 */
-	_onRemovalComplete: function(template) {
+	_onRemovalComplete: function(refresher, template) {
 
 		template.destroy();
 
@@ -23663,10 +23400,10 @@ Lava.define(
 
 		if (Lava.schema.DEBUG && (this._argument.isWaitingRefresh() || this._foreach_scope.isWaitingRefresh())) Lava.t();
 
-		this._refresher && this._refresher.onRender(this._current_templates);
-
 		var buffer = '',
 			i = 0;
+
+		this._requires_refresh_children && this._refreshChildren();
 
 		for (; i < this._current_count; i++) {
 
@@ -23678,15 +23415,32 @@ Lava.define(
 
 	},
 
+	/**
+	 * Version of `_renderContent` for usage with refresher instance
+	 * @returns {string}
+	 */
+	_renderContent_Refresher: function() {
+
+		if (Lava.schema.DEBUG && (this._argument.isWaitingRefresh() || this._foreach_scope.isWaitingRefresh())) Lava.t();
+		this._requires_refresh_children && this._refreshChildren();
+		return this._refresher.render(this._current_templates);
+
+	},
+
 	_refresh: function() {
 
+		this._requires_refresh_children && this._refreshChildren();
 		this._container.setHTML(this._renderContent());
 		this._broadcastToChildren('broadcastInDOM');
 
 	},
 
+	/**
+	 * Version of `_refresh` for usage with created refresher instance
+	 */
 	_refresh_Refresher: function() {
 
+		this._requires_refresh_children && this._refreshChildren();
 		this._refresher.refresh(this._current_templates);
 
 	},
@@ -23701,24 +23455,19 @@ Lava.define(
 
 	},
 
-	_sleep: function() {
+	/**
+	 * Version of _broadcastToChildren for usage with created refresher instance
+	 * @param {string} function_name
+	 */
+	_broadcastToChildren_Refresher: function(function_name) {
 
-		Lava.suspendListener(this._foreach_scope_changed_listener);
-		this._foreach_scope.sleep();
-		this._argument.sleep();
+		this._refresher[function_name] && this._refresher[function_name]();
 
-		this.Abstract$_sleep();
+		for (var name in this._current_hash) {
 
-	},
+			this._current_hash[name][function_name]();
 
-	_wakeup: function() {
-
-		this._argument.wakeup();
-		this._foreach_scope.wakeup();
-		Lava.resumeListener(this._foreach_scope_changed_listener);
-		this._refreshChildren();
-
-		this.Abstract$_wakeup();
+		}
 
 	},
 
@@ -23788,7 +23537,7 @@ Lava.define(
 	 * Currently active if/elseif section id
 	 * @type {number}
 	 */
-	_active_argument_index: null,
+	_active_argument_index: -1,
 	/**
 	 * Content of each if/elseif section
 	 * @type {Array.<Lava.system.Template>}
@@ -23801,7 +23550,8 @@ Lava.define(
 	_else_content: null,
 
 	/**
-	 * Refreshers animates insertion and removal of templates
+	 * Refreshers animate insertion and removal of templates.
+	 * They can also insert and remove templates independently of each other
 	 * @type {(Lava.view.refresher.Standard)}
 	 */
 	_refresher: null,
@@ -23810,14 +23560,6 @@ Lava.define(
 	 * @type {Lava.system.Template}
 	 */
 	_active_template: null,
-
-	init: function(config, widget, parent_view, template, properties) {
-
-		this.Abstract$init(config, widget, parent_view, template, properties);
-
-		this._active_template = this._getActiveTemplate();
-
-	},
 
 	_postInit: function() {
 
@@ -23843,7 +23585,7 @@ Lava.define(
 		}
 
 		this._count_arguments = this._arguments.length;
-		this._active_argument_index = this._getActiveArgumentIndex();
+		this._refreshActiveArgumentIndex();
 
 		if (this._config.refresher) {
 			this.createRefresher(this._config.refresher);
@@ -23865,7 +23607,22 @@ Lava.define(
 		var constructor = Lava.ClassManager.getConstructor(refresher_config['type'], 'Lava.view.refresher');
 		this._refresher = /** @type {Lava.view.refresher.Standard} */ new constructor(refresher_config, this, this._container);
 
+		this._refresher.on('removal_complete', this._onRemovalComplete, this);
 		this._refresh = this._refresh_Refresher;
+		this._removeTemplate = this._removeTemplate_Refresher;
+		this._renderContent = this._renderContent_Refresher;
+		this._broadcastToChildren = this._broadcastToChildren_Refresher;
+
+	},
+
+	/**
+	 * Animation has ended and template was removed from DOM. Destroy it.
+	 * @param {Lava.view.refresher.Standard} refresher
+	 * @param {Lava.system.Template} template
+	 */
+	_onRemovalComplete: function(refresher, template) {
+
+		this._destroyTemplate(template);
 
 	},
 
@@ -23883,21 +23640,20 @@ Lava.define(
 	 * Get index of the first argument which evaluates to <kw>true</kw>
 	 * @returns {?number} Zero-based argument index, or <kw>null</kw>, if all arguments evaluate to <kw>false</kw>
 	 */
-	_getActiveArgumentIndex: function() {
+	_refreshActiveArgumentIndex: function() {
 
-		var i = 0,
-			active_argument_index = null;
+		this._active_argument_index = -1;
 
-		for (; i < this._count_arguments; i++) {
+		for (var i = 0; i < this._count_arguments; i++) {
 
 			if (!!this._arguments[i].getValue()) {
-				active_argument_index = i;
+
+				this._active_argument_index = i;
 				break;
+
 			}
 
 		}
-
-		return active_argument_index;
 
 	},
 
@@ -23908,17 +23664,28 @@ Lava.define(
 	 */
 	_getActiveTemplate: function() {
 
-		var result = null;
+		var result = null,
+			index = this._active_argument_index;
 
-		if (this._active_argument_index != null) {
+		if (index != -1) {
 
-			this._createContent(this._active_argument_index);
+			if (!this._content[index]) {
 
-			result = this._content[this._active_argument_index];
+				this._content[index] = (index == 0)
+					? new Lava.system.Template(this._config.template || [], this._widget, this, {if_index: index})
+					: new Lava.system.Template(this._config.elseif_templates[index - 1] || [], this._widget, this, {if_index: index});
+
+			}
+
+			result = this._content[index];
 
 		} else if ('else_template' in this._config) {
 
-			this._createElseContent();
+			if (this._else_content == null) {
+
+				this._else_content = new Lava.system.Template(this._config.else_template || [], this._widget, this);
+
+			}
 
 			result = this._else_content;
 
@@ -23933,31 +23700,60 @@ Lava.define(
 	 */
 	_onArgumentChanged: function() {
 
-		var active_argument_index = this._getActiveArgumentIndex();
+		var old_active_argument_index = this._active_argument_index;
+		this._refreshActiveArgumentIndex();
 
-		if (this._active_argument_index != active_argument_index) {
-
-			this._active_argument_index = active_argument_index;
+		if (this._active_argument_index != old_active_argument_index) {
 
 			if (this._active_template && this._is_inDOM) {
 
-				if (this._refresher) {
-
-					this._refresher.removeTemplates([this._active_template]);
-
-				} else {
-
-					this._active_template.broadcastRemove();
-
-				}
+				this._removeTemplate(this._active_template);
 
 			}
 
-			this._active_template = this._getActiveTemplate();
-
 			this.trySetDirty();
+			this._active_template = null;
 
 		}
+
+	},
+
+	/**
+	 * Branches that are not in DOM are destroyed
+	 * @param {Lava.system.Template} template
+	 */
+	_destroyTemplate: function(template) {
+
+		var index = this._content.indexOf(template);
+
+		if (index == -1) {
+			if (Lava.schema.DEBUG && template != this._else_content) Lava.t();
+			this._else_content = null;
+		} else {
+			this._content[index] = null;
+		}
+
+		template.destroy();
+
+	},
+
+	/**
+	 * Destroys branches, that are removed from DOM
+	 * @param {Lava.system.Template} template
+	 */
+	_removeTemplate: function(template) {
+
+		this._destroyTemplate(template);
+
+	},
+
+	/**
+	 * Removes branches from DOM using a refresher instance
+	 * @param {Lava.system.Template} template
+	 */
+	_removeTemplate_Refresher: function(template) {
+
+		this._refresher.prepareRemoval([template]);
 
 	},
 
@@ -23967,10 +23763,21 @@ Lava.define(
 	 */
 	_renderContent: function() {
 
-		if (Lava.schema.DEBUG && this._active_argument_index != null && this._arguments[this._active_argument_index].isWaitingRefresh()) Lava.t();
-
-		this._refresher && this._refresher.onRender(this._active_template ? [this._active_template] : []);
+		if (Lava.schema.DEBUG && this._active_argument_index != -1 && this._arguments[this._active_argument_index].isWaitingRefresh()) Lava.t();
+		this._active_template = this._getActiveTemplate();
 		return this._active_template ? this._active_template.render() : '';
+
+	},
+
+	/**
+	 * Version of `_renderContent` which uses created refresher instance
+	 * @returns {string}
+	 */
+	_renderContent_Refresher: function() {
+
+		if (Lava.schema.DEBUG && this._active_argument_index != -1 && this._arguments[this._active_argument_index].isWaitingRefresh()) Lava.t();
+		this._active_template = this._getActiveTemplate();
+		return this._refresher.render(this._active_template ? [this._active_template] : []);
 
 	},
 
@@ -23980,83 +23787,18 @@ Lava.define(
 	 */
 	_broadcastToChildren: function(function_name) {
 
-		if (this._active_template) {
-
-			this._active_template[function_name]();
-
-		}
-
-	},
-
-	_sleep: function() {
-
-		var i = 0,
-			count = this._arguments.length;
-
-		for (; i < count; i++) {
-
-			this._arguments[i].sleep();
-
-		}
-
-		for (i = 0, count = this._argument_changed_listeners.length; i < count; i++) {
-
-			Lava.suspendListener(this._argument_changed_listeners[i]);
-
-		}
-
-		this.Abstract$_sleep();
-
-	},
-
-	_wakeup: function() {
-
-		for (i = 0, count = this._arguments.length; i < count; i++) {
-
-			this._arguments[i].wakeup();
-
-		}
-
-		for (var i = 0, count = this._argument_changed_listeners.length; i < count; i++) {
-
-			Lava.resumeListener(this._argument_changed_listeners[i]);
-
-		}
-
-		this._onArgumentChanged();
-
-		this.Abstract$_wakeup();
+		this._active_template && this._active_template[function_name]();
 
 	},
 
 	/**
-	 * Create the template that corresponds to a if/elseif section
-	 * @param {number} index
+	 * Version of `_broadcastToChildren` for use with refresher instance
+	 * @param {string} function_name
 	 */
-	_createContent: function(index) {
+	_broadcastToChildren_Refresher: function(function_name) {
 
-		if (typeof(this._content[index]) == 'undefined') {
-
-			this._content[index] = (index == 0)
-				? new Lava.system.Template(this._config.template || [], this._widget, this)
-				: new Lava.system.Template(this._config.elseif_templates[index - 1] || [], this._widget, this);
-
-			this._content[index].batchSetProperty('if_index', index);
-
-		}
-
-	},
-
-	/**
-	 * Create the 'else' template
-	 */
-	_createElseContent: function() {
-
-		if (this._else_content == null) {
-
-			this._else_content = new Lava.system.Template(this._config.else_template || [], this._widget, this);
-
-		}
+		this._refresher[function_name] && this._refresher[function_name]();
+		this._active_template && this._active_template[function_name]();
 
 	},
 
@@ -24067,8 +23809,14 @@ Lava.define(
 
 	},
 
+	/**
+	 * Version of `_refresh` for use with refresher instance
+	 */
 	_refresh_Refresher: function() {
 
+		if (!this._active_template) {
+			this._active_template = this._getActiveTemplate();
+		}
 		this._refresher.refresh(this._active_template ? [this._active_template] : []);
 
 	},
@@ -24334,9 +24082,9 @@ Lava.define(
 		if (Lava.schema.DEBUG && this._parent_view) Lava.t("Widget: only top-level widgets can be inserted into DOM");
 		if (Lava.schema.DEBUG && !this._container) Lava.t("Widget: root widgets must have a container");
 
-		// If you assign data to a widget, that was removed from DOM (sleeping widget),
-		// and then render it - it would render with old data.
-		Lava.ScopeManager.refreshScopes();
+		// If you assign data to a widget, that was removed from DOM,
+		// and then render it - it will render with old data.
+		Lava.ScopeManager.refresh();
 		var html = this.render();
 
 		Firestorm.DOM.insertHTML(element, html, position || 'Top');
@@ -24376,7 +24124,6 @@ Lava.define(
 		if (!this._is_inDOM) Lava.t("remove: widget is not in DOM");
 		if (Lava.schema.DEBUG && !this._container) Lava.t("remove: widget doesn't have a container");
 
-		if (!this._is_sleeping) this._sleep();
 		this._is_inDOM = false;
 		this._is_dirty = false;
 		this._broadcastToChildren('broadcastRemove');
@@ -24475,28 +24222,21 @@ Lava.define(
 
 			}
 
-			if (descriptor.setter) {
+		}
 
-				// It's forced to make setters private, cause type-checking will not work if setter is called directly.
+		if (this._properties[name] !== value) {
+
+			if (descriptor && descriptor.setter) {
+
+				// you are forced to make setters private, cause type-checking will not work if setter is called directly.
 				if (Lava.schema.DEBUG && descriptor.setter[0] != '_') Lava.t("Widget property setters must not be public: " + descriptor.setter);
-
-				//try { // additional protection from crash for the scope system
-				//	this[descriptor.setter](name, value);
-				//} catch (e) {
-				//	Lava.logException(e);
-				//}
-
 				this[descriptor.setter](value, name);
 
 			} else {
 
-				this.View$set(name, value);
+				this._set(name, value);
 
 			}
-
-		} else {
-
-			this.View$set(name, value);
 
 		}
 
@@ -24845,13 +24585,9 @@ Lava.define(
 	 */
 	_setValue: function(value) {
 
-		if (this._properties.value != value) {
-
-			this._set('value', value);
-			if (this._input_container) {
-				this._input_container.setProperty('value', this._valueToElementProperty(value));
-			}
-
+		this._set('value', value);
+		if (this._input_container) {
+			this._input_container.setProperty('value', this._valueToElementProperty(value));
 		}
 
 	},
@@ -24994,13 +24730,9 @@ Lava.define(
 	 */
 	_setIsChecked: function(value) {
 
-		if (this._properties.is_checked != value) {
-
-			this._set('is_checked', value);
-			if (this._input_container) {
-				this._input_container.setProperty('checked', this._properties.is_checked ? 'checked' : null);
-			}
-
+		this._set('is_checked', value);
+		if (this._input_container) {
+			this._input_container.setProperty('checked', this._properties.is_checked ? 'checked' : null);
 		}
 
 	},
@@ -25263,20 +24995,17 @@ Lava.define(
 	_setValue: function(value) {
 
 		var element;
-		if (this._properties.value != value) {
 
-			if (this._input_container) {
-				element = this._input_container.getDOMElement();
-				element.value = value;
-				if (value != element.value) { // workaround for nonexistent values
-					Lava.logError("[Select] nonexistent value assigned: " + value);
-					value = element.value;
-				}
+		if (this._input_container) {
+			element = this._input_container.getDOMElement();
+			element.value = value;
+			if (value != element.value) { // workaround for nonexistent values
+				Lava.logError("[Select] nonexistent value assigned: " + value);
+				value = element.value;
 			}
-
-			this._set('value', value);
-
 		}
+
+		this._set('value', value);
 
 	},
 
@@ -25947,28 +25676,24 @@ Lava.define(
 			i = 0,
 			last_index;
 
-		if (this._properties.is_enabled != value) {
+		if (value) {
 
-			if (value) {
+			if (this._active_panels.length > 1) {
 
-				if (this._active_panels.length > 1) {
-
-					last_index = this._active_panels.length - 1;
-					// slice is needed for the listeners
-					turnoff_panels = this._active_panels.slice(0, last_index);
-					for (; i < last_index; i++) {
-						turnoff_panels[i].set('is_expanded', false);
-					}
-					// keep expanded only the last opened panel
-					this._active_panels = [this._active_panels[last_index]];
-
+				last_index = this._active_panels.length - 1;
+				// slice is needed for the listeners
+				turnoff_panels = this._active_panels.slice(0, last_index);
+				for (; i < last_index; i++) {
+					turnoff_panels[i].set('is_expanded', false);
 				}
+				// keep expanded only the last opened panel
+				this._active_panels = [this._active_panels[last_index]];
 
 			}
 
-			this._set(name, value);
-
 		}
+
+		this._set(name, value);
 
 	},
 
@@ -26469,36 +26194,32 @@ Lava.define(
 
 		var new_display = 'none';
 
-		if (this._properties.is_expanded != value) {
+		this._set(name, value);
 
-			this._set(name, value);
+		if ((this._is_inDOM && this._properties.is_animation_enabled) || value) {
 
-			if ((this._is_inDOM && this._properties.is_animation_enabled) || value) {
+			new_display = this._default_display; // allow display:none only in case the panel must be collapsed and animation is disabled
 
-				new_display = this._default_display; // allow display:none only in case the panel must be collapsed and animation is disabled
+		}
 
-			}
+		// if this property is set in constructor - then container does not yet exist
+		if (this._panel_container) {
 
-			// if this property is set in constructor - then container does not yet exist
-			if (this._panel_container) {
+			this._panel_container.setStyle('display', new_display);
 
-				this._panel_container.setStyle('display', new_display);
+		}
 
-			}
+		if (this._is_inDOM) {
 
-			if (this._is_inDOM) {
+			this._fire(value ? 'expanding' : 'collapsing');
 
-				this._fire(value ? 'expanding' : 'collapsing');
+			if (this._properties.is_animation_enabled && this._panel_container) {
 
-				if (this._properties.is_animation_enabled && this._panel_container) {
+				this._refreshAnimation(value);
 
-					this._refreshAnimation(value);
+			} else {
 
-				} else {
-
-					this._fire(value ? 'expanded' : 'collapsed');
-
-				}
+				this._fire(value ? 'expanded' : 'collapsed');
 
 			}
 
@@ -26705,22 +26426,18 @@ Lava.define(
 	 */
 	_setAnimationEnabled: function(value, name) {
 
-		if (this._properties.is_animation_enabled != value) {
+		this._set(name, value);
 
-			this._set(name, value);
+		// it may be set via assign or right after creation. At this time refresher does not exist yet.
+		if (this._content_refresher) {
 
-			// it may be set via assign or right after creation. At this time refresher does not exist yet.
-			if (this._content_refresher) {
+			if (value) {
 
-				if (value) {
+				this._content_refresher.enableAnimation();
 
-					this._content_refresher.enableAnimation();
+			} else {
 
-				} else {
-
-					this._content_refresher.disableAnimation();
-
-				}
+				this._content_refresher.disableAnimation();
 
 			}
 
@@ -26880,19 +26597,15 @@ Lava.define(
 		var open_target_container = this._getTargetContainer();
 		if (Lava.schema.DEBUG && !open_target_container) Lava.t("DropDown was created without container and target");
 
-		if (this._properties.is_expanded != value) {
+		this._set(name, value);
 
-			this._set(name, value);
+		if (value) {
 
-			if (value) {
+			open_target_container.addClass(this._config.options.target_class);
 
-				open_target_container.addClass(this._config.options.target_class);
+		} else {
 
-			} else {
-
-				open_target_container.removeClass(this._config.options.target_class);
-
-			}
+			open_target_container.removeClass(this._config.options.target_class);
 
 		}
 
@@ -26923,39 +26636,133 @@ Lava.define(
 {
 
 	Extends: 'Lava.widget.Standard',
-	Shared: ['_shared', '_meta_storage_config', '_default_refresher_config'],
+	Shared: ['_meta_storage_config', '_default_if_refresher_config', '_foreach_refresher_config',
+		'_direct_bind_configs', '_meta_storage_bind_configs'],
 
 	name: 'tree',
 
 	/**
-	 * Shared configs
+	 * Dynamic scope configs which use direct bindings to record properties
 	 */
-	_shared: {
-		is_expanded_meta_storage_bind_config: Lava.ExpressionParser.parseScopeEval('$tree.meta_storage[node.guid].is_expanded'),
-		is_expanded_direct_bind_config: Lava.ExpressionParser.parseScopeEval('node.is_expanded')
+	_direct_bind_configs: {
+		is_expanded: Lava.ExpressionParser.parseScopeEval('node.is_expanded'),
+		is_expandable: Lava.ExpressionParser.parseScopeEval('node.children.length')
+	},
+
+	/**
+	 * Dynamic scope configs for columns from MetaStorage
+	 * @type {Object}
+	 */
+	_meta_storage_bind_configs: {
+		is_expanded: Lava.ExpressionParser.parseScopeEval('$tree.meta_storage[node.guid].is_expanded'),
+		// can be used by inherited classes
+		is_expandable: Lava.ExpressionParser.parseScopeEval('$tree.meta_storage[node.guid].is_expandable')
 	},
 
 	/**
 	 * MetaStorage is used by Tree to store the `expanded` state
+	 * @type {Object}
 	 */
 	_meta_storage_config: {
 		fields: {
-			'is_expanded': {type:'Boolean'}
+			is_expanded: {type:'Boolean'}
+			// is_expandable: {type:'Boolean'}
 		}
 	},
 
 	/**
-	 * Default refresher (without animation)
+	 * Default refresher for the If view with node children (without animation)
+	 * @type {_cRefresher}
 	 */
-	_default_refresher_config: {
+	_default_if_refresher_config: {
 		type: 'Standard'
 	},
 
-	_refresher_config: null,
+	/**
+	 * Config of refresher, that expands children
+	 * @type {_cRefresher}
+	 */
+	_if_refresher_config: null,
+
+	/**
+	 * Refresher, that inserts and removes new child nodes in the `record.children` collection.
+	 * @type {_cRefresher}
+	 */
+	_foreach_refresher_config: {
+		type: 'Standard',
+		remove_callback: function(template) {
+
+			// Here we don't know the previous and next templates, and we can not use this._current_templates
+			// so we must find other ways to remove nodes.
+
+			// save, cause we can not retrieve container's DOM elements after broadcastRemove
+			var node_body_element = template.getFirstView().getContainer().getDOMElement(),
+				// Last view is the If with node children.
+				// "_foreach_view" property was set in "node_children" role.
+				children_foreach  = template.getLastView().get('_foreach_view'),
+				node_children_element;
+
+			if (children_foreach) {
+
+				node_children_element = children_foreach.getContainer().getDOMElement();
+
+			}
+
+			// first, we must inform the template, that it's going to be removed: to allow it's child views to interact
+			// with nodes while they are still in DOM
+			template.broadcastRemove();
+
+			if (node_children_element) {
+				// we have both containers in DOM: node body, and node children.
+				Firestorm.DOM.clearOuterRange(node_body_element, node_children_element);
+			} else {
+				// node children are not in DOM, only node body is visible
+				Firestorm.Element.destroy(node_body_element);
+			}
+
+		},
+
+		insert_callback: function(template, index) {
+
+			if (index) {
+
+				var previous_template = this._current_templates[index - 1],
+					children_foreach = previous_template.getLastView().get('_foreach_view');
+
+				if (children_foreach && children_foreach.getContainer().isInDOM()) {
+
+					// previous node children are in DOM, insert after them
+					children_foreach.getContainer().insertHTMLAfter(template.render());
+
+				} else {
+
+					// children of previous node are not in DOM, so insert after body
+					previous_template.getFirstView().getContainer().insertHTMLAfter(template.render());
+
+				}
+
+			} else {
+
+				// insert at top, as it's the first template
+				this._view.getContainer().prependHTML(template.render());
+
+			}
+
+			template.broadcastInDOM();
+
+		}
+
+	},
+
+	_property_descriptors: {
+		records: {setter: '_setRecords'},
+		meta_storage: {is_readonly: true}
+	},
 
 	_properties: {
 		/** User-assigned records in the root of the tree */
-		records: null
+		records: null,
+		meta_storage: null
 	},
 
 	_event_handlers: {
@@ -26963,7 +26770,9 @@ Lava.define(
 	},
 
 	_role_handlers: {
-		node_children_view: '_handleNodeChildrenView'
+		node_children_view: '_handleNodeChildrenView',
+		root_nodes_foreach: '_handleRootNodesForeach',
+		nodes_foreach: '_handleNodesForeach'
 	},
 
 	/**
@@ -26971,16 +26780,30 @@ Lava.define(
 	 * @type {Lava.data.MetaStorage}
 	 */
 	_meta_storage: null,
+
 	/**
-	 * Route to record's "is_expanded" property for templates
-	 * @type {_cScopeLocator}
+	 * Columns, which are served from MetaStorage instead of record instance
+	 * @type {Object.<string,true>}
 	 */
-	_is_expanded_bind_config: null,
+	_meta_storage_columns: {},
+
+	/**
+	 * Dynamic scopes configuration
+	 * @type {Object.<string,_cScopeLocator>}
+	 */
+	_column_bind_configs: {},
+
+	/**
+	 * May be overridden in inherited classes to force creation of MetaStorage in constructor
+	 * @type {boolean}
+	 */
+	CREATE_META_STORAGE: false,
 
 	/**
 	 * @param config
-	 * @param {boolean} config.options.use_meta_storage Store "is_expanded" property of tree nodes in separate MetaStorage instance.
-	 *  By default, "is_expanded" property is taken directly from nodes
+	 * @param {Array.<string>} config.options.meta_storage_columns This setting allows you to define columns,
+	 *  which will be stored in separate MetaStorage instance instead of record properties.
+	 *  Commonly, you will want to store "is_expanded" property in MetaStorage.
 	 * @param {Object} config.options.refresher You can assign custom refresher config for nodes (with animation support, etc).
 	 * 	Use {type: 'Collapse'} to apply basic animation
 	 * @param widget
@@ -26990,24 +26813,96 @@ Lava.define(
 	 */
 	init: function(config, widget, parent_view, template, properties) {
 
-		this.Standard$init(config, widget, parent_view, template, properties);
+		var i = 0,
+			count,
+			columns_list,
+			name;
 
-		this._is_expanded_bind_config = this._shared.is_expanded_direct_bind_config;
-		if (config.options && config.options.use_meta_storage) {
-			this._meta_storage = new Lava.data.MetaStorage(this._meta_storage_config);
-			this.set('meta_storage', this._meta_storage);
-			this._is_expanded_bind_config = this._shared.is_expanded_meta_storage_bind_config;
+		if (config.options && config.options.meta_storage_columns) {
+			columns_list = config.options.meta_storage_columns;
+			count = columns_list.length;
+			for (; i < count; i++) {
+				this._meta_storage_columns[columns_list[i]] = true;
+			}
 		}
 
-		this._refresher_config = (config.options && config.options.refresher)
+		for (name in this._direct_bind_configs) {
+
+			this._column_bind_configs[name] = (name in this._meta_storage_columns)
+				? this._meta_storage_bind_configs[name]
+				: this._direct_bind_configs[name];
+
+		}
+
+		if (this.CREATE_META_STORAGE || !Firestorm.Object.isEmpty(this._meta_storage_columns)) {
+			this._meta_storage = new Lava.data.MetaStorage(this._meta_storage_config);
+			this._properties.meta_storage = this._meta_storage;
+		}
+
+		this.Standard$init(config, widget, parent_view, template, properties);
+
+		this._if_refresher_config = (config.options && config.options.refresher)
 			? config.options.refresher
-			: this._default_refresher_config
+			: this._default_if_refresher_config
 
 	},
 
+	/**
+	 * Setter for `records` property
+	 * @param {?Array.<Object>} value
+	 * @param {string} name
+	 */
+	_setRecords: function(value, name) {
+
+		if (this._meta_storage) {
+			this._meta_storage.destroy();
+			this._meta_storage = new Lava.data.MetaStorage(this._meta_storage_config);
+			this._set('meta_storage', this._meta_storage);
+		}
+
+		this._set(name, value);
+
+	},
+
+	/**
+	 * Get or create an instance of MetaRecord, which is attached to record from data
+	 * @param {Object} record
+	 * @returns {Lava.data.MetaRecord}
+	 */
+	_getMetaRecord: function(record) {
+
+		return this._meta_storage.get(record.get('guid')) || this._meta_storage.createMetaRecord(record.get('guid'));
+
+	},
+
+	/**
+	 * Create refresher for the If view with node children
+	 * @param {Lava.view.If} view
+	 */
 	_handleNodeChildrenView: function(view) {
 
-		view.createRefresher(this._refresher_config);
+		view.createRefresher(this._if_refresher_config);
+
+	},
+
+	/**
+	 * Create refresher for the root Foreach view
+	 * @param {Lava.view.Foreach} view
+	 */
+	_handleRootNodesForeach: function(view) {
+
+		view.createRefresher(this._foreach_refresher_config);
+
+	},
+
+	/**
+	 * Initialize Foreach views with node children
+	 * @param {Lava.view.Foreach} view
+	 */
+	_handleNodesForeach: function(view) {
+
+		view.createRefresher(this._foreach_refresher_config);
+		view.getParentView().set('_foreach_view', view);
 
 	},
 
@@ -27022,13 +26917,14 @@ Lava.define(
 
 		// template_arguments[0] - node record
 		if (Lava.schema.DEBUG) {
-			if (this._meta_storage) {
-				if (!template_arguments[0].guid) Lava.t("Tree: record without GUID");
-			} else if (!template_arguments[0].isProperties) {
+			if (!template_arguments[0].isProperties) {
 				Lava.t("Tree: record is not instance of Properties");
 			}
+			if ('is_expanded' in this._meta_storage_columns) {
+				if (!template_arguments[0].get('guid')) Lava.t("Tree: record without GUID");
+			}
 		}
-		var property_source = this._meta_storage ? this._meta_storage.get(template_arguments[0].guid) : template_arguments[0];
+		var property_source = ('is_expanded' in this._meta_storage_columns) ? this._getMetaRecord(template_arguments[0]) : template_arguments[0];
 		property_source.set('is_expanded', !property_source.get('is_expanded'));
 		dom_event.preventDefault(); // to prevent text selection
 
@@ -27056,7 +26952,7 @@ Lava.define(
 				}
 			}
 
-			property_source = this._meta_storage ? this._meta_storage.get(node.guid) : node;
+			property_source = ('is_expanded' in this._meta_storage_columns) ? this._getMetaRecord(node) : node;
 			property_source.set('is_expanded', expanded_state);
 
 		}
@@ -27103,14 +26999,14 @@ Lava.define(
 	},
 
 	/**
-	 * Locate record's "is_expanded" property for templates
+	 * Locate record field references for templates (like "is_expanded" property)
 	 * @param {Lava.view.Abstract} view
 	 * @param {_cDynamicScope} config
 	 */
 	getDynamicScope: function(view, config) {
 
-		if (config.property_name != 'is_expanded') Lava.t('unknown dynamic scope: ' + config.property_name);
-		return view.getScopeByPathConfig(this._is_expanded_bind_config);
+		if (!(config.property_name in this._column_bind_configs)) Lava.t('unknown dynamic scope: ' + config.property_name);
+		return view.getScopeByPathConfig(this._column_bind_configs[config.property_name]);
 
 	},
 
@@ -27747,9 +27643,14 @@ Lava.define(
 
 		// do not add the class to the container itself, just to the element
 		// cause we do not need it to stay after refresh or render
-		var element = this._year_input.getMainContainer().getDOMElement();
-		if (element) {
-			Firestorm.Element.addClass(element, this._config.options['invalid_input_class']);
+		var year_input_container = this._year_input.getMainContainer(),
+			element;
+
+		if (year_input_container) {
+			element = year_input_container.getDOMElement();
+			if (element) {
+				Firestorm.Element.addClass(element, this._config.options['invalid_input_class']);
+			}
 		}
 
 	},
@@ -27759,9 +27660,14 @@ Lava.define(
 	 */
 	_clearInvalidInputState: function() {
 
-		var element = this._year_input.getMainContainer().getDOMElement();
-		if (element) {
-			Firestorm.Element.removeClass(element, this._config.options['invalid_input_class']);
+		var year_input_container = this._year_input.getMainContainer(),
+			element;
+
+		if (year_input_container) {
+			element = year_input_container.getDOMElement();
+			if (element) {
+				Firestorm.Element.removeClass(element, this._config.options['invalid_input_class']);
+			}
 		}
 
 	},
@@ -29744,11 +29650,8 @@ return (this._binds[0].getValue() ? 'in' : 'hidden');
 		is_extended: false
 	},
 	Tree: {
-		type: "widget",
-		"class": "Lava.WidgetConfigExtensionGateway",
-		extender_type: "Standard",
 		template: [
-			"\r\n\t\t\t",
+			"\r\n\t\t",
 			{
 				type: "view",
 				"class": "Foreach",
@@ -29763,10 +29666,14 @@ return (this._binds[0].getValue());
 						tail: ["records"]
 					}]
 				},
-				container: {type: "Morph"},
 				as: "node",
+				roles: [{
+					locator_type: "Name",
+					locator: "tree",
+					name: "root_nodes_foreach"
+				}],
 				template: [
-					"\r\n\t\t\t\t",
+					"\r\n\t\t\t\t\r\n\t\t\t\t",
 					{
 						locator_type: "Name",
 						locator: "tree",
@@ -29774,19 +29681,19 @@ return (this._binds[0].getValue());
 						type: "include"
 					},
 					"\r\n\t\t\t"
-				]
+				],
+				container: {
+					type: "Element",
+					tag_name: "div",
+					resource_id: {
+						locator_type: "Name",
+						locator: "tree",
+						name: "MAIN_TREE_CONTAINER"
+					}
+				}
 			},
-			"\r\n\t\t"
+			"\r\n\t"
 		],
-		container: {
-			type: "Element",
-			tag_name: "div",
-			resource_id: {
-				locator_type: "Name",
-				locator: "tree",
-				name: "MAIN_TREE_CONTAINER"
-			}
-		},
 		assigns: {
 			pad: {
 				evaluator: function() {
@@ -29903,11 +29810,10 @@ return ('lava-tree' + ((this._binds[0].getValue() == this._binds[1].getValue() -
 										property_name: "count"
 									},
 									{
-										property_name: "node",
-										tail: [
-											"children",
-											"length"
-										]
+										locator_type: "Name",
+										locator: "tree",
+										isDynamic: true,
+										property_name: "is_expandable"
 									},
 									{
 										locator_type: "Name",
@@ -30010,8 +29916,13 @@ return (this._binds[0].getValue());
 								}]
 							},
 							as: "node",
+							roles: [{
+								locator_type: "Name",
+								locator: "tree",
+								name: "nodes_foreach"
+							}],
 							template: [
-								"\r\n\t\t\t\t\t",
+								"\r\n\t\t\t\t\t\r\n\t\t\t\t\t",
 								{
 									locator_type: "Name",
 									locator: "tree",
@@ -30096,6 +30007,8 @@ return (this._binds[0].getValue() ? 'lava-tree-title-expandable' : '');
 		},
 		default_events: [],
 		real_class: "Tree",
+		"class": "Lava.WidgetConfigExtensionGateway",
+		extender_type: "Standard",
 		is_extended: false
 	},
 	Table: {

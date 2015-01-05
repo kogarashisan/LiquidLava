@@ -125,22 +125,18 @@ Lava.define(
 	 */
 	_setAnimationEnabled: function(value, name) {
 
-		if (this._properties.is_animation_enabled != value) {
+		this._set(name, value);
 
-			this._set(name, value);
+		// it may be set via assign or right after creation. At this time refresher does not exist yet.
+		if (this._content_refresher) {
 
-			// it may be set via assign or right after creation. At this time refresher does not exist yet.
-			if (this._content_refresher) {
+			if (value) {
 
-				if (value) {
+				this._content_refresher.enableAnimation();
 
-					this._content_refresher.enableAnimation();
+			} else {
 
-				} else {
-
-					this._content_refresher.disableAnimation();
-
-				}
+				this._content_refresher.disableAnimation();
 
 			}
 

@@ -30,13 +30,9 @@ Lava.define(
 	 */
 	_setValue: function(value) {
 
-		if (this._properties.value != value) {
-
-			this._set('value', value);
-			if (this._input_container) {
-				this._input_container.setProperty('value', this._valueToElementProperty(value));
-			}
-
+		this._set('value', value);
+		if (this._input_container) {
+			this._input_container.setProperty('value', this._valueToElementProperty(value));
 		}
 
 	},

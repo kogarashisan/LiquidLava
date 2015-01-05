@@ -96,10 +96,15 @@ Lava.define(
 	_cancel_bubble: false,
 
 	/**
-	 * Is in process of dispatching roles or events (so we know that bubble can be cancelled)
-	 * @type {boolean}
+	 * How many dispatch cycles are currently running
+	 * @type {number}
 	 */
-	_is_dispatching: false,
+	_nested_dispatch_count: 0,
+	/**
+	 * Number of the current refresh loop
+	 * @type {number}
+	 */
+	_refresh_id: 0,
 
 	/**
 	 * Create an instance of the class, acquire event listeners
@@ -124,8 +129,6 @@ Lava.define(
 	 * @param {Lava.view.Abstract} view
 	 */
 	scheduleViewRefresh: function(view) {
-
-		if (this._is_refreshing) Lava.t("Views may not become dirty while they are being refreshed");
 
 		if (view.depth in this._dirty_views) {
 
@@ -154,41 +157,63 @@ Lava.define(
 			return;
 		}
 
+		Lava.ScopeManager.refresh();
+
+		if (this._dirty_views.length) {
+
+			this._is_refreshing = true;
+			Lava.ScopeManager.lock();
+			this._refresh_id++;
+
+			do {
+				var dirty_views = this._dirty_views,
+					has_exceptions;
+				this._dirty_views = [];
+				has_exceptions = this._refreshCycle(dirty_views);
+			} while (this._dirty_views.length && !has_exceptions);
+
+			Lava.ScopeManager.unlock();
+			this._is_refreshing = false;
+
+		}
+
+	},
+
+	/**
+	 * Repeatable callback, that performs refresh of dirty views
+	 * @param {Array.<Array.<Lava.view.Abstract>>} dirty_views
+	 */
+	_refreshCycle: function(dirty_views) {
+
 		var level = 0,
 			deepness,
 			views_list,
+			has_exceptions = false,
 			i,
 			count;
 
-		Lava.ScopeManager.refreshScopes();
+		deepness = dirty_views.length; // this line must be after ScopeManager#refresh()
 
-		deepness = this._dirty_views.length; // this line must be after refreshScopes()
+		for (; level < deepness; level++) {
 
-		if (deepness) {
+			if (level in dirty_views) {
 
-			this._is_refreshing = true;
+				views_list = dirty_views[level];
 
-			for (; level < deepness; level++) {
+				for (i = 0, count = views_list.length; i < count; i++) {
 
-				if (level in this._dirty_views) {
-
-					views_list = this._dirty_views[level];
-
-					for (i = 0, count = views_list.length; i < count; i++) {
-
-						views_list[i].refresh();
-
+					if (views_list[i].refresh(this._refresh_id)) {
+						Lava.logError("ViewManager: view was refreshed several times in one refresh loop. Aborting.");
+						has_exceptions = true;
 					}
 
 				}
 
 			}
 
-			this._is_refreshing = false;
-
-			this._dirty_views = [];
-
 		}
+
+		return has_exceptions;
 
 	},
 
@@ -376,11 +401,7 @@ Lava.define(
 			bubble_index = 0,
 			bubble_targets_count;
 
-		if (this._is_dispatching) {
-			Lava.logError("recursive call to _dispatchCallback");
-			return;
-		}
-		this._is_dispatching = true;
+		this._nested_dispatch_count++;
 
 		for (; i < count; i++) {
 
@@ -400,7 +421,7 @@ Lava.define(
 
 				if (!widget) {
 
-					Lava.logError('ViewManager: callback target (widget) not found');
+					Lava.logError('ViewManager: callback target (widget) not found. Type: ' + target.locator_type + ', locator: ' + target.locator);
 
 				} else if (!widget.isWidget) {
 
@@ -423,7 +444,7 @@ Lava.define(
 
 					if (this._cancel_bubble) {
 						this._cancel_bubble = false;
-						this._is_dispatching = false;
+						this._nested_dispatch_count--;
 						return;
 					}
 
@@ -445,7 +466,7 @@ Lava.define(
 
 						if (this._cancel_bubble) {
 							this._cancel_bubble = false;
-							this._is_dispatching = false;
+							this._nested_dispatch_count--;
 							return;
 						}
 
@@ -457,7 +478,7 @@ Lava.define(
 
 		}
 
-		this._is_dispatching = false;
+		this._nested_dispatch_count--;
 
 	},
 
@@ -868,7 +889,7 @@ Lava.define(
 
 		for (; i < count; i++) {
 			view = this.getViewByElement(stack[i]);
-			if (view && !view.isSleeping()) {
+			if (view) {
 				container = view.getContainer();
 				if (container.isElementContainer) {
 					if (container.getEventTargets(event_name)) {
@@ -983,7 +1004,7 @@ Lava.define(
 	 */
 	cancelBubble: function() {
 
-		if (!this._is_dispatching) {
+		if (!this._nested_dispatch_count) {
 			Lava.logError("Call to cancelBubble outside of dispatch cycle");
 			return;
 		}

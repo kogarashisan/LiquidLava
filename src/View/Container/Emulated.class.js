@@ -190,10 +190,6 @@ Lava.define(
 
 	/** Does nothing */
 	refresh: function() {},
-	/** Does nothing */
-	sleep: function() {},
-	/** Does nothing */
-	wakeup: function() {},
 
 	/**
 	 * Get `_is_inDOM`

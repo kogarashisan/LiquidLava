@@ -160,6 +160,17 @@ Firestorm.String = {
 
 		return result;
 
+	},
+
+	/**
+	 * Before constructing regular expressions from user input - you must escape them
+	 * @param {string} string
+	 * @returns {string}
+	 */
+	escapeStringForRegExp: function(string) {
+
+		return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+
 	}
 
 };

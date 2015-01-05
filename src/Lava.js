@@ -218,6 +218,7 @@ var Lava = {
 		if (typeof(Firestorm) == 'undefined') Lava.t('init: Firestorm is not loaded');
 
 		this.ClassManager.registerRootNamespace('Lava', this);
+		this.ScopeManager.init();
 
 		for (path in this.classes) {
 
@@ -709,10 +710,9 @@ var Lava = {
 	 */
 	scheduleRefresh: function() {
 
-		var self;
+		var self = this;
 		if (!this._refresh_timer && !Lava.Core.isProcessingEvent()) {
 
-			self = this;
 			this._refresh_timer = window.setTimeout(
 				function(){
 					self._refresh_timer = null;

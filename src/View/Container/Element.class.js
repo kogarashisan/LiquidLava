@@ -661,9 +661,6 @@ Lava.define(
 			properties_string = '',
 			name;
 
-		// view calls this function in render(), and before that it must wake up itself and it's container
-		if (Lava.schema.DEBUG && this._is_sleeping) Lava.t();
-
 		this._element = null;
 
 		for (name in this._static_properties) {
@@ -831,6 +828,26 @@ Lava.define(
 	},
 
 	/**
+	 * For Element container this returns it's DOM element
+	 * @returns {HTMLElement}
+	 */
+	getStartElement: function() {
+
+		return this.getDOMElement();
+
+	},
+
+	/**
+	 * For Element container this returns it's DOM element
+	 * @returns {HTMLElement}
+	 */
+	getEndElement: function() {
+
+		return this.getDOMElement();
+
+	},
+
+	/**
 	 * Get `_id`
 	 * @returns {string}
 	 */
@@ -854,24 +871,6 @@ Lava.define(
 	release: function() {
 
 		this._element = null;
-
-	},
-
-	/**
-	 * Turn off bindings
-	 */
-	sleep: function() {
-
-		this._withArguments('sleep');
-
-	},
-
-	/**
-	 * Resume bindings
-	 */
-	wakeup: function() {
-
-		this._withArguments('wakeup', true);
 
 	},
 
@@ -905,8 +904,6 @@ Lava.define(
 		// there must not be ID attribute
 		if (Element.getProperty(element, 'id')) Lava.t("Target element already has an ID, and could be owned by another container");
 		if (Element.getProperty(element, 'tag').toLowerCase() != this._tag_name) Lava.t("Captured tag name differs from the container's tag name");
-
-		this.wakeup();
 
 		Element.setProperty(element, 'id', this._id);
 

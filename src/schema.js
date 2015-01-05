@@ -62,7 +62,7 @@ Lava.schema = {
 		 * an infinite refresh loop
 		 * @const
 		 */
-		REFRESH_INFINITE_LOOP_THRESHOLD: 3
+		REFRESH_INFINITE_LOOP_THRESHOLD: 3 // up to 5 times
 	},
 	/**
 	 * Config for {@link Lava#serializer} - the default instance

@@ -41,13 +41,9 @@ Lava.define(
 	 */
 	_setIsChecked: function(value) {
 
-		if (this._properties.is_checked != value) {
-
-			this._set('is_checked', value);
-			if (this._input_container) {
-				this._input_container.setProperty('checked', this._properties.is_checked ? 'checked' : null);
-			}
-
+		this._set('is_checked', value);
+		if (this._input_container) {
+			this._input_container.setProperty('checked', this._properties.is_checked ? 'checked' : null);
 		}
 
 	},

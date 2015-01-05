@@ -1122,7 +1122,7 @@ Lava.parsers.Directives = {
 	_xstatic_value: function(raw_directive) {
 
 		if (Lava.schema.DEBUG && (raw_directive.content || !raw_directive.attributes || !raw_directive.attributes.resource_id))
-			Lava.t('Malformed static_value directive');
+			Lava.t('Malformed static_value directive. Note: content inside directive is not allowed, check for white space.');
 
 		return {
 			type: 'static_value',
@@ -1141,7 +1141,7 @@ Lava.parsers.Directives = {
 	_xstatic_eval: function(raw_directive) {
 
 		if (Lava.schema.DEBUG && (!raw_directive.content || raw_directive.content.length != 1))
-			Lava.t('Malformed static_eval directive');
+			Lava.t('Malformed static_eval directive. No content.');
 
 		var arguments = Lava.ExpressionParser.parse(raw_directive.content[0]);
 

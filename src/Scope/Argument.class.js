@@ -62,11 +62,10 @@ Lava.define(
 	 */
 	_binds_count: 0,
 	/**
-	 * objects with listeners for {@link Lava.mixin.Refreshable#event:waits_refresh}, {@link Lava.mixin.Refreshable#event:refreshed}
-	 * and <str>"changed"</str> events
-	 * @type {Array.<Object>}
+	 * Listeners for <str>"changed"</str> events
+	 * @type {Array.<_tListener>}
 	 */
-	_bind_listeners: [],
+	_bind_changed_listeners: [],
 
 	/**
 	 * Objects with a reference to modifier's widget (it's cached to speed up calling) and modifier name
@@ -93,7 +92,6 @@ Lava.define(
 		var i = 0,
 			count,
 			bind,
-			first_level = 0,
 			binds = config.binds;
 
 		if (binds) {
@@ -110,16 +108,8 @@ Lava.define(
 
 				}
 
-				if (bind.isWaitingRefresh()) {
-					this._count_dependencies_waiting_refresh++;
-					this._waits_refresh = true;
-				}
 				this._binds.push(bind);
-				this._bind_listeners.push({
-					waits_refresh: bind.on('waits_refresh', this._onDependencyWaitsRefresh, this),
-					changed: bind.on('changed', this.onBindingChanged, this),
-					refreshed: bind.on('refreshed', this._onDependencyRefreshed, this)
-				});
+				this._bind_changed_listeners.push(bind.on('changed', this.onBindingChanged, this));
 
 				if (this.level < bind.level) {
 
@@ -127,21 +117,9 @@ Lava.define(
 
 				}
 
-				if (first_level != bind.level) {
-
-					if (i == 0) {
-
-						first_level = bind.level; // replace default
-
-					} else {
-
-						this._requeue = true;
-
-					}
-
-				}
-
 			}
+
+			this.level++;
 
 		}
 
@@ -184,7 +162,6 @@ Lava.define(
 	getWidgetByModifierConfig: function(path_config) {
 
 		var widget = this._widget.locateViewByPathConfig(path_config);
-
 		if (Lava.schema.DEBUG && !widget.isWidget) Lava.t("Tried to call a modifier from non-widget view");
 
 		return /** @type {Lava.widget.Standard} */ widget;
@@ -196,11 +173,7 @@ Lava.define(
 	 */
 	onBindingChanged: function() {
 
-		// Classes that can serve as a binding: PropertyBinding, DataBinding and Segment. They all will fire 'changed'
-		// event only during the refresh cycle, so at this moment the Argument must be already in queue.
-		if (!this._waits_refresh) Lava.t();
-
-		this._is_dirty = true;
+		this._queueForRefresh();
 
 	},
 
@@ -300,89 +273,17 @@ Lava.define(
 	},
 
 	/**
-	 * Suspend argument's listeners
-	 */
-	sleep: function() {
-
-		for (var i = 0, count = this._bind_listeners.length; i < count; i++) {
-
-			Lava.suspendListener(this._bind_listeners[i].waits_refresh);
-			Lava.suspendListener(this._bind_listeners[i].changed);
-			Lava.suspendListener(this._bind_listeners[i].refreshed);
-
-		}
-
-		this.suspendRefreshable();
-
-	},
-
-	/**
-	 * Resume argument's listeners and refresh state
-	 * @param {boolean} fire_changed Whether to fire the <str>"changed"</str> event
-	 */
-	wakeup: function(fire_changed) {
-
-		var i = 0,
-			count = this._bind_listeners.length,
-			new_value,
-			event_args;
-
-		for (; i < count; i++) {
-
-			if (this._binds[i].isWaitingRefresh()) {
-
-				this._count_dependencies_waiting_refresh++;
-
-			}
-
-			Lava.resumeListener(this._bind_listeners[i].waits_refresh);
-			Lava.resumeListener(this._bind_listeners[i].changed);
-			Lava.resumeListener(this._bind_listeners[i].refreshed);
-
-		}
-
-		if (this._count_dependencies_waiting_refresh) {
-
-			this._waits_refresh = true;
-			this._is_dirty = true;
-
-		} else {
-
-			new_value = this._evaluate();
-
-			if (new_value !== this._value) {
-
-				event_args = {old_value: this._value};
-				this._value = new_value;
-
-				if (fire_changed) {
-
-					this._fire('changed', event_args);
-
-				}
-
-			}
-
-			this._is_dirty = false;
-
-		}
-
-	},
-
-	/**
 	 * Free resources and make this instance unusable
 	 */
 	destroy: function() {
 
-		for (var i = 0, count = this._bind_listeners.length; i < count; i++) {
+		for (var i = 0, count = this._bind_changed_listeners.length; i < count; i++) {
 
-			this._binds[i].removeListener(this._bind_listeners[i].waits_refresh);
-			this._binds[i].removeListener(this._bind_listeners[i].changed);
-			this._binds[i].removeListener(this._bind_listeners[i].refreshed);
+			this._binds[i].removeListener(this._bind_changed_listeners[i]);
 
 		}
 
-		this._bind_listeners = null;
+		this._bind_changed_listeners = null;
 		this.suspendRefreshable();
 
 	}

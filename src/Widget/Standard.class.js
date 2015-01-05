@@ -235,9 +235,9 @@ Lava.define(
 		if (Lava.schema.DEBUG && this._parent_view) Lava.t("Widget: only top-level widgets can be inserted into DOM");
 		if (Lava.schema.DEBUG && !this._container) Lava.t("Widget: root widgets must have a container");
 
-		// If you assign data to a widget, that was removed from DOM (sleeping widget),
-		// and then render it - it would render with old data.
-		Lava.ScopeManager.refreshScopes();
+		// If you assign data to a widget, that was removed from DOM,
+		// and then render it - it will render with old data.
+		Lava.ScopeManager.refresh();
 		var html = this.render();
 
 		Firestorm.DOM.insertHTML(element, html, position || 'Top');
@@ -277,7 +277,6 @@ Lava.define(
 		if (!this._is_inDOM) Lava.t("remove: widget is not in DOM");
 		if (Lava.schema.DEBUG && !this._container) Lava.t("remove: widget doesn't have a container");
 
-		if (!this._is_sleeping) this._sleep();
 		this._is_inDOM = false;
 		this._is_dirty = false;
 		this._broadcastToChildren('broadcastRemove');
@@ -376,28 +375,21 @@ Lava.define(
 
 			}
 
-			if (descriptor.setter) {
+		}
 
-				// It's forced to make setters private, cause type-checking will not work if setter is called directly.
+		if (this._properties[name] !== value) {
+
+			if (descriptor && descriptor.setter) {
+
+				// you are forced to make setters private, cause type-checking will not work if setter is called directly.
 				if (Lava.schema.DEBUG && descriptor.setter[0] != '_') Lava.t("Widget property setters must not be public: " + descriptor.setter);
-
-				//try { // additional protection from crash for the scope system
-				//	this[descriptor.setter](name, value);
-				//} catch (e) {
-				//	Lava.logException(e);
-				//}
-
 				this[descriptor.setter](value, name);
 
 			} else {
 
-				this.View$set(name, value);
+				this._set(name, value);
 
 			}
-
-		} else {
-
-			this.View$set(name, value);
 
 		}
 

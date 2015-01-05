@@ -46,20 +46,10 @@ Lava.define(
 	 */
 	_value_container: null,
 	/**
-	 * Listener for {Lava.mixin.Refreshable#event:waits_refresh} in `_value_container`
-	 * @type {_tListener}
-	 */
-	_container_waits_refresh_listener: null,
-	/**
 	 * Listener for "changed" event in `_value_container`
 	 * @type {_tListener}
 	 */
 	_container_changed_listener: null,
-	/**
-	 * Listener for {Lava.mixin.Refreshable#event:refreshed} in `_value_container`
-	 * @type {_tListener}
-	 */
-	_container_refreshed_listener: null,
 
 	/**
 	 * Listener for onPropertyChanged in data source of this scope (if data source is instance of {@link Lava.mixin.Properties})
@@ -88,23 +78,14 @@ Lava.define(
 	 * Create DataBinding instance
 	 * @param {_iValueContainer} value_container The scope, which provides the data source for this instance
 	 * @param {string} property_name
-	 * @param {number} level
 	 */
-	init: function(value_container, property_name, level) {
+	init: function(value_container, property_name) {
 
 		this.guid = Lava.guid++;
 		this._value_container = value_container;
 		this._property_name = property_name;
-		this.level = level;
-
-		if (value_container.isWaitingRefresh()) {
-			this._count_dependencies_waiting_refresh++;
-			this._waits_refresh = true;
-		}
-		this._container_waits_refresh_listener = value_container.on('waits_refresh', this._onDependencyWaitsRefresh, this);
+		this.level = value_container.level + 1;
 		this._container_changed_listener = value_container.on('changed', this.onParentDataSourceChanged, this);
-		this._container_refreshed_listener = value_container.on('refreshed', this._onDependencyRefreshed, this);
-
 		this._refreshValue();
 
 		Lava.schema.DEBUG && Lava.ScopeManager.debugTrackScope(this);
@@ -122,6 +103,7 @@ Lava.define(
 
 		if (property_container != null) {
 
+			// Collection implements Properties, so if _property_name is not a number - then `get` will be called
 			if (property_container.isCollection && /^\d+$/.test(this._property_name)) {
 
 				if (this._enumerable_changed_listener == null) {
@@ -193,8 +175,6 @@ Lava.define(
 
 		this._queueForRefresh();
 
-		this._is_dirty = true;
-
 	},
 
 	_doRefresh: function() {
@@ -209,7 +189,6 @@ Lava.define(
 	onValueChanged: function() {
 
 		this._queueForRefresh();
-		this._is_dirty = true;
 
 	},
 
@@ -246,7 +225,6 @@ Lava.define(
 			}
 
 			this._queueForRefresh();
-			this._is_dirty = true;
 
 		}
 
@@ -260,9 +238,7 @@ Lava.define(
 
 	destroy: function() {
 
-		this._value_container.removeListener(this._container_waits_refresh_listener);
 		this._value_container.removeListener(this._container_changed_listener);
-		this._value_container.removeListener(this._container_refreshed_listener);
 
 		this._property_changed_listener && this._property_container.removePropertyListener(this._property_changed_listener);
 		this._enumerable_changed_listener && this._property_container.removeListener(this._enumerable_changed_listener);

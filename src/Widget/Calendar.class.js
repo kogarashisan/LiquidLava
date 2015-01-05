@@ -330,9 +330,14 @@ Lava.define(
 
 		// do not add the class to the container itself, just to the element
 		// cause we do not need it to stay after refresh or render
-		var element = this._year_input.getMainContainer().getDOMElement();
-		if (element) {
-			Firestorm.Element.addClass(element, this._config.options['invalid_input_class']);
+		var year_input_container = this._year_input.getMainContainer(),
+			element;
+
+		if (year_input_container) {
+			element = year_input_container.getDOMElement();
+			if (element) {
+				Firestorm.Element.addClass(element, this._config.options['invalid_input_class']);
+			}
 		}
 
 	},
@@ -342,9 +347,14 @@ Lava.define(
 	 */
 	_clearInvalidInputState: function() {
 
-		var element = this._year_input.getMainContainer().getDOMElement();
-		if (element) {
-			Firestorm.Element.removeClass(element, this._config.options['invalid_input_class']);
+		var year_input_container = this._year_input.getMainContainer(),
+			element;
+
+		if (year_input_container) {
+			element = year_input_container.getDOMElement();
+			if (element) {
+				Firestorm.Element.removeClass(element, this._config.options['invalid_input_class']);
+			}
 		}
 
 	},

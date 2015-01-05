@@ -47,11 +47,6 @@ Lava.define(
 	 */
 	_is_inDOM: false,
 	/**
-	 * Is template currently sleeping
-	 * @type {boolean}
-	 */
-	_is_sleeping: false,
-	/**
 	 * Global unique ID of the instance
 	 * @type {_tGUID}
 	 */
@@ -312,8 +307,6 @@ Lava.define(
 			i = 0,
 			content = this._content;
 
-		this._is_sleeping = false;
-
 		for (; i < this._count; i++) {
 
 			if (typeof(content[i]) == 'string') {
@@ -343,7 +336,6 @@ Lava.define(
 
 		if (this._is_inDOM) {
 
-			this._is_sleeping = true;
 			this._is_inDOM = false;
 			this._broadcast('broadcastRemove');
 
@@ -358,30 +350,6 @@ Lava.define(
 
 		this._is_inDOM = true;
 		this._broadcast('broadcastInDOM');
-
-	},
-
-	/**
-	 * Broadcast <str>"broadcastSleep"</str> to instance content
-	 */
-	broadcastSleep: function() {
-
-		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.t();
-
-		this._is_sleeping = true;
-		this._broadcast('broadcastSleep');
-
-	},
-
-	/**
-	 * Broadcast <str>"broadcastWakeup"</str> to instance content
-	 */
-	broadcastWakeup: function() {
-
-		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.t();
-
-		this._is_sleeping = false;
-		this._broadcast('broadcastWakeup');
 
 	},
 
@@ -580,16 +548,6 @@ Lava.define(
 	isInDOM: function() {
 
 		return this._is_inDOM;
-
-	},
-
-	/**
-	 * Get `_is_sleeping`
-	 * @returns {boolean}
-	 */
-	isSleeping: function() {
-
-		return this._is_sleeping;
 
 	},
 

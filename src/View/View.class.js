@@ -31,8 +31,6 @@ Lava.define(
 
 	render: function() {
 
-		if (this._is_sleeping) this._wakeup();
-
 		var result;
 
 		if (this._container) {

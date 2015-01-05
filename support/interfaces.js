@@ -6,9 +6,7 @@
 _iValueContainer = {
 
 	// fires:
-	//   waits_refresh
 	//   changed
-	//   refreshed
 
 	/**
 	 * Add a listener
@@ -34,9 +32,7 @@ _iViewHierarchyMember = {
 
 	render: function() {},
 	broadcastRemove: function() {},
-	broadcastInDOM: function() {},
-	broadcastSleep: function() {},
-	broadcastWakeup: function() {}
+	broadcastInDOM: function() {}
 
 };
 
@@ -78,8 +74,6 @@ _iContainer = {
 
 	release: function()  {},
 	refresh: function()  {},
-	sleep: function()  {},
-	wakeup: function()  {},
 	destroy: function()  {}
 
 };

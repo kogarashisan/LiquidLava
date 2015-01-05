@@ -149,19 +149,15 @@ Lava.define(
 		var open_target_container = this._getTargetContainer();
 		if (Lava.schema.DEBUG && !open_target_container) Lava.t("DropDown was created without container and target");
 
-		if (this._properties.is_expanded != value) {
+		this._set(name, value);
 
-			this._set(name, value);
+		if (value) {
 
-			if (value) {
+			open_target_container.addClass(this._config.options.target_class);
 
-				open_target_container.addClass(this._config.options.target_class);
+		} else {
 
-			} else {
-
-				open_target_container.removeClass(this._config.options.target_class);
-
-			}
+			open_target_container.removeClass(this._config.options.target_class);
 
 		}
 

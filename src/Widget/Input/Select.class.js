@@ -31,20 +31,17 @@ Lava.define(
 	_setValue: function(value) {
 
 		var element;
-		if (this._properties.value != value) {
 
-			if (this._input_container) {
-				element = this._input_container.getDOMElement();
-				element.value = value;
-				if (value != element.value) { // workaround for nonexistent values
-					Lava.logError("[Select] nonexistent value assigned: " + value);
-					value = element.value;
-				}
+		if (this._input_container) {
+			element = this._input_container.getDOMElement();
+			element.value = value;
+			if (value != element.value) { // workaround for nonexistent values
+				Lava.logError("[Select] nonexistent value assigned: " + value);
+				value = element.value;
 			}
-
-			this._set('value', value);
-
 		}
+
+		this._set('value', value);
 
 	},
 

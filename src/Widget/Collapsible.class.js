@@ -133,36 +133,32 @@ Lava.define(
 
 		var new_display = 'none';
 
-		if (this._properties.is_expanded != value) {
+		this._set(name, value);
 
-			this._set(name, value);
+		if ((this._is_inDOM && this._properties.is_animation_enabled) || value) {
 
-			if ((this._is_inDOM && this._properties.is_animation_enabled) || value) {
+			new_display = this._default_display; // allow display:none only in case the panel must be collapsed and animation is disabled
 
-				new_display = this._default_display; // allow display:none only in case the panel must be collapsed and animation is disabled
+		}
 
-			}
+		// if this property is set in constructor - then container does not yet exist
+		if (this._panel_container) {
 
-			// if this property is set in constructor - then container does not yet exist
-			if (this._panel_container) {
+			this._panel_container.setStyle('display', new_display);
 
-				this._panel_container.setStyle('display', new_display);
+		}
 
-			}
+		if (this._is_inDOM) {
 
-			if (this._is_inDOM) {
+			this._fire(value ? 'expanding' : 'collapsing');
 
-				this._fire(value ? 'expanding' : 'collapsing');
+			if (this._properties.is_animation_enabled && this._panel_container) {
 
-				if (this._properties.is_animation_enabled && this._panel_container) {
+				this._refreshAnimation(value);
 
-					this._refreshAnimation(value);
+			} else {
 
-				} else {
-
-					this._fire(value ? 'expanded' : 'collapsed');
-
-				}
+				this._fire(value ? 'expanded' : 'collapsed');
 
 			}
 

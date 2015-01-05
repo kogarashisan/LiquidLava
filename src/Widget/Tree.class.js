@@ -9,39 +9,133 @@ Lava.define(
 {
 
 	Extends: 'Lava.widget.Standard',
-	Shared: ['_shared', '_meta_storage_config', '_default_refresher_config'],
+	Shared: ['_meta_storage_config', '_default_if_refresher_config', '_foreach_refresher_config',
+		'_direct_bind_configs', '_meta_storage_bind_configs'],
 
 	name: 'tree',
 
 	/**
-	 * Shared configs
+	 * Dynamic scope configs which use direct bindings to record properties
 	 */
-	_shared: {
-		is_expanded_meta_storage_bind_config: Lava.ExpressionParser.parseScopeEval('$tree.meta_storage[node.guid].is_expanded'),
-		is_expanded_direct_bind_config: Lava.ExpressionParser.parseScopeEval('node.is_expanded')
+	_direct_bind_configs: {
+		is_expanded: Lava.ExpressionParser.parseScopeEval('node.is_expanded'),
+		is_expandable: Lava.ExpressionParser.parseScopeEval('node.children.length')
+	},
+
+	/**
+	 * Dynamic scope configs for columns from MetaStorage
+	 * @type {Object}
+	 */
+	_meta_storage_bind_configs: {
+		is_expanded: Lava.ExpressionParser.parseScopeEval('$tree.meta_storage[node.guid].is_expanded'),
+		// can be used by inherited classes
+		is_expandable: Lava.ExpressionParser.parseScopeEval('$tree.meta_storage[node.guid].is_expandable')
 	},
 
 	/**
 	 * MetaStorage is used by Tree to store the `expanded` state
+	 * @type {Object}
 	 */
 	_meta_storage_config: {
 		fields: {
-			'is_expanded': {type:'Boolean'}
+			is_expanded: {type:'Boolean'}
+			// is_expandable: {type:'Boolean'}
 		}
 	},
 
 	/**
-	 * Default refresher (without animation)
+	 * Default refresher for the If view with node children (without animation)
+	 * @type {_cRefresher}
 	 */
-	_default_refresher_config: {
+	_default_if_refresher_config: {
 		type: 'Standard'
 	},
 
-	_refresher_config: null,
+	/**
+	 * Config of refresher, that expands children
+	 * @type {_cRefresher}
+	 */
+	_if_refresher_config: null,
+
+	/**
+	 * Refresher, that inserts and removes new child nodes in the `record.children` collection.
+	 * @type {_cRefresher}
+	 */
+	_foreach_refresher_config: {
+		type: 'Standard',
+		remove_callback: function(template) {
+
+			// Here we don't know the previous and next templates, and we can not use this._current_templates
+			// so we must find other ways to remove nodes.
+
+			// save, cause we can not retrieve container's DOM elements after broadcastRemove
+			var node_body_element = template.getFirstView().getContainer().getDOMElement(),
+				// Last view is the If with node children.
+				// "_foreach_view" property was set in "node_children" role.
+				children_foreach  = template.getLastView().get('_foreach_view'),
+				node_children_element;
+
+			if (children_foreach) {
+
+				node_children_element = children_foreach.getContainer().getDOMElement();
+
+			}
+
+			// first, we must inform the template, that it's going to be removed: to allow it's child views to interact
+			// with nodes while they are still in DOM
+			template.broadcastRemove();
+
+			if (node_children_element) {
+				// we have both containers in DOM: node body, and node children.
+				Firestorm.DOM.clearOuterRange(node_body_element, node_children_element);
+			} else {
+				// node children are not in DOM, only node body is visible
+				Firestorm.Element.destroy(node_body_element);
+			}
+
+		},
+
+		insert_callback: function(template, index) {
+
+			if (index) {
+
+				var previous_template = this._current_templates[index - 1],
+					children_foreach = previous_template.getLastView().get('_foreach_view');
+
+				if (children_foreach && children_foreach.getContainer().isInDOM()) {
+
+					// previous node children are in DOM, insert after them
+					children_foreach.getContainer().insertHTMLAfter(template.render());
+
+				} else {
+
+					// children of previous node are not in DOM, so insert after body
+					previous_template.getFirstView().getContainer().insertHTMLAfter(template.render());
+
+				}
+
+			} else {
+
+				// insert at top, as it's the first template
+				this._view.getContainer().prependHTML(template.render());
+
+			}
+
+			template.broadcastInDOM();
+
+		}
+
+	},
+
+	_property_descriptors: {
+		records: {setter: '_setRecords'},
+		meta_storage: {is_readonly: true}
+	},
 
 	_properties: {
 		/** User-assigned records in the root of the tree */
-		records: null
+		records: null,
+		meta_storage: null
 	},
 
 	_event_handlers: {
@@ -49,7 +143,9 @@ Lava.define(
 	},
 
 	_role_handlers: {
-		node_children_view: '_handleNodeChildrenView'
+		node_children_view: '_handleNodeChildrenView',
+		root_nodes_foreach: '_handleRootNodesForeach',
+		nodes_foreach: '_handleNodesForeach'
 	},
 
 	/**
@@ -57,16 +153,30 @@ Lava.define(
 	 * @type {Lava.data.MetaStorage}
 	 */
 	_meta_storage: null,
+
 	/**
-	 * Route to record's "is_expanded" property for templates
-	 * @type {_cScopeLocator}
+	 * Columns, which are served from MetaStorage instead of record instance
+	 * @type {Object.<string,true>}
 	 */
-	_is_expanded_bind_config: null,
+	_meta_storage_columns: {},
+
+	/**
+	 * Dynamic scopes configuration
+	 * @type {Object.<string,_cScopeLocator>}
+	 */
+	_column_bind_configs: {},
+
+	/**
+	 * May be overridden in inherited classes to force creation of MetaStorage in constructor
+	 * @type {boolean}
+	 */
+	CREATE_META_STORAGE: false,
 
 	/**
 	 * @param config
-	 * @param {boolean} config.options.use_meta_storage Store "is_expanded" property of tree nodes in separate MetaStorage instance.
-	 *  By default, "is_expanded" property is taken directly from nodes
+	 * @param {Array.<string>} config.options.meta_storage_columns This setting allows you to define columns,
+	 *  which will be stored in separate MetaStorage instance instead of record properties.
+	 *  Commonly, you will want to store "is_expanded" property in MetaStorage.
 	 * @param {Object} config.options.refresher You can assign custom refresher config for nodes (with animation support, etc).
 	 * 	Use {type: 'Collapse'} to apply basic animation
 	 * @param widget
@@ -76,24 +186,96 @@ Lava.define(
 	 */
 	init: function(config, widget, parent_view, template, properties) {
 
-		this.Standard$init(config, widget, parent_view, template, properties);
+		var i = 0,
+			count,
+			columns_list,
+			name;
 
-		this._is_expanded_bind_config = this._shared.is_expanded_direct_bind_config;
-		if (config.options && config.options.use_meta_storage) {
-			this._meta_storage = new Lava.data.MetaStorage(this._meta_storage_config);
-			this.set('meta_storage', this._meta_storage);
-			this._is_expanded_bind_config = this._shared.is_expanded_meta_storage_bind_config;
+		if (config.options && config.options.meta_storage_columns) {
+			columns_list = config.options.meta_storage_columns;
+			count = columns_list.length;
+			for (; i < count; i++) {
+				this._meta_storage_columns[columns_list[i]] = true;
+			}
 		}
 
-		this._refresher_config = (config.options && config.options.refresher)
+		for (name in this._direct_bind_configs) {
+
+			this._column_bind_configs[name] = (name in this._meta_storage_columns)
+				? this._meta_storage_bind_configs[name]
+				: this._direct_bind_configs[name];
+
+		}
+
+		if (this.CREATE_META_STORAGE || !Firestorm.Object.isEmpty(this._meta_storage_columns)) {
+			this._meta_storage = new Lava.data.MetaStorage(this._meta_storage_config);
+			this._properties.meta_storage = this._meta_storage;
+		}
+
+		this.Standard$init(config, widget, parent_view, template, properties);
+
+		this._if_refresher_config = (config.options && config.options.refresher)
 			? config.options.refresher
-			: this._default_refresher_config
+			: this._default_if_refresher_config
 
 	},
 
+	/**
+	 * Setter for `records` property
+	 * @param {?Array.<Object>} value
+	 * @param {string} name
+	 */
+	_setRecords: function(value, name) {
+
+		if (this._meta_storage) {
+			this._meta_storage.destroy();
+			this._meta_storage = new Lava.data.MetaStorage(this._meta_storage_config);
+			this._set('meta_storage', this._meta_storage);
+		}
+
+		this._set(name, value);
+
+	},
+
+	/**
+	 * Get or create an instance of MetaRecord, which is attached to record from data
+	 * @param {Object} record
+	 * @returns {Lava.data.MetaRecord}
+	 */
+	_getMetaRecord: function(record) {
+
+		return this._meta_storage.get(record.get('guid')) || this._meta_storage.createMetaRecord(record.get('guid'));
+
+	},
+
+	/**
+	 * Create refresher for the If view with node children
+	 * @param {Lava.view.If} view
+	 */
 	_handleNodeChildrenView: function(view) {
 
-		view.createRefresher(this._refresher_config);
+		view.createRefresher(this._if_refresher_config);
+
+	},
+
+	/**
+	 * Create refresher for the root Foreach view
+	 * @param {Lava.view.Foreach} view
+	 */
+	_handleRootNodesForeach: function(view) {
+
+		view.createRefresher(this._foreach_refresher_config);
+
+	},
+
+	/**
+	 * Initialize Foreach views with node children
+	 * @param {Lava.view.Foreach} view
+	 */
+	_handleNodesForeach: function(view) {
+
+		view.createRefresher(this._foreach_refresher_config);
+		view.getParentView().set('_foreach_view', view);
 
 	},
 
@@ -108,13 +290,14 @@ Lava.define(
 
 		// template_arguments[0] - node record
 		if (Lava.schema.DEBUG) {
-			if (this._meta_storage) {
-				if (!template_arguments[0].guid) Lava.t("Tree: record without GUID");
-			} else if (!template_arguments[0].isProperties) {
+			if (!template_arguments[0].isProperties) {
 				Lava.t("Tree: record is not instance of Properties");
 			}
+			if ('is_expanded' in this._meta_storage_columns) {
+				if (!template_arguments[0].get('guid')) Lava.t("Tree: record without GUID");
+			}
 		}
-		var property_source = this._meta_storage ? this._meta_storage.get(template_arguments[0].guid) : template_arguments[0];
+		var property_source = ('is_expanded' in this._meta_storage_columns) ? this._getMetaRecord(template_arguments[0]) : template_arguments[0];
 		property_source.set('is_expanded', !property_source.get('is_expanded'));
 		dom_event.preventDefault(); // to prevent text selection
 
@@ -142,7 +325,7 @@ Lava.define(
 				}
 			}
 
-			property_source = this._meta_storage ? this._meta_storage.get(node.guid) : node;
+			property_source = ('is_expanded' in this._meta_storage_columns) ? this._getMetaRecord(node) : node;
 			property_source.set('is_expanded', expanded_state);
 
 		}
@@ -189,14 +372,14 @@ Lava.define(
 	},
 
 	/**
-	 * Locate record's "is_expanded" property for templates
+	 * Locate record field references for templates (like "is_expanded" property)
 	 * @param {Lava.view.Abstract} view
 	 * @param {_cDynamicScope} config
 	 */
 	getDynamicScope: function(view, config) {
 
-		if (config.property_name != 'is_expanded') Lava.t('unknown dynamic scope: ' + config.property_name);
-		return view.getScopeByPathConfig(this._is_expanded_bind_config);
+		if (!(config.property_name in this._column_bind_configs)) Lava.t('unknown dynamic scope: ' + config.property_name);
+		return view.getScopeByPathConfig(this._column_bind_configs[config.property_name]);
 
 	},
 

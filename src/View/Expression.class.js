@@ -65,24 +65,6 @@ Lava.define(
 
 	},
 
-	_sleep: function() {
-
-		this._argument.sleep();
-		Lava.suspendListener(this._argument_changed_listener);
-
-		this.Abstract$_sleep();
-
-	},
-
-	_wakeup: function() {
-
-		Lava.resumeListener(this._argument_changed_listener);
-		this._argument.wakeup(true);
-
-		this.Abstract$_wakeup();
-
-	},
-
 	/**
 	 * Perform escaping of HTML entities in argument's value
 	 * @param {string} string Argument's value

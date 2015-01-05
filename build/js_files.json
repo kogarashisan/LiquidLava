@@ -79,7 +79,6 @@
 
 		"Data/ModuleAbstract.class.js",
 		"Data/Module.class.js",
-		"Data/RecordAbstract.class.js",
 		"Data/Record.class.js",
 		"Data/MetaRecord.class.js",
 		"Data/MetaStorage.class.js",

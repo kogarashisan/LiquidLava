@@ -1108,7 +1108,10 @@ Lava.parsers.Common = {
 			} else if (targets_string.length) {
 
 				targets_string = targets_string.trim();
-				if (targets_string.length) Lava.t('Malformed targets (2): ' + targets_string);
+				if (Lava.schema.DEBUG && targets_string.length) {
+					if (targets_string[0] == ';') Lava.t("Space between semicolon in targets is not allowed");
+					Lava.t('Malformed targets (2): ' + targets_string);
+				}
 
 			}
 

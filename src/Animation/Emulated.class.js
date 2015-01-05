@@ -21,11 +21,6 @@ Lava.define(
 	 */
 	_timeout: null,
 
-	/**
-	 * Create an animation
-	 * @param {_cAnimation} config
-	 * @param {*} target
-	 */
 	init: function(config, target) {
 
 		this.Abstract$init(config, target);

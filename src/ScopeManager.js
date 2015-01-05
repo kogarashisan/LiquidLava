@@ -61,20 +61,41 @@ Lava.ScopeManager = {
 	_is_refreshing: false,
 
 	/**
-	 * Queue a scope for update
+	 * Initialize global ScopeManager object
+	 */
+	init: function() {
+
+		this.scheduleScopeRefresh = this.scheduleScopeRefresh_Normal;
+
+	},
+
+	/**
+	 * Queue a scope for update or refresh it immediately, depending on current ScopeManager state
 	 * @param {Lava.mixin.Refreshable} target
 	 * @param {number} level
 	 * @returns {{index: number}} Refresh ticket
 	 */
 	scheduleScopeRefresh: function(target, level) {
 
-		if (this._min_scope_refresh_level > level) {
+		Lava.t("Framework requires initialization");
 
-			this._min_scope_refresh_level = level;
+	},
 
-		}
+	/**
+	 * Normal version outside of view refresh cycle - adds scope into refresh queue.
+	 * @param {Lava.mixin.Refreshable} target
+	 * @param {number} level
+	 * @returns {{index: number}}
+	 */
+	scheduleScopeRefresh_Normal: function(target, level) {
 
 		if (!this._scope_refresh_queues[level]) {
+
+			if (this._min_scope_refresh_level > level) {
+
+				this._min_scope_refresh_level = level;
+
+			}
 
 			this._scope_refresh_queues[level] = [];
 
@@ -84,6 +105,40 @@ Lava.ScopeManager = {
 		return {
 			index: this._scope_refresh_queues[level].push(target) - 1
 		}
+
+	},
+
+	/**
+	 * Inside the refresh cycle - refreshes scope immediately
+	 * @param {Lava.mixin.Refreshable} target
+	 */
+	scheduleScopeRefresh_Locked: function(target) {
+
+		if (target.refresh(this._refresh_id)) {
+			Lava.logError('Scope Manager: infinite loop exception outside of normal refresh cycle');
+		}
+
+		return null;
+
+	},
+
+	/**
+	 * Swap `scheduleScopeRefresh` algorithm to `scheduleScopeRefresh_Locked`
+	 */
+	lock: function() {
+
+		if (Lava.schema.DEBUG && (this.scheduleScopeRefresh == this.scheduleScopeRefresh_Locked || this._is_refreshing)) Lava.t();
+		this.scheduleScopeRefresh = this.scheduleScopeRefresh_Locked;
+
+	},
+
+	/**
+	 * Swap `scheduleScopeRefresh` algorithm to `scheduleScopeRefresh_Normal`
+	 */
+	unlock: function() {
+
+		if (Lava.schema.DEBUG && this.scheduleScopeRefresh == this.scheduleScopeRefresh_Normal) Lava.t();
+		this.scheduleScopeRefresh = this.scheduleScopeRefresh_Normal;
 
 	},
 
@@ -113,7 +168,12 @@ Lava.ScopeManager = {
 	/**
 	 * The main refresh loop
 	 */
-	refreshScopes: function() {
+	refresh: function() {
+
+		if (this._is_refreshing) {
+			Lava.logError("ScopeManager: recursive call to ScopeManager#refresh()");
+			return;
+		}
 
 		var count_refresh_cycles = 0,
 			count_levels = this._scope_refresh_queues.length;
@@ -122,11 +182,6 @@ Lava.ScopeManager = {
 
 			return;
 
-		}
-
-		if (this._is_refreshing) {
-			Lava.logError("ScopeManager: recursive call to refreshScopes()");
-			return;
 		}
 
 		this._is_refreshing = true;
@@ -165,6 +220,7 @@ Lava.ScopeManager = {
 
 		} else {
 
+			Lava.schema.DEBUG && this.debugVerify();
 			this._scope_refresh_queues = [];
 
 		}
@@ -180,8 +236,6 @@ Lava.ScopeManager = {
 		this._has_infinite_loop = this._has_exceptions;
 
 		this._is_refreshing = false;
-
-		Lava.schema.DEBUG && this.debugVerify();
 
 	},
 
@@ -214,11 +268,11 @@ Lava.ScopeManager = {
 
 				if (current_level_queue[i]) {
 
-					if (current_level_queue[i].doRefresh(this._refresh_id)) {
+					if (current_level_queue[i].refresh(this._refresh_id)) {
 
 						this._has_exceptions = true;
 						this.statistics.count_dead_loop_exceptions++;
-						Lava.logError('View Manager: infinite loop exception, interrupting');
+						Lava.logError('Scope Manager: infinite loop exception, interrupting');
 						return false;
 
 					}
@@ -250,7 +304,7 @@ Lava.ScopeManager = {
 
 			this._min_scope_refresh_level++;
 
-			if (this._min_scope_refresh_level in this._scope_refresh_queues) {
+			if (this._scope_refresh_queues[this._min_scope_refresh_level]) {
 
 				return true;
 
@@ -296,7 +350,7 @@ Lava.ScopeManager = {
 
 					if (current_queue[i]) {
 
-						current_queue[i].doRefresh(this._refresh_id, true);
+						current_queue[i].refresh(this._refresh_id, true);
 
 					}
 

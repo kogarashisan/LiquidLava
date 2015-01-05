@@ -99,11 +99,6 @@ Lava.define(
 	 */
 	_is_inDOM: false,
 	/**
-	 * Is this view currently sleeping? (arguments are turned off)
-	 * @type {boolean}
-	 */
-	_is_sleeping: false,
-	/**
 	 * Does this view need refresh
 	 * @type {boolean}
 	 */
@@ -125,6 +120,18 @@ Lava.define(
 	 * @type {Object.<_tGUID, Lava.scope.Segment>}
 	 */
 	_data_segments: {},
+
+	/**
+	 * Each time the view is refreshed - it's assigned the id of the current refresh loop
+	 * @type {number}
+	 */
+	_last_refresh_id: 0,
+	/**
+	 * How many times this view was refreshed during current refresh loop.
+	 * Used for infinite loops protection.
+	 * @type {number}
+	 */
+	_refresh_cycle_count: 0,
 
 	/**
 	 * Create an instance of the view, including container and assigns; dispatch roles
@@ -173,7 +180,7 @@ Lava.define(
 
 				if (name in this._property_bindings_by_property) Lava.t("Error initializing assign: property binding already created");
 
-				this._property_bindings_by_property[name] = new Lava.scope.PropertyBinding(this, name, this.depth, config.assigns[name]);
+				this._property_bindings_by_property[name] = new Lava.scope.PropertyBinding(this, name, config.assigns[name]);
 
 			}
 
@@ -221,12 +228,6 @@ Lava.define(
 	 * @returns {boolean}
 	 */
 	isInDOM: function() { return this._is_inDOM; },
-
-	/**
-	 * Get `_is_sleeping`
-	 * @returns {boolean}
-	 */
-	isSleeping: function() { return this._is_sleeping; },
 
 	/**
 	 * Get `_template`
@@ -348,8 +349,6 @@ Lava.define(
 
 		if (this._is_inDOM) {
 
-			if (!this._is_sleeping) this._sleep();
-
 			this._is_inDOM = false;
 			this._is_dirty = false;
 			this._container && this._container.informRemove();
@@ -361,81 +360,10 @@ Lava.define(
 	},
 
 	/**
-	 * Put the view and it's children into 'sleeping' mode: view is still in DOM, but does not access
-	 * or refresh it's DOM content, and does not react to argument or binding changes
-	 */
-	broadcastSleep: function() {
-
-		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.t();
-
-		if (!this._is_sleeping) {
-
-			this._sleep();
-			this._broadcastToChildren('broadcastSleep');
-
-		}
-
-	},
-
-	/**
-	 * Perform the 'sleep' operation
-	 */
-	_sleep: function() {
-
-		this._is_sleeping = true;
-		this._container && this._container.sleep();
-
-	},
-
-	/**
-	 * View starts listening to it's bindings and refreshes it's DOM content, if needed
-	 */
-	broadcastWakeup: function() {
-
-		if (Lava.schema.DEBUG && !this._is_inDOM) Lava.t();
-
-		if (this._is_sleeping) {
-
-			this._wakeup();
-			this._broadcastToChildren('broadcastWakeup');
-
-		}
-
-	},
-
-	/**
-	 * Perform 'wakeup'
-	 */
-	_wakeup: function() {
-
-		this._is_sleeping = false;
-		this._container && this._container.wakeup();
-
-		if (this._is_dirty && !this._is_queued_for_refresh) {
-
-			Lava.view_manager.scheduleViewRefresh(this);
-			this._is_queued_for_refresh = true;
-
-		}
-
-	},
-
-	/**
-	 * Render the inner hierarchy
-	 */
-	_renderContent: function() {
-
-		Lava.t("_renderContent must be overridden in inherited classes");
-
-	},
-
-	/**
 	 * Render the view, including container and all it's inner content
 	 * @returns {string} The HTML representation of the view
 	 */
 	render: function() {
-
-		if (this._is_sleeping) this._wakeup();
 
 		var buffer = this._renderContent(),
 			result;
@@ -455,25 +383,48 @@ Lava.define(
 	},
 
 	/**
-	 * Refresh the view, if it's dirty (render the view's content and replace old content with the fresh version).
-	 * This method is called by ViewManager, you do not need to call it manually.
+	 * Render the inner hierarchy
 	 */
-	refresh: function() {
+	_renderContent: function() {
+
+		Lava.t("_renderContent must be overridden in inherited classes");
+
+	},
+
+	/**
+	 * Refresh the view, if it's dirty (render the view's content and replace old content with the fresh version).
+	 * This method is called by ViewManager, you should not call it directly.
+	 */
+	refresh: function(refresh_id) {
 
 		if (Lava.schema.DEBUG && !this._container) Lava.t("Refresh on a view without container");
 
 		this._is_queued_for_refresh = false;
 
-		if (this._is_inDOM && !this._is_sleeping) {
+		if (this._is_inDOM && this._is_dirty) {
 
-			if (this._is_dirty) {
+			if (this._last_refresh_id == refresh_id) {
 
-				this._refresh();
-				this._is_dirty = false;
+				this._refresh_cycle_count++;
+				if (this._refresh_cycle_count > Lava.schema.system.REFRESH_INFINITE_LOOP_THRESHOLD) {
+
+					return true; // infinite loop exception
+
+				}
+
+			} else {
+
+				this._last_refresh_id = refresh_id;
+				this._refresh_cycle_count = 0;
 
 			}
 
+			this._refresh();
+			this._is_dirty = false;
+
 		}
+
+		return false;
 
 	},
 
@@ -750,7 +701,7 @@ Lava.define(
 
 		if (!(property_name in this._property_bindings_by_property)) {
 
-			this._property_bindings_by_property[property_name] = new Lava.scope.PropertyBinding(this, property_name, this.depth);
+			this._property_bindings_by_property[property_name] = new Lava.scope.PropertyBinding(this, property_name);
 
 		}
 
@@ -769,7 +720,7 @@ Lava.define(
 
 		if (!(name_source_scope.guid in this._data_segments)) {
 
-			this._data_segments[name_source_scope.guid] = new Lava.scope.Segment(this, name_source_scope, this.depth);
+			this._data_segments[name_source_scope.guid] = new Lava.scope.Segment(this, name_source_scope);
 
 		}
 
@@ -802,7 +753,7 @@ Lava.define(
 
 		}
 
-		this._is_sleeping = true; // to prevent refresh
+		this._is_inDOM = false; // to prevent refresh
 
 	}
 

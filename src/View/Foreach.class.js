@@ -57,7 +57,8 @@ Lava.define(
 	_as: null,
 
 	/**
-	 * Refreshers perform insertion, removal and animation of items
+	 * Refreshers animate insertion and removal of templates.
+	 * They can also insert and remove templates independently of each other
 	 * @type {Lava.view.refresher.Standard}
 	 */
 	_refresher: null,
@@ -69,11 +70,18 @@ Lava.define(
 		count: 0
 	},
 
+	/**
+	 * Set each time when scope changes - sign to refresh child templates in `refresh()` or `render()`
+	 * @type {boolean}
+	 */
+	_requires_refresh_children: true,
+
 	init: function(config, widget, parent_view, template, properties) {
 
 		this.Abstract$init(config, widget, parent_view, template, properties);
 
-		this._refreshChildren();
+		// setting count after roles registration, cause scope can be filtered
+		this.set('count', this._foreach_scope.getValue().getCount());
 
 	},
 
@@ -90,9 +98,6 @@ Lava.define(
 		this._foreach_scope_changed_listener = this._foreach_scope.on('changed', this._onDataSourceChanged, this);
 		this._foreach_scope.on('new_enumerable', this._onEnumerableChanged, this);
 		this._as = this._config.as;
-		// set the count before the view's container is created, cause if it depends on count
-		// - it will be dirty right after creation
-		this.set('count', this._foreach_scope.getValue().getCount());
 
 	},
 
@@ -119,8 +124,10 @@ Lava.define(
 		this._refresher = /** @type {Lava.view.refresher.Standard} */ new constructor(refresher_config, this, this._container);
 
 		this._refresher.on('removal_complete', this._onRemovalComplete, this);
-		this._removeTemplates = this._removeTemplates_Refresher;
 		this._refresh = this._refresh_Refresher;
+		this._removeTemplates = this._removeTemplates_Refresher;
+		this._renderContent = this._renderContent_Refresher;
+		this._broadcastToChildren = this._broadcastToChildren_Refresher;
 
 	},
 
@@ -155,6 +162,7 @@ Lava.define(
 		this._current_hash = {};
 		this._current_uids = [];
 		this._current_templates = [];
+		this.set('count', 0);
 
 	},
 
@@ -180,7 +188,7 @@ Lava.define(
 	 */
 	_removeTemplates_Refresher: function(removed_templates) {
 
-		this._refresher.removeTemplates(removed_templates);
+		this._refresher.prepareRemoval(removed_templates);
 
 	},
 
@@ -213,8 +221,6 @@ Lava.define(
 
 		}
 
-		this.set('count', count);
-
 		for (i = 0; i < count; i++) {
 
 			uid = new_uids[i];
@@ -246,6 +252,7 @@ Lava.define(
 		this._current_count = count;
 		this._current_uids = new_uids;
 		this._current_templates = current_templates;
+		this._requires_refresh_children = false;
 
 	},
 
@@ -254,16 +261,18 @@ Lava.define(
 	 */
 	_onDataSourceChanged: function() {
 
-		this._refreshChildren();
+		this.set('count', this._foreach_scope.getValue().getCount());
+		this._requires_refresh_children = true;
 		this.trySetDirty();
 
 	},
 
 	/**
 	 * Animation has ended and refresher has removed the `template` from DOM
-	 * @param template
+	 * @param {Lava.view.refresher.Standard} refresher
+	 * @param {Lava.system.Template} template
 	 */
-	_onRemovalComplete: function(template) {
+	_onRemovalComplete: function(refresher, template) {
 
 		template.destroy();
 
@@ -273,10 +282,10 @@ Lava.define(
 
 		if (Lava.schema.DEBUG && (this._argument.isWaitingRefresh() || this._foreach_scope.isWaitingRefresh())) Lava.t();
 
-		this._refresher && this._refresher.onRender(this._current_templates);
-
 		var buffer = '',
 			i = 0;
+
+		this._requires_refresh_children && this._refreshChildren();
 
 		for (; i < this._current_count; i++) {
 
@@ -288,15 +297,32 @@ Lava.define(
 
 	},
 
+	/**
+	 * Version of `_renderContent` for usage with refresher instance
+	 * @returns {string}
+	 */
+	_renderContent_Refresher: function() {
+
+		if (Lava.schema.DEBUG && (this._argument.isWaitingRefresh() || this._foreach_scope.isWaitingRefresh())) Lava.t();
+		this._requires_refresh_children && this._refreshChildren();
+		return this._refresher.render(this._current_templates);
+
+	},
+
 	_refresh: function() {
 
+		this._requires_refresh_children && this._refreshChildren();
 		this._container.setHTML(this._renderContent());
 		this._broadcastToChildren('broadcastInDOM');
 
 	},
 
+	/**
+	 * Version of `_refresh` for usage with created refresher instance
+	 */
 	_refresh_Refresher: function() {
 
+		this._requires_refresh_children && this._refreshChildren();
 		this._refresher.refresh(this._current_templates);
 
 	},
@@ -311,24 +337,19 @@ Lava.define(
 
 	},
 
-	_sleep: function() {
+	/**
+	 * Version of _broadcastToChildren for usage with created refresher instance
+	 * @param {string} function_name
+	 */
+	_broadcastToChildren_Refresher: function(function_name) {
 
-		Lava.suspendListener(this._foreach_scope_changed_listener);
-		this._foreach_scope.sleep();
-		this._argument.sleep();
+		this._refresher[function_name] && this._refresher[function_name]();
 
-		this.Abstract$_sleep();
+		for (var name in this._current_hash) {
 
-	},
+			this._current_hash[name][function_name]();
 
-	_wakeup: function() {
-
-		this._argument.wakeup();
-		this._foreach_scope.wakeup();
-		Lava.resumeListener(this._foreach_scope_changed_listener);
-		this._refreshChildren();
-
-		this.Abstract$_wakeup();
+		}
 
 	},
 
