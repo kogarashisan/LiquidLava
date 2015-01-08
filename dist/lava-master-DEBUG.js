@@ -11883,11 +11883,6 @@ Lava.define(
 	 */
 	_animators: [],
 
-	/**
-	 * Create the animation instance
-	 * @param {_cAnimation} config
-	 * @param {*} target
-	 */
 	init: function(config, target) {
 
 		this.Abstract$init(config, target);
@@ -13758,18 +13753,20 @@ Lava.define(
 
 	/**
 	 * To tell other classes that this is instance of Enumerable
+	 * @type {boolean}
 	 * @const
 	 */
 	isDataView: true,
 
 	/**
-	 * @type {Lava.system.Enumerable}
+	 * The existing collection, which provides data for this instance
+	 * @type {Lava.system.CollectionAbstract}
 	 */
 	_data_source: null,
 
 	/**
 	 * Create DataView instance
-	 * @param {Lava.system.Enumerable} data_source
+	 * @param {Lava.system.CollectionAbstract} data_source
 	 */
 	init: function(data_source) {
 
@@ -13791,6 +13788,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Set new `_data_source`
+	 * @param {Lava.system.CollectionAbstract} data_source
+	 */
 	setDataSource: function(data_source) {
 
 		if (Lava.schema.DEBUG && !data_source.isCollection) Lava.t("Wrong argument supplied for DataView constructor");
@@ -13798,6 +13799,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Set `_data_source` and refresh from it
+	 * @param {Lava.system.CollectionAbstract} data_source
+	 */
 	refreshFromDataSource: function (data_source) {
 
 		this.setDataSource(data_source);
@@ -13805,6 +13810,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_data_source`
+	 * @returns {Lava.system.CollectionAbstract}
+	 */
 	getDataSource: function() {
 
 		return this._data_source;
@@ -19257,6 +19266,7 @@ Lava.define(
 	_refreshDataSource_Enumerable: function(argument_value) {
 
 		if (Lava.schema.DEBUG && !argument_value.isCollection) Lava.t("Argument result must be Enumerable");
+		// unlike DataView, Enumerable does not copy UIDs, so there is no need to fire "new_enumerable"
 		this._value.refreshFromDataSource(argument_value);
 
 	},
@@ -22555,6 +22565,8 @@ Lava.define(
 	/**
 	 * Refresh the view, if it's dirty (render the view's content and replace old content with the fresh version).
 	 * This method is called by ViewManager, you should not call it directly.
+	 *
+	 * Warning: violates code style with multiple return statements
 	 */
 	refresh: function(refresh_id) {
 
@@ -22569,7 +22581,12 @@ Lava.define(
 				this._refresh_cycle_count++;
 				if (this._refresh_cycle_count > Lava.schema.system.REFRESH_INFINITE_LOOP_THRESHOLD) {
 
-					return true; // infinite loop exception
+					// schedule this view for refresh in the next refresh loop
+					Lava.view_manager.scheduleViewRefresh(this);
+					this._is_queued_for_refresh = true;
+					// when refresh returns true - it means an infinite loop exception,
+					// it stops current refresh loop.
+					return true;
 
 				}
 

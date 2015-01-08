@@ -52,11 +52,6 @@ Lava.define(
 	 */
 	_animators: [],
 
-	/**
-	 * Create the animation instance
-	 * @param {_cAnimation} config
-	 * @param {*} target
-	 */
 	init: function(config, target) {
 
 		this.Abstract$init(config, target);

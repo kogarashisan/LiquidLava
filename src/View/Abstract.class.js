@@ -394,6 +394,8 @@ Lava.define(
 	/**
 	 * Refresh the view, if it's dirty (render the view's content and replace old content with the fresh version).
 	 * This method is called by ViewManager, you should not call it directly.
+	 *
+	 * Warning: violates code style with multiple return statements
 	 */
 	refresh: function(refresh_id) {
 
@@ -408,7 +410,12 @@ Lava.define(
 				this._refresh_cycle_count++;
 				if (this._refresh_cycle_count > Lava.schema.system.REFRESH_INFINITE_LOOP_THRESHOLD) {
 
-					return true; // infinite loop exception
+					// schedule this view for refresh in the next refresh loop
+					Lava.view_manager.scheduleViewRefresh(this);
+					this._is_queued_for_refresh = true;
+					// when refresh returns true - it means an infinite loop exception,
+					// it stops current refresh loop.
+					return true;
 
 				}
 

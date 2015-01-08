@@ -213,6 +213,7 @@ Lava.define(
 	_refreshDataSource_Enumerable: function(argument_value) {
 
 		if (Lava.schema.DEBUG && !argument_value.isCollection) Lava.t("Argument result must be Enumerable");
+		// unlike DataView, Enumerable does not copy UIDs, so there is no need to fire "new_enumerable"
 		this._value.refreshFromDataSource(argument_value);
 
 	},

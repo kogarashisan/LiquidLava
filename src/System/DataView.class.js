@@ -14,18 +14,20 @@ Lava.define(
 
 	/**
 	 * To tell other classes that this is instance of Enumerable
+	 * @type {boolean}
 	 * @const
 	 */
 	isDataView: true,
 
 	/**
-	 * @type {Lava.system.Enumerable}
+	 * The existing collection, which provides data for this instance
+	 * @type {Lava.system.CollectionAbstract}
 	 */
 	_data_source: null,
 
 	/**
 	 * Create DataView instance
-	 * @param {Lava.system.Enumerable} data_source
+	 * @param {Lava.system.CollectionAbstract} data_source
 	 */
 	init: function(data_source) {
 
@@ -47,6 +49,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Set new `_data_source`
+	 * @param {Lava.system.CollectionAbstract} data_source
+	 */
 	setDataSource: function(data_source) {
 
 		if (Lava.schema.DEBUG && !data_source.isCollection) Lava.t("Wrong argument supplied for DataView constructor");
@@ -54,6 +60,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Set `_data_source` and refresh from it
+	 * @param {Lava.system.CollectionAbstract} data_source
+	 */
 	refreshFromDataSource: function (data_source) {
 
 		this.setDataSource(data_source);
@@ -61,6 +71,10 @@ Lava.define(
 
 	},
 
+	/**
+	 * Get `_data_source`
+	 * @returns {Lava.system.CollectionAbstract}
+	 */
 	getDataSource: function() {
 
 		return this._data_source;
