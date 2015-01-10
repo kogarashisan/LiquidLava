@@ -63,68 +63,16 @@ Lava.define(
 	 */
 	_foreach_refresher_config: {
 		type: 'Standard',
-		remove_callback: function(template) {
+		get_end_element_callback: function(template) {
 
-			// Here we don't know the previous and next templates, and we can not use this._current_templates
-			// so we must find other ways to remove nodes.
+			// Last view is the If with node children.
+			// "_foreach_view" property was set in "node_children" role.
+			var children_foreach  = template.getLastView().get('_foreach_view'),
+				node_children_element = children_foreach ? children_foreach.getContainer().getDOMElement() : null;
 
-			// save, cause we can not retrieve container's DOM elements after broadcastRemove
-			var node_body_element = template.getFirstView().getContainer().getDOMElement(),
-				// Last view is the If with node children.
-				// "_foreach_view" property was set in "node_children" role.
-				children_foreach  = template.getLastView().get('_foreach_view'),
-				node_children_element;
-
-			if (children_foreach) {
-
-				node_children_element = children_foreach.getContainer().getDOMElement();
-
-			}
-
-			// first, we must inform the template, that it's going to be removed: to allow it's child views to interact
-			// with nodes while they are still in DOM
-			template.broadcastRemove();
-
-			if (node_children_element) {
-				// we have both containers in DOM: node body, and node children.
-				Firestorm.DOM.clearOuterRange(node_body_element, node_children_element);
-			} else {
-				// node children are not in DOM, only node body is visible
-				Firestorm.Element.destroy(node_body_element);
-			}
-
-		},
-
-		insert_callback: function(template, index) {
-
-			if (index) {
-
-				var previous_template = this._current_templates[index - 1],
-					children_foreach = previous_template.getLastView().get('_foreach_view');
-
-				if (children_foreach && children_foreach.getContainer().isInDOM()) {
-
-					// previous node children are in DOM, insert after them
-					children_foreach.getContainer().insertHTMLAfter(template.render());
-
-				} else {
-
-					// children of previous node are not in DOM, so insert after body
-					previous_template.getFirstView().getContainer().insertHTMLAfter(template.render());
-
-				}
-
-			} else {
-
-				// insert at top, as it's the first template
-				this._view.getContainer().prependHTML(template.render());
-
-			}
-
-			template.broadcastInDOM();
+			return node_children_element || template.getFirstView().getContainer().getDOMElement();
 
 		}
-
 	},
 
 	_property_descriptors: {

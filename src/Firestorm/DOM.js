@@ -46,6 +46,8 @@ Firestorm.DOM = {
 			this.clearOuterRange = this.clearOuterRange_Range;
 			this.clearInnerRange = this.clearInnerRange_Range;
 			this.replaceInnerRange = this.replaceInnerRange_Range;
+			this.moveRegionAfter = this.moveRegionAfter_Range;
+			this.moveRegionBefore = this.moveRegionBefore_Range;
 
 		} else {
 
@@ -56,6 +58,8 @@ Firestorm.DOM = {
 			this.clearOuterRange = this.clearOuterRange_Nodes;
 			this.clearInnerRange = this.clearInnerRange_Nodes;
 			this.replaceInnerRange = this.replaceInnerRange_Nodes;
+			this.moveRegionAfter = this.moveRegionAfter_Nodes;
+			this.moveRegionBefore = this.moveRegionBefore_Nodes;
 
 		}
 
@@ -105,6 +109,20 @@ Firestorm.DOM = {
 	 * @param {string} html
 	 */
 	replaceInnerRange: function(start_element, end_element, html) { Firestorm.t(1); },
+	/**
+	 * Move `region_start_element`, `region_end_element` and all elements between them before `target`
+	 * @param {HTMLElement} target
+	 * @param {HTMLElement} region_start_element
+	 * @param {HTMLElement} region_end_element
+	 */
+	moveRegionBefore: function(target, region_start_element, region_end_element) { Firestorm.t(1); },
+	/**
+	 * Move `region_start_element`, `region_end_element` and all elements between them after `target`
+	 * @param {HTMLElement} target
+	 * @param {HTMLElement} region_start_element
+	 * @param {HTMLElement} region_end_element
+	 */
+	moveRegionAfter: function(target, region_start_element, region_end_element) { Firestorm.t(1); },
 
 	/**
 	 * Turn HTML into nodes and insert them relatively to the given element
@@ -122,7 +140,7 @@ Firestorm.DOM = {
 	// nodes api
 
 	/**
-	 * Set the elements innerHTML, taking into account various browser bugs
+	 * Set the element's innerHTML, taking into account various browser bugs
 	 * @param {HTMLElement} element
 	 * @param {string} html
 	 */
@@ -325,6 +343,50 @@ Firestorm.DOM = {
 
 	},
 
+	/**
+	 * Perform movement of a range of nodes
+	 * @param {HTMLElement} parent
+	 * @param {HTMLElement} target
+	 * @param {HTMLElement} node
+	 * @param {HTMLElement} region_end_element
+	 */
+	_moveRegionBefore: function(parent, target, node, region_end_element) {
+
+		var next_sibling;
+
+		while (node && node !== region_end_element) {
+			next_sibling = node.nextSibling;
+			parent.insertBefore(node, target);
+			node = next_sibling;
+		}
+		parent.insertBefore(region_end_element, target);
+
+	},
+
+	/**
+	 * Version of `moveRegionBefore`, which works with DOM nodes.
+	 * @param {HTMLElement} target
+	 * @param {HTMLElement} region_start_element
+	 * @param {HTMLElement} region_end_element
+	 */
+	moveRegionBefore_Nodes: function(target, region_start_element, region_end_element) {
+
+		this._moveRegionBefore(target.parentNode, target, region_start_element, region_end_element);
+
+	},
+
+	/**
+	 * Version of `moveRegionAfter`, which works with DOM nodes.
+	 * @param {HTMLElement} target
+	 * @param {HTMLElement} region_start_element
+	 * @param {HTMLElement} region_end_element
+	 */
+	moveRegionAfter_Nodes: function(target, region_start_element, region_end_element) {
+
+		this._moveRegionBefore(target.parentNode, target.nextSibling, region_start_element, region_end_element);
+
+	},
+
 	// endL nodes api
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -465,6 +527,36 @@ Firestorm.DOM = {
 			this.insertHTMLTop_Range(element, html);
 
 		}
+
+	},
+
+	/**
+	 * Version of `moveRegionBefore`, which works with ranges
+	 * @param {HTMLElement} target
+	 * @param {HTMLElement} region_start_element
+	 * @param {HTMLElement} region_end_element
+	 */
+	moveRegionBefore_Range: function(target, region_start_element, region_end_element) {
+
+		target.parentNode.insertBefore(
+			this._createOuterRange(region_start_element, region_end_element).extractContents(),
+			target
+		);
+
+	},
+
+	/**
+	 * Version of `moveRegionAfter`, which works with ranges
+	 * @param {HTMLElement} target
+	 * @param {HTMLElement} region_start_element
+	 * @param {HTMLElement} region_end_element
+	 */
+	moveRegionAfter_Range: function(target, region_start_element, region_end_element) {
+
+		target.parentNode.insertBefore(
+			this._createOuterRange(region_start_element, region_end_element).extractContents(),
+			target.nextSibling
+		);
 
 	}
 

@@ -412,29 +412,18 @@ _cRefresher = {
 	 * @const
 	 */
 	type: 'Standard',
-
 	/**
-	 * Callback, which is used for inserting templates into DOM
+	 * Custom callback that gets the first DOM element of the template
+	 * @param {Lava.system.Template} template
+	 * @returns {HTMLElement}
 	 */
-	insertion_strategy: null,
-
+	get_start_element_callback: function(template) {},
 	/**
-	 * Custom callback that inserts templates into DOM. Will be called in the context of refresher instance
-	 * @param {Lava.system.Template} template The template instance, that should be inserted into DOM
-	 * @param {number} index It's index in the Foreach view
+	 * Custom callback that gets the last DOM element of the template
+	 * @param {Lava.system.Template} template
+	 * @returns {HTMLElement}
 	 */
-	insert_callback: function(template, index) {},
-
-	/**
-	 * Callback, which is used for removal of templates from DOM
-	 */
-	removal_strategy: null,
-
-	/**
-	 * Custom callback, that removes templates from DOM
-	 * @param {Lava.system.Template} template The template instance, that should be removed from DOM
-	 */
-	remove_callback: function(template) {}
+	get_end_element_callback: function(template) {}
 
 };
 

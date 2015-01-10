@@ -48,15 +48,14 @@ Lava.define(
 
 		var i = 0,
 			count = current_templates.length,
+			previous_template = null,
 			guid;
-
-		this._current_templates = current_templates;
 
 		for (; i < count; i++) {
 
-			this._animateInsertion(current_templates[i], i);
-
 			delete this._remove_queue[current_templates[i].guid];
+			this._animateInsertion(current_templates[i], previous_template, i);
+			previous_template = current_templates[i];
 
 		}
 
@@ -66,6 +65,7 @@ Lava.define(
 
 		}
 
+		this._current_templates = current_templates;
 		this._remove_queue = {};
 
 	},
@@ -136,20 +136,33 @@ Lava.define(
 	/**
 	 * Insert the template into DOM and apply corresponding animation
 	 * @param {Lava.system.Template} template
+	 * @param {Lava.system.Template} previous_template
 	 * @param {number} index Index of this template in list of all active templates
 	 */
-	_animateInsertion: function(template, index) {
+	_animateInsertion: function(template, previous_template, index) {
 
 		var animation = this._animations_by_template_guid[template.guid];
 
-		if (!animation) {
+		if (Lava.schema.DEBUG && animation && !template.isInDOM()) Lava.t();
 
-			if (!template.isInDOM()) {
+		if (template.isInDOM()) {
 
-				this._insertTemplate(template, index);
-				animation = this._createAnimation(template, index);
+			// first template does not require moving
+			previous_template && this._moveTemplate(template, previous_template);
+
+		} else {
+
+			if (previous_template) {
+
+				this._insertTemplate(template, previous_template, index);
+
+			} else {
+
+				this._insertFirstTemplate(template);
 
 			}
+
+			animation = this._createAnimation(template, index);
 
 		}
 

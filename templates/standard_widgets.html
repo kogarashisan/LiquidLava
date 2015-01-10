@@ -87,7 +87,7 @@
 				{
 					type: "Emulated",
 					options: {
-						appender: 'AfterPrevious'
+						prepender: 'AfterPrevious'
 					}
 				}
 			</x:container_config>
@@ -117,7 +117,7 @@
 	<include name="content">
 		<div x:type="container" x:resource_id="$accordion.ACCORDION_CONTAINER">
 			{#foreach($accordion._panels) as=panel}
-				<x:refresher>{type: 'Standard', insertion_strategy: 'sequential_elements'}</x:refresher>
+				<x:refresher>{type: 'Standard'}</x:refresher>
 				<collapsible-panel x:roles="$accordion.panel" x:resource_id="$accordion.panel">
 					<x:assign name="is_expanded">panel.is_expanded</x:assign>
 					<title>
@@ -184,7 +184,7 @@
 	<include name="tabs_body">
 		<div x:type="container" x:resource_id="$tabs.TABS_CONTENT_CONTAINER">
 			{#foreach($tabs._tabs) as=tab}
-				<x:refresher>{type: 'Standard', insertion_strategy: 'sequential_elements'}</x:refresher>
+				<x:refresher>{type: 'Standard'}</x:refresher>
 				<div x:type="view" class="tab-pane" x:classes="tab.is_active ? 'active' : ''">
 					{>$tabs.tab_include(tab, 'content')}
 				</div>
@@ -282,7 +282,7 @@
 				{
 					type: "Emulated",
 					options: {
-						appender: 'AfterPrevious'
+						prepender: 'AfterPrevious'
 					}
 				}
 			</x:container_config>

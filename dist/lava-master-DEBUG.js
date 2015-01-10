@@ -813,6 +813,8 @@ Firestorm.DOM = {
 			this.clearOuterRange = this.clearOuterRange_Range;
 			this.clearInnerRange = this.clearInnerRange_Range;
 			this.replaceInnerRange = this.replaceInnerRange_Range;
+			this.moveRegionAfter = this.moveRegionAfter_Range;
+			this.moveRegionBefore = this.moveRegionBefore_Range;
 
 		} else {
 
@@ -823,6 +825,8 @@ Firestorm.DOM = {
 			this.clearOuterRange = this.clearOuterRange_Nodes;
 			this.clearInnerRange = this.clearInnerRange_Nodes;
 			this.replaceInnerRange = this.replaceInnerRange_Nodes;
+			this.moveRegionAfter = this.moveRegionAfter_Nodes;
+			this.moveRegionBefore = this.moveRegionBefore_Nodes;
 
 		}
 
@@ -872,6 +876,20 @@ Firestorm.DOM = {
 	 * @param {string} html
 	 */
 	replaceInnerRange: function(start_element, end_element, html) { Firestorm.t(1); },
+	/**
+	 * Move `region_start_element`, `region_end_element` and all elements between them before `target`
+	 * @param {HTMLElement} target
+	 * @param {HTMLElement} region_start_element
+	 * @param {HTMLElement} region_end_element
+	 */
+	moveRegionBefore: function(target, region_start_element, region_end_element) { Firestorm.t(1); },
+	/**
+	 * Move `region_start_element`, `region_end_element` and all elements between them after `target`
+	 * @param {HTMLElement} target
+	 * @param {HTMLElement} region_start_element
+	 * @param {HTMLElement} region_end_element
+	 */
+	moveRegionAfter: function(target, region_start_element, region_end_element) { Firestorm.t(1); },
 
 	/**
 	 * Turn HTML into nodes and insert them relatively to the given element
@@ -889,7 +907,7 @@ Firestorm.DOM = {
 	// nodes api
 
 	/**
-	 * Set the elements innerHTML, taking into account various browser bugs
+	 * Set the element's innerHTML, taking into account various browser bugs
 	 * @param {HTMLElement} element
 	 * @param {string} html
 	 */
@@ -1092,6 +1110,50 @@ Firestorm.DOM = {
 
 	},
 
+	/**
+	 * Perform movement of a range of nodes
+	 * @param {HTMLElement} parent
+	 * @param {HTMLElement} target
+	 * @param {HTMLElement} node
+	 * @param {HTMLElement} region_end_element
+	 */
+	_moveRegionBefore: function(parent, target, node, region_end_element) {
+
+		var next_sibling;
+
+		while (node && node !== region_end_element) {
+			next_sibling = node.nextSibling;
+			parent.insertBefore(node, target);
+			node = next_sibling;
+		}
+		parent.insertBefore(region_end_element, target);
+
+	},
+
+	/**
+	 * Version of `moveRegionBefore`, which works with DOM nodes.
+	 * @param {HTMLElement} target
+	 * @param {HTMLElement} region_start_element
+	 * @param {HTMLElement} region_end_element
+	 */
+	moveRegionBefore_Nodes: function(target, region_start_element, region_end_element) {
+
+		this._moveRegionBefore(target.parentNode, target, region_start_element, region_end_element);
+
+	},
+
+	/**
+	 * Version of `moveRegionAfter`, which works with DOM nodes.
+	 * @param {HTMLElement} target
+	 * @param {HTMLElement} region_start_element
+	 * @param {HTMLElement} region_end_element
+	 */
+	moveRegionAfter_Nodes: function(target, region_start_element, region_end_element) {
+
+		this._moveRegionBefore(target.parentNode, target.nextSibling, region_start_element, region_end_element);
+
+	},
+
 	// endL nodes api
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1232,6 +1294,36 @@ Firestorm.DOM = {
 			this.insertHTMLTop_Range(element, html);
 
 		}
+
+	},
+
+	/**
+	 * Version of `moveRegionBefore`, which works with ranges
+	 * @param {HTMLElement} target
+	 * @param {HTMLElement} region_start_element
+	 * @param {HTMLElement} region_end_element
+	 */
+	moveRegionBefore_Range: function(target, region_start_element, region_end_element) {
+
+		target.parentNode.insertBefore(
+			this._createOuterRange(region_start_element, region_end_element).extractContents(),
+			target
+		);
+
+	},
+
+	/**
+	 * Version of `moveRegionAfter`, which works with ranges
+	 * @param {HTMLElement} target
+	 * @param {HTMLElement} region_start_element
+	 * @param {HTMLElement} region_end_element
+	 */
+	moveRegionAfter_Range: function(target, region_start_element, region_end_element) {
+
+		target.parentNode.insertBefore(
+			this._createOuterRange(region_start_element, region_end_element).extractContents(),
+			target.nextSibling
+		);
 
 	}
 
@@ -21554,23 +21646,6 @@ Lava.define(
 {
 
 	Extends: 'Lava.mixin.Observable',
-	Shared: ['_insertion_strategies', '_removal_strategies'],
-
-	/**
-	 * Map of callbacks for dynamic insertion of templates
-	 * @type {Object.<string, string>}
-	 */
-	_insertion_strategies: {
-		sequential_elements: '_insertTemplate_SequentialElements'
-	},
-
-	/**
-	 * Map of callbacks for dynamic removal of templates
-	 * @type {Object.<string, string>}
-	 */
-	_removal_strategies: {
-		element_range: '_removeTemplate_ElementRange'
-	},
 
 	/**
 	 * Settings for this instance
@@ -21610,23 +21685,15 @@ Lava.define(
 		this._view = view;
 		this._container = container;
 
-		if (config.insertion_strategy) {
+		if (config.get_start_element_callback) {
 
-			this._insertTemplate = this[this._insertion_strategies[config.insertion_strategy]];
-
-		} else if (config.insert_callback) {
-
-			this._insertTemplate = config.insert_callback;
+			this._getStartElement = config.get_start_element_callback;
 
 		}
 
-		if (config.removal_strategy) {
+		if (config.get_end_element_callback) {
 
-			this._removeTemplate = this[this._removal_strategies[config.removal_strategy]];
-
-		} else if (config.remove_callback) {
-
-			this._removeTemplate = config.remove_callback;
+			this._getEndElement = config.get_end_element_callback;
 
 		}
 
@@ -21647,28 +21714,44 @@ Lava.define(
 	},
 
 	/**
-	 * Insert new templates into DOM and remove those, which are queued for removal
+	 * Insert new templates into DOM and remove those, which are queued for removal. Reorder existing templates
 	 * @param {Array.<Lava.system.Template>} current_templates Templates, that refresher must render and insert into DOM.
 	 *  Some of them can be already in DOM.
 	 */
 	refresh: function(current_templates) {
 
-		var i = 0,
+		var i = 1,
 			count = current_templates.length,
-			guid;
+			guid,
+			previous_template = current_templates[0];
 
-		this._current_templates = current_templates;
+		if (previous_template) { // if list is not empty
 
-		for (; i < count; i++) {
+			delete this._remove_queue[previous_template.guid];
 
-			if (!current_templates[i].isInDOM()) {
+			if (!previous_template.isInDOM()) {
 
-				this._insertTemplate(current_templates[i], i);
-				this._fire('insertion_complete', current_templates[i]);
+				this._insertFirstTemplate(previous_template);
+				this._fire('insertion_complete', previous_template);
 
-			} else if (current_templates[i].guid in this._remove_queue) {
+			}
+
+			for (; i < count; i++) {
 
 				delete this._remove_queue[current_templates[i].guid];
+
+				if (current_templates[i].isInDOM()) {
+
+					this._moveTemplate(current_templates[i], previous_template);
+
+				} else {
+
+					this._insertTemplate(current_templates[i], previous_template, i);
+					this._fire('insertion_complete', current_templates[i]);
+
+				}
+
+				previous_template = current_templates[i];
 
 			}
 
@@ -21685,7 +21768,56 @@ Lava.define(
 
 		}
 
+		this._current_templates = current_templates;
 		this._remove_queue = {};
+
+	},
+
+	/**
+	 * Insert template at the top of view's container
+	 * @param {Lava.system.Template} template
+	 */
+	_insertFirstTemplate: function(template) {
+
+		this._view.getContainer().prependHTML(template.render());
+		template.broadcastInDOM();
+
+	},
+
+	/**
+	 * Move `template` after `previous_template` (both are in DOM)
+	 * @param {Lava.system.Template} template
+	 * @param {Lava.system.Template} previous_template
+	 */
+	_moveTemplate: function (template, previous_template) {
+
+		Firestorm.DOM.moveRegionAfter(
+			this._getEndElement(previous_template),
+			this._getStartElement(template),
+			this._getEndElement(template)
+		)
+
+	},
+
+	/**
+	 * Get top element of a template
+	 * @param {Lava.system.Template} template
+	 * @returns {HTMLElement}
+	 */
+	_getStartElement: function(template) {
+
+		return template.getFirstView().getContainer().getDOMElement();
+
+	},
+
+	/**
+	 * Get bottom element of a template
+	 * @param template
+	 * @returns {HTMLElement}
+	 */
+	_getEndElement: function(template) {
+
+		return template.getLastView().getContainer().getDOMElement();
 
 	},
 
@@ -21698,8 +21830,6 @@ Lava.define(
 		var i = 0,
 			count = current_templates.length,
 			guid;
-
-		this._current_templates = current_templates;
 
 		// from templates, which are prepared for removal, filter out those, which should be in DOM
 		for (; i < count; i++) {
@@ -21719,6 +21849,7 @@ Lava.define(
 
 		}
 
+		this._current_templates = current_templates;
 		this._remove_queue = {};
 
 		return this._render();
@@ -21748,34 +21879,12 @@ Lava.define(
 	/**
 	 * Insert template into DOM
 	 * @param {Lava.system.Template} template
+	 * @param {Lava.system.Template} previous_template
 	 * @param {number} index Index of this template in list of all active templates
 	 */
-	_insertTemplate: function(template, index) {
+	_insertTemplate: function(template, previous_template, index) {
 
-		this._view.getContainer().appendHTML(template.render());
-		template.broadcastInDOM();
-
-	},
-
-	/**
-	 * [insertion strategy]
-	 * With this callback you can insert Foreach elements at the right place.
-	 * All templates inside Foreach are treated as single view with Element container
-	 * @param {Lava.system.Template} template
-	 * @param {number} index Index of the template in the list of all active templates
-	 */
-	_insertTemplate_SequentialElements: function(template, index) {
-
-		if (index) {
-
-			this._current_templates[index - 1].getLastView().getContainer().insertHTMLAfter(template.render());
-
-		} else {
-
-			this._view.getContainer().prependHTML(template.render());
-
-		}
-
+		Firestorm.DOM.insertHTMLAfter(this._getEndElement(previous_template), template.render());
 		template.broadcastInDOM();
 
 	},
@@ -21786,35 +21895,24 @@ Lava.define(
 	 */
 	_removeTemplate: function(template) {
 
-		// save, cause element container will throw an error if we try to do it after broadcastRemove
-		var element = template.getFirstView().getContainer().getDOMElement();
-		// first, we must inform the template, that it's going to be removed: to allow it's child views to interact
-		// with nodes while they are still in DOM
-		template.broadcastRemove();
-		Firestorm.Element.destroy(element);
-
-	},
-
-	/**
-	 * [removal strategy]
-	 * Remove a template that has views with real containers at it's beginning and at the end.
-	 * Removes the first and last views and anything between them
-	 * @param {Lava.system.Template} template
-	 */
-	_removeTemplate_ElementRange: function(template) {
-
 		// save, cause we can not retrieve container's DOM elements after broadcastRemove
-		var start_element = template.getFirstView().getContainer().getStartElement(),
-			end_element = template.getLastView().getContainer().getEndElement();
-
-		if (start_element == end_element) Lava.t();
+		var start_element = this._getStartElement(template),
+			end_element = this._getEndElement(template);
 
 		// first, we must inform the template, that it's going to be removed: to allow it's child views to interact
 		// with nodes while they are still in DOM
 		template.broadcastRemove();
 
-		// remove everything between tags and tags themselves
-		Firestorm.DOM.clearOuterRange(start_element, end_element);
+		if (start_element == end_element) {
+
+			Firestorm.Element.destroy(start_element);
+
+		} else {
+
+			// remove everything between tags and tags themselves
+			Firestorm.DOM.clearOuterRange(start_element, end_element);
+
+		}
 
 	},
 
@@ -21856,7 +21954,7 @@ Lava.define(
 	 */
 	destroy: function() {
 
-		this._current_templates = this._remove_queue;
+		this._current_templates = this._remove_queue = null;
 
 	}
 
@@ -21911,15 +22009,14 @@ Lava.define(
 
 		var i = 0,
 			count = current_templates.length,
+			previous_template = null,
 			guid;
-
-		this._current_templates = current_templates;
 
 		for (; i < count; i++) {
 
-			this._animateInsertion(current_templates[i], i);
-
 			delete this._remove_queue[current_templates[i].guid];
+			this._animateInsertion(current_templates[i], previous_template, i);
+			previous_template = current_templates[i];
 
 		}
 
@@ -21929,6 +22026,7 @@ Lava.define(
 
 		}
 
+		this._current_templates = current_templates;
 		this._remove_queue = {};
 
 	},
@@ -21999,20 +22097,33 @@ Lava.define(
 	/**
 	 * Insert the template into DOM and apply corresponding animation
 	 * @param {Lava.system.Template} template
+	 * @param {Lava.system.Template} previous_template
 	 * @param {number} index Index of this template in list of all active templates
 	 */
-	_animateInsertion: function(template, index) {
+	_animateInsertion: function(template, previous_template, index) {
 
 		var animation = this._animations_by_template_guid[template.guid];
 
-		if (!animation) {
+		if (Lava.schema.DEBUG && animation && !template.isInDOM()) Lava.t();
 
-			if (!template.isInDOM()) {
+		if (template.isInDOM()) {
 
-				this._insertTemplate(template, index);
-				animation = this._createAnimation(template, index);
+			// first template does not require moving
+			previous_template && this._moveTemplate(template, previous_template);
+
+		} else {
+
+			if (previous_template) {
+
+				this._insertTemplate(template, previous_template, index);
+
+			} else {
+
+				this._insertFirstTemplate(template);
 
 			}
+
+			animation = this._createAnimation(template, index);
 
 		}
 
@@ -26707,68 +26818,16 @@ Lava.define(
 	 */
 	_foreach_refresher_config: {
 		type: 'Standard',
-		remove_callback: function(template) {
+		get_end_element_callback: function(template) {
 
-			// Here we don't know the previous and next templates, and we can not use this._current_templates
-			// so we must find other ways to remove nodes.
+			// Last view is the If with node children.
+			// "_foreach_view" property was set in "node_children" role.
+			var children_foreach  = template.getLastView().get('_foreach_view'),
+				node_children_element = children_foreach ? children_foreach.getContainer().getDOMElement() : null;
 
-			// save, cause we can not retrieve container's DOM elements after broadcastRemove
-			var node_body_element = template.getFirstView().getContainer().getDOMElement(),
-				// Last view is the If with node children.
-				// "_foreach_view" property was set in "node_children" role.
-				children_foreach  = template.getLastView().get('_foreach_view'),
-				node_children_element;
-
-			if (children_foreach) {
-
-				node_children_element = children_foreach.getContainer().getDOMElement();
-
-			}
-
-			// first, we must inform the template, that it's going to be removed: to allow it's child views to interact
-			// with nodes while they are still in DOM
-			template.broadcastRemove();
-
-			if (node_children_element) {
-				// we have both containers in DOM: node body, and node children.
-				Firestorm.DOM.clearOuterRange(node_body_element, node_children_element);
-			} else {
-				// node children are not in DOM, only node body is visible
-				Firestorm.Element.destroy(node_body_element);
-			}
-
-		},
-
-		insert_callback: function(template, index) {
-
-			if (index) {
-
-				var previous_template = this._current_templates[index - 1],
-					children_foreach = previous_template.getLastView().get('_foreach_view');
-
-				if (children_foreach && children_foreach.getContainer().isInDOM()) {
-
-					// previous node children are in DOM, insert after them
-					children_foreach.getContainer().insertHTMLAfter(template.render());
-
-				} else {
-
-					// children of previous node are not in DOM, so insert after body
-					previous_template.getFirstView().getContainer().insertHTMLAfter(template.render());
-
-				}
-
-			} else {
-
-				// insert at top, as it's the first template
-				this._view.getContainer().prependHTML(template.render());
-
-			}
-
-			template.broadcastInDOM();
+			return node_children_element || template.getFirstView().getContainer().getDOMElement();
 
 		}
-
 	},
 
 	_property_descriptors: {
@@ -29043,7 +29102,7 @@ return (this._binds[0].getValue());
 					},
 					container: {
 						type: "Emulated",
-						options: {appender: "AfterPrevious"}
+						options: {prepender: "AfterPrevious"}
 					},
 					roles: [{
 						locator_type: "Name",
@@ -29136,10 +29195,7 @@ return (this._binds[0].getValue());
 						}]
 					},
 					as: "panel",
-					refresher: {
-						type: "Standard",
-						insertion_strategy: "sequential_elements"
-					},
+					refresher: {type: "Standard"},
 					template: [
 						"\r\n\t\t\t\t\r\n\t\t\t\t",
 						{
@@ -29448,10 +29504,7 @@ return (this._binds[0].getValue());
 						}]
 					},
 					as: "tab",
-					refresher: {
-						type: "Standard",
-						insertion_strategy: "sequential_elements"
-					},
+					refresher: {type: "Standard"},
 					template: [
 						"\r\n\t\t\t\t\r\n\t\t\t\t",
 						{
@@ -29887,7 +29940,7 @@ return (this._binds[0].getValue() && this._binds[1].getValue());
 					},
 					container: {
 						type: "Emulated",
-						options: {appender: "AfterPrevious"}
+						options: {prepender: "AfterPrevious"}
 					},
 					roles: [{
 						locator_type: "Name",

@@ -9,23 +9,6 @@ Lava.define(
 {
 
 	Extends: 'Lava.mixin.Observable',
-	Shared: ['_insertion_strategies', '_removal_strategies'],
-
-	/**
-	 * Map of callbacks for dynamic insertion of templates
-	 * @type {Object.<string, string>}
-	 */
-	_insertion_strategies: {
-		sequential_elements: '_insertTemplate_SequentialElements'
-	},
-
-	/**
-	 * Map of callbacks for dynamic removal of templates
-	 * @type {Object.<string, string>}
-	 */
-	_removal_strategies: {
-		element_range: '_removeTemplate_ElementRange'
-	},
 
 	/**
 	 * Settings for this instance
@@ -65,23 +48,15 @@ Lava.define(
 		this._view = view;
 		this._container = container;
 
-		if (config.insertion_strategy) {
+		if (config.get_start_element_callback) {
 
-			this._insertTemplate = this[this._insertion_strategies[config.insertion_strategy]];
-
-		} else if (config.insert_callback) {
-
-			this._insertTemplate = config.insert_callback;
+			this._getStartElement = config.get_start_element_callback;
 
 		}
 
-		if (config.removal_strategy) {
+		if (config.get_end_element_callback) {
 
-			this._removeTemplate = this[this._removal_strategies[config.removal_strategy]];
-
-		} else if (config.remove_callback) {
-
-			this._removeTemplate = config.remove_callback;
+			this._getEndElement = config.get_end_element_callback;
 
 		}
 
@@ -102,28 +77,44 @@ Lava.define(
 	},
 
 	/**
-	 * Insert new templates into DOM and remove those, which are queued for removal
+	 * Insert new templates into DOM and remove those, which are queued for removal. Reorder existing templates
 	 * @param {Array.<Lava.system.Template>} current_templates Templates, that refresher must render and insert into DOM.
 	 *  Some of them can be already in DOM.
 	 */
 	refresh: function(current_templates) {
 
-		var i = 0,
+		var i = 1,
 			count = current_templates.length,
-			guid;
+			guid,
+			previous_template = current_templates[0];
 
-		this._current_templates = current_templates;
+		if (previous_template) { // if list is not empty
 
-		for (; i < count; i++) {
+			delete this._remove_queue[previous_template.guid];
 
-			if (!current_templates[i].isInDOM()) {
+			if (!previous_template.isInDOM()) {
 
-				this._insertTemplate(current_templates[i], i);
-				this._fire('insertion_complete', current_templates[i]);
+				this._insertFirstTemplate(previous_template);
+				this._fire('insertion_complete', previous_template);
 
-			} else if (current_templates[i].guid in this._remove_queue) {
+			}
+
+			for (; i < count; i++) {
 
 				delete this._remove_queue[current_templates[i].guid];
+
+				if (current_templates[i].isInDOM()) {
+
+					this._moveTemplate(current_templates[i], previous_template);
+
+				} else {
+
+					this._insertTemplate(current_templates[i], previous_template, i);
+					this._fire('insertion_complete', current_templates[i]);
+
+				}
+
+				previous_template = current_templates[i];
 
 			}
 
@@ -140,7 +131,56 @@ Lava.define(
 
 		}
 
+		this._current_templates = current_templates;
 		this._remove_queue = {};
+
+	},
+
+	/**
+	 * Insert template at the top of view's container
+	 * @param {Lava.system.Template} template
+	 */
+	_insertFirstTemplate: function(template) {
+
+		this._view.getContainer().prependHTML(template.render());
+		template.broadcastInDOM();
+
+	},
+
+	/**
+	 * Move `template` after `previous_template` (both are in DOM)
+	 * @param {Lava.system.Template} template
+	 * @param {Lava.system.Template} previous_template
+	 */
+	_moveTemplate: function (template, previous_template) {
+
+		Firestorm.DOM.moveRegionAfter(
+			this._getEndElement(previous_template),
+			this._getStartElement(template),
+			this._getEndElement(template)
+		)
+
+	},
+
+	/**
+	 * Get top element of a template
+	 * @param {Lava.system.Template} template
+	 * @returns {HTMLElement}
+	 */
+	_getStartElement: function(template) {
+
+		return template.getFirstView().getContainer().getDOMElement();
+
+	},
+
+	/**
+	 * Get bottom element of a template
+	 * @param template
+	 * @returns {HTMLElement}
+	 */
+	_getEndElement: function(template) {
+
+		return template.getLastView().getContainer().getDOMElement();
 
 	},
 
@@ -153,8 +193,6 @@ Lava.define(
 		var i = 0,
 			count = current_templates.length,
 			guid;
-
-		this._current_templates = current_templates;
 
 		// from templates, which are prepared for removal, filter out those, which should be in DOM
 		for (; i < count; i++) {
@@ -174,6 +212,7 @@ Lava.define(
 
 		}
 
+		this._current_templates = current_templates;
 		this._remove_queue = {};
 
 		return this._render();
@@ -203,34 +242,12 @@ Lava.define(
 	/**
 	 * Insert template into DOM
 	 * @param {Lava.system.Template} template
+	 * @param {Lava.system.Template} previous_template
 	 * @param {number} index Index of this template in list of all active templates
 	 */
-	_insertTemplate: function(template, index) {
+	_insertTemplate: function(template, previous_template, index) {
 
-		this._view.getContainer().appendHTML(template.render());
-		template.broadcastInDOM();
-
-	},
-
-	/**
-	 * [insertion strategy]
-	 * With this callback you can insert Foreach elements at the right place.
-	 * All templates inside Foreach are treated as single view with Element container
-	 * @param {Lava.system.Template} template
-	 * @param {number} index Index of the template in the list of all active templates
-	 */
-	_insertTemplate_SequentialElements: function(template, index) {
-
-		if (index) {
-
-			this._current_templates[index - 1].getLastView().getContainer().insertHTMLAfter(template.render());
-
-		} else {
-
-			this._view.getContainer().prependHTML(template.render());
-
-		}
-
+		Firestorm.DOM.insertHTMLAfter(this._getEndElement(previous_template), template.render());
 		template.broadcastInDOM();
 
 	},
@@ -241,35 +258,24 @@ Lava.define(
 	 */
 	_removeTemplate: function(template) {
 
-		// save, cause element container will throw an error if we try to do it after broadcastRemove
-		var element = template.getFirstView().getContainer().getDOMElement();
-		// first, we must inform the template, that it's going to be removed: to allow it's child views to interact
-		// with nodes while they are still in DOM
-		template.broadcastRemove();
-		Firestorm.Element.destroy(element);
-
-	},
-
-	/**
-	 * [removal strategy]
-	 * Remove a template that has views with real containers at it's beginning and at the end.
-	 * Removes the first and last views and anything between them
-	 * @param {Lava.system.Template} template
-	 */
-	_removeTemplate_ElementRange: function(template) {
-
 		// save, cause we can not retrieve container's DOM elements after broadcastRemove
-		var start_element = template.getFirstView().getContainer().getStartElement(),
-			end_element = template.getLastView().getContainer().getEndElement();
-
-		if (start_element == end_element) Lava.t();
+		var start_element = this._getStartElement(template),
+			end_element = this._getEndElement(template);
 
 		// first, we must inform the template, that it's going to be removed: to allow it's child views to interact
 		// with nodes while they are still in DOM
 		template.broadcastRemove();
 
-		// remove everything between tags and tags themselves
-		Firestorm.DOM.clearOuterRange(start_element, end_element);
+		if (start_element == end_element) {
+
+			Firestorm.Element.destroy(start_element);
+
+		} else {
+
+			// remove everything between tags and tags themselves
+			Firestorm.DOM.clearOuterRange(start_element, end_element);
+
+		}
 
 	},
 
@@ -311,7 +317,7 @@ Lava.define(
 	 */
 	destroy: function() {
 
-		this._current_templates = this._remove_queue;
+		this._current_templates = this._remove_queue = null;
 
 	}
 
