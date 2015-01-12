@@ -67,7 +67,7 @@ Lava.define(
 
 			// Last view is the If with node children.
 			// "_foreach_view" property was set in "node_children" role.
-			var children_foreach  = template.getLastView().get('_foreach_view'),
+			var children_foreach = template.getLastView().get('_foreach_view'),
 				node_children_element = children_foreach ? children_foreach.getContainer().getDOMElement() : null;
 
 			return node_children_element || template.getFirstView().getContainer().getDOMElement();

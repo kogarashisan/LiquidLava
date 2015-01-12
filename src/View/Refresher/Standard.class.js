@@ -1,4 +1,18 @@
 
+/**
+ * Animation has ended and template was removed from DOM
+ * @event Lava.view.refresher.Standard#removal_complete
+ * @type {Lava.system.Template}
+ * @lava-type-description Template, that was removed
+ */
+
+/**
+ * Animation has expanded the template
+ * @event Lava.view.refresher.Standard#insertion_complete
+ * @type {Lava.system.Template}
+ * @lava-type-description Template, that was inserted
+ */
+
 Lava.define(
 'Lava.view.refresher.Standard',
 /**
