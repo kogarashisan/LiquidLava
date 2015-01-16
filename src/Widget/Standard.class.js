@@ -493,7 +493,7 @@ Lava.define(
 	ntranslate: function(string_name, n, arguments_list, locale) {
 
 		var string_descriptor = /** @type {_cTranslatablePlural} */ this.getResource(string_name, locale || Lava.schema.LOCALE),
-			form_index = Lava.locales[Lava.schema.LOCALE].pluralize(n),
+			form_index = Lava.locales[Lava.schema.LOCALE].pluralize(n || 0),
 			pluralform,
 			result;
 
