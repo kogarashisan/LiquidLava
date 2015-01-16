@@ -276,7 +276,7 @@
 	</include>
 	<include name="icon"></include>
 	<include name="node_children">
-		{$if(node.children.length && $tree{is_expanded})}
+		{$if($tree{is_expandable} && $tree{is_expanded})}
 			<x:roles>$tree.node_children_view</x:roles>{*<!--role handler creates refresher-->*}
 			<x:container_config>
 				{
@@ -302,7 +302,7 @@
 	</include>
 	<include name="node_title">
 		<span class="lava-tree-title" x:type="container"
-			x:classes="node.children.length ? 'lava-tree-title-expandable' : ''"
+			x:classes="$tree{is_expandable} ? 'lava-tree-title-expandable' : ''"
 			x:event:click="$tree.node_click(node)">
 			{#>node.title}
 		</span>
