@@ -399,6 +399,7 @@ Lava.define(
 			widget,
 			template_arguments,
 			bubble_index = 0,
+			bubble_targets_copy,
 			bubble_targets_count;
 
 		this._nested_dispatch_count++;
@@ -433,6 +434,9 @@ Lava.define(
 
 				}
 
+				// ignore possible call to cancelBubble()
+				this._cancel_bubble = false;
+
 			} else {
 
 				// bubble
@@ -441,23 +445,23 @@ Lava.define(
 				do {
 
 					callback(widget, target_name, view, template_arguments, callback_arguments);
-
-					if (this._cancel_bubble) {
-						this._cancel_bubble = false;
-						this._nested_dispatch_count--;
-						return;
-					}
-
 					widget = widget.getParentWidget();
 
-				} while (widget);
+				} while (widget && !this._cancel_bubble);
+
+				if (this._cancel_bubble) {
+					this._cancel_bubble = false;
+					continue;
+				}
 
 				if (target_name in global_targets_object) {
 
-					for (bubble_targets_count = global_targets_object[target_name].length; bubble_index < bubble_targets_count; bubble_index++) {
+					// cause target can be removed inside event handler
+					bubble_targets_copy = global_targets_object[target_name].slice();
+					for (bubble_targets_count = bubble_targets_copy.length; bubble_index < bubble_targets_count; bubble_index++) {
 
 						callback(
-							global_targets_object[target_name][bubble_index],
+							bubble_targets_copy[bubble_index],
 							target_name,
 							view,
 							template_arguments,
@@ -466,8 +470,7 @@ Lava.define(
 
 						if (this._cancel_bubble) {
 							this._cancel_bubble = false;
-							this._nested_dispatch_count--;
-							return;
+							break;
 						}
 
 					}
