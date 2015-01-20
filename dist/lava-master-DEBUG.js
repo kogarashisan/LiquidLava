@@ -1950,9 +1950,6 @@ var Lava = {
 		this._initGlobal(Lava.schema.popover_manager.CLASS, 'popover_manager');
 		this._initGlobal(Lava.schema.focus_manager.CLASS, 'focus_manager');
 
-		Lava.schema.popover_manager.IS_ENABLED && this.popover_manager && this.popover_manager.enable();
-		Lava.schema.focus_manager.IS_ENABLED && this.focus_manager && this.focus_manager.enable();
-
 	},
 
 	_initGlobal: function(class_name, property_name) {
@@ -2208,6 +2205,9 @@ var Lava = {
 			}
 
 		}
+
+		Lava.schema.popover_manager.IS_ENABLED && this.popover_manager && this.popover_manager.enable();
+		Lava.schema.focus_manager.IS_ENABLED && this.focus_manager && this.focus_manager.enable();
 
 	},
 
