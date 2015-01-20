@@ -484,7 +484,7 @@ Lava.parsers.Directives = {
 	 */
 	_resourceTagOptions: function(raw_tag) {
 
-		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1 || raw_tag.content[0] == '')) Lava.t("Malformed resources tag");
+		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1 || raw_tag.content[0] == '')) Lava.t("Malformed resources options tag");
 
 		return {
 			type: 'options',
@@ -518,7 +518,7 @@ Lava.parsers.Directives = {
 	 */
 	_resourceTagPluralString: function(raw_tag) {
 
-		if (Lava.schema.DEBUG && (!raw_tag.content)) Lava.t("Malformed resources tag");
+		if (Lava.schema.DEBUG && (!raw_tag.content)) Lava.t("Malformed resources plural string tag");
 
 		var plural_tags = Lava.parsers.Common.asBlockType(raw_tag.content, 'tag'),
 			i = 0,
@@ -951,7 +951,7 @@ Lava.parsers.Directives = {
 
 		if (Lava.schema.DEBUG && view_config.type == 'widget') Lava.t("Wrong usage of x:refresher directive. May be applied only to views.");
 		if (Lava.schema.DEBUG && ('refresher' in view_config)) Lava.t("Refresher is already defined");
-		if (Lava.schema.DEBUG && (!raw_directive.content || raw_directive.content.length != 1)) Lava.t("Malformed refresher config");
+		if (Lava.schema.DEBUG && (!raw_directive.content || raw_directive.content.length != 1)) Lava.t("Malformed refresher config: no content");
 		view_config.refresher = Lava.parseOptions(raw_directive.content[0]);
 
 	},
@@ -1122,7 +1122,7 @@ Lava.parsers.Directives = {
 	_xstatic_value: function(raw_directive) {
 
 		if (Lava.schema.DEBUG && (raw_directive.content || !raw_directive.attributes || !raw_directive.attributes.resource_id))
-			Lava.t('Malformed static_value directive. Note: content inside directive is not allowed, check for white space.');
+			Lava.t("Malformed static_value directive. Note: content inside directive is not allowed, even if it's blank space.");
 
 		return {
 			type: 'static_value',
@@ -1187,7 +1187,7 @@ Lava.parsers.Directives = {
 	 */
 	_parseDefaultEvents: function(raw_tag, widget_config) {
 
-		if (Lava.schema.DEBUG && (!raw_tag.content || !raw_tag.content.length)) Lava.t('default_events: tag content is required');
+		if (Lava.schema.DEBUG && (!raw_tag.content || !raw_tag.content.length)) Lava.t('default_events: no content.');
 		if (Lava.schema.DEBUG && ('default_events' in widget_config)) Lava.t('default_events: property already defined');
 
 		var events = Lava.parseOptions(raw_tag.content[0]),

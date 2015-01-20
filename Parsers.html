@@ -165,7 +165,7 @@ IDENTIFIER				[a-zA-Z\_][a-zA-Z0-9\_]*
 \-\>{IDENTIFIER}/\s+\(							{ Lava.t('Spaces between function name and opening brace are not allowed (1)'); }
 \-\&gt\;{IDENTIFIER}/\s+\(						{ Lava.t('Spaces between function name and opening brace are not allowed (1)'); }
 \.{IDENTIFIER}/\s+\(							{ Lava.t('Spaces between function name and opening brace are not allowed (2)'); }
-\s+[\~\.\[\]]									{ Lava.t('Spaces in scope path are not allowed (1)'); }
+\s+[\~\.]										{ Lava.t('Spaces in scope path are not allowed (1)'); }
 \[\s											{ Lava.t('Spaces in scope path are not allowed (2)'); }
 
 \@{IDENTIFIER}									{ yytext = yytext.slice(1); return 'VIEW_BY_LABEL'; }
@@ -477,7 +477,11 @@ Also, you will encounter comments like this: // } <- comment for Jison
 Jison does not parse the JS code, only counts braces, so if it encounters a curly brace inside a string,
 like "return '}'" - it will generate wrong code. These comments are needed to balance the count of opening and closing braces.
 
-Note: strings '#htmlcomment#' and '#cdata#' are replaced in generated (!) parser with right regex values.
+Note: the following strings are replaced in generated (!) parser with right regex values:
+#cdata#
+#htmlcomment#
+BLOCK_OPEN_E
+
 See the end of the file.
 
 About switches: switch-like sequences should be ignored. For example: "{test:}"
@@ -493,7 +497,7 @@ HTML_IDENTIFIER				[a-zA-Z][a-zA-Z0-9\_\-]*(\:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*
 HTML_TAGOPEN				\<{HTML_IDENTIFIER}\s*
 HTML_ENDTAG					\<\/{HTML_IDENTIFIER}\>
 BLOCK_OPEN_N				\{[\#\$\>\*]
-BLOCK_OPEN_E				\{\&gt\;
+BLOCK_OPEN_E				BLOCK_OPEN_E
 OPEN_ENDBLOCK				\{\/
 KNOWN_SWITCHES				\{\:[LR]\:\}|\{\:[LG]T\:\}|\{\:AMP\:\}
 
@@ -501,7 +505,7 @@ KNOWN_SWITCHES				\{\:[LR]\:\}|\{\:[LG]T\:\}|\{\:AMP\:\}
 
 %%
 
-[^\x00]*?/({BLOCK_OPEN_N}|{BLOCK_OPEN_E}|{OPEN_ENDBLOCK}|{HTML_TAGOPEN}|{HTML_ENDTAG}|\#htmlcomment\#|\#cdata\#|\{literal\:\}|\{\:literal\}|{KNOWN_SWITCHES}|\{elseif\s*\(|\{else\})		{
+[^\x00]*?/({BLOCK_OPEN_N}|BLOCK_OPEN_E|{OPEN_ENDBLOCK}|{HTML_TAGOPEN}|{HTML_ENDTAG}|\#htmlcomment\#|\#cdata\#|\{literal\:\}|\{\:literal\}|{KNOWN_SWITCHES}|\{elseif\s*\(|\{else\})		{
 		if (this._input.length) {
 			if (this._input[0] == '<') {
 				if (this.x_pure_blocks_mode) {
@@ -532,9 +536,9 @@ KNOWN_SWITCHES				\{\:[LR]\:\}|\{\:[LG]T\:\}|\{\:AMP\:\}
 <block>\{(\#|\$)\>[^\}]+\}								{ this.popState(); return 'EXPRESSION_BLOCK_N'; // normal }
 <block>\{(\#|\$)\&gt\;[^\}]+\}							{ this.popState(); return 'EXPRESSION_BLOCK_E'; // escaped }
 
-<block>({BLOCK_OPEN_N}|{BLOCK_OPEN_E})\s							{ Lava.t('Spaces between block opening tag and block name are not allowed'); }
-<block>({BLOCK_OPEN_N}|{BLOCK_OPEN_E}){BLOCK_NAME}\s\(				{ Lava.t('Spaces between block name and opening brace are not allowed'); }
-<block>({BLOCK_OPEN_N}|{BLOCK_OPEN_E})								{ return 'OPEN_BLOCK'; }
+<block>({BLOCK_OPEN_N}|BLOCK_OPEN_E)\s							{ Lava.t('Spaces between block opening tag and block name are not allowed'); }
+<block>({BLOCK_OPEN_N}|BLOCK_OPEN_E){BLOCK_NAME}\s\(				{ Lava.t('Spaces between block name and opening brace are not allowed'); }
+<block>({BLOCK_OPEN_N}|BLOCK_OPEN_E)								{ return 'OPEN_BLOCK'; }
 
 <block>\{elseif/\(										{ return 'OPEN_ELSEIF'; }
 <block>\:[\$\#\@]{IDENTIFIER}\/{BLOCK_NAME}/\(			{ return 'DYNAMIC_BLOCK_INIT'; }
@@ -956,6 +960,7 @@ Template parser sources:<br/>
 	// yes, it's very bad. Workaround for Jison 0.4.4 bugs.
 	src = src.replace(/#cdata#/g, "(<" + "!\\[CDATA\\[(.|\\s)*?\\]\\]>)");
 	src = src.replace(/#htmlcomment#/g, "(<" + "!--(.|\\s)*?-->)");
+	src = src.replace(/BLOCK_OPEN_E/g, "\{\&gt\;");
 	$('TemplateParserSrc').set('value', src);
 	eval(src);
 </script>

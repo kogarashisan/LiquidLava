@@ -1896,10 +1896,6 @@ var Lava = {
 	 * @type {_tGUID}
 	 */
 	guid: 1,
-	/**
-	 * Used to delay refresh loop after the current JavaScript thread exits. See {@link Lava#scheduleRefresh}
-	 */
-	_refresh_timer: null,
 
 	/**
 	 * Create all classes and global class instances.
@@ -2402,29 +2398,6 @@ var Lava = {
 	},
 
 	/**
-	 * Feature of the current binding system:
-	 * sometimes, a view may be rendered with dirty bindings. They will be refreshed in the next refresh loop.
-	 * This may happen during widget {@link Lava.widget.Standard#inject|inject()} outside of normal App lifecycle,
-	 * and developer may forget to call Lava.refreshViews()
-	 */
-	scheduleRefresh: function() {
-
-		var self = this;
-		if (!this._refresh_timer && !Lava.Core.isProcessingEvent()) {
-
-			this._refresh_timer = window.setTimeout(
-				function(){
-					self._refresh_timer = null;
-					self.refreshViews();
-				},
-				0
-			);
-
-		}
-
-	},
-
-	/**
 	 * Perform view refresh outside of normal application lifecycle (in the end of AJAX call, or from browser console).
 	 * Note: call to this function does not guarantee, that views will be refreshed immediately
 	 */
@@ -2434,11 +2407,6 @@ var Lava = {
 
 			this.view_manager.refresh();
 
-		}
-
-		if (this._refresh_timer) {
-			window.clearTimeout(this._refresh_timer);
-			this._refresh_timer = null;
 		}
 
 	},
@@ -4221,12 +4189,16 @@ Lava.ScopeManager = {
 	 * @type {boolean}
 	 */
 	_has_infinite_loop: false,
-
 	/**
 	 * Is refresh loop in progress
 	 * @type {boolean}
 	 */
 	_is_refreshing: false,
+	/**
+	 * How many locks does it have, see the `lock()` method
+	 * @type {number}
+	 */
+	_lock_count: 0,
 
 	/**
 	 * Initialize global ScopeManager object
@@ -4295,8 +4267,9 @@ Lava.ScopeManager = {
 	 */
 	lock: function() {
 
-		if (Lava.schema.DEBUG && (this.scheduleScopeRefresh == this.scheduleScopeRefresh_Locked || this._is_refreshing)) Lava.t();
+		if (Lava.schema.DEBUG && this._is_refreshing) Lava.t();
 		this.scheduleScopeRefresh = this.scheduleScopeRefresh_Locked;
+		this._lock_count++;
 
 	},
 
@@ -4305,8 +4278,12 @@ Lava.ScopeManager = {
 	 */
 	unlock: function() {
 
-		if (Lava.schema.DEBUG && this.scheduleScopeRefresh == this.scheduleScopeRefresh_Normal) Lava.t();
-		this.scheduleScopeRefresh = this.scheduleScopeRefresh_Normal;
+		if (this._lock_count == 0) Lava.t();
+
+		this._lock_count--;
+		if (this._lock_count == 0) {
+			this.scheduleScopeRefresh = this.scheduleScopeRefresh_Normal;
+		}
 
 	},
 
@@ -7762,7 +7739,7 @@ Lava.parsers.Directives = {
 	 */
 	_resourceTagOptions: function(raw_tag) {
 
-		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1 || raw_tag.content[0] == '')) Lava.t("Malformed resources tag");
+		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1 || raw_tag.content[0] == '')) Lava.t("Malformed resources options tag");
 
 		return {
 			type: 'options',
@@ -7796,7 +7773,7 @@ Lava.parsers.Directives = {
 	 */
 	_resourceTagPluralString: function(raw_tag) {
 
-		if (Lava.schema.DEBUG && (!raw_tag.content)) Lava.t("Malformed resources tag");
+		if (Lava.schema.DEBUG && (!raw_tag.content)) Lava.t("Malformed resources plural string tag");
 
 		var plural_tags = Lava.parsers.Common.asBlockType(raw_tag.content, 'tag'),
 			i = 0,
@@ -8229,7 +8206,7 @@ Lava.parsers.Directives = {
 
 		if (Lava.schema.DEBUG && view_config.type == 'widget') Lava.t("Wrong usage of x:refresher directive. May be applied only to views.");
 		if (Lava.schema.DEBUG && ('refresher' in view_config)) Lava.t("Refresher is already defined");
-		if (Lava.schema.DEBUG && (!raw_directive.content || raw_directive.content.length != 1)) Lava.t("Malformed refresher config");
+		if (Lava.schema.DEBUG && (!raw_directive.content || raw_directive.content.length != 1)) Lava.t("Malformed refresher config: no content");
 		view_config.refresher = Lava.parseOptions(raw_directive.content[0]);
 
 	},
@@ -8400,7 +8377,7 @@ Lava.parsers.Directives = {
 	_xstatic_value: function(raw_directive) {
 
 		if (Lava.schema.DEBUG && (raw_directive.content || !raw_directive.attributes || !raw_directive.attributes.resource_id))
-			Lava.t('Malformed static_value directive. Note: content inside directive is not allowed, check for white space.');
+			Lava.t("Malformed static_value directive. Note: content inside directive is not allowed, even if it's blank space.");
 
 		return {
 			type: 'static_value',
@@ -8465,7 +8442,7 @@ Lava.parsers.Directives = {
 	 */
 	_parseDefaultEvents: function(raw_tag, widget_config) {
 
-		if (Lava.schema.DEBUG && (!raw_tag.content || !raw_tag.content.length)) Lava.t('default_events: tag content is required');
+		if (Lava.schema.DEBUG && (!raw_tag.content || !raw_tag.content.length)) Lava.t('default_events: no content.');
 		if (Lava.schema.DEBUG && ('default_events' in widget_config)) Lava.t('default_events: property already defined');
 
 		var events = Lava.parseOptions(raw_tag.content[0]),
@@ -9839,7 +9816,7 @@ case 41: return 4;
 break;
 }
 },
-rules: [/^(?:->([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\s+)\()/,/^(?:-&gt;([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\s+)\()/,/^(?:\.([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\s+)\()/,/^(?:\s+[\~\.\[\]])/,/^(?:\[\s\b)/,/^(?:@([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:#([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:\$([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:->([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\())/,/^(?:-&gt;([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\())/,/^(?:\.([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\())/,/^(?:([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\())/,/^(?:~\d+)/,/^(?:\.[a-zA-Z0-9\_]+)/,/^(?:->([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:-&gt;([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?::up\(([a-zA-Z\_][a-zA-Z0-9\_]*)\))/,/^(?::dn\(([a-zA-Z\_][a-zA-Z0-9\_]*)\))/,/^(?:(&lt;|&gt;))/,/^(?:(&amp;|&lt;|&gt;|&)+)/,/^(?:\/\/depends:)/,/^(?:[\+\-\*\/\%])/,/^(?:\|\||!!)/,/^(?:===|!==|==|!=|<=|>=|<|>)/,/^(?:>>>|>>|<<|[\|\^])/,/^(?:[\?\:])/,/^(?:!)/,/^(?:,)/,/^(?:;)/,/^(?:\d+(\.\d+)?((e|E)(\+|-)\d+)?)/,/^(?:0x[a-fA-F0-9]+)/,/^(?:"(\\"|[^"])*")/,/^(?:'(\\'|[^'])*')/,/^(?:\[(?=[^\s]))/,/^(?:\])/,/^(?:\s+)/,/^(?:\{)/,/^(?:\})/,/^(?:\()/,/^(?:\))/,/^(?:([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:$)/],
+rules: [/^(?:->([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\s+)\()/,/^(?:-&gt;([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\s+)\()/,/^(?:\.([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\s+)\()/,/^(?:\s+[\~\.])/,/^(?:\[\s\b)/,/^(?:@([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:#([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:\$([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:->([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\())/,/^(?:-&gt;([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\())/,/^(?:\.([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\())/,/^(?:([a-zA-Z\_][a-zA-Z0-9\_]*)(?=\())/,/^(?:~\d+)/,/^(?:\.[a-zA-Z0-9\_]+)/,/^(?:->([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:-&gt;([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?::up\(([a-zA-Z\_][a-zA-Z0-9\_]*)\))/,/^(?::dn\(([a-zA-Z\_][a-zA-Z0-9\_]*)\))/,/^(?:(&lt;|&gt;))/,/^(?:(&amp;|&lt;|&gt;|&)+)/,/^(?:\/\/depends:)/,/^(?:[\+\-\*\/\%])/,/^(?:\|\||!!)/,/^(?:===|!==|==|!=|<=|>=|<|>)/,/^(?:>>>|>>|<<|[\|\^])/,/^(?:[\?\:])/,/^(?:!)/,/^(?:,)/,/^(?:;)/,/^(?:\d+(\.\d+)?((e|E)(\+|-)\d+)?)/,/^(?:0x[a-fA-F0-9]+)/,/^(?:"(\\"|[^"])*")/,/^(?:'(\\'|[^'])*')/,/^(?:\[(?=[^\s]))/,/^(?:\])/,/^(?:\s+)/,/^(?:\{)/,/^(?:\})/,/^(?:\()/,/^(?:\))/,/^(?:([a-zA-Z\_][a-zA-Z0-9\_]*))/,/^(?:$)/],
 conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41],"inclusive":true}}
 };
 return lexer;
@@ -10854,7 +10831,7 @@ case 43: return 4;
 break;
 }
 },
-rules: [/^(?:[^\x00]*?(?=((\{[\#\$\>\*])|(\{&)|(\{\/)|(<([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)\s*)|(<\/([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)>)|(<!--(.|\s)*?-->)|(<!\[CDATA\[(.|\s)*?\]\]>)|\{literal:\}|\{:literal\}|(\{:[LR]:\}|\{:[LG])|\{elseif\s*\(|\{else\})))/,/^(?:[^\x00]+)/,/^(?:<)/,/^(?:\{>[^\}]*\})/,/^(?:\{&gt;[^\}]*\})/,/^(?:\{else\})/,/^(?:\{\/(([a-zA-Z\_][a-zA-Z0-9\_]*)(\/([a-zA-Z\_][a-zA-Z0-9\_]*))*)\})/,/^(?:\{\*([^\*]|\*[^\}])*\*\})/,/^(?:\{(#|\$)>[^\}]+\})/,/^(?:\{(#|\$)&gt;[^\}]+\})/,/^(?:((\{[\#\$\>\*])|(\{&))\s\b)/,/^(?:((\{[\#\$\>\*])|(\{&))(([a-zA-Z\_][a-zA-Z0-9\_]*)(\/([a-zA-Z\_][a-zA-Z0-9\_]*))*)\s\()/,/^(?:((\{[\#\$\>\*])|(\{&)))/,/^(?:\{elseif(?=\())/,/^(?::[\$\#\@]([a-zA-Z\_][a-zA-Z0-9\_]*)\/(([a-zA-Z\_][a-zA-Z0-9\_]*)(\/([a-zA-Z\_][a-zA-Z0-9\_]*))*)(?=\())/,/^(?:(([a-zA-Z\_][a-zA-Z0-9\_]*)(\/([a-zA-Z\_][a-zA-Z0-9\_]*))*)(?=\())/,/^(?:\(\s*\))/,/^(?:\()/,/^(?:([a-zA-Z\_][a-zA-Z0-9\_]*)=)/,/^(?:([a-zA-Z\_][a-zA-Z0-9\_]*)(?=[\s\}]))/,/^(?:"([^\\\"]|\\.)*"(?=[\s\}]))/,/^(?:'([^\\\']|\\.)*'(?=[\s\}]))/,/^(?:\s*\})/,/^(?:\s+)/,/^(?:(<!--(.|\s)*?-->))/,/^(?:(<!\[CDATA\[(.|\s)*?\]\]>))/,/^(?:(<\/([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)>))/,/^(?:(<([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)\s*))/,/^(?:>)/,/^(?:\/>)/,/^(?:([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)\s+)/,/^(?:([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)(?=>))/,/^(?:([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)=)/,/^(?:([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)=([a-zA-Z\_][a-zA-Z0-9\_]*)+\s\b)/,/^(?:"([^\\\"]|\\.)*")/,/^(?:'([^\\\']|\\.)*')/,/^(?:\s+)/,/^(?:[\s\S]*?<\/script>)/,/^(?:[\s\S]*?<\/style>)/,/^(?:(\{:[LR]:\}|\{:[LG]))/,/^(?:\{literal:\})/,/^(?:\{:literal\})/,/^(?:[^\x00]*?\{:literal\})/,/^(?:$)/],
+rules: [/^(?:[^\x00]*?(?=((\{[\#\$\>\*])|{&gt;|(\{\/)|(<([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)\s*)|(<\/([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)>)|(<!--(.|\s)*?-->)|(<!\[CDATA\[(.|\s)*?\]\]>)|\{literal:\}|\{:literal\}|(\{:[LR]:\}|\{:[LG])|\{elseif\s*\(|\{else\})))/,/^(?:[^\x00]+)/,/^(?:<)/,/^(?:\{>[^\}]*\})/,/^(?:\{&gt;[^\}]*\})/,/^(?:\{else\})/,/^(?:\{\/(([a-zA-Z\_][a-zA-Z0-9\_]*)(\/([a-zA-Z\_][a-zA-Z0-9\_]*))*)\})/,/^(?:\{\*([^\*]|\*[^\}])*\*\})/,/^(?:\{(#|\$)>[^\}]+\})/,/^(?:\{(#|\$)&gt;[^\}]+\})/,/^(?:((\{[\#\$\>\*])|{&gt;)\s\b)/,/^(?:((\{[\#\$\>\*])|{&gt;)(([a-zA-Z\_][a-zA-Z0-9\_]*)(\/([a-zA-Z\_][a-zA-Z0-9\_]*))*)\s\()/,/^(?:((\{[\#\$\>\*])|{&gt;))/,/^(?:\{elseif(?=\())/,/^(?::[\$\#\@]([a-zA-Z\_][a-zA-Z0-9\_]*)\/(([a-zA-Z\_][a-zA-Z0-9\_]*)(\/([a-zA-Z\_][a-zA-Z0-9\_]*))*)(?=\())/,/^(?:(([a-zA-Z\_][a-zA-Z0-9\_]*)(\/([a-zA-Z\_][a-zA-Z0-9\_]*))*)(?=\())/,/^(?:\(\s*\))/,/^(?:\()/,/^(?:([a-zA-Z\_][a-zA-Z0-9\_]*)=)/,/^(?:([a-zA-Z\_][a-zA-Z0-9\_]*)(?=[\s\}]))/,/^(?:"([^\\\"]|\\.)*"(?=[\s\}]))/,/^(?:'([^\\\']|\\.)*'(?=[\s\}]))/,/^(?:\s*\})/,/^(?:\s+)/,/^(?:(<!--(.|\s)*?-->))/,/^(?:(<!\[CDATA\[(.|\s)*?\]\]>))/,/^(?:(<\/([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)>))/,/^(?:(<([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)\s*))/,/^(?:>)/,/^(?:\/>)/,/^(?:([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)\s+)/,/^(?:([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)(?=>))/,/^(?:([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)=)/,/^(?:([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)=([a-zA-Z\_][a-zA-Z0-9\_]*)+\s\b)/,/^(?:"([^\\\"]|\\.)*")/,/^(?:'([^\\\']|\\.)*')/,/^(?:\s+)/,/^(?:[\s\S]*?<\/script>)/,/^(?:[\s\S]*?<\/style>)/,/^(?:(\{:[LR]:\}|\{:[LG]))/,/^(?:\{literal:\})/,/^(?:\{:literal\})/,/^(?:[^\x00]*?\{:literal\})/,/^(?:$)/],
 conditions: {"block":{"rules":[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"inclusive":false},"blockHash":{"rules":[18,19,20,21,22,23],"inclusive":false},"tag":{"rules":[24,25,26,27,28,29,30,31,32,33,34,35,36],"inclusive":false},"skipTag":{"rules":[2],"inclusive":false},"switch":{"rules":[39,40,41],"inclusive":false},"literal":{"rules":[42],"inclusive":false},"eatScript":{"rules":[37],"inclusive":false},"eatStyle":{"rules":[38],"inclusive":false},"INITIAL":{"rules":[0,1,43],"inclusive":true}}
 };
 return lexer;
@@ -14878,6 +14855,7 @@ Lava.define(
 			widget,
 			template_arguments,
 			bubble_index = 0,
+			bubble_targets_copy,
 			bubble_targets_count;
 
 		this._nested_dispatch_count++;
@@ -14912,6 +14890,9 @@ Lava.define(
 
 				}
 
+				// ignore possible call to cancelBubble()
+				this._cancel_bubble = false;
+
 			} else {
 
 				// bubble
@@ -14920,23 +14901,23 @@ Lava.define(
 				do {
 
 					callback(widget, target_name, view, template_arguments, callback_arguments);
-
-					if (this._cancel_bubble) {
-						this._cancel_bubble = false;
-						this._nested_dispatch_count--;
-						return;
-					}
-
 					widget = widget.getParentWidget();
 
-				} while (widget);
+				} while (widget && !this._cancel_bubble);
+
+				if (this._cancel_bubble) {
+					this._cancel_bubble = false;
+					continue;
+				}
 
 				if (target_name in global_targets_object) {
 
-					for (bubble_targets_count = global_targets_object[target_name].length; bubble_index < bubble_targets_count; bubble_index++) {
+					// cause target can be removed inside event handler
+					bubble_targets_copy = global_targets_object[target_name].slice();
+					for (bubble_targets_count = bubble_targets_copy.length; bubble_index < bubble_targets_count; bubble_index++) {
 
 						callback(
-							global_targets_object[target_name][bubble_index],
+							bubble_targets_copy[bubble_index],
 							target_name,
 							view,
 							template_arguments,
@@ -14945,8 +14926,7 @@ Lava.define(
 
 						if (this._cancel_bubble) {
 							this._cancel_bubble = false;
-							this._nested_dispatch_count--;
-							return;
+							break;
 						}
 
 					}
@@ -21636,6 +21616,20 @@ Lava.define(
 
 });
 
+/**
+ * Animation has ended and template was removed from DOM
+ * @event Lava.view.refresher.Standard#removal_complete
+ * @type {Lava.system.Template}
+ * @lava-type-description Template, that was removed
+ */
+
+/**
+ * Animation has expanded the template
+ * @event Lava.view.refresher.Standard#insertion_complete
+ * @type {Lava.system.Template}
+ * @lava-type-description Template, that was inserted
+ */
+
 Lava.define(
 'Lava.view.refresher.Standard',
 /**
@@ -21729,6 +21723,7 @@ Lava.define(
 
 			delete this._remove_queue[previous_template.guid];
 
+			// handle first template separately from others
 			if (!previous_template.isInDOM()) {
 
 				this._insertFirstTemplate(previous_template);
@@ -21742,7 +21737,7 @@ Lava.define(
 
 				if (current_templates[i].isInDOM()) {
 
-					this._moveTemplate(current_templates[i], previous_template);
+					this._moveTemplate(current_templates[i], previous_template, current_templates);
 
 				} else {
 
@@ -21768,7 +21763,6 @@ Lava.define(
 
 		}
 
-		this._current_templates = current_templates;
 		this._remove_queue = {};
 
 	},
@@ -21781,21 +21775,48 @@ Lava.define(
 
 		this._view.getContainer().prependHTML(template.render());
 		template.broadcastInDOM();
+		this._current_templates.unshift(template);
 
 	},
 
 	/**
 	 * Move `template` after `previous_template` (both are in DOM)
 	 * @param {Lava.system.Template} template
-	 * @param {Lava.system.Template} previous_template
+	 * @param {Lava.system.Template} new_previous_template
+	 * @param {Array.<Lava.system.Template>} current_templates
 	 */
-	_moveTemplate: function (template, previous_template) {
+	_moveTemplate: function (template, new_previous_template, current_templates) {
 
-		Firestorm.DOM.moveRegionAfter(
-			this._getEndElement(previous_template),
-			this._getStartElement(template),
-			this._getEndElement(template)
-		)
+		var current_previous_index = this._current_templates.indexOf(template) - 1,
+			current_previous_template = null;
+
+		if (Lava.schema.DEBUG && current_previous_index == -2) Lava.t();
+
+		// skip removed templates
+		while (current_previous_index > -1 && current_templates.indexOf(this._current_templates[current_previous_index]) == -1) {
+			current_previous_index--;
+		}
+
+		if (current_previous_index > -1) {
+			current_previous_template = this._current_templates[current_previous_index];
+		}
+
+		if (new_previous_template != current_previous_template) {
+
+			Firestorm.DOM.moveRegionAfter(
+				this._getEndElement(new_previous_template),
+				this._getStartElement(template),
+				this._getEndElement(template)
+			);
+
+			// move it in local _current_templates array
+			Firestorm.Array.exclude(this._current_templates, template);
+
+			var previous_index = this._current_templates.indexOf(new_previous_template);
+			if (Lava.schema.DEBUG && previous_index == -1) Lava.t();
+			this._current_templates.splice(previous_index + 1, 0, template);
+
+		}
 
 	},
 
@@ -21887,6 +21908,10 @@ Lava.define(
 		Firestorm.DOM.insertHTMLAfter(this._getEndElement(previous_template), template.render());
 		template.broadcastInDOM();
 
+		var previous_index = this._current_templates.indexOf(previous_template);
+		if (Lava.schema.DEBUG && previous_index == -1) Lava.t();
+		this._current_templates.splice(previous_index + 1, 0, template);
+
 	},
 
 	/**
@@ -21914,6 +21939,8 @@ Lava.define(
 
 		}
 
+		Firestorm.Array.exclude(this._current_templates, template);
+
 	},
 
 	/**
@@ -21937,13 +21964,32 @@ Lava.define(
 	},
 
 	/**
+	 * Actions to take after the view was rendered and inserted into DOM
+	 */
+	broadcastInDOM: function() {
+
+		this._broadcast('broadcastInDOM');
+
+	},
+
+	/**
 	 * Actions to take before owner view is removed from DOM
 	 */
 	broadcastRemove: function() {
 
-		for (var guid in this._remove_queue) {
+		this._broadcast('broadcastRemove');
 
-			this._remove_queue[guid].broadcastRemove();
+	},
+
+	/**
+	 * Broadcast callback to children
+	 * @param {string} function_name
+	 */
+	_broadcast: function(function_name) {
+
+		for (var i = 0, count = this._current_templates.length; i < count; i++) {
+
+			this._current_templates[i][function_name]();
 
 		}
 
@@ -22015,7 +22061,7 @@ Lava.define(
 		for (; i < count; i++) {
 
 			delete this._remove_queue[current_templates[i].guid];
-			this._animateInsertion(current_templates[i], previous_template, i);
+			this._animateInsertion(current_templates[i], previous_template, i, current_templates);
 			previous_template = current_templates[i];
 
 		}
@@ -22026,7 +22072,6 @@ Lava.define(
 
 		}
 
-		this._current_templates = current_templates;
 		this._remove_queue = {};
 
 	},
@@ -22099,8 +22144,9 @@ Lava.define(
 	 * @param {Lava.system.Template} template
 	 * @param {Lava.system.Template} previous_template
 	 * @param {number} index Index of this template in list of all active templates
+	 * @param {Array.<Lava.system.Template>} current_templates
 	 */
-	_animateInsertion: function(template, previous_template, index) {
+	_animateInsertion: function(template, previous_template, index, current_templates) {
 
 		var animation = this._animations_by_template_guid[template.guid];
 
@@ -22109,7 +22155,7 @@ Lava.define(
 		if (template.isInDOM()) {
 
 			// first template does not require moving
-			previous_template && this._moveTemplate(template, previous_template);
+			previous_template && this._moveTemplate(template, previous_template, current_templates);
 
 		} else {
 
@@ -22239,6 +22285,7 @@ Lava.define(
 	destroy: function() {
 
 		this._finishAnimations();
+		this.Standard$destroy();
 
 	}
 
@@ -23589,13 +23636,7 @@ Lava.define(
 	 */
 	_broadcastToChildren_Refresher: function(function_name) {
 
-		this._refresher[function_name] && this._refresher[function_name]();
-
-		for (var name in this._current_hash) {
-
-			this._current_hash[name][function_name]();
-
-		}
+		this._refresher[function_name]();
 
 	},
 
@@ -23925,8 +23966,7 @@ Lava.define(
 	 */
 	_broadcastToChildren_Refresher: function(function_name) {
 
-		this._refresher[function_name] && this._refresher[function_name]();
-		this._active_template && this._active_template[function_name]();
+		this._refresher[function_name]();
 
 	},
 
@@ -24210,15 +24250,15 @@ Lava.define(
 		if (Lava.schema.DEBUG && this._parent_view) Lava.t("Widget: only top-level widgets can be inserted into DOM");
 		if (Lava.schema.DEBUG && !this._container) Lava.t("Widget: root widgets must have a container");
 
-		// If you assign data to a widget, that was removed from DOM,
+		// Otherwise, if you assign data to a widget, that was removed from DOM,
 		// and then render it - it will render with old data.
 		Lava.ScopeManager.refresh();
-		var html = this.render();
 
-		Firestorm.DOM.insertHTML(element, html, position || 'Top');
+		// lock, cause render operation can change data. Although it's not recommended to change data in render().
+		Lava.ScopeManager.lock();
+		Firestorm.DOM.insertHTML(element, this.render(), position || 'Top');
+		Lava.ScopeManager.unlock();
 		this.broadcastInDOM();
-
-		Lava.scheduleRefresh(); // see comment for scheduleRefresh
 
 	},
 
@@ -24234,8 +24274,12 @@ Lava.define(
 		if (Lava.schema.DEBUG && !this._container) Lava.t("Widget: root widgets must have a container");
 		if (Lava.schema.DEBUG && !this._container.isElementContainer) Lava.t("injectIntoExistingElement expects an element containers");
 
+		Lava.ScopeManager.refresh();
+
+		Lava.ScopeManager.lock();
 		this._container.captureExistingElement(element);
 		this._container.setHTML(this._renderContent());
+		Lava.ScopeManager.unlock();
 
 		// rewritten broadcastInDOM - without this._container.informInDOM()
 		this._is_inDOM = true;
@@ -24468,7 +24512,7 @@ Lava.define(
 	ntranslate: function(string_name, n, arguments_list, locale) {
 
 		var string_descriptor = /** @type {_cTranslatablePlural} */ this.getResource(string_name, locale || Lava.schema.LOCALE),
-			form_index = Lava.locales[Lava.schema.LOCALE].pluralize(n),
+			form_index = Lava.locales[Lava.schema.LOCALE].pluralize(n || 0),
 			pluralform,
 			result;
 
@@ -26822,7 +26866,7 @@ Lava.define(
 
 			// Last view is the If with node children.
 			// "_foreach_view" property was set in "node_children" role.
-			var children_foreach  = template.getLastView().get('_foreach_view'),
+			var children_foreach = template.getLastView().get('_foreach_view'),
 				node_children_element = children_foreach ? children_foreach.getContainer().getDOMElement() : null;
 
 			return node_children_element || template.getFirstView().getContainer().getDOMElement();
@@ -29924,11 +29968,10 @@ return (this._binds[0].getValue() && this._binds[1].getValue());
 },
 						binds: [
 							{
-								property_name: "node",
-								tail: [
-									"children",
-									"length"
-								]
+								locator_type: "Name",
+								locator: "tree",
+								isDynamic: true,
+								property_name: "is_expandable"
 							},
 							{
 								locator_type: "Name",
@@ -30048,11 +30091,10 @@ return (this._binds[0].getValue());
 return (this._binds[0].getValue() ? 'lava-tree-title-expandable' : '');
 },
 								binds: [{
-									property_name: "node",
-									tail: [
-										"children",
-										"length"
-									]
+									locator_type: "Name",
+									locator: "tree",
+									isDynamic: true,
+									property_name: "is_expandable"
 								}]
 							}
 						}

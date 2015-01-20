@@ -106,6 +106,7 @@ Lava.define(
 
 			delete this._remove_queue[previous_template.guid];
 
+			// handle first template separately from others
 			if (!previous_template.isInDOM()) {
 
 				this._insertFirstTemplate(previous_template);
@@ -119,7 +120,7 @@ Lava.define(
 
 				if (current_templates[i].isInDOM()) {
 
-					this._moveTemplate(current_templates[i], previous_template);
+					this._moveTemplate(current_templates[i], previous_template, current_templates);
 
 				} else {
 
@@ -145,7 +146,6 @@ Lava.define(
 
 		}
 
-		this._current_templates = current_templates;
 		this._remove_queue = {};
 
 	},
@@ -158,21 +158,48 @@ Lava.define(
 
 		this._view.getContainer().prependHTML(template.render());
 		template.broadcastInDOM();
+		this._current_templates.unshift(template);
 
 	},
 
 	/**
 	 * Move `template` after `previous_template` (both are in DOM)
 	 * @param {Lava.system.Template} template
-	 * @param {Lava.system.Template} previous_template
+	 * @param {Lava.system.Template} new_previous_template
+	 * @param {Array.<Lava.system.Template>} current_templates
 	 */
-	_moveTemplate: function (template, previous_template) {
+	_moveTemplate: function (template, new_previous_template, current_templates) {
 
-		Firestorm.DOM.moveRegionAfter(
-			this._getEndElement(previous_template),
-			this._getStartElement(template),
-			this._getEndElement(template)
-		)
+		var current_previous_index = this._current_templates.indexOf(template) - 1,
+			current_previous_template = null;
+
+		if (Lava.schema.DEBUG && current_previous_index == -2) Lava.t();
+
+		// skip removed templates
+		while (current_previous_index > -1 && current_templates.indexOf(this._current_templates[current_previous_index]) == -1) {
+			current_previous_index--;
+		}
+
+		if (current_previous_index > -1) {
+			current_previous_template = this._current_templates[current_previous_index];
+		}
+
+		if (new_previous_template != current_previous_template) {
+
+			Firestorm.DOM.moveRegionAfter(
+				this._getEndElement(new_previous_template),
+				this._getStartElement(template),
+				this._getEndElement(template)
+			);
+
+			// move it in local _current_templates array
+			Firestorm.Array.exclude(this._current_templates, template);
+
+			var previous_index = this._current_templates.indexOf(new_previous_template);
+			if (Lava.schema.DEBUG && previous_index == -1) Lava.t();
+			this._current_templates.splice(previous_index + 1, 0, template);
+
+		}
 
 	},
 
@@ -264,6 +291,10 @@ Lava.define(
 		Firestorm.DOM.insertHTMLAfter(this._getEndElement(previous_template), template.render());
 		template.broadcastInDOM();
 
+		var previous_index = this._current_templates.indexOf(previous_template);
+		if (Lava.schema.DEBUG && previous_index == -1) Lava.t();
+		this._current_templates.splice(previous_index + 1, 0, template);
+
 	},
 
 	/**
@@ -291,6 +322,8 @@ Lava.define(
 
 		}
 
+		Firestorm.Array.exclude(this._current_templates, template);
+
 	},
 
 	/**
@@ -314,13 +347,32 @@ Lava.define(
 	},
 
 	/**
+	 * Actions to take after the view was rendered and inserted into DOM
+	 */
+	broadcastInDOM: function() {
+
+		this._broadcast('broadcastInDOM');
+
+	},
+
+	/**
 	 * Actions to take before owner view is removed from DOM
 	 */
 	broadcastRemove: function() {
 
-		for (var guid in this._remove_queue) {
+		this._broadcast('broadcastRemove');
 
-			this._remove_queue[guid].broadcastRemove();
+	},
+
+	/**
+	 * Broadcast callback to children
+	 * @param {string} function_name
+	 */
+	_broadcast: function(function_name) {
+
+		for (var i = 0, count = this._current_templates.length; i < count; i++) {
+
+			this._current_templates[i][function_name]();
 
 		}
 

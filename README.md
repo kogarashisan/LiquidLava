@@ -4,4 +4,4 @@
 
 http://www.lava-framework.com/
 
-Thank You for the stars!
+Thank you for the stars!

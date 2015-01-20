@@ -291,8 +291,7 @@ Lava.define(
 	 */
 	_broadcastToChildren_Refresher: function(function_name) {
 
-		this._refresher[function_name] && this._refresher[function_name]();
-		this._active_template && this._active_template[function_name]();
+		this._refresher[function_name]();
 
 	},
 

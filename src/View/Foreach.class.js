@@ -343,13 +343,7 @@ Lava.define(
 	 */
 	_broadcastToChildren_Refresher: function(function_name) {
 
-		this._refresher[function_name] && this._refresher[function_name]();
-
-		for (var name in this._current_hash) {
-
-			this._current_hash[name][function_name]();
-
-		}
+		this._refresher[function_name]();
 
 	},
 

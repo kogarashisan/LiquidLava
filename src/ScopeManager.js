@@ -53,12 +53,16 @@ Lava.ScopeManager = {
 	 * @type {boolean}
 	 */
 	_has_infinite_loop: false,
-
 	/**
 	 * Is refresh loop in progress
 	 * @type {boolean}
 	 */
 	_is_refreshing: false,
+	/**
+	 * How many locks does it have, see the `lock()` method
+	 * @type {number}
+	 */
+	_lock_count: 0,
 
 	/**
 	 * Initialize global ScopeManager object
@@ -127,8 +131,9 @@ Lava.ScopeManager = {
 	 */
 	lock: function() {
 
-		if (Lava.schema.DEBUG && (this.scheduleScopeRefresh == this.scheduleScopeRefresh_Locked || this._is_refreshing)) Lava.t();
+		if (Lava.schema.DEBUG && this._is_refreshing) Lava.t();
 		this.scheduleScopeRefresh = this.scheduleScopeRefresh_Locked;
+		this._lock_count++;
 
 	},
 
@@ -137,8 +142,12 @@ Lava.ScopeManager = {
 	 */
 	unlock: function() {
 
-		if (Lava.schema.DEBUG && this.scheduleScopeRefresh == this.scheduleScopeRefresh_Normal) Lava.t();
-		this.scheduleScopeRefresh = this.scheduleScopeRefresh_Normal;
+		if (this._lock_count == 0) Lava.t();
+
+		this._lock_count--;
+		if (this._lock_count == 0) {
+			this.scheduleScopeRefresh = this.scheduleScopeRefresh_Normal;
+		}
 
 	},
 

@@ -235,15 +235,15 @@ Lava.define(
 		if (Lava.schema.DEBUG && this._parent_view) Lava.t("Widget: only top-level widgets can be inserted into DOM");
 		if (Lava.schema.DEBUG && !this._container) Lava.t("Widget: root widgets must have a container");
 
-		// If you assign data to a widget, that was removed from DOM,
+		// Otherwise, if you assign data to a widget, that was removed from DOM,
 		// and then render it - it will render with old data.
 		Lava.ScopeManager.refresh();
-		var html = this.render();
 
-		Firestorm.DOM.insertHTML(element, html, position || 'Top');
+		// lock, cause render operation can change data. Although it's not recommended to change data in render().
+		Lava.ScopeManager.lock();
+		Firestorm.DOM.insertHTML(element, this.render(), position || 'Top');
+		Lava.ScopeManager.unlock();
 		this.broadcastInDOM();
-
-		Lava.scheduleRefresh(); // see comment for scheduleRefresh
 
 	},
 
@@ -259,8 +259,12 @@ Lava.define(
 		if (Lava.schema.DEBUG && !this._container) Lava.t("Widget: root widgets must have a container");
 		if (Lava.schema.DEBUG && !this._container.isElementContainer) Lava.t("injectIntoExistingElement expects an element containers");
 
+		Lava.ScopeManager.refresh();
+
+		Lava.ScopeManager.lock();
 		this._container.captureExistingElement(element);
 		this._container.setHTML(this._renderContent());
+		Lava.ScopeManager.unlock();
 
 		// rewritten broadcastInDOM - without this._container.informInDOM()
 		this._is_inDOM = true;

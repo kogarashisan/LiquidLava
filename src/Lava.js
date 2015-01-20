@@ -197,10 +197,6 @@ var Lava = {
 	 * @type {_tGUID}
 	 */
 	guid: 1,
-	/**
-	 * Used to delay refresh loop after the current JavaScript thread exits. See {@link Lava#scheduleRefresh}
-	 */
-	_refresh_timer: null,
 
 	/**
 	 * Create all classes and global class instances.
@@ -703,29 +699,6 @@ var Lava = {
 	},
 
 	/**
-	 * Feature of the current binding system:
-	 * sometimes, a view may be rendered with dirty bindings. They will be refreshed in the next refresh loop.
-	 * This may happen during widget {@link Lava.widget.Standard#inject|inject()} outside of normal App lifecycle,
-	 * and developer may forget to call Lava.refreshViews()
-	 */
-	scheduleRefresh: function() {
-
-		var self = this;
-		if (!this._refresh_timer && !Lava.Core.isProcessingEvent()) {
-
-			this._refresh_timer = window.setTimeout(
-				function(){
-					self._refresh_timer = null;
-					self.refreshViews();
-				},
-				0
-			);
-
-		}
-
-	},
-
-	/**
 	 * Perform view refresh outside of normal application lifecycle (in the end of AJAX call, or from browser console).
 	 * Note: call to this function does not guarantee, that views will be refreshed immediately
 	 */
@@ -735,11 +708,6 @@ var Lava = {
 
 			this.view_manager.refresh();
 
-		}
-
-		if (this._refresh_timer) {
-			window.clearTimeout(this._refresh_timer);
-			this._refresh_timer = null;
 		}
 
 	},
