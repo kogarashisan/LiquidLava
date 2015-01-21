@@ -2183,9 +2183,15 @@ var Lava = {
 
 		this.init && this.init();
 
+		// focus manager must be initialized before any widgets are in DOM, so it could receive the focus event
+		// which can be fired after insertion
+		Lava.schema.focus_manager.IS_ENABLED && this.focus_manager && this.focus_manager.enable();
+
 		var body = document.body,
 			app_class = Firestorm.Element.getProperty(body, 'lava-app'),
-			bootstrap_targets;
+			bootstrap_targets,
+			i = 0,
+			count;
 
 		if (app_class != null) {
 
@@ -2194,7 +2200,7 @@ var Lava = {
 		} else {
 
 			bootstrap_targets = Firestorm.selectElements('script[type="lava/app"],lava-app');
-			for (var i = 0, count = bootstrap_targets.length; i < count; i++) {
+			for (count = bootstrap_targets.length; i < count; i++) {
 
 				if (Firestorm.Element.getTagName(bootstrap_targets[i]) == 'script') {
 					this._scriptToWidget(bootstrap_targets[i]);
@@ -2207,7 +2213,6 @@ var Lava = {
 		}
 
 		Lava.schema.popover_manager.IS_ENABLED && this.popover_manager && this.popover_manager.enable();
-		Lava.schema.focus_manager.IS_ENABLED && this.focus_manager && this.focus_manager.enable();
 
 	},
 
