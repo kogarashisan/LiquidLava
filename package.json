@@ -1,6 +1,6 @@
 {
   "name": "LiquidLava",
-  "version": "0.11.1",
+  "version": "0.11.2",
   "description": "Advanced MVC framework",
   "author": "Alex Galashov",
   "main": "dist/lava-master-DEBUG.js",
