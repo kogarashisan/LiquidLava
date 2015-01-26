@@ -83,7 +83,7 @@ Lava.define(
 
 		if (!this._animation) {
 
-			animation_options = this._properties.is_animation_enabled ? this._config.options.animation : {class: this.TOGGLE_ANIMATION_CLASS};
+			animation_options = this._properties.is_animation_enabled ? this._config.options.animation : {"class": this.TOGGLE_ANIMATION_CLASS};
 			this._animation = new Lava.animation[animation_options['class']](animation_options, element);
 			this._animation.on('complete', this._onAnimationComplete, this);
 

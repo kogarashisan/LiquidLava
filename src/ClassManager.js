@@ -78,8 +78,8 @@ Lava.ClassManager = {
 			path: class_path,
 			source_object: source_object,
 			level: 0,
-			extends: null,
-			implements: [],
+			"extends": null,
+			"implements": [],
 			parent_class_data: null,
 			hierarchy_paths: null,
 			hierarchy_names: null,
@@ -93,12 +93,12 @@ Lava.ClassManager = {
 		if ('Extends' in source_object) {
 
 			if (Lava.schema.DEBUG && typeof(source_object.Extends) != 'string') Lava.t('Extends: string expected. ' + class_path);
-			class_data.extends = /** @type {string} */ source_object.Extends;
+			class_data['extends'] = /** @type {string} */ source_object.Extends;
 			parent_data = this._sources[source_object.Extends];
 			class_data.parent_class_data = parent_data;
 
 			if (!parent_data) Lava.t('[define] Base class not found: "' + source_object.Extends + '"');
-			if (!parent_data.skeleton) Lava.t("[define] Parent class was loaded without skeleton, extension is not possible: " + class_data.extends);
+			if (!parent_data.skeleton) Lava.t("[define] Parent class was loaded without skeleton, extension is not possible: " + class_data['extends']);
 			if (parent_data.hierarchy_names.indexOf(class_data.name) != -1) Lava.t("[define] Duplicate name in inheritance chain: " + class_data.name + " / " + class_path);
 
 			class_data.level = parent_data.level + 1;
@@ -764,8 +764,8 @@ Lava.ClassManager = {
 			name: class_data.name,
 			path: class_data.path,
 			level: class_data.level,
-			extends: class_data.extends,
-			implements: null,
+			"extends": class_data['extends'],
+			"implements": null,
 			hierarchy_paths: class_data.hierarchy_paths,
 			parent_class_data: null, // reserved for serialization
 
@@ -811,10 +811,10 @@ Lava.ClassManager = {
 			count,
 			own_implements = class_data.implements;
 
-		if (class_data.extends) {
+		if (class_data['extends']) {
 
-			parent_data = this._sources[class_data.extends];
-			if (Lava.schema.DEBUG && !parent_data) Lava.t("[loadClass] class parent does not exists: " + class_data.extends);
+			parent_data = this._sources[class_data['extends']];
+			if (Lava.schema.DEBUG && !parent_data) Lava.t("[loadClass] class parent does not exists: " + class_data['extends']);
 
 			class_data.parent_class_data = parent_data;
 			class_data.references = parent_data.references.concat(class_data.references);

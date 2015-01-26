@@ -2042,9 +2042,9 @@ var Lava = {
 
 		if (config) {
 
-			if (Lava.schema.DEBUG && config.extends && config.extends != extends_title) Lava.t("Malformed widget config");
+			if (Lava.schema.DEBUG && config['extends'] && config['extends'] != extends_title) Lava.t("Malformed widget config");
 
-			config.extends = extends_title;
+			config['extends'] = extends_title;
 			Lava.extenders[config.extender_type || widget_config.extender_type](config);
 
 		} else {
@@ -2709,7 +2709,8 @@ Lava.schema = {
 			'expression': 'Expression',
 			'foreach': 'Foreach',
 			'if': 'If',
-			'view': 'View'
+			'view': 'View',
+			'include': 'Include'
 		},
 		/**
 		 * Whether to keep original view names in compiled templates, or leave just classes
@@ -3182,7 +3183,7 @@ Lava.types = {
 	 */
 	Boolean: {
 
-		extends: 'AbstractType',
+		"extends": 'AbstractType',
 
 		_mappings: {
 			'true': true,
@@ -3220,7 +3221,7 @@ Lava.types = {
 	 */
 	String: {
 
-		extends: 'AbstractType',
+		"extends": 'AbstractType',
 
 		/**
 		 * @param {*} value
@@ -3251,7 +3252,7 @@ Lava.types = {
 	 */
 	Number: {
 
-		extends: 'AbstractType',
+		"extends": 'AbstractType',
 
 		_valid_value_regex: /^(\-|\+)?\d+(\.\d*)?$/,
 
@@ -3284,7 +3285,7 @@ Lava.types = {
 	 */
 	Integer: {
 
-		extends: 'Number',
+		"extends": 'Number',
 
 		_valid_value_regex: /^(\-|\+)?\d+$/
 
@@ -3295,7 +3296,7 @@ Lava.types = {
 	 */
 	PositiveInteger: {
 
-		extends: 'Number',
+		"extends": 'Number',
 
 		_valid_value_regex: /^\+?[1-9]\d*$/
 
@@ -3306,7 +3307,7 @@ Lava.types = {
 	 */
 	NonNegativeInteger: {
 
-		extends: 'Number',
+		"extends": 'Number',
 
 		_valid_value_regex: /^\+?\d+$/
 
@@ -3317,7 +3318,7 @@ Lava.types = {
 	 */
 	Percent: {
 
-		extends: 'Number',
+		"extends": 'Number',
 
 		_valid_value_regex: /^(0?\.\d+|1\.0+|0|1)$/,
 
@@ -3338,7 +3339,7 @@ Lava.types = {
 	 */
 	Set: {
 
-		extends: 'AbstractType',
+		"extends": 'AbstractType',
 
 		/**
 		 * @param {*} value
@@ -3375,7 +3376,7 @@ Lava.types = {
 	 */
 	SwitchAttribute: {
 
-		extends: 'AbstractType',
+		"extends": 'AbstractType',
 
 		/**
 		 * @param {*} value
@@ -3407,7 +3408,7 @@ Lava.types = {
 	 */
 	Map: {
 
-		extends: 'AbstractType',
+		"extends": 'AbstractType',
 
 		/**
 		 * @param {*} value
@@ -3440,7 +3441,7 @@ Lava.types = {
 	 */
 	Array: {
 
-		extends: 'AbstractType',
+		"extends": 'AbstractType',
 
 		isValidValue: function(value) {
 
@@ -3467,7 +3468,7 @@ Lava.types = {
 	 */
 	Date: {
 
-		extends: 'AbstractType',
+		"extends": 'AbstractType',
 
 		isValidValue: function(value) {
 
@@ -3498,7 +3499,7 @@ Lava.types = {
 	function extendLavaType(type_object) {
 		var base;
 		if ('extends' in type_object) {
-			base = types[type_object.extends];
+			base = types[type_object['extends']];
 			if (!base.is_extended) {
 				extendLavaType(base);
 			}
@@ -3742,7 +3743,7 @@ Lava.extenders = {
 
 		if ('extends' in config) {
 
-			parent_widget_name = config.extends;
+			parent_widget_name = config['extends'];
 			// returns already extended configs
 			parent_config = Lava.getWidgetConfig(parent_widget_name);
 
@@ -4039,8 +4040,22 @@ Lava.Core = {
 		// http://stackoverflow.com/questions/11188729/jquery-keyup-event-trouble-in-opera
 		// see also this to understand the roots of such behaviour:
 		// http://stackoverflow.com/questions/4968194/event-keyword-in-js
-		return function(event) {
+		return (Firestorm.Environment.browser_name == 'ie') ? function(event) {
+
+			// IE bug: there can be fractional values for coordinates
+			if ('x' in event.page) {
+				event.page.x = Math.floor(event.page.x);
+				event.page.y = Math.floor(event.page.y);
+				event.client.x = Math.floor(event.client.x);
+				event.client.y = Math.floor(event.client.y);
+			}
+
 			self._onDomEvent(event_name, event, freeze_protection);
+
+		} : function(event) {
+
+			self._onDomEvent(event_name, event, freeze_protection);
+
 		};
 
 	},
@@ -5172,8 +5187,8 @@ Lava.ClassManager = {
 			path: class_path,
 			source_object: source_object,
 			level: 0,
-			extends: null,
-			implements: [],
+			"extends": null,
+			"implements": [],
 			parent_class_data: null,
 			hierarchy_paths: null,
 			hierarchy_names: null,
@@ -5187,12 +5202,12 @@ Lava.ClassManager = {
 		if ('Extends' in source_object) {
 
 			if (Lava.schema.DEBUG && typeof(source_object.Extends) != 'string') Lava.t('Extends: string expected. ' + class_path);
-			class_data.extends = /** @type {string} */ source_object.Extends;
+			class_data['extends'] = /** @type {string} */ source_object.Extends;
 			parent_data = this._sources[source_object.Extends];
 			class_data.parent_class_data = parent_data;
 
 			if (!parent_data) Lava.t('[define] Base class not found: "' + source_object.Extends + '"');
-			if (!parent_data.skeleton) Lava.t("[define] Parent class was loaded without skeleton, extension is not possible: " + class_data.extends);
+			if (!parent_data.skeleton) Lava.t("[define] Parent class was loaded without skeleton, extension is not possible: " + class_data['extends']);
 			if (parent_data.hierarchy_names.indexOf(class_data.name) != -1) Lava.t("[define] Duplicate name in inheritance chain: " + class_data.name + " / " + class_path);
 
 			class_data.level = parent_data.level + 1;
@@ -5858,8 +5873,8 @@ Lava.ClassManager = {
 			name: class_data.name,
 			path: class_data.path,
 			level: class_data.level,
-			extends: class_data.extends,
-			implements: null,
+			"extends": class_data['extends'],
+			"implements": null,
 			hierarchy_paths: class_data.hierarchy_paths,
 			parent_class_data: null, // reserved for serialization
 
@@ -5905,10 +5920,10 @@ Lava.ClassManager = {
 			count,
 			own_implements = class_data.implements;
 
-		if (class_data.extends) {
+		if (class_data['extends']) {
 
-			parent_data = this._sources[class_data.extends];
-			if (Lava.schema.DEBUG && !parent_data) Lava.t("[loadClass] class parent does not exists: " + class_data.extends);
+			parent_data = this._sources[class_data['extends']];
+			if (Lava.schema.DEBUG && !parent_data) Lava.t("[loadClass] class parent does not exists: " + class_data['extends']);
 
 			class_data.parent_class_data = parent_data;
 			class_data.references = parent_data.references.concat(class_data.references);
@@ -6332,7 +6347,7 @@ Lava.parsers.Common = {
 		/** @type {_cView} */
 		var config = {
 				type: 'view',
-				class: null
+				"class": null
 			},
 			i = 0,
 			count;
@@ -6397,7 +6412,7 @@ Lava.parsers.Common = {
 
 		var config = {
 			type: 'view',
-			class: 'Expression',
+			"class": 'Expression',
 			argument: raw_expression.arguments[0]
 		};
 
@@ -6466,7 +6481,7 @@ Lava.parsers.Common = {
 
 		var view_config = {
 				type: 'view',
-				class: 'View',
+				"class": 'View',
 				container: this._toContainer(raw_tag)
 			},
 			x = raw_tag.x;
@@ -6652,7 +6667,7 @@ Lava.parsers.Common = {
 
 		var config = this.createDefaultWidgetConfig();
 
-		config.extends = raw_tag.x.widget;
+		config['extends'] = raw_tag.x.widget;
 		config.container = this._toContainer(raw_tag);
 
 		this._parseViewAttributes(config, raw_tag);
@@ -7210,7 +7225,7 @@ Lava.parsers.Common = {
 
 		return {
 			type: 'widget',
-			class: Lava.schema.widget.DEFAULT_EXTENSION_GATEWAY,
+			"class": Lava.schema.widget.DEFAULT_EXTENSION_GATEWAY,
 			extender_type: Lava.schema.widget.DEFAULT_EXTENDER
 		}
 
@@ -7622,7 +7637,7 @@ Lava.parsers.Directives = {
 				widget_tag = this._widget_directives_stack[this._widget_directives_stack.length - 1];
 				if (!widget_tag) Lava.t('edit_template: unable to find source template');
 
-				extends_ = widget_tag.attributes.extends;
+				extends_ = widget_tag.attributes['extends'];
 				while (true) {
 					if (!extends_) Lava.t('edit_template: unable to find source template');
 					source_widget_config = Lava.widgets[extends_];
@@ -7631,7 +7646,7 @@ Lava.parsers.Directives = {
 						template = source_widget_config.includes[raw_tag.attributes.name];
 						break;
 					}
-					extends_ = source_widget_config.extends;
+					extends_ = source_widget_config['extends'];
 				}
 
 			}
@@ -7959,7 +7974,7 @@ Lava.parsers.Directives = {
 		}
 
 		// extends must be set before <storage> (required by Lava.parsers.Storage.getMergedStorageSchema())
-		if (raw_directive.attributes.extends) widget_config.extends = raw_directive.attributes.extends;
+		if (raw_directive.attributes['extends']) widget_config['extends'] = raw_directive.attributes['extends'];
 
 		for (; i < count; i++) {
 
@@ -8040,7 +8055,7 @@ Lava.parsers.Directives = {
 		var widget_config = this._parseWidgetDefinition(raw_directive);
 
 		if (Lava.schema.DEBUG && ('sugar' in widget_config)) Lava.t("Inline widgets must not have sugar");
-		if (Lava.schema.DEBUG && !widget_config['class'] && !widget_config.extends) Lava.t("x:define: widget definition is missing either 'controller' or 'extends' attribute");
+		if (Lava.schema.DEBUG && !widget_config['class'] && !widget_config['extends']) Lava.t("x:define: widget definition is missing either 'controller' or 'extends' attribute");
 		if (raw_directive.attributes.resource_id) widget_config.resource_id = Lava.parsers.Common.parseResourceId(raw_directive.attributes.resource_id);
 
 		widget_config.type = 'widget';
@@ -8759,9 +8774,9 @@ Lava.parsers.Storage = {
 		var parent_schema,
 			result = widget_config.storage_schema;
 
-		if (!widget_config.is_extended && widget_config.extends) {
+		if (!widget_config.is_extended && widget_config['extends']) {
 
-			parent_schema = this.getMergedStorageSchema(Lava.widgets[widget_config.extends]);
+			parent_schema = this.getMergedStorageSchema(Lava.widgets[widget_config['extends']]);
 			if (parent_schema) {
 				if (result) {
 					result = Firestorm.clone(result);
@@ -15619,7 +15634,7 @@ Lava.define(
 			name,
 			x = raw_tag.x;
 
-		widget_config.extends = parent_title;
+		widget_config['extends'] = parent_title;
 
 		if (raw_tag.content) {
 
@@ -22483,8 +22498,12 @@ Lava.define(
 
 		this.guid = Lava.guid++;
 		if (Lava.schema.DEBUG && config.id && !Lava.isValidId(config.id)) Lava.t();
-		this.id = config.id || null;
-		this.label = config.label || null;
+		if ('id' in config) {
+			this.id = config.id;
+		}
+		if ('label' in config) {
+			this.label = config.label;
+		}
 
 		Lava.view_manager.registerView(this);
 
@@ -23227,7 +23246,7 @@ Lava.define(
 	 */
 	_argument: null,
 	/**
-	 * Listener to {@link Lava.scope.Argument#event:changed}
+	 * Listener for {@link Lava.scope.Argument#event:changed}
 	 * @type {_tListener}
 	 */
 	_argument_changed_listener: null,
@@ -23258,7 +23277,7 @@ Lava.define(
 
 	_renderContent: function() {
 
-		if (Lava.schema.DEBUG && this._argument.isWaitingRefresh()) Lava.t();
+		if (Lava.schema.DEBUG && this._argument.isWaitingRefresh()) Lava.t("Rendering a view in dirty state");
 
 		var result = '',
 			new_value = this._argument.getValue();
@@ -23578,7 +23597,7 @@ Lava.define(
 
 	_renderContent: function() {
 
-		if (Lava.schema.DEBUG && (this._argument.isWaitingRefresh() || this._foreach_scope.isWaitingRefresh())) Lava.t();
+		if (Lava.schema.DEBUG && (this._argument.isWaitingRefresh() || this._foreach_scope.isWaitingRefresh())) Lava.t("Rendering a view in dirty state");
 
 		var buffer = '',
 			i = 0;
@@ -23601,7 +23620,7 @@ Lava.define(
 	 */
 	_renderContent_Refresher: function() {
 
-		if (Lava.schema.DEBUG && (this._argument.isWaitingRefresh() || this._foreach_scope.isWaitingRefresh())) Lava.t();
+		if (Lava.schema.DEBUG && (this._argument.isWaitingRefresh() || this._foreach_scope.isWaitingRefresh())) Lava.t("Rendering a view in dirty state");
 		this._requires_refresh_children && this._refreshChildren();
 		return this._refresher.render(this._current_templates);
 
@@ -23937,7 +23956,16 @@ Lava.define(
 	 */
 	_renderContent: function() {
 
-		if (Lava.schema.DEBUG && this._active_argument_index != -1 && this._arguments[this._active_argument_index].isWaitingRefresh()) Lava.t();
+		if (Lava.schema.DEBUG) {
+
+			for (var i = 0; i < this._count_arguments; i++) {
+
+				this._arguments[i].isWaitingRefresh() && Lava.t("Rendering a view in dirty state");
+
+			}
+
+		}
+
 		this._active_template = this._getActiveTemplate();
 		return this._active_template ? this._active_template.render() : '';
 
@@ -24012,6 +24040,136 @@ Lava.define(
 		// to speed up garbage collection and break this object forever (destroyed objects must not be used!)
 		this._refresher = this._content = this._else_content = this._arguments = this._active_template
 			= this._argument_changed_listeners = null;
+
+		this.Abstract$destroy();
+
+	}
+
+});
+Lava.define(
+'Lava.view.Include',
+/**
+ * View, that displays a template, returned by an argument
+ *
+ * @lends Lava.view.Include#
+ * @extends Lava.view.Abstract
+ * @implements _iViewHierarchyMember
+ */
+{
+
+	Extends: 'Lava.view.Abstract',
+	/**
+	 * Argument that returns a template config
+	 * @type {Lava.scope.Argument}
+	 */
+	_argument: null,
+	/**
+	 * Listener for {@link Lava.scope.Argument#event:changed}
+	 * @type {_tListener}
+	 */
+	_argument_changed_listener: null,
+	/**
+	 * Child template
+	 * @type {Lava.system.Template}
+	 */
+	_content: null,
+
+	_postInit: function() {
+
+		if (Lava.schema.DEBUG && !('argument' in this._config)) Lava.t("Include view requires an argument");
+		this._argument = new Lava.scope.Argument(this._config.argument, this, this._widget);
+		this._argument_changed_listener = this._argument.on('changed', this._onValueChanged, this);
+
+	},
+
+	/**
+	 * Argument's value has changed. Old content in not valid.
+	 */
+	_onValueChanged: function() {
+
+		this._content && this._content.destroy();
+		this._content = null;
+		this.trySetDirty();
+
+	},
+
+	render: function() {
+
+		if (Lava.schema.DEBUG && this._argument.isWaitingRefresh()) Lava.t("Rendering a view in dirty state");
+
+		var result;
+
+		if (this._container) {
+
+			result = this._container.wrap(this._renderContent());
+
+		} else {
+
+			result = this._renderContent();
+
+		}
+
+		return result;
+
+	},
+
+	_renderContent: function() {
+
+		return this._getContent().render();
+
+	},
+
+	_refresh: function() {
+
+		this._container.setHTML(this._renderContent());
+		this._broadcastToChildren('broadcastInDOM');
+
+	},
+
+	/**
+	 * @param {string} function_name
+	 */
+	_broadcastToChildren: function(function_name) {
+
+		if (this._content != null) {
+
+			this._content[function_name]();
+
+		}
+
+	},
+
+	/**
+	 * Get `_content`. Create, if needed
+	 * @returns {Lava.system.Template}
+	 */
+	_getContent: function() {
+
+		if (this._content == null) {
+
+			var argument_value = this._argument.getValue();
+			if (Lava.schema.DEBUG && argument_value && !Array.isArray(argument_value)) Lava.t("Include view expects to receive a template from it's argument");
+
+			this._content = new Lava.system.Template(
+				this._argument.getValue() || this._config.template || [],
+				this._widget,
+				this
+			)
+
+		}
+
+		return this._content;
+
+	},
+
+	destroy: function() {
+
+		this._content && this._content.destroy();
+		this._argument.destroy();
+		this._argument_changed_listener
+			= this._argument
+			= this._content
+			= null;
 
 		this.Abstract$destroy();
 
@@ -25679,6 +25837,7 @@ Lava.define(
 	 */
 	addPanel: function(properties) {
 
+		if (Lava.schema.DEBUG && properties.isProperties) Lava.t("Wrong argument to addPanel. Plain object expected.");
 		if (Lava.schema.DEBUG && (properties.title && !Array.isArray(properties.title)) || (properties.content && !Array.isArray(properties.content))) Lava.t('Accordion: title and content must be templates');
 
 		var panel = new Lava.mixin.Properties({
@@ -26041,6 +26200,7 @@ Lava.define(
 	 */
 	addTab: function(properties) {
 
+		if (Lava.schema.DEBUG && properties.isProperties) Lava.t("Wrong argument to addTab. Plain object expected.");
 		if (Lava.schema.DEBUG && (properties.title && !Array.isArray(properties.title)) || (properties.content && !Array.isArray(properties.content))) Lava.t('Tabs: title and content must be templates');
 
 		var tab = new Lava.mixin.Properties({
@@ -26321,7 +26481,7 @@ Lava.define(
 
 		if (!this._animation) {
 
-			animation_options = this._properties.is_animation_enabled ? this._config.options.animation : {class: this.TOGGLE_ANIMATION_CLASS};
+			animation_options = this._properties.is_animation_enabled ? this._config.options.animation : {"class": this.TOGGLE_ANIMATION_CLASS};
 			this._animation = new Lava.animation[animation_options['class']](animation_options, element);
 			this._animation.on('complete', this._onAnimationComplete, this);
 

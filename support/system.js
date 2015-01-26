@@ -77,13 +77,13 @@ _cClassData = {
 	 * When Extends is present - a string with full name of the parent
 	 * @type {string}
 	 */
-	extends: null,
+	"extends": null,
 
 	/**
 	 * List of all classes, implemented by this class and it's parents
 	 * @type {Array.<string>}
 	 */
-	implements: [],
+	"implements": [],
 
 	/**
 	 * Class data of parent

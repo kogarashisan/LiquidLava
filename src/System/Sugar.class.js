@@ -54,7 +54,7 @@ Lava.define(
 			name,
 			x = raw_tag.x;
 
-		widget_config.extends = parent_title;
+		widget_config['extends'] = parent_title;
 
 		if (raw_tag.content) {
 

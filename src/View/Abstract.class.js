@@ -149,8 +149,12 @@ Lava.define(
 
 		this.guid = Lava.guid++;
 		if (Lava.schema.DEBUG && config.id && !Lava.isValidId(config.id)) Lava.t();
-		this.id = config.id || null;
-		this.label = config.label || null;
+		if ('id' in config) {
+			this.id = config.id;
+		}
+		if ('label' in config) {
+			this.label = config.label;
+		}
 
 		Lava.view_manager.registerView(this);
 

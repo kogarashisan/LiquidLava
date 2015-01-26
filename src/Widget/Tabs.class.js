@@ -107,6 +107,7 @@ Lava.define(
 	 */
 	addTab: function(properties) {
 
+		if (Lava.schema.DEBUG && properties.isProperties) Lava.t("Wrong argument to addTab. Plain object expected.");
 		if (Lava.schema.DEBUG && (properties.title && !Array.isArray(properties.title)) || (properties.content && !Array.isArray(properties.content))) Lava.t('Tabs: title and content must be templates');
 
 		var tab = new Lava.mixin.Properties({

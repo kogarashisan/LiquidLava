@@ -174,9 +174,9 @@ Lava.parsers.Storage = {
 		var parent_schema,
 			result = widget_config.storage_schema;
 
-		if (!widget_config.is_extended && widget_config.extends) {
+		if (!widget_config.is_extended && widget_config['extends']) {
 
-			parent_schema = this.getMergedStorageSchema(Lava.widgets[widget_config.extends]);
+			parent_schema = this.getMergedStorageSchema(Lava.widgets[widget_config['extends']]);
 			if (parent_schema) {
 				if (result) {
 					result = Firestorm.clone(result);

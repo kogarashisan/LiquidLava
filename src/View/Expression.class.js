@@ -17,7 +17,7 @@ Lava.define(
 	 */
 	_argument: null,
 	/**
-	 * Listener to {@link Lava.scope.Argument#event:changed}
+	 * Listener for {@link Lava.scope.Argument#event:changed}
 	 * @type {_tListener}
 	 */
 	_argument_changed_listener: null,
@@ -48,7 +48,7 @@ Lava.define(
 
 	_renderContent: function() {
 
-		if (Lava.schema.DEBUG && this._argument.isWaitingRefresh()) Lava.t();
+		if (Lava.schema.DEBUG && this._argument.isWaitingRefresh()) Lava.t("Rendering a view in dirty state");
 
 		var result = '',
 			new_value = this._argument.getValue();

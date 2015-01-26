@@ -257,7 +257,16 @@ Lava.define(
 	 */
 	_renderContent: function() {
 
-		if (Lava.schema.DEBUG && this._active_argument_index != -1 && this._arguments[this._active_argument_index].isWaitingRefresh()) Lava.t();
+		if (Lava.schema.DEBUG) {
+
+			for (var i = 0; i < this._count_arguments; i++) {
+
+				this._arguments[i].isWaitingRefresh() && Lava.t("Rendering a view in dirty state");
+
+			}
+
+		}
+
 		this._active_template = this._getActiveTemplate();
 		return this._active_template ? this._active_template.render() : '';
 

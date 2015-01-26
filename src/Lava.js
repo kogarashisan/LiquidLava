@@ -343,9 +343,9 @@ var Lava = {
 
 		if (config) {
 
-			if (Lava.schema.DEBUG && config.extends && config.extends != extends_title) Lava.t("Malformed widget config");
+			if (Lava.schema.DEBUG && config['extends'] && config['extends'] != extends_title) Lava.t("Malformed widget config");
 
-			config.extends = extends_title;
+			config['extends'] = extends_title;
 			Lava.extenders[config.extender_type || widget_config.extender_type](config);
 
 		} else {

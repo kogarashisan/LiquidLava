@@ -362,7 +362,7 @@ Lava.parsers.Directives = {
 				widget_tag = this._widget_directives_stack[this._widget_directives_stack.length - 1];
 				if (!widget_tag) Lava.t('edit_template: unable to find source template');
 
-				extends_ = widget_tag.attributes.extends;
+				extends_ = widget_tag.attributes['extends'];
 				while (true) {
 					if (!extends_) Lava.t('edit_template: unable to find source template');
 					source_widget_config = Lava.widgets[extends_];
@@ -371,7 +371,7 @@ Lava.parsers.Directives = {
 						template = source_widget_config.includes[raw_tag.attributes.name];
 						break;
 					}
-					extends_ = source_widget_config.extends;
+					extends_ = source_widget_config['extends'];
 				}
 
 			}
@@ -699,7 +699,7 @@ Lava.parsers.Directives = {
 		}
 
 		// extends must be set before <storage> (required by Lava.parsers.Storage.getMergedStorageSchema())
-		if (raw_directive.attributes.extends) widget_config.extends = raw_directive.attributes.extends;
+		if (raw_directive.attributes['extends']) widget_config['extends'] = raw_directive.attributes['extends'];
 
 		for (; i < count; i++) {
 
@@ -780,7 +780,7 @@ Lava.parsers.Directives = {
 		var widget_config = this._parseWidgetDefinition(raw_directive);
 
 		if (Lava.schema.DEBUG && ('sugar' in widget_config)) Lava.t("Inline widgets must not have sugar");
-		if (Lava.schema.DEBUG && !widget_config['class'] && !widget_config.extends) Lava.t("x:define: widget definition is missing either 'controller' or 'extends' attribute");
+		if (Lava.schema.DEBUG && !widget_config['class'] && !widget_config['extends']) Lava.t("x:define: widget definition is missing either 'controller' or 'extends' attribute");
 		if (raw_directive.attributes.resource_id) widget_config.resource_id = Lava.parsers.Common.parseResourceId(raw_directive.attributes.resource_id);
 
 		widget_config.type = 'widget';

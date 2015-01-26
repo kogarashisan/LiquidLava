@@ -118,8 +118,22 @@ Lava.Core = {
 		// http://stackoverflow.com/questions/11188729/jquery-keyup-event-trouble-in-opera
 		// see also this to understand the roots of such behaviour:
 		// http://stackoverflow.com/questions/4968194/event-keyword-in-js
-		return function(event) {
+		return (Firestorm.Environment.browser_name == 'ie') ? function(event) {
+
+			// IE bug: there can be fractional values for coordinates
+			if ('x' in event.page) {
+				event.page.x = Math.floor(event.page.x);
+				event.page.y = Math.floor(event.page.y);
+				event.client.x = Math.floor(event.client.x);
+				event.client.y = Math.floor(event.client.y);
+			}
+
 			self._onDomEvent(event_name, event, freeze_protection);
+
+		} : function(event) {
+
+			self._onDomEvent(event_name, event, freeze_protection);
+
 		};
 
 	},

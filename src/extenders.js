@@ -227,7 +227,7 @@ Lava.extenders = {
 
 		if ('extends' in config) {
 
-			parent_widget_name = config.extends;
+			parent_widget_name = config['extends'];
 			// returns already extended configs
 			parent_config = Lava.getWidgetConfig(parent_widget_name);
 

@@ -277,7 +277,7 @@ Lava.parsers.Common = {
 		/** @type {_cView} */
 		var config = {
 				type: 'view',
-				class: null
+				"class": null
 			},
 			i = 0,
 			count;
@@ -342,7 +342,7 @@ Lava.parsers.Common = {
 
 		var config = {
 			type: 'view',
-			class: 'Expression',
+			"class": 'Expression',
 			argument: raw_expression.arguments[0]
 		};
 
@@ -411,7 +411,7 @@ Lava.parsers.Common = {
 
 		var view_config = {
 				type: 'view',
-				class: 'View',
+				"class": 'View',
 				container: this._toContainer(raw_tag)
 			},
 			x = raw_tag.x;
@@ -597,7 +597,7 @@ Lava.parsers.Common = {
 
 		var config = this.createDefaultWidgetConfig();
 
-		config.extends = raw_tag.x.widget;
+		config['extends'] = raw_tag.x.widget;
 		config.container = this._toContainer(raw_tag);
 
 		this._parseViewAttributes(config, raw_tag);
@@ -1155,7 +1155,7 @@ Lava.parsers.Common = {
 
 		return {
 			type: 'widget',
-			class: Lava.schema.widget.DEFAULT_EXTENSION_GATEWAY,
+			"class": Lava.schema.widget.DEFAULT_EXTENSION_GATEWAY,
 			extender_type: Lava.schema.widget.DEFAULT_EXTENDER
 		}
 

@@ -27,7 +27,7 @@ Lava.types = {
 	 */
 	Boolean: {
 
-		extends: 'AbstractType',
+		"extends": 'AbstractType',
 
 		_mappings: {
 			'true': true,
@@ -65,7 +65,7 @@ Lava.types = {
 	 */
 	String: {
 
-		extends: 'AbstractType',
+		"extends": 'AbstractType',
 
 		/**
 		 * @param {*} value
@@ -96,7 +96,7 @@ Lava.types = {
 	 */
 	Number: {
 
-		extends: 'AbstractType',
+		"extends": 'AbstractType',
 
 		_valid_value_regex: /^(\-|\+)?\d+(\.\d*)?$/,
 
@@ -129,7 +129,7 @@ Lava.types = {
 	 */
 	Integer: {
 
-		extends: 'Number',
+		"extends": 'Number',
 
 		_valid_value_regex: /^(\-|\+)?\d+$/
 
@@ -140,7 +140,7 @@ Lava.types = {
 	 */
 	PositiveInteger: {
 
-		extends: 'Number',
+		"extends": 'Number',
 
 		_valid_value_regex: /^\+?[1-9]\d*$/
 
@@ -151,7 +151,7 @@ Lava.types = {
 	 */
 	NonNegativeInteger: {
 
-		extends: 'Number',
+		"extends": 'Number',
 
 		_valid_value_regex: /^\+?\d+$/
 
@@ -162,7 +162,7 @@ Lava.types = {
 	 */
 	Percent: {
 
-		extends: 'Number',
+		"extends": 'Number',
 
 		_valid_value_regex: /^(0?\.\d+|1\.0+|0|1)$/,
 
@@ -183,7 +183,7 @@ Lava.types = {
 	 */
 	Set: {
 
-		extends: 'AbstractType',
+		"extends": 'AbstractType',
 
 		/**
 		 * @param {*} value
@@ -220,7 +220,7 @@ Lava.types = {
 	 */
 	SwitchAttribute: {
 
-		extends: 'AbstractType',
+		"extends": 'AbstractType',
 
 		/**
 		 * @param {*} value
@@ -252,7 +252,7 @@ Lava.types = {
 	 */
 	Map: {
 
-		extends: 'AbstractType',
+		"extends": 'AbstractType',
 
 		/**
 		 * @param {*} value
@@ -285,7 +285,7 @@ Lava.types = {
 	 */
 	Array: {
 
-		extends: 'AbstractType',
+		"extends": 'AbstractType',
 
 		isValidValue: function(value) {
 
@@ -312,7 +312,7 @@ Lava.types = {
 	 */
 	Date: {
 
-		extends: 'AbstractType',
+		"extends": 'AbstractType',
 
 		isValidValue: function(value) {
 
@@ -343,7 +343,7 @@ Lava.types = {
 	function extendLavaType(type_object) {
 		var base;
 		if ('extends' in type_object) {
-			base = types[type_object.extends];
+			base = types[type_object['extends']];
 			if (!base.is_extended) {
 				extendLavaType(base);
 			}

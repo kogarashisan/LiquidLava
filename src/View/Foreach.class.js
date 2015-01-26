@@ -280,7 +280,7 @@ Lava.define(
 
 	_renderContent: function() {
 
-		if (Lava.schema.DEBUG && (this._argument.isWaitingRefresh() || this._foreach_scope.isWaitingRefresh())) Lava.t();
+		if (Lava.schema.DEBUG && (this._argument.isWaitingRefresh() || this._foreach_scope.isWaitingRefresh())) Lava.t("Rendering a view in dirty state");
 
 		var buffer = '',
 			i = 0;
@@ -303,7 +303,7 @@ Lava.define(
 	 */
 	_renderContent_Refresher: function() {
 
-		if (Lava.schema.DEBUG && (this._argument.isWaitingRefresh() || this._foreach_scope.isWaitingRefresh())) Lava.t();
+		if (Lava.schema.DEBUG && (this._argument.isWaitingRefresh() || this._foreach_scope.isWaitingRefresh())) Lava.t("Rendering a view in dirty state");
 		this._requires_refresh_children && this._refreshChildren();
 		return this._refresher.render(this._current_templates);
 

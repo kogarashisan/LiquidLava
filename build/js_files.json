@@ -106,6 +106,7 @@
 		"View/Expression.class.js",
 		"View/Foreach.class.js",
 		"View/If.class.js",
+		"View/Include.class.js",
 
 		"Widget/Standard.class.js"
 	],

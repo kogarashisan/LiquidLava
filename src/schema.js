@@ -165,7 +165,8 @@ Lava.schema = {
 			'expression': 'Expression',
 			'foreach': 'Foreach',
 			'if': 'If',
-			'view': 'View'
+			'view': 'View',
+			'include': 'Include'
 		},
 		/**
 		 * Whether to keep original view names in compiled templates, or leave just classes

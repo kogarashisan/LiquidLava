@@ -120,6 +120,7 @@ Lava.define(
 	 */
 	addPanel: function(properties) {
 
+		if (Lava.schema.DEBUG && properties.isProperties) Lava.t("Wrong argument to addPanel. Plain object expected.");
 		if (Lava.schema.DEBUG && (properties.title && !Array.isArray(properties.title)) || (properties.content && !Array.isArray(properties.content))) Lava.t('Accordion: title and content must be templates');
 
 		var panel = new Lava.mixin.Properties({
