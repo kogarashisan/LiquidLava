@@ -33,10 +33,6 @@ Lava.define(
 		header_click: '_onTabHeaderClicked'
 	},
 
-	_include_handlers: {
-		tab_include: '_getTabInclude'
-	},
-
 	/**
 	 * Reference to <wp>_tabs</wp> property
 	 * @type {Lava.system.Enumerable}
@@ -56,7 +52,8 @@ Lava.define(
 
 		var sugar_tabs,
 			i,
-			count;
+			count,
+			tab;
 
 		this.Standard$_initMembers(properties);
 
@@ -68,7 +65,15 @@ Lava.define(
 
 			for (; i < count; i++) {
 
-				this.addTab(sugar_tabs[i]);
+				tab = sugar_tabs[i];
+				this.addTab({
+					name: tab.name || '',
+					is_enabled: ("is_enabled" in tab) ? tab.is_enabled : true,
+					is_hidden: ("is_hidden" in tab) ? tab.is_hidden : false,
+					is_active: ("is_active" in tab) ? tab.is_active : false,
+					title_template: tab.title,
+					content_template: tab.content
+				});
 
 			}
 
@@ -101,14 +106,13 @@ Lava.define(
 	 * @param {string} properties.name
 	 * @param {boolean} properties.is_enabled
 	 * @param {boolean} properties.is_hidden
-	 * @param {_tTemplate} properties.content Read only
-	 * @param {_tTemplate} properties.title Read only
+	 * @param {_tTemplate} properties.title_template
+	 * @param {_tTemplate} properties.content_template
 	 * @returns {Lava.mixin.Properties} Created object with tab data
 	 */
 	addTab: function(properties) {
 
 		if (Lava.schema.DEBUG && properties.isProperties) Lava.t("Wrong argument to addTab. Plain object expected.");
-		if (Lava.schema.DEBUG && (properties.title && !Array.isArray(properties.title)) || (properties.content && !Array.isArray(properties.content))) Lava.t('Tabs: title and content must be templates');
 
 		var tab = new Lava.mixin.Properties({
 			guid: Lava.guid++,
@@ -116,8 +120,8 @@ Lava.define(
 			is_enabled: true,
 			is_hidden: false,
 			is_active: false,
-			title: null,
-			content: null
+			title_template: null,
+			content_template: null
 		});
 		tab.setProperties(properties);
 
@@ -239,19 +243,6 @@ Lava.define(
 		});
 
 		this._setActiveTab(active_tab);
-
-	},
-
-	/**
-	 * Get include from tab data
-	 * @param template_arguments
-	 * @returns {_tTemplate}
-	 */
-	_getTabInclude: function(template_arguments) {
-
-		// template_arguments[0] - tab object
-		// template_arguments[1] - property name
-		return template_arguments[0].get(template_arguments[1]);
 
 	},
 

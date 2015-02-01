@@ -661,7 +661,8 @@ Lava.define(
 			properties_string = '',
 			name;
 
-		this._element = null;
+		// see informInDOM_Normal
+		// this._element = null;
 
 		for (name in this._static_properties) {
 
@@ -797,7 +798,12 @@ Lava.define(
 	informInDOM_Normal: function() {
 
 		this._is_inDOM = true;
-		if (Lava.schema.DEBUG && this._element) Lava.t();
+		// if <input> which is already in DOM is re-rendered and inserted back
+		// - then "changed" event will fire in Chrome.
+		// During the event - the DOM element may be retrieved by widget,
+		// so at the moment, when informInDOM is called - it's already set.
+		// if (Lava.schema.DEBUG && this._element) Lava.t();
+		this._element = null;
 
 	},
 

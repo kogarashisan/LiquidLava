@@ -171,6 +171,28 @@ Firestorm.String = {
 
 		return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
 
+	},
+
+	/**
+	 * Repeat string `count` times
+	 * @param {string} string
+	 * @param {number} count
+	 * @returns {string}
+	 */
+	repeat: function(string, count) {
+
+		var result = '';
+
+		while (count > 1) {
+			if ((count & 1)) {
+				result += string;
+			}
+			count >>= 1;
+			string += string;
+		}
+
+		return result + string;
+
 	}
 
 };

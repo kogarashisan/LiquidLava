@@ -43,10 +43,6 @@ Lava.define(
 		panel: '_handlePanelRole'
 	},
 
-	_include_handlers: {
-		panel_include: '_getPanelInclude'
-	},
-
 	/**
 	 * Reference to the <wp>_panels</wp> property
 	 * @type {Lava.system.Enumerable}
@@ -100,8 +96,8 @@ Lava.define(
 
 				this.addPanel({
 					is_expanded: data[i].is_expanded || false,
-					title: data[i].title,
-					content: data[i].content
+					title_template: data[i].title,
+					content_template: data[i].content
 				});
 
 			}
@@ -114,19 +110,18 @@ Lava.define(
 	 * Create a panel inside accordion
 	 * @param {Object} properties Plain object with panel's data
 	 * @param {boolean} properties.is_expanded Initial "expanded" state
-	 * @param {_tTemplate} properties.title
-	 * @param {_tTemplate} properties.content
+	 * @param {_tTemplate} properties.title_template
+	 * @param {_tTemplate} properties.content_template
 	 * @returns {Lava.mixin.Properties} The {@link Lava.mixin.Properties} instance with panel's data
 	 */
 	addPanel: function(properties) {
 
 		if (Lava.schema.DEBUG && properties.isProperties) Lava.t("Wrong argument to addPanel. Plain object expected.");
-		if (Lava.schema.DEBUG && (properties.title && !Array.isArray(properties.title)) || (properties.content && !Array.isArray(properties.content))) Lava.t('Accordion: title and content must be templates');
 
 		var panel = new Lava.mixin.Properties({
 			is_expanded: false,
-			title: null,
-			content: null
+			title_template: null,
+			content_template: null
 		});
 		panel.setProperties(properties);
 		this._panels.push(panel);
@@ -151,19 +146,6 @@ Lava.define(
 	getPanelWidgets: function() {
 
 		return this._panel_widgets.slice();
-
-	},
-
-	/**
-	 * Get an include from panel data
-	 * @param template_arguments
-	 * @returns {_tTemplate}
-	 */
-	_getPanelInclude: function(template_arguments) {
-
-		// template_arguments[0] - panel object (Properties)
-		// template_arguments[1] - name of variable (ex: "content")
-		return template_arguments[0].get(template_arguments[1]);
 
 	},
 

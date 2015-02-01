@@ -121,10 +121,10 @@
 				<collapsible-panel x:roles="$accordion.panel" x:resource_id="$accordion.panel">
 					<x:assign name="is_expanded">panel.is_expanded</x:assign>
 					<title>
-						{>$accordion.panel_include(panel, 'title')}
+						{#include(panel.title_template)}{/include}
 					</title>
 					<content>
-						{>$accordion.panel_include(panel, 'content')}
+						{#include(panel.content_template)}{/include}
 					</content>
 				</collapsible-panel>
 			{/foreach}
@@ -174,7 +174,7 @@
 					<li x:type="view" x:classes="tab.is_active ? 'active' : '';
 							tab.is_enabled ? '' : 'disabled'">
 						<a x:type="view" x:bind:href="'#' + (tab.name || '')" x:event:click="$tabs.header_click(tab)">
-							{>$tabs.tab_include(tab, 'title')}
+							{#include(tab.title_template)}{/include}
 						</a>
 					</li>
 				{/if}
@@ -186,7 +186,7 @@
 			{#foreach($tabs._tabs) as=tab}
 				<x:refresher>{type: 'Standard'}</x:refresher>
 				<div x:type="view" class="tab-pane" x:classes="tab.is_active ? 'active' : ''">
-					{>$tabs.tab_include(tab, 'content')}
+					{#include(tab.content_template)}{/include}
 				</div>
 			{/foreach}
 		</div>

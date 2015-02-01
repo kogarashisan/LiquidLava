@@ -1617,6 +1617,28 @@ Firestorm.String = {
 
 		return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
 
+	},
+
+	/**
+	 * Repeat string `count` times
+	 * @param {string} string
+	 * @param {number} count
+	 * @returns {string}
+	 */
+	repeat: function(string, count) {
+
+		var result = '';
+
+		while (count > 1) {
+			if ((count & 1)) {
+				result += string;
+			}
+			count >>= 1;
+			string += string;
+		}
+
+		return result + string;
+
 	}
 
 };
@@ -20554,7 +20576,8 @@ Lava.define(
 			properties_string = '',
 			name;
 
-		this._element = null;
+		// see informInDOM_Normal
+		// this._element = null;
 
 		for (name in this._static_properties) {
 
@@ -20690,7 +20713,12 @@ Lava.define(
 	informInDOM_Normal: function() {
 
 		this._is_inDOM = true;
-		if (Lava.schema.DEBUG && this._element) Lava.t();
+		// if <input> which is already in DOM is re-rendered and inserted back
+		// - then "changed" event will fire in Chrome.
+		// During the event - the DOM element may be retrieved by widget,
+		// so at the moment, when informInDOM is called - it's already set.
+		// if (Lava.schema.DEBUG && this._element) Lava.t();
+		this._element = null;
 
 	},
 
@@ -25760,10 +25788,6 @@ Lava.define(
 		panel: '_handlePanelRole'
 	},
 
-	_include_handlers: {
-		panel_include: '_getPanelInclude'
-	},
-
 	/**
 	 * Reference to the <wp>_panels</wp> property
 	 * @type {Lava.system.Enumerable}
@@ -25817,8 +25841,8 @@ Lava.define(
 
 				this.addPanel({
 					is_expanded: data[i].is_expanded || false,
-					title: data[i].title,
-					content: data[i].content
+					title_template: data[i].title,
+					content_template: data[i].content
 				});
 
 			}
@@ -25831,19 +25855,18 @@ Lava.define(
 	 * Create a panel inside accordion
 	 * @param {Object} properties Plain object with panel's data
 	 * @param {boolean} properties.is_expanded Initial "expanded" state
-	 * @param {_tTemplate} properties.title
-	 * @param {_tTemplate} properties.content
+	 * @param {_tTemplate} properties.title_template
+	 * @param {_tTemplate} properties.content_template
 	 * @returns {Lava.mixin.Properties} The {@link Lava.mixin.Properties} instance with panel's data
 	 */
 	addPanel: function(properties) {
 
 		if (Lava.schema.DEBUG && properties.isProperties) Lava.t("Wrong argument to addPanel. Plain object expected.");
-		if (Lava.schema.DEBUG && (properties.title && !Array.isArray(properties.title)) || (properties.content && !Array.isArray(properties.content))) Lava.t('Accordion: title and content must be templates');
 
 		var panel = new Lava.mixin.Properties({
 			is_expanded: false,
-			title: null,
-			content: null
+			title_template: null,
+			content_template: null
 		});
 		panel.setProperties(properties);
 		this._panels.push(panel);
@@ -25868,19 +25891,6 @@ Lava.define(
 	getPanelWidgets: function() {
 
 		return this._panel_widgets.slice();
-
-	},
-
-	/**
-	 * Get an include from panel data
-	 * @param template_arguments
-	 * @returns {_tTemplate}
-	 */
-	_getPanelInclude: function(template_arguments) {
-
-		// template_arguments[0] - panel object (Properties)
-		// template_arguments[1] - name of variable (ex: "content")
-		return template_arguments[0].get(template_arguments[1]);
 
 	},
 
@@ -26126,10 +26136,6 @@ Lava.define(
 		header_click: '_onTabHeaderClicked'
 	},
 
-	_include_handlers: {
-		tab_include: '_getTabInclude'
-	},
-
 	/**
 	 * Reference to <wp>_tabs</wp> property
 	 * @type {Lava.system.Enumerable}
@@ -26149,7 +26155,8 @@ Lava.define(
 
 		var sugar_tabs,
 			i,
-			count;
+			count,
+			tab;
 
 		this.Standard$_initMembers(properties);
 
@@ -26161,7 +26168,15 @@ Lava.define(
 
 			for (; i < count; i++) {
 
-				this.addTab(sugar_tabs[i]);
+				tab = sugar_tabs[i];
+				this.addTab({
+					name: tab.name || '',
+					is_enabled: ("is_enabled" in tab) ? tab.is_enabled : true,
+					is_hidden: ("is_hidden" in tab) ? tab.is_hidden : false,
+					is_active: ("is_active" in tab) ? tab.is_active : false,
+					title_template: tab.title,
+					content_template: tab.content
+				});
 
 			}
 
@@ -26194,14 +26209,13 @@ Lava.define(
 	 * @param {string} properties.name
 	 * @param {boolean} properties.is_enabled
 	 * @param {boolean} properties.is_hidden
-	 * @param {_tTemplate} properties.content Read only
-	 * @param {_tTemplate} properties.title Read only
+	 * @param {_tTemplate} properties.title_template
+	 * @param {_tTemplate} properties.content_template
 	 * @returns {Lava.mixin.Properties} Created object with tab data
 	 */
 	addTab: function(properties) {
 
 		if (Lava.schema.DEBUG && properties.isProperties) Lava.t("Wrong argument to addTab. Plain object expected.");
-		if (Lava.schema.DEBUG && (properties.title && !Array.isArray(properties.title)) || (properties.content && !Array.isArray(properties.content))) Lava.t('Tabs: title and content must be templates');
 
 		var tab = new Lava.mixin.Properties({
 			guid: Lava.guid++,
@@ -26209,8 +26223,8 @@ Lava.define(
 			is_enabled: true,
 			is_hidden: false,
 			is_active: false,
-			title: null,
-			content: null
+			title_template: null,
+			content_template: null
 		});
 		tab.setProperties(properties);
 
@@ -26332,19 +26346,6 @@ Lava.define(
 		});
 
 		this._setActiveTab(active_tab);
-
-	},
-
-	/**
-	 * Get include from tab data
-	 * @param template_arguments
-	 * @returns {_tTemplate}
-	 */
-	_getTabInclude: function(template_arguments) {
-
-		// template_arguments[0] - tab object
-		// template_arguments[1] - property name
-		return template_arguments[0].get(template_arguments[1]);
 
 	},
 
@@ -29428,40 +29429,38 @@ return (this._binds[0].getValue());
 								title: [
 									"\r\n\t\t\t\t\t\t",
 									{
-										locator_type: "Name",
-										locator: "accordion",
-										name: "panel_include",
-										arguments: [
-											{
-												type: 2,
-												data: {property_name: "panel"}
-											},
-											{
-												type: 1,
-												data: "title"
-											}
-										],
-										type: "include"
+										type: "view",
+										"class": "Include",
+										argument: {
+											evaluator: function() {
+return (this._binds[0].getValue());
+},
+											flags: {isScopeEval: true},
+											binds: [{
+												property_name: "panel",
+												tail: ["title_template"]
+											}]
+										},
+										template: []
 									},
 									"\r\n\t\t\t\t\t"
 								],
 								content: [
 									"\r\n\t\t\t\t\t\t",
 									{
-										locator_type: "Name",
-										locator: "accordion",
-										name: "panel_include",
-										arguments: [
-											{
-												type: 2,
-												data: {property_name: "panel"}
-											},
-											{
-												type: 1,
-												data: "content"
-											}
-										],
-										type: "include"
+										type: "view",
+										"class": "Include",
+										argument: {
+											evaluator: function() {
+return (this._binds[0].getValue());
+},
+											flags: {isScopeEval: true},
+											binds: [{
+												property_name: "panel",
+												tail: ["content_template"]
+											}]
+										},
+										template: []
 									},
 									"\r\n\t\t\t\t\t"
 								]
@@ -29658,20 +29657,19 @@ return ('#' + (this._binds[0].getValue() || ''));
 											template: [
 												"\r\n\t\t\t\t\t\t\t",
 												{
-													locator_type: "Name",
-													locator: "tabs",
-													name: "tab_include",
-													arguments: [
-														{
-															type: 2,
-															data: {property_name: "tab"}
-														},
-														{
-															type: 1,
-															data: "title"
-														}
-													],
-													type: "include"
+													type: "view",
+													"class": "Include",
+													argument: {
+														evaluator: function() {
+return (this._binds[0].getValue());
+},
+														flags: {isScopeEval: true},
+														binds: [{
+															property_name: "tab",
+															tail: ["title_template"]
+														}]
+													},
+													template: []
 												},
 												"\r\n\t\t\t\t\t\t"
 											]
@@ -29738,20 +29736,19 @@ return (this._binds[0].getValue() ? 'active' : '');
 							template: [
 								"\r\n\t\t\t\t\t",
 								{
-									locator_type: "Name",
-									locator: "tabs",
-									name: "tab_include",
-									arguments: [
-										{
-											type: 2,
-											data: {property_name: "tab"}
-										},
-										{
-											type: 1,
-											data: "content"
-										}
-									],
-									type: "include"
+									type: "view",
+									"class": "Include",
+									argument: {
+										evaluator: function() {
+return (this._binds[0].getValue());
+},
+										flags: {isScopeEval: true},
+										binds: [{
+											property_name: "tab",
+											tail: ["content_template"]
+										}]
+									},
+									template: []
 								},
 								"\r\n\t\t\t\t"
 							]
