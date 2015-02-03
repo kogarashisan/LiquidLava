@@ -370,7 +370,9 @@ Lava.ClassManager = {
 			constructor_actions = [],
 			name,
 			source,
-			constructor;
+			constructor,
+			object_properties,
+			uses_references = false;
 
 		for (name in skeleton) {
 
@@ -402,12 +404,16 @@ Lava.ClassManager = {
 				// members that are copied as inline property
 				case 'sliceArray':
 					serialized_action = 'r[' + skeleton[name].index + '].slice()';
+					uses_references = true;
 					break;
 				case 'inlineArray':
 					serialized_action = skeleton[name].is_empty ? '[]' : this._serializeInlineArray(skeleton[name].value);
 					break;
 				case 'object':
-					var object_properties = this._serializeSkeleton(skeleton[name].skeleton, class_data, "\t");
+					object_properties = [];
+					if (this._serializeSkeleton(skeleton[name].skeleton, class_data, "\t", object_properties)) {
+						uses_references = true;
+					}
 					serialized_action = object_properties.length
 						? "{\n\t" + object_properties.join(",\n\t") + "\n}"
 						: "{}";
@@ -440,7 +446,7 @@ Lava.ClassManager = {
 
 		prototype.Class = class_data;
 
-		source = "var r=Lava.ClassManager.getClassData('" + class_data.path + "').references;\n"
+		source = (uses_references ? ("var r=Lava.ClassManager.getClassData('" + class_data.path + "').references;\n") : '')
 			+ constructor_actions.join(";\n")
 			+ ";";
 
@@ -463,13 +469,15 @@ Lava.ClassManager = {
 	 * @param {Object} skeleton
 	 * @param {_cClassData} class_data
 	 * @param {string} padding
-	 * @returns {Array}
+	 * @param {Array} serialized_properties
+	 * @returns {boolean} <kw>true</kw>, if object uses {@link _cClassData#references}
 	 */
-	_serializeSkeleton: function(skeleton, class_data, padding) {
+	_serializeSkeleton: function(skeleton, class_data, padding, serialized_properties) {
 
-		var serialized_properties = [],
-			name,
-			serialized_value;
+		var name,
+			serialized_value,
+			uses_references = false,
+			object_properties;
 
 		for (name in skeleton) {
 
@@ -491,18 +499,23 @@ Lava.ClassManager = {
 					break;
 				case 'function':
 					serialized_value = 'r[' + skeleton[name].index + ']';
+					uses_references = true;
 					break;
 				case 'regexp':
 					serialized_value = skeleton[name].value.toString();
 					break;
 				case 'sliceArray':
 					serialized_value = 'r[' + skeleton[name].index + '].slice()';
+					uses_references = true;
 					break;
 				case 'inlineArray':
 					serialized_value = skeleton[name].is_empty ? '[]' : this._serializeInlineArray(skeleton[name].value);
 					break;
 				case 'object':
-					var object_properties = this._serializeSkeleton(skeleton[name].skeleton, class_data, padding + "\t");
+					object_properties = [];
+					if (this._serializeSkeleton(skeleton[name].skeleton, class_data, padding + "\t", object_properties)) {
+						uses_references = true;
+					}
 					serialized_value = object_properties.length
 						? "{\n\t" + padding + object_properties.join(",\n\t" + padding) + "\n" + padding + "}" : "{}";
 					break;
@@ -522,7 +535,7 @@ Lava.ClassManager = {
 
 		}
 
-		return serialized_properties;
+		return uses_references;
 
 	},
 
