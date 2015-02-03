@@ -62,11 +62,6 @@ Lava.define(
 	guid: null,
 
 	/**
-	 * Scope's value
-	 * @type {Lava.system.Enumerable}
-	 */
-	_value: null,
-	/**
 	 * Listens to changes in `_observable`. Event name varies
 	 * @type {_tListener}
 	 */
@@ -82,19 +77,16 @@ Lava.define(
 	 * @type {boolean}
 	 */
 	_own_collection: false,
-
 	/**
 	 * Scope options
 	 * @type {?_cScopeForeach}
 	 */
 	_config: null,
-
 	/**
 	 * Scopes, on which this one depends. When they change - this scope is refreshed.
 	 * @type {Array.<_iValueContainer>}
 	 */
 	_binds: null,
-
 	/**
 	 * Listeners for `_binds`
 	 * @type {?Array.<_tListener>}

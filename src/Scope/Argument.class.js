@@ -41,11 +41,6 @@ Lava.define(
 	 */
 	_evaluator: null,
 	/**
-	 * The result of `_evaluator` call
-	 * @type {*}
-	 */
-	_value: null,
-	/**
 	 * Global unique identifier
 	 * @type {_tGUID}
 	 */

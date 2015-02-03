@@ -1,12 +1,12 @@
 {
   "name": "LiquidLava",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "homepage": "https://github.com/kogarashisan/LiquidLava",
   "authors": [
     "Alex Galashov"
   ],
   "description": "Advanced MVC framework",
-  "main": "dist/lava-master-DEBUG.js",
+  "main": "dist/lava-master-DEV.js",
   "keywords": [
     "MVC",
     "framework"

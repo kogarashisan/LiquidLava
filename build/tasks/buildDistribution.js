@@ -6,7 +6,7 @@ module.exports = function(grunt) {
 
 	grunt.registerTask('buildDistribution', function() {
 
-		if (global.buildLavaModule_run) throw new Error('You cannot run both tasks in one command');
+		if (global.buildLavaModule_run) throw new Error('You must run buildModule task in separate command');
 
 		var group_content = global.group_content;
 		var fs = require('fs');
@@ -59,6 +59,7 @@ module.exports = function(grunt) {
 				+ grunt.file.read('./templates/standard_widgets.html')
 			);
 
+			// check that all events, required by widgets, are in the schema.
 			for (var name in Lava.widgets) {
 				if (Lava.widgets[name].default_events) {
 					Lava.widgets[name].default_events.forEach(function(event_name){
@@ -81,12 +82,13 @@ module.exports = function(grunt) {
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			// Build package with raw (not compiled) classes
 
-			package_content = group_content['_lava_core']
-				+ group_content['classes']
-				+ group_content['widgets']
-				+ compiled_templates;
-
-			grunt.file.write('./dist/lava-master-DEBUG.js', package_content);
+			grunt.file.write(
+				'./dist/lava-master-DEV.js',
+				group_content['_lava_core']
+					+ group_content['classes']
+					+ group_content['widgets']
+					+ compiled_templates
+			);
 
 			// End
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -94,12 +96,13 @@ module.exports = function(grunt) {
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			// Finally, build compiled Lava package
 
-			package_content = group_content['_lava_core']
-				+ "Lava.ClassManager.registerRootNamespace('Lava', Lava);\n\n"
-				+ exportClasses(Lava)
-				+ compiled_templates;
-
-			grunt.file.write('./dist/lava-master-compiled-DEBUG.js', package_content);
+			grunt.file.write(
+				'./dist/lava-master-compiled-DEV.js',
+				group_content['_lava_core']
+					+ "Lava.ClassManager.registerRootNamespace('Lava', Lava);\n\n"
+					+ exportClasses(Lava)
+					+ compiled_templates
+			);
 
 			// End
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////////

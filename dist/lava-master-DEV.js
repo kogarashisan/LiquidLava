@@ -11473,6 +11473,11 @@ Lava.define(
 	 * @type {number}
 	 */
 	_refresh_cycle_count: 0,
+	/**
+	 * Scope's value
+	 * @type {*}
+	 */
+	_value: null,
 
 	/**
 	 * Called by {@link Lava.ScopeManager} during refresh loop. You should not call this method directly.
@@ -18562,11 +18567,6 @@ Lava.define(
 	 */
 	_evaluator: null,
 	/**
-	 * The result of `_evaluator` call
-	 * @type {*}
-	 */
-	_value: null,
-	/**
 	 * Global unique identifier
 	 * @type {_tGUID}
 	 */
@@ -18949,11 +18949,6 @@ Lava.define(
 	 * @type {string}
 	 */
 	_property_name: null,
-	/**
-	 * Current value of this instance (equals to property value in data source)
-	 * @type {*}
-	 */
-	_value: null,
 
 	/**
 	 * Scope, that provides data source for this instance
@@ -19229,11 +19224,6 @@ Lava.define(
 	guid: null,
 
 	/**
-	 * Scope's value
-	 * @type {Lava.system.Enumerable}
-	 */
-	_value: null,
-	/**
 	 * Listens to changes in `_observable`. Event name varies
 	 * @type {_tListener}
 	 */
@@ -19249,19 +19239,16 @@ Lava.define(
 	 * @type {boolean}
 	 */
 	_own_collection: false,
-
 	/**
 	 * Scope options
 	 * @type {?_cScopeForeach}
 	 */
 	_config: null,
-
 	/**
 	 * Scopes, on which this one depends. When they change - this scope is refreshed.
 	 * @type {Array.<_iValueContainer>}
 	 */
 	_binds: null,
-
 	/**
 	 * Listeners for `_binds`
 	 * @type {?Array.<_tListener>}
@@ -19571,11 +19558,6 @@ Lava.define(
 	 * @type {string}
 	 */
 	_property_name: null,
-	/**
-	 * The value of this scope (equals to property value in bound view)
-	 * @type {*}
-	 */
-	_value: null,
 
 	/**
 	 * Scope's bound view (also the scope's owner view, which created the instance)
@@ -19772,12 +19754,6 @@ Lava.define(
 	 * @type {_tListener}
 	 */
 	_data_binding_changed_listener: null,
-
-	/**
-	 * Segment's current value
-	 * @type {*}
-	 */
-	_value: null,
 
 	/**
 	 * Create Segment instance. Refresh `_property_name`, `_data_binding` and get value

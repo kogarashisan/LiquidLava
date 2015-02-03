@@ -38,6 +38,11 @@ Lava.define(
 	 * @type {number}
 	 */
 	_refresh_cycle_count: 0,
+	/**
+	 * Scope's value
+	 * @type {*}
+	 */
+	_value: null,
 
 	/**
 	 * Called by {@link Lava.ScopeManager} during refresh loop. You should not call this method directly.

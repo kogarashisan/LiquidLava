@@ -32,11 +32,6 @@ Lava.define(
 	 * @type {string}
 	 */
 	_property_name: null,
-	/**
-	 * The value of this scope (equals to property value in bound view)
-	 * @type {*}
-	 */
-	_value: null,
 
 	/**
 	 * Scope's bound view (also the scope's owner view, which created the instance)

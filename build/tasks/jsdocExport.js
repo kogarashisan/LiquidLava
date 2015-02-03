@@ -69,8 +69,10 @@ module.exports = function(grunt) {
 
 		var fs = require('fs');
 		var support_list = fs.readdirSync('support/');
+		// force interfaces to appear before objects
 		support_list.splice(support_list.indexOf('interfaces.js'), 1);
-		support_list.unshift('interfaces.js'); // force interfaces to appear before objects
+		support_list.unshift('interfaces.js');
+
 		callJSDoc('jsdoc_support_template', 'support/' + support_list.join(' support/'));
 
 	});

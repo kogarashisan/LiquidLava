@@ -34,11 +34,6 @@ Lava.define(
 	 * @type {string}
 	 */
 	_property_name: null,
-	/**
-	 * Current value of this instance (equals to property value in data source)
-	 * @type {*}
-	 */
-	_value: null,
 
 	/**
 	 * Scope, that provides data source for this instance

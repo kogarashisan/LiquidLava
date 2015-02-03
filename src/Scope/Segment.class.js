@@ -56,12 +56,6 @@ Lava.define(
 	_data_binding_changed_listener: null,
 
 	/**
-	 * Segment's current value
-	 * @type {*}
-	 */
-	_value: null,
-
-	/**
 	 * Create Segment instance. Refresh `_property_name`, `_data_binding` and get value
 	 * @param {(Lava.view.Abstract|Lava.scope.Abstract)} container
 	 * @param {(Lava.scope.PropertyBinding|Lava.scope.DataBinding)} name_source_container
