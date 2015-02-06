@@ -23,17 +23,17 @@ Lava.define(
 	_fields: {},
 	/**
 	 * All records in this module
-	 * @type {Array.<Lava.data.RecordAbstract>}
+	 * @type {Array.<Lava.data.Record>}
 	 */
 	_records: [],
 	/**
 	 * Records by their global unique identifiers
-	 * @type {Object.<string, Lava.data.RecordAbstract>}
+	 * @type {Object.<string, Lava.data.Record>}
 	 */
 	_records_by_guid: {},
 	/**
 	 * Record's properties by their global unique identifiers
-	 * @type {Object.<string, Lava.data.RecordAbstract>}
+	 * @type {Object.<string, Lava.data.Record>}
 	 */
 	_properties_by_guid: {},
 	/**
@@ -100,7 +100,7 @@ Lava.define(
 
 	/**
 	 * Return a copy of local `_records` array
-	 * @returns {Array.<Lava.data.RecordAbstract>}
+	 * @returns {Array.<Lava.data.Record>}
 	 */
 	getAllRecords: function() {
 

@@ -322,7 +322,7 @@ Lava.parsers.Directives = {
 	},
 
 	/**
-	 * Copy template and apply editing operations to it. ALPHA
+	 * [ALPHA] Copy template and apply editing operations to it
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */

@@ -57,7 +57,7 @@ Lava.define(
 	_collection_listeners_by_guid: {},
 	/**
 	 * Hash of global unique identifiers of Enumerables from `_collections_by_record_guid` to their owner record (local)
-	 * @type {Object.<_tGUID, Lava.data.RecordAbstract>}
+	 * @type {Object.<_tGUID, Lava.data.Record>}
 	 */
 	_collection_guid_to_record: {},
 
@@ -206,8 +206,8 @@ Lava.define(
 
 	/**
 	 * Set the related {@link Lava.data.field.Record} field of the `records` array to `new_value`
-	 * @param {Array.<Lava.data.RecordAbstract>} records
-	 * @param {?Lava.data.RecordAbstract} new_value
+	 * @param {Array.<Lava.data.Record>} records
+	 * @param {?Lava.data.Record} new_value
 	 */
 	_setCollectionOwner: function(records, new_value) {
 
@@ -228,7 +228,7 @@ Lava.define(
 
 	/**
 	 * Get count of items in record's collection of this field
-	 * @param {Lava.data.RecordAbstract} record
+	 * @param {Lava.data.Record} record
 	 * @param {Object} properties
 	 * @returns {Number}
 	 */

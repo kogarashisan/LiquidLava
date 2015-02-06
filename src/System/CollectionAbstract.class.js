@@ -1,7 +1,7 @@
 
 /**
  * Values were removed from collection
- * @event Lava.system.Enumerable#items_removed
+ * @event Lava.system.CollectionAbstract#items_removed
  * @type {Object}
  * @property {Array.<number>} uids Unique IDs of values, internal to this instance
  * @property {array.<*>} values Values, that were removed

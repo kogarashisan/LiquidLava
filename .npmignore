@@ -1,0 +1,15 @@
+node\_modules
+\.idea
+\.ssh
+
+lib/packages/all-classes-compiled.js
+
+support
+Gruntfile\.js
+build
+dependencies
+extra
+templates
+bower\.json
+Parsers\.html
+src

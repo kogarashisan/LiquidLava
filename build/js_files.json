@@ -25,22 +25,6 @@
 		"Parsers/Generated/TemplateParser.js",
 		"Parsers/TemplateParser.js"
 	],
-	"firestorm":[
-		"Firestorm/Firestorm.js",
-		"Firestorm/schema.js",
-		"Firestorm/known_exceptions.js",
-		"Firestorm/Environment.js",
-		"Firestorm/Element.js",
-		"Firestorm/ElementProperties.js",
-		"Firestorm/ElementDimensions.js",
-		"Firestorm/ElementStyles.js",
-		"Firestorm/DOM.js",
-		"Firestorm/Array.js",
-		"Firestorm/String.js",
-		"Firestorm/Object.js",
-		"Firestorm/Date.js",
-		"Firestorm/init.js"
-	],
 	"classes": [
 		"Mixin/Observable.class.js",
 		"Mixin/Properties.class.js",

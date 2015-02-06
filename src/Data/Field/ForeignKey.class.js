@@ -20,7 +20,7 @@ Lava.define(
 
 	/**
 	 * Local records, grouped by foreign field
-	 * @type {Object.<string, Array.<Lava.data.RecordAbstract>>}
+	 * @type {Object.<string, Array.<Lava.data.Record>>}
 	 */
 	_collections_by_foreign_id: {},
 
@@ -46,7 +46,7 @@ Lava.define(
 
 	/**
 	 * Add record to local collection of records, grouped by this field
-	 * @param {Lava.data.RecordAbstract} record
+	 * @param {Lava.data.Record} record
 	 * @param {string} foreign_key
 	 */
 	_registerByForeignKey: function(record, foreign_key) {
@@ -75,7 +75,7 @@ Lava.define(
 	/**
 	 * Get local records with given `foreign_key` value
 	 * @param {string} foreign_key
-	 * @returns {Array.<Lava.data.RecordAbstract>}
+	 * @returns {Array.<Lava.data.Record>}
 	 */
 	getCollection: function(foreign_key) {
 

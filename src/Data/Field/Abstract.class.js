@@ -3,7 +3,7 @@
  * Field's value has changed in a record instance
  * @event Lava.data.field.Abstract#changed
  * @type {Object}
- * @property {Lava.data.RecordAbstract} record The record with changed field
+ * @property {Lava.data.Record} record The record with changed field
  */
 
 Lava.define(
@@ -121,7 +121,7 @@ Lava.define(
 
 	/**
 	 * Initialize a field from server-side data
-	 * @param {Lava.data.RecordAbstract} record
+	 * @param {Lava.data.Record} record
 	 * @param {Object} properties
 	 * @param {Object} raw_properties
 	 */
@@ -129,7 +129,7 @@ Lava.define(
 
 	/**
 	 * Export the field's value back to server-side data
-	 * @param {Lava.data.RecordAbstract} record
+	 * @param {Lava.data.Record} record
 	 * @param {Object} destination_object Object with exported data
 	 */
 	'export': function(record, destination_object) {
@@ -138,7 +138,7 @@ Lava.define(
 
 	/**
 	 * Get this field's value from a record's properties
-	 * @param {Lava.data.RecordAbstract} record
+	 * @param {Lava.data.Record} record
 	 * @param {Object} properties
 	 */
 	getValue: function(record, properties) {
@@ -147,7 +147,7 @@ Lava.define(
 
 	/**
 	 * Set this field's value to record's properties
-	 * @param {Lava.data.RecordAbstract} record
+	 * @param {Lava.data.Record} record
 	 * @param {Object} properties
 	 * @param {*} value
 	 */
@@ -157,7 +157,7 @@ Lava.define(
 
 	/**
 	 * Emit {@link Lava.data.field.Abstract#event:changed} and fire the changed events from record instance
-	 * @param {Lava.data.RecordAbstract} record
+	 * @param {Lava.data.Record} record
 	 */
 	_fireFieldChangedEvents: function(record) {
 
@@ -183,8 +183,8 @@ Lava.define(
 
 	/**
 	 * Compare values of this field in two records
-	 * @param {Lava.data.RecordAbstract} record_a
-	 * @param {Lava.data.RecordAbstract} record_b
+	 * @param {Lava.data.Record} record_a
+	 * @param {Lava.data.Record} record_b
 	 * @returns {boolean} True, in case the value of this field in `record_a` is less than value in `record_b`
 	 */
 	isLess: function(record_a, record_b) {

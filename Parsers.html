@@ -2,9 +2,9 @@
 <head>
 	<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
 	<script src="http://ajax.googleapis.com/ajax/libs/mootools/1.5.1/mootools-yui-compressed.js"></script>
-	<script src="lib/jison/webtoolkit.base64.js"></script>
-	<script src="lib/jison/es5.js"></script>
-	<script src="lib/jison/jison.js"></script>
+	<script src="dependencies/jison/webtoolkit.base64.js"></script>
+	<script src="dependencies/jison/es5.js"></script>
+	<script src="dependencies/jison/jison.js"></script>
 </head>
 <body>
 
@@ -168,19 +168,19 @@ IDENTIFIER				[a-zA-Z\_][a-zA-Z0-9\_]*
 \s+[\~\.]										{ Lava.t('Spaces in scope path are not allowed (1)'); }
 \[\s											{ Lava.t('Spaces in scope path are not allowed (2)'); }
 
-\@{IDENTIFIER}									{ yytext = yytext.slice(1); return 'VIEW_BY_LABEL'; }
-\#{IDENTIFIER}									{ yytext = yytext.slice(1); return 'VIEW_BY_ID'; }
-\${IDENTIFIER}									{ yytext = yytext.slice(1); return 'VIEW_BY_NAME'; }
+\@{IDENTIFIER}									{ yytext = yytext.substr(1); return 'VIEW_BY_LABEL'; }
+\#{IDENTIFIER}									{ yytext = yytext.substr(1); return 'VIEW_BY_ID'; }
+\${IDENTIFIER}									{ yytext = yytext.substr(1); return 'VIEW_BY_NAME'; }
 
-\-\>{IDENTIFIER}/\(								{ yytext = yytext.slice(2); return 'ACTIVE_MODIFIER_CALL'; }
-\-\&gt\;{IDENTIFIER}/\(							{ yytext = yytext.slice(5); return 'ACTIVE_MODIFIER_CALL'; }
-\.{IDENTIFIER}/\(								{ yytext = yytext.slice(1); return 'WIDGET_MODIFIER_CALL'; }
+\-\>{IDENTIFIER}/\(								{ yytext = yytext.substr(2); return 'ACTIVE_MODIFIER_CALL'; }
+\-\&gt\;{IDENTIFIER}/\(							{ yytext = yytext.substr(5); return 'ACTIVE_MODIFIER_CALL'; }
+\.{IDENTIFIER}/\(								{ yytext = yytext.substr(1); return 'WIDGET_MODIFIER_CALL'; }
 {IDENTIFIER}/\(									{ return 'GLOBAL_MODIFIER_CALL'; }
 
-\~\d+											{ yytext = yytext.slice(1); return 'DEEPNESS_OPERATOR'; }
-\.[a-zA-Z0-9\_]+								{ yytext = yytext.slice(1); return 'DOT_PROPERTY'; }
-\-\>{IDENTIFIER}								{ yytext = yytext.slice(2); return 'SEARCH_OPERATOR'; }
-\-\&gt\;{IDENTIFIER}							{ yytext = yytext.slice(5); return 'SEARCH_OPERATOR'; }
+\~\d+											{ yytext = yytext.substr(1); return 'DEEPNESS_OPERATOR'; }
+\.[a-zA-Z0-9\_]+								{ yytext = yytext.substr(1); return 'DOT_PROPERTY'; }
+\-\>{IDENTIFIER}								{ yytext = yytext.substr(2); return 'SEARCH_OPERATOR'; }
+\-\&gt\;{IDENTIFIER}							{ yytext = yytext.substr(5); return 'SEARCH_OPERATOR'; }
 
 \:up\({IDENTIFIER}\)							{ yytext = yytext.substr(4, yyleng - 5); return 'LOOK_UP'; }
 \:dn\({IDENTIFIER}\)							{ yytext = yytext.substr(4, yyleng - 5); return 'LOOK_DOWN'; }

@@ -1,9 +1,9 @@
 {
-  "name": "LiquidLava",
-  "version": "0.13.1",
+  "name": "lava",
+  "version": "0.13.2",
   "description": "Advanced MVC framework",
   "author": "Alex Galashov",
-  "main": "dist/lava-master-DEV.js",
+  "main": "lib/node-module.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/kogarashisan/LiquidLava"
@@ -19,5 +19,8 @@
     "grunt": ">= 0.4.4",
     "grunt-cli": ">= 0.1.13"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "firestorm": "~0.1.3"
+  }
 }

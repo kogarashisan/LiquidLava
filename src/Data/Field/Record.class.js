@@ -2,16 +2,16 @@
  * Fired, when the field's value changes: local record (`child`) now references the `collection_owner`
  * @event Lava.data.field.Record#added_child
  * @type {Object}
- * @property {Lava.data.RecordAbstract} collection_owner New referenced record
- * @property {Lava.data.RecordAbstract} child Referencing record from local module
+ * @property {Lava.data.Record} collection_owner New referenced record
+ * @property {Lava.data.Record} child Referencing record from local module
  */
 
 /**
  * Fired, when the field's value changes: local record (`child`) no longer references the `collection_owner`
  * @event Lava.data.field.Record#removed_child
  * @type {Object}
- * @property {Lava.data.RecordAbstract} collection_owner Old referenced record
- * @property {Lava.data.RecordAbstract} child Referencing record from local module
+ * @property {Lava.data.Record} collection_owner Old referenced record
+ * @property {Lava.data.Record} child Referencing record from local module
  */
 
 Lava.define(
@@ -289,7 +289,7 @@ Lava.define(
 
 	/**
 	 * Update value of this field in local `record` and add the record to field's internal collections
-	 * @param {Lava.data.RecordAbstract} record The local record
+	 * @param {Lava.data.Record} record The local record
 	 * @param {Object} properties The properties of local record
 	 * @param {string} referenced_record_id The id of foreign record, which it belongs to
 	 */
@@ -359,8 +359,8 @@ Lava.define(
 
 	/**
 	 * Remove `local_record` from field's internal collection referenced by `referenced_record`
-	 * @param {Lava.data.RecordAbstract} local_record
-	 * @param {Lava.data.RecordAbstract} referenced_record
+	 * @param {Lava.data.Record} local_record
+	 * @param {Lava.data.Record} referenced_record
 	 */
 	_unregisterRecord: function(local_record, referenced_record) {
 
@@ -374,8 +374,8 @@ Lava.define(
 
 	/**
 	 * Add `local_record` to field's internal collection of records from local module, referenced by `referenced_record`
-	 * @param {Lava.data.RecordAbstract} local_record
-	 * @param {Lava.data.RecordAbstract} referenced_record The collection owner
+	 * @param {Lava.data.Record} local_record
+	 * @param {Lava.data.Record} referenced_record The collection owner
 	 */
 	_registerRecord: function(local_record, referenced_record) {
 
@@ -402,7 +402,7 @@ Lava.define(
 
 	/**
 	 * API for {@link Lava.data.field.Collection} field. Get all local records, which reference `referenced_record`
-	 * @param {Lava.data.RecordAbstract} referenced_record The collection's owner record from referenced module
+	 * @param {Lava.data.Record} referenced_record The collection's owner record from referenced module
 	 * @returns {Array} All records
 	 */
 	getCollection: function(referenced_record) {
@@ -415,7 +415,7 @@ Lava.define(
 
 	/**
 	 * API for {@link Lava.data.field.Collection} field. Get count of local records, which reference the `referenced_record`
-	 * @param {Lava.data.RecordAbstract} referenced_record The collection's owner record from referenced module
+	 * @param {Lava.data.Record} referenced_record The collection's owner record from referenced module
 	 * @returns {Number}
 	 */
 	getCollectionCount: function(referenced_record) {
@@ -437,7 +437,7 @@ Lava.define(
 
 	/**
 	 * Get field's value equivalent for comparison
-	 * @param {Lava.data.RecordAbstract} record
+	 * @param {Lava.data.Record} record
 	 * @returns {string}
 	 */
 	_getComparisonValue: function(record) {

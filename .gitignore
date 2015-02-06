@@ -1,5 +1,5 @@
 node\_modules
 \.idea
 \.ssh
-dist/lava-master-compiled-DEV.js
-build/temp/*
+
+lib/packages/all-classes-compiled.js

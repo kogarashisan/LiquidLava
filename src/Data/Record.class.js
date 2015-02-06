@@ -11,7 +11,7 @@ Lava.define(
 
 	Implements: 'Lava.mixin.Properties',
 	/**
-	 * To tell other classes that this is instance of RecordAbstract
+	 * To tell other classes that this is instance of Record
 	 * @type {boolean}
 	 * @const
 	 */

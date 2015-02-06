@@ -184,6 +184,7 @@ Lava.Core = {
 	 */
 	_onDomEvent: function(event_name, event_object, freeze_protection) {
 
+		// slice, cause handlers may be removed while they are called
 		var handlers = this._event_handlers[event_name].slice(),
 			i = 0,
 			count = handlers.length;

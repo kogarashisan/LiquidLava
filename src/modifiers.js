@@ -25,7 +25,7 @@ Lava.modifiers = {
 
 		if (value) {
 			result = value.toString();
-			result = result[0].toUpperCase() + result.slice(1);
+			result = result[0].toUpperCase() + result.substr(1);
 		}
 
 		return result;

@@ -1,11 +1,22 @@
 
+// workaround for a bug in Grunt, https://github.com/gruntjs/grunt/issues/1135
+global.bug1135 = function(callback) {
+	return function() {
+		try {
+			return callback();
+		} catch (e) {
+			if (typeof(e) == 'string' || typeof(e) == 'number') throw new Error(e);
+			throw e;
+		}
+	}
+};
+
 module.exports = function(grunt) {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// read files from disk
+	// read files from disk and pack them for tasks
 
 	var groups = grunt.file.readJSON('build/js_files.json'),
-		fs = require('fs'),
 		group_content = {};
 
 	for (var name in groups) {
@@ -21,14 +32,6 @@ module.exports = function(grunt) {
 
 	}
 
-	group_content['locale'] = grunt.file.read('./locale/en/schema.js');
-
-	group_content['_lava_core'] =
-		group_content['firestorm']
-		+ group_content['core']
-		+ group_content['parsers']
-		+ group_content['locale'];
-
 	global.group_content = group_content;
 
 	// End
@@ -37,10 +40,8 @@ module.exports = function(grunt) {
 	grunt.option('stack', true);
 	grunt.loadTasks('build/tasks/');
 
-	grunt.registerTask('default', ['buildModule']);
-	// depends on buildModule
-	grunt.registerTask('export', ['buildDistribution']);
-	// depends on buildDistribution
-	grunt.registerTask('jsdoc_export', ['jsdocExport']);
+	grunt.registerTask('default', ['buildLibrary']);
+	// depends on buildLibrary
+	grunt.registerTask('export', ['buildWidgetTemplates', 'buildCompiled']);
 
 };
