@@ -16,7 +16,7 @@ module.exports = function(grunt) {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// read files from disk and pack them for tasks
 
-	var groups = grunt.file.readJSON('build/js_files.json'),
+	var groups = grunt.file.readJSON('build/files.json'),
 		group_content = {};
 
 	for (var name in groups) {

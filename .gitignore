@@ -1,5 +1,5 @@
-node\_modules
-\.idea
-\.ssh
+/node_modules
+/.idea
+/.ssh
 
-lib/packages/all-classes-compiled.js
+/lib/packages/all-classes-compiled.js

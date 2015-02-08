@@ -1,6 +1,6 @@
 {
   "name": "lava",
-  "version": "0.13.2",
+  "version": "0.13.3",
   "description": "Advanced MVC framework",
   "author": "Alex Galashov",
   "main": "lib/node-module.js",
@@ -21,6 +21,6 @@
   },
   "license": "MIT",
   "dependencies": {
-    "firestorm": "~0.1.3"
+    "firestorm": "~0.1.4"
   }
 }

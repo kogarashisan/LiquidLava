@@ -312,7 +312,7 @@ Lava.define('Lava.system.CollectionAbstract',
 	},
 
 	/**
-	 * Swap values, names and UIDs at given index. Does not generate {@link Lava.system.Enumerable#event:items_removed}
+	 * Swap values, names and UIDs at given index. Does not generate {@link Lava.system.CollectionAbstract#event:items_removed}
 	 * and {@link Lava.system.Enumerable#event:items_added} events, just {@link Lava.system.Enumerable#event:collection_changed}
 	 * @param {number} index_a First index to swap
 	 * @param {number} index_b Second index to swap

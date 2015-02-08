@@ -196,7 +196,7 @@ Lava.define(
 	/**
 	 * When directly removing records from collection - their related Record field must be set to null
 	 * @param {Lava.system.Enumerable} collection Collection of records that belong to local record ("children")
-	 * @param {Lava.system.Enumerable#event:items_removed} event_args
+	 * @param {Lava.system.CollectionAbstract#event:items_removed} event_args
 	 */
 	_onCollectionRecordsRemoved: function(collection, event_args) {
 

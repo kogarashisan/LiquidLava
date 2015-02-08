@@ -1,15 +1,16 @@
-node\_modules
-\.idea
-\.ssh
+/node_modules
+/.idea
+/.ssh
 
-lib/packages/all-classes-compiled.js
+/lib/packages/all-classes-compiled.js
 
-support
-Gruntfile\.js
-build
-dependencies
-extra
-templates
-bower\.json
-Parsers\.html
-src
+/support
+/build
+/dependencies
+/extra
+/templates
+/src
+/design
+/Gruntfile.js
+/bower.json
+/Parsers.html
