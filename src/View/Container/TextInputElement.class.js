@@ -24,7 +24,7 @@ Lava.define(
 
 	init: function(view, config, widget) {
 
-		var needs_shim = Firestorm.Environment.NEEDS_INPUT_EVENT_SHIM,
+		var needs_shim = Firestorm.Environment.capabilities[Firestorm.CAPABILITY_NAMES.NEEDS_INPUT_EVENT_SHIM],
 			new_init_name = needs_shim ? "init_IE" : "Element$init";
 
 		Lava.ClassManager.patch(this, "TextInputElement", "informInDOM", needs_shim ? "informInDOM_OldIE" : "Element$informInDOM");

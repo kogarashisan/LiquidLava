@@ -11,7 +11,6 @@ Lava.define(
 {
 
 	Extends: 'Lava.animation.Standard',
-	Shared: ['_shared'],
 
 	/**
 	 * Animation config

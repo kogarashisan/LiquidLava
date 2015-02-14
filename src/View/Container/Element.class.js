@@ -372,7 +372,7 @@ Lava.define(
 	 */
 	syncClasses: function() {
 
-		Firestorm.Element.setProperty(this.getDOMElement(), 'class', this._renderClasses());
+		Firestorm.Element.setClass(this.getDOMElement(), this._renderClasses());
 
 	},
 

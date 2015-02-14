@@ -10,8 +10,13 @@ module.exports = function(grunt) {
 
 		var group_content = global.group_content;
 
-		grunt.file.delete('lib/packages/widget-templates.js');
-		grunt.file.delete('lib/packages/all-classes-compiled.js');
+		if (grunt.file.exists('lib/packages/widget-templates.js')) {
+			grunt.file.delete('lib/packages/widget-templates.js');
+		}
+
+		if (grunt.file.exists('lib/packages/all-classes-compiled.js')) {
+			grunt.file.delete('lib/packages/all-classes-compiled.js');
+		}
 
 		grunt.file.write('lib/packages/core.js', group_content['core']);
 		grunt.file.write('lib/packages/parsers.js', group_content['parsers']);

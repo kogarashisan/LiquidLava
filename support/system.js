@@ -68,12 +68,6 @@ _cClassData = {
 	source_object: {},
 
 	/**
-	 * How many parents does it have (via Extends directive)
-	 * @type {number}
-	 */
-	level: 0,
-
-	/**
 	 * When Extends is present - a string with full name of the parent
 	 * @type {string}
 	 */
@@ -125,7 +119,18 @@ _cClassData = {
 	 * Temporary counter for class serialization
 	 * @type {number}
 	 */
-	own_references_count: 0
+	own_references_count: 0,
+
+	/**
+	 * For exported classes: helper method, used by {@link Lava.ClassManager#loadClass}
+	 * @type {function}
+	 */
+	prototype_generator: null,
+	/**
+	 * For exported classes: generated constructor
+	 * @type {function}
+	 */
+	constructor: null
 };
 
 /**

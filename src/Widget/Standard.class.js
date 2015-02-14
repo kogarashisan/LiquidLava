@@ -312,7 +312,7 @@ Lava.define(
 	},
 
 	/**
-	 * Alpha: not implemented
+	 * Deprecated
 	 * @param {string} name
 	 * @param {Array} arguments_array
 	 * @returns {*}

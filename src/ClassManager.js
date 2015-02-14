@@ -71,13 +71,14 @@ Lava.ClassManager = {
 			parent_data,
 			i,
 			count,
-			shared_names;
+			shared_names,
+			is_array,
+			type;
 
 		class_data = /** @type {_cClassData} */ {
 			name: class_path.split('.').pop(),
 			path: class_path,
 			source_object: source_object,
-			level: 0,
 			"extends": null,
 			"implements": [],
 			parent_class_data: null,
@@ -101,7 +102,6 @@ Lava.ClassManager = {
 			if (!parent_data.skeleton) Lava.t("[define] Parent class was loaded without skeleton, extension is not possible: " + class_data['extends']);
 			if (parent_data.hierarchy_names.indexOf(class_data.name) != -1) Lava.t("[define] Duplicate name in inheritance chain: " + class_data.name + " / " + class_path);
 
-			class_data.level = parent_data.level + 1;
 			class_data.hierarchy_paths = parent_data.hierarchy_paths.slice();
 			class_data.hierarchy_paths.push(class_path);
 			class_data.hierarchy_names = parent_data.hierarchy_names.slice();
@@ -112,12 +112,19 @@ Lava.ClassManager = {
 
 			for (name in parent_data.shared) {
 
-				class_data.shared[name] = {};
-				Firestorm.extend(class_data.shared[name], parent_data.shared[name]);
+				is_array = Array.isArray(parent_data.shared[name]);
+				class_data.shared[name] = is_array
+					? parent_data.shared[name].slice()
+					: Firestorm.Object.copy(parent_data.shared[name]);
 
 				if (name in source_object) {
 
-					Firestorm.extend(class_data.shared[name], source_object[name]);
+					if (Lava.schema.DEBUG && Array.isArray(source_object[name]) != is_array) Lava.t("Shared members of different types must not override each other (array must not become an object)");
+					if (is_array) {
+						class_data.shared[name] = source_object[name];
+					} else {
+						Firestorm.extend(class_data.shared[name], source_object[name]);
+					}
 
 				}
 
@@ -137,23 +144,22 @@ Lava.ClassManager = {
 			for (i = 0, count = shared_names.length; i < count; i++) {
 
 				name = shared_names[i];
-				if (Lava.schema.DEBUG && !(name in source_object)) Lava.t("Shared member is not in class: " + name);
-				if (Lava.schema.DEBUG && Firestorm.getType(source_object[name]) != 'object') Lava.t("Shared: class member must be an object");
-				if (Lava.schema.DEBUG && class_data.parent_class_data && (name in class_data.parent_class_data.skeleton)) Lava.t("[ClassManager] instance member from parent class may not become shared in descendant: " + name);
+				type = Firestorm.getType(source_object[name]);
 
-				if (!(name in class_data.shared)) {
-
-					class_data.shared[name] = {};
-
+				if (Lava.schema.DEBUG) {
+					if (!(name in source_object)) Lava.t("Shared member is not in class: " + name);
+					if (type != 'object' && type != 'array') Lava.t("Shared: class member must be an object or array");
+					if (class_data.parent_class_data && (name in class_data.parent_class_data.skeleton)) Lava.t("[ClassManager] instance member from parent class may not become shared in descendant: " + name);
+					if (name in class_data.shared) Lava.t("Member is already shared in parent class: " + class_path + "#" + name);
 				}
 
-				Firestorm.extend(class_data.shared[name], source_object[name]);
+				class_data.shared[name] = source_object[name];
 
 			}
 
 		}
 
-		class_data.skeleton = this._disassemble(class_data, source_object, class_data.level, true);
+		class_data.skeleton = this._disassemble(class_data, source_object, true);
 
 		if (parent_data) {
 
@@ -282,11 +288,10 @@ Lava.ClassManager = {
 	 * Recursively create skeletons for all objects inside class body
 	 * @param {_cClassData} class_data
 	 * @param {Object} source_object
-	 * @param {number} level
 	 * @param {boolean} is_root
 	 * @returns {Object}
 	 */
-	_disassemble: function(class_data, source_object, level, is_root) {
+	_disassemble: function(class_data, source_object, is_root) {
 
 		var name,
 			skeleton = {},
@@ -309,7 +314,7 @@ Lava.ClassManager = {
 				case 'object':
 					skeleton_value = {
 						type: 'object',
-						skeleton: this._disassemble(class_data, value, level, false)
+						skeleton: this._disassemble(class_data, value, false)
 					};
 					break;
 				case 'function':
@@ -430,7 +435,7 @@ Lava.ClassManager = {
 
 				} else {
 
-					constructor_actions.push('this["' + name.replace(/\"/g, "\\\"") + '"] = ' + serialized_action);
+					constructor_actions.push('this[' + Firestorm.String.quote(name) + '] = ' + serialized_action);
 
 				}
 
@@ -753,7 +758,7 @@ Lava.ClassManager = {
 	 * Server-side export function: create an exported version of a class, which can be loaded by
 	 * {@link Lava.ClassManager#loadClass} to save time on client
 	 * @param {string} class_path
-	 * @returns {Object}
+	 * @returns {_cClassData}
 	 */
 	exportClass: function(class_path) {
 
@@ -773,23 +778,21 @@ Lava.ClassManager = {
 		}
 
 		result = {
-			// string data
-			name: class_data.name,
 			path: class_data.path,
-			level: class_data.level,
 			"extends": class_data['extends'],
 			"implements": null,
-			hierarchy_paths: class_data.hierarchy_paths,
-			parent_class_data: null, // reserved for serialization
 
 			prototype_generator: this._getPrototypeGenerator(class_data),
-			shared: shared,
 			references: null, // warning: partial array, contains only own class' members
 			constructor: this.constructors[class_path],
 
 			skeleton: class_data.skeleton, // may be deleted, if extension via define() is not needed for this class
-			source_object: class_data.source_object // may be safely deleted before serialization.
+			source_object: class_data.source_object // may be safely deleted before serialization
 		};
+
+		if (!Firestorm.Object.isEmpty(shared)) {
+			result.shared = shared;
+		}
 
 		if (class_data.parent_class_data) {
 
@@ -813,16 +816,20 @@ Lava.ClassManager = {
 
 	/**
 	 * Load an object, exported by {@link Lava.ClassManager#exportClass}
-	 * @param {Object} class_data
+	 * @param {_cClassData} class_data
 	 */
 	loadClass: function(class_data) {
 
 		var parent_data,
 			name,
-			shared = class_data.shared,
+			shared,
 			i = 0,
 			count,
 			own_implements = class_data.implements;
+
+		if (!class_data.shared) class_data.shared = {};
+		shared = class_data.shared;
+		class_data.name = class_data.path.split('.').pop();
 
 		if (class_data['extends']) {
 
@@ -836,10 +843,11 @@ Lava.ClassManager = {
 
 				if (!(name in shared)) {
 
-					shared[name] = {};
-					Firestorm.extend(shared[name], parent_data.shared[name]);
+					shared[name] = Array.isArray(parent_data.shared[name])
+						? parent_data.shared[name].slice()
+						: Firestorm.Object.copy(parent_data.shared[name]);
 
-				} else {
+				} else if (!Array.isArray(shared[name])) {
 
 					Firestorm.implement(shared[name], parent_data.shared[name]);
 
@@ -850,10 +858,14 @@ Lava.ClassManager = {
 			class_data.implements = parent_data.implements.concat(class_data.implements);
 			class_data.hierarchy_names = parent_data.hierarchy_names.slice();
 			class_data.hierarchy_names.push(class_data.name);
+			class_data.hierarchy_paths = parent_data.hierarchy_paths.slice();
+			class_data.hierarchy_paths.push(class_data.path);
 
 		} else {
 
 			class_data.hierarchy_names = [class_data.name];
+			class_data.hierarchy_paths = [class_data.path];
+			class_data.parent_class_data = null;
 
 		}
 

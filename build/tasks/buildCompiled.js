@@ -24,7 +24,7 @@ module.exports = function(grunt) {
 					export_path(exported.extends);
 				}
 
-				delete exported.skeleton;
+				//delete exported.skeleton;
 				delete exported.source_object;
 				export_classes_result += "Lava.ClassManager.loadClass(" + Lava.serializer.serialize(exported) + ");\n\n";
 				exported_paths.push(path);

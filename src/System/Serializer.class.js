@@ -226,7 +226,7 @@ Lava.define(
 		// cause the property names in configs are always valid.
 		if (this._check_property_names && (!Lava.VALID_PROPERTY_NAME_REGEX.test(name) || Lava.JS_KEYWORDS.indexOf(name) != -1)) {
 
-			name = '"' + name.replace(/\"/g, "\\\"") + '"';
+			name = Firestorm.String.quote(name);
 
 		}
 
