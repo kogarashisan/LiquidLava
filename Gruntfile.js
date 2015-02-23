@@ -5,8 +5,7 @@ global.bug1135 = function(callback) {
 		try {
 			return callback();
 		} catch (e) {
-			if (typeof(e) == 'string' || typeof(e) == 'number') throw new Error(e);
-			throw e;
+			throw new Error(e);
 		}
 	}
 };

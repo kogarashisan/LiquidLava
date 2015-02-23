@@ -28,6 +28,17 @@ Lava.Cron = {
 	_active_tasks: [],
 
 	/**
+	 * Initialize Lava.Cron object
+	 */
+	init: function() {
+
+		this._enable = (Firestorm.Environment.requestAnimationFrame && Lava.schema.system.ALLOW_REQUEST_ANIMATION_FRAME)
+			? this._enable_AnimationFrame
+			: this._enable_Interval;
+
+	},
+
+	/**
 	 * Callback for window.setInterval()
 	 */
 	timeout_callback: function() {
@@ -78,12 +89,25 @@ Lava.Cron = {
 	 */
 	_enable: function() {
 
-		// one-time gateway
-		this._enable = (Firestorm.Environment.requestAnimationFrame && Lava.schema.system.ALLOW_REQUEST_ANIMATION_FRAME)
-			? function() { Firestorm.Environment.requestAnimationFrame(this.animation_frame_callback); }
-			: function() { this._timer = window.setInterval(this.timeout_callback, this.DEFAULT_TIMER_DELAY); };
+		Lava.t("Framework requires initialization");
 
-		this._enable();
+	},
+
+	/**
+	 * Version of `_enable`, which uses requestAnimationFrame
+	 */
+	_enable_AnimationFrame: function() {
+
+		Firestorm.Environment.requestAnimationFrame(this.animation_frame_callback);
+
+	},
+
+	/**
+	 * Version of `_enable`, which uses setInterval
+	 */
+	_enable_Interval: function() {
+
+		this._timer = window.setInterval(this.timeout_callback, this.DEFAULT_TIMER_DELAY);
 
 	},
 

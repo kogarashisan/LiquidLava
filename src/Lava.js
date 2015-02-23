@@ -228,6 +228,7 @@ var Lava = {
 			this._initGlobals();
 			this.ClassManager.registerExistingConstructor('Lava.WidgetConfigExtensionGateway', this.WidgetConfigExtensionGateway);
 			this.ClassManager.registerExistingConstructor('Lava.ClassLocatorGateway', this.ClassLocatorGateway);
+			this.Cron.init();
 		}
 
 		for (count = this.schema.SUGAR_CLASSES.length; i < count; i++) {
@@ -304,7 +305,7 @@ var Lava = {
 	 */
 	logException: function(e) {
 
-		this.logError((typeof(e) == 'string' || typeof(e) == 'number') ? e : e.message);
+		this.logError((typeof(e) == 'string' || typeof(e) == 'number') ? (e + '') : e.message);
 
 	},
 

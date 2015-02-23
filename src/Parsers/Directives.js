@@ -310,18 +310,6 @@ Lava.parsers.Directives = {
 	},
 
 	/**
-	 * Helper method for edit_template to evaluate and extract editing method from task definition
-	 * @param {string} src
-	 * @returns {*}
-	 */
-	_evalTaskHandler: function(src) {
-		var handler = null;
-		eval(src);
-		if (Lava.schema.DEBUG && typeof(handler) != 'function') Lava.t('malformed task handler');
-		return handler;
-	},
-
-	/**
 	 * [ALPHA] Copy template and apply editing operations to it
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
@@ -402,7 +390,8 @@ Lava.parsers.Directives = {
 			switch (tasks[i].attributes.type) {
 				case 'manual':
 					if (Lava.schema.DEBUG && (!blocks_hash['handler'] || !blocks_hash['handler'].content || blocks_hash['handler'].content.length != 1)) Lava.t('edit_template: malformed task handler');
-					handler = this._evalTaskHandler(blocks_hash['handler'].content[0]);
+					handler = eval("(" + blocks_hash['handler'].content[0] + ")");
+					if (Lava.schema.DEBUG && typeof(handler) != 'function') Lava.t('malformed task handler');
 					handler(template, tasks[i], blocks_hash, task_arguments);
 					break;
 				case 'traverse':

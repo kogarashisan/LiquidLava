@@ -1,6 +1,6 @@
 {
   "name": "lava",
-  "version": "0.13.5",
+  "version": "0.13.6",
   "description": "Advanced MVC framework",
   "author": "Alex Galashov",
   "main": "lib/node-module.js",

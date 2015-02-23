@@ -130,7 +130,18 @@ _cClassData = {
 	 * For exported classes: generated constructor
 	 * @type {function}
 	 */
-	constructor: null
+	constructor: null,
+	/**
+	 * Was this class optimized for function monomorphism
+	 * @type {boolean}
+	 */
+	is_monomorphic: true,
+
+	/**
+	 * For exported classes: partial (own) references array
+	 * @type {Array}
+	 */
+	own_references: null
 };
 
 /**

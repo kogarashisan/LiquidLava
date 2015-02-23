@@ -999,7 +999,7 @@ Lava.parsers.Common = {
 
 		for (name in attributes_object) {
 
-			result += ' ' + name + '="' + attributes_object[name].replace(/\"/g,'\"') + '"';
+			result += ' ' + name + '="' + Firestorm.String.escape(attributes_object[name], Firestorm.String.ATTRIBUTE_ESCAPE_REGEX) + '"';
 
 		}
 

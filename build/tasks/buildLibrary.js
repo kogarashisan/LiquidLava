@@ -1,7 +1,7 @@
 
 module.exports = function(grunt) {
 
-	grunt.registerTask('buildLibrary', function() {
+	grunt.registerTask('buildLibrary', global.bug1135(function() {
 
 		// currently, you cannot write a Node module and then immediately require() it - Node will load old file from disk.
 		// As a workaround for this - the build process was split into two tasks, which need to be run separately
@@ -23,6 +23,6 @@ module.exports = function(grunt) {
 		grunt.file.write('lib/packages/core-classes.js', group_content['classes']);
 		grunt.file.write('lib/packages/widget-classes.js', group_content['widgets']);
 
-	});
+	}));
 
 };

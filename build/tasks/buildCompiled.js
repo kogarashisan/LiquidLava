@@ -11,44 +11,60 @@ module.exports = function(grunt) {
 
 		var Lava = require('./../../lib/node-module.js');
 
-		function exportClasses(Lava) {
+		var exported_classes = [];
+		var skeletons = {};
+		var exported_paths = [];
 
-			var export_classes_result = '';
-			var exported_paths = [];
+		var constructors = [];
+		var own_references = [];
+		var prototype_generators = [];
 
-			function export_path(path) {
+		function export_path(path) {
 
-				var exported = Lava.ClassManager.exportClass(path);
+			exported_paths.push(path);
+			var class_data = Lava.ClassManager.exportClass(path);
 
-				if (exported.extends && exported_paths.indexOf(exported.extends) == -1) {
-					export_path(exported.extends);
-				}
-
-				//delete exported.skeleton;
-				delete exported.source_object;
-				export_classes_result += "Lava.ClassManager.loadClass(" + Lava.serializer.serialize(exported) + ");\n\n";
-				exported_paths.push(path);
-
+			if (class_data.extends && exported_paths.indexOf(class_data.extends) == -1) {
+				export_path(class_data.extends);
 			}
 
-			var class_names = Lava.ClassManager.getClassNames();
-			for (var i = 0, count = class_names.length; i < count; i++) {
+			skeletons[path] = class_data.skeleton;
+			delete class_data.skeleton;
+			constructors.push(class_data.constructor);
+			delete class_data.constructor;
+			own_references.push(class_data.own_references);
+			delete class_data.own_references;
+			prototype_generators.push(class_data.prototype_generator);
+			delete class_data.prototype_generator;
 
-				if (exported_paths.indexOf(class_names[i]) == -1) {
-					export_path(class_names[i]);
-				}
+			delete class_data.source_object;
+			delete class_data.references;
+			exported_classes.push(class_data);
 
+		}
+
+		var class_names = Lava.ClassManager.getClassNames();
+		for (var i = 0, count = class_names.length; i < count; i++) {
+
+			if (exported_paths.indexOf(class_names[i]) == -1) {
+				export_path(class_names[i]);
 			}
-
-			return export_classes_result;
 
 		}
 
 		grunt.file.write(
-			'lib/packages/all-classes-compiled.js',
-			"Lava.ClassManager.registerRootNamespace('Lava', Lava);\n\n"
-			+ exportClasses(Lava)
+			'lib/compiled/skeletons.js',
+			"Lava.ClassManager.loadSkeletons(" + Lava.serializer.serialize(skeletons) + ");\n\n"
 		);
+
+		var wrapper = grunt.file.read('build/compiled_export_wrapper.js');
+		// replaces are done in backwards order - it's faster
+		wrapper = wrapper.replace("$$$_CLASS_DATAS_$$$", Lava.serializer.serialize(exported_classes));
+		wrapper = wrapper.replace("$$$_GENERATORS_$$$", Lava.serializer.serialize(prototype_generators));
+		wrapper = wrapper.replace("$$$_OWN_REFERENCES_$$$", Lava.serializer.serialize(own_references));
+		wrapper = wrapper.replace("$$$_CONSTRUCTORS_$$$", Lava.serializer.serialize(constructors));
+
+		grunt.file.write('lib/compiled/all-classes.js', wrapper);
 
 	}));
 

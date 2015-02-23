@@ -2,8 +2,6 @@
 /.idea
 /.ssh
 
-/lib/packages/all-classes-compiled.js
-
 /support
 /build
 /dependencies
