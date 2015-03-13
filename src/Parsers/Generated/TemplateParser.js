@@ -273,12 +273,7 @@ break;
 case 27: this.$ = {name:$$[$0], value:true}; 
 break;
 case 28:
-			var literals = {
-				'null': null,
-				'undefined': undefined,
-				'true': true,
-				'false': false
-			};
+			var literals = Lava.parsers.Common.LITERALS;
 			if ($$[$0] in literals) {
 				$$[$0] = literals[$$[$0]];
 			}

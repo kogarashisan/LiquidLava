@@ -76,15 +76,11 @@ Lava.parsers.Common = {
 		sugar: '_compileSugar' // element with it's name in schema.sugar_map
 	},
 
-	/**
-	 * Does given string represent a JavaScript literal ('true', 'false', 'null', 'undefined')
-	 * @param {string} string
-	 * @returns {boolean}
-	 */
-	isLiteral: function(string) {
-
-		return (['true','false','null','undefined'].indexOf(string.toLowerCase()) !== -1);
-
+	LITERALS: {
+		'null': null,
+		'undefined': void 0,
+		'true': true,
+		'false': false
 	},
 
 	/**

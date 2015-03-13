@@ -123,11 +123,15 @@ Lava.schema = {
 		 */
 		DEFAULT_FIELD_TYPE: 'Basic',
 		/**
-		 * Whether to validate the data, which is loaded into modules.
-		 * Generally, it's NOT recommended to turn this off in production
+		 * Whether to validate the data, which is loaded into modules
 		 * @const
 		 */
-		VALIDATE_IMPORT_DATA: true
+		VALIDATE_IMPORT_DATA: true,
+		/**
+		 * Validate values, which are assigned to record fields
+		 * @const
+		 */
+		VALIDATE_VALUES: true
 	},
 	/**
 	 * User-defined module settings

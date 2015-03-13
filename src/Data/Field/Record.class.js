@@ -317,7 +317,7 @@ Lava.define(
 
 	setValue: function(record, properties, new_ref_record) {
 
-		if (!this.isValidValue(new_ref_record))
+		if (Lava.schema.data.VALIDATE_VALUES && !this.isValidValue(new_ref_record))
 			Lava.t("Field/Record: assigned value is not valid. Reason: " + this.getInvalidReason(new_ref_record));
 
 		if (properties[this._name] != null) {

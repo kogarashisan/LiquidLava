@@ -81,7 +81,7 @@ Lava.define(
 		this.Abstract$init(config, widget, parent_view, template, properties);
 
 		// setting count after roles registration, cause scope can be filtered
-		this.set('count', this._foreach_scope.getValue().getCount());
+		this._setCount(this._foreach_scope.getValue().getCount());
 
 	},
 
@@ -106,6 +106,13 @@ Lava.define(
 		if (this._config.refresher) {
 			this.createRefresher(this._config.refresher);
 		}
+
+	},
+
+	set: function(name, value) {
+
+		if (Lava.schema.DEBUG && name == "count") Lava.t("Tried to assign 'count' to Foreach view");
+		this.Abstract$set(name, value);
 
 	},
 
@@ -162,7 +169,7 @@ Lava.define(
 		this._current_hash = {};
 		this._current_uids = [];
 		this._current_templates = [];
-		this.set('count', 0);
+		this._setCount(0);
 
 	},
 
@@ -261,7 +268,7 @@ Lava.define(
 	 */
 	_onDataSourceChanged: function() {
 
-		this.set('count', this._foreach_scope.getValue().getCount());
+		this._setCount(this._foreach_scope.getValue().getCount());
 		this._requires_refresh_children = true;
 		this.trySetDirty();
 
@@ -355,6 +362,12 @@ Lava.define(
 
 		return this._foreach_scope;
 
+	},
+
+	_setCount: function(new_count) {
+		if (this._properties.count != new_count) {
+			this._set("count", new_count);
+		}
 	},
 
 	destroy: function() {

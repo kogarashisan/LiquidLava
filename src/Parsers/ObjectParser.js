@@ -14,7 +14,7 @@ Lava.ObjectParser.yy = {
 
 		if (Lava.schema.VALIDATE_OBJECT_PATHS) {
 
-			if (!Lava.parsers.Common.isLiteral(path_segments[0]) && this.valid_globals.indexOf(path_segments[0]) == -1) {
+			if (!(path_segments[0] in Lava.parsers.Common.LITERALS) && this.valid_globals.indexOf(path_segments[0]) == -1) {
 				Lava.t("ObjectParser: invalid external path. Text: " + path_segments.join('.'));
 			}
 

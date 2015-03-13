@@ -188,7 +188,6 @@ IDENTIFIER				[a-zA-Z\_][a-zA-Z0-9\_]*
 (\&lt\;=|\&gt\;=)								{ yytext = yy.unescape(yytext); return 'OPERATOR'; /*escaped operator versions*/ }
 (\&amp\;|\&lt\;|\&gt\;|\&)+						{ yytext = yy.unescape(yytext); return 'OPERATOR'; /*escaped operator versions + "&", "&&" */ }
 
-\/\/depends\:									{ return 'DEPENDS_START'; }
 [\+\-\*\/\%]									{ return 'OPERATOR'; /*arithmetic*/ }
 \|\||\!\!										{ return 'OPERATOR'; /*logical, without "&&" and "!" */ }
 \=\=\=|\!\=\=|\=\=|\!\=|\<\=|\>\=|\<|\>			{ return 'OPERATOR'; /*comparison*/ }
@@ -225,21 +224,15 @@ IDENTIFIER				[a-zA-Z\_][a-zA-Z0-9\_]*
 
 {IDENTIFIER}									{
 		var lowercase = yytext.toLowerCase();
-		var map = {
-			'lt': '<',
-			'gt': '>',
-			'and': '&&'
-		};
+		if (lowercase == 'this') Lava.t("Expression parser: 'this' is reserved word. Are you missing the Label sign (@)?");
 
-		if (lowercase == 'this') Lava.t("'this' is reserved word. Are you missing the Label sign (@)?");
-		if ((lowercase in map) && lowercase != yytext) Lava.t("Expression parser: 'lt', 'gt', 'and' must be lower case");
-
-		if (lowercase in map) {
-			yytext = map[lowercase];
+		if (lowercase in this.operators_map) {
+			if (lowercase != yytext) Lava.t("Expression parser: 'lt', 'gt', 'and' must be lower case");
+			yytext = this.operators_map[lowercase];
 			return 'OPERATOR';
 		}
 
-		if (Lava.parsers.Common.isLiteral(yytext)) {
+		if (lowercase in Lava.parsers.Common.LITERALS) {
 			if (lowercase != yytext) Lava.t("Expression parser, code style: literals must be lower case");
 			return 'LITERAL';
 		}
@@ -261,25 +254,20 @@ root
 	;
 
 expressions
-	: expressions SEMICOLON expressionWithOptionalDepends {
+	: expressions SEMICOLON expression {
 			yy.assertSemicolonAllowed();
 			yy.finishArgument($3.trim());
 		}
-	| expressions COMMA expressionWithOptionalDepends {
+	| expressions COMMA expression {
 			yy.assertCommaAllowed();
 			yy.finishArgument($3.trim());
 		}
-	| expressionWithOptionalDepends { yy.finishArgument($1.trim()); }
+	| expression { yy.finishArgument($1.trim()); }
 	;
 
 scopeEvalList
 	: scopeEvalList COMMA scopeEval { yy.x_argument_binds.push($3); }
 	| scopeEval { yy.x_argument_binds.push($1); }
-	;
-
-expressionWithOptionalDepends
-	: expression DEPENDS_START OPEN_CURLY scopeEvalList CLOSE_CURLY { $$ = $1; }
-	| expression { $$ = $1; }
 	;
 
 expression
@@ -844,12 +832,7 @@ blockHash
 blockHashSegment
 	: IDENTIFIER { $$ = {name:$1, value:true}; }
 	| HASH_ASSIGN IDENTIFIER {
-			var literals = {
-				'null': null,
-				'undefined': undefined,
-				'true': true,
-				'false': false
-			};
+			var literals = Lava.parsers.Common.LITERALS;
 			if ($2 in literals) {
 				$2 = literals[$2];
 			}

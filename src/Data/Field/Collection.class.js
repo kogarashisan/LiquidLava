@@ -126,6 +126,8 @@ Lava.define(
 
 	isValidValue: function() {
 
+		// You can not assign anything to Collection fields.
+		// They can only be imported and are updated automatically, when corresponding Record field changes
 		return false;
 
 	},

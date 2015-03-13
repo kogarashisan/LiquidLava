@@ -37,24 +37,6 @@ _iViewHierarchyMember = {
 };
 
 /**
- * Visitor for {@link Lava.TemplateWalker}
- * @interface
- */
-_iVisitor = {
-	enter: function(walker, block_type, block) {},
-	leave: function(walker, block_type, block) {},
-	enterRegion: function(walker, region_name) {},
-	leaveRegion: function(walker, region_name) {},
-	visitView: function(walker, node) {},
-	visitWidget: function(walker, node) {},
-	visitString: function(walker, node) {},
-	visitInclude: function(walker, node) {},
-	visitStaticValue: function(walker, node) {},
-	visitStaticEval: function(walker, node) {},
-	visitStaticTag: function(walker, node) {}
-};
-
-/**
  * Interface of Lava.view.container classes
  * @interface
  */

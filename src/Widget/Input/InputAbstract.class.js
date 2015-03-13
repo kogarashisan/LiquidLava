@@ -9,6 +9,7 @@ Lava.define(
 {
 
 	Extends: 'Lava.widget.Standard',
+	Shared: ["DEFAULT_ROLES"],
 
 	_property_descriptors: {
 		name: {type: 'String', is_nullable: true},
@@ -55,10 +56,16 @@ Lava.define(
 	 */
 	_input_container: null,
 
+	/**
+	 * Will be dispatched in `init()`. Needed to register input in forms and field groups.
+	 * @type {Array.<_cTarget>}
+	 */
+	DEFAULT_ROLES: [{name: 'form_field'}],
+
 	init: function(config, widget, parent_view, template, properties) {
 
 		this.Standard$init(config, widget, parent_view, template, properties);
-		Lava.view_manager.dispatchRoles(this, [{name: 'form_field'}]);
+		Lava.view_manager.dispatchRoles(this, this.DEFAULT_ROLES);
 
 	},
 

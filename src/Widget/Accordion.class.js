@@ -267,7 +267,8 @@ Lava.define(
 	},
 
 	/**
-	 * Turn accordion on and off
+	 * Turn accordion functionality on and off. When accordion is off - it will not control state of it's panels
+	 * (when a panel is expanded - other panels are not closed)
 	 * @param {boolean} value
 	 * @param {string} name
 	 */
@@ -341,6 +342,21 @@ Lava.define(
 	removePanel: function(panel) {
 
 		this._panels.removeValue(panel); // everything else will be done by destroy listener
+
+	},
+
+	/**
+	 * Collapse all panels in Accordion
+	 */
+	collapseAll: function() {
+
+		var panels = this._active_panels.slice();
+
+		for (var i = 0, count = panels.length; i < count; i++) {
+
+			panels[i].set('is_expanded', false);
+
+		}
 
 	},
 

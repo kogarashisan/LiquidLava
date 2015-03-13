@@ -23,6 +23,11 @@ Lava.ExpressionParser.parseRaw = function(input, separator) {
 	this.lexer.x_tail_mode = false;
 	this.lexer.x_lex_brace_levels = 0;
 	this.lexer.x_input_tail_length = 0;
+	this.lexer.operators_map = {
+		'lt': '<',
+		'gt': '>',
+		'and': '&&'
+	};
 	this.yy.x_allowed_separator = separator;
 	this.yy.reset();
 

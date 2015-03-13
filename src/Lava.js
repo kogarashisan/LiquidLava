@@ -5,7 +5,7 @@ var Lava = {
 	/**
 	 * Version numbers, split by comma to allow easier comparison of versions
 	 */
-	version: [],
+	version: [/*<%version%>*/],
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Default namespaces reservation. All root members must be reserved ahead - v8 optimization.
@@ -20,8 +20,6 @@ var Lava = {
 	TemplateParser: null,
 	/** @ignore */
 	ObjectParser: null,
-	/** @ignore */
-	TemplateWalker: null,
 	/** @ignore */
 	transitions: null,
 	/** @ignore */

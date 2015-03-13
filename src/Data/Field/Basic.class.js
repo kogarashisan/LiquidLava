@@ -71,7 +71,7 @@ Lava.define(
 
 		if (properties[this._name] !== value) {
 
-			if (!this.isValidValue(value)) Lava.t('[Field name=' + this._name + '] Invalid field value: '
+			if (Lava.schema.data.VALIDATE_VALUES && !this.isValidValue(value)) Lava.t('[Field name=' + this._name + '] Invalid field value: '
 				+ value + ". Reason: " + this.getInvalidReason(value));
 
 			properties[this._name] = value;
