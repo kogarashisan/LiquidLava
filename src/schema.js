@@ -239,5 +239,10 @@ Lava.schema = {
 	 * at the time of development and testing
 	 * @define
 	 */
-	DEBUG: true
+	DEBUG: true,
+	/**
+	 * Whether to verify results of the scope refresh cycle. See {@link Lava.ScopeManager} sources.
+	 * @define
+	 */
+	DEBUG_SCOPES: true
 };

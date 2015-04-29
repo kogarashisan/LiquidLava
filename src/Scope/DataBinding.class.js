@@ -83,7 +83,7 @@ Lava.define(
 		this._container_changed_listener = value_container.on('changed', this.onParentDataSourceChanged, this);
 		this._refreshValue();
 
-		Lava.schema.DEBUG && Lava.ScopeManager.debugTrackScope(this);
+		Lava.schema.DEBUG_SCOPES && Lava.ScopeManager.debugTrackScope(this);
 
 	},
 
@@ -239,7 +239,7 @@ Lava.define(
 		this._enumerable_changed_listener && this._property_container.removeListener(this._enumerable_changed_listener);
 		this._property_container = null;
 
-		Lava.schema.DEBUG && Lava.ScopeManager.debugStopTracking(this);
+		Lava.schema.DEBUG_SCOPES && Lava.ScopeManager.debugStopTracking(this);
 		this.Abstract$destroy();
 
 	}

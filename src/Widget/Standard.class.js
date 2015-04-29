@@ -73,7 +73,8 @@ Lava.define(
 	 */
 	_modifiers: {
 		translate: 'translate',
-		ntranslate: 'ntranslate'
+		ntranslate: 'ntranslate',
+		translateBoolean: 'translateBoolean'
 	},
 
 	/**
@@ -527,6 +528,18 @@ Lava.define(
 		}
 
 		return result;
+
+	},
+
+	/**
+	 * (modifier) Translate a boolean type into user language
+	 * @param value
+	 * @returns {string}
+	 */
+	translateBoolean: function(value) {
+
+		if (Lava.schema.DEBUG && typeof(value) != 'boolean') Lava.t("translateBoolean: argument is not boolean type");
+		return Lava.locales[Lava.schema.LOCALE].booleans[+value];
 
 	},
 

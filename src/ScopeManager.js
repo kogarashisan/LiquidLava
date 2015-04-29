@@ -229,7 +229,7 @@ Lava.ScopeManager = {
 
 		} else {
 
-			Lava.schema.DEBUG && this.debugVerify();
+			Lava.schema.DEBUG_SCOPES && this.debugVerify();
 			this._scope_refresh_queues = [];
 
 		}
@@ -469,5 +469,8 @@ Lava.ScopeManager = {
 		}
 
 	}
+
+	// end: debug-mode validations
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 };

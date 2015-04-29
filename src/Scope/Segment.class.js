@@ -79,7 +79,7 @@ Lava.define(
 		this._name_source_container = name_source_container;
 		this._name_source_changed_listener = name_source_container.on('changed', this.onPropertyNameChanged, this);
 		this._value = this._data_binding.getValue();
-		Lava.schema.DEBUG && Lava.ScopeManager.debugTrackScope(this);
+		Lava.schema.DEBUG_SCOPES && Lava.ScopeManager.debugTrackScope(this);
 
 	},
 
@@ -183,7 +183,7 @@ Lava.define(
 		this._name_source_container.removeListener(this._name_source_changed_listener);
 		this._data_binding_changed_listener && this._data_binding.removeListener(this._data_binding_changed_listener);
 
-		Lava.schema.DEBUG && Lava.ScopeManager.debugStopTracking(this);
+		Lava.schema.DEBUG_SCOPES && Lava.ScopeManager.debugStopTracking(this);
 		this.Abstract$destroy();
 
 	}

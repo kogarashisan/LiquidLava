@@ -45,18 +45,6 @@ Lava.modifiers = {
 	},
 
 	/**
-	 * Translate a boolean type into user language
-	 * @param value
-	 * @returns {string}
-	 */
-	translateBoolean: function(value) {
-
-		if (Lava.schema.DEBUG && typeof(value) != 'boolean') Lava.t("translateBoolean: argument is not boolean type");
-		return Lava.locales[Lava.schema.LOCALE].booleans[+value];
-
-	},
-
-	/**
 	 * Join an array of values
 	 * @param {Array} array
 	 * @param {string} glue
