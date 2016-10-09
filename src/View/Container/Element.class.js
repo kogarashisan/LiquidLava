@@ -106,6 +106,11 @@ Lava.define(
 	 * @type {boolean}
 	 */
 	_is_element_owner: true,
+	/**
+	 * DEBUG-only flag, used to guarantee that Element's properties are not changed between rendered and inDOM states
+	 * @type {boolean}
+	 */
+	_is_rendered: false,
 
 	/**
 	 * One-time static constructor, which modifies container's prototype and replaces itself with correct version
@@ -181,12 +186,9 @@ Lava.define(
 
 		// Must clone everything, cause additional statics can be added to the element at run time
 		if (static_classes) this._static_classes = static_classes.slice();
-		for (name in static_styles) {
-			this._static_styles[name] = static_styles[name];
-		}
-		for (name in static_properties) {
-			this._static_properties[name] = static_properties[name];
-		}
+
+        Firestorm.extend(this._static_styles, static_styles);
+		Firestorm.extend(this._static_properties, static_properties);
 
 		for (name in config.events) {
 			this._events[name] = Firestorm.clone(config.events[name]); // Object.<string, Array.<_cTarget>>
@@ -223,7 +225,7 @@ Lava.define(
 	 */
 	addEventTarget: function(event_name, target) {
 
-		Lava.t();
+		Lava.t('Framework requires initialization');
 
 	},
 
@@ -279,8 +281,11 @@ Lava.define(
 	 */
 	storeProperty: function(name, value) {
 
-		if (Lava.schema.DEBUG && name == 'id') Lava.t();
-		if (Lava.schema.DEBUG && (name in this._property_bindings)) Lava.t("Property is bound to an argument and cannot be set directly: " + name);
+		if (Lava.schema.DEBUG) {
+			if (this._is_rendered) Lava.t("Trying to set container's property/style/class while in rendered state");
+			if (name == 'id') Lava.t(); // IDs belong to framework - you must not set them manually!
+			if (name in this._property_bindings) Lava.t("Property is bound to an argument and cannot be set directly: " + name);
+		}
 
 		this._static_properties[name] = value;
 
@@ -315,6 +320,7 @@ Lava.define(
 	addClass: function(class_name, cancel_sync) {
 
 		if (Lava.schema.DEBUG && (!class_name || class_name.indexOf(' ') != -1)) Lava.t("addClass: expected one class name, got: " + class_name);
+		if (Lava.schema.DEBUG && this._is_rendered) Lava.t("Trying to set container's property/style/class while in rendered state");
 
 		if (Firestorm.Array.include(this._static_classes, class_name)) {
 
@@ -331,6 +337,7 @@ Lava.define(
 	 */
 	removeClass: function(class_name, cancel_sync) {
 
+		if (Lava.schema.DEBUG && this._is_rendered) Lava.t("Trying to set container's property/style/class while in rendered state");
 		if (Firestorm.Array.exclude(this._static_classes, class_name)) {
 
 			if (this._is_inDOM && !cancel_sync) Firestorm.Element.removeClass(this.getDOMElement(), class_name);
@@ -384,6 +391,7 @@ Lava.define(
 	 */
 	setStyle: function(name, value, cancel_sync) {
 
+		if (Lava.schema.DEBUG && this._is_rendered) Lava.t("Trying to set container's property/style/class while in rendered state");
 		if (value == null) {
 
 			this.removeStyle(name, cancel_sync);
@@ -404,9 +412,10 @@ Lava.define(
 	 */
 	removeStyle: function(name, cancel_sync) {
 
+		if (Lava.schema.DEBUG && this._is_rendered) Lava.t("Trying to set container's property/style/class while in rendered state");
 		if (name in this._static_styles) {
 			delete this._static_styles[name];
-			if (this._is_inDOM && !cancel_sync) Firestorm.Element.setStyle(this.getDOMElement(), name, null);
+			if (this._is_inDOM && !cancel_sync) Firestorm.Element.setStyle(this.getDOMElement(), name, '');
 		}
 
 	},
@@ -465,22 +474,29 @@ Lava.define(
 
 		if (this._is_inDOM) {
 
-			// note: escape will be handled by framework
 			var value = argument.getValue();
+            if (listener_args.name.indexOf("data-") === 0) {
 
-			if (value != null && value !== false) {
+                if (value != null) {
 
-				if (value === true) {
-					value = listener_args.name;
-				}
+                    Firestorm.Element.setAttribute(this.getDOMElement(), listener_args.name, value);
 
-				Firestorm.Element.setProperty(this.getDOMElement(), listener_args.name, value);
+                } else {
 
-			} else {
+                    Firestorm.Element.removeAttribute(this.getDOMElement(), listener_args.name);
 
-				Firestorm.Element.removeProperty(this.getDOMElement(), listener_args.name);
+                }
 
-			}
+            } else if (value != null) { // filters out null and undefined
+
+                Firestorm.Element.setProperty(this.getDOMElement(), listener_args.name, value);
+
+            } else if (Lava.schema.DEBUG) {
+
+                Firestorm.Element.removeAttribute(this.getDOMElement(), listener_args.name);
+                Lava.logError("[container.Element] result of binding is null or undefined. Property name: " + listener_args.name);
+
+            }
 
 		}
 
@@ -568,7 +584,7 @@ Lava.define(
 	 */
 	_renderClasses: function() {
 
-		var resultClasses = this._static_classes.clone(),
+		var resultClasses = this._static_classes.slice(),
 			name,
 			value;
 
@@ -689,7 +705,6 @@ Lava.define(
 		}
 
 		return "<" + this._tag_name + " id=\"" + this._id + "\" "
-			// + this._writeEvents()
 			+ properties_string; //+ ">"
 
 	},
@@ -702,6 +717,7 @@ Lava.define(
 	wrap: function(html) {
 
 		if (Lava.schema.DEBUG && this._is_void) Lava.t('Trying to wrap content in void tag');
+		if (Lava.schema.DEBUG) this._is_rendered = true;
 		// _element is cleared in _renderOpeningTag
 		return this._renderOpeningTag() + ">" + html + "</" + this._tag_name + ">";
 
@@ -714,6 +730,7 @@ Lava.define(
 	renderVoid: function() {
 
 		if (Lava.schema.DEBUG && !this._is_void) Lava.t('Trying to render non-void container as void');
+		if (Lava.schema.DEBUG) this._is_rendered = true;
 		// _element is cleared in _renderOpeningTag
 		return this._renderOpeningTag() + "/>";
 
@@ -728,7 +745,7 @@ Lava.define(
 		if (!this._is_inDOM) Lava.t("setHTML: element is not in DOM");
 		if (this._is_void) Lava.t('setHTML on void tag');
 
-		Firestorm.Element.setProperty(this.getDOMElement(), 'html', html);
+		Firestorm.Element.setHtml(this.getDOMElement(), html);
 
 	},
 
@@ -798,6 +815,7 @@ Lava.define(
 	informInDOM_Normal: function() {
 
 		this._is_inDOM = true;
+		if (Lava.schema.DEBUG) this._is_rendered = false;
 		// if <input> which is already in DOM is re-rendered and inserted back
 		// - then "changed" event will fire in Chrome.
 		// During the event - the DOM element may be retrieved by widget,
@@ -908,10 +926,10 @@ Lava.define(
 
 		if (this._is_inDOM) Lava.t("Can not set duplicate id attribute on elements");
 		// there must not be ID attribute
-		if (Element.getProperty(element, 'id')) Lava.t("Target element already has an ID, and could be owned by another container");
-		if (Element.getProperty(element, 'tag').toLowerCase() != this._tag_name) Lava.t("Captured tag name differs from the container's tag name");
+		if (Element.getAttribute(element, 'id')) Lava.t("Target element already has an ID, and could be owned by another container");
+		if (Element.getTagName(element) != this._tag_name) Lava.t("Captured tag name differs from the container's tag name");
 
-		Element.setProperty(element, 'id', this._id);
+		Element.getAttribute(element, 'id', this._id);
 
 		this._is_inDOM = true;
 		this._element = element;
@@ -942,7 +960,7 @@ Lava.define(
 
 		// keep original container in DOM
 		this.setHTML('');
-		Firestorm.Element.removeProperty(this.getDOMElement(), 'id');
+		Firestorm.Element.removeAttribute(this.getDOMElement(), 'id');
 		this.informRemove();
 		this._is_element_owner = true;
 

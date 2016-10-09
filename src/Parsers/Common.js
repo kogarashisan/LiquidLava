@@ -696,7 +696,6 @@ Lava.parsers.Common = {
 		if ('bind' in x) {
 
 			if (typeof(x.bind) != 'object') Lava.t("Malformed x:bind attribute");
-
 			container_config.property_bindings = this._parseBindingsHash(x.bind);
 
 		}
@@ -704,7 +703,6 @@ Lava.parsers.Common = {
 		if ('style' in x) {
 
 			if (typeof(x.style) != 'object') Lava.t("Malformed x:style attribute");
-
 			container_config.style_bindings = this._parseBindingsHash(x.style);
 
 		}

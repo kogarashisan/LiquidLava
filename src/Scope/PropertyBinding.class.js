@@ -82,7 +82,7 @@ Lava.define(
 
 		}
 
-		Lava.schema.DEBUG && Lava.ScopeManager.debugTrackScope(this);
+		Lava.schema.DEBUG_SCOPES && Lava.ScopeManager.debugTrackScope(this);
 
 	},
 
@@ -165,8 +165,7 @@ Lava.define(
 
 		}
 
-		Lava.schema.DEBUG && Lava.ScopeManager.debugStopTracking(this);
-
+		Lava.schema.DEBUG_SCOPES && Lava.ScopeManager.debugStopTracking(this);
 		this.Abstract$destroy();
 
 	}

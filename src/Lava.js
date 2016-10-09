@@ -1,3 +1,12 @@
+/*!
+ * LiquidLava library
+ * http://www.lava-framework.com/
+ *
+ * Copyright Alex Galashov, MIT license
+ *
+ * Version: <%=version_string%>
+ */
+
 /**
  * Root object of the Lava framework
  */
@@ -5,7 +14,7 @@ var Lava = {
 	/**
 	 * Version numbers, split by comma to allow easier comparison of versions
 	 */
-	version: [/*<%version%>*/],
+	version: [/*<%=version_array%>*/],
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Default namespaces reservation. All root members must be reserved ahead - v8 optimization.
@@ -488,7 +497,7 @@ var Lava = {
 		Lava.schema.focus_manager.IS_ENABLED && this.focus_manager && this.focus_manager.enable();
 
 		var body = document.body,
-			app_class = Firestorm.Element.getProperty(body, 'lava-app'),
+			app_class = Firestorm.Element.getAttribute(body, 'lava-app'),
 			bootstrap_targets,
 			i = 0,
 			count;
@@ -536,7 +545,7 @@ var Lava = {
 		config.is_extended = true;
 		config['class'] = raw_tag.attributes['lava-app'];
 
-		if (raw_tag.attributes.id) Firestorm.Element.removeProperty(element, 'id'); // needed for captureExistingElement
+		if (raw_tag.attributes.id) Firestorm.Element.removeAttribute(element, 'id'); // needed for captureExistingElement
 
 		constructor = Lava.ClassManager.getConstructor(config['class'] || 'Lava.widget.Standard', 'Lava.widget');
 		if (Lava.schema.DEBUG && !constructor) Lava.t('Class not found: ' + config['class']);
@@ -556,8 +565,8 @@ var Lava = {
 		var widget,
 			config,
 			constructor,
-			id = Firestorm.Element.getProperty(script_element, 'id'),
-			class_name = Firestorm.Element.getProperty(script_element, 'lava-app');
+			id = Firestorm.Element.getAttribute(script_element, 'id'),
+			class_name = Firestorm.Element.getAttribute(script_element, 'lava-app');
 
 		config = {
 			type: 'widget',
@@ -569,7 +578,7 @@ var Lava = {
 
 		if (id) {
 			config.id = id;
-			Firestorm.Element.removeProperty(script_element, 'id');
+			Firestorm.Element.removeAttribute(script_element, 'id');
 		}
 
 		constructor = Lava.ClassManager.getConstructor(class_name || 'Lava.widget.Standard', 'Lava.widget');
@@ -686,7 +695,9 @@ var Lava = {
 			}
 		}
 
-		this.ClassManager.define(path, class_body);
+        if (!this.ClassManager.hasClass(path)) {
+            this.ClassManager.define(path, class_body);
+        }
 
 	},
 

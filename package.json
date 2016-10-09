@@ -1,6 +1,6 @@
 {
   "name": "lava",
-  "version": "0.13.6",
+  "version": "0.14.0",
   "description": "Advanced MVC framework",
   "author": "Alex Galashov",
   "main": "lib/node-module.js",
@@ -15,12 +15,9 @@
     "MVC",
     "framework"
   ],
-  "devDependencies": {
-    "grunt": ">= 0.4.4",
-    "grunt-cli": ">= 0.1.13"
-  },
+  "devDependencies": {},
   "license": "MIT",
   "dependencies": {
-    "firestorm": ">= 0.1.5"
+    "firestorm": "= 0.2"
   }
 }

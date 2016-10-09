@@ -224,7 +224,7 @@ Lava.define(
 			name,
 			is_void = Lava.isVoidTag(child_config.name),
 
-			static_properties,
+			static_attributes,
 			static_classes,
 			static_styles;
 
@@ -238,12 +238,12 @@ Lava.define(
 		if (Lava.schema.DEBUG && !container_resources) Lava.t("Static container, resources not found: " + resource_id.name);
 		if (Lava.schema.DEBUG && container_resources.type != 'container') Lava.t("Malformed/invalid container resource: " + resource_id.locator_type + '=' + resource_id.locator);
 
-		static_properties = container_resources.value['static_properties'];
+		static_attributes = container_resources.value['static_properties'];
 		static_classes = container_resources.value['static_classes'];
 		static_styles = container_resources.value['static_styles'];
 
-		if (static_properties) {
-			serialized_tag += Lava.parsers.Common.renderTagAttributes(static_properties);
+		if (static_attributes) {
+			serialized_tag += Lava.parsers.Common.renderTagAttributes(static_attributes);
 		}
 
 		if (static_classes) {

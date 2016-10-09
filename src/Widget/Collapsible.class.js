@@ -63,7 +63,7 @@ Lava.define(
 	 * The "display" CSS rule from container's element
 	 * @type {string}
 	 */
-	_default_display: null,
+	_default_display: '',
 
 	/**
 	 * When animation is disabled, Toggle animation is used to show and hide the DOM element
@@ -174,7 +174,7 @@ Lava.define(
 
 		this._panel_container = view.getContainer();
 
-		this._default_display = this._panel_container.getStyle('display') || null;
+		this._default_display = this._panel_container.getStyle('display') || '';
 
 		if (!this._properties.is_expanded) {
 

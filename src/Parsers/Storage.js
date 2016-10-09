@@ -176,6 +176,7 @@ Lava.parsers.Storage = {
 
 		if (!widget_config.is_extended && widget_config['extends']) {
 
+		    if (Lava.schema.DEBUG && !Lava.widgets[widget_config['extends']]) Lava.t("Unable to inherit widget config, parent widget not found: " + widget_config['extends']);
 			parent_schema = this.getMergedStorageSchema(Lava.widgets[widget_config['extends']]);
 			if (parent_schema) {
 				if (result) {

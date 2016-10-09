@@ -10,7 +10,7 @@ Lava.define(
  * Base class for all views and widgets
  *
  * @lends Lava.view.Abstract#
- * @extends Lava.mixin.Properties#
+ * @extends Lava.mixin.Properties
  * @implements _iViewHierarchyMember
  */
 {

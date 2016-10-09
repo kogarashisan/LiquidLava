@@ -69,7 +69,7 @@ Lava.ScopeManager = {
 	 */
 	init: function() {
 
-		this.scheduleScopeRefresh = this.scheduleScopeRefresh_Normal;
+		this.scheduleScopeRefresh = this._scheduleScopeRefresh_Normal;
 
 	},
 
@@ -85,13 +85,28 @@ Lava.ScopeManager = {
 
 	},
 
+    /**
+     * Version to handle the first dirty scope in a refresh cycle.
+     * Schedules refresh in view_manager.
+     * @param {Lava.mixin.Refreshable} target
+     * @param {number} level
+     * @returns {{index: number}}
+     */
+    _scheduleScopeRefresh_Initial: function(target, level) {
+
+        Lava.view_manager.scheduleRefresh();
+        this.scheduleScopeRefresh = this._scheduleScopeRefresh_Normal;
+	    return this._scheduleScopeRefresh_Normal(target, level);
+
+    },
+
 	/**
 	 * Normal version outside of view refresh cycle - adds scope into refresh queue.
 	 * @param {Lava.mixin.Refreshable} target
 	 * @param {number} level
 	 * @returns {{index: number}}
 	 */
-	scheduleScopeRefresh_Normal: function(target, level) {
+    _scheduleScopeRefresh_Normal: function(target, level) {
 
 		if (!this._scope_refresh_queues[level]) {
 
@@ -116,7 +131,7 @@ Lava.ScopeManager = {
 	 * Inside the refresh cycle - refreshes scope immediately
 	 * @param {Lava.mixin.Refreshable} target
 	 */
-	scheduleScopeRefresh_Locked: function(target) {
+	_scheduleScopeRefresh_Locked: function(target) {
 
 		if (target.refresh(this._refresh_id)) {
 			Lava.logError('Scope Manager: infinite loop exception outside of normal refresh cycle');
@@ -127,18 +142,18 @@ Lava.ScopeManager = {
 	},
 
 	/**
-	 * Swap `scheduleScopeRefresh` algorithm to `scheduleScopeRefresh_Locked`
+	 * Swap `scheduleScopeRefresh` algorithm to `_scheduleScopeRefresh_Locked`
 	 */
 	lock: function() {
 
 		if (Lava.schema.DEBUG && this._is_refreshing) Lava.t();
-		this.scheduleScopeRefresh = this.scheduleScopeRefresh_Locked;
+		this.scheduleScopeRefresh = this._scheduleScopeRefresh_Locked;
 		this._lock_count++;
 
 	},
 
 	/**
-	 * Swap `scheduleScopeRefresh` algorithm to `scheduleScopeRefresh_Normal`
+	 * Swap `scheduleScopeRefresh` algorithm to `_scheduleScopeRefresh_Normal`
 	 */
 	unlock: function() {
 
@@ -146,7 +161,7 @@ Lava.ScopeManager = {
 
 		this._lock_count--;
 		if (this._lock_count == 0) {
-			this.scheduleScopeRefresh = this.scheduleScopeRefresh_Normal;
+			this.scheduleScopeRefresh = this._scheduleScopeRefresh_Initial;
 		}
 
 	},
@@ -229,7 +244,7 @@ Lava.ScopeManager = {
 
 		} else {
 
-			Lava.schema.DEBUG && this.debugVerify();
+			Lava.schema.DEBUG_SCOPES && this.debugVerify();
 			this._scope_refresh_queues = [];
 
 		}
@@ -469,5 +484,8 @@ Lava.ScopeManager = {
 		}
 
 	}
+
+	// end: debug-mode validations
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 };

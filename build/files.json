@@ -24,6 +24,23 @@
 		"Parsers/Generated/TemplateParser.js",
 		"Parsers/TemplateParser.js"
 	],
+    "data": [
+        "Data/Field/Abstract.class.js",
+        "Data/Field/Basic.class.js",
+        "Data/Field/Collection.class.js",
+        "Data/Field/Integer.class.js",
+        "Data/Field/Id.class.js",
+        "Data/Field/ForeignKey.class.js",
+        "Data/Field/Record.class.js",
+        "Data/Field/Boolean.class.js",
+        "Data/Field/Guid.class.js",
+
+        "Data/ModuleAbstract.class.js",
+        "Data/Module.class.js",
+        "Data/Record.class.js",
+        "Data/MetaRecord.class.js",
+        "Data/MetaStorage.class.js"
+    ],
 	"classes": [
 		"Mixin/Observable.class.js",
 		"Mixin/Properties.class.js",
@@ -49,22 +66,6 @@
 		"System/Sugar.class.js",
 		"System/PopoverManager.class.js",
 		"System/FocusManager.class.js",
-
-		"Data/Field/Abstract.class.js",
-		"Data/Field/Basic.class.js",
-		"Data/Field/Collection.class.js",
-		"Data/Field/Integer.class.js",
-		"Data/Field/Id.class.js",
-		"Data/Field/ForeignKey.class.js",
-		"Data/Field/Record.class.js",
-		"Data/Field/Boolean.class.js",
-		"Data/Field/Guid.class.js",
-
-		"Data/ModuleAbstract.class.js",
-		"Data/Module.class.js",
-		"Data/Record.class.js",
-		"Data/MetaRecord.class.js",
-		"Data/MetaStorage.class.js",
 
 		"Scope/Abstract.class.js",
 		"Scope/Argument.class.js",

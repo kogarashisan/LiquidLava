@@ -106,6 +106,12 @@ Lava.define(
 	 */
 	_refresh_id: 0,
 
+    /**
+     * Timeout id of the next scheduled refresh cycle.
+     * @type {number}
+     */
+    _refresh_timeout: 0,
+
 	/**
 	 * Create an instance of the class, acquire event listeners
 	 */
@@ -142,6 +148,21 @@ Lava.define(
 
 	},
 
+    /**
+     * Schedule refresh after current thread exits (unless `refresh()` was called in the current thread).
+     */
+    scheduleRefresh: function () {
+
+        var self = this;
+        if (!this._refresh_timeout) {
+            this._refresh_timeout = window.setTimeout(function () {
+                self._refresh_timeout = 0;
+                self.refresh();
+            }, 0);
+        }
+
+    },
+
 	/**
 	 * View refresh cycle. Call {@link Lava.view.Abstract#refresh} of all views in the queue, starting from the root views
 	 */
@@ -176,6 +197,11 @@ Lava.define(
 			this._is_refreshing = false;
 
 		}
+
+        if (this._refresh_timeout) {
+            window.clearTimeout(this._refresh_timeout);
+            this._refresh_timeout = 0;
+        }
 
 	},
 
@@ -725,22 +751,19 @@ Lava.define(
 	},
 
 	/**
-	 * Get the view, the container of which owns the given element
+	 * Get the view, the container of which owns the given element.
+	 * This method checks solely the given element (it does not check parents).
 	 * @param {HTMLElement} element
 	 * @returns {Lava.view.Abstract}
 	 */
 	getViewByElement: function(element) {
 
-		var id = Firestorm.Element.getProperty(element, 'id'),
+		var id = Firestorm.Element.getAttribute(element, 'id'),
 			result = null;
 
-		if (id) {
+		if (id && id.indexOf(Lava.ELEMENT_ID_PREFIX) == 0) {
 
-			if (id.indexOf(Lava.ELEMENT_ID_PREFIX) == 0) {
-
-				result = this.getViewByGuid(id.substr(Lava.ELEMENT_ID_PREFIX.length));
-
-			}
+			result = this.getViewByGuid(id.substr(Lava.ELEMENT_ID_PREFIX.length));
 
 		}
 

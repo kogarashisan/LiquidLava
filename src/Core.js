@@ -146,15 +146,15 @@ Lava.Core = {
 
 		this._event_listeners[event_name] = this._createEventWrapper(event_name);
 
-		if ((event_name in this._dom_event_support) && this._dom_event_support[event_name].delegation) {
+		//if ((event_name in this._dom_event_support) && this._dom_event_support[event_name].delegation) {
 
-			Firestorm.Element.addDelegation(window, event_name, '*', this._event_listeners[event_name]);
+		//	Firestorm.Element.addDelegation(window, event_name, '*', this._event_listeners[event_name]);
 
-		} else {
+		//} else {
 
 			Firestorm.Element.addListener(window, event_name, this._event_listeners[event_name]);
 
-		}
+		//}
 
 	},
 

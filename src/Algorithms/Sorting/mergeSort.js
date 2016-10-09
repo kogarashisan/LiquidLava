@@ -85,6 +85,7 @@ Lava.algorithms.sorting.mergeSort = (function(){
 
 		if (length < 2) {
 
+			// @todo тут надо clone()?
 			result = items;
 
 		} else {

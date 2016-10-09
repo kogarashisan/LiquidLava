@@ -35,11 +35,6 @@ Lava.define(
 		is_valid: true
 	},
 
-	_event_handlers: {
-		_focused: '_onInputFocused',
-		_blurred: '_onInputBlurred'
-	},
-
 	_role_handlers: {
 		_input_view: '_handleInputView',
 		label: '_handleLabel'
@@ -97,30 +92,9 @@ Lava.define(
 	},
 
 	/**
-	 * Fire global "focus_acquired" event
-	 */
-	_onInputFocused: function(dom_event_name, dom_event, view) {
-
-		Lava.app.fireGlobalEvent('focus_acquired', {
-			target: this,
-			element: view.getContainer().getDOMElement()
-		});
-
-	},
-
-	/**
-	 * Fire global "focus_lost" event
-	 */
-	_onInputBlurred: function() {
-
-		Lava.app.fireGlobalEvent('focus_lost');
-
-	},
-
-	/**
 	 * Focus the input's element, if it's currently in DOM
 	 */
-	focus: function(){
+	focus: function() {
 
 		if (this._input_container && this._input_container.isInDOM()) {
 			this._input_container.getDOMElement().focus();
