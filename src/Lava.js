@@ -836,7 +836,14 @@ var Lava = {
 	 */
 	instanceOf: function(instance, class_name) {
 
-		return instance.Class.hierarchy_paths.indexOf(class_name) != -1 || instance.Class.implements.indexOf(class_name) != -1;
+	    if (instance) {
+            var Class = instance.Class;
+            return Class
+                && !instance.hasOwnProperty('Class')
+                && (Class.hierarchy_paths.indexOf(class_name) != -1 || Class.implements.indexOf(class_name) != -1);
+        }
+
+		return false;
 
 	},
 
