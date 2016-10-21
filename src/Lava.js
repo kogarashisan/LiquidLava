@@ -180,7 +180,7 @@ var Lava = {
 	/**
 	 * List of common framework exceptions to make the framework smaller in size. May be excluded in production
 	 */
-	KNOWN_EXCEPTIONS: null,
+    ERROR_DESCRIPTIONS: null,
 
 	// end: constants and predefined data
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -411,8 +411,8 @@ var Lava = {
 	 */
 	t: function(message) {
 
-		if (typeof(message) == 'number' && this.KNOWN_EXCEPTIONS && (message in this.KNOWN_EXCEPTIONS)) {
-			throw new Error(this.KNOWN_EXCEPTIONS[message]);
+		if (typeof(message) == 'number' && this.ERROR_DESCRIPTIONS && (message in this.ERROR_DESCRIPTIONS)) {
+			throw new Error(this.ERROR_DESCRIPTIONS[message]);
 		}
 
 		throw new Error(message || 'Debug assertion failed');
@@ -839,7 +839,7 @@ var Lava = {
 	    if (instance) {
             var Class = instance.Class;
             return Class
-                && !instance.hasOwnProperty('Class')
+                && !instance.hasOwnProperty('Class') // security check to protect from "fake" classes
                 && (Class.hierarchy_paths.indexOf(class_name) != -1 || Class.implements.indexOf(class_name) != -1);
         }
 

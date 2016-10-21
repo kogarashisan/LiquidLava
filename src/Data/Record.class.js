@@ -52,21 +52,21 @@ Lava.define(
 		this._fields = fields;
 		this._properties = properties_ref;
 
-		var field;
+		var field_name;
 
 		if (typeof(raw_properties) != 'undefined') {
 
-			for (field in fields) {
+			for (field_name in fields) {
 
-				fields[field]['import'](this, properties_ref, raw_properties);
+				fields[field_name]['import'](this, properties_ref, raw_properties);
 
 			}
 
 		} else {
 
-			for (field in fields) {
+			for (field_name in fields) {
 
-				fields[field].initNewRecord(this, properties_ref);
+				fields[field_name].initNewRecord(this, properties_ref);
 
 			}
 
@@ -106,9 +106,9 @@ Lava.define(
 
 		var export_record = {};
 
-		for (var field in this._fields) {
+		for (var field_name in this._fields) {
 
-			this._fields[field]['export'](this, export_record);
+			this._fields[field_name]['export'](this, export_record);
 
 		}
 

@@ -40,11 +40,7 @@ Lava.define(
 	 */
 	init: function(properties) {
 
-		for (var name in properties) {
-
-			this._properties[name] = properties[name];
-
-		}
+	    Firestorm.extend(this._properties, properties);
 
 	},
 

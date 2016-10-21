@@ -133,7 +133,7 @@ Lava.define(
 	 * @param {Object} destination_object Object with exported data
 	 */
 	'export': function(record, destination_object) {
-		Lava.t("Abstract function call: export");
+		Lava.t("Abstract method call");
 	},
 
 	/**
@@ -142,7 +142,7 @@ Lava.define(
 	 * @param {Object} properties
 	 */
 	getValue: function(record, properties) {
-		Lava.t("Abstract function call: getValue");
+		Lava.t("Abstract method call");
 	},
 
 	/**
@@ -152,7 +152,7 @@ Lava.define(
 	 * @param {*} value
 	 */
 	setValue: function(record, properties, value) {
-		Lava.t("Abstract function call: setValue");
+		Lava.t("Abstract method call");
 	},
 
 	/**

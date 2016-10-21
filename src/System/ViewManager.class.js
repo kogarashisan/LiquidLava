@@ -110,7 +110,7 @@ Lava.define(
      * Timeout id of the next scheduled refresh cycle.
      * @type {number}
      */
-    _refresh_timeout: 0,
+    _refresh_timeout: null,
 
 	/**
 	 * Create an instance of the class, acquire event listeners
@@ -128,13 +128,29 @@ Lava.define(
 
 		}
 
+        this.scheduleViewRefresh = this.scheduleViewRefresh_Initial;
+
 	},
+
+    scheduleViewRefresh: function(view) {
+
+        Lava.t("Framework requires initialization");
+
+    },
+
+    scheduleViewRefresh_Initial: function(view) {
+
+        this.scheduleRefresh();
+        this.scheduleViewRefresh = this.scheduleViewRefresh_Normal;
+        this.scheduleViewRefresh(view);
+
+    },
 
 	/**
 	 * Place a view into queue for refresh
 	 * @param {Lava.view.Abstract} view
 	 */
-	scheduleViewRefresh: function(view) {
+    scheduleViewRefresh_Normal: function(view) {
 
 		if (view.depth in this._dirty_views) {
 
@@ -153,10 +169,10 @@ Lava.define(
      */
     scheduleRefresh: function () {
 
-        var self = this;
         if (!this._refresh_timeout) {
+            var self = this;
             this._refresh_timeout = window.setTimeout(function () {
-                self._refresh_timeout = 0;
+                self._refresh_timeout = null;
                 self.refresh();
             }, 0);
         }
@@ -200,8 +216,10 @@ Lava.define(
 
         if (this._refresh_timeout) {
             window.clearTimeout(this._refresh_timeout);
-            this._refresh_timeout = 0;
+            this._refresh_timeout = null;
         }
+
+        this.scheduleViewRefresh = this.scheduleViewRefresh_Initial;
 
 	},
 

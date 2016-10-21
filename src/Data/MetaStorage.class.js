@@ -24,11 +24,11 @@ Lava.define(
 		this._createFields(config);
 		this.initFields(); // MetaStorage is constructed directly, not via App class
 
-		var field;
+		var field_name;
 
 		if (Lava.schema.DEBUG) {
-			for (field in this._fields) {
-				if (this._fields[field].isCollectionField || this._fields[field].isRecordField)
+			for (field_name in this._fields) {
+				if (this._fields[field_name].isCollectionField || this._fields[field_name].isRecordField)
 					Lava.t("Standard Collection and Record fields will not work inside the MetaStorage");
 			}
 		}

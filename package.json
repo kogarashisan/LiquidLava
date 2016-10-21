@@ -15,7 +15,6 @@
     "MVC",
     "framework"
   ],
-  "devDependencies": {},
   "license": "MIT",
   "dependencies": {
     "firestorm": "= 0.2"

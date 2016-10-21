@@ -264,7 +264,7 @@ Lava.define(
 	 */
 	_createAnimation: function(template, index) {
 
-		Lava.t("Abstract function call: _createAnimation");
+		Lava.t("Abstract method call");
 
 	},
 

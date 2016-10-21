@@ -69,7 +69,7 @@ Lava.ScopeManager = {
 	 */
 	init: function() {
 
-		this.scheduleScopeRefresh = this._scheduleScopeRefresh_Normal;
+		this.scheduleScopeRefresh = this._scheduleScopeRefresh_Initial;
 
 	},
 
@@ -153,12 +153,11 @@ Lava.ScopeManager = {
 	},
 
 	/**
-	 * Swap `scheduleScopeRefresh` algorithm to `_scheduleScopeRefresh_Normal`
+	 * Swap `scheduleScopeRefresh` algorithm to `_scheduleScopeRefresh_Initial`
 	 */
 	unlock: function() {
 
 		if (this._lock_count == 0) Lava.t();
-
 		this._lock_count--;
 		if (this._lock_count == 0) {
 			this.scheduleScopeRefresh = this._scheduleScopeRefresh_Initial;
@@ -174,7 +173,6 @@ Lava.ScopeManager = {
 	cancelScopeRefresh: function(refresh_ticket, level) {
 
 		if (Lava.schema.DEBUG && refresh_ticket == null) Lava.t();
-
 		this._scope_refresh_queues[level][refresh_ticket.index] = null;
 
 	},
@@ -260,6 +258,8 @@ Lava.ScopeManager = {
 		this._has_infinite_loop = this._has_exceptions;
 
 		this._is_refreshing = false;
+
+        this.scheduleScopeRefresh = this._scheduleScopeRefresh_Initial;
 
 	},
 

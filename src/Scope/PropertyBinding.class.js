@@ -67,6 +67,11 @@ Lava.define(
 			this._assign_argument = new Lava.scope.Argument(assign_config, view, view.getWidget());
 			this._assign_argument.on('changed', this.onAssignChanged, this);
 			this._value = this._assign_argument.getValue();
+            if (typeof this._value == 'undefined' && !view.isset(this._property_name)) {
+                // if property is not defined, and we assign undefined to it - nothing will happen.
+                // We must define this property, cause inner views can be dependent on it
+                view.set(this._property_name, null);
+            }
 			view.set(this._property_name, this._value);
 			this.level = this._assign_argument.level + 1;
 

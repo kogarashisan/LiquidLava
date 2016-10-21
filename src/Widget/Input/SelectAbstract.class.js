@@ -57,7 +57,7 @@ Lava.define(
 	 */
 	_refreshValue: function() {
 
-		Lava.t('Abstract function call: _refreshValue');
+		Lava.t('Abstract method call');
 
 	}
 

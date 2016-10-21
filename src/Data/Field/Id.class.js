@@ -68,15 +68,9 @@ Lava.define(
 
 	'import': function(record, properties, raw_properties) {
 
-		if (this._name in raw_properties) {
+		if (!(this._name in raw_properties)) Lava.t("Import record must have an ID");
 
-			properties[this._name] = this._getImportValue(properties, raw_properties);
-
-		} else {
-
-			Lava.t("Import record must have an ID");
-
-		}
+		properties[this._name] = this._getImportValue(properties, raw_properties);
 
 	},
 

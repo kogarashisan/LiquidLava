@@ -230,7 +230,7 @@ Lava.ClassManager = {
 		if (Lava.schema.DEBUG) {
 
 			if (!implements_source) Lava.t('Implements: class not found - "' + path + '"');
-			for (name in implements_source.shared) Lava.t("Implements: unable to use a class with Shared as mixin.");
+			for (name in implements_source.shared) Lava.t("Implements: unable to use a class with Shared as mixin. " + class_data.psth + " <- " + path);
 			if (class_data.implements.indexOf(path) != -1) Lava.t("Implements: class " + class_data.path + " already implements " + path);
 
 		}
