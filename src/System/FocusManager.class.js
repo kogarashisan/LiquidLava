@@ -45,15 +45,28 @@ Lava.define(
 	 */
 	_focus_stack_changed_listener: null,
 
+    _keydown_listener: null,
+    _keyup_listener: null,
+    _keypress_listener: null,
+
 	/**
 	 * Start listening to global focus-related events
 	 */
 	enable: function () {
 
-		if (!this._focus_listener) {
-			Lava.view_manager.lendEvent("focus");
-			this._focus_stack_changed_listener = Lava.view_manager.on("focus_stack_changed", this._onFocusStackChanged, this);
+		if (!this._focus_stack_changed_listener) {
+
+            /*$(document.body).onfocusin = handleMouseOver;
+            $(document.body).onfocusout = handleMouseOut;
+            $(document.body).addEventListener('focus',handleMouseOver,true);
+            $(document.body).addEventListener('blur',handleMouseOut,true);*/
+
+			Lava.view_manager.lendEvent("focusin");
+			this._focus_stack_changed_listener = Lava.view_manager.on("focusin_stack_changed", this._onFocusStackChanged, this);
 			this._blur_listener = Lava.Core.addGlobalHandler('blur', this._onElementBlurred, this);
+            this._keydown_listener = Lava.Core.addGlobalHandler('keydown', this._onKeyboard, this);
+            this._keyup_listener = Lava.Core.addGlobalHandler('keyup', this._onKeyboard, this);
+            this._keypress_listener = Lava.Core.addGlobalHandler('keypress', this._onKeyboard, this);
 		}
 
 	},
@@ -63,18 +76,35 @@ Lava.define(
 	 */
 	disable: function() {
 
-		if (this._blur_listener) {
-			Lava.view_manager.releaseEvent("focus");
+		if (this._focus_stack_changed_listener) {
+			Lava.view_manager.releaseEvent("focusin");
 			Lava.view_manager.removeListener(this._focus_stack_changed_listener);
 			Lava.Core.removeGlobalHandler(this._blur_listener);
+            Lava.Core.removeGlobalHandler(this._keydown_listener);
+            Lava.Core.removeGlobalHandler(this._keyup_listener);
+            Lava.Core.removeGlobalHandler(this._keypress_listener);
 			this._focused_element
 				= this._focused_view
 				= this._focus_stack_changed_listener
 				= this._blur_listener
+				= this._keydown_listener
+				= this._keyup_listener
+				= this._keypress_listener
 				= null;
 		}
 
 	},
+
+    _onKeyboard: function (view_manager, event_object) {
+
+        this._focused_view && Lava.view_manager.dispatchEvent(
+            this._focused_view,
+            event_object.type,
+            event_object,
+            [{name: 'focus_' + event_object.type}]
+        );
+
+    },
 
 	/**
 	 * Does it listen to focus changes and sends keyboard events
@@ -155,19 +185,14 @@ Lava.define(
 			for (; i < count; i++) {
 				focused_view = Lava.view_manager.getViewByElement(stack[i]);
 				if (focused_view) {
+                    this._focused_view = focused_view;
+                    event_object = {
+                        new_focused_element: focused_element,
+                        new_focused_view: focused_view
+                    };
+                    Lava.view_manager.dispatchEvent(focused_view, "focus_acquired", event_object, this.TARGETS.focus_acquired);
 					break;
 				}
-			}
-
-			if (focused_view) {
-
-				this._focused_view = focused_view;
-				event_object = {
-					new_focused_element: focused_element,
-					new_focused_view: focused_view
-				};
-				focused_view && Lava.view_manager.dispatchEvent(focused_view, "focus_acquired", event_object, this.TARGETS.focus_acquired);
-
 			}
 
 		}

@@ -14,7 +14,7 @@ Lava.define(
 	/**
 	 * Instance belongs to Morph container
 	 * @type {boolean}
-	 * @const
+	 * @readonly
 	 */
 	isMorphContainer: true,
 

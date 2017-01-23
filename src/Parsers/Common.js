@@ -1,4 +1,3 @@
-
 /**
  * Common methods and properties for working with widget templates
  */
@@ -709,12 +708,12 @@ Lava.parsers.Common = {
 
 		if ('classes' in x) {
 
-			var arguments = Lava.ExpressionParser.parse(x.classes, Lava.ExpressionParser.SEPARATORS.SEMICOLON),
+			var args = Lava.ExpressionParser.parse(x.classes, Lava.ExpressionParser.SEPARATORS.SEMICOLON),
 				class_bindings = {};
 
-			for (i = 0, count = arguments.length; i < count; i++) {
+			for (i = 0, count = args.length; i < count; i++) {
 
-				class_bindings[i] = arguments[i];
+				class_bindings[i] = args[i];
 
 			}
 
@@ -741,15 +740,15 @@ Lava.parsers.Common = {
 		if (typeof(hash) != 'object') Lava.t("Malformed control tag");
 
 		var name,
-			arguments,
+			args,
 			result = {};
 
 		for (name in hash) {
 
-			arguments = Lava.ExpressionParser.parse(hash[name]);
-			if (arguments.length == 0) Lava.t("Binding: empty expression (" + name + ")");
-			if (arguments.length > 1) Lava.t("Binding: malformed expression for '" + name + "'");
-			result[name] = arguments[0];
+			args = Lava.ExpressionParser.parse(hash[name]);
+			if (args.length == 0) Lava.t("Binding: empty expression (" + name + ")");
+			if (args.length > 1) Lava.t("Binding: malformed expression for '" + name + "'");
+			result[name] = args[0];
 
 		}
 

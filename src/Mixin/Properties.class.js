@@ -19,7 +19,7 @@ Lava.define(
 
 	/**
 	 * To signal other classes that this class implements Properties
-	 * @const
+	 * @readonly
 	 */
 	isProperties: true,
 

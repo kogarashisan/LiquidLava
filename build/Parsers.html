@@ -1,10 +1,10 @@
 <html lang="ru" xmlns="">
 <head>
 	<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-	<script src="http://ajax.googleapis.com/ajax/libs/mootools/1.5.1/mootools-yui-compressed.js"></script>
-	<script src="build/jison/webtoolkit.base64.js"></script>
-	<script src="build/jison/es5.js"></script>
-	<script src="build/jison/jison.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	<script src="jison/webtoolkit.base64.js"></script>
+	<script src="jison/es5.js"></script>
+	<script src="jison/jison.js"></script>
 </head>
 <body>
 
@@ -28,11 +28,11 @@
 		//Jison.print = function () {};
 		generator = new Jison.Generator(cfg, {type: "lalr"});
 
-		generator.resolutions.each(function (res) {
-			var r = res[2];
-			if (!r.bydefault) return;
-			console.log(r.msg+"\n"+"("+r.s+", "+r.r+") -> "+r.action);
-		});
+        for (var i = 0, count = generator.resolutions.length; i < count; i++) {
+            var r = generator.resolutions[i][2];
+            if (!r.bydefault) continue;
+            console.log(r.msg+"\n"+"("+r.s+", "+r.r+") -> "+r.action);
+        }
 
 		if (generator.conflicts) {
 			throw new Error('generator conflicts');
@@ -141,10 +141,10 @@ Object parser sources: <br/>
 <textarea id="ObjectParserSrc" cols="90" rows="3"></textarea><br/><br/>
 <script type="text/javascript">
 	var src = createParser(
-		$('object_parser_grammar').text,
+		$('#object_parser_grammar').html(),
 		"Lava.ObjectParser"
 	);
-	$('ObjectParserSrc').set('value', src);
+	$('#ObjectParserSrc').val(src);
 	eval(src);
 </script>
 
@@ -441,10 +441,10 @@ Expression parser sources:<br/>
 <textarea id="ExpressionParserSrc" cols="90" rows="3"></textarea><br/><br/>
 <script type="text/javascript">
 	var src = createParser(
-		$('expression_parser_grammar').text,
+		$('#expression_parser_grammar').html(),
 		'Lava.ExpressionParser'
 	);
-	$('ExpressionParserSrc').set('value', src);
+	$('#ExpressionParserSrc').val(src);
 	eval(src);
 </script>
 
@@ -888,9 +888,9 @@ elseifChain
 
 blockElseif
 	: OPEN_ELSEIF EXPORT_ARGUMENTS BLOCK_CLOSE {
-			var arguments = yy.lexer.x_export_arguments;
-			if (arguments.length != 1) Lava.t('Elseif block requires exactly one argument');
-			$$ = arguments[0];
+			var args = yy.lexer.x_export_arguments;
+			if (args.length != 1) Lava.t('Elseif block requires exactly one argument');
+			$$ = args[0];
 			yy.lexer.x_export_arguments = null;
 		}
 	;
@@ -937,14 +937,14 @@ Template parser sources:<br/>
 <textarea id="TemplateParserSrc" cols="90" rows="3"></textarea><br/>
 <script type="text/javascript">
 	var src = createParser(
-		$('template_parser_grammar').text,
+		$('#template_parser_grammar').html(),
 		'Lava.TemplateParser'
 	);
 	// yes, it's very bad. Workaround for Jison 0.4.4 bugs.
 	src = src.replace(/#cdata#/g, "(<" + "!\\[CDATA\\[(.|\\s)*?\\]\\]>)");
 	src = src.replace(/#htmlcomment#/g, "(<" + "!--(.|\\s)*?-->)");
 	src = src.replace(/BLOCK_OPEN_E/g, "\{\&gt\;");
-	$('TemplateParserSrc').set('value', src);
+	$('#TemplateParserSrc').val(src);
 	eval(src);
 </script>
 <br/>

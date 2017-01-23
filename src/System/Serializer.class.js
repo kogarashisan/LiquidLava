@@ -33,8 +33,15 @@ Lava.define(
 		number: '_serializeNumber',
 		regexp: '_serializeRegexp',
 		'null': '_serializeNull',
-		'undefined': '_serializeUndefined'
+		'undefined': '_serializeUndefined',
+        date: '_serializeDate'
 	},
+
+    /**
+     * Whether to allow dates in serialized objects (otherwise, an exception will be thrown, when date is encountered).
+     * @define {boolean}
+     */
+    _allow_dates: false,
 
 	/**
 	 * If you know that you serialize objects with only valid property names (all characters are alphanumeric),
@@ -56,6 +63,7 @@ Lava.define(
 	init: function(config) {
 
 		if (config) {
+            if (config.allow_dates_serialization) this._allow_dates = true;
 			if (config.check_property_names === false) this._check_property_names = false;
 		}
 
@@ -350,6 +358,13 @@ Lava.define(
 
 		return 'undefined';
 
-	}
+	},
+
+    _serializeDate: function (value) {
+
+        if (!this._allow_dates) Lava.t("Serializer: serialization of dates is not enabled in options");
+        return "new Date(" + (+value) + ")";
+
+    }
 
 });

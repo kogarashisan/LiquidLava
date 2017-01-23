@@ -12,7 +12,7 @@ Lava.define(
 	/**
 	 * Instance belongs to scope/Abstract
 	 * @type {boolean}
-	 * @const
+	 * @readonly
 	 */
 	isValueContainer: true,
 

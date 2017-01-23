@@ -15,7 +15,7 @@ Lava.define(
 	/**
 	 * To tell other classes that this is instance of Enumerable
 	 * @type {boolean}
-	 * @const
+	 * @readonly
 	 */
 	isDataView: true,
 

@@ -1,4 +1,4 @@
-{
+module.exports = {
 	"core": [
 		"Lava.js",
 		"schema.js",
@@ -91,6 +91,8 @@
 		"View/Foreach.class.js",
 		"View/If.class.js",
 		"View/Include.class.js",
+		"View/ContentContainerAbstract.class.js",
+		"View/TextArea.class.js",
 
 		"Widget/Standard.class.js"
 	],
@@ -123,4 +125,4 @@
 		"Widget/Calendar.class.js",
 		"Widget/Tooltip.class.js"
 	]
-}
+};

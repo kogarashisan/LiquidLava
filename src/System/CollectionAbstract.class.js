@@ -25,7 +25,7 @@ Lava.define('Lava.system.CollectionAbstract',
 
 	/**
 	 * To tell other classes that this is instance of Enumerable
-	 * @const
+	 * @readonly
 	 */
 	isCollection: true,
 
@@ -454,7 +454,7 @@ Lava.define('Lava.system.CollectionAbstract',
 			index,
 			verification = {};
 
-		if (Lava.schema.DEBUG && new_indices.length != this._count) throw "reorder: new item count is less than current";
+		if (Lava.schema.DEBUG && new_indices.length != this._count) Lava.t("reorder: new item count is less than current");
 
 		for (; i < this._count; i++) {
 

@@ -20,7 +20,7 @@ Lava.define(
 	/**
 	 * This instance supports two-way data binding
 	 * @type {boolean}
-	 * @const
+	 * @readonly
 	 */
 	isSetValue: true,
 	/**

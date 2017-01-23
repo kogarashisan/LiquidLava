@@ -31,7 +31,7 @@ Lava.define(
 	/**
 	 * This class is instance of a Record field
 	 * @type {boolean}
-	 * @const
+	 * @readonly
 	 */
 	isRecordField: true,
 

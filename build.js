@@ -12,7 +12,7 @@ BuildHelper.ensureDirectoryExists('lib/export');
 
 // read files from disk
 var fs = require('fs'),
-    groups = BuildHelper.readJSON('build/files.json'),
+    groups = require('./build/files.js'),
     result = '';
 
 for (var name in groups) {

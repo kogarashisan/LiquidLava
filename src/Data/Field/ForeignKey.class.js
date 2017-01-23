@@ -14,7 +14,7 @@ Lava.define(
 	/**
 	 * Instance belongs to ForeignKey field
 	 * @type {boolean}
-	 * @const
+	 * @readonly
 	 */
 	isForeignKey: true,
 

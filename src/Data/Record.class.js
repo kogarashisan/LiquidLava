@@ -13,7 +13,7 @@ Lava.define(
 	/**
 	 * To tell other classes that this is instance of Record
 	 * @type {boolean}
-	 * @const
+	 * @readonly
 	 */
 	isRecord: true,
 	/**

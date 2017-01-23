@@ -13,7 +13,7 @@ Lava.define(
 	/**
 	 * Instance belongs to Collection field
 	 * @type {boolean}
-	 * @const
+	 * @readonly
 	 */
 	isCollectionField: true,
 

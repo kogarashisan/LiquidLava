@@ -13,7 +13,7 @@ Lava.define(
 	/**
 	 * Instance belongs to MetaRecord class
 	 * @type {boolean}
-	 * @const
+	 * @readonly
 	 */
 	isMetaRecord: true,
 

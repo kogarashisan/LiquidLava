@@ -21,7 +21,7 @@ Lava.define(
 	/**
 	 * Sign that this instance implements {@link _iValueContainer}
 	 * @type {boolean}
-	 * @const
+	 * @readonly
 	 */
 	isValueContainer: true,
 

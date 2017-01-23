@@ -12,7 +12,7 @@ Lava.define(
 	/**
 	 * Tell other classes that this instance is inherited from Refreshable
 	 * @type {boolean}
-	 * @const
+	 * @readonly
 	 */
 	isRefreshable: true,
 	/**

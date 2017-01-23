@@ -11,7 +11,7 @@ Lava.define(
 	/**
 	 * This instance belongs to Element container
 	 * @type {boolean}
-	 * @const
+	 * @readonly
 	 */
 	isElementContainer: true,
 

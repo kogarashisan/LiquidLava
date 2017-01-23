@@ -9,7 +9,7 @@ Lava.define(
 
 	/**
 	 * Indicates that this class is inherited from Observable and supports events
-	 * @const
+	 * @readonly
 	 */
 	isObservable: true,
 

@@ -11,7 +11,7 @@ Lava.define(
 	/**
 	 * Instance belongs to Emulated container
 	 * @type {boolean}
-	 * @const
+	 * @readonly
 	 */
 	isEmulatedContainer: true,
 

@@ -331,9 +331,9 @@ case 38:
 		
 break;
 case 39:
-			var arguments = yy.lexer.x_export_arguments;
-			if (arguments.length != 1) Lava.t('Elseif block requires exactly one argument');
-			this.$ = arguments[0];
+			var args = yy.lexer.x_export_arguments;
+			if (args.length != 1) Lava.t('Elseif block requires exactly one argument');
+			this.$ = args[0];
 			yy.lexer.x_export_arguments = null;
 		
 break;

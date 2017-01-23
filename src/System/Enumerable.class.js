@@ -22,7 +22,7 @@ Lava.define(
 
 	/**
 	 * To tell other classes that this is instance of Enumerable
-	 * @const
+	 * @readonly
 	 */
 	isEnumerable: true,
 

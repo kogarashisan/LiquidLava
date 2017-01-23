@@ -9,13 +9,6 @@ Lava.define(
 {
 
 	Extends: 'Lava.widget.input.TextAbstract',
-
-	name: 'textarea',
-
-	_renderContent: function() {
-
-		return Firestorm.String.escape(this._properties.value, Firestorm.String.TEXTAREA_ESCAPE_REGEX);
-
-	}
+	name: 'textarea'
 
 });

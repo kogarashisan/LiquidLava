@@ -645,16 +645,16 @@ Lava.parsers.Directives = {
 		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.t("Malformed assign");
 		if (raw_tag.attributes.name in config.assigns) Lava.t("Duplicate assign: " + raw_tag.attributes.name);
 
-		var arguments = Lava.ExpressionParser.parse(raw_tag.content[0]);
-		if (Lava.schema.DEBUG && arguments.length != 1) Lava.t("Expression block requires exactly one argument");
+		var args = Lava.ExpressionParser.parse(raw_tag.content[0]);
+		if (Lava.schema.DEBUG && args.length != 1) Lava.t("Expression block requires exactly one argument");
 
 		if (raw_tag.attributes.once && Lava.types.Boolean.fromString(raw_tag.attributes.once)) {
 
-			arguments[0].once = true;
+			args[0].once = true;
 
 		}
 
-		config.assigns[raw_tag.attributes.name] = arguments[0];
+		config.assigns[raw_tag.attributes.name] = args[0];
 
 	},
 
@@ -976,13 +976,13 @@ Lava.parsers.Directives = {
 		if (Lava.schema.DEBUG && (!raw_directive.content || raw_directive.content.length != 1))
 			Lava.t('Malformed static_eval directive. No content.');
 
-		var arguments = Lava.ExpressionParser.parse(raw_directive.content[0]);
+		var args = Lava.ExpressionParser.parse(raw_directive.content[0]);
 
-		if (Lava.schema.DEBUG && arguments.length == 0) Lava.t("static_eval: malformed argument");
+		if (Lava.schema.DEBUG && args.length == 0) Lava.t("static_eval: malformed argument");
 
 		return {
 			type: 'static_eval',
-			argument: arguments[0]
+			argument: args[0]
 		}
 
 	},

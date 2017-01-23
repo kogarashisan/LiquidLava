@@ -256,7 +256,16 @@ _cSerializer = {
 	 * Is not guaranteed to produce correct results, so may be used only for pretty-printing of source code for browser.
 	 * @type {boolean}
 	 */
-	pretty_print_functions: false
+	pretty_print_functions: false,
+    /**
+     * Turn this on, if you want to serialize dates. Example of what you will get:
+     * ```javascript
+     * var result = {
+     *     date_field: new Date(1481486549849)
+     * }
+     * ```
+     */
+    allow_dates_serialization: false
 };
 
 /**

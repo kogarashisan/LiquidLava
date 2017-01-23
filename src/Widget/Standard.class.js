@@ -15,7 +15,7 @@ Lava.define(
 	/**
 	 * Instance is widget
 	 * @type {boolean}
-	 * @const
+	 * @readonly
 	 */
 	isWidget: true,
 	/**

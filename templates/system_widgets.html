@@ -51,19 +51,18 @@
 
 <x:define controller="input.TextArea" title="TextArea" extends="InputAbstract">
 	<include name="input_view">
-		<textarea
-			x:type="view"
-			x:roles="_input_view"
-			x:resource_id="$textarea.TEXTAREA_ELEMENT"
-			x:event:change="$textarea.value_changed"
-			x:event:input="$textarea.input"
-			x:event:focus="$textarea._focused"
-			x:event:blur="$textarea._blurred"
+        <textarea
+            x:type="container"
+            x:resource_id="$textarea.TEXTAREA_ELEMENT"
+            x:event:change="$textarea.value_changed"
+            x:event:input="$textarea.input"
+            x:event:focus="$textarea._focused"
+            x:event:blur="$textarea._blurred"
 
-			x:bind:name="$textarea.name"
-			x:bind:disabled="$textarea.is_disabled"
-			x:bind:required="$textarea.is_required"
-			x:bind:readonly="$textarea.is_readonly"></textarea>
+            x:bind:name="$textarea.name"
+            x:bind:disabled="$textarea.is_disabled"
+            x:bind:required="$textarea.is_required"
+            x:bind:readonly="$textarea.is_readonly">{#TextArea($textarea.value)}<x:roles>_input_view</x:roles>{/TextArea}</textarea>
 	</include>
 	<script x:equiv="sugar" type="lava/options">
 		{

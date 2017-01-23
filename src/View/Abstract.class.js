@@ -19,7 +19,7 @@ Lava.define(
 	/**
 	 * Indicate that this class is instance of Lava.view.Abstract
 	 * @type {boolean}
-	 * @const
+	 * @readonly
 	 */
 	isView: true,
 	/**
