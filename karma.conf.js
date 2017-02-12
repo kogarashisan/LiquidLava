@@ -59,11 +59,15 @@ module.exports = function(config) {
         // how many browser should be started simultaneous
         concurrency: Infinity,
 
-        coverageReporter: { type : 'html', dir : 'coverage/' }
+        coverageReporter: {
+            type : 'lcov', // type : 'html'
+            dir : 'coverage/'
+        }
     };
 
     if (process.env.TRAVIS) {
         configuration.browsers = ['Chrome_travis_ci'];
+        configuration.reporters.push('coveralls');
     }
 
     config.set(configuration);
