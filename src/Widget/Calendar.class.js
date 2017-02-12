@@ -163,9 +163,9 @@ Lava.define(
 	/**
 	 * Show previous month
 	 * @param dom_event_name
-	 * @param dom_event
+	 * @param event_object
 	 */
-	_onPreviousMonthClick: function(dom_event_name, dom_event) {
+	_onPreviousMonthClick: function(dom_event_name, event_object) {
 
 		var month = this._properties._displayed_month;
 		if (month == 0) {
@@ -176,16 +176,16 @@ Lava.define(
 		}
 		this._refreshData();
 
-		dom_event.preventDefault();
+		event_object.preventDefault();
 
 	},
 
 	/**
 	 * Show next month
 	 * @param dom_event_name
-	 * @param dom_event
+	 * @param event_object
 	 */
-	_onNextMonthClick: function(dom_event_name, dom_event) {
+	_onNextMonthClick: function(dom_event_name, event_object) {
 
 		var month = this._properties._displayed_month;
 		if (month == 11) {
@@ -196,35 +196,35 @@ Lava.define(
 		}
 		this._refreshData();
 
-		dom_event.preventDefault();
+		event_object.preventDefault();
 
 	},
 
 	/**
 	 * Select current day
 	 * @param dom_event_name
-	 * @param dom_event
+	 * @param event_object
 	 */
-	_onTodayClick: function(dom_event_name, dom_event) {
+	_onTodayClick: function(dom_event_name, event_object) {
 
 		var time = Date.UTC(this._properties._current_year, this._properties._current_month, this._properties._current_day);
 		this._select(this._properties._current_year, this._properties._current_month, time);
-		dom_event.preventDefault();
+		event_object.preventDefault();
 
 	},
 
 	/**
 	 * Select the clicked day
 	 * @param dom_event_name
-	 * @param dom_event
+	 * @param event_object
 	 * @param view
 	 * @param template_arguments
 	 */
-	_onDayClick: function(dom_event_name, dom_event, view, template_arguments) {
+	_onDayClick: function(dom_event_name, event_object, view, template_arguments) {
 
 		var day = template_arguments[0]; // the rendered "day" structure
 		this._select(day.year, day.month, day.milliseconds);
-		dom_event.preventDefault(); // cancel selection
+		event_object.preventDefault(); // cancel selection
 
 	},
 
@@ -251,19 +251,19 @@ Lava.define(
 	/**
 	 * Switch current view to "months" selection
 	 * @param dom_event_name
-	 * @param dom_event
+	 * @param event_object
 	 */
-	_onSwitchToMonthViewClick: function(dom_event_name, dom_event) {
+	_onSwitchToMonthViewClick: function(dom_event_name, event_object) {
 
 		this.set('_selected_view', 'months');
 		if (this._year_input) {
 			this._year_input.set('value', this._properties._displayed_year + '');
 		}
-		dom_event.preventDefault();
+		event_object.preventDefault();
 
 	},
 
-	/*_onCloseMonthsViewClick: function(dom_event_name, dom_event, view, template_arguments) {
+	/*_onCloseMonthsViewClick: function(dom_event_name, event_object, view, template_arguments) {
 
 		this._refreshData();
 		this.set('_selected_view', 'days');
@@ -273,37 +273,37 @@ Lava.define(
 	/**
 	 * Display previous year
 	 * @param dom_event_name
-	 * @param dom_event
+	 * @param event_object
 	 */
-	_onPreviousYearClick: function(dom_event_name, dom_event) {
+	_onPreviousYearClick: function(dom_event_name, event_object) {
 
 		this.set('_displayed_year', this.get('_displayed_year') - 1);
 		this._clearInvalidInputState();
-		dom_event.preventDefault();
+		event_object.preventDefault();
 
 	},
 
 	/**
 	 * Display next year
 	 * @param dom_event_name
-	 * @param dom_event
+	 * @param event_object
 	 */
-	_onNextYearClick: function(dom_event_name, dom_event) {
+	_onNextYearClick: function(dom_event_name, event_object) {
 
 		this.set('_displayed_year', this.get('_displayed_year') + 1);
 		this._clearInvalidInputState();
-		dom_event.preventDefault();
+		event_object.preventDefault();
 
 	},
 
 	/**
 	 * Display calendar for chosen month
 	 * @param dom_event_name
-	 * @param dom_event
+	 * @param event_object
 	 * @param view
 	 * @param template_arguments
 	 */
-	_onMonthClick: function(dom_event_name, dom_event, view, template_arguments) {
+	_onMonthClick: function(dom_event_name, event_object, view, template_arguments) {
 
 		var month_descriptor = template_arguments[0];
 		this.set('_displayed_month', month_descriptor.get('index'));

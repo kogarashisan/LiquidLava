@@ -204,19 +204,19 @@ Lava.define(
 	/**
 	 * Respond to DOM event, routed by {@link Lava.system.ViewManager}
 	 * @param {string} dom_event_name
-	 * @param dom_event Browser event object, wrapped by the framework
+	 * @param event_object Browser event object, wrapped by the framework
 	 * @param {string} handler_name Template event name
 	 * @param {Lava.view.Abstract} source_view View, that is the source for this event
 	 * @param {Array.<*>} template_arguments Evaluated argument values from view's template
 	 * @returns {boolean} <kw>true</kw>, if event was handled, and <kw>false</kw> otherwise
 	 */
-	handleEvent: function(dom_event_name, dom_event, handler_name, source_view, template_arguments) {
+	handleEvent: function(dom_event_name, event_object, handler_name, source_view, template_arguments) {
 
 		var result = false;
 
 		if (handler_name in this._event_handlers) {
 
-			this[this._event_handlers[handler_name]](dom_event_name, dom_event, source_view, template_arguments);
+			this[this._event_handlers[handler_name]](dom_event_name, event_object, source_view, template_arguments);
 			result = true;
 
 		}

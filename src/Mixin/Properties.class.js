@@ -143,6 +143,12 @@ Lava.define(
 
 	},
 
+    oncePropertyChanged: function(property_name, fn, context, listener_args) {
+
+        return this._addOnce(property_name, fn, context, listener_args, this._property_listeners);
+
+    },
+
 	/**
 	 * Removes listeners added with {@link Lava.mixin.Properties#onPropertyChanged}
 	 * @param {_tListener} listener The listener structure, returned from {@link Lava.mixin.Properties#onPropertyChanged}

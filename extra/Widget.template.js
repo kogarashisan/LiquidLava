@@ -37,7 +37,7 @@ Lava.define(
 
 	}
 
-	//_eventHandler: function(dom_event_name, dom_event, view, template_arguments) {},
+	//_eventHandler: function(dom_event_name, event_object, view, template_arguments) {},
 
 	//_roleHandler: function(view, template_arguments) {}
 

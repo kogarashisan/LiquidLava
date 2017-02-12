@@ -84,11 +84,11 @@ Lava.define(
 	/**
 	 * Tab header was clicked. Switch active tab
 	 * @param dom_event_name
-	 * @param dom_event
+	 * @param event_object
 	 * @param view
 	 * @param template_arguments
 	 */
-	_onTabHeaderClicked: function(dom_event_name, dom_event, view, template_arguments) {
+	_onTabHeaderClicked: function(dom_event_name, event_object, view, template_arguments) {
 
 		var tab = template_arguments[0]; // tab object
 		if (tab.get('is_enabled')) {
@@ -96,7 +96,7 @@ Lava.define(
 		}
 		// to remove dotted outline in FF. This can be done with CSS, but CSS will disable it completely
 		view.getContainer().getDOMElement().blur();
-		dom_event.preventDefault();
+		event_object.preventDefault();
 
 	},
 

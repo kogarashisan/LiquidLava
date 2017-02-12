@@ -10,14 +10,6 @@ Lava.ClassManager = {
 	 */
 	inline_simple_arrays: true,
 	/**
-	 * In monomorphic mode all value members of classes will be assigned in constructor -
-	 * this will produce classes with slow construction time and fast method calls.
-	 * If it's is off - then value members will be moved to prototype, and class instance construction will become
-	 * significantly faster, but performance of long-living objects will decrease.
-	 * @type {boolean}
-	 */
-	is_monomorphic: true,
-	/**
 	 * If an array consists of these types - it can be inlined
 	 * @type {Array.<string>}
 	 */
@@ -81,12 +73,22 @@ Lava.ClassManager = {
 
 	},
 
+    /**
+     * Returns an object with all class structures by their path
+     * @returns {Object.<string, _cClassData>}
+     */
+    getAllClasses: function() {
+
+        return this._sources;
+
+    },
+
 	/**
 	 * Create a class
 	 * @param {string} class_path Full name of the class
-	 * @param {Object} source_object Class body
+	 * @param {Object} class_body Class body
 	 */
-	define: function(class_path, source_object) {
+	define: function(class_path, class_body) {
 
 		var name,
 			class_data,
@@ -100,7 +102,7 @@ Lava.ClassManager = {
 		class_data = /** @type {_cClassData} */ {
 			name: class_path.split('.').pop(),
 			path: class_path,
-			source_object: source_object,
+            class_body: class_body,
 			"extends": null,
 			"implements": [],
 			parent_class_data: null,
@@ -110,18 +112,17 @@ Lava.ClassManager = {
 			references: [],
 			shared: {},
 			constructor: null,
-			own_references_count: 0,
-			is_monomorphic: this.is_monomorphic
+			own_references_count: 0
 		};
 
-		if ('Extends' in source_object) {
+		if ('Extends' in class_body) {
 
-			if (Lava.schema.DEBUG && typeof(source_object.Extends) != 'string') Lava.t('Extends: string expected. ' + class_path);
-			class_data['extends'] = /** @type {string} */ source_object.Extends;
-			parent_data = this._sources[source_object.Extends];
+			if (Lava.schema.DEBUG && typeof(class_body.Extends) != 'string') Lava.t('Extends: string expected. ' + class_path);
+			class_data['extends'] = /** @type {string} */ class_body.Extends;
+			parent_data = this._sources[class_body.Extends];
 			class_data.parent_class_data = parent_data;
 
-			if (!parent_data) Lava.t('[define] Base class not found: "' + source_object.Extends + '"');
+			if (!parent_data) Lava.t('[define] Parent class not found: "' + class_body.Extends + '"');
 			if (!parent_data.skeleton) Lava.t("[define] Parent class was loaded without skeleton, extension is not possible: " + class_data['extends']);
 			if (parent_data.hierarchy_names.indexOf(class_data.name) != -1) Lava.t("[define] Duplicate name in inheritance chain: " + class_data.name + " / " + class_path);
 
@@ -140,13 +141,13 @@ Lava.ClassManager = {
 					? parent_data.shared[name].slice()
 					: Firestorm.Object.copy(parent_data.shared[name]);
 
-				if (name in source_object) {
+				if (name in class_body) {
 
-					if (Lava.schema.DEBUG && Array.isArray(source_object[name]) != is_array) Lava.t("Shared members of different types must not override each other (array must not become an object)");
+					if (Lava.schema.DEBUG && Array.isArray(class_body[name]) != is_array) Lava.t("Shared members of different types must not override each other (array must not become an object)");
 					if (is_array) {
-						class_data.shared[name] = source_object[name];
+						class_data.shared[name] = class_body[name];
 					} else {
-						Firestorm.extend(class_data.shared[name], source_object[name]);
+						Firestorm.extend(class_data.shared[name], class_body[name]);
 					}
 
 				}
@@ -160,29 +161,29 @@ Lava.ClassManager = {
 
 		}
 
-		if ('Shared' in source_object) {
+		if ('Shared' in class_body) {
 
-			shared_names = (typeof(source_object.Shared) == 'string') ? [source_object.Shared] : source_object.Shared;
+			shared_names = (typeof(class_body.Shared) == 'string') ? [class_body.Shared] : class_body.Shared;
 
 			for (i = 0, count = shared_names.length; i < count; i++) {
 
 				name = shared_names[i];
-				type = Firestorm.getType(source_object[name]);
+				type = Firestorm.getType(class_body[name]);
 
 				if (Lava.schema.DEBUG) {
-					if (!(name in source_object)) Lava.t("Shared member is not in class: " + name);
+					if (!(name in class_body)) Lava.t("Shared member is not in class: " + name);
 					if (type != 'object' && type != 'array') Lava.t("Shared: class member must be an object or array");
 					if (class_data.parent_class_data && (name in class_data.parent_class_data.skeleton)) Lava.t("[ClassManager] instance member from parent class may not become shared in descendant: " + name);
 					if (name in class_data.shared) Lava.t("Member is already shared in parent class: " + class_path + "#" + name);
 				}
 
-				class_data.shared[name] = source_object[name];
+				class_data.shared[name] = class_body[name];
 
 			}
 
 		}
 
-		class_data.skeleton = this._disassemble(class_data, source_object, true);
+		class_data.skeleton = this._disassemble(class_data, class_body, true);
 
 		if (parent_data) {
 
@@ -192,23 +193,29 @@ Lava.ClassManager = {
 
 		class_data.own_references_count += class_data.references.length;
 
-		if ('Implements' in source_object) {
+		if ('Implements' in class_body) {
 
-			if (typeof(source_object.Implements) == 'string') {
+			if (typeof(class_body.Implements) == 'string') {
 
-				this._implementPath(class_data, source_object.Implements);
+				this._implementPath(class_data, class_body.Implements);
 
 			} else {
 
-				for (i = 0, count = source_object.Implements.length; i < count; i++) {
+				for (i = 0, count = class_body.Implements.length; i < count; i++) {
 
-					this._implementPath(class_data, source_object.Implements[i]);
+					this._implementPath(class_data, class_body.Implements[i]);
 
 				}
 
 			}
 
 		}
+
+        if (Lava.schema.DEBUG) {
+            for (name in class_data.shared) {
+                if (name in class_data.skeleton) Lava.t('Shared class member is hidden by member from instance: ' + class_data.path + "::" + name);
+            }
+        }
 
 		class_data.constructor = this._buildRealConstructor(class_data);
 
@@ -314,11 +321,11 @@ Lava.ClassManager = {
 	/**
 	 * Recursively create skeletons for all objects inside class body
 	 * @param {_cClassData} class_data
-	 * @param {Object} source_object
+	 * @param {Object} class_body
 	 * @param {boolean} is_root
 	 * @returns {Object}
 	 */
-	_disassemble: function(class_data, source_object, is_root) {
+	_disassemble: function(class_data, class_body, is_root) {
 
 		var name,
 			skeleton = {},
@@ -326,7 +333,7 @@ Lava.ClassManager = {
 			type,
 			skeleton_value;
 
-		for (name in source_object) {
+		for (name in class_body) {
 
 			if (is_root && (this._reserved_members.indexOf(name) != -1 || (name in class_data.shared))) {
 
@@ -334,7 +341,7 @@ Lava.ClassManager = {
 
 			}
 
-			value = source_object[name];
+			value = class_body[name];
 			type = Firestorm.getType(value);
 
 			switch (type) {
@@ -401,25 +408,16 @@ Lava.ClassManager = {
 			source,
 			constructor,
 			object_properties,
-			uses_references = false,
-			is_monomorphic = class_data.is_monomorphic;
+			uses_references = false;
 
 		for (name in skeleton) {
 
 			switch (skeleton[name].type) {
 				case this.MEMBER_TYPES.STRING:
-					if (is_monomorphic) {
-						serialized_value = Firestorm.String.quote(skeleton[name].value);
-					} else {
-						prototype[name] = skeleton[name].value;
-					}
+                    serialized_value = Firestorm.String.quote(skeleton[name].value);
 					break;
 				case this.MEMBER_TYPES.PRIMITIVE: // null, boolean, number
-					if (is_monomorphic) {
-						serialized_value = skeleton[name].value + '';
-					} else {
-						prototype[name] = skeleton[name].value;
-					}
+                    serialized_value = skeleton[name].value + '';
 					break;
 				case this.MEMBER_TYPES.EMPTY_ARRAY:
 					serialized_value = "[]";
@@ -586,6 +584,7 @@ Lava.ClassManager = {
 			}
 
 			namespace = namespace[segment_name];
+            if (Lava.schema.DEBUG && !namespace) Lava.t("Namespaces must be objects: please make sure, that path " + path_segments.join('.') + " does not contain null or undefined values.");
 
 		}
 
@@ -704,237 +703,6 @@ Lava.ClassManager = {
 	hasClass: function(class_path) {
 
 		return class_path in this._sources;
-
-	},
-
-	/**
-	 * Build a function that creates class constructor's prototype. Used in export
-	 * @param {_cClassData} class_data
-	 * @returns {function}
-	 */
-	_getPrototypeGenerator: function(class_data) {
-
-		var skeleton = class_data.skeleton,
-			name,
-			serialized_value,
-			serialized_actions = [],
-			is_polymorphic = !class_data.is_monomorphic;
-
-		for (name in skeleton) {
-
-			switch (skeleton[name].type) {
-				case this.MEMBER_TYPES.REGEXP:
-				case this.MEMBER_TYPES.FUNCTION:
-					serialized_value = 'r[' + skeleton[name].index + ']';
-					break;
-				//case 'undefined':
-				case this.MEMBER_TYPES.STRING:
-					if (is_polymorphic) {
-						serialized_value = '"' + skeleton[name].value.replace(/\"/g, "\\\"") + '"';
-					}
-					break;
-				case this.MEMBER_TYPES.PRIMITIVE: // null, boolean, number
-					if (is_polymorphic) {
-						serialized_value = skeleton[name].value + '';
-					}
-					break;
-			}
-
-			if (serialized_value) {
-
-				if (Lava.VALID_PROPERTY_NAME_REGEX.test(name)) {
-
-					serialized_actions.push('p.' + name + ' = ' + serialized_value + ';');
-
-				} else {
-
-					serialized_actions.push('p[' + Firestorm.String.quote(name) + '] = ' + serialized_value + ';');
-
-				}
-
-				serialized_value = null;
-
-			}
-
-		}
-
-		for (name in class_data.shared) {
-
-			serialized_actions.push('p.' + name + ' = s.' + name + ';');
-
-		}
-
-		return serialized_actions.length
-			? new Function('cd,p', "\tvar r=cd.references,\n\t\ts=cd.shared;\n\n\t" + serialized_actions.join('\n\t') + "\n")
-			: null;
-
-	},
-
-	/**
-	 * Server-side export function: create an exported version of a class, which can be loaded by
-	 * {@link Lava.ClassManager#loadClass} to save time on client. <b>Warning: export produces lots of excessive data,
-	 * which you should manually <kw>delete</kw></b> (read the reference for more info)
-	 * @param {string} class_path
-	 * @returns {_cClassData}
-	 */
-	exportClass: function(class_path) {
-
-		var class_data = this._sources[class_path],
-			shared = {},
-			name,
-			result,
-			implements_list,
-			prototype_generator = this._getPrototypeGenerator(class_data);
-
-		for (name in class_data.shared) {
-
-			if (name in class_data.source_object) {
-
-				shared[name] = class_data.source_object[name];
-
-			}
-
-		}
-
-		result = {
-			path: class_data.path,
-			"extends": class_data['extends'],
-			"implements": null,
-
-			references: class_data.references,
-			constructor: this.constructors[class_path],
-
-			skeleton: class_data.skeleton, // may be deleted, if extension via define() is not needed for this class
-			source_object: class_data.source_object // may be safely deleted before serialization
-		};
-
-		if (prototype_generator) result.prototype_generator = prototype_generator;
-		if (!Firestorm.Object.isEmpty(shared)) result.shared = shared;
-
-		if (class_data.parent_class_data) {
-
-			// cut the parent's data and leave only child's
-			result.own_references = class_data.references.slice(
-				class_data.parent_class_data.references.length,
-				class_data.parent_class_data.references.length + class_data.own_references_count
-			);
-			implements_list = class_data.implements.slice(class_data.parent_class_data.implements.length);
-
-		} else {
-
-			result.own_references = class_data.references.slice(0, class_data.own_references_count);
-			implements_list = class_data.implements;
-
-		}
-
-		if (implements_list.length) result.implements = implements_list;
-
-		return result;
-
-	},
-
-	/**
-	 * Load an object, exported by {@link Lava.ClassManager#exportClass}
-	 * @param {_cClassData} class_data
-	 */
-	loadClass: function(class_data) {
-
-		var parent_data,
-			name,
-			shared,
-			i = 0,
-			count,
-			own_implements;
-
-		if (!class_data.shared) class_data.shared = {};
-		if (!class_data.implements) class_data.implements = [];
-		own_implements = class_data.implements;
-		shared = class_data.shared;
-		class_data.name = class_data.path.split('.').pop();
-
-		if (class_data['extends']) {
-
-			parent_data = this._sources[class_data['extends']];
-			if (Lava.schema.DEBUG && !parent_data) Lava.t("[loadClass] class parent does not exists: " + class_data['extends']);
-
-			class_data.parent_class_data = parent_data;
-
-			for (name in parent_data.shared) {
-
-				if (!(name in shared)) {
-
-					shared[name] = Array.isArray(parent_data.shared[name])
-						? parent_data.shared[name].slice()
-						: Firestorm.Object.copy(parent_data.shared[name]);
-
-				} else if (!Array.isArray(shared[name])) {
-
-					Firestorm.implement(shared[name], parent_data.shared[name]);
-
-				}
-
-			}
-
-			class_data.implements = parent_data.implements.concat(class_data.implements);
-			class_data.hierarchy_names = parent_data.hierarchy_names.slice();
-			class_data.hierarchy_names.push(class_data.name);
-			class_data.hierarchy_paths = parent_data.hierarchy_paths.slice();
-			class_data.hierarchy_paths.push(class_data.path);
-
-		} else {
-
-			class_data.hierarchy_names = [class_data.name];
-			class_data.hierarchy_paths = [class_data.path];
-			class_data.parent_class_data = null;
-
-		}
-
-		if (class_data.own_references) {
-
-			class_data.references = parent_data
-				? parent_data.references.concat(class_data.own_references)
-				: class_data.own_references;
-
-			for (count = own_implements.length; i < count; i++) {
-
-				class_data.references = class_data.references.concat(this._sources[own_implements[i]].references);
-
-			}
-
-		}
-
-		if (class_data.prototype_generator) {
-			class_data.prototype_generator(class_data, class_data.constructor.prototype);
-			class_data.constructor.prototype.Class = class_data;
-		}
-
-		this._registerClass(class_data);
-
-	},
-
-	/**
-	 * Batch load exported classes. Constructors, references and skeletons can be provided as separate arrays
-	 * @param {Array.<_cClassData>} class_datas
-	 */
-	loadClasses: function(class_datas) {
-
-		for (var i = 0, count = class_datas.length; i <count; i++) {
-
-			this.loadClass(class_datas[i]);
-
-		}
-
-	},
-
-	/**
-	 * Convenience method for loading skeletons, which were exported separately from class bodies
-	 * @param {Object.<string, Object>} skeletons_hash Class name => skeleton
-	 */
-	loadSkeletons: function(skeletons_hash) {
-
-		for (var class_name in skeletons_hash) {
-			this._sources[class_name].skeleton = skeletons_hash[class_name];
-		}
 
 	},
 

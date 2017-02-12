@@ -667,8 +667,7 @@ Lava.define(
 		if ('locator_type' in config) {
 
 			widget = this['_locateWidgetBy' + config.locator_type](widget, config.locator);
-
-			if (!widget || !widget.isWidget) Lava.t();
+			if (!widget || !widget.isWidget) Lava.t("getInclude: Unable to find widget with [" + config.locator_type + "=" + config.locator + "]");
 
 		}
 

@@ -12,7 +12,7 @@
  */
 var Lava = {
 	/**
-	 * Version numbers, split by comma to allow easier comparison of versions
+	 * Version numbers in form of array - to allow easier comparison of versions
 	 */
 	version: [/*<%=version_array%>*/],
 
@@ -820,7 +820,7 @@ var Lava = {
 	 * @param {_tListener} listener
 	 */
 	resumeListener: function(listener) {
-		listener.fn = listener.fn_original;
+		listener.fn = listener._fn;
 	},
 
 	/**

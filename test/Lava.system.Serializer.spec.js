@@ -1,6 +1,5 @@
 
-//var expect = require('chai').expect;
-Lava.init();
+Lava.init && Lava.init();
 
 describe("Lava.system.Serializer", function() {
 

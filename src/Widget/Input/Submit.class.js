@@ -25,12 +25,12 @@ Lava.define(
 	/**
 	 * Submit button was clicked. Fire "clicked" event
 	 * @param dom_event_name
-	 * @param dom_event
+	 * @param event_object
 	 */
-	_onClicked: function(dom_event_name, dom_event) {
+	_onClicked: function(dom_event_name, event_object) {
 
 		this._fire('clicked');
-		dom_event.preventDefault();
+		event_object.preventDefault();
 
 	}
 

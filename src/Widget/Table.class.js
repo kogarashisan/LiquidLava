@@ -58,11 +58,11 @@ Lava.define(
 	/**
 	 * Column header has been clicked. Apply sorting
 	 * @param dom_event_name
-	 * @param dom_event
+	 * @param event_object
 	 * @param view
 	 * @param template_arguments
 	 */
-	_onColumnHeaderClick: function(dom_event_name, dom_event, view, template_arguments) {
+	_onColumnHeaderClick: function(dom_event_name, event_object, view, template_arguments) {
 
 		var column_name = template_arguments[0].name,
 			less;

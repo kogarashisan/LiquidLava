@@ -230,11 +230,11 @@ Lava.define(
 	/**
 	 * Expand or collapse the node
 	 * @param dom_event_name
-	 * @param dom_event
+	 * @param event_object
 	 * @param view
 	 * @param template_arguments
 	 */
-	_onNodeClick: function(dom_event_name, dom_event, view, template_arguments) {
+	_onNodeClick: function(dom_event_name, event_object, view, template_arguments) {
 
 		// template_arguments[0] - node record
 		if (Lava.schema.DEBUG) {
@@ -247,7 +247,7 @@ Lava.define(
 		}
 		var property_source = ('is_expanded' in this._meta_storage_columns) ? this._getMetaRecord(template_arguments[0]) : template_arguments[0];
 		property_source.set('is_expanded', !property_source.get('is_expanded'));
-		dom_event.preventDefault(); // to prevent text selection
+		event_object.preventDefault(); // to prevent text selection
 
 	},
 

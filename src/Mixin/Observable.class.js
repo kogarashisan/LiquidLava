@@ -34,6 +34,25 @@ Lava.define(
 
 	},
 
+    once: function(event_name, fn, context, listener_args) {
+
+        return this._addOnce(event_name, fn, context, listener_args, this._listeners);
+
+    },
+
+    _addOnce: function(event_name, fn, context, listener_args, listeners_by_event) {
+
+        var listener,
+            callback = function(self, event_args, listener_args) {
+                fn.call(context, self, event_args, listener_args);
+                self._removeListener(listener, listeners_by_event);
+            };
+
+        listener = this._addListener(event_name, callback, context, listener_args, listeners_by_event);
+        return listener;
+
+    },
+
 	/**
 	 * Create the listener construct and push it into the listeners array for given event name
 	 *
@@ -56,7 +75,7 @@ Lava.define(
 		var listener = {
 			event_name: event_name,
 			fn: fn,
-			fn_original: fn,
+			_fn: fn,
 			context: context,
 			listener_args: listener_args
 		};
@@ -154,6 +173,31 @@ Lava.define(
 
 		return this._listeners[event_name] != null;
 
-	}
+	},
+
+    removeAllListenersByContext: function (context) {
+
+        for (var event_name in this._listeners) {
+
+            this.removeListenersByContext(event_name, context);
+
+        }
+
+    },
+
+    removeListenersByContext: function (event_name, context) {
+
+        var listeners = this._listeners[event_name];
+        if (listeners) {
+            var result = [];
+            for (var i = 0, count = listeners.length; i < count; i++) {
+                if (listeners[i].context != context) {
+                    result.push(listeners[i]);
+                }
+            }
+            this._listeners[event_name] = result.length ? result : null;
+        }
+
+    }
 
 });

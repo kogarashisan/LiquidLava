@@ -185,15 +185,26 @@ IDENTIFIER				[a-zA-Z\_][a-zA-Z0-9\_]*
 \:up\({IDENTIFIER}\)							{ yytext = yytext.substr(4, yyleng - 5); return 'LOOK_UP'; }
 \:dn\({IDENTIFIER}\)							{ yytext = yytext.substr(4, yyleng - 5); return 'LOOK_DOWN'; }
 
-(\&lt\;=|\&gt\;=)								{ yytext = yy.unescape(yytext); return 'OPERATOR'; /*escaped operator versions*/ }
-(\&amp\;|\&lt\;|\&gt\;|\&)+						{ yytext = yy.unescape(yytext); return 'OPERATOR'; /*escaped operator versions + "&", "&&" */ }
+\&lt;\&lt;\=|\&gt;\&gt;\=|\&gt;\&gt;\&gt;\=|\&amp;\=|\+\+|\-\-|\+\=|\-\=|\*\=|\/\=|\%\=|\<\<\=|\>\>\=|\>\>\>\=|\&\=|\^\=|\|\=       {
+    if (yytext == '++' || yytext == '--') Lava.t('Increment and decrement are not allowed (side-effects). Missing a brace after the first \'' + yytext[0] + '\'?');
+    Lava.t('Operators with side-effects are not allowed: ' + yytext); // all assignments, increments and other side-effects
+}
 
-[\+\-\*\/\%]									{ return 'OPERATOR'; /*arithmetic*/ }
-\|\||\!\!										{ return 'OPERATOR'; /*logical, without "&&" and "!" */ }
+(\&lt\;=|\&gt\;=)								{ yytext = yy.unescape(yytext); return 'OPERATOR'; /*escaped operator versions of <=, >= */ }
+\&amp\;\&amp\;|\&lt\;\&lt\;|\&gt\;\&gt\;\&gt\;|\&gt\;\&gt\;		{ yytext = yy.unescape(yytext); return 'OPERATOR'; /* escaped &&, <<, >>>, >> */ }
+\&amp\;|\&lt\;|\&gt\;   						{ yytext = yy.unescape(yytext); return 'OPERATOR'; /* escaped bitwise &, <, > */ }
+
+[\*\/\%]	    							    { return 'OPERATOR'; /*arithmetic without unary*/ }
+\|\||\&\&		    							{ return 'OPERATOR'; /*logical*/ }
 \=\=\=|\!\=\=|\=\=|\!\=|\<\=|\>\=|\<|\>			{ return 'OPERATOR'; /*comparison*/ }
-\>\>\>|\>\>|\<\<|[\|\^]							{ return 'OPERATOR'; /*bitwise, without "&" */ }
+\>\>\>|\>\>|\<\<|[\|\^]|\&						{ return 'OPERATOR'; /*bitwise*/ }
 [\?\:]											{ return 'OPERATOR'; /*ternary*/ }
-\!												{ return 'OPERATOR'; /*unary*/ }
+\!\!|\!				        					{ return 'UNARY_OPERATOR'; /*unary*/ }
+\+|\-		        							{ return 'UNARY_ARITHMETIC_OPERATOR'; /*unary*/ }
+
+\=                                              { Lava.t('Operators with side-effects are not allowed: ='); }
+\sin\s|\sIN\s|\sIn\s|\siN\s						{ if (yytext != yytext.toLowerCase()) Lava.t("The 'in' operator must be written in lower case."); return 'OPERATOR'; }
+
 \,												{ return 'COMMA'; }
 \;												{ return 'SEMICOLON'; }
 \d+(\.\d+)?((e|E)(\+|\-)\d+)?					{ return 'NUMBER'; }
@@ -271,30 +282,37 @@ scopeEvalList
 	;
 
 expression
-	: expressionTail {
-			yy.x_counters.expression_tails++;
-			$$ = $1;
-		}
-	| operand {
-			yy.x_counters.operands++;
-			$$ = $1;
-		}
-	| operand expressionTail {
+	: modifiedOperand expressionTail {
 			yy.x_counters.operands++;
 			yy.x_counters.expression_tails++;
 			$$ = $1 + ' ' + $2;
+		}
+	| modifiedOperand {
+			yy.x_counters.operands++;
+			$$ = $1;
 		}
 	;
 
 expressionTail
-	: expressionTail OPERATOR operand {
+	: expressionTail operator modifiedOperand {
 			yy.x_counters.operands++;
 			$$ = $1 + ' ' + $2 + ' ' + $3;
 		}
-	| OPERATOR operand {
+	| operator modifiedOperand {
 			yy.x_counters.operands++;
 			$$ = $1 + ' ' + $2;
 		}
+	;
+
+operator
+	: OPERATOR { $$ = $1; }
+	| UNARY_ARITHMETIC_OPERATOR { $$ = $1; }
+	;
+
+modifiedOperand
+	: UNARY_ARITHMETIC_OPERATOR operand { $$ = $1 + ' ' + $2; }
+	| UNARY_OPERATOR operand { $$ = $1 + ' ' + $2; }
+	| operand { $$ = $1; }
 	;
 
 operand

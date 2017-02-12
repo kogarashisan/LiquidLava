@@ -148,7 +148,7 @@ Lava.define(
 			constructor;
 
 		this.guid = Lava.guid++;
-		if (Lava.schema.DEBUG && config.id && !Lava.isValidId(config.id)) Lava.t();
+		if (Lava.schema.DEBUG && config.id && !Lava.isValidId(config.id)) Lava.t("Invalid view id: " + config.id);
 		if ('id' in config) {
 			this.id = config.id;
 		}

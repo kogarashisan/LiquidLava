@@ -74,9 +74,9 @@ Lava.define(
 	/**
 	 * Change <wp>is_open</wp> state (open dropdown which is closed and vice versa)
 	 * @param dom_event_name
-	 * @param dom_event
+	 * @param event_object
 	 */
-	_onTriggerClick: function(dom_event_name, dom_event) {
+	_onTriggerClick: function(dom_event_name, event_object) {
 
 		if (this._properties.is_open) {
 
@@ -93,7 +93,7 @@ Lava.define(
 
 		}
 
-		dom_event.preventDefault();
+		event_object.preventDefault();
 
 	},
 

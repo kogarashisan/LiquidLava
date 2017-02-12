@@ -62,7 +62,7 @@ Lava.Core = {
 		var listener = {
 				event_name: event_name,
 				fn: fn,
-				fn_original: fn,
+                _fn: fn,
 				context: context
 			};
 

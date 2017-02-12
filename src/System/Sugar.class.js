@@ -36,7 +36,7 @@ Lava.define(
 		expressions_option: '_parseRootExpressionsOptionAttribute',
 		targets_option: '_parseRootTargetsOptionAttribute',
 		property: '_parseRootPropertyAttribute',
-		'switch': '_parseRootSwitchAttribute',
+		'switch': '_parseRootSwitchAttribute', // option, not property
 		option: '_parseRootOptionAttribute',
 		id: '_parseRootIdAttribute'
 	},

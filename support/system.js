@@ -65,7 +65,7 @@ _cClassData = {
 	 * Raw class body, from which it was constructed
 	 * @type {Object}
 	 */
-	source_object: {},
+    class_body: {},
 
 	/**
 	 * When Extends is present - a string with full name of the parent
@@ -122,20 +122,10 @@ _cClassData = {
 	own_references_count: 0,
 
 	/**
-	 * For exported classes: helper method, used by {@link Lava.ClassManager#loadClass}
-	 * @type {function}
-	 */
-	prototype_generator: null,
-	/**
 	 * For exported classes: generated constructor
 	 * @type {function}
 	 */
 	constructor: null,
-	/**
-	 * Was this class optimized for function monomorphism
-	 * @type {boolean}
-	 */
-	is_monomorphic: true,
 
 	/**
 	 * For exported classes: partial (own) references array
@@ -233,8 +223,11 @@ _tListener = {
 	event_name: '',
 	/** @readonly */
 	fn: null,
-	/** @readonly */
-	fn_original: null,
+	/**
+     * Used to resume listener after suspension
+     * @readonly
+     */
+    _fn: null,
 	/** @readonly */
 	context: null,
 	/** @readonly */

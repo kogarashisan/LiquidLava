@@ -17,7 +17,8 @@ module.exports = function(config) {
     config.set({
         // base path that will be used to resolve all patterns (eg. files, exclude)
         basePath: '',
-        frameworks: ['mocha', 'chai'],
+        frameworks: ['mocha', 'chai-spies', 'chai' /*, 'browserify'*/],
+        //plugins: ['karma-mocha', 'karma-browserify', 'karma-coverage', 'karma-chai', 'karma-chrome-launcher'],
         // list of files / patterns to load in the browser
         files: files_list,
         // list of files to exclude
@@ -27,6 +28,7 @@ module.exports = function(config) {
         // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
         preprocessors: {
             'src/**/*': 'coverage'
+            //'test/**/*.spec.js': 'browserify'
         },
         // test results reporter to use
         // possible values: 'dots', 'progress'
