@@ -1,5 +1,5 @@
 
-Lava.init && Lava.init();
+Lava.init();
 
 describe("Lava.mixin.Properties", function() {
 

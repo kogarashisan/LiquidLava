@@ -17,17 +17,6 @@ Lava.schema = {
 	 */
 	VALIDATE_OBJECT_PATHS: true,
 	/**
-	 * Sort algorithm is called stable, if it preserves order of items that are already sorted. Suitable for ordering
-	 * table data by several columns
-	 * @const
-	 */
-	DEFAULT_STABLE_SORT_ALGORITHM: 'mergeSort',
-	/**
-	 * Unstable algorithms are faster, but subsequent sorts mess the previous results
-	 * @const
-	 */
-	DEFAULT_UNSTABLE_SORT_ALGORITHM: 'mergeSort',
-	/**
 	 * Core settings
 	 */
 	system: {

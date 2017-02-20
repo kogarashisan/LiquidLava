@@ -10,7 +10,6 @@ module.exports = {
 		"Cron.js",
 		"Core.js",
 		"ScopeManager.js",
-		"Algorithms/Sorting/mergeSort.js",
 		"ClassManager.js"
 	],
 	"parsers": [

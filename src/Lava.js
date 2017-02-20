@@ -46,11 +46,6 @@ var Lava = {
 	/** @ignore */
 	resources: null,
 	/** @ignore */
-	algorithms: {
-		sorting: {}
-	},
-
-	/** @ignore */
 	animation: {},
 	/** @ignore */
 	animator: {},
@@ -158,11 +153,6 @@ var Lava = {
 	 */
 	VALID_LABEL_REGEX: /^[A-Za-z\_][A-Za-z\_0-9]*$/,
 
-	/**
-	 * Default comparison function
-	 * @returns {boolean}
-	 */
-	DEFAULT_LESS: function(a, b) { return a < b; },
 	// not sure if these obsolete tags should also be included: basefont, bgsound, frame, isindex
 	/**
 	 * HTML tags that do not require a closing tag
@@ -205,11 +195,18 @@ var Lava = {
 	 */
 	guid: 1,
 
+	_is_initialized: false,
+
 	/**
 	 * Create all classes and global class instances.
 	 * Must be called before bootstrap() or creating any widgets. Replaces itself with <kw>null</kw> after first use.
 	 */
 	init: function() {
+
+		if (this._is_initialized) {
+			this.logError('Lava.init was called more than once');
+			return;
+		}
 
 		var path,
 			i = 0,
@@ -245,7 +242,7 @@ var Lava = {
 		}
 
 		this.define = this.define_Normal;
-		this.init = null;
+		this._is_initialized = true;
 
 	},
 
@@ -298,10 +295,8 @@ var Lava = {
 	 */
 	logError: function(msg) {
 
-		if (typeof(window) == 'undefined') throw new Error(msg); // Node environment
-
-		if (window.console) {
-			window.console.error(msg);
+		if (typeof console != 'undefined') {
+			console.error(msg);
 		}
 
 	},

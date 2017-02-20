@@ -692,17 +692,8 @@ Lava.define(
 
 		}
 
-		if (classes) {
-
-			properties_string += ' class="' + classes + '"';
-
-		}
-
-		if (style) {
-
-			properties_string += ' style="' + style + '"';
-
-		}
+		if (classes) properties_string += ' class="' + classes + '"';
+		if (style) properties_string += ' style="' + style + '"';
 
 		return "<" + this._tag_name + " id=\"" + this._id + "\" "
 			+ properties_string; //+ ">"
@@ -906,11 +897,8 @@ Lava.define(
 	_withArguments: function(callback_name, callback_argument) {
 
 		var name;
-
 		for (name in this._property_bindings) this._property_bindings[name][callback_name](callback_argument);
-
 		for (name in this._style_bindings) this._style_bindings[name][callback_name](callback_argument);
-
 		for (name in this._class_bindings) this._class_bindings[name][callback_name](callback_argument);
 
 	},
@@ -925,7 +913,7 @@ Lava.define(
 			name;
 
 		if (this._is_inDOM) Lava.t("Can not set duplicate id attribute on elements");
-		// there must not be ID attribute
+		// there must be no ID attribute
 		if (Element.getAttribute(element, 'id')) Lava.t("Target element already has an ID, and could be owned by another container");
 		if (Element.getTagName(element) != this._tag_name) Lava.t("Captured tag name differs from the container's tag name");
 

@@ -1,5 +1,5 @@
 
-Lava.init && Lava.init();
+Lava.init();
 var TestNamespace = {
     badPath: null
 };
@@ -15,7 +15,7 @@ describe("Lava.ClassManager", function() {
 
     });
 
-    it("Does not allow nulls in path", function() {
+    it("Does not allow nulls in namespace path", function() {
 
         expect(function () {
             Lava.ClassManager._getNamespace(['TestNamespace', 'badPath', 'something'])
@@ -40,5 +40,33 @@ describe("Lava.ClassManager", function() {
         }).to.throw(/Shared class member is hidden/);
 
     });
+
+	it("Allows nulls in parents to become methods in child", function() {
+
+		Lava.define("TestNamespace.Parent1", {
+			test_property: null
+		});
+
+		Lava.define("TestNamespace.Child1", {
+			Extends: 'TestNamespace.Parent1',
+			test_property: function () {}
+		});
+
+	});
+
+	it("Does not allow to replace a method from parent with other values", function() {
+
+		Lava.define("TestNamespace.Parent2", {
+			test_property: function () {}
+		});
+
+		expect(function () {
+			Lava.define("TestNamespace.Child2", {
+				Extends: 'TestNamespace.Parent2',
+				test_property: null
+			});
+		}).to.throw(/must not become/);
+
+	});
 
 });

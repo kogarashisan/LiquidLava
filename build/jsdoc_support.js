@@ -9,14 +9,6 @@
 Lava.ObjectParser.parse = function(input) {};
 
 /**
- * Collection of sorting algorithms.
- *
- * Sorting algorithm is called "stable" if it maintains the relative order of records with equal keys.
- * Unstable algorithms may be faster than stable ones.
- */
-Lava.algorithms.sorting = {};
-
-/**
  * Expression parser - produces configs for {@link Lava.scope.Argument} class
  */
 Lava.ExpressionParser = {};

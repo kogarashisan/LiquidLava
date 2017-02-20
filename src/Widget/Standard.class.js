@@ -193,6 +193,7 @@ Lava.define(
 
 		} else {
 
+			if (Lava.schema.DEBUG && !this._config.includes) Lava.t("Include not found: " + name + ". Widget does not have any includes in it's config.");
 			result = this._config.includes[name];
 
 		}
@@ -237,7 +238,7 @@ Lava.define(
 		if (Lava.schema.DEBUG && !this._container) Lava.t("Widget: root widgets must have a container");
 
 		// Otherwise, if you assign data to a widget, that was removed from DOM,
-		// and then render it - it will render with old data.
+		// and then render it - it will render with old (stale) data.
 		Lava.ScopeManager.refresh();
 
 		// lock, cause render operation can change data. Although it's not recommended to change data in render().
@@ -266,11 +267,7 @@ Lava.define(
 		this._container.captureExistingElement(element);
 		this._container.setHTML(this._renderContent());
 		Lava.ScopeManager.unlock();
-
-		// rewritten broadcastInDOM - without this._container.informInDOM()
-		this._is_inDOM = true;
-		this._is_dirty = false;
-		this._broadcastToChildren('broadcastInDOM');
+		this.broadcastInDOM();
 
 	},
 

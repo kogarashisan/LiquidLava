@@ -393,22 +393,22 @@ Lava.define('Lava.system.CollectionAbstract',
 	/**
 	 * Sort items in collection
 	 * @param {_tLessCallback} less A callback to compare items
-	 * @param {string} [algorithm_name] The name of the sorting method from Lava.algorithms.sorting
+	 * @param {string} [algorithm_name] The name of the sorting method from {@link Firestorm.Sorting}
 	 */
 	sort: function(less, algorithm_name) {
 
-		this._sort(less || Lava.DEFAULT_LESS, this._data_values, algorithm_name);
+		this._sort(less || Firestorm.defaultLess, this._data_values, algorithm_name);
 
 	},
 
 	/**
 	 * Sort items by the array of names
 	 * @param {_tLessCallback} less A callback to compare items
-	 * @param {string} [algorithm_name] The name of the sorting method from {@link Lava.algorithms.sorting}
+	 * @param {string} [algorithm_name] The name of the sorting method from {@link Firestorm.Sorting}
 	 */
 	sortByNames: function(less, algorithm_name) {
 
-		this._sort(less || Lava.DEFAULT_LESS, this._data_names, algorithm_name);
+		this._sort(less || Firestorm.defaultLess, this._data_names, algorithm_name);
 
 	},
 
@@ -416,7 +416,7 @@ Lava.define('Lava.system.CollectionAbstract',
 	 * Perform sorting
 	 * @param {_tLessCallback} less A callback to compare items
 	 * @param {Array} values
-	 * @param {string} [algorithm_name]
+	 * @param {string} [algorithm_name] The name of the sorting method from {@link Firestorm.Sorting}
 	 */
 	_sort: function(less, values, algorithm_name) {
 
@@ -437,7 +437,7 @@ Lava.define('Lava.system.CollectionAbstract',
 
 		}
 
-		indices = Lava.algorithms.sorting[algorithm_name || Lava.schema.DEFAULT_STABLE_SORT_ALGORITHM](indices, _less);
+		indices = Firestorm.Sorting[algorithm_name || Firestorm.schema.DEFAULT_STABLE_SORT_ALGORITHM](indices, _less);
 
 		this.reorder(indices);
 

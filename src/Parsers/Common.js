@@ -102,7 +102,10 @@ Lava.parsers.Common = {
 
 		for (var name in raw_hash) {
 
-			if (Lava.schema.DEBUG && this._allowed_hash_options.indexOf(name) == -1) Lava.t("Hash option is not supported: " + name);
+			if (Lava.schema.DEBUG && this._allowed_hash_options.indexOf(name) == -1) {
+				Lava.t("Hash option is not supported: " + name + ((('as' in raw_hash) && !raw_hash['as']) ? ". Probably, you are missing the '=' sign between 'as' and it's value: as=" + name : ''));
+			}
+
 			if (name in this._view_config_property_setters) {
 				this[this._view_config_property_setters[name]](view_config, raw_hash[name]);
 			} else {
@@ -442,7 +445,7 @@ Lava.parsers.Common = {
 
 			if (Lava.isVoidTag(raw_tag.name)) Lava.t("Void tag with type='container'");
 			if (!raw_tag.content) Lava.t("Empty container tag");
-			this._assertControlAttributesValid(x);
+			if (Lava.schema.DEBUG) this._assertControlAttributesValid(x);
 
 			if (('options' in x) || ('roles' in x) || ('label' in x)) {
 
@@ -642,7 +645,18 @@ Lava.parsers.Common = {
 	_assertControlAttributesValid: function(x) {
 
 		for (var name in x) {
-			if (this._allowed_control_attributes.indexOf(name) == -1) Lava.t("Unknown option in x: " + name);
+			if (this._allowed_control_attributes.indexOf(name) == -1) {
+
+                var common_misspellings = {
+                    events: 'event',
+                    styles: 'style',
+                    class: 'classes',
+                    option: 'options',
+                    role: 'roles'
+                };
+
+                Lava.t("Unknown control attribute - 'x:" + name + "'." + ((name in common_misspellings) ? " Did you mean 'x:" + common_misspellings[name] + "'?" : ''));
+            }
 		}
 
 	},
@@ -1183,6 +1197,11 @@ Lava.parsers.Common = {
 
 	},
 
+	/**
+	 * Converts raw tag node to widget config.
+	 * @param {_cRawTag} raw_tag
+	 * @returns {_cWidget}
+	 */
 	toWidget: function(raw_tag) {
 
 		var config = this.createDefaultWidgetConfig();

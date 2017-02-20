@@ -172,7 +172,7 @@ Lava.ClassManager = {
 
 				if (Lava.schema.DEBUG) {
 					if (!(name in class_body)) Lava.t("Shared member is not in class: " + name);
-					if (type != 'object' && type != 'array') Lava.t("Shared: class member must be an object or array");
+					if (type != 'object' && type != 'array') Lava.t("ClassManager: only objects and arrays can be made Shared");
 					if (class_data.parent_class_data && (name in class_data.parent_class_data.skeleton)) Lava.t("[ClassManager] instance member from parent class may not become shared in descendant: " + name);
 					if (name in class_data.shared) Lava.t("Member is already shared in parent class: " + class_path + "#" + name);
 				}
@@ -275,7 +275,14 @@ Lava.ClassManager = {
 			if (name in child_skeleton) {
 
 				if (is_root && (child_skeleton[name].type == this.MEMBER_TYPES.FUNCTION ^ parent_type == this.MEMBER_TYPES.FUNCTION)) {
-					Lava.t('Extend: functions in class root are not replaceable with other types (' + name + ')');
+					// Allow null properties from parent to become class methods in child
+					if (
+						child_skeleton[name].type != this.MEMBER_TYPES.FUNCTION
+						|| parent_type != this.MEMBER_TYPES.PRIMITIVE
+						|| parent_descriptor.value != null
+					) {
+						Lava.t('Extend: a method from parent must not become something else in child (' + child_data.path + "::" + name + ')');
+					}
 				}
 
 				if (parent_type == this.MEMBER_TYPES.FUNCTION) {
