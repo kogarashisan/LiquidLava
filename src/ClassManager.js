@@ -112,8 +112,17 @@ Lava.ClassManager = {
 			references: [],
 			shared: {},
 			constructor: null,
-			own_references_count: 0
+			own_references_count: 0,
+			is_abstract: false,
+			after_init: null
 		};
+
+		if ('Class' in class_body) {
+			var class_options = class_body.Class;
+			if (!class_options) Lava.t("Malformed 'Class' property in " + class_path);
+			if (class_options.is_abstract) class_data.is_abstract = true;
+			if (class_options.after_init) class_data.after_init = class_options.after_init;
+		}
 
 		if ('Extends' in class_body) {
 
@@ -122,9 +131,12 @@ Lava.ClassManager = {
 			parent_data = this._sources[class_body.Extends];
 			class_data.parent_class_data = parent_data;
 
-			if (!parent_data) Lava.t('[define] Parent class not found: "' + class_body.Extends + '"');
-			if (!parent_data.skeleton) Lava.t("[define] Parent class was loaded without skeleton, extension is not possible: " + class_data['extends']);
-			if (parent_data.hierarchy_names.indexOf(class_data.name) != -1) Lava.t("[define] Duplicate name in inheritance chain: " + class_data.name + " / " + class_path);
+			if (Lava.schema.DEBUG) {
+				if (!parent_data) Lava.t('[define] Parent class not found: "' + class_body.Extends + '"');
+				if (!parent_data.skeleton) Lava.t("[define] Parent class was loaded without skeleton, extension is not possible: " + class_data['extends']);
+				if (parent_data.hierarchy_names.indexOf(class_data.name) != -1) Lava.t("[define] Duplicate name in inheritance chain: " + class_data.name + " / " + class_path);
+				if (class_data.after_init && parent_data.after_init) Lava.t("[define] `after_init` hook is already defined in parent class: " + class_path);
+			}
 
 			class_data.hierarchy_paths = parent_data.hierarchy_paths.slice();
 			class_data.hierarchy_paths.push(class_path);
@@ -133,6 +145,7 @@ Lava.ClassManager = {
 			class_data.references = parent_data.references.slice();
 			class_data.own_references_count -= parent_data.references.length;
 			class_data.implements = parent_data.implements.slice();
+			class_data.after_init = parent_data.after_init;
 
 			for (name in parent_data.shared) {
 
@@ -217,7 +230,18 @@ Lava.ClassManager = {
             }
         }
 
-		class_data.constructor = this._buildRealConstructor(class_data);
+        if (class_data.is_abstract) {
+
+			class_data.constructor = function () {
+				Lava.t("Trying to create an instance of an abstract class: " + class_data.path);
+			};
+			class_data.constructor.prototype.Class = class_data;
+
+		} else {
+
+			class_data.constructor = this._buildRealConstructor(class_data);
+
+		}
 
 		this._registerClass(class_data);
 
@@ -237,8 +261,9 @@ Lava.ClassManager = {
 		if (Lava.schema.DEBUG) {
 
 			if (!implements_source) Lava.t('Implements: class not found - "' + path + '"');
-			for (name in implements_source.shared) Lava.t("Implements: unable to use a class with Shared as mixin. " + class_data.psth + " <- " + path);
+			for (name in implements_source.shared) Lava.t("Implements: classes with Shared can not be used as mixin. " + class_data.psth + " <- " + path);
 			if (class_data.implements.indexOf(path) != -1) Lava.t("Implements: class " + class_data.path + " already implements " + path);
+			if (implements_source.after_init) Lava.t("Implements: Classes with `after_init` hook can not be used as mixin: " + class_data.psth + " <- " + path);
 
 		}
 
@@ -479,13 +504,27 @@ Lava.ClassManager = {
 
 		prototype.Class = class_data;
 
-		source = (uses_references ? ("var r=this.Class.references;\n") : '')
+		if (Lava.schema.DEBUG) {
+			source = 'if (!this.Class) Lava.t("Class constructor was called without `new` operator.");'
+		}
+
+		source += (uses_references ? ("var r=this.Class.references;\n") : '')
 			+ constructor_actions.join(";\n")
 			+ ";";
 
 		if (class_data.skeleton.init) {
 
 			source += "\nthis.init.apply(this, arguments);";
+
+		}
+
+		if (class_data.after_init) {
+
+			if (
+				Lava.schema.DEBUG
+				&& (!(class_data.after_init in class_data.skeleton) || class_data.skeleton[class_data.after_init].type != this.MEMBER_TYPES.FUNCTION)
+			) Lava.t("`after_init` is not a method in class");
+			source += "\nthis." + class_data.after_init + "();";
 
 		}
 

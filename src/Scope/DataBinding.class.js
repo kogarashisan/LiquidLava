@@ -160,7 +160,7 @@ Lava.define(
 		if (this._property_changed_listener && (this._value_container.getValue() != this._property_container)) {
 
 			// currently listening to the parent's old data source
-			this._property_changed_listener && this._property_container.removePropertyListener(this._property_changed_listener);
+			this._property_changed_listener && this._property_container.removeListener(this._property_changed_listener);
 			this._enumerable_changed_listener && this._property_container.removeListener(this._enumerable_changed_listener);
 			this._property_changed_listener = null;
 			this._enumerable_changed_listener = null;
@@ -235,7 +235,7 @@ Lava.define(
 
 		this._value_container.removeListener(this._container_changed_listener);
 
-		this._property_changed_listener && this._property_container.removePropertyListener(this._property_changed_listener);
+		this._property_changed_listener && this._property_container.removeListener(this._property_changed_listener);
 		this._enumerable_changed_listener && this._property_container.removeListener(this._enumerable_changed_listener);
 		this._property_container = null;
 

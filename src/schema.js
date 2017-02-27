@@ -17,6 +17,11 @@ Lava.schema = {
 	 */
 	VALIDATE_OBJECT_PATHS: true,
 	/**
+	 * Prefix for "property changed" event names
+	 * @const
+	 */
+	PROPERTY_CHANGED_EVENT_PREFIX: '_p:',
+	/**
 	 * Core settings
 	 */
 	system: {

@@ -96,7 +96,7 @@ Lava.define(
 	destroy: function() {
 
 		this._scope_changed_listener && this._scope.removeListener(this._scope_changed_listener);
-		this._widget.removePropertyListener(this._widget_property_changed_listener);
+		this._widget.removeListener(this._widget_property_changed_listener);
 
 	}
 

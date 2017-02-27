@@ -3,6 +3,25 @@ Lava.init();
 
 describe("Lava.mixin.Observable", function() {
 
+	it("Fires and removes a listener", function() {
+
+		var spy = chai.spy();
+		var context = {
+			callback: function () {
+				spy();
+			}
+		};
+
+		var test = new Lava.mixin.Observable();
+		var listener = test.on('test_event', context.callback, context);
+
+		test._fire('test_event');
+		test.removeListener(listener);
+		test._fire('test_event');
+		expect(spy).to.have.been.called.once;
+
+	});
+
     it("Removes all listeners by context", function() {
 
         var bad_context = {

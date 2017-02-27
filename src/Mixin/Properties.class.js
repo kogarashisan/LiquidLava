@@ -28,11 +28,6 @@ Lava.define(
 	 * @type {Object.<name, *>}
 	 */
 	_properties: {},
-	/**
-	 * Separate listeners hash for property changed events, same as {@link Lava.mixin.Observable#_listeners}
-	 * @type {Object.<string, Array.<_tListener>>}
-	 */
-	_property_listeners: {},
 
 	/**
 	 * Allows the mixin to be used as full-featured class
@@ -124,12 +119,12 @@ Lava.define(
 	firePropertyChangedEvents: function(property_name) {
 
 		this._fire('property_changed', {name: property_name});
-		this._firePropertyChanged(property_name);
+		this._fire(Lava.schema.PROPERTY_CHANGED_EVENT_PREFIX + property_name);
 
 	},
 
 	/**
-	 * The same, as {@link Lava.mixin.Observable#on}, but returns listener to `property_name` instead of `event_name`
+	 * Same as {@link Lava.mixin.Observable#on}, but returns listener to `property_name` instead of `event_name`
 	 *
 	 * @param {string} property_name Name of the property to listen for changes
 	 * @param {function} fn The callback
@@ -139,40 +134,23 @@ Lava.define(
 	 */
 	onPropertyChanged: function(property_name, fn, context, listener_args) {
 
-		return this._addListener(property_name, fn, context, listener_args, this._property_listeners);
+		return this.on(Lava.schema.PROPERTY_CHANGED_EVENT_PREFIX + property_name, fn, context, listener_args);
 
 	},
 
+	/**
+	 * Same as {@link Lava.mixin.Observable#once}, but returns listener to `property_name` instead of `event_name`
+	 *
+	 * @param {string} property_name Name of the property to listen for changes
+	 * @param {function} fn The callback
+	 * @param {Object} context The context for callback execution (an object, to which the callback belongs)
+	 * @param {*} [listener_args] May be usable when one callback responds to changes of different properties
+	 * @returns {_tListener} Listener construct, which may be removed or suspended later
+	 */
     oncePropertyChanged: function(property_name, fn, context, listener_args) {
 
-        return this._addOnce(property_name, fn, context, listener_args, this._property_listeners);
+        return this.once(Lava.schema.PROPERTY_CHANGED_EVENT_PREFIX + property_name, fn, context, listener_args);
 
-    },
-
-	/**
-	 * Removes listeners added with {@link Lava.mixin.Properties#onPropertyChanged}
-	 * @param {_tListener} listener The listener structure, returned from {@link Lava.mixin.Properties#onPropertyChanged}
-	 */
-	removePropertyListener: function(listener) {
-
-		this._removeListener(listener, this._property_listeners);
-
-	},
-
-	/**
-	 * Same as {@link Lava.mixin.Observable#_fire}, but for property listeners
-	 * @param {string} property_name Name of the changed property
-	 */
-	_firePropertyChanged: function(property_name) {
-
-		if (Lava.schema.DEBUG && property_name == null) Lava.t("firePropertyChanged: property_name is null");
-
-		if (this._property_listeners[property_name] != null) {
-
-			this._callListeners(this._property_listeners[property_name]);
-
-		}
-
-	}
+    }
 
 });

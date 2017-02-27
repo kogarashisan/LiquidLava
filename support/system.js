@@ -112,12 +112,26 @@ _cClassData = {
 	 * @type {function}
 	 */
 	constructor: null,
-
 	/**
 	 * For exported classes: partial (own) references array
 	 * @type {Array}
 	 */
-	own_references: null
+	own_references: null,
+	/**
+	 * If true - than the class will be created with dummy constructor, that throws exception
+	 * (so you can not create an instance of this class).
+	 *
+	 * This option is not inherited from parents: if you want to make a child abstract
+	 * - you must explicitly declare it as abstract in body's Class property
+	 * @type {boolean}
+	 */
+	is_abstract: false,
+	/**
+	 * Name of method, which is called after `init()` - this allows to split `init()`,
+	 * so that parents can perform actions after the inherited class has been fully initialized
+	 * @type {?string}
+	 */
+	after_init: null
 };
 
 /**

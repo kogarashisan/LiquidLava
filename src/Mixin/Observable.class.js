@@ -30,41 +30,6 @@ Lava.define(
 	 */
 	on: function(event_name, fn, context, listener_args) {
 
-		return this._addListener(event_name, fn, context, listener_args, this._listeners)
-
-	},
-
-    once: function(event_name, fn, context, listener_args) {
-
-        return this._addOnce(event_name, fn, context, listener_args, this._listeners);
-
-    },
-
-    _addOnce: function(event_name, fn, context, listener_args, listeners_by_event) {
-
-        var listener,
-            callback = function(self, event_args, listener_args) {
-                fn.call(context, self, event_args, listener_args);
-                self._removeListener(listener, listeners_by_event);
-            };
-
-        listener = this._addListener(event_name, callback, context, listener_args, listeners_by_event);
-        return listener;
-
-    },
-
-	/**
-	 * Create the listener construct and push it into the listeners array for given event name
-	 *
-	 * @param {string} event_name The name of event
-	 * @param {function} fn The callback
-	 * @param {Object} context The owner of the callback
-	 * @param {*} listener_args Static listener arguments
-	 * @param {Object.<string, Array.<_tListener>>} listeners_by_event {@link Lava.mixin.Observable#_listeners} or {@link Lava.mixin.Properties#_property_listeners}
-	 * @returns {_tListener} Listener structure
-	 */
-	_addListener: function(event_name, fn, context, listener_args, listeners_by_event) {
-
 		// otherwise, listener would be called on window object
 		if (Lava.schema.DEBUG && !context) Lava.t('Listener was created without a context');
 
@@ -80,13 +45,13 @@ Lava.define(
 			listener_args: listener_args
 		};
 
-		if (listeners_by_event[event_name] != null) {
+		if (this._listeners[event_name] != null) {
 
-			listeners_by_event[event_name].push(listener);
+			this._listeners[event_name].push(listener);
 
 		} else {
 
-			listeners_by_event[event_name] = [listener];
+			this._listeners[event_name] = [listener];
 
 		}
 
@@ -94,24 +59,26 @@ Lava.define(
 
 	},
 
+    once: function(event_name, fn, context, listener_args) {
+
+		var listener,
+			callback = function(self, event_args, listener_args) {
+				fn.call(context, self, event_args, listener_args);
+				self.removeListener(listener);
+			};
+
+		listener = this.on(event_name, callback, context, listener_args);
+		return listener;
+
+    },
+
 	/**
 	 * Remove the given listener object from event listeners array
 	 * @param {_tListener} listener Structure, which was returned by {@link Lava.mixin.Observable#on} method
 	 */
 	removeListener: function(listener) {
 
-		this._removeListener(listener, this._listeners);
-
-	},
-
-	/**
-	 * Perform removal of the listener structure
-	 * @param {_tListener} listener Structure, which was returned by {@link Lava.mixin.Observable#on} method
-	 * @param {Object.<string, Array.<_tListener>>} listeners_by_event {@link Lava.mixin.Observable#_listeners} or {@link Lava.mixin.Properties#_property_listeners}
-	 */
-	_removeListener: function(listener, listeners_by_event) {
-
-		var list = listeners_by_event[listener.event_name],
+		var list = this._listeners[listener.event_name],
 			index;
 
 		if (list) {
@@ -119,7 +86,7 @@ Lava.define(
 			if (index != -1) {
 				list.splice(index, 1);
 				if (list.length == 0) {
-					listeners_by_event[listener.event_name] = null;
+					this._listeners[listener.event_name] = null;
 				}
 			}
 		}
@@ -135,46 +102,28 @@ Lava.define(
 
 		if (Lava.schema.DEBUG && typeof(event_name) == "undefined") Lava.t();
 
-		if (this._listeners[event_name] != null) {
+		if (this._listeners[event_name]) {
 
-			this._callListeners(this._listeners[event_name], event_args);
+			var copy = this._listeners[event_name].slice(), // cause they may be removed during the fire cycle
+				i = 0,
+				count = copy.length,
+				listener;
 
-		}
+			for (; i < count; i++) {
 
-	},
+				listener = copy[i];
+				listener.fn.call(listener.context, this, event_args, listener.listener_args);
 
-	/**
-	 * Perform fire - call listeners of an event
-	 * @param {Array.<_tListener>} listeners An array with listener structures
-	 * @param {*} event_args Dynamic event arguments
-	 */
-	_callListeners: function(listeners, event_args) {
-
-		var copy = listeners.slice(), // cause they may be removed during the fire cycle
-			i = 0,
-			count = listeners.length,
-			listener;
-
-		for (; i < count; i++) {
-
-			listener = copy[i];
-			listener.fn.call(listener.context, this, event_args, listener.listener_args);
+			}
 
 		}
 
 	},
 
 	/**
-	 * Does this object have any listeners for given event, including suspended instances
-	 * @param {string} event_name The name of event
-	 * @returns {boolean} True, if there are listeners
+	 * Remove all listeners, which belong to `context`
+	 * @param {object} context
 	 */
-	_hasListeners: function(event_name) {
-
-		return this._listeners[event_name] != null;
-
-	},
-
     removeAllListenersByContext: function (context) {
 
         for (var event_name in this._listeners) {
@@ -185,6 +134,11 @@ Lava.define(
 
     },
 
+	/**
+	 * Remove all listeners to `event_name`, which belong to `context`
+	 * @param {string} event_name
+	 * @param {object} context
+	 */
     removeListenersByContext: function (event_name, context) {
 
         var listeners = this._listeners[event_name];

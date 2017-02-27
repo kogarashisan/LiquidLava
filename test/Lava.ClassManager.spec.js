@@ -69,4 +69,49 @@ describe("Lava.ClassManager", function() {
 
 	});
 
+	it("Creates an abstract constructor for abstract classes", function() {
+
+		Lava.define("TestNamespace.AbstractClass", {
+			Class: {
+				is_abstract: true
+			},
+			test_property: 'test'
+		});
+
+		expect(function() {
+			new TestNamespace.AbstractClass();
+		}).to.throw(/Trying to create an instance of an abstract class/);
+
+	});
+
+	it("Calls 'after_init' hook", function() {
+
+		var after_init_spy = chai.spy();
+
+		Lava.define("TestNamespace.ClassWithAfterInit", {
+			Class: {
+				after_init: '_afterInit'
+			},
+			test: true,
+			init: function() {},
+			_afterInit: function() {
+				after_init_spy();
+			}
+		});
+		new TestNamespace.ClassWithAfterInit();
+
+		after_init_spy.should.have.been.called();
+
+	});
+
+	it("Does not allow calling class constructors without `new` in DEBUG mode", function() {
+
+		Lava.define("TestNamespace.TestClass3", {});
+
+		expect(function() {
+			TestNamespace.TestClass3();
+		}).to.throw(/Class constructor was called without `new`/);
+
+	});
+
 });

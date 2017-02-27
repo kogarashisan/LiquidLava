@@ -166,7 +166,7 @@ Lava.define(
 
 		} else {
 
-			this._view.removePropertyListener(this._property_changed_listener);
+			this._view.removeListener(this._property_changed_listener);
 
 		}
 
