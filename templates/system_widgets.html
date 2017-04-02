@@ -82,7 +82,7 @@
 			<input
 				x:type="view"
 				x:roles="_input_view"
-				x:resource_id="$text_input.TEXT_INPUT_ELEMENT"
+				x:resource_id="$text_input.MAIN_ELEMENT"
 				x:event:change="$text_input.value_changed"
 				x:event:input="$text_input.input"
 				x:event:focus="$text_input._focused"
@@ -99,7 +99,7 @@
 	<script x:equiv="sugar" type="lava/options">
 		{
 			tag_name: 'text_input',
-			root_resource_name: 'TEXT_INPUT_ELEMENT',
+			root_resource_name: 'MAIN_ELEMENT',
 			attribute_mappings: {
 				'value': {type: 'property', type_name: 'String'}
 			}
