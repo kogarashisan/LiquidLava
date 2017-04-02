@@ -47,21 +47,22 @@ Lava.define(
 
 	},
 
-	_setIsChecked: function(value, name) {
+	_setIsChecked: function(name, value) {
 
-		this.RadioAbstract$_setIsChecked(value, name);
-		this._setIsIndeterminate(false);
+		this.RadioAbstract$_setIsChecked(name, value);
+		this._setIsIndeterminate('is_indeterminate', false);
 
 	},
 
 	/**
 	 * Setter for <wp>is_indeterminate</wp> property
+	 * @param {string} name "is_indeterminate"
 	 * @param {boolean} value
 	 */
-	_setIsIndeterminate: function(value) {
+	_setIsIndeterminate: function(name, value) {
 
-		if (this._properties.is_indeterminate != value) {
-			this._set('is_indeterminate', value);
+		if (this._properties[name] != value) {
+			this._set(name, value);
 		}
 		this._refreshIndeterminate(); // outside of condition: do not trust the browser and set anyway
 

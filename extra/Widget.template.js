@@ -51,7 +51,7 @@ Lava.define(
 
     },
 
-    _setPropertyName: function(value, name) {
+    _setPropertyName: function(name, value) {
 
     }
 

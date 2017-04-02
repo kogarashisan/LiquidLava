@@ -57,9 +57,10 @@ Lava.define(
 
 	/**
 	 * Setter for the <wp>value</wp> property
+	 * @param {string} name
 	 * @param {Array.<string>} value
 	 */
-	_setValue: function(value) {
+	_setValue: function(name, value) {
 
 		var element,
 			options,
@@ -79,7 +80,7 @@ Lava.define(
 
 		}
 
-		this._set('value', value);
+		this._set(name, value);
 
 	},
 

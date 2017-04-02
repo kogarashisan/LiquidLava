@@ -387,7 +387,7 @@ Lava.define(
 
 				// you are forced to make setters private, cause type-checking will not work if setter is called directly.
 				if (Lava.schema.DEBUG && descriptor.setter[0] != '_') Lava.t("Widget property setters must not be public: " + descriptor.setter);
-				this[descriptor.setter](value, name);
+				this[descriptor.setter](name, value);
 
 			} else {
 

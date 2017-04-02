@@ -170,10 +170,10 @@ Lava.define(
 
 	/**
 	 * Setter for `records` property
-	 * @param {?Array.<Object>} value
 	 * @param {string} name
+	 * @param {?Array.<Object>} value
 	 */
-	_setRecords: function(value, name) {
+	_setRecords: function(name, value) {
 
 		if (this._meta_storage) {
 			this._meta_storage.destroy();

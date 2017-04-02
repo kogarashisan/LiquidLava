@@ -41,11 +41,12 @@ Lava.define(
 
 	/**
 	 * Set the "checked" property on checkbox or radio input element
+	 * @param {boolean} name
 	 * @param {boolean} value
 	 */
-	_setIsChecked: function(value) {
+	_setIsChecked: function(name, value) {
 
-		this._set('is_checked', value);
+		this._set(name, value);
 		if (this._input_container) {
 			this._input_container.setProperty('checked', this._properties.is_checked ? 'checked' : null);
 		}

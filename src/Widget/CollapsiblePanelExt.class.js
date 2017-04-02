@@ -120,10 +120,10 @@ Lava.define(
 
 	/**
 	 * Setter for `is_animation_enabled`
-	 * @param {boolean} value
 	 * @param {string} name
+	 * @param {boolean} value
 	 */
-	_setAnimationEnabled: function(value, name) {
+	_setAnimationEnabled: function(name, value) {
 
 		this._set(name, value);
 

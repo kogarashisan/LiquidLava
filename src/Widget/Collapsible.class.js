@@ -32,7 +32,7 @@ Lava.define(
 	name: 'collapsible',
 
 	_property_descriptors: {
-		is_expanded: {type: 'Boolean', setter: '_setExpanded'},
+		is_expanded: {type: 'Boolean', setter: '_setIsExpanded'},
 		is_animation_enabled: {type: 'Boolean'}
 	},
 
@@ -126,10 +126,10 @@ Lava.define(
 
 	/**
 	 * Setter for <wp>is_expanded</wp> property
+	 * @param {string} name "is_expanded"
 	 * @param {boolean} value
-	 * @param {string} name
 	 */
-	_setExpanded: function(value, name) {
+	_setIsExpanded: function(name, value) {
 
 		var new_display = 'none';
 

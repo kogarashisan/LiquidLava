@@ -112,7 +112,7 @@ Lava.define(
 		this.CalendarAbstract$init(config, widget, parent_view, template, properties);
 
 		if (this._properties.value == null) {
-			this._setValue(current_date, 'value');
+			this._setValue('value', current_date);
 		}
 
 		this.set(
@@ -379,9 +379,10 @@ Lava.define(
 
 	/**
 	 * Set selected date. Setter for <wp>value</wp> property
+	 * @param {string} name "value"
 	 * @param {Date} value
 	 */
-	_setValue: function(value) {
+	_setValue: function(name, value) {
 
 		var year = value.getFullYear(),
 			month = value.getMonth(),
@@ -394,7 +395,7 @@ Lava.define(
 		this.set('_selection_start', new_time);
 		this.set('_selection_end', new_time);
 
-		this._set('value', value);
+		this._set(name, value);
 
 		this._refreshData();
 

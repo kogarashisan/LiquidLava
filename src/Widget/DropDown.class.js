@@ -141,10 +141,10 @@ Lava.define(
 
 	/**
 	 * Setter for <wp>is_open</wp> property
-	 * @param {boolean} value
 	 * @param {string} name
+	 * @param {boolean} value
 	 */
-	_setIsOpen: function(value, name) {
+	_setIsOpen: function(name, value) {
 
 		var open_target_container = this._getTargetContainer();
 		if (Lava.schema.DEBUG && !open_target_container) Lava.t("DropDown was created without container and target");

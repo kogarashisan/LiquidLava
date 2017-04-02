@@ -269,10 +269,10 @@ Lava.define(
 	/**
 	 * Turn accordion functionality on and off. When accordion is off - it will not control state of it's panels
 	 * (when a panel is expanded - other panels are not closed)
-	 * @param {boolean} value
 	 * @param {string} name
+	 * @param {boolean} value
 	 */
-	_setIsEnabled: function(value, name) {
+	_setIsEnabled: function(name, value) {
 
 		var turnoff_panels = [],
 			i = 0,

@@ -92,7 +92,7 @@ Lava.define(
 
 		var tab = template_arguments[0]; // tab object
 		if (tab.get('is_enabled')) {
-			this._setActiveTab(tab);
+			this._setActiveTab(null, tab);
 		}
 		// to remove dotted outline in FF. This can be done with CSS, but CSS will disable it completely
 		view.getContainer().getDOMElement().blur();
@@ -129,7 +129,7 @@ Lava.define(
 
 		if (this._properties.active_tab == null && tab.get('is_enabled') && !tab.get('is_hidden')) {
 
-			this._setActiveTab(tab);
+			this._setActiveTab(null, tab);
 
 		}
 
@@ -158,11 +158,11 @@ Lava.define(
 
 		if (tab.get('is_active')) {
 
-			this._setActiveTab(tab);
+			this._setActiveTab(null, tab);
 
 		} else if (this._properties.active_tab == tab) {
 
-			this._setActiveTab(null);
+			this._setActiveTab(null, null);
 
 		}
 
@@ -170,9 +170,10 @@ Lava.define(
 
 	/**
 	 * Change currently active tab
+	 * @param _
 	 * @param {Lava.mixin.Properties} new_tab
 	 */
-	_setActiveTab: function(new_tab) {
+	_setActiveTab: function(_, new_tab) {
 
 		var old_active_tab = this._properties.active_tab;
 
@@ -242,7 +243,7 @@ Lava.define(
 			return result;
 		});
 
-		this._setActiveTab(active_tab);
+		this._setActiveTab(null, active_tab);
 
 	},
 
@@ -259,7 +260,7 @@ Lava.define(
 			this.removeTab(tabs[i]);
 		}
 
-		this._setActiveTab(null);
+		this._setActiveTab(null, null);
 
 	},
 

@@ -30,13 +30,14 @@ Lava.define(
 
 	/**
 	 * Set input's value
+	 * @param {string} name "value"
 	 * @param {string} value
 	 */
-	_setValue: function(value) {
+	_setValue: function(name, value) {
 
-		this._set('value', value);
+		this._set(name, value);
 		if (this._input_container) {
-			this._input_container.setProperty('value', this._valueToElementProperty(value));
+			this._input_container.setProperty(name, this._valueToElementProperty(value));
 		}
 
 	},
