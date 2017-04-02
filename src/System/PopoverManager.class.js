@@ -67,7 +67,7 @@ Lava.define(
 			Lava.view_manager.removeListener(this._mouseover_stack_changed_listener);
 			this._mouseover_stack_changed_listener = null;
 			if (this._mousemove_listener) {
-				Lava.Core.removeGlobalHandler(this._mousemove_listener);
+				Lava.DOMEvents.removeListener(this._mousemove_listener);
 				this._mousemove_listener = null;
 			}
 			this._tooltip.set('is_visible', false);
@@ -112,12 +112,12 @@ Lava.define(
 			if (!this._tooltip_target) { // if there was no tooltip
 
 				if (Lava.schema.DEBUG && this._mousemove_listener) Lava.t();
-				this._mousemove_listener = Lava.Core.addGlobalHandler('mousemove', this._onMouseMove, this);
+				this._mousemove_listener = Lava.DOMEvents.addListener('mousemove', this._onMouseMove, this);
 				this._tooltip.set('is_visible', true);
 
 			} else if (!new_tooltip_target) { // if there was a tooltip, and now it should be hidden
 
-				Lava.Core.removeGlobalHandler(this._mousemove_listener);
+				Lava.DOMEvents.removeListener(this._mousemove_listener);
 				this._mousemove_listener = null;
 				this._tooltip.set('is_visible', false);
 

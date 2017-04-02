@@ -36,7 +36,7 @@ Lava.define(
 	 */
 	_focused_view: null,
 	/**
-	 * Listener for Core "blur" event
+	 * Listener for DOM "blur" event
 	 * @type {_tListener}
 	 */
 	_blur_listener: null,
@@ -63,10 +63,10 @@ Lava.define(
 
 			Lava.view_manager.lendEvent("focusin");
 			this._focus_stack_changed_listener = Lava.view_manager.on("focusin_stack_changed", this._onFocusStackChanged, this);
-			this._blur_listener = Lava.Core.addGlobalHandler('blur', this._onElementBlurred, this);
-            this._keydown_listener = Lava.Core.addGlobalHandler('keydown', this._onKeyboard, this);
-            this._keyup_listener = Lava.Core.addGlobalHandler('keyup', this._onKeyboard, this);
-            this._keypress_listener = Lava.Core.addGlobalHandler('keypress', this._onKeyboard, this);
+			this._blur_listener = Lava.DOMEvents.addListener('blur', this._onElementBlurred, this);
+            this._keydown_listener = Lava.DOMEvents.addListener('keydown', this._onKeyboard, this);
+            this._keyup_listener = Lava.DOMEvents.addListener('keyup', this._onKeyboard, this);
+            this._keypress_listener = Lava.DOMEvents.addListener('keypress', this._onKeyboard, this);
 		}
 
 	},
@@ -79,10 +79,10 @@ Lava.define(
 		if (this._focus_stack_changed_listener) {
 			Lava.view_manager.releaseEvent("focusin");
 			Lava.view_manager.removeListener(this._focus_stack_changed_listener);
-			Lava.Core.removeGlobalHandler(this._blur_listener);
-            Lava.Core.removeGlobalHandler(this._keydown_listener);
-            Lava.Core.removeGlobalHandler(this._keyup_listener);
-            Lava.Core.removeGlobalHandler(this._keypress_listener);
+			Lava.DOMEvents.removeListener(this._blur_listener);
+            Lava.DOMEvents.removeListener(this._keydown_listener);
+            Lava.DOMEvents.removeListener(this._keyup_listener);
+            Lava.DOMEvents.removeListener(this._keypress_listener);
 			this._focused_element
 				= this._focused_view
 				= this._focus_stack_changed_listener

@@ -1,10 +1,10 @@
 /**
  * Listens to DOM events and provides them to framework
  */
-Lava.Core = {
+Lava.DOMEvents = {
 
 	/**
-	 * Map of events that require special support from Core
+	 * Map of events that require special support.
 	 * Note: IE8 and below are not fully supported
 	 * @type {Object.<string, Object>}
 	 */
@@ -20,7 +20,7 @@ Lava.Core = {
 	},*/
 
 	/**
-	 * Core's own handlers, which then call attached listeners
+	 * Framework's handlers, which then call attached listeners
 	 * @type {Object.<string, function>}
 	 */
 	_event_listeners: {},
@@ -37,7 +37,7 @@ Lava.Core = {
 	_event_handlers: {},
 
 	/**
-	 * Incremented at the beginning of Core's DOM event listener and decremented at the end.
+	 * Incremented at the beginning of event listener callback and decremented at the end.
 	 * Used to delay refresh of views until the end of event processing.
 	 *
 	 * @type {number}
@@ -57,7 +57,7 @@ Lava.Core = {
 	 * @param {Object} context Context for callback invocation (similar to {@link Lava.mixin.Observable#on})
 	 * @returns {_tListener} The listener structure, similar to {@link Lava.mixin.Observable#on} result
 	 */
-	addGlobalHandler: function(event_name, fn, context) {
+	addListener: function(event_name, fn, context) {
 
 		var listener = {
 				event_name: event_name,
@@ -84,10 +84,10 @@ Lava.Core = {
 	},
 
 	/**
-	 * Release the listener, acquired via call to {@link Lava.Core#addGlobalHandler}
+	 * Release the listener, acquired via call to {@link Lava.DOMEvents#addListener}
 	 * @param {_tListener} listener Listener structure
 	 */
-	removeGlobalHandler: function(listener) {
+	removeListener: function(listener) {
 
 		var event_name = listener.event_name,
 			index = this._event_handlers[event_name].indexOf(listener);
@@ -105,7 +105,7 @@ Lava.Core = {
 	},
 
 	/**
-	 * Used to bind `_onDomEvent` to Core instance
+	 * Used to bind `_onDomEvent` to instance of this object
 	 * @param {string} event_name DOM event name
 	 * @returns {Function}
 	 */
@@ -177,7 +177,7 @@ Lava.Core = {
 	},
 
 	/**
-	 * Actual listener for DOM events. Calls framework listeners, attached via {@link Lava.Core#addGlobalHandler}
+	 * Actual listener for DOM events. Calls framework listeners, attached via {@link Lava.DOMEvents#addListener}
 	 * @param {string} event_name DOM event name
 	 * @param {Object} event_object Event object, returned by low-level framework
 	 * @param {boolean} freeze_protection Is this a frequent event, which may cause lags
@@ -224,7 +224,7 @@ Lava.Core = {
 
 	/**
 	 * Return <kw>true</kw>, if `_nested_handlers_count > 0`
-	 * @returns {boolean} True, if Core is in the process of calling framework listeners
+	 * @returns {boolean} True, if DOMEvents is in the process of calling framework listeners
 	 */
 	isProcessingEvent: function() {
 

@@ -86,7 +86,7 @@ Lava.define(
 
 			Lava.app.fireGlobalEvent('close_popups');
 			if (!this._click_listener) {
-				this._click_listener = Lava.Core.addGlobalHandler('click', this._onGlobalClick, this);
+				this._click_listener = Lava.DOMEvents.addListener('click', this._onGlobalClick, this);
 			}
 
 			this.set('is_open', true);
@@ -102,7 +102,7 @@ Lava.define(
 	 */
 	_onGlobalClick: function() {
 
-		Lava.Core.removeGlobalHandler(this._click_listener);
+		Lava.DOMEvents.removeListener(this._click_listener);
 		this._click_listener = null;
 		this.set('is_open', false);
 
@@ -166,7 +166,7 @@ Lava.define(
 	destroy: function() {
 
 		if (this._click_listener) {
-			Lava.Core.removeGlobalHandler(this._click_listener);
+			Lava.DOMEvents.removeListener(this._click_listener);
 			this._click_listener = null;
 		}
 

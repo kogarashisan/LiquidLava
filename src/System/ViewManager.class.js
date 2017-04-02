@@ -81,7 +81,7 @@ Lava.define(
 	 */
 	_event_usage_counters: {},
 	/**
-	 * Listeners from {@link Lava.Core} for each DOM event
+	 * Listeners from {@link Lava.DOMEvents} for each DOM event
 	 * @type {Object.<string, _tListener>}
 	 */
 	_events_listeners: {
@@ -184,7 +184,7 @@ Lava.define(
 	 */
 	refresh: function() {
 
-		if (Lava.Core.isProcessingEvent()) {
+		if (Lava.DOMEvents.isProcessingEvent()) {
 			Lava.logError("ViewManager::refresh() must not be called inside event listeners");
 			return;
 		}
@@ -974,15 +974,12 @@ Lava.define(
 
 		if (event_name == 'mouse_events') {
 
-			this._events_listeners['mouseover'] =
-				Lava.Core.addGlobalHandler('mouseover', this.handleMouseMovement, this);
-			this._events_listeners['mouseout'] =
-				Lava.Core.addGlobalHandler('mouseout', this.handleMouseMovement, this);
+			this._events_listeners['mouseover'] = Lava.DOMEvents.addListener('mouseover', this.handleMouseMovement, this);
+			this._events_listeners['mouseout'] = Lava.DOMEvents.addListener('mouseout', this.handleMouseMovement, this);
 
 		} else {
 
-			this._events_listeners[event_name] =
-				Lava.Core.addGlobalHandler(event_name, this.onDOMEvent, this);
+			this._events_listeners[event_name] = Lava.DOMEvents.addListener(event_name, this.onDOMEvent, this);
 
 		}
 
@@ -1028,14 +1025,14 @@ Lava.define(
 
 		if (event_name == 'mouse_events') {
 
-			Lava.Core.removeGlobalHandler(this._events_listeners['mouseover']);
+			Lava.DOMEvents.removeListener(this._events_listeners['mouseover']);
 			this._events_listeners['mouseover'] = null;
-			Lava.Core.removeGlobalHandler(this._events_listeners['mouseout']);
+			Lava.DOMEvents.removeListener(this._events_listeners['mouseout']);
 			this._events_listeners['mouseout'] = null;
 
 		} else {
 
-			Lava.Core.removeGlobalHandler(this._events_listeners[event_name]);
+			Lava.DOMEvents.removeListener(this._events_listeners[event_name]);
 			this._events_listeners[event_name] = null;
 
 		}
@@ -1064,7 +1061,7 @@ Lava.define(
 
 			if (this._events_listeners[name]) {
 
-				Lava.Core.removeGlobalHandler(this._events_listeners[name]);
+				Lava.DOMEvents.removeListener(this._events_listeners[name]);
 				this._events_listeners[name] = null;
 				this._event_usage_counters[name] = 0;
 

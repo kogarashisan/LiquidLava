@@ -928,7 +928,8 @@ Lava.parsers.Common = {
 
 					} else {
 
-						Lava.t("Tag with control attributes and no sugar or type on it: " + current_block.name);
+						type = 'view';
+						Lava.logWarning("Tag with control attributes and no sugar or type on it - was automatically converted to view: " + current_block.name + ". Please, add 'x:type' attribute.");
 
 					}
 

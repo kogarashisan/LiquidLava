@@ -34,7 +34,7 @@ var Lava = {
 	/** @ignore */
 	Cron: null,
 	/** @ignore */
-	Core: null,
+	DOMEvents: null,
 	/** @ignore */
 	ScopeManager: null,
 	/** @ignore */
@@ -738,7 +738,7 @@ var Lava = {
 	 */
 	refreshViews: function() {
 
-		if (!Lava.Core.isProcessingEvent() && !Lava.view_manager.isRefreshing()) {
+		if (!Lava.DOMEvents.isProcessingEvent() && !Lava.view_manager.isRefreshing()) {
 
 			this.view_manager.refresh();
 

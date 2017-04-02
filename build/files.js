@@ -8,7 +8,7 @@ module.exports = {
 		"types.js",
 		"extenders.js",
 		"Cron.js",
-		"Core.js",
+		"DOMEvents.js",
 		"ScopeManager.js",
 		"ClassManager.js"
 	],
