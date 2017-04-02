@@ -15,6 +15,10 @@ Lava.define(
  */
 {
 
+	Class: {
+		is_abstract: true
+	},
+
 	Extends: 'Lava.mixin.Properties',
 	/**
 	 * Indicate that this class is instance of Lava.view.Abstract
@@ -574,7 +578,7 @@ Lava.define(
 
 		var view = this;
 
-		while (view && !view.isset(name)) {
+		while (view && !view.isSet(name)) {
 
 			view = view.getParentView();
 
@@ -603,7 +607,7 @@ Lava.define(
 
 			view = view.locateViewWithProperty(path_config.property_name);
 
-			if (Lava.schema.DEBUG && !view) Lava.t("Property not found: " + path_config.property_name);
+			if (Lava.schema.DEBUG && !view) Lava.t("Property not found: " + path_config.property_name + ". Tip: did you forget to build your project?");
 
 			result = view.getDataBinding(path_config.property_name);
 
@@ -736,6 +740,17 @@ Lava.define(
 		}
 
 		return this._data_segments[name_source_scope.guid];
+
+	},
+
+	set: function(name, value) {
+
+		// When we assign a property somewhere - we expect it to be defined afterwards.
+		// This matters when we reference properties in templates,
+		// and that's why the IN operator is needed.
+		if (this._properties[name] !== value || !(name in this._properties)) {
+			this._set(name, value);
+		}
 
 	},
 

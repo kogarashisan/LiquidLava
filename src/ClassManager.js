@@ -106,46 +106,41 @@ Lava.ClassManager = {
 			"extends": null,
 			"implements": [],
 			parent_class_data: null,
-			hierarchy_paths: null,
-			hierarchy_names: null,
+			extends_paths: null,
+			extends_names: null,
 			skeleton: null,
 			references: [],
 			shared: {},
 			constructor: null,
 			own_references_count: 0,
-			is_abstract: false,
-			after_init: null
+			is_abstract: false
 		};
 
 		if ('Class' in class_body) {
 			var class_options = class_body.Class;
 			if (!class_options) Lava.t("Malformed 'Class' property in " + class_path);
 			if (class_options.is_abstract) class_data.is_abstract = true;
-			if (class_options.after_init) class_data.after_init = class_options.after_init;
 		}
 
 		if ('Extends' in class_body) {
 
-			if (Lava.schema.DEBUG && typeof(class_body.Extends) != 'string') Lava.t('Extends: string expected. ' + class_path);
+			if (Lava.schema.DEBUG && typeof(class_body.Extends) != 'string') Lava.t('[ClassManager] value of Extends directive must be a string. ' + class_path);
 			class_data['extends'] = /** @type {string} */ class_body.Extends;
 			parent_data = this._sources[class_body.Extends];
 			class_data.parent_class_data = parent_data;
 
 			if (Lava.schema.DEBUG) {
-				if (!parent_data) Lava.t('[define] Parent class not found: "' + class_body.Extends + '"');
-				if (!parent_data.skeleton) Lava.t("[define] Parent class was loaded without skeleton, extension is not possible: " + class_data['extends']);
-				if (parent_data.hierarchy_names.indexOf(class_data.name) != -1) Lava.t("[define] Duplicate name in inheritance chain: " + class_data.name + " / " + class_path);
-				if (class_data.after_init && parent_data.after_init) Lava.t("[define] `after_init` hook is already defined in parent class: " + class_path);
+				if (!parent_data) Lava.t('[ClassManager] parent class not found: "' + class_body.Extends + '"');
+				if (parent_data.extends_names.indexOf(class_data.name) != -1) Lava.t("[ClassManager] duplicate name in inheritance chain: '" + class_data.name + "' in " + class_path);
 			}
 
-			class_data.hierarchy_paths = parent_data.hierarchy_paths.slice();
-			class_data.hierarchy_paths.push(class_path);
-			class_data.hierarchy_names = parent_data.hierarchy_names.slice();
-			class_data.hierarchy_names.push(class_data.name);
+			class_data.extends_paths = parent_data.extends_paths.slice();
+			class_data.extends_paths.push(class_path);
+			class_data.extends_names = parent_data.extends_names.slice();
+			class_data.extends_names.push(class_data.name);
 			class_data.references = parent_data.references.slice();
 			class_data.own_references_count -= parent_data.references.length;
 			class_data.implements = parent_data.implements.slice();
-			class_data.after_init = parent_data.after_init;
 
 			for (name in parent_data.shared) {
 
@@ -156,7 +151,7 @@ Lava.ClassManager = {
 
 				if (name in class_body) {
 
-					if (Lava.schema.DEBUG && Array.isArray(class_body[name]) != is_array) Lava.t("Shared members of different types must not override each other (array must not become an object)");
+					if (Lava.schema.DEBUG && Array.isArray(class_body[name]) != is_array) Lava.t("[ClassManager] 'Shared' members of different types must not override each other (array must not become an object)");
 					if (is_array) {
 						class_data.shared[name] = class_body[name];
 					} else {
@@ -169,8 +164,8 @@ Lava.ClassManager = {
 
 		} else {
 
-			class_data.hierarchy_paths = [class_path];
-			class_data.hierarchy_names = [class_data.name];
+			class_data.extends_paths = [class_path];
+			class_data.extends_names = [class_data.name];
 
 		}
 
@@ -184,10 +179,10 @@ Lava.ClassManager = {
 				type = Firestorm.getType(class_body[name]);
 
 				if (Lava.schema.DEBUG) {
-					if (!(name in class_body)) Lava.t("Shared member is not in class: " + name);
-					if (type != 'object' && type != 'array') Lava.t("ClassManager: only objects and arrays can be made Shared");
-					if (class_data.parent_class_data && (name in class_data.parent_class_data.skeleton)) Lava.t("[ClassManager] instance member from parent class may not become shared in descendant: " + name);
-					if (name in class_data.shared) Lava.t("Member is already shared in parent class: " + class_path + "#" + name);
+					if (!(name in class_body)) Lava.t("[ClassManager] 'Shared' member is not in class: " + name);
+					if (type != 'object' && type != 'array') Lava.t("[ClassManager] only objects and arrays can be made 'Shared'");
+					if (class_data.parent_class_data && (name in class_data.parent_class_data.skeleton)) Lava.t("[ClassManager] instance member from parent class may not become 'Shared' in descendant: " + name);
+					if (name in class_data.shared) Lava.t("[ClassManager] member is already 'Shared' in parent class: " + class_path + "#" + name);
 				}
 
 				class_data.shared[name] = class_body[name];
@@ -226,7 +221,7 @@ Lava.ClassManager = {
 
         if (Lava.schema.DEBUG) {
             for (name in class_data.shared) {
-                if (name in class_data.skeleton) Lava.t('Shared class member is hidden by member from instance: ' + class_data.path + "::" + name);
+                if (name in class_data.skeleton) Lava.t("[ClassManager] 'Shared' class member is hidden by member from instance: " + class_data.path + "::" + name);
             }
         }
 
@@ -260,10 +255,10 @@ Lava.ClassManager = {
 
 		if (Lava.schema.DEBUG) {
 
-			if (!implements_source) Lava.t('Implements: class not found - "' + path + '"');
-			for (name in implements_source.shared) Lava.t("Implements: classes with Shared can not be used as mixin. " + class_data.psth + " <- " + path);
-			if (class_data.implements.indexOf(path) != -1) Lava.t("Implements: class " + class_data.path + " already implements " + path);
-			if (implements_source.after_init) Lava.t("Implements: Classes with `after_init` hook can not be used as mixin: " + class_data.psth + " <- " + path);
+			if (!implements_source) Lava.t('[ClassManager] Implements: class not found - "' + path + '"');
+			for (name in implements_source.shared) Lava.t("[ClassManager] Implements: classes with 'Shared' can not be used as mixin. " + class_data.path + " <- " + path);
+			if (class_data.implements.indexOf(path) != -1) Lava.t("[ClassManager] Implements: class " + class_data.path + " already implements " + path);
+			if (implements_source.skeleton._afterInit) Lava.t("[ClassManager] Implements: Classes with `_afterInit` hook can not be used as mixin: " + class_data.path + " <- " + path);
 
 		}
 
@@ -306,7 +301,7 @@ Lava.ClassManager = {
 						|| parent_type != this.MEMBER_TYPES.PRIMITIVE
 						|| parent_descriptor.value != null
 					) {
-						Lava.t('Extend: a method from parent must not become something else in child (' + child_data.path + "::" + name + ')');
+						Lava.t('[ClassManager] Extend: a method from parent must not become something else in child: ' + child_data.path + "::" + name);
 					}
 				}
 
@@ -315,7 +310,7 @@ Lava.ClassManager = {
 					if (!is_root || typeof(references_offset) != 'undefined') continue;
 
 					new_name = parent_data.name + '$' + name;
-					if (new_name in child_skeleton) Lava.t('[ClassManager] Assertion failed, function already exists: ' + new_name);
+					if (new_name in child_skeleton) Lava.t('[ClassManager] conflict, function already exists in child: ' + new_name);
 					child_skeleton[new_name] = parent_descriptor;
 
 				} else if (parent_type == this.MEMBER_TYPES.OBJECT) {
@@ -475,7 +470,7 @@ Lava.ClassManager = {
 						: "{}";
 					break;
 				default:
-					Lava.t("[_buildRealConstructor] unknown property descriptor type: " + skeleton[name].type);
+					Lava.t("[ClassManager] assertion failed - unknown property descriptor type: " + skeleton[name].type);
 			}
 
 			if (serialized_value) {
@@ -518,13 +513,10 @@ Lava.ClassManager = {
 
 		}
 
-		if (class_data.after_init) {
+		if (class_data.skeleton._afterInit) {
 
-			if (
-				Lava.schema.DEBUG
-				&& (!(class_data.after_init in class_data.skeleton) || class_data.skeleton[class_data.after_init].type != this.MEMBER_TYPES.FUNCTION)
-			) Lava.t("`after_init` is not a method in class");
-			source += "\nthis." + class_data.after_init + "();";
+			if (Lava.schema.DEBUG && class_data.skeleton._afterInit.type != this.MEMBER_TYPES.FUNCTION) Lava.t("[ClassManager] _afterInit is not a function. If _afterInit is defined - then it must be a function.");
+			source += "\nthis._afterInit();";
 
 		}
 
@@ -584,7 +576,7 @@ Lava.ClassManager = {
 						? "{\n\t" + padding + object_properties.join(",\n\t" + padding) + "\n" + padding + "}" : "{}";
 					break;
 				default:
-					Lava.t("[_serializeSkeleton] unknown property descriptor type: " + skeleton[name].type);
+					Lava.t("[ClassManager] assertion failed - unknown property descriptor type: " + skeleton[name].type);
 			}
 
 			if (Lava.VALID_PROPERTY_NAME_REGEX.test(name) && Lava.JS_KEYWORDS.indexOf(name) == -1) {
@@ -615,7 +607,7 @@ Lava.ClassManager = {
 			count = path_segments.length,
 			i = 1;
 
-		if (!count) Lava.t("ClassManager: class names must include a namespace, even for global classes.");
+		if (!count) Lava.t("[ClassManager] class path must start with a namespace, even for global classes.");
 		if (!(path_segments[0] in this._root)) Lava.t("[ClassManager] namespace is not registered: " + path_segments[0]);
 		namespace = this._root[path_segments[0]];
 
@@ -772,7 +764,7 @@ Lava.ClassManager = {
 			class_name = namespace_path.pop();
 			namespace = this._getNamespace(namespace_path);
 
-			if ((class_name in namespace) && namespace[class_name] != null) Lava.t("Class name conflict: '" + class_path + "' property is already defined in namespace path");
+			if ((class_name in namespace) && namespace[class_name] != null) Lava.t("Class name conflict: '" + class_path + "' is already defined in it's namespace");
 
 			this.constructors[class_path] = class_data.constructor;
 			namespace[class_name] = class_data.constructor;
@@ -789,7 +781,7 @@ Lava.ClassManager = {
 	 */
 	getPackageConstructor: function(base_path, suffix) {
 
-		if (Lava.schema.DEBUG && !(base_path in this._sources)) Lava.t("[getPackageConstructor] Class not found: " + base_path);
+		if (Lava.schema.DEBUG && !(base_path in this._sources)) Lava.t("[ClassManager] getPackageConstructor - class not found: " + base_path);
 
 		var path,
 			current_class = this._sources[base_path],
@@ -837,7 +829,7 @@ Lava.ClassManager = {
 
 		var cd = instance.Class,
 			proto = cd.constructor.prototype,
-			names = cd.hierarchy_names,
+			names = cd.extends_names,
 			i = names.indexOf(instance_class_name),
 			count = names.length,
 			overridden_name;

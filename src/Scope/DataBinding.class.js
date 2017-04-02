@@ -101,7 +101,7 @@ Lava.define(
 			// Collection implements Properties, so if _property_name is not a number - then `get` will be called
 			if (property_container.isCollection && /^\d+$/.test(this._property_name)) {
 
-				if (this._enumerable_changed_listener == null) {
+				if (!this._enumerable_changed_listener) {
 
 					this._enumerable_changed_listener = property_container.on('collection_changed', this.onValueChanged, this);
 					this._property_container = property_container;
@@ -112,7 +112,7 @@ Lava.define(
 
 			} else if (property_container.isProperties) {
 
-				if (this._property_changed_listener == null) {
+				if (!this._property_changed_listener) {
 
 					this._property_changed_listener = property_container.onPropertyChanged(this._property_name, this.onValueChanged, this);
 					this._property_container = property_container;

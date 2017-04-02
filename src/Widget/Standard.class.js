@@ -344,6 +344,7 @@ Lava.define(
 
 		if (role in this._role_handlers) {
 
+			if (Lava.schema.DEBUG && typeof this[this._role_handlers[role]] != 'function') Lava.t("There is no such method in class: " + role + ". It's referenced as a role handler");
 			this[this._role_handlers[role]](view, template_arguments);
 			result = true;
 
@@ -379,7 +380,8 @@ Lava.define(
 
 		}
 
-		if (this._properties[name] !== value) {
+		// why we need IN operator: see Lava.view.Abstract#set
+		if (this._properties[name] !== value || !(name in this._properties)) {
 
 			if (descriptor && descriptor.setter) {
 

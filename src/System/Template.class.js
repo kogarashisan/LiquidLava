@@ -134,13 +134,17 @@ Lava.define(
 	_createView: function(result, childConfig, include_name_stack, properties) {
 
 		var constructor = Lava.ClassManager.getConstructor(childConfig['class'], 'Lava.view'),
-			view = new constructor(
-				childConfig,
-				this._widget,
-				this._parent_view,
-				this, // template
-				properties
-			);
+			view;
+
+		if (Lava.schema.DEBUG && !constructor) Lava.t(childConfig['class'] ? ("Widget constructor not found: " + childConfig['class']) : "Trying to create a widget without class. Tip: did you forget to add the 'controller' attribute to widget definition?");
+
+		view = new constructor(
+			childConfig,
+			this._widget,
+			this._parent_view,
+			this, // template
+			properties
+		);
 
 		view.template_index = result.push(view) - 1;
 

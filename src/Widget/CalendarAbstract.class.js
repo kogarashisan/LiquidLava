@@ -8,6 +8,10 @@ Lava.define(
  */
 {
 
+	Class: {
+		is_abstract: true
+	},
+
 	Extends: 'Lava.widget.Standard',
 	name: 'calendar',
 

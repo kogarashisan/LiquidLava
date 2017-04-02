@@ -108,9 +108,9 @@
 	<default_events>['change', 'input', 'focus', 'blur']</default_events>
 </x:define>
 
-<x:define controller="input.Password" title="PasswordInput" extends="TextInput"></x:define>
+<x:define controller="input.Password" title="PasswordInput" extends="TextInput" />
 
-<x:define controller="input.Numeric" title="Numeric" extends="TextInput"></x:define>
+<x:define controller="input.Numeric" title="Numeric" extends="TextInput" />
 
 <x:define controller="input.Radio" title="Radio" extends="InputAbstract">
 	<include name="input_view">
@@ -194,6 +194,7 @@
 	<include name="input_view">
 		<select x:type="view"
 				x:roles="_input_view"
+				x:resource_id="$select.MAIN_ELEMENT"
 				x:event:change="$select.value_changed"
 				x:event:focus="$select._focused"
 				x:event:blur="$select._blurred">
@@ -222,8 +223,8 @@
 	<default_events>['change', 'focus', 'blur']</default_events>
 </x:define>
 
-<x:define controller="input.Select" title="Select" extends="SelectAbstract"></x:define>
-<x:define controller="input.MultipleSelect" title="MultipleSelect" extends="SelectAbstract"></x:define>
+<x:define controller="input.Select" title="Select" extends="SelectAbstract" />
+<x:define controller="input.MultipleSelect" title="MultipleSelect" extends="SelectAbstract" />
 
 <!--x:define controller="Form" title="Form">
 	<template>

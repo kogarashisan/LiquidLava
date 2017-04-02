@@ -8,7 +8,7 @@ Lava.Core = {
 	 * Note: IE8 and below are not fully supported
 	 * @type {Object.<string, Object>}
 	 */
-	_dom_event_support: {
+	/*_dom_event_support: {
 		focus: {delegation: true},
 		blur: {delegation: true},
 		change: {delegation: true},
@@ -17,7 +17,7 @@ Lava.Core = {
 		submit: {delegation: true},
 		paste: {delegation: true},
 		input: {delegation: true}
-	},
+	},*/
 
 	/**
 	 * Core's own handlers, which then call attached listeners
@@ -51,10 +51,10 @@ Lava.Core = {
 	_freeze_protected_events: ['mouseover', 'mouseout', 'mousemove'],
 
 	/**
-	 * Add a listener for DOM event. Similar to {@link Lava.mixin.Observable#on}
+	 * Add a listener for DOM event
 	 * @param {string} event_name Name of DOM event
 	 * @param {function} fn Callback
-	 * @param {Object} context Callback owner
+	 * @param {Object} context Context for callback invocation (similar to {@link Lava.mixin.Observable#on})
 	 * @returns {_tListener} The listener structure, similar to {@link Lava.mixin.Observable#on} result
 	 */
 	addGlobalHandler: function(event_name, fn, context) {
@@ -164,15 +164,15 @@ Lava.Core = {
 	 */
 	_shutdownEvent: function(event_name) {
 
-		if ((event_name in this._dom_event_support) && this._dom_event_support[event_name].delegation) {
+		//if ((event_name in this._dom_event_support) && this._dom_event_support[event_name].delegation) {
 
-			Firestorm.Element.removeDelegation(window, event_name, '*', this._event_listeners[event_name]);
+		//	Firestorm.Element.removeDelegation(window, event_name, '*', this._event_listeners[event_name]);
 
-		} else {
+		//} else {
 
 			Firestorm.Element.removeListener(window, event_name, this._event_listeners[event_name]);
 
-		}
+		//}
 
 	},
 

@@ -8,6 +8,10 @@ Lava.define(
  */
 {
 
+	Class: {
+		is_abstract: true
+	},
+
 	Extends: 'Lava.widget.input.InputAbstract',
 
 	name: 'select',

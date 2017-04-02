@@ -290,28 +290,6 @@ var Lava = {
 	},
 
 	/**
-	 * Log a recoverable error
-	 * @param {string} msg
-	 */
-	logError: function(msg) {
-
-		if (typeof console != 'undefined') {
-			console.error(msg);
-		}
-
-	},
-
-	/**
-	 * Log a caught exception
-	 * @param {(Error|string|number)} e
-	 */
-	logException: function(e) {
-
-		this.logError((typeof(e) == 'string' || typeof(e) == 'number') ? (e + '') : e.message);
-
-	},
-
-	/**
 	 * Get extended config of global named widget
 	 * @param {string} widget_title
 	 * @returns {_cWidget}
@@ -411,6 +389,52 @@ var Lava = {
 		}
 
 		throw new Error(message || 'Debug assertion failed');
+
+	},
+
+	/**
+	 * Perform logging into browser's console
+	 * @param {string} message
+	 * @param {string} console_command "error", "warn" etc.
+	 * @param {boolean} is_critical Whether to throw exception when there is no console
+	 */
+	_log: function(message, console_command, is_critical) {
+
+		if (typeof console != 'undefined') {
+
+			console[(console_command in console) ? console_command : "log"](message);
+
+		} else if (is_critical) {
+
+			throw new Error("Unable to log message: " + message);
+
+		}
+
+	},
+
+	logWarning: function(message) {
+
+		this._log(message, 'warn');
+
+	},
+
+	/**
+	 * Log a recoverable error
+	 * @param {string} message
+	 */
+	logError: function(message) {
+
+		this._log(message, 'error', true);
+
+	},
+
+	/**
+	 * Log a caught exception
+	 * @param {(Error|string|number)} e
+	 */
+	logException: function(e) {
+
+		this.logError((typeof(e) == 'string' || typeof(e) == 'number') ? (e + '') : e.message);
 
 	},
 
@@ -609,7 +633,7 @@ var Lava = {
 
 		}
 
-		if (Lava.schema.DEBUG && !config['class']) Lava.t("Trying to create a widget without class");
+		if (Lava.schema.DEBUG && !config['class']) Lava.t("Trying to create a widget without controller");
 		var constructor = Lava.ClassManager.getConstructor(config['class'], 'Lava.widget');
 		if (Lava.schema.DEBUG && !constructor) Lava.t("Class not found: " + config['class']);
 		return new constructor(config, widget, parent_view, template, properties);
@@ -835,7 +859,7 @@ var Lava = {
             var Class = instance.Class;
             return Class
                 && !instance.hasOwnProperty('Class') // security check to protect from "fake" classes
-                && (Class.hierarchy_paths.indexOf(class_name) != -1 || Class.implements.indexOf(class_name) != -1);
+                && (Class.extends_paths.indexOf(class_name) != -1 || Class.implements.indexOf(class_name) != -1);
         }
 
 		return false;

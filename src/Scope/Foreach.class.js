@@ -268,7 +268,7 @@ Lava.define(
 
 	createsOwnEnumerable: function() {
 
-		return this._config['own_enumerable_mode'];
+		return !!this._config['own_enumerable_mode'];
 
 	},
 

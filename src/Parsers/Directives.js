@@ -122,6 +122,17 @@ Lava.parsers.Directives = {
 		}
 	},
 
+	/**
+	 * Returns true when a directive with given name exists.
+	 * @param {string} name
+	 * @returns {boolean}
+	 */
+	hasDirective: function(name) {
+
+		return name in this._directives_schema;
+
+	},
+
 	////////////////////////////////////////////////////////////////////
 	// start: actions for widget tags
 
@@ -687,7 +698,7 @@ Lava.parsers.Directives = {
 
 			if (option_type == 'targets') {
 
-				result = Lava.parsers.Common.parseTargets(raw_tag.content[0]);
+				result = Lava.parsers.Common.parseEventHandlers(raw_tag.content[0]);
 
 			} else if (option_type == 'expressions') {
 
@@ -743,7 +754,7 @@ Lava.parsers.Directives = {
 
 		if ('roles' in config) Lava.t("Roles are already defined");
 		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.t("Malformed roles tag/directive");
-		config.roles = Lava.parsers.Common.parseTargets(raw_tag.content[0]);
+		config.roles = Lava.parsers.Common.parseEventHandlers(raw_tag.content[0]);
 
 	},
 

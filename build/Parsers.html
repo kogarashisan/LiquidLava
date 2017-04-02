@@ -706,7 +706,7 @@ block
 			$$ = $1;
 		}
 	| INCLUDE {
-			var targets = Lava.parsers.Common.parseTargets($1);
+			var targets = Lava.parsers.Common.parseEventHandlers($1);
 			if (targets.length != 1) Lava.t("Malformed include");
 			targets[0].type = 'include';
 			$$ = targets[0];

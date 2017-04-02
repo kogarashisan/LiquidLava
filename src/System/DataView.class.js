@@ -5,6 +5,8 @@ Lava.define(
  * Holds a subset of values from {@link Lava.system.Enumerable}, preserving item UIDs.
  * Can remove, filter and sort existing values, but can't be used to add new values.
  *
+ * This class is used to display paginated and filtered data.
+ *
  * @lends Lava.system.DataView#
  * @extends Lava.system.CollectionAbstract#
  */

@@ -84,14 +84,11 @@ describe("Lava.ClassManager", function() {
 
 	});
 
-	it("Calls 'after_init' hook", function() {
+	it("Calls '_afterInit' hook", function() {
 
 		var after_init_spy = chai.spy();
 
 		Lava.define("TestNamespace.ClassWithAfterInit", {
-			Class: {
-				after_init: '_afterInit'
-			},
 			test: true,
 			init: function() {},
 			_afterInit: function() {

@@ -119,7 +119,7 @@ case 5:
 		
 break;
 case 6:
-			var targets = Lava.parsers.Common.parseTargets($$[$0]);
+			var targets = Lava.parsers.Common.parseEventHandlers($$[$0]);
 			if (targets.length != 1) Lava.t("Malformed include");
 			targets[0].type = 'include';
 			this.$ = targets[0];

@@ -2,7 +2,9 @@
 Lava.define(
 'Lava.widget.Tooltip',
 /**
- * Tooltip instance
+ * Tooltip instance.
+ * Tooltips are controlled by {@link Lava.system.PopoverManager}
+ *
  * @lends Lava.widget.Tooltip#
  * @extends Lava.widget.Standard#
  */

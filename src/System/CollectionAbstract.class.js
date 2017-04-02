@@ -21,6 +21,10 @@ Lava.define('Lava.system.CollectionAbstract',
  */
 {
 
+	Class: {
+		is_abstract: true
+	},
+
 	Extends: 'Lava.mixin.Properties',
 
 	/**

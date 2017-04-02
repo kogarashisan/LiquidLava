@@ -146,7 +146,7 @@ Lava.schema = {
 		 */
 		VALIDATE_STYLES: true,
 		/**
-		 * Gateway, which constructs the views with dynamic class names
+		 * Gateway, which constructs views with dynamic class names
 		 * @const
 		 */
 		DEFAULT_CLASS_LOCATOR_GATEWAY: 'Lava.ClassLocatorGateway'

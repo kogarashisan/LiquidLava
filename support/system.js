@@ -75,13 +75,13 @@ _cClassData = {
 	 * List of full paths to classes in the hierarchy, with this one being the last
 	 * @type {Array.<string>}
 	 */
-	hierarchy_paths: [],
+	extends_paths: [],
 
 	/**
 	 * List of short class names (last segment of class path)
 	 * @type {Array.<string>}
 	 */
-	hierarchy_names: [],
+	extends_names: [],
 
 	/**
 	 * Used to build the class constructor
@@ -125,13 +125,7 @@ _cClassData = {
 	 * - you must explicitly declare it as abstract in body's Class property
 	 * @type {boolean}
 	 */
-	is_abstract: false,
-	/**
-	 * Name of method, which is called after `init()` - this allows to split `init()`,
-	 * so that parents can perform actions after the inherited class has been fully initialized
-	 * @type {?string}
-	 */
-	after_init: null
+	is_abstract: false
 };
 
 /**

@@ -90,7 +90,7 @@ Lava.define(
 			}
 
 			if ('label' in x) this.setViewConfigLabel(widget_config, x.label);
-			if ('roles' in x) widget_config.roles = Lava.parsers.Common.parseTargets(x.roles);
+			if ('roles' in x) widget_config.roles = Lava.parsers.Common.parseEventHandlers(x.roles);
 			if ('resource_id' in x) widget_config.resource_id = Lava.parsers.Common.parseResourceId(x.resource_id);
 			if ('controller' in x) widget_config.real_class = x.controller;
 
@@ -378,7 +378,7 @@ Lava.define(
 	},
 
 	/**
-	 * Parse attribute value via {@link Lava.parsers.Common#parseTargets} and store it as an option
+	 * Parse attribute value via {@link Lava.parsers.Common#parseEventHandlers} and store it as an option
 	 * @param {_cWidget} widget_config
 	 * @param {string} attribute_value
 	 * @param {_cSugarRootAttribute} descriptor
@@ -386,7 +386,7 @@ Lava.define(
 	 */
 	_parseRootTargetsOptionAttribute: function(widget_config, attribute_value, descriptor, name) {
 
-		Lava.store(widget_config, 'options', name, Lava.parsers.Common.parseTargets(attribute_value));
+		Lava.store(widget_config, 'options', name, Lava.parsers.Common.parseEventHandlers(attribute_value));
 
 	},
 

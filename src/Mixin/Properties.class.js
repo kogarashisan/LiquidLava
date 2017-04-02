@@ -55,7 +55,7 @@ Lava.define(
 	 * @param {string} name Property name
 	 * @returns {boolean} True, if property exists
 	 */
-	isset: function(name) {
+	isSet: function(name) {
 
 		return name in this._properties;
 
