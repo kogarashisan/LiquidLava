@@ -17,7 +17,7 @@ describe("Lava.ClassManager", function() {
 
     it("Does not allow nulls in namespace path", function() {
 
-        expect(function () {
+        expect(function() {
             Lava.ClassManager._getNamespace(['TestNamespace', 'badPath', 'something'])
         }).to.throw(/Namespaces must be objects/);
 
@@ -31,7 +31,7 @@ describe("Lava.ClassManager", function() {
             test_property: {}
         });
 
-        expect(function () {
+        expect(function() {
             Lava.define("TestNamespace.TestTarget", {
                 Implements: 'TestNamespace.TestMixin',
                 Shared: ['test_property'],
@@ -49,7 +49,7 @@ describe("Lava.ClassManager", function() {
 
 		Lava.define("TestNamespace.Child1", {
 			Extends: 'TestNamespace.Parent1',
-			test_property: function () {}
+			test_property: function() {}
 		});
 
 	});
@@ -57,10 +57,10 @@ describe("Lava.ClassManager", function() {
 	it("Does not allow to replace a method from parent with other values", function() {
 
 		Lava.define("TestNamespace.Parent2", {
-			test_property: function () {}
+			test_property: function() {}
 		});
 
-		expect(function () {
+		expect(function() {
 			Lava.define("TestNamespace.Child2", {
 				Extends: 'TestNamespace.Parent2',
 				test_property: null

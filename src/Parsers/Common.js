@@ -1207,7 +1207,7 @@ Lava.parsers.Common = {
 			result;
 
 		try {
-			result = eval("(" + raw_string.replace(this.UNQUOTE_ESCAPE_REGEX, function (a) {
+			result = eval("(" + raw_string.replace(this.UNQUOTE_ESCAPE_REGEX, function(a) {
 				var c = map[a];
 				return typeof c == 'string' ? c : '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
 			}) + ")");

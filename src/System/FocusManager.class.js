@@ -52,7 +52,7 @@ Lava.define(
 	/**
 	 * Start listening to global focus-related events
 	 */
-	enable: function () {
+	enable: function() {
 
 		if (!this._focus_stack_changed_listener) {
 
@@ -95,7 +95,7 @@ Lava.define(
 
 	},
 
-    _onKeyboard: function (view_manager, event_object) {
+    _onKeyboard: function(view_manager, event_object) {
 
         this._focused_view && Lava.view_manager.dispatchEvent(
             this._focused_view,

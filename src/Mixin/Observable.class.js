@@ -30,20 +30,7 @@ Lava.define(
 	 */
 	on: function(event_name, fn, context, listener_args) {
 
-		// otherwise, listener would be called on window object
-		if (Lava.schema.DEBUG && !context) Lava.t('Listener was created without a context');
-
-		// note 1: member count for a plain object like this must not exceed 8
-		// otherwise, chrome will slow down greatly (!)
-		// note 2: there is no 'remove()' method inside the listener, cause depending on implementation,
-		// it may either slow down script execution or lead to memory leaks
-		var listener = {
-			event_name: event_name,
-			fn: fn,
-			_fn: fn,
-			context: context,
-			listener_args: listener_args
-		};
+		var listener = new Lava.Listener(event_name, fn, context, listener_args);
 
 		if (this._listeners[event_name] != null) {
 
@@ -59,6 +46,16 @@ Lava.define(
 
 	},
 
+	/**
+	 * Same as `on` method, but removes listener after the first use.
+	 * Please, note: even suspended listeners will be removed
+	 *
+	 * @param {string} event_name
+	 * @param {function} fn
+	 * @param {object} context
+	 * @param {*} listener_args
+	 * @returns {_tListener}
+	 */
     once: function(event_name, fn, context, listener_args) {
 
 		var listener,
@@ -106,13 +103,11 @@ Lava.define(
 
 			var copy = this._listeners[event_name].slice(), // cause they may be removed during the fire cycle
 				i = 0,
-				count = copy.length,
-				listener;
+				count = copy.length;
 
 			for (; i < count; i++) {
 
-				listener = copy[i];
-				listener.fn.call(listener.context, this, event_args, listener.listener_args);
+				copy[i].fire(this, event_args);
 
 			}
 
@@ -124,7 +119,7 @@ Lava.define(
 	 * Remove all listeners, which belong to `context`
 	 * @param {object} context
 	 */
-    removeAllListenersByContext: function (context) {
+    removeAllListenersByContext: function(context) {
 
         for (var event_name in this._listeners) {
 
@@ -139,7 +134,7 @@ Lava.define(
 	 * @param {string} event_name
 	 * @param {object} context
 	 */
-    removeListenersByContext: function (event_name, context) {
+    removeListenersByContext: function(event_name, context) {
 
         var listeners = this._listeners[event_name];
         if (listeners) {

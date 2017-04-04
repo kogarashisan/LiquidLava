@@ -225,7 +225,23 @@ _tListener = {
 	/** @readonly */
 	context: null,
 	/** @readonly */
-	listener_args: null
+	listener_args: null,
+
+	/**
+	 * Suspend this listener
+	 */
+	suspend: function() {},
+	/**
+	 * Resume listener
+	 */
+	resume: function() {},
+	/**
+	 * Run the `callback` from `context`. This method should not be called directly.
+	 *
+	 * @param caller
+	 * @param event_args
+	 */
+	fire: function(caller, event_args) {}
 };
 
 /**

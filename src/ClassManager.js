@@ -227,7 +227,7 @@ Lava.ClassManager = {
 
         if (class_data.is_abstract) {
 
-			class_data.constructor = function () {
+			class_data.constructor = function() {
 				Lava.t("Trying to create an instance of an abstract class: " + class_data.path);
 			};
 			class_data.constructor.prototype.Class = class_data;
@@ -280,7 +280,7 @@ Lava.ClassManager = {
 	 * @param {boolean} is_root <kw>true</kw>, when extending skeletons class bodies, and <kw>false</kw> in all other cases
 	 * @param {number} [references_offset] Also acts as a sign of 'implements' mode
 	 */
-	_extend: function (child_data, child_skeleton, parent_data, parent_skeleton, is_root, references_offset) {
+	_extend: function(child_data, child_skeleton, parent_data, parent_skeleton, is_root, references_offset) {
 
 		var parent_descriptor,
 			name,

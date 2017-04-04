@@ -7,7 +7,7 @@ describe("Lava.mixin.Observable", function() {
 
 		var spy = chai.spy();
 		var context = {
-			callback: function () {
+			callback: function() {
 				spy();
 			}
 		};
@@ -25,14 +25,14 @@ describe("Lava.mixin.Observable", function() {
     it("Removes all listeners by context", function() {
 
         var bad_context = {
-            callback: function () {
+            callback: function() {
                 throw new Error("This must not be called");
             }
         };
 
         var spy = chai.spy();
         var good_context = {
-            callback: function () {
+            callback: function() {
                 spy(); // this must be called
             }
         };
@@ -42,7 +42,7 @@ describe("Lava.mixin.Observable", function() {
         test.on('test2', bad_context.callback, bad_context);
         test.on('test2', good_context.callback, good_context);
 
-        expect(function () {
+        expect(function() {
             test._fire("test1");
         }).to.throw(/This must not be called/);
 
@@ -59,7 +59,7 @@ describe("Lava.mixin.Observable", function() {
 
         var spy = chai.spy();
         var context = {
-            callback: function () {
+            callback: function() {
                 spy();
             }
         };

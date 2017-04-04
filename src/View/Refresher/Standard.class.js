@@ -168,7 +168,7 @@ Lava.define(
 	 * @param {Lava.system.Template} new_previous_template
 	 * @param {Array.<Lava.system.Template>} current_templates
 	 */
-	_moveTemplate: function (template, new_previous_template, current_templates) {
+	_moveTemplate: function(template, new_previous_template, current_templates) {
 
 		var current_previous_index = this._current_templates.indexOf(template) - 1,
 			current_previous_template = null;

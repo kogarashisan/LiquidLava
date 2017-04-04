@@ -1,6 +1,7 @@
 module.exports = {
 	"core": [
 		"Lava.js",
+		"Listener.js",
 		"schema.js",
 		"modifiers.js",
 		"resources.js",

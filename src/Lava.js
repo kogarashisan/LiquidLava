@@ -22,6 +22,8 @@ var Lava = {
 	/** @ignore */
 	schema: null,
 	/** @ignore */
+	Listener: null,
+	/** @ignore */
 	ClassManager: null,
 	/** @ignore */
 	ExpressionParser: null,
@@ -876,7 +878,7 @@ var Lava = {
 	/**
 	 * Destroy global objects. Widgets must be destroyed manually, before calling this method.
 	 */
-	destroy: function () {
+	destroy: function() {
 
 		this.popover_manager && this.popover_manager.destroy();
 		this.view_manager && this.view_manager.destroy();

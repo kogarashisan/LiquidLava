@@ -167,11 +167,11 @@ Lava.define(
     /**
      * Schedule refresh after current thread exits (unless `refresh()` was called in the current thread).
      */
-    scheduleRefresh: function () {
+    scheduleRefresh: function() {
 
         if (!this._refresh_timeout) {
             var self = this;
-            this._refresh_timeout = window.setTimeout(function () {
+            this._refresh_timeout = window.setTimeout(function() {
                 self._refresh_timeout = null;
                 self.refresh();
             }, 0);

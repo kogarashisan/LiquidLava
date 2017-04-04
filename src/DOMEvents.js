@@ -59,12 +59,7 @@ Lava.DOMEvents = {
 	 */
 	addListener: function(event_name, fn, context) {
 
-		var listener = {
-				event_name: event_name,
-				fn: fn,
-                _fn: fn,
-				context: context
-			};
+		var listener = new Lava.Listener(event_name, fn, context);
 
 		if (this._event_usage_counters[event_name]) {
 
@@ -95,7 +90,6 @@ Lava.DOMEvents = {
 		this._event_handlers[event_name].splice(index, 1);
 
 		this._event_usage_counters[event_name]--;
-
 		if (this._event_usage_counters[event_name] == 0) {
 
 			this._shutdownEvent(event_name);

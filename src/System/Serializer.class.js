@@ -360,7 +360,7 @@ Lava.define(
 
 	},
 
-    _serializeDate: function (value) {
+    _serializeDate: function(value) {
 
         if (!this._allow_dates) Lava.t("Serializer: serialization of dates is not enabled in options");
         return "new Date(" + (+value) + ")";

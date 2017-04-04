@@ -7,7 +7,7 @@ describe("Lava.mixin.Properties", function() {
 
 		var spy = chai.spy();
 		var context = {
-			callback: function () {
+			callback: function() {
 				spy();
 			}
 		};
@@ -28,7 +28,7 @@ describe("Lava.mixin.Properties", function() {
 
         var spy = chai.spy();
         var context = {
-            callback: function () {
+            callback: function() {
                 spy();
             }
         };

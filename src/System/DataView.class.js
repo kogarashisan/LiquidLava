@@ -66,7 +66,7 @@ Lava.define(
 	 * Set `_data_source` and refresh from it
 	 * @param {Lava.system.CollectionAbstract} data_source
 	 */
-	refreshFromDataSource: function (data_source) {
+	refreshFromDataSource: function(data_source) {
 
 		this.setDataSource(data_source);
 		this.refresh();
