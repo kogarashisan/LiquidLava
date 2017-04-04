@@ -533,8 +533,8 @@ KNOWN_SWITCHES				\{\:[LR]\:\}|\{\:[LG]T\:\}|\{\:AMP\:\}
 [^\x00]+												{ return 'CONTENT'; }
 <skipTag>\<												{ this.popState(); return 'CONTENT'; }
 
-<block>\{\>[^\}]*\}										{ this.popState(); yytext = yytext.substr(2, yyleng - 3); return 'INCLUDE'; }
-<block>\{\&gt\;[^\}]*\}									{ this.popState(); yytext = yytext.substr(5, yyleng - 6); return 'INCLUDE'; // escaped variant }
+<block>\{include\>[^\}]*\}								{ this.popState(); yytext = yytext.substr(9, yyleng - 3); return 'INCLUDE'; }
+<block>\{include\&gt\;[^\}]*\}							{ this.popState(); yytext = yytext.substr(12, yyleng - 6); return 'INCLUDE'; // escaped variant }
 <block>\{else\}				    						{ this.popState(); return 'BLOCK_ELSE'; }
 <block>\{\/{BLOCK_NAME}\}								{ this.popState(); yytext = yytext.substr(2, yyleng - 3); return 'BLOCK_END'; }
 <block>\{\*([^\*]|\*[^\}])*\*\}							{ this.popState(); /* yytext = yytext.substr(2, yyleng - 4); return 'COMMENT'; */ }

@@ -2,7 +2,7 @@
 <x:define controller="Collapsible" title="Collapsible">
 	<template>
 		<div x:type="view" x:resource_id="$collapsible.COLLAPSIBLE_CONTAINER" x:roles="$collapsible._container_view">
-			{>$collapsible.content}
+			{include> $collapsible.content}
 		</div>
 	</template>
 	<script x:equiv="options" type="lava/options">
@@ -31,30 +31,30 @@
 <x:define controller="CollapsiblePanel" title="CollapsiblePanel" extends="Collapsible">
 	<view>
 		<div x:type="view" x:resource_id="$collapsible_panel.COLLAPSIBLE_PANEL_CONTAINER">
-			{>$collapsible_panel.header_wrapper}
-			{>$collapsible_panel.content_wrapper}
+			{include> $collapsible_panel.header_wrapper}
+			{include> $collapsible_panel.content_wrapper}
 		</div>
 	</view>
 	<include name="header_wrapper">
 		<div x:type="view" x:event:click="$collapsible_panel.header_click" x:resource_id="$collapsible_panel.COLLAPSIBLE_PANEL_HEADER_CONTAINER">
-			{>$collapsible_panel.header}
+			{include> $collapsible_panel.header}
 		</div>
 	</include>
 	<include name="content_wrapper">
 		<div x:type="view" x:roles="$collapsible_panel._container_view">
 			<div x:type="static" x:resource_id="$collapsible_panel.COLLAPSIBLE_PANEL_BODY_CONTAINER">
-				{>$collapsible_panel.content}
+				{include> $collapsible_panel.content}
 			</div>
 		</div>
 	</include>
 	<include name="header">
-		<h3 class="panel-title">{>$collapsible_panel.title}</h3>
+		<h3 class="panel-title">{include> $collapsible_panel.title}</h3>
 	</include>
 	<include name="title">
-		{#>$collapsible_panel.title}
+		{#> $collapsible_panel.title}
 	</include>
 	<include name="content">
-		{#>$collapsible_panel.content}
+		{#> $collapsible_panel.content}
 	</include>
 	<script x:equiv="sugar" type="lava/options">
 		{
@@ -95,7 +95,7 @@
 			<x:refresher>{type: 'Collapse'}</x:refresher>
 			<div x:type="view">
 				<div x:type="static" x:resource_id="$collapsible_panel.COLLAPSIBLE_PANEL_EXT_BODY_CONTAINER">
-					{>$collapsible_panel.content}
+					{include> $collapsible_panel.content}
 				</div>
 			</div>
 		{/if}
@@ -112,7 +112,7 @@
 
 <x:define controller="Accordion" title="Accordion">
 	<template>
-		{>$accordion.content}
+		{include> $accordion.content}
 	</template>
 	<include name="content">
 		<div x:type="container" x:resource_id="$accordion.ACCORDION_CONTAINER">
@@ -164,8 +164,8 @@
 
 <x:define controller="Tabs" title="Tabs">
 	<template>
-		{>tabs_header}
-		{>tabs_body}
+		{include> tabs_header}
+		{include> tabs_body}
 	</template>
 	<include name="tabs_header">
 		<ul x:type="container" x:resource_id="$tabs.TABS_HEADERS_CONTAINER">
@@ -250,19 +250,19 @@
 		<div x:type="container" x:resource_id="$tree.MAIN_TREE_CONTAINER">
 			{#foreach($tree.records) as=node}
 				<x:roles>$tree.root_nodes_foreach</x:roles>{*<!--role handler creates refresher-->*}
-				{>$tree.node}
+				{include> $tree.node}
 			{/foreach}
 		</div>
 	</template>
 	<assign name="pad">''</assign>
 	<assign name="level">0</assign>
 	<include name="node">
-		{>$tree.node_body}
-		{>$tree.node_children}
+		{include> $tree.node_body}
+		{include> $tree.node_children}
 	</include>
 	<include name="node_body">
 		<div class="lava-tree-node" x:type="view" unselectable="on" x:classes="'level-' + level">
-			{>$tree.node_body_content}
+			{include> $tree.node_body_content}
 		</div>
 	</include>
 	<include name="node_body_content">
@@ -271,8 +271,8 @@
 			x:event:click="$tree.node_click(node)"
 			x:classes="'lava-tree' + ((foreach_index == @parent->count - 1) ? '-bottom' : '-middle')
 				+ ($tree{is_expandable} ? ($tree{is_expanded} ? '-expanded' : '-collapsed') : '-node')"></i>
-		{>$tree.icon}
-		{>$tree.node_title}
+		{include> $tree.icon}
+		{include> $tree.node_title}
 	</include>
 	<include name="icon"></include>
 	<include name="node_children">
@@ -295,7 +295,7 @@
 			<div x:type="container" class="lava-tree-container">
 				{#foreach(node.children) as=node}
 					<x:roles>$tree.nodes_foreach</x:roles>{*<!--role handler creates refresher-->*}
-					{>$tree.node}
+					{include> $tree.node}
 				{/foreach}
 			</div>
 		{/if}
@@ -316,8 +316,8 @@
 <x:define controller="Table" title="Table">
 	<view>
 		<table x:type="view" x:resource_id="$table.TABLE_ELEMENT">
-			{>$table.thead}
-			{>$table.tbody}
+			{include> $table.thead}
+			{include> $table.tbody}
 		</table>
 	</view>
 	<include name="thead">
@@ -340,7 +340,7 @@
 				<tr x:type="container">
 					{#foreach($table._columns) as=column}
 						<td x:type="view">
-							{>$table.cell(column)}
+							{include> $table.cell(column)}
 						</td>
 					{/foreach}
 				</tr>
@@ -374,9 +374,9 @@
 	<view>
 		<div x:type="view" class="lava-calendar">
 			{#if($calendar._selected_view == 'days')}
-				{>$calendar.days_view}
+				{include> $calendar.days_view}
 			{else}
-				{>$calendar.months_view}
+				{include> $calendar.months_view}
 			{/if}
 		</div>
 	</view>
@@ -389,7 +389,7 @@
 			<a href="#" x:type="view" x:event:click="$calendar.next_month_click" class="lava-calendar-right-arrow">&#9654;</a>
 		</div>
 		<div class="lava-calendar-center">
-			{>$calendar.months}
+			{include> $calendar.months}
 		</div>
 		<div class="lava-calendar-footer">
 			<a href="#" x:type="container" x:event:click="$calendar.today_click" class="lava-calendar-today-link">{#>$calendar._today_string}</a>
@@ -405,7 +405,7 @@
 			<a href="#" x:type="view" x:event:click="$calendar.next_year_click" class="lava-calendar-right-arrow">&#9654;</a>
 		</div>
 		<div class="lava-calendar-center">
-			{>$calendar.month_names}
+			{include> $calendar.month_names}
 		</div>
 	</include>
 	<include name="months">
@@ -422,7 +422,7 @@
 					{#foreach(month.weeks) as=week}
 						<tr>
 							{#foreach(week) as=day}
-								{>$calendar.day}
+								{include> $calendar.day}
 							{/foreach}
 						</tr>
 					{/foreach}

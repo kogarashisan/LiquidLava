@@ -1,7 +1,7 @@
 
 <x:define title="InputAbstract">
 	<template>
-		{>input_view}
+		{include> input_view}
 	</template>
 	<script x:equiv="sugar" type="lava/options">
 		{
@@ -176,7 +176,7 @@
 			x:bind:name="$submit.name"
 			x:bind:value="$submit.value"
 			x:bind:disabled="$submit.is_disabled">
-				{>content}
+				{include> content}
 		</button>
 	</include>
 	<include name="content"></include>
@@ -201,10 +201,10 @@
 			{#foreach($select.optgroups) as=optgroup}
 				{#if(optgroup.label)}
 					<optgroup x:type="view" x:bind:label="optgroup.label" x:bind:disabled="optgroup.is_disabled">
-						{>group_options}
+						{include> group_options}
 					</optgroup>
 				{else}
-					{>group_options}
+					{include> group_options}
 				{/if}
 			{/foreach}
 		</select>
@@ -228,13 +228,13 @@
 
 <!--x:define controller="Form" title="Form">
 	<template>
-		{>main_view}
+		{include> main_view}
 	</template>
 	<include name="main_view">
 		<form x:type="view"
 			x:roles="$form.main_view"
 			x:resource_id="$form.FORM_ELEMENT">
-			{>$form.content}
+			{include> $form.content}
 		</form>
 	</include>
 	<include name="content"></include>
