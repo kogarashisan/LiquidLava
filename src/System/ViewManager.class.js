@@ -540,7 +540,19 @@ Lava.define(
 	 */
 	_callRegisterViewInRole: function(widget, target_name, view, template_arguments) {
 
-		return widget.handleRole(target_name, view, template_arguments);
+		var result = true;
+
+		try {
+
+			result = widget.handleRole(target_name, view, template_arguments);
+
+		} catch (e) {
+
+			Lava.logException(e);
+
+		}
+
+		return result;
 
 	},
 
@@ -572,13 +584,25 @@ Lava.define(
 	 */
 	_callHandleEvent: function(widget, target_name, view, template_arguments, callback_arguments) {
 
-		return widget.handleEvent(
-			callback_arguments.event_name,
-			callback_arguments.event_object,
-			target_name,
-			view,
-			template_arguments
-		);
+		var result = true;
+
+		try {
+
+			result = widget.handleEvent(
+				callback_arguments.event_name,
+				callback_arguments.event_object,
+				target_name,
+				view,
+				template_arguments
+			);
+
+		} catch(e) {
+
+			Lava.logException(e);
+
+		}
+
+		return result;
 
 	},
 
@@ -662,6 +686,7 @@ Lava.define(
 	getInclude: function(starting_view, config) {
 
 		var widget = starting_view.getWidget(),
+			result = [],
 			template_arguments = ('arguments' in config) ? this._evalTargetArguments(starting_view, config) : null;
 
 		if ('locator_type' in config) {
@@ -671,7 +696,17 @@ Lava.define(
 
 		}
 
-		return widget.getInclude(config.name, template_arguments);
+		try {
+
+			result = widget.getInclude(config.name, template_arguments);
+
+		} catch (e) {
+
+			Lava.logException(e);
+
+		}
+
+		return result;
 
 	},
 

@@ -30,8 +30,6 @@ var Lava = {
 	/** @ignore */
 	ObjectParser: null,
 	/** @ignore */
-	transitions: null,
-	/** @ignore */
 	Cron: null,
 	/** @ignore */
 	DOMEvents: null,
@@ -39,8 +37,6 @@ var Lava = {
 	ScopeManager: null,
 	/** @ignore */
 	modifiers: null,
-	/** @ignore */
-	types: null,
 	/** @ignore */
 	extenders: null,
 	/** @ignore */
@@ -821,8 +817,8 @@ var Lava = {
 	 */
 	valueToType: function(descriptor, value) {
 
-		if (Lava.schema.DEBUG && !Lava.types[descriptor.type_name].isValidString(value, descriptor)) Lava.t("Invalid attribute value: " + value);
-		return Lava.types[descriptor.type_name].fromSafeString(value, descriptor);
+		if (Lava.schema.DEBUG && !Firestorm.Types[descriptor.type_name].isValidString(value, descriptor)) Lava.t("Invalid attribute value: " + value);
+		return Firestorm.Types[descriptor.type_name].fromSafeString(value, descriptor);
 
 	},
 

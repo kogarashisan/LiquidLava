@@ -2,6 +2,8 @@
 Lava.define(
 'Lava.view.View',
 /**
+ * The most basic view, which has utility usage
+ *
  * @lends Lava.view.View#
  * @extends Lava.view.ContentContainerAbstract#
  */

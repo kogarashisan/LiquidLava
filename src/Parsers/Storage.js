@@ -21,7 +21,7 @@ Lava.parsers.Storage = {
 	 */
 	_object_property_handlers: {
 		template: '_parsePropertyAsTemplate',
-		lava_type: '_parsePropertyAsLavaType'
+		known_type: '_parsePropertyAsLavaType'
 	},
 
 	/**
@@ -29,7 +29,7 @@ Lava.parsers.Storage = {
 	 * @type {Object.<string, string>}
 	 */
 	_object_attributes_handlers: {
-		lava_type: '_parseAttributeAsLavaType'
+		known_type: '_parseAttributeAsLavaType'
 	},
 
 	/**
@@ -266,7 +266,7 @@ Lava.parsers.Storage = {
 	},
 
 	/**
-	 * Parse tag inside object, that represents a type from {@link Lava.types}
+	 * Parse tag inside object, that represents a type from {@link Firestorm.Types}
 	 * @param {_cStorageObjectPropertySchema} schema
 	 * @param {_cRawTag} raw_tag
 	 */
@@ -278,7 +278,7 @@ Lava.parsers.Storage = {
 	},
 
 	/**
-	 * Parse object attribute as a type from {@link Lava.types}
+	 * Parse object attribute as a type from {@link Firestorm.Types}
 	 * @param {_cStorageObjectPropertySchema} descriptor
 	 * @param {string} value
 	 * @returns {*}

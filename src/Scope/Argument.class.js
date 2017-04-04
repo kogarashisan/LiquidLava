@@ -180,22 +180,13 @@ Lava.define(
 
 		var result = null;
 
-		// in production - wrap evaluation into try/catch block
-		if (Lava.schema.DEBUG) {
+		try {
 
 			result = this._evaluator();
 
-		} else {
+		} catch (e) {
 
-			try {
-
-				result = this._evaluator();
-
-			} catch (e) {
-
-				Lava.logException(e);
-
-			}
+			Lava.logException(e);
 
 		}
 

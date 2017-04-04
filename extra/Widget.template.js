@@ -14,7 +14,7 @@ Lava.define(
 	name: null,
 
 	_property_descriptors: {
-    	property_name: {setter: '_setPropertyName', type: '' /* Name from Lava.types */}
+    	property_name: {setter: '_setPropertyName', type: '' /* Name from Firestorm.Types */}
 	},
 
 	_properties: {

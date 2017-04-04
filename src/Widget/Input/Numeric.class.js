@@ -23,7 +23,7 @@ Lava.define(
 
 	_type: "number",
 	/**
-	 * A type from {@link Lava.types}
+	 * A type from {@link Firestorm.Types}
 	 * @type {string}
 	 */
 	_data_type: 'Number',
@@ -32,7 +32,7 @@ Lava.define(
 	 * @param config
 	 * @param {string} config.options.type The only possible value is "text" - to change default &lt;input&gt; element
 	 *  type from "number" to "text"
-	 * @param {string} config.options.data_type Widget's value type from {@link Lava.types}.
+	 * @param {string} config.options.data_type Widget's value type from {@link Firestorm.Types}.
 	 *  Must produce valid JavaScript number. Defaults to "Number"
 	 * @param widget
 	 * @param parent_view
@@ -71,7 +71,7 @@ Lava.define(
 	_refreshValue: function() {
 
 		var value = this._input_container.getDOMElement().value,
-			is_valid = Lava.types[this._data_type].isValidString(value);
+			is_valid = Firestorm.Types[this._data_type].isValidString(value);
 
 		if (this._properties.input_value != value) { // to bypass readonly check
 

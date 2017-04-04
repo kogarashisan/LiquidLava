@@ -6,29 +6,35 @@ for (var i = 0, count = files_list.length; i < count; i++) {
 }
 
 files_list = [
-    'https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js',
-    'lib/export/firestorm.js'
-].concat(files_list).concat([
-    {pattern: 'locale/*', included: true},
-    'test/*.js'
-]);
+		'https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js',
+		'lib/export/firestorm.js'
+	]
+	.concat(files_list)
+	.concat([
+		{pattern: 'locale/*', included: true},
+		'test/*.js',
+		{pattern: 'templates/**/*'},
+		{pattern: 'test/fixtures/**/*'}
+	]);
 
 module.exports = function(config) {
 
     var configuration = {
         // base path that will be used to resolve all patterns (eg. files, exclude)
         basePath: '',
-        frameworks: ['mocha', 'chai-spies', 'chai' /*, 'browserify'*/],
+        frameworks: ['mocha', 'chai-spies', 'chai', 'fixture' /*, 'browserify'*/],
         //plugins: ['karma-mocha', 'karma-browserify', 'karma-coverage', 'karma-chai', 'karma-chrome-launcher'],
         // list of files / patterns to load in the browser
         files: files_list,
         // list of files to exclude
-        exclude: [
-        ],
+        exclude: [],
         // preprocess matching files before serving them to the browser
         // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
         preprocessors: {
-            'src/**/*': 'coverage'
+            'src/**/*': 'coverage',
+			'templates/**/*.html': ['html2js'],
+			'test/fixtures/**/*.html': ['html2js']
+			//'**/*.json': ['json_fixtures']
             //'test/**/*.spec.js': 'browserify'
         },
         // test results reporter to use
@@ -63,6 +69,9 @@ module.exports = function(config) {
             type : 'lcov', // type : 'html'
             dir : 'coverage/'
         }
+		/*jsonFixturesPreprocessor: {
+			variableName: '__json__'
+		}*/
     };
 
     if (process.env.TRAVIS) {

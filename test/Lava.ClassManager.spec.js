@@ -1,5 +1,5 @@
 
-Lava.init();
+Lava._is_initialized || Lava.init();
 var TestNamespace = {
     badPath: null
 };
@@ -37,7 +37,7 @@ describe("Lava.ClassManager", function() {
                 Shared: ['test_property'],
                 test_property: {}
             });
-        }).to.throw(/Shared class member is hidden/);
+        }).to.throw(/class member is hidden/);
 
     });
 

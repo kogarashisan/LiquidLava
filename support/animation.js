@@ -65,7 +65,7 @@ _cAnimation = {
 	duration: 0,
 
 	/**
-	 * Name of transition from {@link Lava.transitions}
+	 * Name of transition from {@link Firestorm.Transitions}
 	 * @type {string}
 	 */
 	transition_name: 'linear',

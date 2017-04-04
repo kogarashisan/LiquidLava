@@ -79,7 +79,7 @@ Lava.define(
 			this._duration = config.duration;
 		}
 		this._target = target;
-		this._transition = config.transition || Lava.transitions[config.transition_name || 'linear'];
+		this._transition = config.transition || Firestorm.Transitions[config.transition_name || 'linear'];
 		this._config = config;
 
 	},

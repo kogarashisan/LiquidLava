@@ -31,7 +31,8 @@ Lava.parsers.Directives = {
 		properties: {view_config_presence: true, is_top_directive: true},
 		property_string: {view_config_presence: true, is_top_directive: true},
 		resources: {view_config_presence: true, is_top_directive: true},
-		default_events: {view_config_presence: true, is_top_directive: true}
+		default_events: {view_config_presence: true, is_top_directive: true},
+		include: {view_config_presence: true, is_top_directive: true}
 	},
 
 	/**
@@ -49,11 +50,11 @@ Lava.parsers.Directives = {
 		roles: '_widgetTagRoles',
 		resources: '_widgetTagResources',
 		default_events: '_widgetTagDefaultEvents',
+		include: '_widgetTagInclude',
 		// without directive analog
 		sugar: '_widgetTagSugar',
 		storage: '_widgetTagStorage',
-		storage_schema: '_widgetTagStorageSchema',
-		include: '_widgetTagInclude'
+		storage_schema: '_widgetTagStorageSchema'
 	},
 
 	/**
@@ -659,7 +660,7 @@ Lava.parsers.Directives = {
 		var args = Lava.ExpressionParser.parse(raw_tag.content[0]);
 		if (Lava.schema.DEBUG && args.length != 1) Lava.t("Expression block requires exactly one argument");
 
-		if (raw_tag.attributes.once && Lava.types.Boolean.fromString(raw_tag.attributes.once)) {
+		if (raw_tag.attributes.once && Firestorm.Types.Boolean.fromString(raw_tag.attributes.once)) {
 
 			args[0].once = true;
 
@@ -1041,7 +1042,7 @@ Lava.parsers.Directives = {
 		if (Lava.schema.DEBUG) {
 			if (!Array.isArray(events)) Lava.t('default_events: array expected');
 			for (count = events.length; i < count; i++) {
-				if (typeof(events[i]) != 'string') Lava.t('default_events: expected an array of strings');
+				if (typeof(events[i]) != 'string') Lava.t('default_events: expected array of strings');
 			}
 		}
 
@@ -1057,6 +1058,19 @@ Lava.parsers.Directives = {
 	_xdefault_events: function(raw_directive, widget_config) {
 
 		this._parseDefaultEvents(raw_directive, widget_config);
+
+	},
+
+	/**
+	 * Parse an include into {@link _cWidget#includes}
+	 * @param {_cRawDirective} raw_directive
+	 * @param {_cWidget} widget_config
+	 */
+	_xinclude: function(raw_directive, widget_config) {
+
+		if (!Lava.schema.DEBUG && (!raw_directive.attributes || !raw_directive.attributes.name)) Lava.t("Malformed x:include directive: 'name' attribute missing.");
+		var include = raw_directive.content ? Lava.parsers.Common.compileTemplate(raw_directive.content) : [];
+		Lava.store(widget_config, 'includes', raw_directive.attributes.name, include);
 
 	}
 

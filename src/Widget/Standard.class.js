@@ -370,7 +370,7 @@ Lava.define(
 
 					if (!descriptor.is_nullable) Lava.t("Trying to assign NULL to non-nullable property");
 
-				} else if (descriptor.type && !Lava.types[descriptor.type].isValidValue(value, descriptor)) {
+				} else if (descriptor.type && !Firestorm.Types[descriptor.type].isValidValue(value, descriptor)) {
 
 					Lava.t("Assigned value does not match the property type: " + descriptor.type);
 

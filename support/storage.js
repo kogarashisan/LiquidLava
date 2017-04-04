@@ -17,8 +17,8 @@ _eStorageItemTypes = {
 _eStorageObjectTagType = {
 	/** Tag from object contains template inside */
 	template: 'template',
-	/** Tag from object should be parsed by Lava.types */
-	lava_type: 'lava_type'
+	/** Tag from object should be parsed by Firestorm.Types */
+	known_type: 'known_type'
 };
 
 _cStorageObjectPropertySchema = {
@@ -29,7 +29,7 @@ _cStorageObjectPropertySchema = {
 	type: null,
 
 	/**
-	 * The name from Lava.types, when `type` is "lava_type"
+	 * The name from Firestorm.Types, when `type` is "known_type"
 	 * @type{string}
 	 */
 	type_name: null,

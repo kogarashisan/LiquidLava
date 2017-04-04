@@ -569,7 +569,7 @@ _cPropertyDescriptor = {
 	setter: '',
 
 	/**
-	 * A name from {@link Lava.types}
+	 * A name from {@link Firestorm.Types}
 	 */
 	type: '',
 	/**

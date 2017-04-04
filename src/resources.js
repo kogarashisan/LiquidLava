@@ -57,7 +57,6 @@ Lava.resources = {
 		if (Lava.schema.DEBUG && !(widget_title in Lava.widgets)) Lava.t("Widget config not found: " + widget_title);
 
 		var config = Lava.widgets[widget_title];
-
 		if (config.is_extended) Lava.t("Widget is already extended, can not add resources: " + widget_title);
 
 		if (!config.resources) {
@@ -65,7 +64,6 @@ Lava.resources = {
 		}
 
 		if (Lava.schema.DEBUG && (locale in config.resources)) Lava.t("Locale is already defined: " + locale);
-
 		config.resources[locale] = locale_resources;
 
 	},

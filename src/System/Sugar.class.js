@@ -360,7 +360,7 @@ Lava.define(
 	 */
 	_parseRootSwitchAttribute: function(widget_config, attribute_value, descriptor, name) {
 
-		Lava.store(widget_config, 'options',  name, (attribute_value == '') ? true : Lava.types.Boolean.fromString(attribute_value));
+		Lava.store(widget_config, 'options',  name, (attribute_value == '') ? true : Firestorm.Types.Boolean.fromString(attribute_value));
 
 	},
 

@@ -105,7 +105,7 @@ _cSugarRootAttribute = {
 	type: null,
 
 	/**
-	 * Name from {@link Lava.types}
+	 * Name from {@link Firestorm.Types}
 	 * @type {string}
 	 */
 	type_name: '',

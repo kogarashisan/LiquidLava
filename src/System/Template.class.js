@@ -161,7 +161,7 @@ Lava.define(
 
 		if (include_name_stack.indexOf(child_config.name) != -1) Lava.t("Infinite include recursion");
 		var include = Lava.view_manager.getInclude(this._parent_view, child_config);
-		if (Lava.schema.DEBUG && include == null) Lava.t("Include not found: " + child_config.name);
+		if (Lava.schema.DEBUG && !include) Lava.t("Include not found: " + child_config.name);
 
 		include_name_stack.push(child_config.name);
 		this._createChildren(result, include, include_name_stack, properties);
