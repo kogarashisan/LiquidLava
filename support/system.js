@@ -132,11 +132,9 @@ _cClassData = {
  * Event argument for some events in Enumerable
  */
 _cEnumerableEventArgs = {
-
 	uids: [],
 	values: [],
 	names: []
-
 };
 
 /**
@@ -300,3 +298,22 @@ _cEnumerableHelperStorage = {
  * @param {number} i Index in collection
  * @returns {boolean} <kw>false</kw> to break loop
  */
+
+/**
+ * Options for {Lava.ExpressionParser#parse} method
+ */
+_cParseArgs = {
+	/**
+	 * Allowed separator, when parsing multiple expressions
+	 * @type {Lava.ExpressionParser.SEPARATORS}
+	 */
+	separator: null,
+	/**
+	 * @type {boolean}
+	 */
+	is_events_mode: false,
+	/**
+	 * @type {Array.<string>}
+	 */
+	allowed_keywords: null
+};

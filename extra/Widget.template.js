@@ -13,7 +13,7 @@ Lava.define(
 
 	name: null,
 
-	_property_descriptors: {
+	PROPERTY_DESCRIPTORS: {
     	property_name: {setter: '_setPropertyName', type: '' /* Name from Firestorm.Types */}
 	},
 
@@ -21,17 +21,13 @@ Lava.define(
 		property_name: null
 	},
 
-	_event_handlers: {
-		event_name: '_eventHandler'
-	},
+	EVENT_HANDLERS: [
+		'onEvent'
+	],
 
-	_role_handlers: {
-		role_name: '_roleHandler'
-	},
-
-	_include_handlers: {
-		my_include: '_getMyInclude'
-	},
+	TEMPLATE_METHODS: [
+		'doSomething'
+	],
 
 	init: function(config, widget, parent_view, template, properties) {
 
@@ -39,19 +35,21 @@ Lava.define(
 
 	},
 
-	_eventHandler: function(dom_event_name, event_object, view, template_arguments) {
+	onEvent: function(any_arguments) {
+
+		Lava.t("Not implemented");
 
     },
 
-	_roleHandler: function(view, template_arguments) {
+	doSomething: function(any_arguments) {
 
-    },
+		Lava.t("Not implemented");
 
-	_getMyInclude: function(template_arguments) {
-
-    },
+	},
 
     _setPropertyName: function(name, value) {
+
+		Lava.t("Not implemented");
 
     }
 

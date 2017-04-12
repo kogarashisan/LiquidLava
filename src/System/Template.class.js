@@ -128,10 +128,10 @@ Lava.define(
 	 * Handler for views. Create a view and push it into result
 	 * @param {Array.<_tRenderable>} result
 	 * @param {(_cView|_cWidget)} childConfig Config vor the view
-	 * @param {Array.<string>} include_name_stack Used to protect from recursive includes
+	 * @param {Array.<_cInclude>} include_stack Used to protect from recursive includes
 	 * @param {Object} properties Properties for that view
 	 */
-	_createView: function(result, childConfig, include_name_stack, properties) {
+	_createView: function(result, childConfig, include_stack, properties) {
 
 		var constructor = Lava.ClassManager.getConstructor(childConfig['class'], 'Lava.view'),
 			view;
@@ -154,18 +154,21 @@ Lava.define(
 	 * Handler for includes. Get include from widget, then create and append all items from include
 	 * @param {Array.<_tRenderable>} result
 	 * @param {_cInclude} child_config
-	 * @param {Array.<string>} include_name_stack
+	 * @param {Array.<_cInclude>} include_stack
 	 * @param {Object} properties
 	 */
-	_createInclude: function(result, child_config, include_name_stack, properties) {
+	_createInclude: function(result, child_config, include_stack, properties) {
 
-		if (include_name_stack.indexOf(child_config.name) != -1) Lava.t("Infinite include recursion");
-		var include = Lava.view_manager.getInclude(this._parent_view, child_config);
-		if (Lava.schema.DEBUG && !include) Lava.t("Include not found: " + child_config.name);
+		if (include_stack.indexOf(child_config) != -1) Lava.t("Infinite include recursion");
 
-		include_name_stack.push(child_config.name);
-		this._createChildren(result, include, include_name_stack, properties);
-		include_name_stack.pop();
+		var evaluator = new Lava.scope.Evaluator(child_config, this._parent_view),
+			include = evaluator.evaluate();
+
+		if (Lava.schema.DEBUG && !Array.isArray(include)) Lava.t("Include not found or not a template");
+
+		include_stack.push(child_config);
+		this._createChildren(result, include, include_stack, properties);
+		include_stack.pop();
 
 	},
 
@@ -199,14 +202,8 @@ Lava.define(
 	 */
 	_createStaticEval: function(result, childConfig) {
 
-		var argument = new Lava.scope.Argument(childConfig.argument, this._view, this._widget);
-		// if this happens - then you are probably doing something wrong
-		if (argument.isWaitingRefresh()) {
-			if (Lava.schema.DEBUG) Lava.t("static_eval wrong usage: created argument is dirty");
-			Lava.logError("static_eval wrong usage: created argument is dirty");
-		}
-		result.push(argument.getValue + '');
-		argument.destroy();
+		var evaluator = new Lava.scope.Evaluator(childConfig.argument, this._view);
+		result.push(evaluator.evaluate() + '');
 
 	},
 
@@ -215,10 +212,10 @@ Lava.define(
 	 * The content of the tag is processed recursively
 	 * @param {Array.<_tRenderable>} result
 	 * @param {_cStaticTag} child_config
-	 * @param {Array.<string>} include_name_stack
+	 * @param {Array.<_cInclude>} include_stack
 	 * @param {Object} properties
 	 */
-	_createStaticTag: function(result, child_config, include_name_stack, properties) {
+	_createStaticTag: function(result, child_config, include_stack, properties) {
 
 		var resource_id = child_config.resource_id,
 			resource_owner,
@@ -271,7 +268,7 @@ Lava.define(
 			if (Lava.schema.DEBUG && is_void) Lava.t();
 
 			result.push(serialized_tag + '>');
-			this._createChildren(result, child_config.template, include_name_stack, properties);
+			this._createChildren(result, child_config.template, include_stack, properties);
 			result.push('</' + child_config.name + '>');
 
 		} else {

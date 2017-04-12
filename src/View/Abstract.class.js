@@ -42,7 +42,7 @@ Lava.define(
 	 */
 	id: null,
 	/**
-	 * Labels are used to find views when routing events and roles, or manually.
+	 * Labels are used for expressions in templates
 	 * Label is part of template config, so must be considered readonly
 	 * @type {?string}
 	 * @readonly
@@ -138,7 +138,7 @@ Lava.define(
 	_refresh_cycle_count: 0,
 
 	/**
-	 * Create an instance of the view, including container and assigns; dispatch roles
+	 * Create an instance of the view, including container and assigns
 	 * @param {_cView} config
 	 * @param {Lava.widget.Standard} widget
 	 * @param {Lava.view.Abstract} parent_view
@@ -148,7 +148,7 @@ Lava.define(
 	init: function(config, widget, parent_view, template, properties) {
 
 		var name,
-			argument,
+			evaluator,
 			constructor;
 
 		this.guid = Lava.guid++;
@@ -180,9 +180,8 @@ Lava.define(
 
 			if (config.assigns[name].once) {
 
-				argument = new Lava.scope.Argument(config.assigns[name], this, this._widget);
-				this.set(name, argument.getValue());
-				argument.destroy();
+				evaluator = new Lava.scope.Evaluator(config.assigns[name], this);
+				this.set(name, evaluator.evaluate());
 
 			} else {
 
@@ -201,9 +200,35 @@ Lava.define(
 
 		}
 
-		this._postInit();
+	},
 
-		if ('roles' in  config) Lava.view_manager.dispatchRoles(this, config.roles);
+	/**
+	 * Called after `init`
+	 */
+	_afterInit: function() {
+
+		if (('class_events' in this._config) && this._config.class_events.init) {
+			this.dispatchEvents(this._config.class_events.init);
+		}
+
+	},
+
+	/**
+	 * Call dispatchers for a DOM or class event
+	 *
+	 * @param {Array.<_cArgument>} evaluator_configs
+	 * @param {Object} event_object_or_event_args Either DOM event object or event arguments
+	 */
+	dispatchEvents: function(evaluator_configs, event_object_or_event_args) {
+
+		var i = 0,
+			count = evaluator_configs.length,
+			dispatcher;
+
+		for (; i < count; i++) {
+			dispatcher = new Lava.scope.Evaluator(evaluator_configs[i], this);
+			dispatcher.evaluate(event_object_or_event_args);
+		}
 
 	},
 
@@ -267,13 +292,6 @@ Lava.define(
 			this.set(name, properties[name]);
 
 		}
-
-	},
-
-	/**
-	 * Called before registering roles
-	 */
-	_postInit: function() {
 
 	},
 
@@ -759,13 +777,16 @@ Lava.define(
 	 */
 	destroy: function() {
 
-		var name;
+		if (('class_events' in this._config) && this._config.class_events.destroy) {
+			this.dispatchEvents(this._config.class_events.destroy);
+		}
 
 		this._fire('destroy');
-
 		Lava.view_manager.unregisterView(this);
-
 		if (this._container) this._container.destroy();
+		this._is_inDOM = false; // to prevent refresh
+
+		var name;
 
 		for (name in this._property_bindings_by_property) {
 
@@ -778,8 +799,6 @@ Lava.define(
 			this._data_segments[name].destroy();
 
 		}
-
-		this._is_inDOM = false; // to prevent refresh
 
 	}
 

@@ -64,7 +64,7 @@ Lava.define(
 
 		if (assign_config) {
 
-			this._assign_argument = new Lava.scope.Argument(assign_config, view, view.getWidget());
+			this._assign_argument = new Lava.scope.Argument(assign_config, view);
 			this._assign_argument.on('changed', this.onAssignChanged, this);
 			this._value = this._assign_argument.getValue();
 			view.set(this._property_name, this._value);

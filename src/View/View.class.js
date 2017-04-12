@@ -11,7 +11,7 @@ Lava.define(
 
 	Extends: 'Lava.view.ContentContainerAbstract',
 
-	_postInit: function() {
+	_afterInit: function() {
 
 		if (
 			Lava.schema.DEBUG
@@ -19,6 +19,8 @@ Lava.define(
 		) {
 			Lava.t("Standard View does not support arguments and elseif/else blocks");
 		}
+
+		this.Abstract$_afterInit();
 
 	}
 

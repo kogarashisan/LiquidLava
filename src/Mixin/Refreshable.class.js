@@ -7,6 +7,9 @@ Lava.define(
  * @extends Lava.mixin.Observable
  */
 {
+	Class: {
+		is_abstract: true
+	},
 
 	Extends: 'Lava.mixin.Observable',
 	/**

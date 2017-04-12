@@ -20,18 +20,20 @@ Lava.parsers.Directives = {
 		static_eval: {},
 		attach_directives: {},
 		assign: {view_config_presence: true, is_top_directive: true},
-		roles: {view_config_presence: true, is_top_directive: true},
 		container_config: {view_config_presence: true, is_top_directive: true},
 		refresher: {view_config_presence: true, is_top_directive: true},
 		option: {view_config_presence: true, is_top_directive: true},
 		options: {view_config_presence: true, is_top_directive: true},
+		class_event: {view_config_presence: true, is_top_directive: true},
+		class_events: {view_config_presence: true, is_top_directive: true},
+		property_changed_event: {view_config_presence: true, is_top_directive: true},
+		property_changed_events: {view_config_presence: true, is_top_directive: true},
 		// Widget-only directives
 		bind: {view_config_presence: true, is_top_directive: true},
 		property: {view_config_presence: true, is_top_directive: true},
 		properties: {view_config_presence: true, is_top_directive: true},
 		property_string: {view_config_presence: true, is_top_directive: true},
 		resources: {view_config_presence: true, is_top_directive: true},
-		default_events: {view_config_presence: true, is_top_directive: true},
 		include: {view_config_presence: true, is_top_directive: true}
 	},
 
@@ -47,9 +49,11 @@ Lava.parsers.Directives = {
 		property: '_widgetTagProperty',
 		options: '_widgetTagOptions',
 		properties: '_widgetTagProperties',
-		roles: '_widgetTagRoles',
+		class_event: '_widgetTagClassEvent',
+		class_events: '_widgetTagClassEvents',
+		property_changed_event: '_widgetTagPropertyChangedEvent',
+		property_changed_events: '_widgetTagPropertyChangedEvents',
 		resources: '_widgetTagResources',
-		default_events: '_widgetTagDefaultEvents',
 		include: '_widgetTagInclude',
 		// without directive analog
 		sugar: '_widgetTagSugar',
@@ -215,13 +219,95 @@ Lava.parsers.Directives = {
 	},
 
 	/**
-	 * Parse {@link _cView#roles}
+	 * Parse a tag as single event into {@link _cWidget#class_events}
+	 * @param {_cRawTag} raw_tag
+	 * @param {_cWidget} widget_config
+	 * @param {string} prefix
+	 */
+	_parseClassEvent: function(raw_tag, widget_config, prefix) {
+
+		widget_config.class_events = widget_config.class_events || {};
+
+		if (Lava.schema.DEBUG && !('attributes' in raw_tag)) Lava.t("Events tag: missing required attributes");
+		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.t("Malformed events tag");
+		var event_name = prefix ? prefix + raw_tag.attributes.name : raw_tag.attributes.name;
+		if (event_name in widget_config.class_events) Lava.t("Duplicate event: " + event_name);
+		widget_config.class_events[event_name] = Lava.ExpressionParser.parse(raw_tag.content[0], Lava.ExpressionParser.PRESETS.class_events);
+
+	},
+
+	/**
+	 * Parse &lt;class_event&gt; into {@link _cWidget#class_events}
 	 * @param {_cRawTag} raw_tag
 	 * @param {_cWidget} widget_config
 	 */
-	_widgetTagRoles: function(raw_tag, widget_config) {
+	_widgetTagClassEvent: function(raw_tag, widget_config) {
 
-		this._parseRoles(widget_config, raw_tag);
+		this._parseClassEvent(raw_tag, widget_config);
+
+	},
+
+	/**
+	 * Parse &lt;property_changed_event&gt; into {@link _cWidget#class_events}
+	 * @param {_cRawTag} raw_tag
+	 * @param {_cWidget} widget_config
+	 */
+	_widgetTagPropertyChangedEvent: function(raw_tag, widget_config) {
+
+		this._parseClassEvent(raw_tag, widget_config, Lava.schema.PROPERTY_CHANGED_EVENT_PREFIX);
+
+	},
+
+	/**
+	 * Parse a tag as {@link _cWidget#class_events}
+	 * @param {_cRawTag} raw_tag
+	 * @param {_cWidget} widget_config
+	 * @param {string} event_prefix
+	 */
+	_parseClassEvents: function(raw_tag, widget_config, event_prefix) {
+
+		if (Lava.schema.DEBUG && !raw_tag.content) Lava.t("Empty events tag");
+
+		var tags = Lava.parsers.Common.asBlockType(raw_tag.content, 'tag'),
+			i = 0,
+			count = tags.length,
+			event_name,
+			tag_content;
+
+		if (Lava.schema.DEBUG && count == 0) Lava.t("Empty events tag");
+		widget_config.class_events = widget_config.class_events || {};
+
+		for (; i < count; i++) {
+
+			event_name = event_prefix ? event_prefix + tags[i].name : tags[i].name;
+			tag_content = tags[i].content;
+			if (Lava.schema.DEBUG && (event_name in widget_config.class_events)) Lava.t("Event is already defined: " + event_name);
+			if (Lava.schema.DEBUG && (!tag_content || tag_content.length != 1)) Lava.t("Empty event inside events tag");
+			widget_config.class_events[event_name] = Lava.ExpressionParser.parse(tag_content[0], Lava.ExpressionParser.PRESETS.class_events);
+
+		}
+
+	},
+
+	/**
+	 * Parse &lt;class_events&gt; into {@link _cWidget#class_events}
+	 * @param {_cRawTag} raw_tag
+	 * @param {_cWidget} widget_config
+	 */
+	_widgetTagClassEvents: function(raw_tag, widget_config) {
+
+		this._parseClassEvents(raw_tag, widget_config);
+
+	},
+
+	/**
+	 * Parse &lt;property_changed_events&gt; into {@link _cWidget#class_events}
+	 * @param {_cRawTag} raw_tag
+	 * @param {_cWidget} widget_config
+	 */
+	_widgetTagPropertyChangedEvents: function(raw_tag, widget_config) {
+
+		this._parseClassEvents(raw_tag, widget_config, Lava.schema.PROPERTY_CHANGED_EVENT_PREFIX);
 
 	},
 
@@ -246,17 +332,6 @@ Lava.parsers.Directives = {
 	_widgetTagStorage: function(raw_tag, widget_config) {
 
 		Lava.parsers.Storage.parse(widget_config, raw_tag.content);
-
-	},
-
-	/**
-	 * Parse {@link _cWidget#default_events}
-	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} widget_config
-	 */
-	_widgetTagDefaultEvents: function(raw_tag, widget_config) {
-
-		this._parseDefaultEvents(raw_tag, widget_config);
 
 	},
 
@@ -658,7 +733,7 @@ Lava.parsers.Directives = {
 		if (raw_tag.attributes.name in config.assigns) Lava.t("Duplicate assign: " + raw_tag.attributes.name);
 
 		var args = Lava.ExpressionParser.parse(raw_tag.content[0]);
-		if (Lava.schema.DEBUG && args.length != 1) Lava.t("Expression block requires exactly one argument");
+		if (Lava.schema.DEBUG && args.length != 1) Lava.t("Assign directive requires exactly one argument");
 
 		if (raw_tag.attributes.once && Firestorm.Types.Boolean.fromString(raw_tag.attributes.once)) {
 
@@ -682,6 +757,49 @@ Lava.parsers.Directives = {
 	},
 
 	/**
+	 * Parse &lt;class_event&gt; into {@link _cWidget#class_events}
+	 * @param {_cRawDirective} raw_directive
+	 * @param {_cView} view_config
+	 */
+	_xclass_event: function(raw_directive, view_config) {
+
+		this._parseClassEvent(raw_directive, view_config);
+
+	},
+
+	/**
+	 * Parse &lt;property_changed_event&gt; into {@link _cWidget#class_events}
+	 * @param {_cRawDirective} raw_directive
+	 * @param {_cView} view_config
+	 */
+	_xproperty_changed_event: function(raw_directive, view_config) {
+
+		this._parseClassEvent(raw_directive, view_config, Lava.schema.PROPERTY_CHANGED_EVENT_PREFIX);
+
+	},
+	/**
+	 * Parse &lt;class_events&gt; into {@link _cWidget#class_events}
+	 * @param {_cRawDirective} raw_directive
+	 * @param {_cView} view_config
+	 */
+	_xclass_events: function(raw_directive, view_config) {
+
+		this._parseClassEvents(raw_directive, view_config);
+
+	},
+
+	/**
+	 * Parse &lt;property_changed_events&gt; into {@link _cWidget#class_events}
+	 * @param {_cRawDirective} raw_directive
+	 * @param {_cView} view_config
+	 */
+	_xproperty_changed_events: function(raw_directive, view_config) {
+
+		this._parseClassEvents(raw_directive, view_config, Lava.schema.PROPERTY_CHANGED_EVENT_PREFIX);
+
+	},
+
+	/**
 	 * Perform parsing of a tag with serialized JavaScript object inside it
 	 * @param {(_cView|_cWidget)} config
 	 * @param {(_cRawDirective|_cRawTag)} raw_tag
@@ -697,13 +815,9 @@ Lava.parsers.Directives = {
 
 		if (option_type) {
 
-			if (option_type == 'targets') {
+			if (option_type == 'expressions') {
 
-				result = Lava.parsers.Common.parseEventHandlers(raw_tag.content[0]);
-
-			} else if (option_type == 'expressions') {
-
-				result = Lava.ExpressionParser.parse(raw_tag.content[0], Lava.ExpressionParser.SEPARATORS.SEMICOLON);
+				result = Lava.ExpressionParser.parse(raw_tag.content[0], Lava.ExpressionParser.PRESETS.expressions);
 
 			} else {
 
@@ -732,30 +846,6 @@ Lava.parsers.Directives = {
 		if (Lava.schema.DEBUG && !('attributes' in raw_tag)) Lava.t("option: missing attributes");
 		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.t("Malformed option: " + raw_tag.attributes.name);
 		Lava.store(config, config_property_name, raw_tag.attributes.name, Lava.parseOptions(raw_tag.content[0]));
-
-	},
-
-	/**
-	 * Parse {@link _cView#roles}
-	 * @param {_cRawDirective} raw_directive
-	 * @param {_cView} view_config
-	 */
-	_xroles: function(raw_directive, view_config) {
-
-		this._parseRoles(view_config, raw_directive);
-
-	},
-
-	/**
-	 * Perform parsing a role from {@link _cView#roles}
-	 * @param {(_cView|_cWidget)} config
-	 * @param {_cRawTag} raw_tag
-	 */
-	_parseRoles: function(config, raw_tag) {
-
-		if ('roles' in config) Lava.t("Roles are already defined");
-		if (Lava.schema.DEBUG && (!raw_tag.content || raw_tag.content.length != 1)) Lava.t("Malformed roles tag/directive");
-		config.roles = Lava.parsers.Common.parseEventHandlers(raw_tag.content[0]);
 
 	},
 
@@ -990,7 +1080,7 @@ Lava.parsers.Directives = {
 
 		var args = Lava.ExpressionParser.parse(raw_directive.content[0]);
 
-		if (Lava.schema.DEBUG && args.length == 0) Lava.t("static_eval: malformed argument");
+		if (Lava.schema.DEBUG && args.length != 1) Lava.t("static_eval: malformed argument");
 
 		return {
 			type: 'static_eval',
@@ -1022,42 +1112,6 @@ Lava.parsers.Directives = {
 
 		sugar.content = directives;
 		return Lava.parsers.Common.compileAsView([sugar]);
-
-	},
-
-	/**
-	 * Perform parsing of {@link _cWidget#default_events}
-	 * @param {_cRawTag} raw_tag
-	 * @param {_cWidget} widget_config
-	 */
-	_parseDefaultEvents: function(raw_tag, widget_config) {
-
-		if (Lava.schema.DEBUG && (!raw_tag.content || !raw_tag.content.length)) Lava.t('default_events: no content.');
-		if (Lava.schema.DEBUG && ('default_events' in widget_config)) Lava.t('default_events: property already defined');
-
-		var events = Lava.parseOptions(raw_tag.content[0]),
-			i = 0,
-			count;
-
-		if (Lava.schema.DEBUG) {
-			if (!Array.isArray(events)) Lava.t('default_events: array expected');
-			for (count = events.length; i < count; i++) {
-				if (typeof(events[i]) != 'string') Lava.t('default_events: expected array of strings');
-			}
-		}
-
-		widget_config.default_events = Lava.excludeDefaultEvents(events);
-
-	},
-
-	/**
-	 * Parse {@link _cWidget#default_events}
-	 * @param {_cRawDirective} raw_directive
-	 * @param {_cWidget} widget_config
-	 */
-	_xdefault_events: function(raw_directive, widget_config) {
-
-		this._parseDefaultEvents(raw_directive, widget_config);
 
 	},
 

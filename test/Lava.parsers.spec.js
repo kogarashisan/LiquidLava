@@ -22,4 +22,13 @@ describe("Lava.parsers", function() {
 
 	});
 
+	it("Parses class_events widget tag correctly", function() {
+
+		var template = window.__html__['test/fixtures/widget-tag-class_events.html'];
+		var result = Lava.TemplateParser.parse(template);
+		// @todo
+		expect(result[0].class_events[0]).to.deep.equal({});
+
+	});
+
 });

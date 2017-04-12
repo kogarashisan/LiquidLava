@@ -26,11 +26,13 @@ Lava.define(
 	 */
 	_content: null,
 
-	_postInit: function() {
+	_afterInit: function() {
 
 		if (Lava.schema.DEBUG && !('argument' in this._config)) Lava.t("Include view requires an argument");
-		this._argument = new Lava.scope.Argument(this._config.argument, this, this._widget);
+		this._argument = new Lava.scope.Argument(this._config.argument, this);
 		this._argument_changed_listener = this._argument.on('changed', this._onValueChanged, this);
+
+		this.Abstract$_afterInit();
 
 	},
 

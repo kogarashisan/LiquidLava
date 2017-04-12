@@ -80,9 +80,6 @@ Lava.define(
 
 		this.Abstract$init(config, widget, parent_view, template, properties);
 
-		// setting count after roles registration, cause scope can be filtered
-		this._setCount(this._foreach_scope.getValue().getCount());
-
 	},
 
 	_initMembers: function(properties) {
@@ -93,7 +90,7 @@ Lava.define(
 
 		this.Abstract$_initMembers(properties);
 
-		this._argument = new Lava.scope.Argument(this._config.argument, this, this._widget);
+		this._argument = new Lava.scope.Argument(this._config.argument, this);
 		this._foreach_scope = new Lava.scope.Foreach(this._argument, this, this._widget, this._config.scope);
 		this._foreach_scope_changed_listener = this._foreach_scope.on('changed', this._onDataSourceChanged, this);
 		this._foreach_scope.on('new_enumerable', this._onEnumerableChanged, this);
@@ -101,11 +98,16 @@ Lava.define(
 
 	},
 
-	_postInit: function() {
+	_afterInit: function() {
 
 		if (this._config.refresher) {
 			this.createRefresher(this._config.refresher);
 		}
+
+		this.Abstract$_afterInit();
+
+		// setting count after `init` event, cause scope can be filtered
+		this._setCount(this._foreach_scope.getValue().getCount());
 
 	},
 
@@ -117,7 +119,7 @@ Lava.define(
 	},
 
 	/**
-	 * Can be called during roles registration (at the time of `init()`), before children are created.
+	 * Can be called on `init` event, before children are created.
 	 * Initializes a refresher instance with custom config.
 	 *
 	 * @param {_cRefresher} refresher_config
@@ -388,7 +390,12 @@ Lava.define(
 		this.Abstract$destroy();
 
 		// to speed up garbage collection and break this object forever (destroyed objects must not be used!)
-		this._refresher = this._current_templates = this._current_hash = this._foreach_scope = this._argument = null;
+		this._refresher
+			= this._current_templates
+			= this._current_hash
+			= this._foreach_scope
+			= this._argument
+			= null;
 
 	}
 

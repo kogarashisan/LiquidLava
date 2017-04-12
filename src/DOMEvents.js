@@ -55,11 +55,12 @@ Lava.DOMEvents = {
 	 * @param {string} event_name Name of DOM event
 	 * @param {function} fn Callback
 	 * @param {Object} context Context for callback invocation (similar to {@link Lava.mixin.Observable#on})
+	 * @param {*} [listener_args] Static listener arguments. May be usable when one callback responds to different events
 	 * @returns {_tListener} The listener structure, similar to {@link Lava.mixin.Observable#on} result
 	 */
-	addListener: function(event_name, fn, context) {
+	addListener: function(event_name, fn, context, listener_args) {
 
-		var listener = new Lava.Listener(event_name, fn, context);
+		var listener = new Lava.Listener(event_name, fn, context, listener_args);
 
 		if (this._event_usage_counters[event_name]) {
 

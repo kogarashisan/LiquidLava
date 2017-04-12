@@ -16,7 +16,7 @@ Lava.define(
 	 * Shared data
 	 */
 	_shared: {
-		// pre-generated variants of this._callAnimators function
+		// premade variants of this._callAnimators function
 		call_animators: [
 			function(transition_value) {},
 			function(transition_value) {

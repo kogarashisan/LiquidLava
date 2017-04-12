@@ -3,7 +3,6 @@ module.exports = {
 		"Lava.js",
 		"Listener.js",
 		"schema.js",
-		"modifiers.js",
 		"resources.js",
 		"extenders.js",
 		"Cron.js",
@@ -66,7 +65,9 @@ module.exports = {
 		"System/FocusManager.class.js",
 
 		"Scope/Abstract.class.js",
+		"Scope/ArgumentCommonMixin.class.js",
 		"Scope/Argument.class.js",
+		"Scope/Evaluator.class.js",
 		"Scope/Binding.class.js",
 		"Scope/DataBinding.class.js",
 		"Scope/Foreach.class.js",

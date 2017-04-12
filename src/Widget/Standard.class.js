@@ -10,7 +10,11 @@ Lava.define(
 {
 
 	Extends: 'Lava.view.View',
-	Shared: ['_property_descriptors', '_event_handlers', '_role_handlers', '_include_handlers', '_modifiers'],
+	Shared: ['PROPERTY_DESCRIPTORS'],
+	Merged: [
+		'TEMPLATE_METHODS',
+		'EVENT_HANDLERS'
+	],
 
 	/**
 	 * Instance is widget
@@ -23,34 +27,36 @@ Lava.define(
 	 * @readonly
 	 */
 	name: 'widget',
+	/**
+	 * Map of template event handlers
+	 * @type {Array.<string, string>}
+	 */
+	EVENT_HANDLERS: [],
+	/**
+	 * Map of template callbacks. Called in context of the widget
+	 * @type {Array.<string, string>}
+	 */
+	TEMPLATE_METHODS: [
+		'translate',
+		'ntranslate',
+		'translateBoolean',
+		'saveReference',
+		'storeReference',
+		'removeReference',
+		'getReference',
+		'getInclude'
+	],
 
 	/**
 	 * Rules for accessing widget's properties
 	 * @type {Object.<string, _cPropertyDescriptor>}
 	 */
-	_property_descriptors: {},
-
+	PROPERTY_DESCRIPTORS: {},
 	/**
 	 * List of non-default template events, to which this widget responds
 	 * @type {Array.<string>}
 	 */
 	_acquired_events: [],
-	/**
-	 * Map of template event handlers
-	 * @type {Object.<string, string>}
-	 */
-	_event_handlers: {},
-	/**
-	 * Map of template role handlers
-	 * @type {Object.<string, string>}
-	 */
-	_role_handlers: {},
-	/**
-	 * Map of template include handlers
-	 * @type {Object.<string, string>}
-	 */
-	_include_handlers: {},
-
 	/**
 	 * Two-way bindings to properties of this widget
 	 * @type {Object.<string, Lava.scope.Binding>}
@@ -66,16 +72,11 @@ Lava.define(
 	 * @type {?Lava.widget.Standard}
 	 */
 	_parent_widget: null,
-
 	/**
-	 * Map of template callbacks. Called in context of the widget
-	 * @type {Object.<string, string>}
+	 * Saved references to inner views and widgets
+	 * @type {Object.<string, Lava.view.Abstract>}
 	 */
-	_modifiers: {
-		translate: 'translate',
-		ntranslate: 'ntranslate',
-		translateBoolean: 'translateBoolean'
-	},
+	_references: {},
 
 	/**
 	 * Create widget instance
@@ -91,16 +92,12 @@ Lava.define(
 			count,
 			i;
 
-		if (Lava.schema.DEBUG && !config.is_extended) Lava.t("Widget was created with partial (unextended) config");
-
 		if (Lava.schema.DEBUG) {
-			for (name in this._property_descriptors) {
+
+			if (!config.is_extended) Lava.t("Widget was created with partial (unextended) config");
+
+			for (name in this.PROPERTY_DESCRIPTORS) {
 				if (!(name in this._properties)) Lava.t("All widget properties must have a default value");
-			}
-			if (config.default_events) {
-				for (i = 0, count = config.default_events.length; i < count; i++) {
-					if (!Lava.view_manager.isEventRouted(config.default_events[i])) Lava.t('Event is not routed: ' + config.default_events[i]);
-				}
 			}
 		}
 
@@ -178,55 +175,6 @@ Lava.define(
 	},
 
 	/**
-	 * Get view's include
-	 * @param {string} name Include name
-	 * @param {Array} template_arguments Evaluated argument values from view's template
-	 * @returns {?_tTemplate}
-	 */
-	getInclude: function(name, template_arguments) {
-
-		var result = null;
-
-		if (name in this._include_handlers) {
-
-			result = this[this._include_handlers[name]](template_arguments);
-
-		} else {
-
-			if (Lava.schema.DEBUG && !this._config.includes) Lava.t("Include not found: " + name + ". Widget does not have any includes in it's config.");
-			result = this._config.includes[name];
-
-		}
-
-		return result;
-
-	},
-
-	/**
-	 * Respond to DOM event, routed by {@link Lava.system.ViewManager}
-	 * @param {string} dom_event_name
-	 * @param event_object Browser event object, wrapped by the framework
-	 * @param {string} handler_name Template event name
-	 * @param {Lava.view.Abstract} source_view View, that is the source for this event
-	 * @param {Array.<*>} template_arguments Evaluated argument values from view's template
-	 * @returns {boolean} <kw>true</kw>, if event was handled, and <kw>false</kw> otherwise
-	 */
-	handleEvent: function(dom_event_name, event_object, handler_name, source_view, template_arguments) {
-
-		var result = false;
-
-		if (handler_name in this._event_handlers) {
-
-			this[this._event_handlers[handler_name]](dom_event_name, event_object, source_view, template_arguments);
-			result = true;
-
-		}
-
-		return result;
-
-	},
-
-	/**
 	 * Render and insert the widget instance into DOM
 	 * @param {HTMLElement} element
 	 * @param {_eInsertPosition} position
@@ -250,8 +198,9 @@ Lava.define(
 	},
 
 	/**
-	 * The target element becomes container for this widget.
-	 * Primary usage: inject a widget into the &lt;body&gt; element
+	 * Passed element becomes container for this widget, and widget inserts itself inside.
+	 *
+	 * Example usage: inject a widget into the &lt;body&gt; element
 	 * @param element
 	 */
 	injectIntoExistingElement: function(element) {
@@ -296,32 +245,6 @@ Lava.define(
 	},
 
 	/**
-	 * Call a template method
-	 * @param {string} name Modifier name
-	 * @param {Array} arguments_array Evaluated template arguments
-	 * @returns {*}
-	 */
-	callModifier: function(name, arguments_array) {
-
-		if (Lava.schema.DEBUG && !(name in this._modifiers)) Lava.t("Unknown widget modifier: " + name);
-
-		return this[this._modifiers[name]].apply(this, arguments_array);
-
-	},
-
-	/**
-	 * Deprecated
-	 * @param {string} name
-	 * @param {Array} arguments_array
-	 * @returns {*}
-	 */
-	callActiveModifier: function(name, arguments_array) {
-
-		Lava.t("Alpha version. This functionality may be removed later.");
-
-	},
-
-	/**
 	 * Get `_parent_widget`
 	 * @returns {Lava.widget.Standard}
 	 */
@@ -331,36 +254,13 @@ Lava.define(
 
 	},
 
-	/**
-	 * Handle a view with a role in this widget
-	 * @param {string} role Role name
-	 * @param {Lava.view.Abstract} view
-	 * @param {Array.<*>} template_arguments
-	 * @returns {boolean} <kw>true</kw>, if the role was handled, and <kw>false</kw> otherwise
-	 */
-	handleRole: function(role, view, template_arguments) {
-
-		var result = false;
-
-		if (role in this._role_handlers) {
-
-			if (Lava.schema.DEBUG && typeof this[this._role_handlers[role]] != 'function') Lava.t("There is no such method in class: " + role + ". It's referenced as a role handler");
-			this[this._role_handlers[role]](view, template_arguments);
-			result = true;
-
-		}
-
-		return result;
-
-	},
-
 	set: function(name, value) {
 
 		var descriptor;
 
-		if (name in this._property_descriptors) {
+		if (name in this.PROPERTY_DESCRIPTORS) {
 
-			descriptor = this._property_descriptors[name];
+			descriptor = this.PROPERTY_DESCRIPTORS[name];
 
 			if (Lava.schema.DEBUG && descriptor.is_readonly) Lava.t("Trying to set readonly property: " + name);
 
@@ -401,8 +301,8 @@ Lava.define(
 
 	get: function(name) {
 
-		return ((name in this._property_descriptors) && this._property_descriptors[name].getter)
-			? this[this._property_descriptors[name].getter](name)
+		return ((name in this.PROPERTY_DESCRIPTORS) && this.PROPERTY_DESCRIPTORS[name].getter)
+			? this[this.PROPERTY_DESCRIPTORS[name].getter](name)
 			: this.View$get(name);
 
 	},
@@ -435,7 +335,7 @@ Lava.define(
 	},
 
 	/**
-	 * Get a scope instance
+	 * Get a dynamically constructed scope instance
 	 * @param {Lava.view.Abstract} view
 	 * @param {_cDynamicScope} config
 	 */
@@ -445,8 +345,64 @@ Lava.define(
 
 	},
 
+	_fire: function(event_name, event_args) {
+
+		if (('class_events' in this._config) && this._config.class_events[event_name]) {
+			this.dispatchEvents(this._config.class_events[event_name], event_args);
+		}
+
+		this.View$_fire(event_name, event_args);
+
+	},
+
 	/**
-	 * (modifier) Translate a string from resources. If `arguments_list` is present - then also replaces
+	 * Dispatch event to this widget, and all it's parents (if any of them supports it)
+	 *
+	 * @param {string} callback_name Event name
+	 * @param {*} args Either DOM event, or `event_args`
+	 */
+	sendBubblingEvent: function(callback_name, args) {
+
+		try {
+
+			var result,
+				target = this;
+			do {
+
+				if (target.EVENT_HANDLERS.indexOf(callback_name) != -1) {
+					if (Lava.schema.DEBUG && !target[callback_name]) Lava.t("Trying to call nonexistent method from widget: " + callback_name);
+					result = target[callback_name].apply(target, args);
+				} else {
+					target = target.getParentWidget();
+				}
+
+			} while (target && result !== false);
+
+		} catch (e) {
+
+			Lava.logException(e);
+
+		}
+
+	},
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Template methods
+
+	/**
+	 * Get widget's include
+	 * @param {string} name Include name
+	 * @returns {?_tTemplate}
+	 */
+	getInclude: function(name) {
+
+		if (Lava.schema.DEBUG && !this._config.includes) Lava.t("Include not found: " + name + ". Widget does not have any includes in it's config.");
+		return this._config.includes[name];
+
+	},
+
+	/**
+	 * Translate a string from resources. If `arguments_list` is present - then also replaces
 	 * `{&lt;number&gt;}` sequences with corresponding value from array.
 	 * @param {string} resource_name
 	 * @param {Array} arguments_list
@@ -486,7 +442,7 @@ Lava.define(
 	},
 
 	/**
-	 * (modifier) Translate a plural string from resources. If `arguments_list` is present - then also replaces
+	 * Translate a plural string from resources. If `arguments_list` is present - then also replaces
 	 * `{&lt;number&gt;}` sequences with corresponding value from array.
 	 * @param {string} string_name
 	 * @param {number} n
@@ -531,16 +487,84 @@ Lava.define(
 	},
 
 	/**
-	 * (modifier) Translate a boolean type into user language
+	 * Translate a boolean type into user language
 	 * @param value
 	 * @returns {string}
 	 */
 	translateBoolean: function(value) {
 
-		if (Lava.schema.DEBUG && typeof(value) != 'boolean') Lava.t("translateBoolean: argument is not boolean type");
+		if (Lava.schema.DEBUG && typeof(value) != 'boolean') Lava.t("translateBoolean: argument is not of boolean type");
 		return Lava.locales[Lava.schema.LOCALE].booleans[+value];
 
 	},
+
+	/**
+	 * Save the view into widget's property for later use.
+	 * Reference will be removed, when referenced view is destroyed.
+	 *
+	 * @param {Lava.view.Abstract} view
+	 * @param {string} name
+	 */
+	saveReference: function(view, name) {
+
+		this._references[name] = view;
+		view.on('destroy', this._onReferencedViewDestroyed, this, name);
+
+	},
+
+	/**
+	 * Listener to saved view's `destroy` event - removes the view from references
+	 * @param {Lava.view.Abstract} view
+	 * @param {*} event_args
+	 * @param {string} name
+	 */
+	_onReferencedViewDestroyed: function(view, event_args, name) {
+
+		delete this._references[name];
+
+	},
+
+	/**
+	 * Save reference, but don't listen to view's 'destroy' event
+	 * (this way, when view is destroyed - it's reference stays active).
+	 *
+	 * May be used at later stage of development for micro-optimizations
+	 * as faster alternative to `saveReference`.
+	 * But keep in mind: using this method may lead to bugs in your code
+	 * (if you do something with destroyed views).
+	 *
+	 * @param {Lava.view.Abstract} view
+	 * @param {string} name
+	 */
+	storeReference: function(view, name) {
+
+		this._references[name] = view;
+
+	},
+
+	/**
+	 * Forget the view, referenced by `name`
+	 * @param {string} name
+	 */
+	removeReference: function(name) {
+
+		delete this._references[name];
+
+	},
+
+	/**
+	 * Get the view, stored as `name`
+	 * @param {string} name
+	 * @returns {Lava.view.Abstract}
+	 */
+	getReference: function(name) {
+
+		return this._references[name];
+
+	},
+
+	// end: template methods
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	destroy: function() {
 

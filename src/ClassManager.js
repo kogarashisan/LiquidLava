@@ -111,6 +111,7 @@ Lava.ClassManager = {
 			skeleton: null,
 			references: [],
 			shared: {},
+			merged: [],
 			constructor: null,
 			own_references_count: 0,
 			is_abstract: false
@@ -120,6 +121,21 @@ Lava.ClassManager = {
 			var class_options = class_body.Class;
 			if (!class_options) Lava.t("Malformed 'Class' property in " + class_path);
 			if (class_options.is_abstract) class_data.is_abstract = true;
+		}
+
+		if ('Merged' in class_body) {
+
+			if (!Array.isArray(class_body.Merged)) Lava.t("[ClassManager] 'Merged': array expected");
+
+			if (Lava.schema.DEBUG) {
+				for (i = 0, count = class_body.Merged.length; i < count; i++) {
+					name = class_body.Merged[i];
+					if (Firestorm.getType(class_body[name]) != 'array') Lava.t("[ClassManager] 'Merged': property is not array: " + name);
+				}
+			}
+
+			class_data.merged = class_data.merged.concat(class_body.Merged);
+
 		}
 
 		if ('Extends' in class_body) {
@@ -153,7 +169,11 @@ Lava.ClassManager = {
 
 					if (Lava.schema.DEBUG && Array.isArray(class_body[name]) != is_array) Lava.t("[ClassManager] 'Shared' members of different types must not override each other (array must not become an object)");
 					if (is_array) {
-						class_data.shared[name] = class_body[name];
+						if (class_data.merged.indexOf('name') != -1) {
+							class_data.shared[name] = class_data.shared[name].concat(class_body[name]);
+						} else {
+							class_data.shared[name] = class_body[name];
+						}
 					} else {
 						Firestorm.extend(class_data.shared[name], class_body[name]);
 					}
@@ -171,7 +191,14 @@ Lava.ClassManager = {
 
 		if ('Shared' in class_body) {
 
-			shared_names = (typeof(class_body.Shared) == 'string') ? [class_body.Shared] : class_body.Shared;
+			if (!Array.isArray(class_body.Shared)) Lava.t("[ClassManager] 'Shared': array expected");
+			shared_names = class_body.Shared.slice();
+
+			if ('Merged' in class_body) {
+
+				Firestorm.Array.includeUnique(shared_names, class_body.Merged);
+
+			}
 
 			for (i = 0, count = shared_names.length; i < count; i++) {
 
@@ -181,8 +208,8 @@ Lava.ClassManager = {
 				if (Lava.schema.DEBUG) {
 					if (!(name in class_body)) Lava.t("[ClassManager] 'Shared' member is not in class: " + name);
 					if (type != 'object' && type != 'array') Lava.t("[ClassManager] only objects and arrays can be made 'Shared'");
-					if (class_data.parent_class_data && (name in class_data.parent_class_data.skeleton)) Lava.t("[ClassManager] instance member from parent class may not become 'Shared' in descendant: " + name);
-					if (name in class_data.shared) Lava.t("[ClassManager] member is already 'Shared' in parent class: " + class_path + "#" + name);
+					if (class_data.parent_class_data && (name in class_data.parent_class_data.skeleton)) Lava.t("[ClassManager] instance member from parent class may not become 'Shared' ('Merged') in descendant: " + name);
+					if (name in class_data.shared) Lava.t("[ClassManager] member is already 'Shared' ('Merged') in parent class: " + class_path + "#" + name + ". Please, remove it from 'Shared' ('Merged') in descendant.");
 				}
 
 				class_data.shared[name] = class_body[name];

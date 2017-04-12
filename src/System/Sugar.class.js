@@ -85,12 +85,11 @@ Lava.define(
 
 			if (Lava.schema.DEBUG && x) {
 				for (name in x) {
-					if (['label', 'roles', 'resource_id', 'controller'].indexOf(name) == -1) Lava.t("Control attribute is not allowed on sugar: " + name);
+					if (['label', 'resource_id', 'controller'].indexOf(name) == -1) Lava.t("Control attribute is not allowed on sugar: " + name);
 				}
 			}
 
 			if ('label' in x) this.setViewConfigLabel(widget_config, x.label);
-			if ('roles' in x) widget_config.roles = Lava.parsers.Common.parseEventHandlers(x.roles);
 			if ('resource_id' in x) widget_config.resource_id = Lava.parsers.Common.parseResourceId(x.resource_id);
 			if ('controller' in x) widget_config.real_class = x.controller;
 
@@ -378,7 +377,7 @@ Lava.define(
 	},
 
 	/**
-	 * Parse attribute value via {@link Lava.parsers.Common#parseEventHandlers} and store it as an option
+	 * @todo
 	 * @param {_cWidget} widget_config
 	 * @param {string} attribute_value
 	 * @param {_cSugarRootAttribute} descriptor
@@ -386,7 +385,8 @@ Lava.define(
 	 */
 	_parseRootTargetsOptionAttribute: function(widget_config, attribute_value, descriptor, name) {
 
-		Lava.store(widget_config, 'options', name, Lava.parsers.Common.parseEventHandlers(attribute_value));
+		throw "todo"; // @todo
+		//Lava.store(widget_config, 'options', name, Lava.parsers.Common.parseEventHandlers(attribute_value));
 
 	},
 
@@ -403,7 +403,7 @@ Lava.define(
 			widget_config,
 			'options',
 			name,
-			Lava.ExpressionParser.parse(attribute_value, Lava.ExpressionParser.SEPARATORS.SEMICOLON)
+			Lava.ExpressionParser.parse(attribute_value, Lava.ExpressionParser.PRESETS.expressions)
 		);
 
 	}

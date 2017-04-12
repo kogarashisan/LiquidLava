@@ -114,7 +114,7 @@ Lava.define(
 	_sendRefreshValue: function() {
 
 		if (this._events['compatible_changed']) {
-			Lava.view_manager.dispatchEvent(this._view, 'compatible_changed', null, this._events['compatible_changed']);
+			this._view.dispatchEvents(this._events['compatible_changed']);
 		}
 
 	}

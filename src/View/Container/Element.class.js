@@ -80,10 +80,10 @@ Lava.define(
 	_property_bindings: null,
 
 	/**
-	 * Targets for DOM events, routed by {@link Lava.system.ViewManager}
-	 * @type {Object.<string, Array.<_cTarget>>}
+	 * Dispatchers for DOM events, routed by {@link Lava.system.ViewManager}
+	 * @type {Object.<string, Array.<_cArgument>>}
 	 */
-	_events: {},
+	_event_dispatchers: {},
 
 	/**
 	 * Is container's html element in DOM
@@ -186,12 +186,11 @@ Lava.define(
 
 		// Must clone everything, cause additional statics can be added to the element at run time
 		if (static_classes) this._static_classes = static_classes.slice();
-
         Firestorm.extend(this._static_styles, static_styles);
 		Firestorm.extend(this._static_properties, static_properties);
 
-		for (name in config.events) {
-			this._events[name] = Firestorm.clone(config.events[name]); // Object.<string, Array.<_cTarget>>
+		for (name in config.dom_events) {
+			this._event_dispatchers[name] = config.dom_events[name].slice();
 		}
 
 		this._property_bindings = this._createArguments(config.property_bindings, view, this._onPropertyBindingChanged);
@@ -208,22 +207,22 @@ Lava.define(
 	},
 
 	/**
-	 * Get target routes for dom event
+	 * Get dispatchers for dom event
 	 * @param {string} event_name
-	 * @returns {Array.<_cTarget>}
+	 * @returns {Array.<_cArgument>}
 	 */
 	getEventTargets: function(event_name) {
 
-		return this._events[event_name];
+		return this._event_dispatchers[event_name];
 
 	},
 
 	/**
 	 * Add a route for DOM event
 	 * @param {string} event_name
-	 * @param {_cTarget} target
+	 * @param {_cArgument} dispatcher
 	 */
-	addEventTarget: function(event_name, target) {
+	addEventTarget: function(event_name, dispatcher) {
 
 		Lava.t('Framework requires initialization');
 
@@ -232,31 +231,31 @@ Lava.define(
 	/**
 	 * Add a route for DOM event - IOS bugfix version
 	 * @param {string} event_name
-	 * @param {_cTarget} target
+	 * @param {_cArgument} dispatcher
 	 */
-	addEventTarget_IOS: function(event_name, target) {
+	addEventTarget_IOS: function(event_name, dispatcher) {
 
-		if (this._is_inDOM && event_name == 'click' && !(event_name in this._events)) {
+		if (this._is_inDOM && event_name == 'click' && !(event_name in this._event_dispatchers)) {
 			this.getDOMElement().onclick = Lava.noop;
 		}
-		this.addEventTarget_Normal(event_name, target)
+		this.addEventTarget_Normal(event_name, dispatcher)
 
 	},
 
 	/**
 	 * Add a route for DOM event - normal version
 	 * @param {string} event_name
-	 * @param {_cTarget} target
+	 * @param {_cArgument} dispatcher
 	 */
-	addEventTarget_Normal: function(event_name, target) {
+	addEventTarget_Normal: function(event_name, dispatcher) {
 
-		if (!(event_name in this._events)) {
+		if (!(event_name in this._event_dispatchers)) {
 
-			this._events[event_name] = [target];
+			this._event_dispatchers[event_name] = [dispatcher];
 
 		} else {
 
-			this._events[event_name].push(target);
+			this._event_dispatchers[event_name].push(dispatcher);
 
 		}
 
@@ -454,7 +453,7 @@ Lava.define(
 
 		for (var name in configs) {
 
-			argument = new Lava.scope.Argument(configs[name], view, this._widget);
+			argument = new Lava.scope.Argument(configs[name], view);
 			result[name] = argument;
 			argument.on('changed', fn, this, {name: name})
 
@@ -914,7 +913,7 @@ Lava.define(
 
 		if (this._is_inDOM) Lava.t("Can not set duplicate id attribute on elements");
 		// there must be no ID attribute
-		if (Element.getAttribute(element, 'id')) Lava.t("Target element already has an ID, and could be owned by another container");
+		if (Element.getAttribute(element, 'id')) Lava.t("Trying to capture an element with ID");
 		if (Element.getTagName(element) != this._tag_name) Lava.t("Captured tag name differs from the container's tag name");
 
 		Element.getAttribute(element, 'id', this._id);

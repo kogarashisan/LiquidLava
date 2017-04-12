@@ -120,15 +120,6 @@ var Lava = {
 	// constants and predefined data
 
 	/**
-	 * Types of template arguments, allowed in view events and roles
-	 * @enum {number}
-	 */
-	TARGET_ARGUMENT_TYPES: {
-		VALUE: 1,
-		BIND: 2
-	},
-
-	/**
 	 * <str>"id"</str> attribute of framework's DOM elements start with this prefix.
 	 * When changing this, you must also change SYSTEM_ID_REGEX
 	 * @const
@@ -348,31 +339,6 @@ var Lava = {
 	hasWidgetConfig: function(widget_title) {
 
 		return widget_title in this.widgets;
-
-	},
-
-	/**
-	 * Take an array of event names and remove default from {@link Lava.schema#system.DEFAULT_EVENTS}
-	 * @param {Array.<string>} event_names
-	 * @returns {Array.<string>} Filtered array of event names
-	 */
-	excludeDefaultEvents: function(event_names) {
-
-		var i = 0,
-			count = event_names.length,
-			result = [];
-
-		for (; i < count; i++) {
-
-			if (Lava.schema.system.DEFAULT_EVENTS.indexOf(event_names[i]) == -1) {
-
-				result.push(event_names[i]);
-
-			}
-
-		}
-
-		return result;
 
 	},
 
@@ -651,7 +617,7 @@ var Lava = {
 	ClassLocatorGateway: function(config, widget, parent_view, template, properties) {
 
 		var name_source = Lava.view_manager.locateTarget(widget, config.class_locator.locator_type, config.class_locator.name);
-		if (Lava.schema.DEBUG && (!name_source || !name_source.isWidget)) Lava.t("[ClassLocatorGateway] Target is null or not a widget");
+		if (Lava.schema.DEBUG && (!name_source || !name_source.isWidget)) Lava.t("Unable to resolve dynamic class. Widget not found or not a widget: " + config.class_locator.locator_type + "=" + config.class_locator.name);
 
 		var constructor = name_source.getPackageConstructor(config.real_class);
 		return new constructor(config, widget, parent_view, template, properties);

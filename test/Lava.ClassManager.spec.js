@@ -111,4 +111,22 @@ describe("Lava.ClassManager", function() {
 
 	});
 
+	it("'Merged' directive works", function() {
+
+		Lava.define("TestNamespace.Parent3", {
+			Merged: ['merged_array'],
+			merged_array: [1]
+		});
+
+		Lava.define("TestNamespace.Child3", {
+			Extends: 'TestNamespace.Parent3',
+			merged_array: [2]
+		});
+
+		var instance = new TestNamespace.Child3();
+		expect(instance.merged_array).to.deep.equal([1, 2]);
+		assert(!instance.hasOwnProperty('merged_array'));
+
+	});
+
 });

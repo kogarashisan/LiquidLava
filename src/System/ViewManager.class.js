@@ -12,7 +12,7 @@
 Lava.define(
 'Lava.system.ViewManager',
 /**
- * Refreshes views and routes view events and roles
+ * Refreshes views and routes view events
  *
  * @lends Lava.system.ViewManager#
  * @extends Lava.mixin.Observable
@@ -42,17 +42,6 @@ Lava.define(
 	 * @type {Object.<*, Lava.view.Abstract>}
 	 */
 	_views_by_guid: {},
-
-	/**
-	 * Global user-assigned handlers for unhandled roles. <role_name> => [widgets_that_will_handle_it]
-	 * @type {Object.<string, Array.<Lava.widget.Standard>>}
-	 */
-	_global_role_targets: {},
-	/**
-	 * Global user-assigned handlers for unhandled events
-	 * @type {Object.<string, Array.<Lava.widget.Standard>>}
-	 */
-	_global_event_targets: {},
 
 	/**
 	 * Used in mouse events processing algorithm
@@ -88,12 +77,6 @@ Lava.define(
 		mouseover: null,
 		mouseout: null
 	},
-
-	/**
-	 * Whether to cancel bubbling of current event or role
-	 * @type {boolean}
-	 */
-	_cancel_bubble: false,
 
 	/**
 	 * How many dispatch cycles are currently running
@@ -132,11 +115,7 @@ Lava.define(
 
 	},
 
-    scheduleViewRefresh: function(view) {
-
-        Lava.t("Framework requires initialization");
-
-    },
+    scheduleViewRefresh: null,
 
     scheduleViewRefresh_Initial: function(view) {
 
@@ -335,7 +314,6 @@ Lava.define(
 	_locateWidgetById: function(starting_widget, id) {
 
 		if (Lava.schema.DEBUG && !id) Lava.t();
-
 		return this._views_by_id[id];
 
 	},
@@ -349,7 +327,6 @@ Lava.define(
 	_locateWidgetByGuid: function(starting_widget, guid) {
 
 		if (Lava.schema.DEBUG && !guid) Lava.t();
-
 		return this._views_by_guid[guid];
 
 	},
@@ -375,7 +352,7 @@ Lava.define(
 	},
 
 	/**
-	 * Find first widget with given label among parents of the given widget (including widget itself)
+	 * Find first widget with `label`, starting from `widget` and ascending up the hierarchy.
 	 *
 	 * @param {Lava.widget.Standard} widget Starting widget
 	 * @param {string} label
@@ -385,7 +362,7 @@ Lava.define(
 
 		if (Lava.schema.DEBUG && !label) Lava.t();
 
-		// Targets are different from view locators, there must be no hardcoded '@widget' label, like in views
+		// Event targets are different from view locators: there must be no hardcoded '@widget' label, like in views
 		// ('@widget' label may be very harmful in this case. Use widget names instead!)
 
 		if (label == 'root') {
@@ -420,385 +397,6 @@ Lava.define(
 	locateTarget: function(starting_widget, locator_type, locator) {
 
 		return this['_locateWidgetBy' + locator_type](starting_widget, locator);
-
-	},
-
-	/**
-	 * Dispatch events and roles to their targets.
-	 * Warning! Violates codestyle with multiple return statements
-	 *
-	 * @param {Lava.view.Abstract} view The source of events or roles
-	 * @param {Array.<_cTarget>} targets The target routes
-	 * @param {function} callback The ViewManager callback that will perform dispatching
-	 * @param {*} callback_arguments Will be passed to `callback`
-	 * @param {Object.<string, Array>} global_targets_object Either {@link Lava.system.ViewManager#_global_role_targets}
-	 *  or {@link Lava.system.ViewManager#_global_event_targets}
-	 */
-	_dispatchCallback: function(view, targets, callback, callback_arguments, global_targets_object) {
-
-		var i = 0,
-			count = targets.length,
-			target,
-			target_name,
-			widget,
-			template_arguments,
-			bubble_index = 0,
-			bubble_targets_copy,
-			bubble_targets_count;
-
-		this._nested_dispatch_count++;
-
-		for (; i < count; i++) {
-
-			target = targets[i];
-			target_name = target.name;
-			template_arguments = ('arguments' in target) ? this._evalTargetArguments(view, target) : null;
-			widget = null;
-
-			if ('locator_type' in target) {
-
-				/*
-				 Note: there is similar view location mechanism in view.Abstract, but the algorithms are different:
-				 when ViewManager seeks by label - it searches only for widgets, while view checks all views in hierarchy.
-				 Also, hardcoded labels differ.
-				 */
-				widget = this['_locateWidgetBy' + target.locator_type](view.getWidget(), target.locator);
-
-				if (!widget) {
-
-					Lava.logError('ViewManager: callback target (widget) not found. Type: ' + target.locator_type + ', locator: ' + target.locator);
-
-				} else if (!widget.isWidget) {
-
-					Lava.logError('ViewManager: callback target is not a widget');
-
-				} else if (!callback(widget, target_name, view, template_arguments, callback_arguments)) {
-
-					Lava.logError('ViewManager: targeted widget did not handle the role or event: ' + target_name);
-
-				}
-
-				// ignore possible call to cancelBubble()
-				this._cancel_bubble = false;
-
-			} else {
-
-				// bubble
-				widget = view.getWidget();
-
-				do {
-
-					callback(widget, target_name, view, template_arguments, callback_arguments);
-					widget = widget.getParentWidget();
-
-				} while (widget && !this._cancel_bubble);
-
-				if (this._cancel_bubble) {
-					this._cancel_bubble = false;
-					continue;
-				}
-
-				if (target_name in global_targets_object) {
-
-					// cause target can be removed inside event handler
-					bubble_targets_copy = global_targets_object[target_name].slice();
-					for (bubble_targets_count = bubble_targets_copy.length; bubble_index < bubble_targets_count; bubble_index++) {
-
-						callback(
-							bubble_targets_copy[bubble_index],
-							target_name,
-							view,
-							template_arguments,
-							callback_arguments
-						);
-
-						if (this._cancel_bubble) {
-							this._cancel_bubble = false;
-							break;
-						}
-
-					}
-
-				}
-
-			}
-
-		}
-
-		this._nested_dispatch_count--;
-
-	},
-
-	/**
-	 * Callback for dispatching roles: call widget's role handler
-	 *
-	 * @param {Lava.widget.Standard} widget
-	 * @param {string} target_name
-	 * @param {Lava.view.Abstract} view
-	 * @param {Array.<*>} template_arguments
-	 * @returns {boolean}
-	 */
-	_callRegisterViewInRole: function(widget, target_name, view, template_arguments) {
-
-		var result = true;
-
-		try {
-
-			result = widget.handleRole(target_name, view, template_arguments);
-
-		} catch (e) {
-
-			Lava.logException(e);
-
-		}
-
-		return result;
-
-	},
-
-	/**
-	 * Dispatch roles
-	 * @param {Lava.view.Abstract} view
-	 * @param {Array.<_cTarget>} targets
-	 */
-	dispatchRoles: function(view, targets) {
-
-		this._dispatchCallback(
-			view,
-			targets,
-			this._callRegisterViewInRole,
-			null,
-			this._global_role_targets
-		);
-
-	},
-
-	/**
-	 * Callback for dispatching events: call the widget's event handler
-	 * @param {Lava.widget.Standard} widget
-	 * @param {string} target_name
-	 * @param {Lava.view.Abstract} view
-	 * @param {Array.<*>} template_arguments
-	 * @param {Object} callback_arguments
-	 * @returns {boolean}
-	 */
-	_callHandleEvent: function(widget, target_name, view, template_arguments, callback_arguments) {
-
-		var result = true;
-
-		try {
-
-			result = widget.handleEvent(
-				callback_arguments.event_name,
-				callback_arguments.event_object,
-				target_name,
-				view,
-				template_arguments
-			);
-
-		} catch(e) {
-
-			Lava.logException(e);
-
-		}
-
-		return result;
-
-	},
-
-	/**
-	 * Helper method which checks for events presence on container and dispatches them
-	 * @param {Lava.view.Abstract} view
-	 * @param {string} event_name
-	 * @param {Object} event_object
-	 */
-	_dispatchViewEvent: function(view, event_name, event_object) {
-
-		var targets = view.getContainer().getEventTargets(event_name);
-
-		if (targets) {
-
-			this.dispatchEvent(view, event_name, event_object, targets);
-
-		}
-
-	},
-
-	/**
-	 * Dispatch DOM events to targets
-	 *
-	 * @param {Lava.view.Abstract} view View, that owns the container, which raised the events
-	 * @param {string} event_name
-	 * @param {Object} event_object DOM event object
-	 * @param {Array.<_cTarget>} targets
-	 */
-	dispatchEvent: function(view, event_name, event_object, targets) {
-
-		this._dispatchCallback(
-			view,
-			targets,
-			this._callHandleEvent,
-			{
-				event_name: event_name,
-				event_object: event_object
-			},
-			this._global_event_targets
-		);
-
-	},
-
-	/**
-	 * Evaluate template arguments
-	 * @param {Lava.view.Abstract} view
-	 * @param {_cTarget} target
-	 * @returns {Array.<*>}
-	 */
-	_evalTargetArguments: function(view, target) {
-
-		var result = [];
-
-		for (var i = 0, count = target.arguments.length; i < count; i++) {
-
-			if (target.arguments[i].type == Lava.TARGET_ARGUMENT_TYPES.VALUE) {
-
-				result.push(target.arguments[i].data);
-
-			} else {
-
-				if (target.arguments[i].type != Lava.TARGET_ARGUMENT_TYPES.BIND) Lava.t();
-
-				result.push(view.evalPathConfig(target.arguments[i].data));
-
-			}
-
-		}
-
-		return result;
-
-	},
-
-	/**
-	 * Get include from widget
-	 * @param {Lava.view.Abstract} starting_view
-	 * @param {_cInclude} config
-	 * @returns {_tTemplate}
-	 */
-	getInclude: function(starting_view, config) {
-
-		var widget = starting_view.getWidget(),
-			result = [],
-			template_arguments = ('arguments' in config) ? this._evalTargetArguments(starting_view, config) : null;
-
-		if ('locator_type' in config) {
-
-			widget = this['_locateWidgetBy' + config.locator_type](widget, config.locator);
-			if (!widget || !widget.isWidget) Lava.t("getInclude: Unable to find widget with [" + config.locator_type + "=" + config.locator + "]");
-
-		}
-
-		try {
-
-			result = widget.getInclude(config.name, template_arguments);
-
-		} catch (e) {
-
-			Lava.logException(e);
-
-		}
-
-		return result;
-
-	},
-
-	/**
-	 * Add a widget which will globally handle bubbling events
-	 * @param {string} callback_name
-	 * @param {Lava.widget.Standard} widget
-	 */
-	addGlobalEventTarget: function(callback_name, widget) {
-
-		this._addTarget(this._global_event_targets, callback_name, widget);
-
-	},
-
-	/**
-	 * Remove a widget, added with {@link Lava.system.ViewManager#addGlobalEventTarget}
-	 * @param {string} callback_name
-	 * @param {Lava.widget.Standard} widget
-	 */
-	removeGlobalEventTarget: function(callback_name, widget) {
-
-		this._removeTarget(this._global_event_targets, callback_name, widget);
-
-	},
-
-	/**
-	 * Add a widget which will globally handle bubbling roles
-	 * @param {string} callback_name
-	 * @param {Lava.widget.Standard} widget
-	 */
-	addGlobalRoleTarget: function(callback_name, widget) {
-
-		this._addTarget(this._global_role_targets, callback_name, widget);
-
-	},
-
-	/**
-	 * Remove widget added with {@link Lava.system.ViewManager#addGlobalRoleTarget}
-	 * @param {string} callback_name
-	 * @param {Lava.widget.Standard} widget
-	 */
-	removeGlobalRoleTarget: function(callback_name, widget) {
-
-		this._removeTarget(this._global_role_targets, callback_name, widget);
-
-	},
-
-	/**
-	 * Perform {@link Lava.system.ViewManager#addGlobalEventTarget} or {@link Lava.system.ViewManager#addGlobalRoleTarget}
-	 * @param {Object} storage
-	 * @param {string} name
-	 * @param {Lava.widget.Standard} widget
-	 */
-	_addTarget: function(storage, name, widget) {
-
-		if (name in storage) {
-
-			if (storage[name].indexOf(widget) == -1) {
-
-				storage[name].push(widget);
-
-			} else {
-
-				Lava.logError('[ViewManager] Duplicate target: ' + name);
-
-			}
-
-		} else {
-
-			storage[name] = [widget];
-
-		}
-
-	},
-
-	/**
-	 * Remove widget, added with {@link Lava.system.ViewManager#_addTarget}
-	 * @param {Object} storage
-	 * @param {string} name
-	 * @param {Lava.widget.Standard} widget
-	 */
-	_removeTarget: function(storage, name, widget) {
-
-		if (!(name in storage)) Lava.t("Trying to remove a global event target for nonexistent event");
-
-		var index = storage[name].indexOf(widget);
-
-		if (index !== -1) {
-
-			storage[name].splice(index, 1);
-
-		}
 
 	},
 
@@ -843,6 +441,23 @@ Lava.define(
 		}
 
 		return result;
+
+	},
+
+	/**
+	 * Helper method which checks for events presence on container and dispatches them
+	 * @param {Lava.view.Abstract} view
+	 * @param {Object} event_object
+	 */
+	_dispatchViewEvent: function(view, event_object) {
+
+		var evaluator_configs = view.getContainer().getEventTargets(event_name);
+
+		if (evaluator_configs) {
+
+			view.dispatchEvents(evaluator_configs, event_object);
+
+		}
 
 	},
 
@@ -894,11 +509,11 @@ Lava.define(
 
 				if (this._new_mouseover_view_stack.indexOf(this._old_mouseover_view_stack[i]) == -1) {
 
-					this._dispatchViewEvent(this._old_mouseover_view_stack[i], 'mouseleave', event_object);
+					this._dispatchViewEvent(this._old_mouseover_view_stack[i], event_object);
 
 				}
 
-				this._dispatchViewEvent(this._old_mouseover_view_stack[i], 'mouseout', event_object);
+				this._dispatchViewEvent(this._old_mouseover_view_stack[i], event_object);
 
 			}
 
@@ -906,11 +521,11 @@ Lava.define(
 
 			for (i = 0, count = this._new_mouseover_view_stack.length; i < count; i++) {
 
-				this._dispatchViewEvent(this._new_mouseover_view_stack[i], 'mouseover', event_object);
+				this._dispatchViewEvent(this._new_mouseover_view_stack[i], event_object);
 
 				if (this._old_mouseover_view_stack.indexOf(this._new_mouseover_view_stack[i]) == -1) {
 
-					this._dispatchViewEvent(this._new_mouseover_view_stack[i], 'mouseenter', event_object);
+					this._dispatchViewEvent(this._new_mouseover_view_stack[i], event_object);
 
 				}
 
@@ -969,10 +584,8 @@ Lava.define(
 			view = this.getViewByElement(stack[i]);
 			if (view) {
 				container = view.getContainer();
-				if (container.isElementContainer) {
-					if (container.getEventTargets(event_name)) {
-						this.dispatchEvent(view, event_name, event_object, container.getEventTargets(event_name));
-					}
+				if (container.isElementContainer && container.getEventTargets(event_name)) {
+					view.dispatchEvents(container.getEventTargets(event_name), event_object);
 				}
 			}
 		}
@@ -1046,7 +659,7 @@ Lava.define(
 	 * @param {string} event_name Event name
 	 * @returns {boolean}
 	 */
-	isEventRouted: function(event_name) {
+	isEventEnabled: function(event_name) {
 
 		return this._event_usage_counters[event_name] > 0;
 
@@ -1071,19 +684,6 @@ Lava.define(
 			this._events_listeners[event_name] = null;
 
 		}
-
-	},
-
-	/**
-	 * Stop bubbling current event or role
-	 */
-	cancelBubble: function() {
-
-		if (!this._nested_dispatch_count) {
-			Lava.logError("Call to cancelBubble outside of dispatch cycle");
-			return;
-		}
-		this._cancel_bubble = true;
 
 	},
 

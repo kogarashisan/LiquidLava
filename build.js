@@ -51,17 +51,6 @@ Lava.TemplateParser.parse(
     + BuildHelper.readFile('./templates/standard_widgets.html')
 );
 
-// check that all events, required by widgets, are in the schema.
-for (var name in Lava.widgets) {
-    if (Lava.widgets[name].default_events) {
-        Lava.widgets[name].default_events.forEach(function(event_name){
-            if (Lava.schema.system.DEFAULT_EVENTS.indexOf(event_name) == -1) {
-                throw new Error('Event ' + event_name + ' is used by widget ' + name + ' and not in schema');
-            }
-        })
-    }
-}
-
 fs.writeFileSync(
     'lib/export/widget-templates.js',
     'Lava.widgets = ' + Lava.serializer.serialize(Lava.widgets) + ';\n'

@@ -55,13 +55,13 @@ Lava.define(
 	 */
 	_active_template: null,
 
-	_postInit: function() {
+	_afterInit: function() {
 
 		if (Lava.schema.DEBUG && !('argument' in this._config)) Lava.t("If view requires an argument");
 
 		var i = 0,
 			count,
-			argument = new Lava.scope.Argument(this._config.argument, this, this._widget);
+			argument = new Lava.scope.Argument(this._config.argument, this);
 
 		this._argument_changed_listeners.push(argument.on('changed', this._onArgumentChanged, this));
 		this._arguments.push(argument);
@@ -70,7 +70,7 @@ Lava.define(
 
 			for (count = this._config.elseif_arguments.length; i < count; i++) {
 
-				argument = new Lava.scope.Argument(this._config.elseif_arguments[i], this, this._widget);
+				argument = new Lava.scope.Argument(this._config.elseif_arguments[i], this);
 				this._argument_changed_listeners.push(argument.on('changed', this._onArgumentChanged, this));
 				this._arguments.push(argument);
 
@@ -85,10 +85,12 @@ Lava.define(
 			this.createRefresher(this._config.refresher);
 		}
 
+		this.Abstract$_afterInit();
+
 	},
 
 	/**
-	 * Can be called during roles registration (at the time of `init()`), before children are created.
+	 * Can be called during initialization, before children are created.
 	 * Initializes a refresher instance with custom config.
 	 *
 	 * @param {_cRefresher} refresher_config

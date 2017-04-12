@@ -13,14 +13,16 @@ Lava.define(
 
     _argument: null,
 
-    _postInit: function() {
+    _afterInit: function() {
 
         if (Lava.schema.DEBUG && (('else_template' in this._config) || ('elseif_arguments' in this._config))) {
             Lava.t("TextArea View does not support elseif/else blocks");
         }
 
         if (Lava.schema.DEBUG && !('argument' in this._config)) Lava.t("TextArea view requires an argument");
-        this._argument = new Lava.scope.Argument(this._config.argument, this, this._widget);
+        this._argument = new Lava.scope.Argument(this._config.argument, this);
+
+		this.Abstract$_afterInit();
 
     },
 

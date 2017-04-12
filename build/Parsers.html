@@ -162,37 +162,36 @@ IDENTIFIER				[a-zA-Z\_][a-zA-Z0-9\_]*
 
 %%
 
-\-\>{IDENTIFIER}/\s+\(							{ Lava.t('Spaces between function name and opening brace are not allowed (1)'); }
-\-\&gt\;{IDENTIFIER}/\s+\(						{ Lava.t('Spaces between function name and opening brace are not allowed (1)'); }
-\.{IDENTIFIER}/\s+\(							{ Lava.t('Spaces between function name and opening brace are not allowed (2)'); }
-\s+[\~\.]										{ Lava.t('Spaces in scope path are not allowed (1)'); }
-\[\s											{ Lava.t('Spaces in scope path are not allowed (2)'); }
+\-\>{IDENTIFIER}\s+\(							{ Lava.schema.DEBUG && Lava.t('Spaces between function name and opening brace are not allowed (1A)'); }
+\-\&gt\;{IDENTIFIER}\s+\(						{ Lava.schema.DEBUG && Lava.t('Spaces between function name and opening brace are not allowed (1B)'); }
+\.{IDENTIFIER}\s+\(								{ Lava.schema.DEBUG && Lava.t('Spaces between function name and opening brace are not allowed (2)'); }
+{IDENTIFIER}\s+\(								{ Lava.schema.DEBUG && Lava.t('Spaces between function name and opening brace are not allowed (3)'); }
+\s+[\~\.]										{ Lava.schema.DEBUG && Lava.t('Spaces in scope path are not allowed (1)'); }
+\[\s											{ Lava.schema.DEBUG && Lava.t('Spaces in scope path are not allowed (2)'); }
+this(\.|\-\>|\-\&gt\;|\~)						{ Lava.schema.DEBUG && Lava.t("'this' is a keyword. Did you forget '@'?"); }
 
 \@{IDENTIFIER}									{ yytext = yytext.substr(1); return 'VIEW_BY_LABEL'; }
 \#{IDENTIFIER}									{ yytext = yytext.substr(1); return 'VIEW_BY_ID'; }
 \${IDENTIFIER}									{ yytext = yytext.substr(1); return 'VIEW_BY_NAME'; }
 
-\-\>{IDENTIFIER}/\(								{ yytext = yytext.substr(2); return 'ACTIVE_MODIFIER_CALL'; }
-\-\&gt\;{IDENTIFIER}/\(							{ yytext = yytext.substr(5); return 'ACTIVE_MODIFIER_CALL'; }
+\-\>{IDENTIFIER}/\(								{ yytext = yytext.substr(2); return 'EVENT_CALL'; }
+\-\&gt\;{IDENTIFIER}/\(							{ yytext = yytext.substr(5); return 'EVENT_CALL'; }
 \.{IDENTIFIER}/\(								{ yytext = yytext.substr(1); return 'WIDGET_MODIFIER_CALL'; }
-{IDENTIFIER}/\(									{ return 'GLOBAL_MODIFIER_CALL'; }
+{IDENTIFIER}/\(									{ Lava.t("Syntax is not supported"); /* return 'GLOBAL_MODIFIER_CALL'; */ }
 
-\~\d+											{ yytext = yytext.substr(1); return 'DEEPNESS_OPERATOR'; }
+\~\d+											{ yytext = yytext.substr(1); return 'DEPTH_OPERATOR'; }
 \.[a-zA-Z0-9\_]+								{ yytext = yytext.substr(1); return 'DOT_PROPERTY'; }
 \-\>{IDENTIFIER}								{ yytext = yytext.substr(2); return 'SEARCH_OPERATOR'; }
 \-\&gt\;{IDENTIFIER}							{ yytext = yytext.substr(5); return 'SEARCH_OPERATOR'; }
 
-\:up\({IDENTIFIER}\)							{ yytext = yytext.substr(4, yyleng - 5); return 'LOOK_UP'; }
-\:dn\({IDENTIFIER}\)							{ yytext = yytext.substr(4, yyleng - 5); return 'LOOK_DOWN'; }
-
 \&lt;\&lt;\=|\&gt;\&gt;\=|\&gt;\&gt;\&gt;\=|\&amp;\=|\+\+|\-\-|\+\=|\-\=|\*\=|\/\=|\%\=|\<\<\=|\>\>\=|\>\>\>\=|\&\=|\^\=|\|\=       {
-    if (yytext == '++' || yytext == '--') Lava.t('Increment and decrement are not allowed (side-effects). Missing a brace after the first \'' + yytext[0] + '\'?');
+    if (yytext == '++' || yytext == '--') Lava.t('Increment and decrement are not allowed (operators with side-effects). Missing a brace after the first \'' + yytext[0] + '\'?');
     Lava.t('Operators with side-effects are not allowed: ' + yytext); // all assignments, increments and other side-effects
 }
 
-(\&lt\;=|\&gt\;=)								{ yytext = yy.unescape(yytext); return 'OPERATOR'; /*escaped operator versions of <=, >= */ }
-\&amp\;\&amp\;|\&lt\;\&lt\;|\&gt\;\&gt\;\&gt\;|\&gt\;\&gt\;		{ yytext = yy.unescape(yytext); return 'OPERATOR'; /* escaped &&, <<, >>>, >> */ }
-\&amp\;|\&lt\;|\&gt\;   						{ yytext = yy.unescape(yytext); return 'OPERATOR'; /* escaped bitwise &, <, > */ }
+(\&lt\;=|\&gt\;=)								{ yytext = Firestorm.String.unescape(yytext); return 'OPERATOR'; /*escaped operator versions of <=, >= */ }
+\&amp\;\&amp\;|\&lt\;\&lt\;|\&gt\;\&gt\;\&gt\;|\&gt\;\&gt\;		{ yytext = Firestorm.String.unescape(yytext); return 'OPERATOR'; /* escaped &&, <<, >>>, >> */ }
+\&amp\;|\&lt\;|\&gt\;   						{ yytext = Firestorm.String.unescape(yytext); return 'OPERATOR'; /* escaped bitwise &, <, > */ }
 
 [\*\/\%]	    							    { return 'OPERATOR'; /*arithmetic without unary*/ }
 \|\||\&\&		    							{ return 'OPERATOR'; /*logical*/ }
@@ -203,7 +202,10 @@ IDENTIFIER				[a-zA-Z\_][a-zA-Z0-9\_]*
 \+|\-		        							{ return 'UNARY_ARITHMETIC_OPERATOR'; /*unary*/ }
 
 \=                                              { Lava.t('Operators with side-effects are not allowed: ='); }
-\sin\s|\sIN\s|\sIn\s|\siN\s						{ if (yytext != yytext.toLowerCase()) Lava.t("The 'in' operator must be written in lower case."); return 'OPERATOR'; }
+\sin\s|\sIN\s|\sIn\s|\siN\s						{
+	if (yytext != yytext.toLowerCase()) Lava.t("The 'in' operator must be written in lower case.");
+	return 'OPERATOR';
+}
 
 \,												{ return 'COMMA'; }
 \;												{ return 'SEMICOLON'; }
@@ -235,16 +237,22 @@ IDENTIFIER				[a-zA-Z\_][a-zA-Z0-9\_]*
 
 {IDENTIFIER}									{
 		var lowercase = yytext.toLowerCase();
-		if (lowercase == 'this') Lava.t("Expression parser: 'this' is reserved word. Are you missing the Label sign (@)?");
+
+		if (lowercase in this.reserved_words) {
+			if (Lava.schema.DEBUG && lowercase != yytext) Lava.t("Reserved words must be lower case: " + yytext);
+			if (Lava.schema.DEBUG && (!this.allowed_keywords || this.allowed_keywords.indexOf(lowercase) == -1)) Lava.t("Reserved word is not allowed in this expression: " + lowercase);
+			yytext = this.reserved_words[lowercase];
+			return 'RESERVED_WORD';
+		}
 
 		if (lowercase in this.operators_map) {
-			if (lowercase != yytext) Lava.t("Expression parser: 'lt', 'gt', 'and' must be lower case");
+			if (Lava.schema.DEBUG && lowercase != yytext) Lava.t("Expression parser: 'lt', 'gt', 'and' must be lower case");
 			yytext = this.operators_map[lowercase];
 			return 'OPERATOR';
 		}
 
 		if (lowercase in Lava.parsers.Common.LITERALS) {
-			if (lowercase != yytext) Lava.t("Expression parser, code style: literals must be lower case");
+			if (Lava.schema.DEBUG && lowercase != yytext) Lava.t("Expression parser, code style: literals must be lower case");
 			return 'LITERAL';
 		}
 
@@ -262,23 +270,53 @@ IDENTIFIER				[a-zA-Z\_][a-zA-Z0-9\_]*
 root
 	: EOF { }
 	| expressions EOF { }
+	| event_calls EOF { }
+	;
+
+event_calls
+	: event_calls SEMICOLON event_call {
+			yy.finishArgument($3.trim());
+	 	}
+	| event_call {
+			yy.finishArgument($1.trim());
+		}
+	;
+
+event_call
+	: EVENT_CALL OPEN_BRACE CLOSE_BRACE {
+			if (Lava.schema.DEBUG && yy.is_events_mode) Lava.t("Event calls are not allowed in this expression");
+			yy.x_counters.event_calls++;
+			$$ = 'Lava.view_manager.callBubblingEvent(this._widget, "' + $1 + '")';
+		}
+	| EVENT_CALL OPEN_BRACE argumentList CLOSE_BRACE {
+			if (Lava.schema.DEBUG && yy.is_events_mode) Lava.t("Event calls are not allowed in this expression");
+			yy.x_counters.event_calls++;
+			$$ = 'Lava.view_manager.callBubblingEvent(this._widget, "' + $1 + '", [' + $3 + '])';
+		}
+	| knownView EVENT_CALL OPEN_BRACE CLOSE_BRACE {
+			if (Lava.schema.DEBUG && yy.is_events_mode) Lava.t("Event calls are not allowed in this expression");
+			yy.x_counters.event_calls++;
+			var index = yy.x_argument_targets.push($1) - 1;
+			$$ = 'this._callEvent(' + index + ', "' + $2 + '")';
+		}
+	| knownView EVENT_CALL OPEN_BRACE argumentList CLOSE_BRACE {
+			if (Lava.schema.DEBUG && yy.is_events_mode) Lava.t("Event calls are not allowed in this expression");
+			yy.x_counters.event_calls++;
+			var index = yy.x_argument_targets.push($1) - 1;
+			$$ = 'this._callEvent(' + index + ', "' + $2 + '", [' + $4 + '])';
+		}
 	;
 
 expressions
 	: expressions SEMICOLON expression {
-			yy.assertSemicolonAllowed();
+			if (yy.x_allowed_separator != Lava.ExpressionParser.SEPARATORS.SEMICOLON) Lava.t("ExpressionParser: semicolon is not allowed here" + ((yy.x_allowed_separator == null) ? ". Tip: allowed separator is not set" : ''));
 			yy.finishArgument($3.trim());
 		}
 	| expressions COMMA expression {
-			yy.assertCommaAllowed();
+			if (yy.x_allowed_separator != Lava.ExpressionParser.SEPARATORS.COMMA) Lava.t("ExpressionParser: comma is not allowed here" + ((yy.x_allowed_separator == null) ? ". Tip: allowed separator is not set" : ''));
 			yy.finishArgument($3.trim());
 		}
 	| expression { yy.finishArgument($1.trim()); }
-	;
-
-scopeEvalList
-	: scopeEvalList COMMA scopeEval { yy.x_argument_binds.push($3); }
-	| scopeEval { yy.x_argument_binds.push($1); }
 	;
 
 expression
@@ -322,25 +360,24 @@ operand
 		}
 	| arrayDefinition { $$ = $1; }
 	| NUMBER {
-			yy.x_counters.numbers++;
 			$$ = $1;
 		}
 	| RAW_STRING {
-			yy.x_counters.strings++;
 			$$ = $1;
 		}
 	| LITERAL {
-			yy.x_counters.literals++;
 			$$ = $1;
 		}
 	| scopeEval {
 			var index = yy.x_argument_binds.push($1) - 1;
-			$$ = 'this._binds[' + index + '].getValue()';
+			//$$ = 'this._binds[' + index + '].getValue()';
+			$$ = 'this._evalBind(' + index + ')';
 		}
 	| dynamicScope {
 			yy.x_counters.dynamic_scopes++;
 			var index = yy.x_argument_binds.push($1) - 1;
-			$$ = 'this._binds[' + index + '].getValue()';
+			//$$ = 'this._binds[' + index + '].getValue()';
+			$$ = 'this._evalBind(' + index + ')';
 		}
 	| functionCall { $$ = $1; }
 	;
@@ -355,60 +392,51 @@ expressionList
 	| expression { $$ = $1; }
 	;
 
+argumentList
+	: argumentList COMMA argument { $$ = $1 + ', ' + $3; }
+	| argument { $$ = $1; }
+	;
+
+argument
+	: RESERVED_WORD { $$ = $1; }
+	| expression { $$ = $1; }
+	;
+
 knownView
 	: VIEW_BY_LABEL { $$ = {locator_type: 'Label', locator: $1}; }
 	| VIEW_BY_ID { $$ = {locator_type: 'Id', locator: $1}; }
 	| VIEW_BY_NAME { $$ = {locator_type: 'Name', locator: $1}; }
 	;
 
-lookupOperator
-	: LOOK_UP { $$ = {label: $1, direction: 'look_up'}; }
-	| LOOK_DOWN { $$ = {label: $1, direction: 'look_down'}; }
-	;
-
 viewLocator
 	: knownView { $$ = $1; }
-	| knownView lookupOperator { Lava.t("Lookup operator is not supported yet."); }
-	| knownView DEEPNESS_OPERATOR {
+	| knownView DEPTH_OPERATOR {
 			$1.depth = parseInt($2);
 			if (!$1.depth) Lava.t('Deepness operator: depth must be > 0');
 			$$ = $1;
 		}
-	| knownView DEEPNESS_OPERATOR lookupOperator { Lava.t("Lookup operator is not supported yet."); }
 	;
 
 functionCall
 	: GLOBAL_MODIFIER_CALL OPEN_BRACE CLOSE_BRACE {
-			yy.x_counters.global_modifiers++;
-			$$ = 'this._callGlobalModifier("' + $1 + '", [])';
+			Lava.t(); // part of possible future functionality
+			//yy.x_counters.modifiers++;
+			//$$ = 'this._callGlobalModifier("' + $1 + '")';
 		}
-	| GLOBAL_MODIFIER_CALL OPEN_BRACE expressionList CLOSE_BRACE {
-			yy.x_counters.global_modifiers++;
-			$$ = 'this._callGlobalModifier("' + $1 + '", [' + $3 + '])';
+	| GLOBAL_MODIFIER_CALL OPEN_BRACE argumentList CLOSE_BRACE {
+			Lava.t(); // part of possible future functionality
+			//yy.x_counters.modifiers++;
+			//$$ = 'this._callGlobalModifier("' + $1 + '", [' + $3 + '])';
 		}
 	| knownView WIDGET_MODIFIER_CALL OPEN_BRACE CLOSE_BRACE {
-			yy.x_counters.widget_modifiers++;
-			$1.callback_name = $2;
-			var index = yy.x_argument_widget_modifiers.push($1) - 1;
-			$$ = 'this._callModifier("' + index + '", [])';
+			yy.x_counters.modifiers++;
+			var index = yy.x_argument_targets.push($1) - 1;
+			$$ = 'this._callModifier(' + index + ', "' + $2 + '")';
 		}
-	| knownView WIDGET_MODIFIER_CALL OPEN_BRACE expressionList CLOSE_BRACE {
-			yy.x_counters.widget_modifiers++;
-			$1.callback_name = $2;
-			var index = yy.x_argument_widget_modifiers.push($1) - 1;
-			$$ = 'this._callModifier("' + index + '", [' + $4 + '])';
-		}
-	| knownView ACTIVE_MODIFIER_CALL OPEN_BRACE CLOSE_BRACE {
-			yy.x_counters.active_modifiers++;
-			$1.callback_name = $2;
-			var index = yy.x_argument_active_modifiers.push($1) - 1;
-			$$ = 'this._callActiveModifier("' + index + '", [])';
-		}
-	| knownView ACTIVE_MODIFIER_CALL OPEN_BRACE expressionList CLOSE_BRACE {
-			yy.x_counters.active_modifiers++;
-			$1.callback_name = $2;
-			var index = yy.x_argument_active_modifiers.push($1) - 1;
-			$$ = 'this._callActiveModifier("' + index + '", [' + $4 + '])';
+	| knownView WIDGET_MODIFIER_CALL OPEN_BRACE argumentList CLOSE_BRACE {
+			yy.x_counters.modifiers++;
+			var index = yy.x_argument_targets.push($1) - 1;
+			$$ = 'this._callModifier(' + index + ', "' + $2 + '", [' + $4 + '])';
 		}
 	;
 
@@ -706,10 +734,10 @@ block
 			$$ = $1;
 		}
 	| INCLUDE {
-			var targets = Lava.parsers.Common.parseEventHandlers($1);
-			if (targets.length != 1) Lava.t("Malformed include");
-			targets[0].type = 'include';
-			$$ = targets[0];
+			var evaluators = Lava.ExpressionParser.parse($1);
+			if (evaluators.length != 1) Lava.t("Malformed include");
+			evaluators[0].type = 'include';
+			$$ = evaluators[0];
 		}
 	| EXPRESSION_BLOCK_N {
 			$$ = {

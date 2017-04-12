@@ -37,7 +37,6 @@ Lava.schema = {
 		VIEW_MANAGER_CLASS: 'Lava.system.ViewManager',
 		/**
 		 * ViewManager events (routed via templates), which are enabled by default, so does not require a call to lendEvent().
-		 * Events from this list must have a valid `target` property.
 		 * @const
 		 */
 		DEFAULT_EVENTS: [

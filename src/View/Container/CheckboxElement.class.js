@@ -45,7 +45,7 @@ Lava.define(
 
 		this._IE_click_callback = function() {
 			if (self._events['compatible_changed']) {
-				Lava.view_manager.dispatchEvent(self._view, 'compatible_changed', null, self._events['compatible_changed']);
+				self._view.dispatchEvents(self._events['compatible_changed']);
 			}
 		};
 

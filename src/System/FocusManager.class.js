@@ -16,14 +16,6 @@ Lava.define(
  */
 {
 	Extends: 'Lava.mixin.Observable',
-	Shared: ['TARGETS'],
-	/**
-	 * Targets for bubbling "focus_acquired" and "focus_lost" events
-	 */
-	TARGETS: {
-		focus_acquired: [{name: 'focus_acquired'}],
-		focus_lost: [{name: 'focus_lost'}]
-	},
 
 	/**
 	 * Currently focused DOM element
@@ -64,9 +56,9 @@ Lava.define(
 			Lava.view_manager.lendEvent("focusin");
 			this._focus_stack_changed_listener = Lava.view_manager.on("focusin_stack_changed", this._onFocusStackChanged, this);
 			this._blur_listener = Lava.DOMEvents.addListener('blur', this._onElementBlurred, this);
-            this._keydown_listener = Lava.DOMEvents.addListener('keydown', this._onKeyboard, this);
-            this._keyup_listener = Lava.DOMEvents.addListener('keyup', this._onKeyboard, this);
-            this._keypress_listener = Lava.DOMEvents.addListener('keypress', this._onKeyboard, this);
+            this._keydown_listener = Lava.DOMEvents.addListener('keydown', this._onKeyboard, this, "KeyDown");
+            this._keyup_listener = Lava.DOMEvents.addListener('keyup', this._onKeyboard, this, "KeyUp");
+            this._keypress_listener = Lava.DOMEvents.addListener('keypress', this._onKeyboard, this, "KeyPress");
 		}
 
 	},
@@ -95,13 +87,11 @@ Lava.define(
 
 	},
 
-    _onKeyboard: function(view_manager, event_object) {
+    _onKeyboard: function(view_manager, event_object, event_name) {
 
-        this._focused_view && Lava.view_manager.dispatchEvent(
-            this._focused_view,
-            event_object.type,
-            event_object,
-            [{name: 'focus_' + event_object.type}]
+        this._focused_view && this._focused_view.getWidget().sendBubblingEvent(
+            "onFocus" + event_name,
+            [event_object]
         );
 
     },
@@ -161,7 +151,8 @@ Lava.define(
 			old_focused_element: this._focused_element,
 			old_focused_view: this._focused_view
 		};
-		this._focused_view && Lava.view_manager.dispatchEvent(this._focused_view, "focus_lost", event_object, this.TARGETS.focus_lost);
+
+		this._focused_view && this._focused_view.getWidget().sendBubblingEvent('onFocusLost', [event_object]);
 
 		this._focused_element
 			= this._focused_view
@@ -190,7 +181,7 @@ Lava.define(
                         new_focused_element: focused_element,
                         new_focused_view: focused_view
                     };
-                    Lava.view_manager.dispatchEvent(focused_view, "focus_acquired", event_object, this.TARGETS.focus_acquired);
+					focused_view.getWidget().sendBubblingEvent('onFocusAcquired', [event_object]);
 					break;
 				}
 			}

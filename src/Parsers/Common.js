@@ -25,7 +25,8 @@ Lava.parsers.Common = {
 	 * @type {Array.<string>}
 	 */
 	_allowed_control_attributes: [
-		'event',
+		'dom-event',
+		'class-event',
 		'bind',
 		'style',
 		'classes',
@@ -33,7 +34,6 @@ Lava.parsers.Common = {
 		'type',
 		'options',
 		'label',
-		'roles',
 		'resource_id',
 		'widget'
 	],
@@ -41,7 +41,7 @@ Lava.parsers.Common = {
 	 * Words, that cannot be used as a label
 	 * @type {Array.<string>}
 	 */
-	_reserved_labels: ['parent', 'widget', 'this', 'root'],
+	_reserved_labels: ['parent', 'widget', 'this', 'root', 'event_object', 'event_args'],
 
 	/**
 	 * When widgets are referenced in expressions - they are prefixed with these special characters, which define the kind of reference
@@ -191,15 +191,17 @@ Lava.parsers.Common = {
 	_setDepends: function(view_config, depends_text) {
 
 		var binds = [],
-			raw_arguments = Lava.ExpressionParser.parseRaw(depends_text, Lava.ExpressionParser.SEPARATORS.SEMICOLON),
+			arguments = Lava.ExpressionParser.parse(depends_text, {
+				separator: Lava.ExpressionParser.SEPARATORS.SEMICOLON
+			}),
 			i = 0,
-			count = raw_arguments.length;
+			count = arguments.length;
 
 		if (Lava.schema.DEBUG && count == 0) Lava.t("malformed 'depends' hash option");
 
 		for (; i < count; i++) {
-			if (Lava.schema.DEBUG && (!raw_arguments[i].flags || !raw_arguments[i].flags.isScopeEval)) Lava.t('malformed "depends" hash option: argument ');
-			binds.push(raw_arguments[i].binds[0]);
+			if (Lava.schema.DEBUG && (!arguments[i].isScopeEval)) Lava.t('malformed "depends" hash option: argument ');
+			binds.push(arguments[i].binds[0]);
 		}
 
 		if (!('scope' in view_config)) {
@@ -466,11 +468,11 @@ Lava.parsers.Common = {
 
 			if (Lava.isVoidTag(raw_tag.name)) Lava.t("Void tag with type='container'");
 			if (!raw_tag.content) Lava.t("Empty container tag");
-			if (Lava.schema.DEBUG) this._assertControlAttributesValid(x);
+			this._assertControlAttributesValid(x);
 
-			if (('options' in x) || ('roles' in x) || ('label' in x)) {
+			if (('options' in x) || ('label' in x)) {
 
-				Lava.t("Please move x:options, x:roles and x:label from container element to the wrapped view");
+				Lava.t("Please move x:options and x:label from container element to the wrapped view");
 
 			}
 
@@ -639,7 +641,8 @@ Lava.parsers.Common = {
 	 */
 	_parseViewAttributes: function(view_config, raw_tag) {
 
-		var x = raw_tag.x;
+		var x = raw_tag.x,
+			name;
 
 		if (x) {
 
@@ -651,7 +654,20 @@ Lava.parsers.Common = {
 
 			}
 			if ('label' in x) this.setViewConfigLabel(view_config, x.label);
-			if ('roles' in x) view_config.roles = this.parseEventHandlers(x.roles);
+
+			if ('class-event' in x) {
+
+				if (Lava.schema.DEBUG && typeof(x['class-event']) != 'object') Lava.t("Malformed x:class-event attribute");
+
+				view_config.class_events = view_config.class_events || {};
+
+				for (name in x['class-event']) {
+
+					view_config.class_events[name] = Lava.ExpressionParser.parse(x['class-event'][name], Lava.ExpressionParser.PRESETS.class_events);
+
+				}
+
+			}
 
 		}
 
@@ -669,11 +685,13 @@ Lava.parsers.Common = {
 			if (this._allowed_control_attributes.indexOf(name) == -1) {
 
                 var common_misspellings = {
-                    events: 'event',
+					'dom-events': 'dom-event',
+					'class-events': 'class-event',
+                    events: 'dom-event',
+                    event: 'dom-event',
                     styles: 'style',
                     class: 'classes',
-                    option: 'options',
-                    role: 'roles'
+                    option: 'options'
                 };
 
                 Lava.t("Unknown control attribute - 'x:" + name + "'." + ((name in common_misspellings) ? " Did you mean 'x:" + common_misspellings[name] + "'?" : ''));
@@ -712,15 +730,15 @@ Lava.parsers.Common = {
 			count,
 			name;
 
-		if ('event' in x) {
+		if ('dom-event' in x) {
 
-			if (typeof(x.event) != 'object') Lava.t("Malformed x:event attribute");
+			if (Lava.schema.DEBUG && typeof(x['dom-event']) != 'object') Lava.t("Malformed x:dom-event attribute");
 
-			container_config.events = {};
+			container_config.dom_events = {};
 
-			for (name in x.event) {
+			for (name in x['dom-event']) {
 
-				container_config.events[name] = this.parseEventHandlers(x.event[name]);
+				container_config.dom_events[name] = Lava.ExpressionParser.parse(x['dom-event'][name], Lava.ExpressionParser.PRESETS.dom_events);
 
 			}
 
@@ -743,7 +761,7 @@ Lava.parsers.Common = {
 
 		if ('classes' in x) {
 
-			var args = Lava.ExpressionParser.parse(x.classes, Lava.ExpressionParser.SEPARATORS.SEMICOLON),
+			var args = Lava.ExpressionParser.parse(x.classes, Lava.ExpressionParser.PRESETS.expressions),
 				class_bindings = {};
 
 			for (i = 0, count = args.length; i < count; i++) {
@@ -1029,122 +1047,6 @@ Lava.parsers.Common = {
 		for (name in attributes_object) {
 
 			result += ' ' + name + '="' + Firestorm.String.escape(attributes_object[name], Firestorm.String.ATTRIBUTE_ESCAPE_REGEX) + '"';
-
-		}
-
-		return result;
-
-	},
-
-	/**
-	 * Parse a string with semicolon-delimited list of event targets (optionally, with arguments)
-	 * @param {string} targets_string
-	 * @returns {Array.<_cTarget>}
-	 */
-	parseEventHandlers: function(targets_string) {
-
-		var target = {},
-			result = [],
-			match,
-			guid_match,
-			config_ref,
-			raw_arguments,
-			i,
-			count,
-			flags;
-
-		targets_string = targets_string.trim();
-
-		if (targets_string == '') Lava.t("Code style: empty event handlers are not allowed");
-
-		while (targets_string.length) {
-
-			match = this._locator_regex.exec(targets_string);
-			if (!match) guid_match = /^\d+$/.exec(targets_string);
-
-			if (match) {
-
-				target.locator_type = this.locator_types[targets_string[0]];
-				target.locator = match[1];
-				target.name = match[2];
-
-			} else if (guid_match) {
-
-				target.locator_type = 'Guid';
-				target.locator = +guid_match[0];
-
-			} else {
-
-				match = this._identifier_regex.exec(targets_string);
-				if (!match) Lava.t("Malformed event handlers (1): " + targets_string);
-				target.name = match[0];
-
-			}
-
-			if (Lava.schema.DEBUG) {
-
-				if ((target.locator_type == 'Id' || target.locator_type == 'Name') && !Lava.isValidId(target.locator)) Lava.t("Malformed id: " + target.locator);
-				else if (target.locator_type == 'Label' && !Lava.VALID_LABEL_REGEX.test(target.locator)) Lava.t("Malformed event handler label" + target.locator);
-
-			}
-
-			targets_string = targets_string.substr(match[0].length);
-
-			if (targets_string[0] == '(') {
-
-				if (targets_string[1] == ')') Lava.t("Code style: empty arguments in event handlers must be removed");
-
-				config_ref = {
-					input: targets_string.substr(1),
-					tail_length: 0
-				};
-				raw_arguments = Lava.ExpressionParser.parseWithTailRaw(config_ref, Lava.ExpressionParser.SEPARATORS.COMMA);
-				target.arguments = [];
-
-				for (i = 0, count = raw_arguments.length; i < count; i++) {
-
-					flags = raw_arguments[i].flags;
-					if (flags.isScopeEval) {
-
-						target.arguments.push({
-							type: Lava.TARGET_ARGUMENT_TYPES.BIND,
-							data: raw_arguments[i].binds[0]
-						});
-
-					} else if (flags.isLiteral || flags.isNumber || flags.isString) {
-
-						target.arguments.push({
-							type: Lava.TARGET_ARGUMENT_TYPES.VALUE,
-							data: Function('return ' + raw_arguments[i].evaluator_src).apply({})
-						});
-
-					} else {
-
-						Lava.t("Expressions are not allowed for event handler arguments, only scope paths and static values");
-
-					}
-
-				}
-
-				targets_string = targets_string.substr(targets_string.length - config_ref.tail_length);
-
-			}
-
-			if (targets_string[0] == ';') {
-
-				targets_string = targets_string.substr(1).trim();
-
-			} else if (targets_string.length) {
-
-				targets_string = targets_string.trim();
-				if (Lava.schema.DEBUG && targets_string.length) {
-					if (targets_string[0] == ';') Lava.t("Space between semicolon in event handlers is not allowed");
-					Lava.t('Malformed event handlers (2): ' + targets_string);
-				}
-
-			}
-
-			result.push(target);
 
 		}
 

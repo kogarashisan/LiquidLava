@@ -78,14 +78,14 @@ symbols_: {"error":2,"root":3,"EOF":4,"blocks":5,"block":6,"CONTENT":7,"INCLUDE"
 terminals_: {2:"error",4:"EOF",7:"CONTENT",8:"INCLUDE",9:"EXPRESSION_BLOCK_N",10:"EXPRESSION_BLOCK_E",12:"BLOCK_END",16:"TAG_END",17:"SCRIPT_CONTENT",18:"SWITCH_ON",19:"SWITCH_OFF",20:"OPEN_BLOCK",22:"BLOCK_CLOSE",24:"DYNAMIC_BLOCK_INIT",25:"EMPTY_ARGS",26:"EXPORT_ARGUMENTS",27:"BLOCK_INIT",29:"IDENTIFIER",30:"HASH_ASSIGN",31:"STRING",33:"BLOCK_ELSE",35:"OPEN_ELSEIF",36:"TAG_OPEN",37:"TAG_END_CLOSE",39:"TAG_CLOSE",41:"HASH_ATTRIBUTE",42:"UNESCAPED_HASH_ASSIGN"},
 productions_: [0,[3,1],[3,2],[5,2],[5,1],[6,1],[6,1],[6,1],[6,1],[6,2],[6,3],[6,3],[6,4],[6,1],[6,2],[6,2],[6,3],[6,1],[6,1],[11,3],[11,4],[21,2],[21,2],[21,2],[21,2],[23,2],[23,1],[28,1],[28,2],[28,2],[13,3],[13,2],[13,1],[13,2],[13,1],[32,3],[32,2],[32,2],[32,1],[34,3],[14,2],[14,3],[15,2],[15,3],[38,2],[38,1],[40,1],[40,1],[40,2]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */
-/**/) {
+/*``*/) {
 /* this == yyval */
 
 var $0 = $$.length - 1;
 switch (yystate) {
-case 1: return []; 
+case 1: return [];
 break;
-case 2: return $$[$0-1]; 
+case 2: return $$[$0-1];
 break;
 case 3:
 			this.$ = $$[$0-1];
@@ -99,7 +99,7 @@ case 3:
 					this.$.push($$[$0]);
 				}
 			}
-		
+
 break;
 case 4:
 			if ($$[$0]) {
@@ -111,19 +111,19 @@ case 4:
 			} else {
 				this.$ = [];
 			}
-		
+
 break;
 case 5:
 			//this.$ = yy.preserve_whitespace ? $$[$0] : $$[$0].trim();
 			this.$ = $$[$0];
-		
+
 break;
 case 6:
-			var targets = Lava.parsers.Common.parseEventHandlers($$[$0]);
-			if (targets.length != 1) Lava.t("Malformed include");
-			targets[0].type = 'include';
-			this.$ = targets[0];
-		
+			var evaluators = Lava.ExpressionParser.parse($$[$0]);
+			if (evaluators.length != 1) Lava.t("Malformed include");
+			evaluators[0].type = 'include';
+			this.$ = evaluators[0];
+
 break;
 case 7:
 			this.$ = {
@@ -131,7 +131,7 @@ case 7:
 				prefix: $$[$0][1],
 				arguments: Lava.ExpressionParser.parse(yytext.substr(3, yyleng - 4))
 			};
-		
+
 break;
 case 8:
 			this.$ = {
@@ -139,18 +139,18 @@ case 8:
 				prefix: $$[$0][1],
 				arguments: Lava.ExpressionParser.parse(yytext.substr(6, yyleng - 7))
 			};
-		
+
 break;
 case 9:
 			if ($$[$0-1].name != $$[$0]) Lava.t('End block ("' + $$[$0] + '") does not match the start block ("' + $$[$0-1].name + '") (1)');
 			this.$ = $$[$0-1];
-		
+
 break;
 case 10:
 			if ($$[$0-2].name != $$[$0]) Lava.t('End block ("' + $$[$0] + '") does not match the start block ("' + $$[$0-2].name + '") (2)');
 			$$[$0-2].content = $$[$0-1];
 			this.$ = $$[$0-2];
-		
+
 break;
 case 11:
 			if ($$[$0-2].name != $$[$0]) Lava.t('End block ("' + $$[$0] + '") does not match the start block ("' + $$[$0-2].name + '") (3)');
@@ -160,7 +160,7 @@ case 11:
 			}
 			if ('else_content' in $$[$0-1]) $$[$0-2].else_content = $$[$0-1].else_content;
 			this.$ = $$[$0-2];
-		
+
 break;
 case 12:
 			if ($$[$0-3].name != $$[$0]) Lava.t('End block ("' + $$[$0] + '") does not match the start block ("' + $$[$0-3].name + '") (4)');
@@ -171,16 +171,16 @@ case 12:
 			}
 			if ('else_content' in $$[$0-1]) $$[$0-3].else_content = $$[$0-1].else_content;
 			this.$ = $$[$0-3];
-		
+
 break;
 case 13:
 			this.$ = $$[$0];
-		
+
 break;
 case 14:
 			yy.validateTagEnd($$[$0-1], $$[$0]);
 			this.$ = $$[$0-1];
-		
+
 break;
 case 15:
 			this.$ = $$[$0-1];
@@ -194,14 +194,14 @@ case 15:
 				if ('attributes' in $$[$0-1]) this.$.attributes = $$[$0-1].attributes;
 			}
 			this.$.content = [$$[$0]];
-		
+
 break;
 case 16:
 			yy.validateTagEnd($$[$0-2], $$[$0]);
 			$$[$0-2].content = $$[$0-1];
 			this.$ = $$[$0-2];
 			if (Lava.isVoidTag(this.$.name)) Lava.t("Void tag with content: " + this.$.name);
-		
+
 break;
 case 17:
 			if ($$[$0] == 'preserve_whitespace') {
@@ -211,7 +211,7 @@ case 17:
 				Lava.t("Parser error: lexer returned unknown switch: " + $$[$0]);
 			}
 			this.$ = null;
-		
+
 break;
 case 18:
 			if ($$[$0] == 'preserve_whitespace') {
@@ -221,37 +221,37 @@ case 18:
 				Lava.t("Parser error: lexer returned unknown switch: " + $$[$0]);
 			}
 			this.$ = null;
-		
+
 break;
 case 19:
 			this.$ = $$[$0-1];
 			this.$.prefix = $$[$0-2][1]; // '$' or '#'
-		
+
 break;
 case 20:
 			this.$ = $$[$0-2];
 			this.$.prefix = $$[$0-3][1]; // '$' or '#'
 			this.$.hash = $$[$0-1];
-		
+
 break;
 case 21:
 			this.$ = {type:'block'};
 			yy.parseDynamicBlockInit(this.$, $$[$0-1].substr(1)); // substr to cut the colon before locator
-		
+
 break;
 case 22:
 			this.$ = {type:'block'};
 			yy.parseDynamicBlockInit(this.$, $$[$0-1].substr(1)); // substr to cut the colon before locator
 			this.$.arguments = yy.lexer.x_export_arguments;
 			yy.lexer.x_export_arguments = null;
-		
+
 break;
 case 23:
 			this.$ = {
 				type:'block',
 				name: $$[$0-1]
 			};
-		
+
 break;
 case 24:
 			this.$ = {
@@ -260,17 +260,17 @@ case 24:
 			};
 			this.$.arguments = yy.lexer.x_export_arguments;
 			yy.lexer.x_export_arguments = null;
-		
+
 break;
 case 25:
 			if ($$[$0].name in $$[$0-1]) Lava.t('Duplicate attribute in block definition: ' + $$[$0].name);
 			$$[$0-1][$$[$0].name] = $$[$0].value;
 			this.$ = $$[$0-1];
-		
+
 break;
-case 26: this.$ = {}; this.$[$$[$0].name] = $$[$0].value; 
+case 26: this.$ = {}; this.$[$$[$0].name] = $$[$0].value;
 break;
-case 27: this.$ = {name:$$[$0], value:true}; 
+case 27: this.$ = {name:$$[$0], value:true};
 break;
 case 28:
 			var literals = Lava.parsers.Common.LITERALS;
@@ -278,97 +278,97 @@ case 28:
 				$$[$0] = literals[$$[$0]];
 			}
 			this.$ = {name:$$[$0-1], value:$$[$0]};
-		
+
 break;
-case 29: this.$ = {name:$$[$0-1], value:$$[$0]}; 
+case 29: this.$ = {name:$$[$0-1], value:$$[$0]};
 break;
 case 30:
 			$$[$0-2].else_content = $$[$0];
 			this.$ = $$[$0-2];
-		
+
 break;
 case 31:
 			$$[$0-1].else_content = [];
 			this.$ = $$[$0-1];
-		
+
 break;
 case 32:
 			this.$ = $$[$0];
-		
+
 break;
 case 33:
 			this.$ = {else_content: $$[$0]};
-		
+
 break;
 case 34:
 			this.$ = {else_content: []};
-		
+
 break;
 case 35:
 			$$[$0-2].elseif_arguments.push($$[$0-1]);
 			$$[$0-2].elseif_content.push($$[$0]);
 			this.$ = $$[$0-2];
-		
+
 break;
 case 36:
 			$$[$0-1].elseif_arguments.push($$[$0]);
 			$$[$0-1].elseif_content.push([]);
 			this.$ = $$[$0-1];
-		
+
 break;
 case 37:
 			this.$ = {
 				elseif_arguments: [$$[$0-1]],
 				elseif_content: [$$[$0]]
 			};
-		
+
 break;
 case 38:
 			this.$ = {
 				elseif_arguments: [$$[$0]],
 				elseif_content: [[]]
 			};
-		
+
 break;
 case 39:
 			var args = yy.lexer.x_export_arguments;
 			if (args.length != 1) Lava.t('Elseif block requires exactly one argument');
 			this.$ = args[0];
 			yy.lexer.x_export_arguments = null;
-		
+
 break;
 case 40:
 			if ($$[$0-1] != $$[$0-1].toLowerCase()) Lava.t("Tag names must be lower case: " + $$[$0-1]);
 			this.$ = yy.parseRawTag($$[$0-1]);
-		
+
 break;
 case 41:
 			if ($$[$0-2] != $$[$0-2].toLowerCase()) Lava.t("Tag names must be lower case: " + $$[$0-2]);
 			this.$ = yy.parseRawTag($$[$0-2], $$[$0-1]);
-		
+
 break;
 case 42:
 			if ($$[$0-1] != $$[$0-1].toLowerCase()) Lava.t("Tag names must be lower case: " + $$[$0-1]);
 			this.$ = yy.parseRawTag($$[$0-1]);
-		
+
 break;
 case 43:
 			if ($$[$0-2] != $$[$0-2].toLowerCase()) Lava.t("Tag names must be lower case: " + $$[$0-2]);
 			this.$ = yy.parseRawTag($$[$0-2], $$[$0-1]);
-		
+
 break;
-case 44: $$[$0-1].push($$[$0]); this.$ = $$[$0-1]; 
+case 44: $$[$0-1].push($$[$0]); this.$ = $$[$0-1];
 break;
-case 45: this.$ = [$$[$0]]; 
+case 45: this.$ = [$$[$0]];
 break;
-case 46: this.$ = {name:$$[$0], value: ''}; // behaviour of innerHTML 
+case 46: this.$ = {name:$$[$0], value: ''}; // behaviour of innerHTML
 break;
 case 47:
 			var parts = $$[$0].split('=');
 			this.$ = {name:parts[0], value:parts[1]};
-		
+
 break;
-case 48: this.$ = {name:$$[$0-1], value:$$[$0]}; 
+case 48: this.$ = {name:$$[$0-1], value:$$[$0]};
 break;
 }
 },
@@ -560,7 +560,7 @@ pushState:function pushState(condition){this.begin(condition)},
 stateStackSize:function stateStackSize(){return this.conditionStack.length},
 options: {},
 performAction: function anonymous(yy,yy_,$avoiding_name_collisions,YY_START
-/**/) {
+/*``*/) {
 
 var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {
@@ -581,43 +581,43 @@ case 0:
 			}
 		}
 		if(yy_.yytext) return 7;
-	
+
 break;
-case 1: return 7; 
+case 1: return 7;
 break;
-case 2: this.popState(); return 7; 
+case 2: this.popState(); return 7;
 break;
-case 3: this.popState(); yy_.yytext = yy_.yytext.substr(2, yy_.yyleng - 3); return 8; 
+case 3: this.popState(); yy_.yytext = yy_.yytext.substr(9, yy_.yyleng - 3); return 8;
 break;
-case 4: this.popState(); yy_.yytext = yy_.yytext.substr(5, yy_.yyleng - 6); return 8; // escaped variant 
+case 4: this.popState(); yy_.yytext = yy_.yytext.substr(12, yy_.yyleng - 6); return 8; // escaped variant
 break;
-case 5: this.popState(); return 33; 
+case 5: this.popState(); return 33;
 break;
-case 6: this.popState(); yy_.yytext = yy_.yytext.substr(2, yy_.yyleng - 3); return 12; 
+case 6: this.popState(); yy_.yytext = yy_.yytext.substr(2, yy_.yyleng - 3); return 12;
 break;
-case 7: this.popState(); /* yy_.yytext = yy_.yytext.substr(2, yy_.yyleng - 4); return 'COMMENT'; */ 
+case 7: this.popState(); /* yy_.yytext = yy_.yytext.substr(2, yy_.yyleng - 4); return 'COMMENT'; */
 break;
-case 8: this.popState(); return 9; // normal 
+case 8: this.popState(); return 9; // normal
 break;
-case 9: this.popState(); return 10; // escaped 
+case 9: this.popState(); return 10; // escaped
 break;
-case 10: Lava.t('Spaces between block opening tag and block name are not allowed'); 
+case 10: Lava.t('Spaces between block opening tag and block name are not allowed');
 break;
-case 11: Lava.t('Spaces between block name and opening brace are not allowed'); 
+case 11: Lava.t('Spaces between block name and opening brace are not allowed');
 break;
-case 12: return 20; 
+case 12: return 20;
 break;
-case 13: return 35; 
+case 13: return 35;
 break;
-case 14: return 24; 
+case 14: return 24;
 break;
-case 15: return 27; 
+case 15: return 27;
 break;
 case 16:
 		this.popState(); // block
 		this.begin('blockHash');
 		return 25;
-	
+
 break;
 case 17:
 		var config_ref = {
@@ -631,25 +631,25 @@ case 17:
 		this.popState(); // block
 		this.begin('blockHash');
 		return 26;
-	
+
 break;
-case 18: yy_.yytext = yy_.yytext.substr(0,yy_.yyleng-1); return 30; 
+case 18: yy_.yytext = yy_.yytext.substr(0,yy_.yyleng-1); return 30;
 break;
-case 19: return 29; 
+case 19: return 29;
 break;
-case 20: yy_.yytext = Lava.parsers.Common.unquoteString(yy_.yytext); return 31; 
+case 20: yy_.yytext = Lava.parsers.Common.unquoteString(yy_.yytext); return 31;
 break;
-case 21: yy_.yytext = Lava.parsers.Common.unquoteString(yy_.yytext); return 31; 
+case 21: yy_.yytext = Lava.parsers.Common.unquoteString(yy_.yytext); return 31;
 break;
-case 22: this.popState(); return 22; 
+case 22: this.popState(); return 22;
 break;
-case 23: 
+case 23:
 break;
-case 24: this.popState(); return 7; 
+case 24: this.popState(); return 7;
 break;
-case 25: this.popState(); return 7; 
+case 25: this.popState(); return 7;
 break;
-case 26: this.popState(); yy_.yytext = yy_.yytext.substr(2,yy_.yyleng-3).toLowerCase(); return 16; 
+case 26: this.popState(); yy_.yytext = yy_.yytext.substr(2,yy_.yyleng-3).toLowerCase(); return 16;
 break;
 case 27:
 		yy_.yytext = yy_.yytext.substr(1).trim().toLowerCase();
@@ -664,7 +664,7 @@ case 27:
 			}
 		}
 		return 36;
-	
+
 break;
 case 28:
 		var tag_name = this.yy.x_lexer_tag_name;
@@ -676,31 +676,31 @@ case 28:
 			return 37; // in html5 browser returns void tags as unclosed
 		}
 		return 39;
-	
+
 break;
 case 29:
 		this.yy.x_lexer_tag_name = null;
 		this.popState();
 		return 37;
-	
+
 break;
-case 30: yy_.yytext = yy_.yytext.trim(); return 41; 
+case 30: yy_.yytext = yy_.yytext.trim(); return 41;
 break;
-case 31: return 41; 
+case 31: return 41;
 break;
-case 32: yy_.yytext = yy_.yytext.substr(0,yy_.yyleng-1); return 30; 
+case 32: yy_.yytext = yy_.yytext.substr(0,yy_.yyleng-1); return 30;
 break;
-case 33: yy_.yytext = yy_.yytext.trim(); return 42; 
+case 33: yy_.yytext = yy_.yytext.trim(); return 42;
 break;
-case 34: yy_.yytext = Lava.parsers.Common.unquoteString(yy_.yytext); return 31; 
+case 34: yy_.yytext = Lava.parsers.Common.unquoteString(yy_.yytext); return 31;
 break;
-case 35: yy_.yytext = Lava.parsers.Common.unquoteString(yy_.yytext); return 31; 
+case 35: yy_.yytext = Lava.parsers.Common.unquoteString(yy_.yytext); return 31;
 break;
-case 36: 
+case 36:
 break;
-case 37: this.popState(); yy_.yytext = yy_.yytext.substr(0,yy_.yyleng-9); return 17; 
+case 37: this.popState(); yy_.yytext = yy_.yytext.substr(0,yy_.yyleng-9); return 17;
 break;
-case 38: this.popState(); yy_.yytext = yy_.yytext.substr(0,yy_.yyleng-8); return 17; 
+case 38: this.popState(); yy_.yytext = yy_.yytext.substr(0,yy_.yyleng-8); return 17;
 break;
 case 39:
 		var _map = {
@@ -713,7 +713,7 @@ case 39:
 		this.popState();
 		yy_.yytext = _map[yy_.yytext.substr(2,yy_.yyleng-4)];
 		return 7;
-	
+
 break;
 case 40:
 		this.popState();
@@ -728,7 +728,7 @@ case 40:
 		} else {
 			Lava.t('Unknown switch: ' + yy_.yytext);
 		}
-	
+
 break;
 case 41:
 		this.popState();
@@ -741,15 +741,15 @@ case 41:
 		} else {
 			Lava.t('Unknown switch: ' + yy_.yytext);
 		}
-	
+
 break;
-case 42: this.popState(); yy_.yytext = yy_.yytext.substr(0, yy_.yyleng-10); return 7; 
+case 42: this.popState(); yy_.yytext = yy_.yytext.substr(0, yy_.yyleng-10); return 7;
 break;
-case 43: return 4; 
+case 43: return 4;
 break;
 }
 },
-rules: [/^(?:[^\x00]*?(?=((\{[\#\$\>\*])|{&gt;|(\{\/)|(<([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)\s*)|(<\/([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)>)|(<!--(.|\s)*?-->)|(<!\[CDATA\[(.|\s)*?\]\]>)|\{literal:\}|\{:literal\}|(\{:[LR]:\}|\{:[LG])|\{elseif\s*\(|\{else\})))/,/^(?:[^\x00]+)/,/^(?:<)/,/^(?:\{>[^\}]*\})/,/^(?:\{&gt;[^\}]*\})/,/^(?:\{else\})/,/^(?:\{\/(([a-zA-Z\_][a-zA-Z0-9\_]*)(\/([a-zA-Z\_][a-zA-Z0-9\_]*))*)\})/,/^(?:\{\*([^\*]|\*[^\}])*\*\})/,/^(?:\{(#|\$)>[^\}]+\})/,/^(?:\{(#|\$)&gt;[^\}]+\})/,/^(?:((\{[\#\$\>\*])|{&gt;)\s\b)/,/^(?:((\{[\#\$\>\*])|{&gt;)(([a-zA-Z\_][a-zA-Z0-9\_]*)(\/([a-zA-Z\_][a-zA-Z0-9\_]*))*)\s\()/,/^(?:((\{[\#\$\>\*])|{&gt;))/,/^(?:\{elseif(?=\())/,/^(?::[\$\#\@]([a-zA-Z\_][a-zA-Z0-9\_]*)\/(([a-zA-Z\_][a-zA-Z0-9\_]*)(\/([a-zA-Z\_][a-zA-Z0-9\_]*))*)(?=\())/,/^(?:(([a-zA-Z\_][a-zA-Z0-9\_]*)(\/([a-zA-Z\_][a-zA-Z0-9\_]*))*)(?=\())/,/^(?:\(\s*\))/,/^(?:\()/,/^(?:([a-zA-Z\_][a-zA-Z0-9\_]*)=)/,/^(?:([a-zA-Z\_][a-zA-Z0-9\_]*)(?=[\s\}]))/,/^(?:"([^\\\"]|\\.)*"(?=[\s\}]))/,/^(?:'([^\\\']|\\.)*'(?=[\s\}]))/,/^(?:\s*\})/,/^(?:\s+)/,/^(?:(<!--(.|\s)*?-->))/,/^(?:(<!\[CDATA\[(.|\s)*?\]\]>))/,/^(?:(<\/([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)>))/,/^(?:(<([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)\s*))/,/^(?:>)/,/^(?:\/>)/,/^(?:([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)\s+)/,/^(?:([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)(?=>))/,/^(?:([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)=)/,/^(?:([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)=([a-zA-Z\_][a-zA-Z0-9\_]*)+\s\b)/,/^(?:"([^\\\"]|\\.)*")/,/^(?:'([^\\\']|\\.)*')/,/^(?:\s+)/,/^(?:[\s\S]*?<\/script>)/,/^(?:[\s\S]*?<\/style>)/,/^(?:(\{:[LR]:\}|\{:[LG]))/,/^(?:\{literal:\})/,/^(?:\{:literal\})/,/^(?:[^\x00]*?\{:literal\})/,/^(?:$)/],
+rules: [/^(?:[^\x00]*?(?=((\{[\#\$\>\*])|{&gt;|(\{\/)|(<([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)\s*)|(<\/([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)>)|(<!--(.|\s)*?-->)|(<!\[CDATA\[(.|\s)*?\]\]>)|\{literal:\}|\{:literal\}|(\{:[LR]:\}|\{:[LG])|\{elseif\s*\(|\{else\})))/,/^(?:[^\x00]+)/,/^(?:<)/,/^(?:\{include>[^\}]*\})/,/^(?:\{include&gt;[^\}]*\})/,/^(?:\{else\})/,/^(?:\{\/(([a-zA-Z\_][a-zA-Z0-9\_]*)(\/([a-zA-Z\_][a-zA-Z0-9\_]*))*)\})/,/^(?:\{\*([^\*]|\*[^\}])*\*\})/,/^(?:\{(#|\$)>[^\}]+\})/,/^(?:\{(#|\$)&gt;[^\}]+\})/,/^(?:((\{[\#\$\>\*])|{&gt;)\s\b)/,/^(?:((\{[\#\$\>\*])|{&gt;)(([a-zA-Z\_][a-zA-Z0-9\_]*)(\/([a-zA-Z\_][a-zA-Z0-9\_]*))*)\s\()/,/^(?:((\{[\#\$\>\*])|{&gt;))/,/^(?:\{elseif(?=\())/,/^(?::[\$\#\@]([a-zA-Z\_][a-zA-Z0-9\_]*)\/(([a-zA-Z\_][a-zA-Z0-9\_]*)(\/([a-zA-Z\_][a-zA-Z0-9\_]*))*)(?=\())/,/^(?:(([a-zA-Z\_][a-zA-Z0-9\_]*)(\/([a-zA-Z\_][a-zA-Z0-9\_]*))*)(?=\())/,/^(?:\(\s*\))/,/^(?:\()/,/^(?:([a-zA-Z\_][a-zA-Z0-9\_]*)=)/,/^(?:([a-zA-Z\_][a-zA-Z0-9\_]*)(?=[\s\}]))/,/^(?:"([^\\\"]|\\.)*"(?=[\s\}]))/,/^(?:'([^\\\']|\\.)*'(?=[\s\}]))/,/^(?:\s*\})/,/^(?:\s+)/,/^(?:(<!--(.|\s)*?-->))/,/^(?:(<!\[CDATA\[(.|\s)*?\]\]>))/,/^(?:(<\/([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)>))/,/^(?:(<([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)\s*))/,/^(?:>)/,/^(?:\/>)/,/^(?:([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)\s+)/,/^(?:([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)(?=>))/,/^(?:([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)=)/,/^(?:([a-zA-Z][a-zA-Z0-9\_\-]*(:[a-zA-Z0-9\_][a-zA-Z0-9\_\-]*)*)=([a-zA-Z\_][a-zA-Z0-9\_]*)+\s\b)/,/^(?:"([^\\\"]|\\.)*")/,/^(?:'([^\\\']|\\.)*')/,/^(?:\s+)/,/^(?:[\s\S]*?<\/script>)/,/^(?:[\s\S]*?<\/style>)/,/^(?:(\{:[LR]:\}|\{:[LG]))/,/^(?:\{literal:\})/,/^(?:\{:literal\})/,/^(?:[^\x00]*?\{:literal\})/,/^(?:$)/],
 conditions: {"block":{"rules":[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"inclusive":false},"blockHash":{"rules":[18,19,20,21,22,23],"inclusive":false},"tag":{"rules":[24,25,26,27,28,29,30,31,32,33,34,35,36],"inclusive":false},"skipTag":{"rules":[2],"inclusive":false},"switch":{"rules":[39,40,41],"inclusive":false},"literal":{"rules":[42],"inclusive":false},"eatScript":{"rules":[37],"inclusive":false},"eatStyle":{"rules":[38],"inclusive":false},"INITIAL":{"rules":[0,1,43],"inclusive":true}}
 };
 return lexer;

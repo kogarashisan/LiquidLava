@@ -13,81 +13,53 @@ Lava.define(
  *
  * @lends Lava.scope.Argument#
  * @extends Lava.mixin.Refreshable
+ * @extends Lava.scope.ArgumentCommonMixin
  * @implements _iValueContainer
  */
 {
 
 	Extends: 'Lava.mixin.Refreshable',
+	Implements: ['Lava.scope.ArgumentCommonMixin'],
+
 	/**
 	 * Sign that this instance implements {@link _iValueContainer}
 	 * @type {boolean}
 	 * @readonly
 	 */
 	isValueContainer: true,
-
-	/**
-	 * Owner view
-	 * @type {Lava.view.Abstract}
-	 */
-	_view: null,
-	/**
-	 * Nearest widget in hierarchy
-	 * @type {Lava.widget.Standard}
-	 */
-	_widget: null,
-	/**
-	 * Generated method that is called in context of Argument instance and produces the argument's result
-	 * @type {function}
-	 */
-	_evaluator: null,
 	/**
 	 * Global unique identifier
 	 * @type {_tGUID}
 	 */
-	guid: null,
-
+	guid: 0,
 	/**
 	 * Scopes that provide operands for the `_evaluator`
 	 * @type {Array.<_iValueContainer>}
 	 */
 	_binds: [],
 	/**
-	 * Length of `_binds` array
-	 * @type {number}
-	 */
-	_binds_count: 0,
-	/**
-	 * Listeners for <str>"changed"</str> events
+	 * Listeners for scope's <str>"changed"</str> events
 	 * @type {Array.<_tListener>}
 	 */
 	_bind_changed_listeners: [],
 
 	/**
-	 * Objects with a reference to modifier's widget (it's cached to speed up calling) and modifier name
-	 * @type {Array.<Object>}
-	 */
-	_modifier_descriptors: [],
-
-	// Alpha version. Not used
-	//_active_modifiers: [],
-
-	/**
 	 * Create an Argument instance. Acquire binds, find modifier sources, apply correct state
 	 * @param {_cArgument} config
 	 * @param {Lava.view.Abstract} view Argument's view
-	 * @param {Lava.widget.Standard} widget Nearest widget in hierarchy
 	 */
-	init: function(config, view, widget) {
+	init: function(config, view) {
 
 		this.guid = Lava.guid++;
 		this._view = view;
-		this._widget = widget;
 		this._evaluator = config.evaluator;
 
-		var i = 0,
+		var widget = view.getWidget(),
+			i = 0,
 			count,
 			bind,
-			binds = config.binds;
+			binds = config.binds,
+			target;
 
 		if (binds) {
 
@@ -118,48 +90,20 @@ Lava.define(
 
 		}
 
-		if ('modifiers' in config) {
+		if ('targets' in config) {
 
-			for (i = 0, count = config.modifiers.length; i < count; i++) {
+			for (i = 0, count = config.targets.length; i < count; i++) {
 
-				this._modifier_descriptors.push({
-					widget: this.getWidgetByModifierConfig(config.modifiers[i]),
-					callback_name: config.modifiers[i].callback_name
-				});
+				target = widget.locateViewByPathConfig(config.targets[i]);
+				if (Lava.schema.DEBUG && !target) Lava.t("Widget not found: " + config.targets[i].locator_type + "=" + config.targets[i].locator);
+				if (Lava.schema.DEBUG && !target.isWidget) Lava.t("Tried to call something from non-widget view");
+				this._targets.push(target);
 
 			}
 
 		}
 
-		/*if ('active_modifiers' in config) {
-
-			for (i = 0, count = config.active_modifiers.length; i < count; i++) {
-
-				this._active_modifiers.push({
-					widget: this.getWidgetByModifierConfig(config.active_modifiers[i]),
-					callback_name: config.active_modifiers[i].callback_name
-				});
-
-			}
-
-		}*/
-
-		this._binds_count = this._binds.length;
 		this._value = this._evaluate();
-
-	},
-
-	/**
-	 * Get widget, that will be used to call a modifier
-	 * @param {_cKnownViewLocator} path_config Route to the widget
-	 * @returns {Lava.widget.Standard}
-	 */
-	getWidgetByModifierConfig: function(path_config) {
-
-		var widget = this._widget.locateViewByPathConfig(path_config);
-		if (Lava.schema.DEBUG && !widget.isWidget) Lava.t("Tried to call a modifier from non-widget view");
-
-		return /** @type {Lava.widget.Standard} */ widget;
 
 	},
 
@@ -224,37 +168,22 @@ Lava.define(
 	},
 
 	/**
-	 * Call a modifier from widget
+	 * Return value from a scope, used by `evaluator`
 	 * @param {number} index
-	 * @param {?Array.<*>} arguments_array
 	 * @returns {*}
 	 */
-	_callModifier: function(index, arguments_array) {
+	_evalBind: function(index) {
 
-		return this._modifier_descriptors[index].widget.callModifier(this._modifier_descriptors[index].callback_name, arguments_array);
+		return this._binds[index].getValue();
 
 	},
 
 	/**
-	 * Alpha. Not used
-	 * @param index
-	 * @param arguments_array
-	 * @returns {*}
+	 * Throws error, as Argument does not support events
 	 */
-	_callActiveModifier: function(index, arguments_array) {
+	_callEvent: function() {
 
-	},
-
-	/**
-	 * Calls a global function from {@link Lava.modifiers}
-	 * @param {string} name The function's name
-	 * @param {?Array.<*>} arguments_array Evaluator's arguments
-	 * @returns {*}
-	 */
-	_callGlobalModifier: function(name, arguments_array) {
-
-		if (Lava.schema.DEBUG && !(name in Lava.modifiers)) Lava.t("Unknown global modifier: " + name);
-		return Lava.modifiers[name].apply(Lava.modifiers, arguments_array);
+		Lava.t("Argument must not be used to dispatch events!");
 
 	},
 

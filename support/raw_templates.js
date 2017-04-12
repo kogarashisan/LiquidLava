@@ -4,58 +4,49 @@
  */
 
 _cRawTag = {
-
 	/**
 	 * Block type
 	 * @type {string}
 	 * @const
 	 */
 	type: 'tag',
-
 	/**
 	 * Tag name
 	 * @type {string}
 	 */
 	name: '',
-
 	/**
 	 * Name-value hash of tag's attributes, excluding control attributes
 	 * @type {Object.<string, string>}
 	 */
 	attributes: {},
-
 	/**
 	 * Attributes, that start with "x:"
 	 * @type {_cRawX}
 	 */
 	x: {},
-
 	/**
 	 * Tag's content
 	 * @type {?_tRawTemplate}
 	 */
 	content: []
-
 };
 
 /**
  * Directive is a tag with name starting with "x:"
  */
 _cRawDirective = {
-
 	/**
 	 * Block type
 	 * @type {string}
 	 * @const
 	 */
 	type: 'directive',
-
 	/**
 	 * Directive name, without the control prefix ("x:")
 	 * @type {string}
 	 */
 	name: '',
-
 	/**
 	 * Directive's attributes, same as in {@link _cRawTag}
 	 * @type {Object.<string, string>}
@@ -65,20 +56,14 @@ _cRawDirective = {
 		 * For x:define: name of the JS class, inherited from Widget (default namespace is "Lava.widget")
 		 */
 		controller: '',
-		/**
-		 * For common tags and tags inside x:define. Meaning depends on context
-		 */
-		role: '',
 
 		name: ''
 	},
-
 	/**
 	 * Directive's content
 	 * @type {_tRawTemplate}
 	 */
 	content: []
-
 };
 
 /** @enum {string} */
@@ -103,7 +88,6 @@ _cRawBlock = {
 	 * @const
 	 */
 	type: 'block',
-
 	/**
 	 * For blocks with dynamic class name
 	 * @type {Object}
@@ -115,13 +99,11 @@ _cRawBlock = {
 		locator_type: null,
 		name: ''
 	},
-
 	/**
 	 * Real class name (default namespace is "Lava.widget")
 	 * @type {string}
 	 */
 	real_class: '',
-
 	/**
 	 * Block's name
 	 * @type {string}
@@ -132,7 +114,6 @@ _cRawBlock = {
 	 * @type {Array.<_cArgument>}
 	 */
 	arguments: null,
-
 	/**
 	 * Block's prefix which defines it's container type
 	 * @type {_iBlockPrefix}
@@ -166,47 +147,28 @@ _cRawBlock = {
 };
 
 _cRawExpression = {
-
 	/**
 	 * Block type
 	 * @type {string}
 	 * @const
 	 */
 	type: 'expression',
-
 	/**
 	 * Prefix, which defines container for this expression
 	 * @type {_iBlockPrefix}
 	 */
 	prefix: null,
-
 	/**
 	 * Array with single expression's argument
 	 * @type {Array.<_cArgument>}
 	 */
 	arguments: null
-
-};
-
-/**
- * ExpressionParser parsing result
- * @extends _cArgumentCommon
- */
-_cRawArgument = {
-
-	/**
-	 * Source code for the Argument's evaluator function
-	 * @type {string}
-	 */
-	evaluator_src: null
-
 };
 
 /**
  * TemplateParser's intermediate objects used when parsing tags
  */
 _cRawAttribute = {
-
 	/**
 	 * Attribute name
 	 * @type {string}
@@ -217,14 +179,12 @@ _cRawAttribute = {
 	 * @type {string}
 	 */
 	value: ''
-
 };
 
 /**
  * TemplateParser's intermediate object with content of all control attributes
  */
 _cRawX = {
-
 	/**
 	 * 'view' || 'container'
 	 * @type {string}
@@ -233,7 +193,7 @@ _cRawX = {
 	/**
 	 * @type {Object}
 	 */
-	event: {},
+	'dom-event': {},
 	/**
 	 * @type {Object}
 	 */
@@ -247,10 +207,6 @@ _cRawX = {
 	 */
 	classes: '',
 	/**
-	 * Comma-separated list of targets
-	 */
-	roles: '',
-	/**
 	 * @type {string}
 	 */
 	container_class: '',
@@ -258,6 +214,5 @@ _cRawX = {
 	 * @type {string}
 	 */
 	resource_id: ''
-
 };
 
