@@ -14,7 +14,6 @@ Lava.ClassManager = {
 	 * @type {Array.<string>}
 	 */
 	SIMPLE_TYPES: ['string', 'boolean', 'number', 'null', 'undefined'],
-
 	/**
 	 * Member type IDs in skeleton
 	 * @enum {number}
@@ -29,6 +28,24 @@ Lava.ClassManager = {
 		INLINE_ARRAY: 6,
 		SLICE_ARRAY: 7
 	},
+	/**
+	 * Types, which are allowed to be 'Shared'.
+	 * Number means their logical group (primitive, array, object...)
+	 * @type {Object.<string, number>}
+	 */
+	ALLOWED_SHARED_TYPES_MAP: {
+		boolean: 0,
+		number: 0,
+		string: 0,
+		null: 1,
+		array: 2,
+		object: 3
+	},
+	/**
+	 * Special directives, understandable by ClassManager
+	 * @type {Array.<string>}
+	 */
+	RESERVED_MEMBERS: ['Extends', 'Implements', 'Class', 'Shared', 'Merged'],
 
 	/**
 	 * All data that belongs to each class: everything that's needed for inheritance and building of a constructor
@@ -40,11 +57,6 @@ Lava.ClassManager = {
 	 * @type {Object.<string, function>}
 	 */
 	constructors: {},
-	/**
-	 * Special directives, understandable by ClassManager
-	 */
-	_reserved_members: ['Extends', 'Implements', 'Class', 'Shared'],
-
 	/**
 	 * Namespaces, which can hold class constructors
 	 * @type {Object.<string, Object>}
@@ -96,8 +108,9 @@ Lava.ClassManager = {
 			i,
 			count,
 			shared_names,
-			is_array,
-			type;
+			type,
+			child_type,
+			parent_type;
 
 		class_data = /** @type {_cClassData} */ {
 			name: class_path.split('.').pop(),
@@ -160,22 +173,32 @@ Lava.ClassManager = {
 
 			for (name in parent_data.shared) {
 
-				is_array = Array.isArray(parent_data.shared[name]);
-				class_data.shared[name] = is_array
-					? parent_data.shared[name].slice()
-					: Firestorm.Object.copy(parent_data.shared[name]);
+				parent_type = this.ALLOWED_SHARED_TYPES_MAP[Firestorm.getType(parent_data.shared[name])];
+				if (parent_type == 3) { // object
+					class_data.shared[name] = Firestorm.Object.copy(parent_data.shared[name]);
+				} else if (parent_type == 2) { // array
+					class_data.shared[name] = parent_data.shared[name].slice()
+				} else { // value types
+					class_data.shared[name] = parent_data.shared[name];
+				}
 
 				if (name in class_body) {
 
-					if (Lava.schema.DEBUG && Array.isArray(class_body[name]) != is_array) Lava.t("[ClassManager] 'Shared' members of different types must not override each other (array must not become an object)");
-					if (is_array) {
-						if (class_data.merged.indexOf('name') != -1) {
-							class_data.shared[name] = class_data.shared[name].concat(class_body[name]);
-						} else {
-							class_data.shared[name] = class_body[name];
-						}
-					} else {
+					child_type = this.ALLOWED_SHARED_TYPES_MAP[Firestorm.getType(class_body[name])];
+					if (Lava.schema.DEBUG && parent_type != 1) { // null in parent can be replaced with anything
+						if (parent_type != child_type && (parent_type != 0 || child_type != 1)) Lava.t("[ClassManager] 'Shared' members of different types must not override each other (e.g. array must not become an object or something else). Except: null may become anything, and primitive type may become null.");
+					}
+
+					if (child_type == 3) { // object
+
 						Firestorm.extend(class_data.shared[name], class_body[name]);
+
+					} else { // arrays and primitives
+
+						class_data.shared[name] = (class_data.merged.indexOf('name') != -1)
+							? class_data.shared[name].concat(class_body[name]) // if it's Merged, then it's definitely an array
+							: class_body[name];
+
 					}
 
 				}
@@ -207,7 +230,7 @@ Lava.ClassManager = {
 
 				if (Lava.schema.DEBUG) {
 					if (!(name in class_body)) Lava.t("[ClassManager] 'Shared' member is not in class: " + name);
-					if (type != 'object' && type != 'array') Lava.t("[ClassManager] only objects and arrays can be made 'Shared'");
+					if (type in this.ALLOWED_SHARED_TYPES_MAP) Lava.t("[ClassManager] only objects and arrays can be made 'Shared'");
 					if (class_data.parent_class_data && (name in class_data.parent_class_data.skeleton)) Lava.t("[ClassManager] instance member from parent class may not become 'Shared' ('Merged') in descendant: " + name);
 					if (name in class_data.shared) Lava.t("[ClassManager] member is already 'Shared' ('Merged') in parent class: " + class_path + "#" + name + ". Please, remove it from 'Shared' ('Merged') in descendant.");
 				}
@@ -248,7 +271,7 @@ Lava.ClassManager = {
 
         if (Lava.schema.DEBUG) {
             for (name in class_data.shared) {
-                if (name in class_data.skeleton) Lava.t("[ClassManager] 'Shared' class member is hidden by member from instance: " + class_data.path + "::" + name);
+                if (name in class_data.skeleton) Lava.t("[ClassManager] 'Shared' class member is hidden by member from instance: " + class_data.path + "::" + name + ". Tip: this may happen when Shared member is also present in Implemented class (where it's not Shared)");
             }
         }
 
@@ -389,7 +412,7 @@ Lava.ClassManager = {
 
 		for (name in class_body) {
 
-			if (is_root && (this._reserved_members.indexOf(name) != -1 || (name in class_data.shared))) {
+			if (is_root && (this.RESERVED_MEMBERS.indexOf(name) != -1 || (name in class_data.shared))) {
 
 				continue;
 

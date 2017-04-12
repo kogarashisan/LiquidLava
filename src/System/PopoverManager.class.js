@@ -125,7 +125,13 @@ Lava.define(
 
 			if (new_tooltip_target) {
 
-				html = Firestorm.Element.getAttribute(new_tooltip_target, this._attribute_name).replace(/\r?\n/g, '<br/>');
+				html = Firestorm.Element.getAttribute(new_tooltip_target, this._attribute_name);
+				html = (Lava.schema.DISPLAY_HTML_IN_TOOLTIPS)
+					// either treat tooltips as encoded HTML
+					? this._decodeHTML(html)
+					// or as plain text
+					: html.replace(/\r?\n/g, '<br/>');
+
 				this._tooltip.set('html', html);
 				this._tooltip.set('is_visible', !!(html || !Lava.schema.popover_manager.HIDE_EMPTY_TOOLTIPS));
 
@@ -134,6 +140,19 @@ Lava.define(
 			this._tooltip_target = new_tooltip_target;
 
 		}
+
+	},
+
+	/**
+	 * Decode an escaped HTML string
+	 * @param string
+	 * @returns {string}
+	 */
+	_decodeHTML: function(string) {
+
+		var e = document.createElement('div');
+		e.innerHTML = string;
+		return e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;
 
 	},
 

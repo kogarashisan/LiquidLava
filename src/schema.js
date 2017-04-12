@@ -215,6 +215,11 @@ Lava.schema = {
 	 * @const
 	 */
 	SUGAR_CLASSES: ['Lava.system.Sugar'],
+	/**
+	 * Treat tooltip texts as (encoded) HTML. When you enable this option on your site - make sure,
+	 * that you don't allow `data-tooltip` attribute in user-submitted content, otherwise it opens a security hole.
+	 */
+	DISPLAY_HTML_IN_TOOLTIPS: false,
 
 	/**
 	 * Current locale. Must not be <kw>null</kw> or <str>"default"</str>
