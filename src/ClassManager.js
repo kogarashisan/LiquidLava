@@ -45,7 +45,7 @@ Lava.ClassManager = {
 	 * Special directives, understandable by ClassManager
 	 * @type {Array.<string>}
 	 */
-	RESERVED_MEMBERS: ['Extends', 'Implements', 'Class', 'Shared', 'Merged'],
+	RESERVED_MEMBERS: ['Extends', 'Implements', 'Class', 'Shared', 'Merged', 'Prepare'],
 
 	/**
 	 * All data that belongs to each class: everything that's needed for inheritance and building of a constructor
@@ -127,13 +127,20 @@ Lava.ClassManager = {
 			merged: [],
 			constructor: null,
 			own_references_count: 0,
-			is_abstract: false
+			is_abstract: false,
+			body_processors: null
 		};
 
 		if ('Class' in class_body) {
 			var class_options = class_body.Class;
 			if (!class_options) Lava.t("Malformed 'Class' property in " + class_path);
 			if (class_options.is_abstract) class_data.is_abstract = true;
+		}
+
+		if ('Prepare' in class_body) {
+			if (Lava.schema.DEBUG && typeof class_body.Prepare != 'function') Lava.t("'Prepare': function expected");
+			class_data.body_processors = [class_body.Prepare];
+			class_body.Prepare();
 		}
 
 		if ('Merged' in class_body) {
@@ -170,6 +177,12 @@ Lava.ClassManager = {
 			class_data.references = parent_data.references.slice();
 			class_data.own_references_count -= parent_data.references.length;
 			class_data.implements = parent_data.implements.slice();
+			if (parent_data.body_processors) {
+				for (i = parent_data.body_processors.length - 1; i >= 0; i--) {
+					parent_data.body_processors[i].call(class_body);
+				}
+				class_data.body_processors = parent_data.body_processors.concat(class_data.body_processors);
+			}
 
 			for (name in parent_data.shared) {
 
@@ -862,45 +875,6 @@ Lava.ClassManager = {
 	getClassNames: function() {
 
 		return Object.keys(this._sources);
-
-	},
-
-	/**
-	 * Replace function in a class with new body. Class may be in middle of inheritance chain.
-	 * Also replaces old method with <kw>null</kw>.
-	 *
-	 * @param {Object} instance Current class instance, must be <kw>this</kw>
-	 * @param {string} instance_class_name Short name of current class
-	 * @param {string} function_name Function to replace
-	 * @param {string} new_function_name Name of new method from the prototype
-	 * @returns {string} name of the method that was replaced
-	 */
-	patch: function(instance, instance_class_name, function_name, new_function_name) {
-
-		var cd = instance.Class,
-			proto = cd.constructor.prototype,
-			names = cd.extends_names,
-			i = names.indexOf(instance_class_name),
-			count = names.length,
-			overridden_name;
-
-		if (Lava.schema.DEBUG && i == -1) Lava.t();
-
-		// find method that belongs to this class body
-		for (; i < count; i++) {
-			overridden_name = names[i] + "$" + function_name;
-			// must not use "in" operator, as function body can be removed and assigned null (see below)
-			if (proto[overridden_name]) {
-				function_name = overridden_name;
-				break;
-			}
-		}
-
-		proto[function_name] = proto[new_function_name];
-		// this plays role when class replaces it's method with parent's method (removes it's own method)
-		// and parent also wants to apply patches to the same method (see comment above about the "in" operator)
-		proto[new_function_name] = null;
-		return function_name;
 
 	}
 

@@ -8,6 +8,22 @@ Lava.define(
  */
 {
 
+	Prepare: function() {
+
+		// About IOS bugfixes:
+		// http://www.quirksmode.org/blog/archives/2010/09/click_event_del.html
+		// http://www.quirksmode.org/blog/archives/2010/10/click_event_del_1.html
+
+		if (Firestorm.Environment.platform == "ios") {
+			this.addEventTarget = this.addEventTarget_IOS;
+			this.informInDOM = this.informInDOM_IOS;
+		} else {
+			this.addEventTarget = this.addEventTarget_Normal;
+			this.informInDOM = this.informInDOM_Normal;
+		}
+
+	},
+
 	/**
 	 * This instance belongs to Element container
 	 * @type {boolean}
@@ -113,35 +129,12 @@ Lava.define(
 	_is_rendered: false,
 
 	/**
-	 * One-time static constructor, which modifies container's prototype and replaces itself with correct version
-	 *
+	 * Initialize the Element instance
 	 * @param {Lava.view.Abstract} view
 	 * @param {_cElementContainer} config
 	 * @param {Lava.widget.Standard} widget
 	 */
 	init: function(view, config, widget) {
-
-		// About IOS bugfixes:
-		// http://www.quirksmode.org/blog/archives/2010/09/click_event_del.html
-		// http://www.quirksmode.org/blog/archives/2010/10/click_event_del_1.html
-
-		var needs_shim = Firestorm.Environment.platform == "ios";
-		Lava.ClassManager.patch(this, "Element", "addEventTarget", needs_shim ? "addEventTarget_IOS" : "addEventTarget_Normal");
-		Lava.ClassManager.patch(this, "Element", "informInDOM", needs_shim ? "informInDOM_IOS" : "informInDOM_Normal");
-
-		this.init_Normal(view, config, widget);
-		Lava.ClassManager.patch(this, "Element", "init", "init_Normal");
-
-	},
-
-	/**
-	 * Real constructor
-	 *
-	 * @param {Lava.view.Abstract} view
-	 * @param {_cElementContainer} config
-	 * @param {Lava.widget.Standard} widget
-	 */
-	init_Normal: function(view, config, widget) {
 
 		var name,
 			resource_owner,
@@ -224,7 +217,7 @@ Lava.define(
 	 */
 	addEventTarget: function(event_name, dispatcher) {
 
-		Lava.t('Framework requires initialization');
+		Lava.t();
 
 	},
 

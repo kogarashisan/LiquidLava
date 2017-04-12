@@ -9,26 +9,24 @@ Lava.define(
  * @extends Lava.view.container.Element#
  */
 {
-	Extends: "Lava.view.container.Element",
+	Prepare: function() {
 
-	/**
-	 * When running inside IE: bound "click" event handler
-	 * @type {function}
-	 */
-	_IE_click_callback: null,
+		if (Firestorm.Environment.browser_name == 'ie') {
 
-	init: function(view, config, widget) {
+			this.init = this.init_IE;
+			this.informInDOM = this.informInDOM_IE;
+			this.informRemove = this.informRemove_IE;
+			/**
+			 * When running inside IE: bound "click" event handler
+			 * @type {function}
+			 */
+			this._IE_click_callback = null;
 
-		var needs_shim = (Firestorm.Environment.browser_name == 'ie'),
-			new_init_name = needs_shim ? "init_IE" : "Element$init";
-
-		Lava.ClassManager.patch(this, "CheckboxElement", "informInDOM", needs_shim ? "informInDOM_IE" : "Element$informInDOM");
-		Lava.ClassManager.patch(this, "CheckboxElement", "informRemove", needs_shim ? "informRemove_IE" : "Element$informRemove");
-
-		this[new_init_name](view, config, widget);
-		Lava.ClassManager.patch(this, "CheckboxElement", "init", new_init_name);
+		}
 
 	},
+
+	Extends: "Lava.view.container.Element",
 
 	/**
 	 * Constructor for IE environment

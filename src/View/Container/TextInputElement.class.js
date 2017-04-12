@@ -11,27 +11,25 @@ Lava.define(
 {
 	Extends: "Lava.view.container.Element",
 
-	/**
-	 * For IE8-9: input element listener callback, bound to this instance
-	 * @type {function}
-	 */
-	_OldIE_refresh_callback: null,
-	/**
-	 * For IE8-9: `onpropertychange` callback, bound to this instance
-	 * @type {function}
-	 */
-	_OldIE_property_change_callback: null,
+	Prepare: function() {
 
-	init: function(view, config, widget) {
+		if (Firestorm.Environment.capabilities[Firestorm.CAPABILITY_NAMES.NEEDS_INPUT_EVENT_SHIM]) {
 
-		var needs_shim = Firestorm.Environment.capabilities[Firestorm.CAPABILITY_NAMES.NEEDS_INPUT_EVENT_SHIM],
-			new_init_name = needs_shim ? "init_IE" : "Element$init";
+			this.init = this.init_IE;
+			this.informInDOM = this.informInDOM_OldIE;
+			this.informRemove = this.informRemove_OldIE;
+			/**
+			 * For IE8-9: input element listener callback, bound to this instance
+			 * @type {function}
+			 */
+			this._OldIE_refresh_callback = null;
+			/**
+			 * For IE8-9: `onpropertychange` callback, bound to this instance
+			 * @type {function}
+			 */
+			this._OldIE_property_change_callback = null;
 
-		Lava.ClassManager.patch(this, "TextInputElement", "informInDOM", needs_shim ? "informInDOM_OldIE" : "Element$informInDOM");
-		Lava.ClassManager.patch(this, "TextInputElement", "informRemove", needs_shim ? "informRemove_OldIE" : "Element$informRemove");
-
-		this[new_init_name](view, config, widget);
-		Lava.ClassManager.patch(this, "TextInputElement", "init", new_init_name);
+		}
 
 	},
 
@@ -56,24 +54,6 @@ Lava.define(
 				self._sendRefreshValue();
 			}
 		};
-
-	},
-
-	/**
-	 * Dummy method, which will be replaced in static constructor
-	 */
-	informInDOM: function() {
-
-		Lava.t();
-
-	},
-
-	/**
-	 * Dummy method, which will be replaced in static constructor
-	 */
-	informRemove: function() {
-
-		Lava.t();
 
 	},
 

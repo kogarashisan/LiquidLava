@@ -10,7 +10,7 @@ Lava.define(
 
 	Extends: 'Lava.widget.input.Text',
 
-	_property_descriptors: {
+	PROPERTY_DESCRIPTORS: {
 		value: {type: 'Number', setter: '_setValue'},
 		input_value: {type: 'String', is_readonly: true}
 	},
@@ -70,25 +70,25 @@ Lava.define(
 
 	_refreshValue: function() {
 
-		var value = this._input_container.getDOMElement().value,
-			is_valid = Firestorm.Types[this._data_type].isValidString(value);
+		var raw_value = this._input_container.getDOMElement().value + '',
+			value,
+			is_valid = Firestorm.Types[this._data_type].isValidString(raw_value);
 
-		if (this._properties.input_value != value) { // to bypass readonly check
+		if (this._properties.input_value != raw_value) { // to bypass readonly check
 
-			this._set('input_value', value);
+			this._set('input_value', raw_value);
 
 		}
 
 		if (is_valid) {
 
+			value = Firestorm.Types[this._data_type].fromSafeString(raw_value);
 			if (this._properties.value != value) {
 
 				this._set('value', value);
-				this._input_container.storeProperty('value', value);
+				this._input_container.storeProperty('value', raw_value);
 
 			}
-
-			this._setValidity(true);
 
 		}
 
