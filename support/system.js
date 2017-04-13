@@ -189,24 +189,6 @@ _cTranslatablePlural = {
 
 };
 
-_cScopeForeach = {
-
-	/**
-	 * Whether to create another (own) instance of Enumerable or DataView, when argument result is also Enumerable.
-	 * May be used to apply sorting and filtering. Allowed values: "Enumerable", "DataView"
-	 * @type {string}
-	 */
-	own_enumerable_mode: null,
-
-	/**
-	 * Can be used to re-apply sorting and filtering in case of `own_enumerable_mode` or plain array
-	 * returned from scope's Argument.
-	 * @type {Array.<(_cScopeLocator|_cDynamicScope)>}
-	 */
-	depends: []
-
-};
-
 /**
  * Listener object
  */

@@ -279,10 +279,6 @@ _cView = {
 	 */
 	refresher: null,
 	/**
-	 * @type {?_cScopeForeach}
-	 */
-	scope: null,
-	/**
 	 * Routed class events (those, which are fired by {Lava.mixin.Observable})
 	 * @type {Array.<_cArgument>}
 	 */

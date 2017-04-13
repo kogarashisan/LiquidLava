@@ -240,7 +240,7 @@ this(\.|\-\>|\-\&gt\;|\~)						{ Lava.schema.DEBUG && Lava.t("'this' is a keywor
 
 		if (lowercase in this.reserved_words) {
 			if (Lava.schema.DEBUG && lowercase != yytext) Lava.t("Reserved words must be lower case: " + yytext);
-			if (Lava.schema.DEBUG && (!this.allowed_keywords || this.allowed_keywords.indexOf(lowercase) == -1)) Lava.t("Reserved word is not allowed in this expression: " + lowercase);
+			if (Lava.schema.DEBUG && lowercase != 'this' && (!this.allowed_keywords || this.allowed_keywords.indexOf(lowercase) == -1)) Lava.t("Reserved word is not allowed in this expression: " + lowercase);
 			yytext = this.reserved_words[lowercase];
 			return 'RESERVED_WORD';
 		}

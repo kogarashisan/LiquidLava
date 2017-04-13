@@ -37,9 +37,7 @@ Lava.parsers.Common = {
 		'id',
 		'label',
 		'escape_off',
-		'as',
-		'own_enumerable_mode',
-		'depends'
+		'as'
 	],
 	/**
 	 * Allowed "x:" attributes on elements
@@ -91,9 +89,7 @@ Lava.parsers.Common = {
 	 */
 	_view_config_property_setters: {
 		id: 'setViewConfigId',
-		label: 'setViewConfigLabel',
-		own_enumerable_mode: '_setOwnEnumerableMode',
-		depends: '_setDepends'
+		label: 'setViewConfigLabel'
 	},
 
 	/**
@@ -181,58 +177,6 @@ Lava.parsers.Common = {
 		if (Lava.schema.DEBUG && !Lava.VALID_LABEL_REGEX.test(label)) Lava.t("Malformed view label");
 		if (Lava.schema.DEBUG && this._reserved_labels.indexOf(label) != -1) Lava.t("Label name is reserved: " + label);
 		view_config.label = label;
-
-	},
-
-	/**
-	 * Set {@link _cScopeForeach#own_enumerable_mode}
-	 * @param {_cView} view_config
-	 * @param {string} own_enumerable_mode <str>"Enumerable"</str> or <str>"DataView"</str>
-	 */
-	_setOwnEnumerableMode: function(view_config, own_enumerable_mode) {
-
-		if (Lava.schema.DEBUG && ['Enumerable', 'DataView'].indexOf(own_enumerable_mode) == -1) Lava.t("Malformed 'own_enumerable_mode' hash option");
-
-		if (!('scope' in view_config)) {
-			view_config['scope'] = {
-				"own_enumerable_mode": own_enumerable_mode
-			}
-		} else {
-			if (Lava.schema.DEBUG && ('own_enumerable_mode' in view_config['scope'])) Lava.t();
-			view_config['scope']['own_enumerable_mode'] = own_enumerable_mode;
-		}
-
-	},
-
-	/**
-	 * Set {@link _cScopeForeach#depends}
-	 * @param {_cView} view_config
-	 * @param {string} depends_text Semicolon-separated list of scope paths
-	 */
-	_setDepends: function(view_config, depends_text) {
-
-		var binds = [],
-			arguments = Lava.ExpressionParser.parse(depends_text, {
-				separator: Lava.ExpressionParser.SEPARATORS.SEMICOLON
-			}),
-			i = 0,
-			count = arguments.length;
-
-		if (Lava.schema.DEBUG && count == 0) Lava.t("malformed 'depends' hash option");
-
-		for (; i < count; i++) {
-			if (Lava.schema.DEBUG && (!arguments[i].isScopeEval)) Lava.t('malformed "depends" hash option: argument ');
-			binds.push(arguments[i].binds[0]);
-		}
-
-		if (!('scope' in view_config)) {
-			view_config['scope'] = {
-				"depends": binds
-			}
-		} else {
-			if (Lava.schema.DEBUG && ('depends' in view_config['scope'])) Lava.t();
-			view_config['scope']['depends'] = binds;
-		}
 
 	},
 

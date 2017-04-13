@@ -76,12 +76,6 @@ Lava.define(
 	 */
 	_requires_refresh_children: true,
 
-	init: function(config, widget, parent_view, template, properties) {
-
-		this.Abstract$init(config, widget, parent_view, template, properties);
-
-	},
-
 	_initMembers: function(properties) {
 
 		if (Lava.schema.DEBUG && !('argument' in this._config)) Lava.t("Foreach view requires an argument");
@@ -91,7 +85,7 @@ Lava.define(
 		this.Abstract$_initMembers(properties);
 
 		this._argument = new Lava.scope.Argument(this._config.argument, this);
-		this._foreach_scope = new Lava.scope.Foreach(this._argument, this, this._widget, this._config.scope);
+		this._foreach_scope = new Lava.scope.Foreach(this._argument);
 		this._foreach_scope_changed_listener = this._foreach_scope.on('changed', this._onDataSourceChanged, this);
 		this._foreach_scope.on('new_enumerable', this._onEnumerableChanged, this);
 		this._as = this._config.as;
@@ -353,16 +347,6 @@ Lava.define(
 	_broadcastToChildren_Refresher: function(function_name) {
 
 		this._refresher[function_name]();
-
-	},
-
-	/**
-	 * Get `_foreach_scope`. Can be used to sort and filter items.
-	 * @returns {Lava.scope.Foreach}
-	 */
-	getScope: function() {
-
-		return this._foreach_scope;
 
 	},
 

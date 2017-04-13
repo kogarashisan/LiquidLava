@@ -599,7 +599,7 @@ case 44:
 
 		if (lowercase in this.reserved_words) {
 			if (Lava.schema.DEBUG && lowercase != yy_.yytext) Lava.t("Reserved words must be lower case: " + yy_.yytext);
-			if (Lava.schema.DEBUG && (!this.allowed_keywords || this.allowed_keywords.indexOf(lowercase) == -1)) Lava.t("Reserved word is not allowed in this expression: " + lowercase);
+			if (Lava.schema.DEBUG && lowercase != 'this' && (!this.allowed_keywords || this.allowed_keywords.indexOf(lowercase) == -1)) Lava.t("Reserved word is not allowed in this expression: " + lowercase);
 			yy_.yytext = this.reserved_words[lowercase];
 			return 34;
 		}
