@@ -3,10 +3,10 @@ Lava.define(
 'Lava.view.container.CheckboxElement',
 /**
  * Container for checkbox input, which implements fixes for IE and other defect browsers.
- * Fires custom ViewManager event "compatible_changed"
+ * Fires custom "compatible_changed" event for old IE
  *
  * @lends Lava.view.container.CheckboxElement#
- * @extends Lava.view.container.Element#
+ * @extends Lava.view.container.Element
  */
 {
 	Prepare: function() {
@@ -50,24 +50,6 @@ Lava.define(
 	},
 
 	/**
-	 * Dummy method, which will be replaced in static constructor
-	 */
-	informInDOM: function() {
-
-		Lava.t();
-
-	},
-
-	/**
-	 * Dummy method, which will be replaced in static constructor
-	 */
-	informRemove: function() {
-
-		Lava.t();
-
-	},
-
-	/**
 	 * IE version of `informInDOM` - applies IE fixes.
 	 * IE 10, 11 and maybe other versions don't fire "change" when indeterminate state is cleared
 	 */
@@ -89,6 +71,13 @@ Lava.define(
 		Firestorm.Element.removeListener(input_element, "click", this._IE_click_callback);
 
 		this.Element$informRemove();
+
+	},
+
+	storeProperty: function(name, value) {
+
+		if (Lava.schema.DEBUG && name == 'type' && ['checkbox', 'radio'].indexOf(value) == -1) Lava.t("You must not change type of checkbox or radio inputs into other types (cause they have different container class)");
+		this.Element$storeProperty(name, value);
 
 	}
 

@@ -77,6 +77,8 @@ module.exports = {
 		"View/Container/Element.class.js",
 		"View/Container/CheckboxElement.class.js",
 		"View/Container/TextInputElement.class.js",
+		"View/Container/InputElement.class.js",
+		"View/Container/TextArea.class.js",
 		"View/Container/Morph.class.js",
 		"View/Container/Emulated.class.js",
 
@@ -90,14 +92,12 @@ module.exports = {
 		"View/Foreach.class.js",
 		"View/If.class.js",
 		"View/Include.class.js",
-		"View/ContentContainerAbstract.class.js",
 		"View/TextArea.class.js",
 
 		"Widget/Standard.class.js"
 	],
 	"widgets": [
 		"Widget/Input/InputAbstract.class.js",
-		"Widget/Input/TextAbstract.class.js",
 		"Widget/Input/TextArea.class.js",
 		"Widget/Input/Text.class.js",
 		"Widget/Input/Password.class.js",

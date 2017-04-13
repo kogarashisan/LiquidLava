@@ -9,6 +9,27 @@ Lava.parsers.Common = {
 	UNQUOTE_ESCAPE_REGEX: /[\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
 
 	/**
+	 * Input types, to which a special container is applied - {@link Lava.view.TextInputElement}.
+	 * That container contains fixes for IE8-9
+	 */
+	TEXTLIKE_INPUTS: {
+		date: true,
+		"datetime-local": true,
+		week: true,
+		time: true,
+		month: true,
+		email: true,
+		tel: true,
+		text: true,
+		url: true,
+		search: true,
+		range: true,
+		password: true,
+		color: true,
+		number: true
+	},
+
+	/**
 	 * The only allowed options on view's hash
 	 * @type {Array.<string>}
 	 */
@@ -393,7 +414,7 @@ Lava.parsers.Common = {
 
 		this. _compileString(result, tag_start_text);
 
-		if (Lava.schema.DEBUG && is_void && tag.content) Lava.t("Void tag with content");
+		if (Lava.schema.DEBUG && is_void && tag.content) Lava.t("Void tag with content: " + tag.name);
 
 		if (!is_void) {
 
@@ -439,7 +460,18 @@ Lava.parsers.Common = {
 
 		this._parseViewAttributes(view_config, raw_tag);
 
-		if ('content' in raw_tag) view_config.template = this.compileTemplate(raw_tag.content, view_config);
+		if ('content' in raw_tag) {
+			view_config.template = this.compileTemplate(raw_tag.content, view_config);
+			if (Lava.schema.DEBUG) {
+				if (Lava.isVoidTag(raw_tag.name)) Lava.t("Void tag with content: " + raw_tag.name);
+				if (raw_tag.name == 'textarea') {
+					if (view_config.template.length > 1) Lava.t("You can have only static text content inside textarea view. However, you can bind it's 'value' attribute");
+					if (view_config.template.length == 1 && (typeof view_config.template[0] != 'string' || Firestorm.String.TEXTAREA_ESCAPE_REGEX.test(view_config.template[0])))
+						Lava.t("Inside textarea view you can have only static text content without these special characters: &<>\'\". However, you can bind it's 'value' attribute. Tip: this is done on purpose, to avoid problems with escaping.");
+				}
+			}
+		}
+
 		if ('resource_id' in x) {
 			if (Lava.schema.DEBUG && (('static_styles' in view_config.container) || ('static_properties' in view_config.container) || ('static_styles' in view_config.container)))
 				Lava.t("View container with resource_id: all properties must be moved to resources");
@@ -466,7 +498,8 @@ Lava.parsers.Common = {
 
 		if (Lava.schema.DEBUG) {
 
-			if (Lava.isVoidTag(raw_tag.name)) Lava.t("Void tag with type='container'");
+			if (Lava.isVoidTag(raw_tag.name)) Lava.t("Attempt to use a void tag as container: " + raw_tag.name);
+			if (raw_tag.name == 'textarea') Lava.t("textarea tag can not be a container, only a view");
 			if (!raw_tag.content) Lava.t("Empty container tag");
 			this._assertControlAttributesValid(x);
 
@@ -715,6 +748,33 @@ Lava.parsers.Common = {
 		if ('attributes' in raw_tag) this._parseContainerStaticAttributes(container_config, raw_tag.attributes);
 		if ('x' in raw_tag) this._parseContainerControlAttributes(container_config, raw_tag.x);
 
+		if (raw_tag.name == 'textarea') {
+
+			container_config.type = 'TextArea'
+
+		} else if (raw_tag.name == 'input') {
+
+			var type;
+			if (container_config.static_properties && container_config.static_properties.type) {
+				type = container_config.static_properties.type.toLower();
+			}
+
+			if (type == 'checkbox' /* || type == 'radio' */) {
+
+				container_config.type = 'CheckboxElement';
+
+			} else if (type in this.TEXTLIKE_INPUTS) {
+
+				container_config.type = 'TextInputElement';
+
+			} else {
+
+				container_config.type = 'InputElement';
+
+			}
+
+		}
+
 		return /** @type {_cElementContainer} */ container_config;
 
 	},
@@ -877,7 +937,6 @@ Lava.parsers.Common = {
 			if (name == 'style') {
 
 				list = this.parseStyleAttribute(raw_attributes.style);
-
 				if (list) container_config.static_styles = list;
 
 			} else if (name == 'class') {

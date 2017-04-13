@@ -636,10 +636,21 @@ KNOWN_SWITCHES				\{\:[LR]\:\}|\{\:[LG]T\:\}|\{\:AMP\:\}
 		this.popState();
 		return 'TAG_END_CLOSE';
 	}
-<tag>{HTML_IDENTIFIER}\s+								{ yytext = yytext.trim(); return 'HASH_ATTRIBUTE'; }
-<tag>{HTML_IDENTIFIER}/\>								{ return 'HASH_ATTRIBUTE'; }
-<tag>{HTML_IDENTIFIER}\=								{ yytext = yytext.substr(0,yyleng-1); return 'HASH_ASSIGN'; }
-<tag>{HTML_IDENTIFIER}\={IDENTIFIER}+\s					{ yytext = yytext.trim(); return 'UNESCAPED_HASH_ASSIGN'; }
+<tag>{HTML_IDENTIFIER}\s+								{
+	yytext = yytext.trim();
+	if (Lava.schema.DEBUG && yytext.toLowerCase() == 'type' && yytext != 'type') Lava.t("The 'type' attribute must be lower case: " + yytext);
+	return 'HASH_ATTRIBUTE';
+}
+<tag>{HTML_IDENTIFIER}/\>								{
+	if (Lava.schema.DEBUG && yytext.toLowerCase() == 'type' && yytext != 'type') Lava.t("The 'type' attribute must be lower case: " + yytext);
+	return 'HASH_ATTRIBUTE';
+}
+<tag>{HTML_IDENTIFIER}\=								{
+	yytext = yytext.substr(0,yyleng-1);
+	if (Lava.schema.DEBUG && yytext.toLowerCase() == 'type' && yytext != 'type') Lava.t("The 'type' attribute must be lower case: " + yytext);
+	return 'HASH_ASSIGN';
+}
+<tag>{HTML_IDENTIFIER}\={IDENTIFIER}+\s					{ yytext = yytext.trim(); /* lowercase check is done in parser */ return 'UNESCAPED_HASH_ASSIGN'; }
 <tag>\"([^\\\"]|\\.)*\"									{ yytext = Lava.parsers.Common.unquoteString(yytext); return 'STRING'; }
 <tag>\'([^\\\']|\\.)*\'									{ yytext = Lava.parsers.Common.unquoteString(yytext); return 'STRING'; }
 <tag>\s+												{ }
@@ -972,6 +983,7 @@ htmlHashSegment
 	: HASH_ATTRIBUTE { $$ = {name:$1, value: ''}; // behaviour of innerHTML }
 	| UNESCAPED_HASH_ASSIGN {
 			var parts = $1.split('=');
+			if (Lava.schema.DEBUG && parts[0].toLowerCase() == 'type' && parts[0] != 'type') Lava.t("The 'type' attribute must be lower case: " + yytext);
 			$$ = {name:parts[0], value:parts[1]};
 		}
 	| HASH_ASSIGN STRING { $$ = {name:$1, value:$2}; }

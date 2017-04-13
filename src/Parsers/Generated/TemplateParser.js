@@ -365,6 +365,7 @@ case 46: this.$ = {name:$$[$0], value: ''}; // behaviour of innerHTML
 break;
 case 47:
 			var parts = $$[$0].split('=');
+			if (Lava.schema.DEBUG && parts[0].toLowerCase() == 'type' && parts[0] != 'type') Lava.t("The 'type' attribute must be lower case: " + yytext);
 			this.$ = {name:parts[0], value:parts[1]};
 
 break;
@@ -684,13 +685,24 @@ case 29:
 		return 37;
 
 break;
-case 30: yy_.yytext = yy_.yytext.trim(); return 41;
+case 30:
+	yy_.yytext = yy_.yytext.trim();
+	if (Lava.schema.DEBUG && yy_.yytext.toLowerCase() == 'type' && yy_.yytext != 'type') Lava.t("The 'type' attribute must be lower case: " + yy_.yytext);
+	return 41;
+
 break;
-case 31: return 41;
+case 31:
+	if (Lava.schema.DEBUG && yy_.yytext.toLowerCase() == 'type' && yy_.yytext != 'type') Lava.t("The 'type' attribute must be lower case: " + yy_.yytext);
+	return 41;
+
 break;
-case 32: yy_.yytext = yy_.yytext.substr(0,yy_.yyleng-1); return 30;
+case 32:
+	yy_.yytext = yy_.yytext.substr(0,yy_.yyleng-1);
+	if (Lava.schema.DEBUG && yy_.yytext.toLowerCase() == 'type' && yy_.yytext != 'type') Lava.t("The 'type' attribute must be lower case: " + yy_.yytext);
+	return 30;
+
 break;
-case 33: yy_.yytext = yy_.yytext.trim(); return 42;
+case 33: yy_.yytext = yy_.yytext.trim(); /* lowercase check is done in parser */ return 42;
 break;
 case 34: yy_.yytext = Lava.parsers.Common.unquoteString(yy_.yytext); return 31;
 break;

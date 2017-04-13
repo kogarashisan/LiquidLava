@@ -3,10 +3,10 @@ Lava.define(
 'Lava.view.container.TextInputElement',
 /**
  * Container for "text" and "password" inputs, which implements fixes for IE and other defect browsers.
- * Fires custom ViewManager event "compatible_changed".
+ * Fires custom "compatible_changed" event for old IE
  *
  * @lends Lava.view.container.TextInputElement#
- * @extends Lava.view.container.Element#
+ * @extends Lava.view.container.Element
  */
 {
 	Extends: "Lava.view.container.Element",
@@ -89,13 +89,21 @@ Lava.define(
 	},
 
 	/**
-	 * Dispatches custom ViewManager "compatible_changed" event
+	 * Dispatches custom "compatible_changed" event for old IE
 	 */
 	_sendRefreshValue: function() {
 
 		if (this._events['compatible_changed']) {
 			this._view.dispatchEvents(this._events['compatible_changed']);
 		}
+
+	},
+
+	storeProperty: function(name, value) {
+
+		if (Lava.schema.DEBUG && name == 'type' && !(value in Lava.parsers.Common.TEXTLIKE_INPUTS))
+			Lava.t("You must not change type of text and date inputs into checkbox, radio or something else (cause they have different container class)");
+		this.Element$storeProperty(name, value);
 
 	}
 

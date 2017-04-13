@@ -687,8 +687,7 @@ Lava.define(
 		if (classes) properties_string += ' class="' + classes + '"';
 		if (style) properties_string += ' style="' + style + '"';
 
-		return "<" + this._tag_name + " id=\"" + this._id + "\" "
-			+ properties_string; //+ ">"
+		return "<" + this._tag_name + " id=\"" + this._id + "\" " + properties_string; //+ ">"
 
 	},
 
